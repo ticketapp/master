@@ -1,0 +1,11 @@
+<div class="home">
+    <div ng-controller="CarouselCtrl">
+        <div class="switch-container" ng-switch="elementEnCours.title">
+            <div ng-repeat="info in infos" class="animate-show" ng-show="elementEnCours.title == info.title">
+                <h2 ng-bind-html="info.title"></h2>
+                <div ng-bind-html="info.content"></div>
+            </div>
+        </div>
+    </div>
+    <div class=" data-ng-events"></div>
+</div>

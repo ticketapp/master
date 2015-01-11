@@ -1,0 +1,30 @@
+<div class="row-fluid block_event_min">
+    <div class="row-fluid span12 img_min_evnt">
+        <img src="/assets/img/{{ event.images[0].path }}" alt="poikjij" class="min"/>
+    </div>
+    <div class="row-fluid text_evnt_min" >
+        <a href="#/event/{{event.id}}"><h4>{{ event.name }}</h4></a>
+        Par
+        <a href="#/user/{{user.id}}" class="custom-trigger" data-ng-repeat="user in event.users"
+           data-tooltip-placement="bottom"
+           data-tooltip-html-unsafe="<div><img src='assets/img/2.jpg'/><a href='#/user/{{user.id}}'><h4>{{nickname}}</h4></a></div>"
+           data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover">{{ user.nickname }} </a>
+
+        <br/>
+        <div class="infos_event">
+            <i class="icon-calendar"></i>{{ event.startSellingTime | date:'dd.MM' }}
+            <i class="icon-time"></i> {{ event.startSellingTime | date:'hh:mm' }} <br/>
+            <i class="icon-map-marker"></i>
+            <a href="#/lieu/{{ place.name }}" data-ng-repeat="place in event.places">{{ place.name }}</a>
+            <a href="#/lieu/{{event.nickname}}" data-ng-repeat="nickname in event.users.nickname" >{{ nickname }} </a>
+        </div>
+        <br/>
+        <div class="description_event_min">
+            <a href="#/artiste/{{artist.artistId}}" data-ng-repeat="artist in event.artists" >{{ artist.name }} </a>
+        </div>
+        <br/>
+        <a href="#" class="btn btn-warning btn_event" title="Suivre"> + </a>
+        <a href="#" class="btn btn-warning btn_event" title="Acheter des places"><i class="icon-white icon-shopping-cart"></i></a>
+    </div>
+</div>
+

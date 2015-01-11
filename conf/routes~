@@ -1,0 +1,81 @@
+# Home page
+GET     /                          controllers.Application.index
+
+################################## Admin ###############################################
+GET     /admin                     controllers.Admin.indexAdmin
+#POST    /admin/createTariff        controllers.Admin.createTariff
+
+################################## Events ###############################################
+GET     /events                    controllers.EventController.events
+GET     /event/:id                 controllers.EventController.event(id: Long)
+POST    /createEvent               controllers.EventController.createEvent
+POST    /event/:userId/:eventId    controllers.EventController.followEvent(userId: Long, eventId: Long)
+
+################################## Artists ##############################################
+GET     /artists                    controllers.ArtistController.artists
+GET     /artist/:artistId           controllers.ArtistController.artist(artistId: Long)
+POST    /admin/createArtist         controllers.ArtistController.createArtist
+POST    /artist/:userId/:artistId   controllers.ArtistController.followArtist(userId: Long, artistId: Long)
+DELETE  /artist/:artistId           controllers.ArtistController.deleteArtist(artistId: Long)
+
+################################## Places ###############################################
+GET     /lieux                      controllers.PlaceController.places
+GET     /lieu/:id                   controllers.PlaceController.place(id: Long)
+POST    /lieu/:userId/:placeId      controllers.PlaceController.followPlace(userId: Long, placeId: Long)
+
+################################## Infos ################################################
+GET    /infos                       controllers.Application.infos
+
+################################## Users ################################################
+GET     /users                      controllers.UserController.users
+GET     /user/:id                   controllers.UserController.user(id: Long)
+
+################################## Buy ticket ###########################################
+GET     /buyTicket                  controllers.TicketCtrlr.buyTicket
+
+################################## Accounting ###########################################
+GET     /orgaPayment                controllers.AccountingCtrlr.orgaPayment
+GET     /totalToPay                 controllers.AccountingCtrlr.totalToPay
+GET     /account708                 controllers.AccountingCtrlr.account708
+GET     /account413                 controllers.AccountingCtrlr.account413
+GET     /account60                  controllers.AccountingCtrlr.account60
+GET     /account63                  controllers.AccountingCtrlr.account63
+GET     /account627                 controllers.AccountingCtrlr.account627
+GET     /account623                 controllers.AccountingCtrlr.account623
+GET     /account626                 controllers.AccountingCtrlr.account626
+
+
+################################## Upload #################################################
+POST    /upload                     controllers.Admin.upload
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+
+#GET /*any controllers.Application.index(any)
+
+
+# Login page
+GET     /login                      securesocial.controllers.LoginPage.login
+GET     /logout                     securesocial.controllers.LoginPage.logout
+
+# User Registration and password handling
+GET     /signup                     securesocial.controllers.Registration.startSignUp
+POST    /signup                     securesocial.controllers.Registration.handleStartSignUp
+GET     /signup/:token              securesocial.controllers.Registration.signUp(token)
+POST    /signup/:token              securesocial.controllers.Registration.handleSignUp(token)
+GET     /reset                      securesocial.controllers.Registration.startResetPassword
+POST    /reset                      securesocial.controllers.Registration.handleStartResetPassword
+GET     /reset/:token               securesocial.controllers.Registration.resetPassword(token)
+POST    /reset/:token               securesocial.controllers.Registration.handleResetPassword(token)
+GET     /password                   securesocial.controllers.PasswordChange.page
+POST    /password                   securesocial.controllers.PasswordChange.handlePasswordChange
+
+# Providers entry points
+GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
+POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
+GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
+
+
+

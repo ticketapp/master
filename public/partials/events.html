@@ -1,0 +1,9 @@
+<div class=" row-fluid ng-search"></div>
+<div class="row-fluid pages_contain">										   
+	<div class="row-fluid span12" id="events_contener" data-ng-controller="EventsCtrl"><br/>
+		<ul>
+			<li class="row-fluid event_min_contener data-ng-event" data-ng-repeat="event in events | filter:{places:query}">
+			</li>
+		</ul>
+	</div> 
+</div>

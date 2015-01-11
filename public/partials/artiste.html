@@ -1,0 +1,41 @@
+<div id="banprofil">
+    <img src="https://scontent-a-fra.xx.fbcdn.net/hphotos-ash3/t1.0-9/580205_10151517016104368_981116153_n.jpg" alt="" >
+</div>
+<div class="row-fluid span12" id="profil_contenu">
+    <div id="photo_profil">
+        <img src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash2/t1.0-1/c24.72.600.600/s160x160/480201_10151516943909368_1443976049_n.jpg" alt="">
+    </div>
+    <div class="headerprofil">
+        <div id="name" class="span8">
+            <b data-ng-model="name">{{artiste.name}}</b>
+        </div>
+        <a href="#" class="btn btn-warning btn_event"> + Suivre</a>
+    </div>
+
+    <div data-ng-controller="TabsCtrl" class="contentprofil">
+        <tabset class="span12">
+            <tab data-heading="Evenements">
+                <div class="tab-pane active">
+                    <div class="row-fluid span12" id="events_contener" data-ng-controller="EventsCtrl">
+                        <ul>
+                            <li class="row-fluid event_min_contener data-ng-event" data-ng-repeat="event in events | filter:{artistes:artiste.name}">
+
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </tab>
+            <tab data-heading="Vidéos">
+                <div class="tab-pane active ng-video">
+                </div>
+            </tab>
+            <tab data-heading="Musique">
+                <div class="tab-pane active ng-musique">
+                </div>
+            </tab>
+            <tab data-ng-repeat="tab in tabs" data-heading="{{tab.title}}" data-active="tab.active" data-disabled="tab.disabled">
+                <div data-ng-bind-html="tab.content"></div>
+            </tab>
+        </tabset>
+    </div>
+</div>

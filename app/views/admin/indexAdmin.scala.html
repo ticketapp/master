@@ -1,0 +1,37 @@
+<h1>Index Administrateurs</h1>
+    <h2>Créer des tarifs</h2>
+    <form name="tariffsForm" method="post" enctype="multipart/form-data" action="/upload">
+        <input type="file" name="picture">
+        <input type="submit" value="Valider"/>
+    </form>
+
+    <h2>Créer un artiste</h2>
+    <form name="createArtistForm" method="post" action="/admin/createArtist">
+        Nom de l'artiste : <input type="text" name="artistName">
+        <input type="submit" value="Valider"/>
+    </form>
+
+    <h2>Supprimer l'artiste 2</h2>
+    <form name="deleteArtistForm" method="delete" action="/artist/2">
+        <input type="submit" value="Supprimer l'artiste d'id 2" />
+    </form>
+
+    <h2>Faire suivre l'artiste 2 par l'user 2</h2>
+    <form name="followArtistForm" method="post" action="/artist/2/2"> <!-- userId/artistId -->
+        <input type="submit" value="Faire suivre l'artiste 2 par l'user 2" />
+    </form>
+
+    <h2>Faire suivre la place 2 par l'user 2</h2>
+    <form name="followArtistForm" method="post" action="/lieu/2/2">
+        <input type="submit" value="Faire suivre la place 2 par l'user 2" />
+    </form>
+
+    <h2>Faire suivre l'event 4 par l'user 1</h2>
+    <form name="followArtistForm" method="post" action="/event/2/2">
+        <input type="submit" value="Faire suivre l'event 4 par l'user 1" />
+    </form>
+
+<img src="https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap
+&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318
+&markers=color:red%7Clabel:C%7C40.718217,-73.998284" />
+

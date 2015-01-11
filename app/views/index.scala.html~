@@ -1,0 +1,23 @@
+@main(title = "Ticketapp") {
+
+<nav id="pages-nav" data-ng-controller="scrollCtrl" id="top">
+    <ul nav-menu="active">
+        <li class="left" id="logo">
+
+            <a href="#/"><img class="logo" src="assets/img/logo.png" alt="" ng-click="gotoTop()"><!--{{asset('img/logo.png')}}--></a>
+        </li>
+        <li class="left">
+            <input class="search-query" type="text" placeholder="Recherche">
+        </li>
+        <li class="right">
+            <a class="btn btn-warning">Sign In</a>
+        </li>
+        <li class="right">
+            <img src="assets/img/user1.png" class="connect"/>
+        </li>
+    </ul>
+</nav>
+<div data-ng-controller="SlideCtrl" data-ng-view class="{{ui.direction}} wrapper-outer row-fluid"></div>
+<div class="ng-lecture"></div>
+<div class="footer row-fluid"></div>
+}

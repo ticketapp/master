@@ -1,0 +1,34 @@
+@(artists: play.api.libs.json.JsValue)
+
+@main(title = "Ticketapp") {
+
+@artists
+
+<br><br><br><br>
+
+<div ng-init="artists = @artists">
+    <h1 data-ng-repeat="artist in artists">Hello, {{artist.name}} !</h1>
+    <div ng-controller="InputCtrl" ng-submit="addName()">
+        <form ng-submit="addName()">
+            <input type="text" ng-model="newName.name"placeholder="Add name"/>
+            <input type="submit">
+        </form>
+        <div ng-repeat="name in names">Hello {{name.name}}!</div>
+    </div>
+    <script>
+      function InputCtrl($scope, $http) {
+	 $scope.newName = {};
+        $scope.names = [{"name":"Cedric"}, {"name":"jean"}];
+	$scope.addName = function(){
+        $scope.names.push($scope.newName);
+	var name = $scope.newName;
+	$scope.newName = {};
+	$http({
+		method: 'POST',
+		url: '/teest',
+		data: name
+	});
+        }
+      }
+    </script>
+    }

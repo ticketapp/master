@@ -1,0 +1,53 @@
+@(title: String)(content: Html)
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>@title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
+
+    <!-- Le style -->
+    <!--<link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet" type="text/css">
+    <link href="@routes.Assets.at("css/bootstrap-responsive.min.css")" rel="stylesheet" type="text/css">!-->
+    <link href="@routes.Assets.at("css/style.css")" rel="stylesheet" type="text/css">
+    <link href="@routes.Assets.at("css/animate.min.css")" rel="stylesheet" type="text/css">
+    <link href="@routes.Assets.at("css/foundation.css")" rel="stylesheet" type="text/css">
+    <link href="@routes.Assets.at("css/normalize.css")" rel="stylesheet" type="text/css">
+
+    </head>
+    <body data-ng-app="MonApp">
+        @content
+    </body>
+    <script src="@routes.Assets.at("js/angular.min.js")"></script>
+    <script src="@routes.Assets.at("js/angular-animate.min.js")"></script>
+    <script src="@routes.Assets.at("js/ui-bootstrap-tpls-0.11.0.min.js")"></script>
+    <script src="@routes.Assets.at("js/angular-route.min.js")"></script>
+    <script src="@routes.Assets.at("js/angular-sanitize.min.js")"></script>
+    <script src="@routes.Assets.at("js/tooltip.js")"></script>
+    <script src="@routes.Assets.at("js/app.js")"></script>
+    <script src="@routes.Assets.at("js/jquery-1.11.0.js")"></script>
+    <script src="@routes.Assets.at("js/jquery.Jcrop.min.js")"></script>
+    <script src="@routes.Assets.at("js/services/artiste.js")"></script>
+    <script src="@routes.Assets.at("js/services/event.js")"></script>
+    <script src="@routes.Assets.at("js/services/user.js")"></script>
+    <script src="@routes.Assets.at("js/services/lieu.js")"></script>
+    <script src="@routes.Assets.at("js/services/info.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/artistes.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/events.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/eventView.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/users.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/tabs.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/slide.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/lieu.js")"></script>
+    <script src="@routes.Assets.at("js/directives/directives.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/scrollCtrl.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/carousel.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/connect.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/tools.js")"></script>
+    <script src="@routes.Assets.at("js/controllers/CreateEvent.js")"></script>
+
+
+</html>

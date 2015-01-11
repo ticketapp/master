@@ -1,0 +1,27 @@
+[
+    {"id": 0,
+     "name" : "Le Transbordeur",
+     "ville" : "Lyon",
+     "adresse" : "3 Boulevard de Stalingrad, 69100 Villeurbanne",
+     "siteWeb" : "www.transbordeur.fr",
+     "facebook": "https://fr-fr.facebook.com/LeTransbordeur"
+    },
+    
+    {"id": 1,
+     "name" : "Bataclan",
+     "ville" : "Paris",
+     "adresse" : "50 Boulevard Voltaire, 75011 Paris",
+     "siteWeb" : "www.bataclan.fr",
+     "facebook": ""
+    },
+    
+    {"id": 2,
+     "name" : "Sucrière",
+     "ville" : "Lyon",
+     "adresse" : "49-50 Quai Rambaud, 69002 Lyon",
+     "siteWeb" : "www.lasucriere-lyon.com",
+     "facebook": ""
+    }
+    
+]
+     
