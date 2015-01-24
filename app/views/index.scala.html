@@ -5,19 +5,19 @@
 	    <li class="left" id="logo">
 	        <a href="#/"><img class="logo" src="assets/img/logo.png" alt="" ng-click="gotoTop()"><!--{{asset('img/logo.png')}}--></a>
 	    </li>
-		<li class="left">
-		    <input class="search-query" type="text" placeholder="Recherche">
-	    </li>
+        <!--<li class="left">
+            <input class="search-query" type="text" placeholder="Recherche">
+        </li>
     <li class="right">
         <div data-ng-controller="connectCtrl" class="btn btn-warning signIn" ng-click="open()">Sign In</div>
-    </li>
+    </li>-->
     <li class="right">
         <img data-ng-controller="toolsCtrl" src="assets/img/user1.png" class="connect" ng-click="open()"/>
-	    </li>
+        </li>
     </ul>
 </nav>
 <div id="contener">
-    <div data-ng-controller="SlideCtrl" data-ng-view class="{{ui.direction}} wrapper-outer row-fluid"></div>
+    <div data-ng-view class="wrapper-outer row"></div>
 </div>
 <div class="ng-lecture"></div>
 <div class="footer row-fluid"></div>

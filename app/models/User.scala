@@ -2,32 +2,31 @@ package models
 
 import anorm.SqlParser._
 import anorm._
+import controllers.DAOException
 import play.api.db.DB
 import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
+import java.util.Date
 
 case class User (id: Long,
+                 creationDateTime: Date,
                  email: String,
                  nickname : String,
                  password : String,
                  profile: String)
 
 object User {
-  /*implicit def pkWrites[T : Writes]: Writes[Pk[T]] = Writes {
-    case anorm.Id(t) => implicitly[Writes[T]].writes(t)
-    case anorm.NotAssigned => JsNull
-  }*/
   implicit val userWrites = Json.writes[User]
-
 
   private val UserParser: RowParser[User] = {
     get[Long]("userId") ~
+      get[Date]("creationDateTime") ~
       get[String]("email") ~
       get[String]("nickname") ~
       get[String]("password") ~
       get[String]("profile")  map {
-      case id ~ email ~ nickname ~ password ~ profile =>
-        User(id, email, nickname, password, profile)
+      case id ~ creationDateTime ~ email ~ nickname ~ password ~ profile =>
+        User(id, creationDateTime, email, nickname, password, profile)
     }
   }
 
@@ -55,16 +54,28 @@ object User {
     }
   }
 
-  def save(name: String) = {
-    DB.withConnection { implicit connection =>
-      SQL("""
-            INSERT INTO users(name)
-            VALUES({name})
-          """).on(
-          'name -> name
-        ).executeUpdate
+  def formApply(email: String, nickname: String, password: String, profile: String): User =
+    new User(-1L, new Date, email, nickname, password, profile)
+
+  def formUnapply(user: User): Option[(String, String, String, String)] =
+    Some((user.email, user.nickname, user.password, user.profile))
+
+
+  def saveUser(user: User) = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL(
+          """INSERT INTO users(email, nickname, password, profile)
+              VALUES({email}, {nickname}, {password}, {profile})"""
+        ).on(
+            'email -> user.email,
+            'nickname -> user.nickname,
+            'password -> user.password,
+            'profile -> user.profile
+        ).executeInsert().get
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot save user: " + e.getMessage)
     }
-
   }
-
 }

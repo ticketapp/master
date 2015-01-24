@@ -1,157 +1,37 @@
-<div class="row-fluid formCreateContener" data-ng-controller="CreateEventCtrl">
-    <form name="createEventForm" method="post" action="/createEvent">
-        <div class="span12">
-        <h3>CREER UN NOUVEL EVENEMENT</h3>
-        <h4 class="formRoute"><a class="Active">1.CONFIGURATION DE L'EVENEMENT > </a><a ng-class="{Active: InfosGeneralesActive}">2.INFOS GENERALES > </a><a ng-class="{Active: DescriptifActive}">3.DESCRIPTIF > </a><a ng-class="{Active: ArtistsActive}">4.ARTISTES > </a><a ng-class="{Active: FinalisationActive}">5. FINALISATION</a></h4>
-        </div>
-        <div class="span5 formCreateEvent">
-            <div class="configuration" data-ng-hide="Config">
-                <h5>Organisateur de l'événement</h5>
-                <input type="hidden" name="id" value=1>
-                <input type="radio" name="Organisateur" value="username">username <br/>
-                <h5>Evénement déjà créé sur facebook ?</h5>
-                <input type="text" placeholder="UrlEventFacebook"/><br>
-                <h5>Evénement Gratuit ?</h5>
-                <input type="radio" name="EvenementGratuit" data-ng-model="gratuit" value="oui">oui <br/>
-                <input type="radio" name="EvenementGratuit" data-ng-model="gratuit" value="non">non <br/>
-                <div class="tarifs" ng-show="gratuit == 'non'">
-                    <h3>Tarifs</h3>
-                    <input type="text" placeholder="newTarifName">
-                    <input type="text" placeholder="newTarifPrice">
-                    <input type="text" placeholder="newTarifNbTickets">
-                </div><br/>
-                <a class="btn btn-primary" data-ng-click="InfosGenerales = !InfosGenerales; Config = !Config; InfosGeneralesActive = !InfosGeneralesActive">Suivant</a>
-            </div>
-            <div class="ng-hide" data-ng-show="InfosGenerales">
-                <h5>Image de l'événement</h5>
-                <!--
-                 "name" -> nonEmptyText(2),
-      "startSellingTime" -> date,
-      "endSellingTime" -> date,
-      "description" -> nonEmptyText(2),
-      "startTime" -> date,
-      "endTime" -> date,
-      "ageRestriction" -> number
-      -->
-                <input type="file" name="image_file" id="image_file"  fileread="newEvent.img"/><br>
-                <input type="text" name="name" placeholder="Nom de l'événement" ng-model="newEvent.name"/><br/>
-                <input type="text" placeholder="LieuEvent" ng-model="newEvent.place"/><br/>
-                <input type="datetime" name="startSellingTime" placeholder="Date et heure de départ de l'événement"
-                       ng-model="newEvent.startDate"/><br/>
-                <input type="datetime" name="endSellingTime" placeholder="HeureDebutEvent"
-                       ng-model="newEvent.startTime"/><br/>
-                <textarea name="description" placeholder="Description..." ng-model="newEvent.description"/></textarea>
-                <input type="datetime" name="startTime"  placeholder="DateFinEvent" ng-model="newEvent.endDate"/><br/>
-                <input type="datetime" name="endTime"  ng-model="newEvent.endTime"/><br/>
-                <input type="number" name="ageRestriction"  ng-model="newEvent.ageRestriction"/><br/>
+<form name="createEventForm" method="post" action="/createEvent"> <!--method="post" action="/createEvent"-->
+    <input type="text" name="name" placeholder="Nom de l'événement" ng-model="newEvent.name"/><br/>
+    <input type="text" placeholder="LieuEvent" ng-model="newEvent.place"/><br/>
+    <input type="datetime" name="startSellingTime" placeholder="Date et heure de départ de l'événement"
+           ng-model="newEvent.startDate"/><br/>
+    <input type="datetime" name="endSellingTime" placeholder="endSellingTime"
+           ng-model="newEvent.startTime"/><br/>
+    <input type="datetime" name="startTime"  placeholder="startTime" ng-model="newEvent.endDate"/><br/>
+    <input type="datetime" name="endTime"  placeholder="endTime" ng-model="newEvent.endTime"/><br/>
+    <input type="number" name="ageRestriction" placeholder="ageRestriction"  ng-model="newEvent.ageRestriction"/><br/>
 
-                <input type="number" name="tarrifs.prices[0]" placeholder="Prix du premier tarif"
-                       ng-model="newEvent.prices0"/><br/>
-                <input type="text" name="tarrifs.denominations[0]" placeholder="Dénomination du tarif"
-                       ng-model="newEvent.denominations0"/><br/>
-                <input type="number" name="tarrifs.nbTicketToSells[0]" placeholder="Nombre de ticket à vendre pour ce tarif"
-                       ng-model="newEvent.nbTicketToSells0"/><br/>
-                <input type="date" name="tarrifs.startTimes[0]" placeholder="Début des ventes pour ce tarif"
-                       ng-model="newEvent.startTimes0"/><br/>
-                <input type="date" name="tarrifs.endTimes[0]" placeholder="Fin des ventes pour ce tarif"
-                       ng-model="newEvent.endTimes0"/><br/>
+    <input type="number" name="prices[0]" placeholder="Prix du premier tarif"
+           ng-model="newEvent.prices0"/><br/>
+    <input type="text" name="denominations[0]" placeholder="Dénomination du tarif"
+           ng-model="newEvent.denominations0"/><br/>
+    <input type="number" name="nbTicketToSells[0]" placeholder="Nombre de ticket à vendre pour ce tarif"
+           ng-model="newEvent.nbTicketToSells0"/><br/>
+    <input type="date" name="startTimes[0]" placeholder="Début des ventes pour ce tarif"
+           ng-model="newEvent.startTimes0"/><br/>
+    <input type="date" name="endTimes[0]" placeholder="Fin des ventes pour ce tarif"
+           ng-model="newEvent.endTimes0"/><br/>
 
-                <input type="number" name="tarrifs.prices[1]" placeholder="Prix du deuxième tarif"
-                       ng-model="newEvent.prices1"/><br/>
-                <input type="text" name="tarrifs.denominations[1]" placeholder="Dénomination du tarif"
-                       ng-model="newEvent.denominations1"/><br/>
-                <input type="number" name="tarrifs.nbTicketToSells[1]" placeholder="Nombre de ticket à vendre pour ce tarif"
-                       ng-model="newEvent.nbTicketToSells1"/><br/>
-                <input type="date" name="tarrifs.startTimes[1]" placeholder="Début des ventes pour ce tarif"
-                       ng-model="newEvent.startTimes1"/><br/>
-                <input type="date" name="tarrifs.endTimes[1]" placeholder="Fin des ventes pour ce tarif"
-                       ng-model="newEvent.endTimes1"/><br/>
-                <a class="btn btn-primary" data-ng-click="Descriptif = !Descriptif; InfosGenerales = !InfosGenerales;
-                    DescriptifActive = !DescriptifActive">Suivant</a>
-            </div>
-            <div class="ng-hide" data-ng-show="Descriptif">
-                <h4>Contenu</h4>
-                <h4>Descriptif</h4>
-                <input placeholder="Titre de l'onglet" data-ng-model="newTab.title"/><br/><br/>
-                <textarea placeholder="Ecrivez un nouvel article" data-ng-model="newTab.content"></textarea>
-                <a data-ng-click="addTab()"> ajouter</a><br/>
-                <h4>Modules</h4>
-                <input type="checkbox" data-ng-model="comments">accepter les commentaires<br/>
-                <input type="checkbox" data-ng-model="news">Inserer un module News<br/><br/>
-                <a class="btn btn-primary" data-ng-click="Artists = !Artists; Descriptif = !Descriptif;
-                    ArtistsActive = !ArtistsActive">Suivant</a>
-            </div>
-            <div class="ng-hide" data-ng-show="Artists">
-                <a class="btn btn-primary" data-ng-click="Finalisation = !Finalisation; Artists = !Artists;
-                    FinalisationActive = !FinalisationActive">Suivant</a>
-            </div>
-            <div class="ng-hide" data-ng-show="Finalisation">
-                <input type="submit"/>
-            </div>
-        </div>
-        <div class="span7 previewEvent">
-            <div ng-hide="newEvent != null"><h1>Bienvenue dans l'éditeur d'événement !</h1></div>
-            <div class="ng-hide" ng-show="newEvent != null">
-                <h3>Preview</h3>
-                <img src="{{newEvent.img}}" alt="poikjij" class="min ng-hide" ng-show="newEvent.img != null"/>
-                <div class="row-fluid">
-                    <div ng-class="{span8 : news}">
-                        <div class="event_entete row-fluid">
-                            <h2>{{newEvent.name}}</h2>
-                            <a href="#" class="btn btn-warning btn_event"><i class="icon-white icon-share"></i></a>
-                            <a href="#" class="btn btn-warning btn_event"> + </a>
-                            <a href="#" class="btn btn-warning btn_event"><i class="icon-white icon-shopping-cart"></i></a>
-                        </div>
-                        <div class="row-fluid">
-                            <p>
-                                Par <a>{{ user.username }},</a>
-                                <i class="icon-calendar"></i>{{newEvent.startDate}}
-                                <i class="icon-time"></i>{{newEvent.startTime}}
-                                <i class="icon-map-marker"></i>{{newEvent.place}}
-                            </p>
-                        </div>
-                        <br/>
-                        <div class="row-fluid ng-hide" ng-show="newTab != null">
-                            <tabset class="span12">
-                                <tab data-heading="{{newTab.title}}" data-Active="tab.Active" data-disabled="tab.disabled">
-                                    <div data-ng-bind-html="newTab.content"></div>
-                                </tab>
-                                <tab data-ng-repeat="tab in tabs" data-heading="{{tab.title}}" data-Active="tab.Active" data-disabled="tab.disabled">
-                                    <div data-ng-bind-html="tab.content"></div>
-                                </tab>
-                            </tabset>
-                        </div>
-                        <br/>
-                        <br/>
-                    </div>
-                    <div class="right row-fluid span4" id="block_info" ng-show="news">
-                        <div id="block_news">
-                            <div class="span12 block_event">
-                                <h5>NEWS</h5>
-                            </div>
-                            <div class="block_event_inner span12">
-                            </div>
-                        </div>
-                    </div>
-                    <div id="block_comment" class="row-fluid span12" ng-show="comments">
-                        <div class="span12 block_event">
-                            <h5>COMMENTAIRES</h5>
-                        </div>
-                        <div class="block_event_inner span12">
-
-                            <div class="comment" data-ng-repeat="comment in event.comments">
-                                <h3>{{comment.userName}}</h3>
-                                {{comment.content}}
-                                <hr>
-                            </div>
-                        </div>
-                        <form data-ng-submit="addComment()" id="comment_event">
-                            <textarea class="span12" placeholder="Laissez un commentaire" data-ng-model="newComment.content"></textarea>
-                            <input type="submit">
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
+    <input type="number" name="prices[1]" placeholder="Prix du deuxième tarif"
+           ng-model="newEvent.prices1"/><br/>
+    <input type="text" name="denominations[1]" placeholder="Dénomination du tarif"
+           ng-model="newEvent.denominations1"/><br/>
+    <input type="number" name="nbTicketToSells[1]" placeholder="Nombre de ticket à vendre pour ce tarif"
+           ng-model="newEvent.nbTicketToSells1"/><br/>
+    <input type="date" name="startTimes[1]" placeholder="Début des ventes pour ce tarif"
+           ng-model="newEvent.startTimes1"/><br/>
+    <input type="date" name="endTimes[1]" placeholder="Fin des ventes pour ce tarif"
+           ng-model="newEvent.endTimes1"/><br/>
+    <h4>Contenu</h4>
+        <input type="text" name="description" placeholder="Description"
+           ng-model="newEvent.description"/><br/>
+    <input type="submit" name="valider"/>
+</form>

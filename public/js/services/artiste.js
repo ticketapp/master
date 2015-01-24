@@ -17,18 +17,18 @@
 		return deferred.promise;
 		},
 		getArtiste : function (id){
-		var deferred = $q.defer();
-		var artistes = {};
-		var artistes = factory.getArtistes().then(function(artistes){
-			angular.forEach(factory.artistes, function(value, key){
-			if(value.id == id){
-				artiste = value
-				}
-				});
-				deferred.resolve(artiste);
-			}, function(msg){
-			deferred.reject(msg);
-	});
+            var deferred = $q.defer();
+            var artistes = {};
+            var artistes = factory.getArtistes().then(function(artistes){
+                angular.forEach(factory.artistes, function(value, key){
+                if(value.id == id){
+                    artiste = value
+                }
+            });
+           deferred.resolve(artiste);
+            }, function(msg){
+                deferred.reject(msg);
+	        });
 		return deferred.promise;
 		}
 		};

@@ -21,12 +21,13 @@ object ArtistController extends Controller {
     "artistName" -> nonEmptyText(2)
   )(Artist.formApply)(Artist.formUnapply)
   )
+
   def createArtist = Action { implicit request =>
     artistBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       artist => {
         Artist.saveArtist(artist)
-        Redirect(routes.Admin.indexAdmin())
+        Redirect(routes.ArtistController.artist(1))
       }
     )
   }

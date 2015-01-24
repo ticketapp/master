@@ -1,14 +1,14 @@
 package controllers
 
-import models.User
-import org.joda.time.DateTime
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.db._
 import play.api.Play.current
 import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
-//import models.User
-//java.util.Date
+import models.User
+//import java.util.Date
 
 object UserController extends Controller {
   def users = Action {
@@ -19,6 +19,24 @@ object UserController extends Controller {
     Ok(Json.toJson(User.find(id)))
   }
 
+  val userBindingForm = Form(mapping(
+    "email" -> email,
+    "nickname" -> nonEmptyText(2),
+    "password" -> nonEmptyText(2),
+    "profile" -> nonEmptyText(2)
+  )(User.formApply)(User.formUnapply)
+  )
+
+  def createUser = Action { implicit request =>
+    userBindingForm.bindFromRequest().fold(
+      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
+      user => {
+        User.saveUser(user)
+        Redirect(routes.UserController.user(1))
+      }
+    )
+  }
+  
   def deleteUser(userId: Long): Int = {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM users WHERE userId={userId}").on(

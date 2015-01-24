@@ -2,10 +2,15 @@
     <h3 class="modal-title">Tools</h3>
 </div>
 <div class="modal-body row-fluid">
-    <div ng-repeat="item in items" class="span4 toolsContener">
+    <div class="switch">
+        <input id="exampleCheckboxSwitch" type="checkbox" ng-model="connected">
+        <label for="exampleCheckboxSwitch"></label>
+    </div>
+    <div ng-repeat="item in items" class="span4 toolsContener" ng-show="connected">
         <div data-ng-bind-html="item" ng-click="cancel()"></div>
     </div>
 </div>
 <div class="modal-footer">
     <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-warning" ng-click="ok()">OK</button>
 </div>

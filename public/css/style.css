@@ -89,6 +89,7 @@ opacity: 0;}
             height: 400px;
             overflow: hidden;
             background-color: rgba(71, 150, 221, 1);
+            background-attachment: fixed;
         }
         .animate-show {padding-left : 50px; color : white; position:absolute; top:0;}
 

@@ -1,4 +1,4 @@
-var app = angular.module('MonApp',['ngAnimate', 'ngRoute','ui.bootstrap', 'ngSanitize']);
+var app = angular.module('MonApp',['ngAnimate', 'ngRoute', 'ngSanitize', 'mm.foundation', 'colorpicker.module']);
 
 app.config(function($routeProvider){
     $routeProvider
