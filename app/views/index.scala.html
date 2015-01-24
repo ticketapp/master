@@ -5,10 +5,18 @@
 	    <li class="left" id="logo">
 	        <a href="#/"><img class="logo" src="assets/img/logo.png" alt="" ng-click="gotoTop()"><!--{{asset('img/logo.png')}}--></a>
 	    </li>
-        <!--<li class="left">
-            <input class="search-query" type="text" placeholder="Recherche">
-        </li>
-    <li class="right">
+        <div class="left" ng-controller="searchCtrl">
+            <md-content md-theme="docs-dark" layout="row" layout-sm="column">
+            <md-input-container>
+                <label>Search</label>
+                <input ng-model="artisteFb" ng-change="searchArtist()">
+            </md-input-container>
+            </md-content>
+            <div class="absolute">
+            <div  ng-click="GetArtisteById(artisteSearch.id)" ng-repeat="artisteSearch in artistes | filter : 'Musician' | limitTo : 10">{{artisteSearch.name}}</div>
+            </div>
+        </div>
+    <!--<li class="right">
         <div data-ng-controller="connectCtrl" class="btn btn-warning signIn" ng-click="open()">Sign In</div>
     </li>-->
     <li class="right">
