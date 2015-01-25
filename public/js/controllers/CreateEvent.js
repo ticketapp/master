@@ -75,7 +75,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     };
 
     $scope.createNewEvent = function () {
-        $http.post('/admin/createEvent', {event : $scope.newEvent});
+        $http.post('/createEvent', $scope.newEvent);
         console.log($scope.newEvent)
     }
 }]);

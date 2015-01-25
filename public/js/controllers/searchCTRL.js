@@ -1,6 +1,6 @@
 app.controller('searchCtrl', ['$scope', '$http', function($scope, $http){
     $scope.searchArtist = function(){
-        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.artisteFb + '&limit=200&type=page&access_token=CAACEdEose0cBAGXo1iKWZCN8wIYzYmkZByVkZBSaoeinH39RcYyBwO5fkDHsCJerDZBGuZBma7xL9mVK42vRx2SDV0ZBfSds1mWMqQREW8bhjFfJV8w2WFm4AiZAJZCXGnFHkmZCJfj44GHcOFagM9U4j09V5MB0LiC8FFxOULFWUsTvBJlsI0RxovNHvJlZBC2xdfR0xvwy5Gl8w6rrfI5rz1B4eI2fArABAZD').
+        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.artisteFb + '&limit=200&type=page&access_token=CAACEdEose0cBAOoLxnzoaILohnySbcAaz0roZBwN64prZAlmwBkh93UZCcHwVDNQFA0Jqte5HeOFFdQKglpxg8m2S9ENDaXyjApCNL80VE5QS7JLZApkwbXPYKCZBBjhmc7K6D7uZBtIaQOVSm5M2hNka9SeVZBYjHJyKuRFFiAUhASKahg7wJp3LGMocRjgZBXcj5hWqFb0dRq7a6Hn2C3aybdX6AqMXxAZD').
             success(function(data, status, headers, config) {
                 console.log(data);
                 $scope.artistes = data.data;
@@ -11,7 +11,7 @@ app.controller('searchCtrl', ['$scope', '$http', function($scope, $http){
             });
     };
     $scope.GetArtisteById = function(id){
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAGXo1iKWZCN8wIYzYmkZByVkZBSaoeinH39RcYyBwO5fkDHsCJerDZBGuZBma7xL9mVK42vRx2SDV0ZBfSds1mWMqQREW8bhjFfJV8w2WFm4AiZAJZCXGnFHkmZCJfj44GHcOFagM9U4j09V5MB0LiC8FFxOULFWUsTvBJlsI0RxovNHvJlZBC2xdfR0xvwy5Gl8w6rrfI5rz1B4eI2fArABAZD').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAOoLxnzoaILohnySbcAaz0roZBwN64prZAlmwBkh93UZCcHwVDNQFA0Jqte5HeOFFdQKglpxg8m2S9ENDaXyjApCNL80VE5QS7JLZApkwbXPYKCZBBjhmc7K6D7uZBtIaQOVSm5M2hNka9SeVZBYjHJyKuRFFiAUhASKahg7wJp3LGMocRjgZBXcj5hWqFb0dRq7a6Hn2C3aybdX6AqMXxAZD').
             success(function(data, status, headers, config) {
                 console.log(data);
                 $scope.artiste = data;
@@ -26,8 +26,8 @@ app.controller('searchCtrl', ['$scope', '$http', function($scope, $http){
         console.log(typeof $scope.artiste.name);
         $http.post('/admin/createArtist', {artistName : $scope.artiste.name}).
             success(function(data, status, headers, config) {
-                // this callback will be called asynchronously
-                // when the response is available
+                window.location.href =('#/artiste/' + data);
+                console.log(data)
             }).
             error(function(data, status, headers, config) {
                 // called asynchronously if an error occurs
