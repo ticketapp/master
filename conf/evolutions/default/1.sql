@@ -32,17 +32,18 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuse');
 INSERT INTO infos (title, content) VALUES ('infos2', 'une info qui va déchirer');
-INSERT INTO infos (title, content) VALUES ('infos3', 'J-80 avant la béta (hope so) et ca ca fuuuuuuuuuse aussi');
+INSERT INTO infos (title, content) VALUES ('infos3', 'fuserie');
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
   creationDateTime          TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  facebookId                BIGINT,
   name                      VARCHAR(255) NOT NULL
 );
-INSERT INTO artists (name) VALUES ('artists1');
-INSERT INTO artists (name) VALUES ('artists2');
-INSERT INTO artists (name) VALUES ('johny666');
-INSERT INTO artists (name) VALUES ('artists4');
+INSERT INTO artists (facebookId, name) VALUES (321, 'artists1');
+INSERT INTO artists (facebookId, name) VALUES (654, 'artists2');
+INSERT INTO artists (facebookId, name) VALUES (666, 'johny666');
+INSERT INTO artists (facebookId, name) VALUES (77777, 'artists4');
 
 CREATE TABLE users (
   userId                    SERIAL PRIMARY KEY,
@@ -58,6 +59,28 @@ VALUES ('admin@global.local', 'admin', '$2a$12$L/rFVHZonEAmydEfZyYR.exvJuDdMY6kX
 INSERT INTO users (email, nickname, password, profile)
 VALUES ('user@global.local', 'user', '$2a$12$3.UvEUatM.2VbYEI2Y.YKeqn3QNc/k0h9S0Vde2vqvzScKt74ofaS', 'User');
 
+CREATE TABLE users_login (
+  id                        SERIAL PRIMARY KEY,
+  userId                    VARCHAR(255) NOT NULL,
+  providerId                VARCHAR(255) NOT NULL,
+  firstName                 VARCHAR(255) NOT NULL,
+  lastName                  VARCHAR(255) NOT NULL,
+  fullName                  VARCHAR(255) NOT NULL,
+  email                     VARCHAR(255),
+  avatarUrl                 VARCHAR(255),
+  authMethod                VARCHAR(255) NOT NULL,
+  oAuth1Info                VARCHAR(255),
+  oAuth2Info                VARCHAR(255),
+  passwordInfo              VARCHAR(255)
+);
+
+CREATE TABLE users_token (
+  id                        VARCHAR(36) NOT NULL,
+  email                     VARCHAR(255) NOT NULL,
+  creationTime              TIMESTAMP NOT NULL,
+  expirationTime            TIMESTAMP NOT NULL,
+  isSignUp                  BOOLEAN NOT NULL
+);
 
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,
@@ -452,6 +475,7 @@ DROP TABLE IF EXISTS places;
 DROP TABLE IF EXISTS amountDue;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users_login, users_token;
 DROP TABLE IF EXISTS artists;
 DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS addresses;

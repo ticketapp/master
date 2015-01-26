@@ -1,73 +1,189 @@
 package services
 
-/*/import controllers.bean.{UserProfile, User}
-import controllers.bean.UserProfile._
-import controllers.dao.UserDao*/
+import _root_.java.util.Date
+import anorm.SqlParser._
+import anorm._
+import controllers.DAOException
+//import json.JsonWriters
+import org.joda.time.DateTime
+import play.api.db.DB
+import play.api.Play.current
 import play.api.{Logger, Application}
+import play.libs.Json
 import securesocial.core._
 import securesocial.core.providers.Token
-import securesocial.core.IdentityId
 
-
-/**
- * A Sample In Memory user service in Scala
- *
- * IMPORTANT: This is just a sample and not suitable for a production environment since
- * it stores everything in memory.
- */
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
-  private var users = Map[String, Identity]()
-  private var tokens = Map[String, Token]()
 
   def find(id: IdentityId): Option[Identity] = {
     if ( Logger.isDebugEnabled ) {
-      Logger.debug("users = %s".format(users))
+      Logger.debug("Find identity by IdentityId: %s".format(id))
     }
-    users.get(id.userId + id.providerId)
+    val ret = DB.withConnection { implicit  connection =>
+      SQL(s"SELECT ${USERS.FIELDS} FROM users_login WHERE userId={userId} AND providerId={providerId}").on(
+        'userId -> id.userId,
+        'providerId -> id.providerId
+      ).as(USERS.parser *).headOption
+    }
+    Logger.debug("Found: " + ret)
+    ret
   }
 
   def findByEmailAndProvider(email: String, providerId: String): Option[Identity] = {
     if ( Logger.isDebugEnabled ) {
-      Logger.debug("users = %s".format(users))
+      Logger.debug("Find identity by email and providerId: %s and %s".format(email, providerId))
     }
-    users.values.find( u => u.email.map( e => e == email && u.identityId.providerId == providerId).getOrElse(false))
+    DB.withConnection { implicit  connection =>
+      SQL(s"SELECT ${USERS.FIELDS} FROM users_login WHERE email={email} AND providerId={providerId}").on(
+        'email -> email,
+        'providerId -> providerId
+      ).as(USERS.parser *).headOption
+    }
   }
 
   def save(user: Identity): Identity = {
-    users = users + (user.identityId.userId + user.identityId.providerId -> user)
-    // this sample returns the same user object, but you could return an instance of your own class
-    // here as long as it implements the Identity trait. This will allow you to use your own class in the protected
-    // actions and event callbacks. The same goes for the find(id: IdentityId) method.
-    /*
-    user.email.getOrElse(throw new IllegalArgumentException("Cannot create user without email"))
-
-    UserDao.create(User(
-      email = user.email.get,
-      login = user.fullName,
-      password = None,
-      profile = UserProfile.User))
-    */
-    println("test")
+    try {
+      DB.withConnection { implicit connection =>
+        SQL(s"INSERT INTO users_login(${USERS.FIELDS_LESS_ID}) VALUES (" +
+          s"{userId}, {providerId}, {firstName}, {lastName}, {fullName}, " +
+          s"{email}, {avatarUrl}, {authMethod}, " +
+          s"{oAuth1Info}, {oAuth2Info}, {passwordInfo})").on(
+            'userId -> user.identityId.userId,
+            'providerId -> user.identityId.providerId,
+            'firstName -> user.firstName,
+            'lastName -> user.lastName,
+            'fullName -> user.fullName,
+            'email -> user.email,
+            'avatarUrl -> user.avatarUrl,
+            'authMethod -> user.authMethod.method,
+            'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info)),
+            'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info)),
+            'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo))
+          ).executeUpdate()
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot create user_login: " + e.getMessage)
+    }
     user
   }
 
   def save(token: Token) {
-    tokens += (token.uuid -> token)
+    try {
+      DB.withConnection { implicit connection =>
+        SQL(s"INSERT INTO users_token(${TOKENS.FIELDS}) VALUES (" +
+          s"{id}, {email}, {creationTime}, {expirationTime}, {isSignUp})").on(
+            'id -> token.uuid,
+            'email -> token.email,
+            'creationTime -> token.creationTime.toDate,
+            'expirationTime -> token.expirationTime.toDate,
+            'isSignUp -> token.isSignUp
+          ).executeUpdate()
+      }
+    } catch {
+      case e: Exception => {
+        e.printStackTrace()
+        throw new DAOException("Cannot create users_token: " + e.getClass + " " + e.getMessage + " " + e.getCause)
+      }
+    }
   }
 
-  def findToken(token: String): Option[Token] = {
-    tokens.get(token)
+  def findToken(uuid: String): Option[Token] = {
+    if ( Logger.isDebugEnabled ) {
+      Logger.debug("Find token by uuid: %s".format(uuid))
+    }
+    DB.withConnection { implicit  connection =>
+      SQL(s"SELECT ${TOKENS.FIELDS} FROM users_token WHERE id={id}").on(
+        'id -> uuid
+      ).as(TOKENS.parser *).headOption
+    }
   }
 
   def deleteToken(uuid: String) {
-    tokens -= uuid
+    if ( Logger.isDebugEnabled ) {
+      Logger.debug("Delete the token with uuid: %s".format(uuid))
+    }
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM users_token WHERE id={id}").on(
+        'id -> uuid
+      ).executeUpdate()
+    }
   }
 
   def deleteTokens() {
-    tokens = Map()
+    if ( Logger.isDebugEnabled ) {
+      Logger.debug("Delete all tokens")
+    }
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM users_token").executeUpdate()
+    }
   }
 
   def deleteExpiredTokens() {
-    tokens = tokens.filter(!_._2.isExpired)
+    if ( Logger.isDebugEnabled ) {
+      Logger.debug("Delete all expired tokens")
+    }
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM users_token WHERE expirationTime <= {now}").on(
+        'now -> DateTime.now().toDate
+      ).executeUpdate()
+    }
+  }
+}
+
+case class SSIdentity(
+                       id: Option[Long],
+                       identityId: IdentityId,
+                       firstName: String,
+                       lastName: String,
+                       fullName: String,
+                       email: Option[String],
+                       avatarUrl: Option[String],
+                       authMethod: AuthenticationMethod,
+                       oAuth1Info: Option[OAuth1Info] = None,
+                       oAuth2Info: Option[OAuth2Info] = None,
+                       passwordInfo: Option[PasswordInfo] = None) extends Identity {}
+
+
+object USERS {
+
+  val FIELDS_LESS_ID = "userId, providerId, firstName, lastName, fullName, email, " +
+    "avatarUrl, authMethod, oAuth1Info, oAuth2Info, passwordInfo"
+  val FIELDS = "id, " + FIELDS_LESS_ID
+
+  val parser = {
+    get[Pk[Long]]("id") ~
+      get[String]("userId") ~
+      get[String]("providerId") ~
+      get[String]("firstName") ~
+      get[String]("lastName") ~
+      get[String]("fullName") ~
+      get[Option[String]]("email") ~
+      get[Option[String]]("avatarUrl") ~
+      get[String]("authMethod") ~
+      get[Option[String]]("oAuth1Info") ~
+      get[Option[String]]("oAuth2Info") ~
+      get[Option[String]]("passwordInfo") map {
+      case id~userId~providerId~firstName~lastName~fullName
+        ~email~avatarUrl~authMethod~oAuth1Info~oAuth2Info
+        ~passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
+        firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
+        None, None, None)
+    }
+  }
+}
+
+object TOKENS {
+
+  val FIELDS = "id, email, creationTime, expirationTime, isSignUp"
+
+  val parser = {
+    get[String]("id") ~
+      get[String]("email") ~
+      get[Date]("creationTime") ~
+      get[Date]("expirationTime") ~
+      get[Boolean]("isSignUp") map {
+      case id~email~creationTime~expirationTime~isSignUp =>
+        Token(id, email, new DateTime(creationTime), new DateTime(expirationTime), isSignUp)
+    }
   }
 }

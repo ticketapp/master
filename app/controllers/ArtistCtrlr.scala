@@ -18,6 +18,7 @@ object ArtistController extends Controller {
 
 
   val artistBindingForm = Form(mapping(
+    "facebookId" -> longNumber(),
     "artistName" -> nonEmptyText(2)
   )(Artist.formApply)(Artist.formUnapply)
   )

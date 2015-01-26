@@ -14,6 +14,7 @@ import java.util.Date
  */
 case class Artist (artistId: Long,
                    creationDateTime: Date,
+                   facebookId: Long,
                    name: String)
 
 
@@ -23,9 +24,10 @@ object Artist {
   private val ArtistParser: RowParser[Artist] = {
     get[Long]("artistId") ~
       get[Date]("creationDateTime") ~
+      get[Long]("facebookId") ~
       get[String]("name") map {
-      case artistId ~ creationDateTime ~ name =>
-        Artist(artistId, creationDateTime, name)
+      case artistId ~ creationDateTime ~ facebookId ~ name =>
+        Artist(artistId, creationDateTime, facebookId, name)
     }
   }
 
@@ -53,15 +55,15 @@ object Artist {
     }
   }
 
-  def formApply(name: String): Artist = new Artist(-1L, new Date, name)
-  def formUnapply(artist: Artist): Option[(String)] = Some((artist.name))
-
+  def formApply(facebookId: Long, name: String): Artist = new Artist(-1L, new Date, facebookId, name)
+  def formUnapply(artist: Artist): Option[(Long, String)] = Some((artist.facebookId, artist.name))
 
   def saveArtist(artist: Artist): Long = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("insert into artists(name) values ({name})").on(
-          'name -> artist.name
+        SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
+          'name -> artist.name,
+          'facebookId -> artist.facebookId
         ).executeInsert().get
       }
     } catch {
