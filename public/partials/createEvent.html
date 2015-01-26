@@ -24,9 +24,10 @@
                 <a class="btn btn-primary" data-ng-click="InfosGenerales = !InfosGenerales; Config = !Config; InfosGeneralesActive = !InfosGeneralesActive">Suivant</a>
             </div>
             <div class="ng-hide" data-ng-show="InfosGenerales">
-                <h5>Image de l'événement</h5>
-                <input type="file" name="image_file" id="image_file"  fileread="newEvent.img" ng-show="eventFb != true"/><br>
-                <div layout="row">
+                <div ng-show="eventFb != true">
+                    <h5>Image de l'événement</h5>
+                    <input type="file" name="image_file" id="image_file"  fileread="newEvent.img" /><br>
+                </div>
                 <md-input-container flex>
                     <label>Event Name</label>
                     <input ng-minlength="2" required ng-model="newEvent.name" name="eventName">
@@ -35,37 +36,67 @@
                         <div ng-message="minlength">The name has to be more than 2 characters long.</div>
                     </div>
                 </md-input-container>
-                </div>
-                <input type="text" placeholder="LieuEvent" ng-model="newEvent.place"/><br/>
-                <input type="date" name="startSellingTime" placeholder="Date et heure de départ de l'événement"
-                       ng-model="newEvent.startDate"/><br/>
-                <input type="date" name="endSellingTime" placeholder="HeureDebutEvent"
-                       ng-model="newEvent.startTime"/><br/>
-                <input type="date" name="startTime"  placeholder="DateFinEvent" ng-model="newEvent.endDate"/><br/>
-                <input type="date" name="endTime"  ng-model="newEvent.endTime"/><br/>
-                <input type="number" name="ageRestriction"  ng-model="newEvent.ageRestriction"/><br/>
+                <md-input-container flex>
+                    <label>Event Place</label>
+                    <input required name="eventPlace" ng-model="newEvent.place"/><br/>
+                    <div ng-messages="createEventForm.eventPlace.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>Event StartDate</label>
+                    <input type="date" name="startSellingTime" placeholder="" required ng-model="newEvent.startDate"/><br/>
+                    <div ng-messages="createEventForm.startSellingTime.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>Event StartTime</label>
+                    <input type="time" name="startTime" required ng-model="newEvent.startTime"/><br/>
+                    <div ng-messages="createEventForm.startTime.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>Event EndDate</label>
+                    <input type="date" name="endDate" required ng-model="newEvent.endDate"/><br/>
+                    <div ng-messages="createEventForm.endDate.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>Event endTime</label>
+                    <input type="time" name="endTime" required="" ng-model="newEvent.endTime"/><br/>
+                    <div ng-messages="createEventForm.endTime.$error">
+                        <div ng-message="required">This is required.</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>Event ageRestict</label>
+                    <input type="number" name="ageRestriction"  ng-model="newEvent.ageRestriction"/><br/>
+                </md-input-container>
                  <h2>Tarifs</h2>
                 <input type="number" name="prices[0]" placeholder="Prix du premier tarif"
-                       ng-model="newEvent.prices0"/><br/>
+                       ng-model="newEvent.tarifs[0].price"/><br/>
                 <input type="text" name="denominations[0]" placeholder="Dénomination du tarif"
-                       ng-model="newEvent.denominations0"/><br/>
+                       ng-model="newEvent.tarifs[0].denomination"/><br/>
                 <input type="number" name="nbTicketToSells[0]" placeholder="Nombre de ticket à vendre pour ce tarif"
-                       ng-model="newEvent.nbTicketToSells0"/><br/>
+                       ng-model="newEvent.tarifs[0].nbTicketToSells"/><br/>
                 <input type="date" name="startTimes[0]" placeholder="Début des ventes pour ce tarif"
-                       ng-model="newEvent.startTimes0"/><br/>
+                       ng-model="newEvent.tarifs[0].startTime"/><br/>
                 <input type="date" name="endTimes[0]" placeholder="Fin des ventes pour ce tarif"
-                       ng-model="newEvent.endTimes0"/><br/>
+                       ng-model="newEvent.tarifs[0].endTime"/><br/>
 
                 <input type="number" name="prices[1]" placeholder="Prix du deuxième tarif"
-                       ng-model="newEvent.prices1"/><br/>
+                       ng-model="newEvent.tarifs[1].price"/><br/>
                 <input type="text" name="denominations[1]" placeholder="Dénomination du tarif"
-                       ng-model="newEvent.denominations1"/><br/>
+                       ng-model="newEvent.tarifs[1].denomination"/><br/>
                 <input type="number" name="nbTicketToSells[1]" placeholder="Nombre de ticket à vendre pour ce tarif"
-                       ng-model="newEvent.nbTicketToSells1"/><br/>
+                       ng-model="newEvent.tarifs[1].nbTicketToSells"/><br/>
                 <input type="date" name="startTimes[1]" placeholder="Début des ventes pour ce tarif"
-                       ng-model="newEvent.startTimes1"/><br/>
+                       ng-model="newEvent.tarifs[1].startTime"/><br/>
                 <input type="date" name="endTimes[1]" placeholder="Fin des ventes pour ce tarif"
-                       ng-model="newEvent.endTimes1"/><br/>
+                       ng-model="newEvent.tarifs[1].endTime"/><br/>
                 <a class="btn btn-primary" data-ng-click="Descriptif = !Descriptif; InfosGenerales = !InfosGenerales;
                     DescriptifActive = !DescriptifActive; addImg()">Suivant</a>
             </div>
