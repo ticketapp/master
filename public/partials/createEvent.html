@@ -29,7 +29,11 @@
                 <div layout="row">
                 <md-input-container flex>
                     <label>Event Name</label>
-                    <input ng-model="newEvent.name" placeholder="Nom de l'événement">
+                    <input ng-minlength="2" required ng-model="newEvent.name" name="eventName">
+                    <div ng-messages="createEventForm.eventName.$error">
+                        <div ng-message="required">This is required.</div>
+                        <div ng-message="minlength">The name has to be more than 2 characters long.</div>
+                    </div>
                 </md-input-container>
                 </div>
                 <input type="text" placeholder="LieuEvent" ng-model="newEvent.place"/><br/>

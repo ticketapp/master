@@ -1,6 +1,6 @@
 app.controller('searchCtrl', ['$scope', '$http', function($scope, $http){
     $scope.searchArtist = function(){
-        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.artisteFb + '&limit=200&type=page&access_token=CAACEdEose0cBAOoLxnzoaILohnySbcAaz0roZBwN64prZAlmwBkh93UZCcHwVDNQFA0Jqte5HeOFFdQKglpxg8m2S9ENDaXyjApCNL80VE5QS7JLZApkwbXPYKCZBBjhmc7K6D7uZBtIaQOVSm5M2hNka9SeVZBYjHJyKuRFFiAUhASKahg7wJp3LGMocRjgZBXcj5hWqFb0dRq7a6Hn2C3aybdX6AqMXxAZD').
+        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.artisteFb + '&limit=200&type=page&access_token=CAACEdEose0cBAPGZBgtLAPlr38J9VMiTv5iLG2LFBW4M1tem7itL3Q5rs9hbIBXraom5R0S0izzjtzGnZCAu8CkpoNLSNsee5elvZBOIq8etXMcV2XF4rdiJImEYvADgxGKnyQAwCB250b72MjuW1RZCLbKiw5LQ3d4YsqrhJFMjqriKC1bWIV4KbTLRRZAYdgVw4bhyIVJiZAG9hFvTKOutKZCIARnm4wZD').
             success(function(data, status, headers, config) {
                 console.log(data);
                 $scope.artistes = data.data;
@@ -11,7 +11,7 @@ app.controller('searchCtrl', ['$scope', '$http', function($scope, $http){
             });
     };
     $scope.GetArtisteById = function(id){
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAOoLxnzoaILohnySbcAaz0roZBwN64prZAlmwBkh93UZCcHwVDNQFA0Jqte5HeOFFdQKglpxg8m2S9ENDaXyjApCNL80VE5QS7JLZApkwbXPYKCZBBjhmc7K6D7uZBtIaQOVSm5M2hNka9SeVZBYjHJyKuRFFiAUhASKahg7wJp3LGMocRjgZBXcj5hWqFb0dRq7a6Hn2C3aybdX6AqMXxAZD').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAPGZBgtLAPlr38J9VMiTv5iLG2LFBW4M1tem7itL3Q5rs9hbIBXraom5R0S0izzjtzGnZCAu8CkpoNLSNsee5elvZBOIq8etXMcV2XF4rdiJImEYvADgxGKnyQAwCB250b72MjuW1RZCLbKiw5LQ3d4YsqrhJFMjqriKC1bWIV4KbTLRRZAYdgVw4bhyIVJiZAG9hFvTKOutKZCIARnm4wZD').
             success(function(data, status, headers, config) {
                 console.log(data);
                 $scope.artiste = data;
