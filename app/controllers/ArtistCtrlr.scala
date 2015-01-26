@@ -27,8 +27,7 @@ object ArtistController extends Controller {
     artistBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       artist => {
-        Artist.saveArtist(artist)
-        Redirect(routes.ArtistController.artist(1))
+        Ok(Json.toJson(Artist.saveArtist(artist)))
       }
     )
   }
