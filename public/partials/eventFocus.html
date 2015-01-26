@@ -1,9 +1,3 @@
-<img src="assets/img/2.jpg" alt="poikjij" class="min"/>
-<h2>{{ event.name }}</h2>
-<p>
-    <a href="#/user/{{user.id}}" class="custom-trigger" data-ng-repeat="nickname in event.nicknames.split(',')">
-        {{ nickname }}
-    </a>
-</p>
+<div ng-bind-html="event.description"></div>
 
 

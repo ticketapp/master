@@ -6,7 +6,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     $scope.newEvent.tarifs = [];
     $scope.eventFb = false;
     $scope.GetEventByUrl = function(){
-        $http.get('https://graph.facebook.com/v2.2/' + $scope.eventFbUrl + '/?' +  'access_token=CAACEdEose0cBAHb7fZAliRXGodDOEq2U2HLvuPFaZBXtR9GGDkpGHpcNexkT2FZAYQZBFG8GSZBiI3A5tcw6goR0wxywsaOz6NlnlQnCB2m1DIchegsTGukNflp87sFmHVatEuJU4PxWTDNXGUe6MHZCjY2C5TEPVAzIBJ4Fi37CT8KTqoLcQ3vukpngTdV4mHFZCjMbyXftuER3QVLXENO7IKb9GZC9Po0ZD').
+        $http.get('https://graph.facebook.com/v2.2/' + $scope.eventFbUrl + '/?' +  'access_token=CAACEdEose0cBAIf806MaiRv06gj9zpZBqQSStcvykZCCMNdvT8ElN0i0mfq2v8gQk3nGXaFFtZCMOT1rmn837Bm31girsZAdJe7hzy5voRGoivWk5iX0W61rjsGECF3v2bvZAEWkFMUmjUVf0LvCHZCN4x4psgSii0eZAc1osQXmqZAhCwvdys16hxlfG6VwbkZA6F4vMezAChgVtmAUOPSqo5w9Ka5HyhekZD').
             success(function(data, status, headers, config) {
                 console.log(data);
             }).
@@ -16,7 +16,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
             });
     };
     $scope.searchEvent = function(){
-        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAACEdEose0cBAHb7fZAliRXGodDOEq2U2HLvuPFaZBXtR9GGDkpGHpcNexkT2FZAYQZBFG8GSZBiI3A5tcw6goR0wxywsaOz6NlnlQnCB2m1DIchegsTGukNflp87sFmHVatEuJU4PxWTDNXGUe6MHZCjY2C5TEPVAzIBJ4Fi37CT8KTqoLcQ3vukpngTdV4mHFZCjMbyXftuER3QVLXENO7IKb9GZC9Po0ZD').
+        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAACEdEose0cBAIf806MaiRv06gj9zpZBqQSStcvykZCCMNdvT8ElN0i0mfq2v8gQk3nGXaFFtZCMOT1rmn837Bm31girsZAdJe7hzy5voRGoivWk5iX0W61rjsGECF3v2bvZAEWkFMUmjUVf0LvCHZCN4x4psgSii0eZAc1osQXmqZAhCwvdys16hxlfG6VwbkZA6F4vMezAChgVtmAUOPSqo5w9Ka5HyhekZD').
             success(function(data, status, headers, config) {
                 console.log(data.data);
 
@@ -31,7 +31,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     $scope.GetEventById = function(id){
         var scopeReady = false;
         var cover = false;
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAHb7fZAliRXGodDOEq2U2HLvuPFaZBXtR9GGDkpGHpcNexkT2FZAYQZBFG8GSZBiI3A5tcw6goR0wxywsaOz6NlnlQnCB2m1DIchegsTGukNflp87sFmHVatEuJU4PxWTDNXGUe6MHZCjY2C5TEPVAzIBJ4Fi37CT8KTqoLcQ3vukpngTdV4mHFZCjMbyXftuER3QVLXENO7IKb9GZC9Po0ZD').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAIf806MaiRv06gj9zpZBqQSStcvykZCCMNdvT8ElN0i0mfq2v8gQk3nGXaFFtZCMOT1rmn837Bm31girsZAdJe7hzy5voRGoivWk5iX0W61rjsGECF3v2bvZAEWkFMUmjUVf0LvCHZCN4x4psgSii0eZAc1osQXmqZAhCwvdys16hxlfG6VwbkZA6F4vMezAChgVtmAUOPSqo5w9Ka5HyhekZD').
             success(function(data, status, headers, config) {
                 console.log(data);
                 //$scope.newEvent = data;
@@ -45,12 +45,13 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
                 $scope.newEvent.endTime = new Date(data.end_time);
                 scopeReady = true;
                 insert();
+                console.log($scope.newEvent.startDate)
             }).
             error(function(data, status, headers, config) {
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
             });
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=cover&access_token=CAACEdEose0cBAHb7fZAliRXGodDOEq2U2HLvuPFaZBXtR9GGDkpGHpcNexkT2FZAYQZBFG8GSZBiI3A5tcw6goR0wxywsaOz6NlnlQnCB2m1DIchegsTGukNflp87sFmHVatEuJU4PxWTDNXGUe6MHZCjY2C5TEPVAzIBJ4Fi37CT8KTqoLcQ3vukpngTdV4mHFZCjMbyXftuER3QVLXENO7IKb9GZC9Po0ZD').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=cover&access_token=CAACEdEose0cBAIf806MaiRv06gj9zpZBqQSStcvykZCCMNdvT8ElN0i0mfq2v8gQk3nGXaFFtZCMOT1rmn837Bm31girsZAdJe7hzy5voRGoivWk5iX0W61rjsGECF3v2bvZAEWkFMUmjUVf0LvCHZCN4x4psgSii0eZAc1osQXmqZAhCwvdys16hxlfG6VwbkZA6F4vMezAChgVtmAUOPSqo5w9Ka5HyhekZD').
             success(function(data, status, headers, config) {
                 $scope.newEvent.img = data.cover.source;
                 cover = true;
@@ -86,7 +87,13 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     };
 
     $scope.createNewEvent = function () {
-        $http.post('/createEvent', {name: $scope.newEvent.name,
+        $scope.newEvent.startDate = $scope.newEvent.startDate.getFullYear() + '-' + $scope.newEvent.startDate.getMonth()+1 + '-' + $scope.newEvent.startDate.getDate();
+        $scope.newEvent.endDate = $scope.newEvent.endDate.getFullYear() + '-' + $scope.newEvent.endDate.getMonth()+1 + '-' + $scope.newEvent.endDate.getDate();
+        $scope.newEvent.startTime = $scope.newEvent.startTime.getFullYear() + '-' + $scope.newEvent.startTime.getMonth()+1 + '-' + $scope.newEvent.startTime.getDate();
+        $scope.newEvent.endTime = $scope.newEvent.endTime.getFullYear() + '-' + $scope.newEvent.endTime.getMonth()+1 + '-' + $scope.newEvent.endTime.getDate();
+        console.log($scope.newEvent)
+        $http.post('/createEvent', {
+            name: $scope.newEvent.name,
             startSellingTime: $scope.newEvent.startDate,
             endSellingTime: $scope.newEvent.endDate,
             description: $scope.newEvent.description,
@@ -98,6 +105,15 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
             users: $scope.newEvent.user,
             artists: $scope.newEvent.artists,
             tariffs: $scope.newEvent.tarifs
-        });
+        }).
+            success(function(data, status, headers, config) {
+                window.location.href =('#/event/' + data.id);
+                console.log(data)
+            }).
+            error(function(data, status, headers, config) {
+                console.log(data)
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
     }
 }]);
