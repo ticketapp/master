@@ -52,10 +52,11 @@ object Place {
 
 
      */
+    var patternLowCase = pattern.toLowerCase()
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM places WHERE name LIKE {pattern} || '%' LIMIT 5")
-          .on('pattern -> pattern)
+        SQL("SELECT * FROM places WHERE name LIKE {patternLowCase} || '%' LIMIT 5")
+          .on('patternLowCase -> patternLowCase)
           .as(PlaceParser *)
       }
     } catch {

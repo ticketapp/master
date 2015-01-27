@@ -118,10 +118,11 @@ object Event {
 
 
      */
+    var patternLowCase = pattern.toLowerCase()
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM events WHERE name LIKE {pattern} || '%' LIMIT 10")
-          .on('pattern -> pattern)
+        SQL("SELECT * FROM events WHERE name LIKE {patternLowCase} || '%' LIMIT 10")
+          .on('patternLowCase -> patternLowCase)
           .as(EventParser *)
       }
     } catch {

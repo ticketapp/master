@@ -1,14 +1,12 @@
 package controllers
 
 import models.Place
-import org.joda.time.DateTime
 import play.api.db._
 import play.api.Play.current
 import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
-//import models.Place
-//java.util.Date
+
 
 object PlaceController extends Controller {
   def places = Action {

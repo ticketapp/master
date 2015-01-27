@@ -58,6 +58,7 @@ object Artist {
 
 
   def findAllStartingWith(pattern: String): Seq[Artist] = {
+    var patternLowCase = pattern.toLowerCase()
     /*
 
     Security with the string? Need to escape it?
@@ -66,8 +67,8 @@ object Artist {
      */
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM artists WHERE name LIKE {pattern} || '%' LIMIT 10")
-          .on('pattern -> pattern)
+        SQL("SELECT * FROM artists WHERE name LIKE {patternLowCase} || '%' LIMIT 10")
+          .on('patternLowCase -> patternLowCase)
           .as(ArtistParser *)
       }
     } catch {
