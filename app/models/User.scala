@@ -56,7 +56,7 @@ object User {
     var patternLowCase = pattern.toLowerCase()
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM users WHERE nickname LIKE {patternLowCase} || '%' LIMIT 3")
+        SQL("SELECT * FROM users WHERE LOWER(nickname) LIKE {patternLowCase} || '%' LIMIT 3")
           .on('patternLowCase -> patternLowCase)
           .as(UserParser *)
       }

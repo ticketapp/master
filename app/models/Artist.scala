@@ -67,7 +67,7 @@ object Artist {
      */
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM artists WHERE name LIKE {patternLowCase} || '%' LIMIT 10")
+        SQL("SELECT * FROM artists WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
           .on('patternLowCase -> patternLowCase)
           .as(ArtistParser *)
       }
