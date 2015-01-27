@@ -40,7 +40,7 @@ object Place {
       SQL("""SELECT *
              FROM eventsPlaces eP
              INNER JOIN places s ON s.placeId = eP.placeId where eP.eventId = {eventId}""")
-        .on('eventId -> event.id)
+        .on('eventId -> event.eventId)
         .as(PlaceParser *)
     }
   }

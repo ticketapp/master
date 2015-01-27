@@ -64,7 +64,7 @@ object Tariff {
       SQL("""SELECT *
              FROM Tariffs
              WHERE eventId = {eventId}""")
-        .on('eventId -> event.id)
+        .on('eventId -> event.eventId)
         .as(TariffParser *)
     }
   }

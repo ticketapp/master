@@ -43,7 +43,7 @@ object Artist {
       SQL("""SELECT *
              FROM eventsArtists eA
              INNER JOIN artists a ON a.artistId = eA.artistId where eA.eventId = {eventId}""")
-        .on('eventId -> event.id)
+        .on('eventId -> event.eventId)
         .as(ArtistParser *)
     }
   }

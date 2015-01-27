@@ -11,7 +11,7 @@ import java.util.Date
 
 import scala.collection.mutable.ListBuffer
 
-case class Event(id: Long,
+case class Event(eventId: Long,
                  isPublic: Boolean,
                  isActive: Boolean,
                  creationDateTime: Date,

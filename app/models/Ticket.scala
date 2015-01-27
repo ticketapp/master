@@ -85,7 +85,7 @@ object Ticket {
       SQL( """SELECT *
              FROM Tickets
              WHERE eventId = {eventId}""")
-        .on('eventId -> event.id)
+        .on('eventId -> event.eventId)
         .as(TicketParser *)
     }
   }
@@ -95,7 +95,7 @@ object Ticket {
       SQL( """SELECT *
            FROM Tickets
            WHERE userId = {userId}""")
-        .on('userId -> user.id)
+        .on('userId -> user.userId)
         .as(TicketParser *)
     }
   }

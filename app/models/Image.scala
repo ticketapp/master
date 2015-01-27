@@ -40,7 +40,7 @@ object Image {
   def findAllByEvent(event: Event): Seq[Image] = {
     DB.withConnection { implicit connection =>
       SQL("select * from images where eventId = {eventId}")
-        .on('eventId -> event.id)
+        .on('eventId -> event.eventId)
         .as(ImageParser *)
     }
   }

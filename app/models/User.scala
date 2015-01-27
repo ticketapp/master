@@ -8,7 +8,7 @@ import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
 import java.util.Date
 
-case class User (id: Long,
+case class User (userId: Long,
                  creationDateTime: Date,
                  email: String,
                  nickname : String,
@@ -41,7 +41,7 @@ object User {
       SQL("""SELECT *
              FROM eventsUsers eU
              INNER JOIN users s ON s.userId = eU.userId where eU.eventId = {eventId}""")
-        .on('eventId -> event.id)
+        .on('eventId -> event.eventId)
         .as(UserParser *)
     }
   }
