@@ -46,6 +46,24 @@ object User {
     }
   }
 
+  def findAllStartingWith(pattern: String): Seq[User] = {
+    /*
+
+    Security with the string? Need to escape it?
+
+
+     */
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("SELECT * FROM users WHERE nickname LIKE {pattern} || '%' LIMIT 3")
+          .on('pattern -> pattern)
+          .as(UserParser *)
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method User.findAllStartingWith: " + e.getMessage)
+    }
+  }
+
   def find(userId: Long): Option[User] = {
     DB.withConnection { implicit connection =>
       SQL("SELECT * from users WHERE userId = {userId}")

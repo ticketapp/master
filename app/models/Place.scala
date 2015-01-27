@@ -45,6 +45,24 @@ object Place {
     }
   }
 
+  def findAllStartingWith(pattern: String): Seq[Place] = {
+    /*
+
+    Security with the string? Need to escape it?
+
+
+     */
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("SELECT * FROM places WHERE name LIKE {pattern} || '%' LIMIT 5")
+          .on('pattern -> pattern)
+          .as(PlaceParser *)
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method Place.findAllStartingWith: " + e.getMessage)
+    }
+  }
+
   def find(placeId: Long): Option[Place] = {
     DB.withConnection { implicit connection =>
       SQL("SELECT * from places WHERE placeId = {placeId}")

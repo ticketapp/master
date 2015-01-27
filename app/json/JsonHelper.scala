@@ -4,6 +4,7 @@ import models._
 import play.api.libs.json._
 import play.api.libs.json.JsString
 import play.api.libs.functional.syntax
+import securesocial.core.OAuth1Info
 import scala.collection.Traversable
 import scala.Traversable
 import play.api.libs.json.Json._
@@ -16,12 +17,25 @@ import play.api.libs.json.{JsString, _}
 import play.api.libs.json.DefaultWrites
 import scala.BigDecimal.javaBigDecimal2bigDecimal
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
+/*class OAuth1Info2(token2 : scala.Predef.String, secret2 : scala.Predef.String) extends OAuth1Info(token2, secret2) {
+  def this() = this("", "")
+  def equals(that: Any) = true
+  def apply(token2 : scala.Predef.String, secret2 : scala.Predef.String) = this()
+}*/
 object JsonHelper {
 
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
     def writes(o : java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(o))
   }
 
+  /*
+    implicit val oAuth1InfoReads: Reads[OAuth1Info2] = (
+      (JsPath \ "token").read[String] and
+      (JsPath \ "secret").read[String]
+      )(OAuth1Info.apply _)*/
 
   implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
   implicit val account63Writes: Writes[Account63] = Json.writes[Account63]

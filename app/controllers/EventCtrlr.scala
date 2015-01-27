@@ -22,6 +22,10 @@ object EventController extends Controller {
     }
   }
 
+  def eventsStartingWith(pattern: String) = Action {
+    Ok(Json.toJson(Event.findAllStartingWith(pattern)))
+  }
+
   val eventBindingForm = Form(mapping(
       "name" -> nonEmptyText(2),
       "startSellingTime" -> date,

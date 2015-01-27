@@ -111,6 +111,23 @@ object Event {
     }
   }
 
+  def findAllStartingWith(pattern: String): Seq[Event] = {
+    /*
+
+    Security with the string? Need to escape it?
+
+
+     */
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("SELECT * FROM events WHERE name LIKE {pattern} || '%' LIMIT 10")
+          .on('pattern -> pattern)
+          .as(EventParser *)
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method Event.findAllStartingWith: " + e.getMessage)
+    }
+  }
 
   def saveEvent(event: Event): Long = {
     var eventIdToReturn: Long = 0

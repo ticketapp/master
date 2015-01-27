@@ -1,6 +1,15 @@
 # Home page
 GET     /                          controllers.Application.index
 
+#
+#
+#
+#CHANGER POST PAR PUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+#
+#
+#
+
 ################################## Admin ###############################################
 GET     /admin                     controllers.Admin.indexAdmin
 #POST    /admin/createTariff        controllers.Admin.createTariff
@@ -10,6 +19,7 @@ GET     /events                    controllers.EventController.events
 GET     /event/:id                 controllers.EventController.event(id: Long)
 POST    /createEvent               controllers.EventController.createEvent
 POST    /event/:userId/:eventId    controllers.EventController.followEvent(userId: Long, eventId: Long)
+GET     /events/:pattern           controllers.EventController.eventsStartingWith(pattern: String)
 
 ################################## Artists ##############################################
 GET     /artists                    controllers.ArtistController.artists
@@ -17,11 +27,13 @@ GET     /artist/:artistId           controllers.ArtistController.artist(artistId
 POST    /admin/createArtist         controllers.ArtistController.createArtist
 POST    /artist/:userId/:artistId   controllers.ArtistController.followArtist(userId: Long, artistId: Long)
 DELETE  /artist/:artistId           controllers.ArtistController.deleteArtist(artistId: Long)
+GET     /artists/:pattern           controllers.ArtistController.artistsStartingWith(pattern: String)
 
 ################################## Places ###############################################
-GET     /lieux                      controllers.PlaceController.places
-GET     /lieu/:id                   controllers.PlaceController.place(id: Long)
-POST    /lieu/:userId/:placeId      controllers.PlaceController.followPlace(userId: Long, placeId: Long)
+GET     /places                     controllers.PlaceController.places
+GET     /place/:id                  controllers.PlaceController.place(id: Long)
+POST    /place/:userId/:placeId     controllers.PlaceController.followPlace(userId: Long, placeId: Long)
+GET     /places/:pattern            controllers.PlaceController.placesStartingWith(pattern: String)
 
 ################################## Infos ################################################
 GET    /infos                       controllers.Application.infos
@@ -29,6 +41,7 @@ GET    /infos                       controllers.Application.infos
 ################################## Users ################################################
 GET     /users                      controllers.UserController.users
 GET     /user/:id                   controllers.UserController.user(id: Long)
+GET     /users/:pattern             controllers.UserController.usersStartingWith(pattern: String)
 
 ################################## Buy ticket ###########################################
 GET     /buyTicket                  controllers.TicketCtrlr.buyTicket

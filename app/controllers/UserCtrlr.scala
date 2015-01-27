@@ -19,6 +19,10 @@ object UserController extends Controller {
     Ok(Json.toJson(User.find(id)))
   }
 
+  def usersStartingWith(pattern: String) = Action {
+    Ok(Json.toJson(User.findAllStartingWith(pattern)))
+  }
+
   val userBindingForm = Form(mapping(
     "email" -> email,
     "nickname" -> nonEmptyText(2),

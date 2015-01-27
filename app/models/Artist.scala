@@ -37,6 +37,7 @@ object Artist {
     }
   }
 
+
   def findAllByEvent(event: Event): Seq[Artist] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
@@ -52,6 +53,25 @@ object Artist {
       SQL("SELECT * from artists WHERE artistId = {artistId}")
         .on('artistId -> artistId)
         .as(ArtistParser.singleOpt)
+    }
+  }
+
+
+  def findAllStartingWith(pattern: String): Seq[Artist] = {
+    /*
+
+    Security with the string? Need to escape it?
+
+
+     */
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("SELECT * FROM artists WHERE name LIKE {pattern} || '%' LIMIT 10")
+          .on('pattern -> pattern)
+          .as(ArtistParser *)
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method Artist.findAllStartingWith: " + e.getMessage)
     }
   }
 

@@ -1,9 +1,14 @@
 package services
 
+//import json.JsonHelper.oAuth1InfoReads
+//import json.OAuth1Info2
 import _root_.java.util.Date
 import anorm.SqlParser._
 import anorm._
+import com.fasterxml.jackson.databind.JsonNode
 import controllers.DAOException
+import play.api.libs.json.JsObject
+
 //import json.JsonWriters
 import org.joda.time.DateTime
 import play.api.db.DB
@@ -167,8 +172,15 @@ object USERS {
         ~email~avatarUrl~authMethod~oAuth1Info~oAuth2Info
         ~passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
         firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
-        None, None, None)
+        getOAuth1Info(oAuth1Info), None, None)
     }
+  }
+
+  def getOAuth1Info(value: Option[String]) : Option[OAuth1Info] = value match {
+    case Some(o) => {
+      Option.apply(Json.fromJson(Json.parse(o), classOf[OAuth1Info]))
+    }
+    case None => None
   }
 }
 

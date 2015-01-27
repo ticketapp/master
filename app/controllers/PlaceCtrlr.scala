@@ -19,6 +19,10 @@ object PlaceController extends Controller {
     Ok(Json.toJson(Place.find(id)))
   }
 
+  def placesStartingWith(pattern: String) = Action {
+    Ok(Json.toJson(Place.findAllStartingWith(pattern)))
+  }
+
   def deletePlace(placeId: Long): Int = {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM places WHERE placeId={placeId}").on(

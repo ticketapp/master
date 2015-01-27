@@ -98,45 +98,28 @@ CREATE TABLE events (
 INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
                     endSellingTime, description, startTime,
                     endTime, ageRestriction)
-VALUES (true, true, '22/02/1991', 'event1', '22/12/2014', '22/12/2014',
-        'descriptionblablablalblagl zae az e', '22/12/2014',
-        '07/07/2017', 16);
+VALUES (true, true, '1991-02-22 00:00:00', 'event1', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
+        'descriptionblablablalblagl zae az e', '1991-02-22 00:00:00',
+        '1991-02-22 00:00:00', 16);
 INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
                     endSellingTime, description, startTime,
                     endTime, ageRestriction)
-VALUES (true, true, '22/02/1991', 'deuxieme', '22/12/2014', '22/12/2014',
-        'descriptionbdlablablalblagl zae az e', '22/12/2014',
-        '07/07/2017', 16);
+VALUES (true, true, '1991-02-22 00:00:00', 'deuxieme', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
+        'descriptionbdlablablalblagl zae az e', '1991-02-22 00:00:00',
+        '1991-02-22 00:00:00', 16);
 INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
                     endSellingTime, description, startTime,
                     endTime, ageRestriction)
-VALUES (true, true, '22/02/1991', 'troisieme3', '22/12/2014', '22/12/2014',
-        'descriptionqsdqsdqsdqsdqsblablablalblagl zae az e', '22/12/2014',
-        '07/07/2017', 16);
+VALUES (true, true, '1991-02-22 00:00:00', 'troisieme3', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
+        'descriptionqsdqsdqsdqsdqsblablablalblagl zae az e', '1991-02-22 00:00:00',
+        '1991-02-22 00:00:00', 16);
 INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
                     endSellingTime, description, startTime,
                     endTime, ageRestriction)
-VALUES (true, true, '22/02/1991', 'DJDKLS', '22/12/2014', '22/12/2014',
-        'yoo oy yoyoyoyoyooyoyoy zae az e', '22/12/2014',
-        '07/07/2017', 16);
-INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
-                    endSellingTime, description, startTime,
-                    endTime, ageRestriction)
-VALUES (true, true, '22/02/1991', 'ton père levenement', '22/12/2014', '22/12/2014',
-        'descriptionblablablalblagl zae az e', '22/12/2014',
-        '22/12/2014', 16);
-INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
-                    endSellingTime, description, startTime,
-                    endTime, ageRestriction)
-VALUES (true, true, '22/02/1991', 'ta soeur levenement', '22/02/2015', '22/02/2015',
-        'descriptionblablablalblagl zae az e', '07/07/2017',
-        '07/07/2017', 16);
-INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
-                    endSellingTime, description, startTime,
-                    endTime, ageRestriction)
-VALUES (true, true, '22/02/1991', 'ta mère levenement', '22/02/2015', '22/02/2015',
-        'descriptionqsdqsdqsdqsdqsblablablalblagl zae az e', '22/02/2015',
-        '07/07/2017', 16);
+VALUES (true, true, '1991-02-22 00:00:00', 'DJDKLS', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
+        'yoo oy yoyoyoyoyooyoyoy zae az e', '1991-02-22 00:00:00',
+        '1991-02-22 00:00:00', 16);
+
 
 
 CREATE TABLE places (
@@ -160,8 +143,7 @@ CREATE TABLE images (
 INSERT INTO images (path, alt, eventId, userId) VALUES ('1.jpg', 'alt', 1, 1);
 INSERT INTO images (path, alt, eventId, userId) VALUES ('2.jpg', 'une jolie description', 2, 1);
 INSERT INTO images (path, alt, eventId, userId) VALUES ('3.jpg', 'une belle description', 3, 2);
-INSERT INTO images (path, alt, eventId) VALUES ('4.jpg', 'alt3', 4);
-INSERT INTO images (path, alt, eventId) VALUES ('5.jpg', 'alt3', 5);
+INSERT INTO images (path, alt, eventId) VALUES ('4.jpg', 'altqsdqsd', 4);
 INSERT INTO images (path, alt, eventId) VALUES ('6.jpg', 'alt3', 1);
 
 CREATE TABLE tariffs (
@@ -188,12 +170,11 @@ CREATE TABLE tickets (
 INSERT INTO tickets (qrCode, tariffId, orderId) VALUES ('145345343453543', 1, 1);
 --INSERT INTO tickets (tariffId, orderId) VALUES (1, 1);
 
-CREATE TABLE tariffsBlocked (
-  tariffsBlockedId         SERIAL PRIMARY KEY,
-  endTime                  TIMESTAMP DEFAULT current_timestamp + time '00:15' NOT NULL,
-  tariffId                 BIGINT REFERENCES tariffs(tariffId)
-);
-
+---CREATE TABLE tariffsBlocked (
+---  tariffsBlockedId         SERIAL PRIMARY KEY,
+---  endTime                  TIMESTAMP DEFAULT current_timestamp + time '00:15' NOT NULL,
+---  tariffId                 BIGINT REFERENCES tariffs(tariffId)
+---);
 
 
 ---############################## ACCOUNTING ###################################
@@ -226,14 +207,14 @@ CREATE TABLE account708 (
     date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
     name                    VARCHAR(255) NOT NULL,
     amount                  NUMERIC NOT NULL,
-    clientId                BIGINT REFERENCES clients(clientId) NOT NULL,
-    orderId                 BIGINT REFERENCES orders(orderId) NOT NULL
+    clientId                BIGINT NOT NULL REFERENCES clients(clientId),
+    orderId                 BIGINT NOT NULL REFERENCES orders(orderId)
 );
 
 --Quand le client a payé sa facture
 CREATE TABLE account411 (
     id                      SERIAL PRIMARY KEY,
-    clientId                BIGINT REFERENCES clients(clientId) NOT NULL,
+    clientId                BIGINT NOT NULL REFERENCES clients(clientId),
     paymentDate             TIMESTAMP NOT NULL,
     amount                  INT NOT NULL,
     paymentMean             VARCHAR(255) NOT NULL
@@ -302,7 +283,7 @@ CREATE TABLE account60 (
 --Fournisseurs à payer
 CREATE TABLE account403 (
     id                      SERIAL PRIMARY KEY,
-    date                    TIMESTAMP DEFAULT current_timestamp NOT NULL NOT NULL,
+    date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
     amount                  NUMERIC NOT NULL,
     debit                   Boolean NOT NULL, --#sinon debit
     userId                  BIGINT REFERENCES users(userId),
@@ -414,8 +395,6 @@ VALUES (3, 1);
 INSERT INTO eventsUsers (eventId, userId)
 VALUES (4, 2);
 INSERT INTO eventsUsers (eventId, userId)
-VALUES (5, 1);
-INSERT INTO eventsUsers (eventId, userId)
 VALUES (4, 1);
 
 
@@ -430,10 +409,7 @@ INSERT INTO eventsArtists (eventId, artistId)
 VALUES (2, 2);
 INSERT INTO eventsArtists (eventId, artistId)
 VALUES (3, 3);
-INSERT INTO eventsArtists (eventId, artistId)
-VALUES (5, 3);
-INSERT INTO eventsArtists (eventId, artistId)
-VALUES (6, 3);
+
 
 CREATE TABLE usersArtists (
     userId INT REFERENCES users (userId),
