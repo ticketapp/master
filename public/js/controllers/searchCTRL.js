@@ -1,9 +1,55 @@
-app.controller('searchCtrl', ['$scope', '$http', function($scope, $http){
-    $scope.searchArtist = function(){
-        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.artisteFb + '&limit=200&type=page&access_token=CAACEdEose0cBAKDlvUZC7UZBdUQF2JWgUciuzgpAsnxi7mVttOjCyYjwuKg4BHdXUjz0vaEZAS0rAdfSZBXMBvVA0byk5vdZAjeo0XBsEXIdz8BR8h9kIwREOfXO69duq82AmZAMVKZCCKZAnCg8hpY3MproDQ1VMIdjh0Vq5SBeuIHvaeWTW53FDpeYtMXjqtIxuRFjEXwMW0ZC9w8c2OW5Cm4Wp2FufZCZBEZD').
+app.controller('searchCtrl', ['$scope', '$http', '$filter', function($scope, $http, $filter){
+    $scope.research = "";
+    $scope.artistes = [];
+    $scope.search = function(){
+        $http.get('/artists/'+$scope.research).
             success(function(data, status, headers, config) {
-                console.log(data);
-                $scope.artistes = data.data;
+                //console.log(data);
+                $scope.artistes = data;
+            }).
+            error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
+        $http.get('/events/'+$scope.research).
+            success(function(data, status, headers, config) {
+                //console.log(data);
+                $scope.events = data;
+            }).
+            error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
+        $http.get('/places/'+$scope.research).
+            success(function(data, status, headers, config) {
+                //console.log(data);
+                $scope.places = data;
+            }).
+            error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
+        $http.get('/users/'+$scope.research).
+            success(function(data, status, headers, config) {
+                //console.log(data);
+                $scope.users = data;
+            }).
+            error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
+        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.research + '&limit=500&type=page&access_token=CAACEdEose0cBAPga0OTtvZBY5ZC8N918fJHhJnebTZCisAtlslqUltqZBYSuMZChGFJxbdbeKZBDVivtmrXjS67RIrZCfFChKxNIaI0frSd0Ue0wyr3clfbyZB95XkwGwOhpnMxjY0jbAEbImFiBZAx8CmtWun0FZCyAGBx0ZCIGT3miHsAbFCSM0PKmMEGXZA7sVqU15zgTd7Hclb7KEpdkb4vd7hUNAfe5k0cZD').
+            success(function(data, status, headers, config) {
+                //$scope.artistesFb = data.data;
+                $scope.artistesFb = $filter('filter')(data.data, 'Musician');
+                for (var i=0; i < $scope.artistesFb.length; i++) {
+                    for (var ii=0; ii < $scope.artistes.length; ii++) {
+                        if($scope.artistes[ii].facebookId == $scope.artistesFb[i].id) {
+                           delete $scope.artistesFb[i];
+                        }
+                    }
+                }
+                console.log($scope.artistesFb)
             }).
             error(function(data, status, headers, config) {
                 // called asynchronously if an error occurs
@@ -11,7 +57,7 @@ app.controller('searchCtrl', ['$scope', '$http', function($scope, $http){
             });
     };
     $scope.GetArtisteById = function(id){
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAKDlvUZC7UZBdUQF2JWgUciuzgpAsnxi7mVttOjCyYjwuKg4BHdXUjz0vaEZAS0rAdfSZBXMBvVA0byk5vdZAjeo0XBsEXIdz8BR8h9kIwREOfXO69duq82AmZAMVKZCCKZAnCg8hpY3MproDQ1VMIdjh0Vq5SBeuIHvaeWTW53FDpeYtMXjqtIxuRFjEXwMW0ZC9w8c2OW5Cm4Wp2FufZCZBEZD').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBAPga0OTtvZBY5ZC8N918fJHhJnebTZCisAtlslqUltqZBYSuMZChGFJxbdbeKZBDVivtmrXjS67RIrZCfFChKxNIaI0frSd0Ue0wyr3clfbyZB95XkwGwOhpnMxjY0jbAEbImFiBZAx8CmtWun0FZCyAGBx0ZCIGT3miHsAbFCSM0PKmMEGXZA7sVqU15zgTd7Hclb7KEpdkb4vd7hUNAfe5k0cZD').
             success(function(data, status, headers, config) {
                 console.log(data);
                 $scope.artiste = data;
