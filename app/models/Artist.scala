@@ -37,7 +37,6 @@ object Artist {
     }
   }
 
-
   def findAllByEvent(event: Event): Seq[Artist] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *

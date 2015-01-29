@@ -1,20 +1,18 @@
 package services
 
-//import json.JsonHelper.oAuth1InfoReads
-//import json.OAuth1Info2
+import json.JsonHelper.oAuth1InfoReads
 import _root_.java.util.Date
 import anorm.SqlParser._
 import anorm._
 import com.fasterxml.jackson.databind.JsonNode
 import controllers.DAOException
-import play.api.libs.json.JsObject
-
+import play.libs.Json
+import play.api.libs.json._
 //import json.JsonWriters
 import org.joda.time.DateTime
 import play.api.db.DB
 import play.api.Play.current
 import play.api.{Logger, Application}
-import play.libs.Json
 import securesocial.core._
 import securesocial.core.providers.Token
 
@@ -47,24 +45,111 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
   }
 
   def save(user: Identity): Identity = {
+    /*println(user.oAuth1Info)
+    println("user.oAuth1Info.toJson : " + Json.toJson(user.oAuth1Info))
+    println("user.oAuth2Info : " + user.oAuth2Info)
+    println("user.oAuth2Info.toJson : " + Json.toJson(user.oAuth2Info))
+    println("user.oAuth2Info.toJson.stringify : " + Json.stringify(Json.toJson(user.oAuth2Info)))
+    println(user.passwordInfo)*/
+    /*var test =  JsObject(Seq(
+      "accessToken" -> user.oAuth2Info.accessToken,
+      "tokenType" -> user.oAuth2Info.tokenType,
+      "expiresIn" -> user.oAuth2Info.expiresIn,
+      "refreshToken" -> user.oAuth2Info.refreshToken
+    ))
+
+
+
+    JsObject(
+      "id" -> JsNumber(5) ::
+        "username" -> JsString("sfsfsdf") ::
+        "age" -> JsNumber(4) :: Nil
+    )
+
+
+
+    */
+
+    var test2 = user.oAuth2Info
+    var test1 = user.oAuth1Info
+    println(test2)
+    println(test1)
+
+
+    user.oAuth2Info match {
+      case Some(o) => {
+        val accessTokenVal = o.accessToken
+        o.tokenType match {
+          case Some(tokenTypeValue) =>
+            val tokenTypeVal =  tokenTypeValue
+          case None =>
+        }
+        o.expiresIn match {
+          case Some(expiresInValue) =>
+            val expiresInVal = expiresInValue
+          case None => val expiresInVal = None
+        }
+        o.refreshToken match {
+          case Some(refreshTokenValue) =>
+            val refreshTokenVal = refreshTokenValue
+          case None => val refreshTokenVal = None
+        }
+      }
+      case None =>
+    }
+
+    var oAuth2InfoJson: JsValue = JsObject(Seq(
+      "accessToken" -> JsString("sqdqsd")
+    ))
+
+
+    /*user.oAuth2Info match {
+      case Some(o) => {
+        val accessTokenVal = o.accessToken
+        o.tokenType match {
+          case Some(tokenTypeValue) =>
+            val tokenTypeVal = tokenTypeValue
+          case None => val tokenTypeVal = None
+        }
+        o.expiresIn match {
+          case Some(expiresInValue) =>
+            val expiresInVal = expiresInValue
+          case None => val expiresInVal = None
+        }
+        o.refreshToken match {
+          case Some(refreshTokenValue) =>
+            val refreshTokenVal = refreshTokenValue
+          case None => val refreshTokenVal = None
+        }
+      }
+      case None =>
+      /*JsObject(Seq(
+        "accessToken" -> JsString(o.accessToken),
+        "tokenType" -> o.tokenType,
+        "expiresIn" -> o.expiresIn,
+        "refreshToken" -> o.refreshToken
+      ))*/
+    }*/
+
     try {
       DB.withConnection { implicit connection =>
-        SQL(s"INSERT INTO users_login(${USERS.FIELDS_LESS_ID}) VALUES (" +
-          s"{userId}, {providerId}, {firstName}, {lastName}, {fullName}, " +
-          s"{email}, {avatarUrl}, {authMethod}, " +
-          s"{oAuth1Info}, {oAuth2Info}, {passwordInfo})").on(
-            'userId -> user.identityId.userId,
-            'providerId -> user.identityId.providerId,
-            'firstName -> user.firstName,
-            'lastName -> user.lastName,
-            'fullName -> user.fullName,
-            'email -> user.email,
-            'avatarUrl -> user.avatarUrl,
-            'authMethod -> user.authMethod.method,
-            'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info)),
-            'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info)),
-            'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo))
-          ).executeUpdate()
+        SQL(s"""INSERT INTO users_login(${USERS.FIELDS_LESS_ID}) VALUES (
+                {userId}, {providerId}, {firstName}, {lastName}, {fullName}, {email}, {avatarUrl}, {authMethod},
+                {oAuth1Info}, {oAuth2Info}, {passwordInfo}
+               )"""
+        ).on(
+          'userId -> user.identityId.userId,
+          'providerId -> user.identityId.providerId,
+          'firstName -> user.firstName,
+          'lastName -> user.lastName,
+          'fullName -> user.fullName,
+          'email -> user.email,
+          'avatarUrl -> user.avatarUrl,
+          'authMethod -> user.authMethod.method,
+          'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info)),
+          'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info)),
+          'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo))
+        ).executeUpdate()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create user_login: " + e.getMessage)
@@ -75,14 +160,15 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
   def save(token: Token) {
     try {
       DB.withConnection { implicit connection =>
-        SQL(s"INSERT INTO users_token(${TOKENS.FIELDS}) VALUES (" +
-          s"{id}, {email}, {creationTime}, {expirationTime}, {isSignUp})").on(
-            'id -> token.uuid,
-            'email -> token.email,
-            'creationTime -> token.creationTime.toDate,
-            'expirationTime -> token.expirationTime.toDate,
-            'isSignUp -> token.isSignUp
-          ).executeUpdate()
+        SQL(s"""INSERT INTO users_token(${TOKENS.FIELDS}) VALUES (
+              {id}, {email}, {creationTime}, {expirationTime}, {isSignUp})"""
+        ).on(
+          'id -> token.uuid,
+          'email -> token.email,
+          'creationTime -> token.creationTime.toDate,
+          'expirationTime -> token.expirationTime.toDate,
+          'isSignUp -> token.isSignUp
+        ).executeUpdate()
       }
     } catch {
       case e: Exception => {
@@ -172,13 +258,28 @@ object USERS {
         ~email~avatarUrl~authMethod~oAuth1Info~oAuth2Info
         ~passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
         firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
-        getOAuth1Info(oAuth1Info), None, None)
+        None, None,None)
+        //getOAuth1Info(oAuth1Info), getOAuth2Info(oAuth2Info), getPasswordInfo(passwordInfo))
     }
   }
 
   def getOAuth1Info(value: Option[String]) : Option[OAuth1Info] = value match {
     case Some(o) => {
       Option.apply(Json.fromJson(Json.parse(o), classOf[OAuth1Info]))
+    }
+    case None => None
+  }
+
+  def getOAuth2Info(value: Option[String]) : Option[OAuth2Info] = value match {
+    case Some(o) => {
+      Option.apply(Json.fromJson(Json.parse(o), classOf[OAuth2Info]))
+    }
+    case None => None
+  }
+
+  def getPasswordInfo(value: Option[String]) : Option[PasswordInfo] = value match {
+    case Some(o) => {
+      Option.apply(Json.fromJson(Json.parse(o), classOf[PasswordInfo]))
     }
     case None => None
   }

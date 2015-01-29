@@ -20,22 +20,16 @@ import scala.BigDecimal.javaBigDecimal2bigDecimal
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-/*class OAuth1Info2(token2 : scala.Predef.String, secret2 : scala.Predef.String) extends OAuth1Info(token2, secret2) {
-  def this() = this("", "")
-  def equals(that: Any) = true
-  def apply(token2 : scala.Predef.String, secret2 : scala.Predef.String) = this()
-}*/
 object JsonHelper {
 
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
     def writes(o : java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(o))
   }
 
-  /*
-    implicit val oAuth1InfoReads: Reads[OAuth1Info2] = (
-      (JsPath \ "token").read[String] and
-      (JsPath \ "secret").read[String]
-      )(OAuth1Info.apply _)*/
+  implicit val oAuth1InfoReads: Reads[OAuth1Info] = (
+    (JsPath \ "token").read[String] and
+    (JsPath \ "secret").read[String]
+    )(OAuth1Info.apply _)
 
   implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
   implicit val account63Writes: Writes[Account63] = Json.writes[Account63]
@@ -47,8 +41,6 @@ object JsonHelper {
   implicit val account708Writes: Writes[Account708] = Json.writes[Account708]
   implicit val account4686Writes: Writes[Account4686] = Json.writes[Account4686]
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
-
-
   implicit val eventWrites = Json.writes[Event]
   /*
     implicit val userReads: Reads[User] = (

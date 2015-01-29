@@ -10,6 +10,7 @@ GET     /                          controllers.Application.index
 #
 #
 GET     /test                      controllers.Teeest.teest
+GET     /test2                     controllers.Teest.test
 
 ################################## Admin ###############################################
 GET     /admin                     controllers.Admin.indexAdmin

@@ -9,7 +9,7 @@ import play.api.mvc._
 import play.api.libs.json.Json
 
 
-object ArtistController extends Controller {
+object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action {
     Ok(Json.toJson(Artist.findAll()))
   }
@@ -28,13 +28,17 @@ object ArtistController extends Controller {
   )(Artist.formApply)(Artist.formUnapply)
   )
 
-  def createArtist = Action { implicit request =>
-    artistBindingForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
-      artist => {
-        Ok(Json.toJson(Artist.saveArtist(artist)))
-      }
-    )
+  def createArtist = SecuredAction(ajaxCall = true) { implicit request =>
+    try {
+      artistBindingForm.bindFromRequest().fold(
+        formWithErrors => BadRequest(formWithErrors.errorsAsJson),
+        artist => {
+          Ok(Json.toJson(Artist.saveArtist(artist)))
+        }
+      )
+    } catch {
+      case e: Exception => InternalServerError(e.getMessage)
+    }
   }
 
   def deleteArtist(artistId: Long) = Action {

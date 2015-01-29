@@ -38,7 +38,9 @@ CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
   creationDateTime          TIMESTAMP DEFAULT  current_timestamp NOT NULL,
   facebookId                BIGINT,
-  name                      VARCHAR(255) NOT NULL
+  name                      VARCHAR(255) NOT NULL,
+  UNIQUE(name),
+  UNIQUE(facebookId)
 );
 INSERT INTO artists (facebookId, name) VALUES (321, 'artists1');
 INSERT INTO artists (facebookId, name) VALUES (654, 'artists2');
