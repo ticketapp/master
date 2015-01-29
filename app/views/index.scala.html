@@ -20,7 +20,7 @@
                 <div ng-show="artistes.length != 0 || artistesFb.length != 0">
                     <b>Artistes</b>
                     <a class="row" ng-click="$parent.research=''" href="#/artiste/{{artiste.artistId}}" ng-repeat="artiste in artistes | limitTo : 10">{{artiste.name}}</a>
-                    <a class="row" ng-click="GetArtisteById(artisteSearch.id); $parent.research=''" ng-repeat="artisteSearch in artistesFb | limitTo : 10-artistes.length">{{artisteSearch.name}}</a>
+                    <a class="row" ng-click="GetArtisteById(artisteSearch.id, artisteSearch.name); $parent.research=''" ng-repeat="artisteSearch in artistesFb | limitTo : 10-artistes.length">{{artisteSearch.name}}</a>
                     <hr/>
                 </div>
                 <div ng-show="places.length != 0">

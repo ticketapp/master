@@ -82,8 +82,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$filter', function($scope, $ht
                 // or server returns response with an error status.
             });
     };
+
     function createArtiste () {
         console.log(typeof $scope.artiste.name);
+        $http.get('https://www.googleapis.com/youtube/v3/search?part=snippet&q=' + $scope.artiste.name + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
+            success(function(data, status, headers, config) {
+                console.log(data);
+            }).
+            error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
         $http.post('/admin/createArtist', {artistName : $scope.artiste.name, facebookId: $scope.artiste.id}).
             success(function(data, status, headers, config) {
                 window.location.href =('#/artiste/' + data);
