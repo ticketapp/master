@@ -9,10 +9,30 @@
 
             <md-input-container md-theme="docs-dark">
                 <label>Search</label>
-                <input ng-model="artisteFb" ng-change="searchArtist()">
+                <input ng-model="research" ng-change="search()">
             </md-input-container>
-            <div class="absolute">
-            <div  ng-click="GetArtisteById(artisteSearch.id)" ng-repeat="artisteSearch in artistes | filter : 'Musician' | limitTo : 10">{{artisteSearch.name}}</div>
+            <div class="absolute ng-hide" style="background: #ffffff" ng-show="research.length != 0">
+                <div ng-show="events.length != 0">
+                    <b>Events</b>
+                    <a class="row" ng-click="$parent.research=''" href="#/event/{{event.eventId}}" ng-repeat="event in events | limitTo : 10">{{event.name}}</a>
+                    <hr/>
+                </div>
+                <div ng-show="artistes.length != 0 || artistesFb.length != 0">
+                    <b>Artistes</b>
+                    <a class="row" ng-click="$parent.research=''" href="#/artiste/{{artiste.artistId}}" ng-repeat="artiste in artistes | limitTo : 10">{{artiste.name}}</a>
+                    <a class="row" ng-click="GetArtisteById(artisteSearch.id); $parent.research=''" ng-repeat="artisteSearch in artistesFb | limitTo : 10-artistes.length">{{artisteSearch.name}}</a>
+                    <hr/>
+                </div>
+                <div ng-show="places.length != 0">
+                    <b>Places</b>
+                    <a class="row" ng-click="$parent.research=''" href="#/lieu/{{place.placeId}}" ng-repeat="place in places | limitTo : 10">{{place.name}}</a>
+                    <hr/>
+                </div>
+                <div ng-show="users.length != 0">
+                    <b>Users</b>
+                    <a class="row" ng-click="$parent.research=''" href="#/user/{{user.userId}}" ng-repeat="user in users | limitTo : 10">{{user.nickname}}</a>
+                    <hr/>
+                </div>
             </div>
         </div>
     <!--<li class="right">
