@@ -1,68 +1,91 @@
 package controllers
 
 import play.api.libs.ws.WS
+import play.api.libs.ws.Response
 import play.api.mvc._
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
+import scala.concurrent.duration.Duration
 
-case class People(name: String, age: Int)
 
 object Teeest extends Controller{
-  def teest = Action.async {
-    var array, places, events, searchPlaces = Array()
-    var placesName = Array("Le Transbordeur", "ninkasi")
-    for(i <- 0 until placesName.length){
-      WS.url("https://graph.facebook.com/v2.2/search?q=" + placesName(i).replace(" ", "+") + "&limit=200&type=page&access_token=" +
-        "CAACEdEose0cBABmdjMhCBzsgeTKyTSZAmXPKWR0Cn6YCpsWjkMnaF2wfrZCzEFC44JkVGBDvKUnV0XYZAJlPzmx7ydlHZC37tDZBEW6SrlyZBcXqV65nslmgSMUK8Es9upoyMWetZBsoKJO5ZAivdZChI5Si5rzXtAIRf57THulZBokYhSHjLUvmJ5GtZAsXa3M0DJJ6E4ZCRc1UetE8ZBwCZBC2zAWZBPSfRpkblQZD")
-        .get().map { response =>
-          println(response.json)
-        var a: JsValue = response.json
-          /*for(data <- a){
-            println(response.body(0))
-          }*/
-        }
+  def returnListOfIdsFromPlaces(resp : play.api.libs.ws.Response): List[String] = {
+    var ids: List[String] = List()
+    val responseData: JsValue = (resp.json \ "data")
+    val responseDataCategory_list = (responseData \\ "category_list" )
+    var indexes: List[Int] = List()
+
+    for(j <- 0 until responseDataCategory_list.length)
+      if((responseDataCategory_list(j) \\ "id")(0) == JsString("179943432047564"))
+        indexes = indexes :+ j
+
+    indexes.foreach{ x =>
+      ids = ids :+ Json.stringify((responseData(x) \ "id")).replaceAll("\"", "")
     }
+    ids
+  }
 
-
-    implicit val peopleReader = Json.reads[People]
-
-    val json = Json.parse("""{"people": [ {"name":"Jack", "age": 19}, {"name": "Tony", "age": 26} ] }""")
-
-    val peoples = (json \ "people" \\ "name")//.as[List[People]]
-    peoples.foreach(println)
-
-    WS.url("http://codebutler.com/firesheep/").get().map { response =>
-      Ok(response.body)
+  def returnListOfIdsFromEvents(resp : play.api.libs.ws.Response): List[String] = {
+    var ids: List[String] = List()
+    val responseData: JsValue = (resp.json \ "data")
+    val responseDataIds = (responseData \\ "id" )
+    for(j <- responseDataIds) {
+      ids = ids :+ Json.stringify(j).replaceAll("\"", "")
     }
+    ids
+  }
+
+  def returnIdsOfPlace(placeName: String) = {
+    for {
+      idsOfPlace <- WS.url("https://graph.facebook.com/v2.2/search?q=" + placeName.replace(" ", "+") + "&limit=200&type=page&access_token=" +
+        "CAACEdEose0cBAHre0KRxYzlneiB63r16ZB671SlSczvdIhqYhB5AwuWZAkPynSOrbhcMogDZCiOU39Y9WRuvqpZBgQ7kRv7E7rRkEfQ1Cq7GyAZA2mDbKn5uuD5ZARvLhZBErHMMGYqIRTZBNqzhWW7UH8bZCMV352lj12XZBxvwL6DuMFoAV17i5kZAswQTHanZBrdC5OjAgo4GGFVRUkAgdHsOftkZAyIFseQoZD")
+        .get
+      placesIds: List[String] = returnListOfIdsFromPlaces(idsOfPlace)
+
+      /*listOfMusicPlaces <- Future.sequence(placesIds.map(placeId =>
+        WS.url("https://graph.facebook.com/v2.2/" + placeId + "/?access_token=" +
+          "CAACEdEose0cBAAdSr4yRU34JjbuJvXXn4GSm2mRBcfJqXOo6VHYIWq8R7ngjUepTKgkNeoO4doHZB7XhX4dMynqZCWhwZAM4bZAHN499msoWpJA125FZBZAkRdXAw1MZBo1TtzCF7KjsOAXVxM1C2uQSZAfS4cIXgaNRbbyA7wqqRZCBQVZBZB7yiNTinbmFiEoZAzoZCtjoJ7wHZCWD8lVUIzqEYMuwLnnshju1UZD")
+          .get))*/
+
+      listOfEventsByPlacesId <- Future.sequence(placesIds.map(placeId =>
+        WS.url("https://graph.facebook.com/v2.2/" + placeId + "/events/?access_token=" +
+          "CAACEdEose0cBAHre0KRxYzlneiB63r16ZB671SlSczvdIhqYhB5AwuWZAkPynSOrbhcMogDZCiOU39Y9WRuvqpZBgQ7kRv7E7rRkEfQ1Cq7GyAZA2mDbKn5uuD5ZARvLhZBErHMMGYqIRTZBNqzhWW7UH8bZCMV352lj12XZBxvwL6DuMFoAV17i5kZAswQTHanZBrdC5OjAgo4GGFVRUkAgdHsOftkZAyIFseQoZD")
+          .get))
+    } yield {
+      //println(respA.json)
+      //listOfMusicPlaces.map(response => println(response.json))
+
+      listOfEventsByPlacesId.map(event => println(event.json))
+
+      /*
+      //eventsIds: List[String] = returnListOfIdsFromEvents(listOfEventsByPlacesId)
+
+      listofEventsDescription <- Future.sequence(listOfEventsByPlacesId.map(eventId =>
+        WS.url("https://graph.facebook.com/v2.2/" + eventId + "/?fields=cover&access_token=" +
+          "CAACEdEose0cBAHre0KRxYzlneiB63r16ZB671SlSczvdIhqYhB5AwuWZAkPynSOrbhcMogDZCiOU39Y9WRuvqpZBgQ7kRv7E7rRkEfQ1Cq7GyAZA2mDbKn5uuD5ZARvLhZBErHMMGYqIRTZBNqzhWW7UH8bZCMV352lj12XZBxvwL6DuMFoAV17i5kZAswQTHanZBrdC5OjAgo4GGFVRUkAgdHsOftkZAyIFseQoZD")
+          .get))
+       */
+/*
+      listOfEventsByPlacesId.map(response => returnListOfIdsFromEvents(response))
+
+      listofEventsDescription.map(response => response.json)
+*/
+    }
+  }
+
+  def teest = Action {
+
+    val placesName = List("Le Transbordeur", "ninkasi")
+
+
+    for (a <- placesName) returnIdsOfPlace(a)
+
+
+    Ok("qsdqsdqs")
   }
 }
 /*
-for (var iv = 0; iv < data.length; iv++) {
-if (data[iv].category == 'Concert venue' || data[iv].category == 'Club') {
-searchPlaces.push(data[iv]);
-} else if (data[iv].category_list != undefined) {
-for (ii = 0; ii < data[iv].category_list.length; ii++) {
-if (data[iv].category_list[ii].name == 'Concert Venue' || data[iv].category_list[ii].name == 'Club') {
-searchPlaces.push(data[iv]);
-}
-}
-}
-}
-if (i == placesName.length -1) {
-detailPlaces(searchPlaces)
-}
-}).
-error(function (data, status, headers, config) {
-// called asynchronously if an error occurs
-// or server returns response with an error status.
-});
-}
-function detailPlaces (searchPlaces) {
-for (var j = 0; j < searchPlaces.length; j++) {
-searchAllPlaces(j, searchPlaces)
-}
-}
 function searchAllPlaces (j, searchPlaces) {
 $http.get('https://graph.facebook.com/v2.2/'+ searchPlaces[j].id +'/?access_token=CAACEdEose0cBABpIOqNdnIf6rP69y5atZC0MkYEpcGSVacO8zBPtc9LdKyUczoqkwvoh4TSTnt3M2vaL24CZADIAsUZBpQdE5o5dLBgGmaHjp1NJg1DrHHKrk7TBd0JkarAFsgKcmYoKRI6tdcGYjkjg1t07jlb37TLlbxvDMntWmWwFIRT3LvTZAIhsTQ8JxWFCkSspAomoMWh0OZBYZCqZBaQRaBhXRkZD').
 success(function(data, status, headers, config) {

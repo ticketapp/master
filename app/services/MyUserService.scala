@@ -15,6 +15,7 @@ import play.api.Play.current
 import play.api.{Logger, Application}
 import securesocial.core._
 import securesocial.core.providers.Token
+import json.JsonHelper
 
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
 
@@ -46,18 +47,28 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
 
   def save(user: Identity): Identity = {
     /*println(user.oAuth1Info)
-    println("user.oAuth1Info.toJson : " + Json.toJson(user.oAuth1Info))
-    println("user.oAuth2Info : " + user.oAuth2Info)
-    println("user.oAuth2Info.toJson : " + Json.toJson(user.oAuth2Info))
-    println("user.oAuth2Info.toJson.stringify : " + Json.stringify(Json.toJson(user.oAuth2Info)))
-    println(user.passwordInfo)*/
-    /*var test =  JsObject(Seq(
-      "accessToken" -> user.oAuth2Info.accessToken,
-      "tokenType" -> user.oAuth2Info.tokenType,
-      "expiresIn" -> user.oAuth2Info.expiresIn,
-      "refreshToken" -> user.oAuth2Info.refreshToken
-    ))
+    println("user.oAuth1Info.toJson : " + Json.toJson(user.oAuth1Info))*/
 
+
+    /*def writes(oAuth2Info: securesocial.core.OAuth2Info) = JsObject(Seq(
+      "accessToken" -> JsString(oAuth2Info.accessToken),
+      "tokenType" -> Json.toJson(oAuth2Info.tokenType),
+      "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
+      "refreshToken" -> Json.toJson(oAuth2Info.refreshToken)
+    ))*/
+
+
+
+
+
+    println("user.oAuth2Info : " + user.oAuth2Info)
+    println("user.oAuth2Info<getOrElse : " + user.oAuth2Info.getOrElse(None))
+    println("user.oAuth2Info.toJson : " + Json.toJson(user.oAuth2Info.getOrElse(None)))
+    println("user.oAuth2Info.toJson.stringify : " + Json.stringify(Json.toJson(user.oAuth2Info)))
+
+
+
+    /*println(user.passwordInfo)
 
 
     JsObject(
@@ -66,9 +77,6 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
         "age" -> JsNumber(4) :: Nil
     )
 
-
-
-    */
 
     var test2 = user.oAuth2Info
     var test1 = user.oAuth1Info
@@ -129,7 +137,7 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
         "expiresIn" -> o.expiresIn,
         "refreshToken" -> o.refreshToken
       ))*/
-    }*/
+    }*/*/
 
     try {
       DB.withConnection { implicit connection =>
