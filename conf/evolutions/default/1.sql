@@ -3,7 +3,8 @@ CREATE TABLE addresses (
   addressID                 SERIAL PRIMARY KEY,
   city                      VARCHAR(127) NOT NULL,
   CP                        VARCHAR(15) NOT NULL,
-  address                   VARCHAR(255) NOT NULL
+  address                   VARCHAR(255) NOT NULL,
+  geographicPoint           point
 );
 INSERT INTO addresses (city, CP, address) VALUES ('Lyon', 69001, 'adresse1');
 INSERT INTO addresses (city, CP, address) VALUES ('Lyon', 69001, 'adresse2');
@@ -86,16 +87,18 @@ CREATE TABLE users_token (
 
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,
+  facebookId                VARCHAR(255),
   isPublic                  boolean NOT NULL,
   isActive                  boolean NOT NULL,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
-  startSellingTime          TIMESTAMP NOT NULL,
-  endSellingTime            TIMESTAMP NOT NULL,
+  startSellingTime          TIMESTAMP,
+  endSellingTime            TIMESTAMP,
   description               TEXT NOT NULL,
   startTime                 TIMESTAMP NOT NULL,
-  endTime                   TIMESTAMP NOT NULL,
-  ageRestriction            SMALLINT NOT NULL
+  endTime                   TIMESTAMP,
+  ageRestriction            SMALLINT NOT NULL DEFAULT 16,
+  UNIQUE(facebookId)
 );
 INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
                     endSellingTime, description, startTime,
@@ -119,7 +122,7 @@ INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime
                     endSellingTime, description, startTime,
                     endTime, ageRestriction)
 VALUES (true, true, '1991-02-22 00:00:00', 'DJDKLS', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
-        'yoo oy yoyoyoyoyooyoyoy zae az e', '1991-02-22 00:00:00',
+        'yoo oy yoyoyoyoyooyoyoy zaeqq az e', '1991-02-22 00:00:00',
         '1991-02-22 00:00:00', 16);
 
 
@@ -127,11 +130,17 @@ VALUES (true, true, '1991-02-22 00:00:00', 'DJDKLS', '1991-02-22 00:00:00', '199
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
-  eventId                   BIGINT references events(eventId),
-  addressID                 BIGINT references addresses(addressID)
+  addressID                 BIGINT references addresses(addressId),
+  facebookId                VARCHAR(31),
+  facebookImage             VARCHAR(255),
+  description               TEXT,
+  webSite                   VARCHAR(255),
+  facebookMiniature         VARCHAR(255),
+  capacity                  INT,
+  openingHours              VARCHAR(255)
 );
-INSERT INTO places (name, addressID) VALUES ('place1 ', 1);
-INSERT INTO places (name, addressID) VALUES ('place2', 2);
+INSERT INTO places (name, addressID) VALUES ('une palceqsdqsdqsdsd ', 1);
+INSERT INTO places (name, addressID) VALUES ('placse2', 2);
 INSERT INTO places (name, addressID) VALUES ('place3', 3);
 
 CREATE TABLE images (

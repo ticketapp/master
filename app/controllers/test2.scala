@@ -15,10 +15,12 @@ object Teest extends Controller{
     val responseData: JsValue = (resp.json \ "data")
     val responseDataCategory_list = (responseData \\ "category_list" )
     var indexes: List[Int] = List()
+    var listCategoryWeWantToKeep = List("179943432047564")
 
-    for(j <- 0 until responseDataCategory_list.length)
-      if((responseDataCategory_list(j) \\ "id")(0) == JsString("179943432047564"))
+    for(j <- 0 until responseDataCategory_list.length) {
+      if (listCategoryWeWantToKeep.contains((responseDataCategory_list(j) \\ "id")(0)))
         indexes = indexes :+ j
+    }
 
     indexes.foreach{ x =>
       ids = ids :+ Json.stringify((responseData(x) \ "id")).replaceAll("\"", "")

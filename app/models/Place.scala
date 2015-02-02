@@ -12,20 +12,55 @@ import controllers.DAOException
  */
 case class Place (placeId: Long,
                   name: String,
-                  eventId: Option[Long] = None,
-                  addressID: Option[Long] = None)
+                  addressID: Option[Long] = None,
+                  facebookId: Option[String] = None,
+                  facebookImage: Option[String] = None,
+                  description: Option[String] = None,
+                  webSite: Option[String] = None,
+                  facebookMiniature: Option[String] = None,
+                  capacity: Option[String] = None,
+                  openingHours: Option[String] = None)
 
 object Place {
   implicit val placeWrites = Json.writes[Place]
 
-
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
       get[String]("name") ~
-      get[Option[Long]]("eventId") ~
-      get[Option[Long]]("addressID") map {
-        case placeId ~ name ~ eventId ~ addressID=>
-          Place(placeId, name, eventId, addressID)
+      get[Option[Long]]("addressID") ~
+      get[Option[String]]("facebookId") ~
+      get[Option[String]]("facebookImage") ~
+      get[Option[String]]("description") ~
+      get[Option[String]]("webSite") ~
+      get[Option[String]]("facebookMiniature") ~
+      get[Option[String]]("capacity") ~
+      get[Option[String]]("openingHours") map {
+        case placeId ~ name ~ addressID ~ facebookId ~ facebookImage ~ description ~ webSite ~
+          facebookMiniature ~ capacity ~ openingHours =>
+          Place(placeId, name, addressID, facebookId, facebookImage, description, webSite, facebookMiniature,
+            capacity, openingHours)
+    }
+  }
+
+  def savePlace(place: Place): Long = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("insert into artists(name, addressID, facebookId, facebookImage, description, webSite, " +
+          "facebookMiniature, capacity, openingHours) values ({name}, {addressID}, {facebookId}, {facebookImage}, " +
+          "{description}, {webSite})").on(
+          'name -> place.name,
+          'addressID -> place.addressID,
+          'facebookId -> place.facebookId,
+          'facebookImage -> place.facebookImage,
+          'description -> place.description,
+          'webSite -> place.webSite,
+          'facebookMiniature -> place.facebookMiniature,
+          'capacity -> place.capacity,
+          'openingHours -> place.openingHours
+        ).executeInsert().get
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
     }
   }
 
