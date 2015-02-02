@@ -12,15 +12,16 @@ import java.util.Date
 import scala.collection.mutable.ListBuffer
 
 case class Event(eventId: Long,
+                 facebookId: Option[String],
                  isPublic: Boolean,
                  isActive: Boolean,
                  creationDateTime: Date,
                  name: String,
-                 startSellingTime: Date,
-                 endSellingTime: Date,
+                 startSellingTime: Option[Date],
+                 endSellingTime: Option[Date],
                  description: String,
                  startTime: Date,
-                 endTime: Date,
+                 endTime: Option[Date],
                  ageRestriction: Int,
                  images: List[Image],
                  users: List[User],
@@ -29,8 +30,8 @@ case class Event(eventId: Long,
                  tariffs: List[Tariff])
 
 object Event {
-  def formApply(name: String, startSellingTime: Date, endSellingTime: Date, description: String, startTime: Date,
-                endTime: Date, ageRestriction: Int, tariffs: Seq[Tariff]
+  def formApply(name: String, startSellingTime: Option[Date], endSellingTime: Option[Date], description: String, startTime: Date,
+                endTime: Option[Date], ageRestriction: Int, tariffs: Seq[Tariff]
                 /*denominations: List[String], nbTicketToSells: List[Int], prices: List[BigDecimal],
                 startTimes: List[Date], endTimes: List[Date]*/): Event = {
 
@@ -49,34 +50,34 @@ object Event {
           newTariffs += new Tariff(-1L, denomination, nbTicketToSell, 0, price, startTime, endTime, -1L)
       }
 */
+
     val images = List()
-    new Event(-1L, true, true, new Date, name, startSellingTime, endSellingTime, description, startTime,
+    new Event(-1L, None, true, true, new Date, name, startSellingTime, endSellingTime, description, startTime,
               endTime, ageRestriction, images, List(), List(), List(), tariffs.toList)//newTariffs.toList)
   }
 
-  def formUnapply(event: Event): Option[(String, Date, Date, String, Date, Date, Int, Seq[Tariff])] = {
+  def formUnapply(event: Event): Option[(String, Option[Date], Option[Date], String, Date, Option[Date], Int, Seq[Tariff])] = {
     Some((event.name, event.startSellingTime, event.endSellingTime, event.description, event.startTime,
           event.endTime, event.ageRestriction, event.tariffs.toSeq))
   }
 
   private val EventParser: RowParser[Event] = {
     get[Long]("eventId") ~
+    get[Option[String]]("facebookId") ~
     get[Boolean]("isPublic") ~
     get[Boolean]("isActive") ~
     get[Date]("creationDateTime") ~
     get[String]("name") ~
-    get[Date]("startSellingTime") ~
-    get[Date]("endSellingTime") ~
+    get[Option[Date]]("startSellingTime") ~
+    get[Option[Date]]("endSellingTime") ~
     get[String]("description") ~
     get[Date]("startTime") ~
-    get[Date]("endTime") ~
+    get[Option[Date]]("endTime") ~
     get[Int]("ageRestriction")  map {
-      case eventId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
-        ~ endSellingTime ~ description ~ startTime
-        ~ endTime ~ ageRestriction  =>
-        Event.apply(eventId, isPublic, isActive, creationDateTime, name, startSellingTime,
-          endSellingTime, description, startTime, endTime,
-          ageRestriction, List(), List(), List(), List(), List())
+      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
+        ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction  =>
+        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
+          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
     }
   }
 
@@ -98,7 +99,7 @@ object Event {
   def findAll() = {
     DB.withConnection { implicit connection =>
       val eventsResultSet = SQL(
-        """ SELECT events.eventId, events.isPublic, events.isActive, events.creationDateTime, events.name,
+        """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime, events.name,
         events.startSellingTime, events.endSellingTime, events.description, events.startTime, events.endTime,
         events.ageRestriction
         FROM events
@@ -130,13 +131,14 @@ object Event {
     }
   }
 
-  def saveEvent(event: Event): Long = {
+  def save(event: Event): Long = {
     var eventIdToReturn: Long = 0
     try {
       eventIdToReturn = DB.withConnection { implicit connection =>
-        SQL("""insert into events(isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-          startTime, endTime, ageRestriction) values ({isPublic}, {isActive}, {creationDateTime}, {name},
+        SQL("""insert into events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
+          startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
           {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction})""").on(
+          'facebookId -> event.facebookId,
           'isPublic -> event.isPublic,
           'isActive -> event.isActive,
           'creationDateTime -> event.creationDateTime,

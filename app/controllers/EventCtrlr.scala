@@ -28,11 +28,11 @@ object EventController extends Controller {
 
   val eventBindingForm = Form(mapping(
       "name" -> nonEmptyText(2),
-      "startSellingTime" -> date,
-      "endSellingTime" -> date,
+      "startSellingTime" -> optional(date),
+      "endSellingTime" -> optional(date),
       "description" -> nonEmptyText(2),
       "startTime" -> date,
-      "endTime" -> date,
+      "endTime" -> optional(date),
       "ageRestriction" -> number,
       /*"images" -> list( mapping(
           "paths" -> text,
@@ -58,7 +58,7 @@ object EventController extends Controller {
     eventBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       event => {
-        val eventId = Event.saveEvent(event)
+        val eventId = Event.save(event)
         //Redirect(routes.Admin.indexAdmin())
         Ok(Json.toJson(Event.find(eventId)))
       }

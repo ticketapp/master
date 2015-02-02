@@ -9,10 +9,11 @@ GET     /                          controllers.Application.index
 #
 #
 #
-GET     /test                      controllers.Teeest.teest
+GET     /test                      controllers.Test.test1
 GET     /test2                     controllers.Teest.test
+GET     /test3                     controllers.Test3.test3
 
-################################## Admin ###############################################
+################################## Admin ################################################
 GET     /admin                     controllers.Admin.indexAdmin
 #POST    /admin/createTariff        controllers.Admin.createTariff
 

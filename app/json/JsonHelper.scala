@@ -4,7 +4,7 @@ import models._
 import play.api.libs.json._
 import play.api.libs.json.JsString
 import play.api.libs.functional.syntax
-import securesocial.core.OAuth1Info
+import securesocial.core.{OAuth2Info, OAuth1Info}
 import scala.collection.Traversable
 import scala.Traversable
 import play.api.libs.json.Json._
@@ -30,6 +30,9 @@ object JsonHelper {
     (JsPath \ "token").read[String] and
     (JsPath \ "secret").read[String]
     )(OAuth1Info.apply _)
+
+  implicit val oauth2InfoWrites: Writes[OAuth2Info] =
+    Json.writes[OAuth2Info]
 
   implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
   implicit val account63Writes: Writes[Account63] = Json.writes[Account63]
