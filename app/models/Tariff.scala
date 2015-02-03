@@ -86,6 +86,4 @@ object Tariff {
       case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
     }
   }
-
-
 }

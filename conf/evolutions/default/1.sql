@@ -6,10 +6,6 @@ CREATE TABLE addresses (
   address                   VARCHAR(255) NOT NULL,
   geographicPoint           point
 );
-INSERT INTO addresses (city, CP, address) VALUES ('Lyon', 69001, 'adresse1');
-INSERT INTO addresses (city, CP, address) VALUES ('Lyon', 69001, 'adresse2');
-INSERT INTO addresses (city, CP, address) VALUES ('Lyon', 69001, 'adresse3');
-
 
 
 CREATE TABLE orders ( --account701
@@ -24,15 +20,15 @@ CREATE TABLE comments (
   commentId                 SERIAL PRIMARY KEY,
   text                      VARCHAR(255) NOT NULL
 );
-INSERT INTO comments (text) VALUES ('un beau petit commentaire');
 
 CREATE TABLE infos (
   infoId                    SERIAL PRIMARY KEY,
   title                     TEXT NOT NULL,
-  content                   TEXT NOT NULL
+  content                   TEXT
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuse');
 INSERT INTO infos (title, content) VALUES ('infos2', 'une info qui va déchirer');
+INSERT INTO infos (title, content) VALUES ('infos3', 'J - 70 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('infos3', 'fuserie');
 
 CREATE TABLE artists (
@@ -43,10 +39,6 @@ CREATE TABLE artists (
   UNIQUE(name),
   UNIQUE(facebookId)
 );
-INSERT INTO artists (facebookId, name) VALUES (321, 'artists1');
-INSERT INTO artists (facebookId, name) VALUES (654, 'artists2');
-INSERT INTO artists (facebookId, name) VALUES (666, 'johny666');
-INSERT INTO artists (facebookId, name) VALUES (77777, 'artists4');
 
 CREATE TABLE users (
   userId                    SERIAL PRIMARY KEY,
@@ -100,31 +92,6 @@ CREATE TABLE events (
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
   UNIQUE(facebookId)
 );
-INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
-                    endSellingTime, description, startTime,
-                    endTime, ageRestriction)
-VALUES (true, true, '1991-02-22 00:00:00', 'event1', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
-        'descriptionblablablalblagl zae az e', '1991-02-22 00:00:00',
-        '1991-02-22 00:00:00', 16);
-INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
-                    endSellingTime, description, startTime,
-                    endTime, ageRestriction)
-VALUES (true, true, '1991-02-22 00:00:00', 'deuxieme', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
-        'descriptionbdlablablalblagl zae az e', '1991-02-22 00:00:00',
-        '1991-02-22 00:00:00', 16);
-INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
-                    endSellingTime, description, startTime,
-                    endTime, ageRestriction)
-VALUES (true, true, '1991-02-22 00:00:00', 'troisieme3', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
-        'descriptionqsdqsdqsdqsdqsblablablalblagl zae az e', '1991-02-22 00:00:00',
-        '1991-02-22 00:00:00', 16);
-INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
-                    endSellingTime, description, startTime,
-                    endTime, ageRestriction)
-VALUES (true, true, '1991-02-22 00:00:00', 'DJDKLS', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
-        'yoo oy yoyoyoyoyooyoyoy zaeqq az e', '1991-02-22 00:00:00',
-        '1991-02-22 00:00:00', 16);
-
 
 
 CREATE TABLE places (
@@ -132,16 +99,15 @@ CREATE TABLE places (
   name                      VARCHAR(255) NOT NULL,
   addressID                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(31),
-  facebookImage             VARCHAR(255),
   description               TEXT,
   webSite                   VARCHAR(255),
   facebookMiniature         VARCHAR(255),
   capacity                  INT,
-  openingHours              VARCHAR(255)
+  openingHours              VARCHAR(255),
+  UNIQUE(facebookId)
 );
-INSERT INTO places (name, addressID) VALUES ('une palceqsdqsdqsdsd ', 1);
-INSERT INTO places (name, addressID) VALUES ('placse2', 2);
-INSERT INTO places (name, addressID) VALUES ('place3', 3);
+INSERT into places(name, facebookId) values ('withFbId', '117030545096697');
+INSERT into places(name) values ('eedzr');
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
@@ -151,11 +117,7 @@ CREATE TABLE images (
   userId                    BIGINT references users(userId),
   UNIQUE(path)
 );
-INSERT INTO images (path, alt, eventId, userId) VALUES ('1.jpg', 'alt', 1, 1);
-INSERT INTO images (path, alt, eventId, userId) VALUES ('2.jpg', 'une jolie description', 2, 1);
-INSERT INTO images (path, alt, eventId, userId) VALUES ('3.jpg', 'une belle description', 3, 2);
-INSERT INTO images (path, alt, eventId) VALUES ('4.jpg', 'altqsdqsd', 4);
-INSERT INTO images (path, alt, eventId) VALUES ('6.jpg', 'alt3', 1);
+---INSERT INTO images (path, alt, eventId, userId) VALUES ('1.jpg', 'alt', 1, 1);
 
 CREATE TABLE tariffs (
   tariffId                 SERIAL PRIMARY KEY,
@@ -167,7 +129,6 @@ CREATE TABLE tariffs (
   endTime                  TIMESTAMP NOT NULL,
   eventId                  BIGINT REFERENCES events(eventId)
 );
-INSERT INTO tariffs (nbTicketToSell, price, startTime, endTime) VALUES (1, 1, current_timestamp, current_timestamp);
 
 CREATE TABLE tickets (
   ticketId                  SERIAL PRIMARY KEY,
@@ -178,7 +139,6 @@ CREATE TABLE tickets (
   tariffId                  INT REFERENCES tariffs(tariffId),
   orderId                   INT REFERENCES orders(orderId)
 );
-INSERT INTO tickets (qrCode, tariffId, orderId) VALUES ('145345343453543', 1, 1);
 --INSERT INTO tickets (tariffId, orderId) VALUES (1, 1);
 
 ---CREATE TABLE tariffsBlocked (
@@ -347,79 +307,42 @@ CREATE TABLE eventsFollowed (
   eventId                  INT REFERENCES events(eventId),
   PRIMARY KEY (userId, eventId)
 );
-INSERT INTO eventsFollowed (userId, eventId) VALUES (1, 1);
-INSERT INTO eventsFollowed (userId, eventId) VALUES (1, 2);
-INSERT INTO eventsFollowed (userId, eventId) VALUES (1, 3);
-INSERT INTO eventsFollowed (userId, eventId) VALUES (2, 1);
-INSERT INTO eventsFollowed (userId, eventId) VALUES (2, 3);
 
 CREATE TABLE artistsFollowed (
   userId                   INT REFERENCES users(userId),
   artistId                 INT REFERENCES artists(artistId),
   PRIMARY KEY (userId, artistId)
 );
-INSERT INTO artistsFollowed (userId, artistId) VALUES (1, 1);
-
 
 CREATE TABLE placesFollowed (
   userId                   INT REFERENCES users(userId),
   placeId                  INT REFERENCES places(placeId),
   PRIMARY KEY (userId, placeId)
 );
-INSERT INTO placesFollowed (userId, placeId) VALUES (1, 1);
-
 
 CREATE TABLE usersFollowed (
   userIdFollower          INT REFERENCES users(userId),
   userIdFollowed          INT REFERENCES users(userId),
   PRIMARY KEY (userIdFollower, userIdFollowed)
 );
-INSERT INTO usersFollowed (userIdFollower, userIdFollowed) VALUES (1, 2);
-INSERT INTO usersFollowed (userIdFollower, userIdFollowed) VALUES (2, 1);
-
 
 CREATE TABLE eventsPlaces (
     eventId INT REFERENCES events (eventId),
     placeId INT REFERENCES places (placeId),
     PRIMARY KEY (eventId, placeId)
 );
-INSERT INTO eventsPlaces (eventId, placeId)
-VALUES (1, 1);
-INSERT INTO eventsPlaces (eventId, placeId)
-VALUES (1, 2);
-INSERT INTO eventsPlaces (eventId, placeId)
-VALUES (2, 1);
 
 CREATE TABLE eventsUsers (
     eventId INT REFERENCES events (eventId),
     userId INT REFERENCES users (userId),
     PRIMARY KEY (eventId, userId)
 );
-INSERT INTO eventsUsers (eventId, userId)
-VALUES (1, 1);
-INSERT INTO eventsUsers (eventId, userId)
-VALUES (1, 2);
-INSERT INTO eventsUsers (eventId, userId)
-VALUES (2, 1);
-INSERT INTO eventsUsers (eventId, userId)
-VALUES (3, 1);
-INSERT INTO eventsUsers (eventId, userId)
-VALUES (4, 2);
-INSERT INTO eventsUsers (eventId, userId)
-VALUES (4, 1);
-
 
 CREATE TABLE eventsArtists (
     eventId INT REFERENCES events (eventId),
     artistId INT REFERENCES artists (artistId),
     PRIMARY KEY (eventId, artistId)
 );
-INSERT INTO eventsArtists (eventId, artistId)
-VALUES (1, 1);
-INSERT INTO eventsArtists (eventId, artistId)
-VALUES (2, 2);
-INSERT INTO eventsArtists (eventId, artistId)
-VALUES (3, 3);
 
 
 CREATE TABLE usersArtists (

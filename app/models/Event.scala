@@ -25,7 +25,6 @@ case class Event(eventId: Long,
                  ageRestriction: Int,
                  images: List[Image],
                  users: List[User],
-                 places: List[Place],
                  artists: List[Artist],
                  tariffs: List[Tariff])
 
@@ -53,7 +52,7 @@ object Event {
 
     val images = List()
     new Event(-1L, None, true, true, new Date, name, startSellingTime, endSellingTime, description, startTime,
-              endTime, ageRestriction, images, List(), List(), List(), tariffs.toList)//newTariffs.toList)
+              endTime, ageRestriction, images, List(), List(), tariffs.toList)//newTariffs.toList)
   }
 
   def formUnapply(event: Event): Option[(String, Option[Date], Option[Date], String, Date, Option[Date], Int, Seq[Tariff])] = {
@@ -76,8 +75,8 @@ object Event {
     get[Int]("ageRestriction")  map {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
         ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction  =>
-        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
+        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime,
+          description, startTime, endTime, ageRestriction, List(), List(), List(), List())
     }
   }
 
@@ -90,24 +89,26 @@ object Event {
       eventResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         users = User.findAllByEvent(e).toList,
-        places = Place.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList,
         tariffs = Tariff.findAllByEvent(e).toList))
     }
   }
 
   def findAll() = {
+    /*
+    change limit by variable
+     */
     DB.withConnection { implicit connection =>
       val eventsResultSet = SQL(
-        """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime, events.name,
-        events.startSellingTime, events.endSellingTime, events.description, events.startTime, events.endTime,
-        events.ageRestriction
+        """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
+            events.name, events.startSellingTime, events.endSellingTime, events.description, events.startTime,
+            events.endTime, events.ageRestriction
         FROM events
-        ORDER BY events.creationDateTime DESC""").as(EventParser *)
+        ORDER BY events.creationDateTime DESC
+        LIMIT 20""").as(EventParser *)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         users = User.findAllByEvent(e).toList,
-        places = Place.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList))
     }
   }
@@ -155,8 +156,8 @@ object Event {
       case e: Exception => throw new DAOException("Cannot save event: " + e.getMessage)
     }
 
-    //save tariffs
-    (event.tariffs).foreach(tariff =>
+    //save tariffs remplacer par save(tariff) + eventIdToReturn
+    event.tariffs.foreach( tariff =>
       try {
         DB.withConnection { implicit connection =>
           SQL("""INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)
@@ -174,6 +175,20 @@ object Event {
       }
     )
     eventIdToReturn
+  }
+
+  def saveEventPlaceRelation(eventId: Long, placeId: Long): Long = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """INSERT INTO eventsPlaces (eventId, placeId)
+          VALUES ({eventId}, {placeId})""").on(
+            'eventId -> eventId,
+            'placeId -> placeId
+          ).executeInsert().get
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot save in eventsPlaces : " + e.getMessage)
+    }
   }
 
   def followEvent(userId : Long, eventId : Long): Long = {

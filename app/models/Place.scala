@@ -1,5 +1,7 @@
 package models
 
+import java.util.Date
+
 import anorm.SqlParser._
 import anorm._
 import play.api.db.DB
@@ -7,54 +9,60 @@ import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
 
+import scala.util.Try
+
 /**
  * Created by sim on 03/10/14.
  */
+
 case class Place (placeId: Long,
                   name: String,
-                  addressID: Option[Long] = None,
+                  addressId: Option[Long] = None,
                   facebookId: Option[String] = None,
-                  facebookImage: Option[String] = None,
                   description: Option[String] = None,
                   webSite: Option[String] = None,
-                  facebookMiniature: Option[String] = None,
-                  capacity: Option[String] = None,
+                  capacity: Option[Int] = None,
                   openingHours: Option[String] = None)
 
 object Place {
   implicit val placeWrites = Json.writes[Place]
+
+  def formApply(name: String, addressId : Option[Long], facebookId: Option[String],
+                description: Option[String], webSite: Option[String], capacity: Option[Int],
+                openingHours: Option[String]): Place =
+    new Place(-1L, name, addressId, facebookId, description, webSite, capacity, openingHours)
+  def formUnapply(place: Place): Option[(String, Option[Long], Option[String], Option[String], Option[String],
+    Option[Int], Option[String])] =
+    Some((place.name, place.addressId, place.facebookId, place.description, place.webSite,
+      place.capacity, place.openingHours))
 
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
       get[String]("name") ~
       get[Option[Long]]("addressID") ~
       get[Option[String]]("facebookId") ~
-      get[Option[String]]("facebookImage") ~
       get[Option[String]]("description") ~
       get[Option[String]]("webSite") ~
-      get[Option[String]]("facebookMiniature") ~
-      get[Option[String]]("capacity") ~
+      get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") map {
-        case placeId ~ name ~ addressID ~ facebookId ~ facebookImage ~ description ~ webSite ~
-          facebookMiniature ~ capacity ~ openingHours =>
-          Place(placeId, name, addressID, facebookId, facebookImage, description, webSite, facebookMiniature,
+        case placeId ~ name ~ addressID ~ facebookId ~ description ~ webSite ~
+           capacity ~ openingHours =>
+          Place(placeId, name, addressID, facebookId, description, webSite,
             capacity, openingHours)
     }
   }
 
-  def savePlace(place: Place): Long = {
+  def save(place: Place): Long = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("insert into artists(name, addressID, facebookId, facebookImage, description, webSite, " +
-          "facebookMiniature, capacity, openingHours) values ({name}, {addressID}, {facebookId}, {facebookImage}, " +
+        SQL("INSERT into places(name, addressId, facebookId, facebookImage, description, webSite, " +
+          "capacity, openingHours) values ({name}, {addressID}, {facebookId}, " +
           "{description}, {webSite})").on(
           'name -> place.name,
-          'addressID -> place.addressID,
+          'addressId -> place.addressId,
           'facebookId -> place.facebookId,
-          'facebookImage -> place.facebookImage,
           'description -> place.description,
           'webSite -> place.webSite,
-          'facebookMiniature -> place.facebookMiniature,
           'capacity -> place.capacity,
           'openingHours -> place.openingHours
         ).executeInsert().get
@@ -68,6 +76,37 @@ object Place {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM places").as(PlaceParser *)
     }
+  }
+/*
+ private val EventParser: RowParser[Event] = {
+    get[Long]("eventId") ~
+    get[Option[String]]("facebookId") ~
+    get[Boolean]("isPublic") ~
+    get[Boolean]("isActive") ~
+    get[Date]("creationDateTime") ~
+    get[String]("name") ~
+    get[Option[Date]]("startSellingTime") ~
+    get[Option[Date]]("endSellingTime") ~
+    get[String]("description") ~
+    get[Date]("startTime") ~
+    get[Option[Date]]("endTime") ~
+    get[Int]("ageRestriction")  map {
+      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
+        ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction  =>
+        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
+          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
+    }
+ */
+
+  def findAllIdsAndFacebookIds = {
+    Try(
+      DB.withConnection { implicit connection =>
+        SQL("SELECT placeId, facebookId from places WHERE facebookId IS NOT NULL")
+          .as((get[Long]("placeId") ~
+            get[String]("facebookId") map {
+              case placeId ~ facebookId => (placeId, facebookId) } ) *)
+            }
+    )
   }
 
   def findAllByEvent(event: Event): Seq[Place] = {

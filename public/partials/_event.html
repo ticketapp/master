@@ -3,7 +3,7 @@
         <img src="/assets/img/{{ event.images[0].path }}" alt="une belle image" class="min"/>
     </div>
     <div class=" text_evnt_min" >
-        <a href="#/event/{{event.id}}"><h4>{{ event.name }}</h4></a>
+        <a href="#/event/{{event.eventId}}"><h4>{{ event.name }}</h4></a>
         Par
         <a href="#/user/{{user.id}}" class="custom-trigger" data-ng-repeat="user in event.users"
            data-tooltip-placement="bottom"

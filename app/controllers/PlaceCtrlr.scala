@@ -1,11 +1,15 @@
 package controllers
 
-import models.Place
+import models.{Artist, Place}
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.db._
 import play.api.Play.current
 import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
+
+import scala.util.{Failure, Success}
 
 
 object PlaceController extends Controller {
@@ -33,4 +37,27 @@ object PlaceController extends Controller {
     Place.followPlace(userId, placeId)
     Redirect(routes.Admin.indexAdmin())
   }
+
+  val placeBindingForm = Form(mapping(
+    "name" -> nonEmptyText(2),
+    "addressId" -> optional(longNumber),
+    "facebookId" -> optional(nonEmptyText()),
+    "description" -> optional(nonEmptyText(2)),
+    "webSite" -> optional(nonEmptyText(4)),
+    "capacity" -> optional(number),
+    "openingHours" -> optional(nonEmptyText(4))
+  )(Place.formApply)(Place.formUnapply)
+  )
+  
+  def createPlace = Action { implicit request =>
+    placeBindingForm.bindFromRequest().fold(
+      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
+      place => {
+        val placeId = Place.save(place)
+        //Redirect(routes.Admin.indexAdmin())
+        Ok(Json.toJson(Place.find(placeId)))
+      }
+    )
+  }
+
 }
