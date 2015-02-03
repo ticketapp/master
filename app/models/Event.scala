@@ -93,7 +93,7 @@ object Event {
     }
   }
 
-  def findAll() = {
+  def findAll = {
     /*
     change limit by variable
      */
@@ -105,6 +105,26 @@ object Event {
         FROM events
         ORDER BY events.creationDateTime DESC
         LIMIT 20""").as(EventParser *)
+      eventsResultSet.map(e => e.copy(
+        images = Image.findAllByEvent(e).toList,
+        artists = Artist.findAllByEvent(e).toList) )
+    }
+  }
+
+
+  def findAllByPlaces(placeId: Long) = {
+  DB.withConnection { implicit connection =>
+      val eventsResultSet = SQL(
+        """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
+            s.name, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
+            s.endTime, s.ageRestriction
+        FROM eventsPlaces eP
+        INNER JOIN events s ON s.eventId = eP.eventId
+        WHERE eP.placeId = {placeId}
+        ORDER BY s.creationDateTime DESC
+        LIMIT 20""" )
+        .on('placeId -> placeId)
+        .as(EventParser *)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList) )

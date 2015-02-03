@@ -14,7 +14,7 @@ import securesocial.core.providers.Token
 import play.api.libs.json.JsNumber
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import json.JsonHelper
+import json.JsonHelper._
 
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
 
@@ -45,24 +45,25 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
   }
 
   def save(user: Identity): Identity = {
-    implicit val oAuth1InfoWrites = new Writes[OAuth1Info] {
-      def writes(oAuth1Info: OAuth1Info) = Json.obj(
-        "token" -> JsString(oAuth1Info.token),
-        "secret" -> JsString(oAuth1Info.secret) )
+    def stringifyAuth1Info(oAuth1Info: Option[OAuth1Info]) = {
+      oAuth1Info match {
+        case Some(oAuth) => Json.stringify(Json.toJson(oAuth))
+        case _ => None
+      }
     }
-    implicit val oAuth2InfoWrites = new Writes[OAuth2Info] {
-      def writes(oAuth2Info: OAuth2Info) = Json.obj(
-        "accessToken" -> JsString(oAuth2Info.accessToken),
-        "tokenType" -> Json.toJson(oAuth2Info.tokenType),
-        "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
-        "refreshToken" -> Json.toJson(oAuth2Info.refreshToken) )
+    def stringifyAuth2Info(oAuth2Info: Option[OAuth2Info]) = {
+      oAuth2Info match {
+        case Some(oAuth) => Json.stringify(Json.toJson(oAuth))
+        case _ => None
+      }
     }
-    implicit val passwordInfoWrites = new Writes[PasswordInfo] {
-      def writes(passwordInfo: PasswordInfo) = Json.obj(
-        "hasher" -> JsString(passwordInfo.hasher),
-        "password" -> JsString(passwordInfo.password),
-        "salt" -> Json.toJson(passwordInfo.salt) )
+    def stringifyPasswordInfo(passwordInfo: Option[PasswordInfo]) = {
+      passwordInfo match {
+        case Some(passwordInfo) => Json.stringify(Json.toJson(passwordInfo))
+        case _ => None
+      }
     }
+
 
     try {
       DB.withConnection { implicit connection =>
@@ -79,9 +80,9 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
           'email -> user.email,
           'avatarUrl -> user.avatarUrl,
           'authMethod -> user.authMethod.method,
-          'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info)),
-          'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info)),
-          'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo))
+          'oAuth1Info -> stringifyAuth1Info(user.oAuth1Info),
+          'oAuth2Info -> stringifyAuth2Info(user.oAuth2Info),
+          'passwordInfo -> stringifyPasswordInfo(user.passwordInfo)
         ).executeUpdate()
       }
     } catch {
@@ -173,6 +174,9 @@ object USERS {
     "avatarUrl, authMethod, oAuth1Info, oAuth2Info, passwordInfo"
   val FIELDS = "id, " + FIELDS_LESS_ID
 
+
+  implicit val oAuth2InfoReads = Json.reads[OAuth2Info]
+
   val parser = {
     get[Pk[Long]]("id") ~
       get[String]("userId") ~
@@ -190,19 +194,32 @@ object USERS {
         ~ email ~ avatarUrl ~ authMethod ~ oAuth1Info ~ oAuth2Info
         ~ passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
         firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
-        None, None, None)
+        None, returnOAuth2Info(oAuth2Info), None)
       //getOAuth1Info(oAuth1Info), getOAuth2Info(oAuth2Info), getPasswordInfo(passwordInfo))
     }
   }
 
-  /*def getOAuth1Info(value: Option[String]) : Option[OAuth1Info] = value match {
-    case Some(o) => {
-      Option.apply(Json.fromJson(Json.parse(o)))
+  def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] = {
+    oAuth2InfoOptionString match {
+      case Some(value) => {
+        println(Json.parse(value))
+        println(Json.fromJson[OAuth2Info](Json.parse(value)))
+      }//Option.apply(Json.fromJson(Json.parse(value)))
+      case None => None
     }
-    case None => None
-  }*/
+    None
+  }
+
+
 /*
-  def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] =  {
+    implicit val oAuth1InfoReads: Reads[OAuth1Info] = (
+      (JsPath \ "token").read[String] and
+        (JsPath \ "secret").read[String]
+      )(OAuth1Info.apply _)
+*/
+
+
+  /*def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] =  {
     oAuth2InfoOptionString match {
       case Some(value) => Option.apply(Json.fromJson(Json.parse(value)))
       case None => None

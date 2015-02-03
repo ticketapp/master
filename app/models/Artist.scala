@@ -14,8 +14,9 @@ import java.util.Date
  */
 case class Artist (artistId: Long,
                    creationDateTime: Date,
-                   facebookId: Long,
-                   name: String)
+                   facebookId: Option[String],
+                   name: String,
+                   description: Option[String])
 
 
 object Artist {
@@ -24,10 +25,11 @@ object Artist {
   private val ArtistParser: RowParser[Artist] = {
     get[Long]("artistId") ~
       get[Date]("creationDateTime") ~
-      get[Long]("facebookId") ~
-      get[String]("name") map {
-      case artistId ~ creationDateTime ~ facebookId ~ name =>
-        Artist(artistId, creationDateTime, facebookId, name)
+      get[Option[String]]("facebookId") ~
+      get[String]("name") ~
+      get[Option[String]]("description") map {
+      case artistId ~ creationDateTime ~ facebookId ~ name ~ description =>
+        Artist(artistId, creationDateTime, facebookId, name, description)
     }
   }
 
@@ -57,7 +59,6 @@ object Artist {
 
 
   def findAllStartingWith(pattern: String): Seq[Artist] = {
-    var patternLowCase = pattern.toLowerCase()
     /*
 
     Security with the string? Need to escape it?
@@ -67,7 +68,7 @@ object Artist {
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM artists WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
-          .on('patternLowCase -> patternLowCase)
+          .on('patternLowCase -> pattern.toLowerCase)
           .as(ArtistParser *)
       }
     } catch {
@@ -75,8 +76,8 @@ object Artist {
     }
   }
 
-  def formApply(facebookId: Long, name: String): Artist = new Artist(-1L, new Date, facebookId, name)
-  def formUnapply(artist: Artist): Option[(Long, String)] = Some((artist.facebookId, artist.name))
+  def formApply(facebookId: Option[String], name: String): Artist = new Artist(-1L, new Date, facebookId, name, None)
+  def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
 
   def saveArtist(artist: Artist): Long = {
     try {
