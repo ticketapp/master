@@ -25,7 +25,6 @@ case class Event(eventId: Long,
                  ageRestriction: Int,
                  images: List[Image],
                  users: List[User],
-                 places: List[Place],
                  artists: List[Artist],
                  tariffs: List[Tariff])
 
@@ -53,7 +52,7 @@ object Event {
 
     val images = List()
     new Event(-1L, None, true, true, new Date, name, startSellingTime, endSellingTime, description, startTime,
-              endTime, ageRestriction, images, List(), List(), List(), tariffs.toList)//newTariffs.toList)
+              endTime, ageRestriction, images, List(), List(), tariffs.toList)//newTariffs.toList)
   }
 
   def formUnapply(event: Event): Option[(String, Option[Date], Option[Date], String, Date, Option[Date], Int, Seq[Tariff])] = {
@@ -90,7 +89,6 @@ object Event {
       eventResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         users = User.findAllByEvent(e).toList,
-        places = Place.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList,
         tariffs = Tariff.findAllByEvent(e).toList))
     }
@@ -111,7 +109,6 @@ object Event {
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         users = User.findAllByEvent(e).toList,
-        places = Place.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList))
     }
   }
@@ -159,23 +156,7 @@ object Event {
       case e: Exception => throw new DAOException("Cannot save event: " + e.getMessage)
     }
 
-    //save places
-    for (place <- event.places) {
-      val placeIdSaved = Place.save(place)
-      try {
-        DB.withConnection { implicit connection =>
-          SQL( """INSERT INTO eventsPlaces (eventId, placeId)
-            VALUES ({eventId}, {placeId})""").on(
-              'eventId -> eventIdToReturn,
-              'placeId -> placeIdSaved
-            ).executeInsert().get
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
-      }
-    }
-
-    //save tariffs remplacer par save(tariff) + enventIdToReturn
+    //save tariffs remplacer par save(tariff) + eventIdToReturn
     event.tariffs.foreach( tariff =>
       try {
         DB.withConnection { implicit connection =>
@@ -194,6 +175,20 @@ object Event {
       }
     )
     eventIdToReturn
+  }
+
+  def saveEventPlaceRelation(eventId: Long, placeId: Long): Long = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """INSERT INTO eventsPlaces (eventId, placeId)
+          VALUES ({eventId}, {placeId})""").on(
+            'eventId -> eventId,
+            'placeId -> placeId
+          ).executeInsert().get
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot save in eventsPlaces : " + e.getMessage)
+    }
   }
 
   def followEvent(userId : Long, eventId : Long): Long = {

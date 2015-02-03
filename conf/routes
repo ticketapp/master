@@ -10,8 +10,9 @@ GET     /                          controllers.Application.index
 #
 #
 GET     /test                      controllers.Test.test1
-GET     /test2                     controllers.Teest.test
-GET     /test3                     controllers.Test3.test3
+GET     /test2                     controllers.Test2.test2
+#GET     /placesFacebookIds         controllers.PlaceController.placesFacebookIds
+
 
 ################################## Admin ################################################
 GET     /admin                     controllers.Admin.indexAdmin
@@ -37,6 +38,7 @@ GET     /places                     controllers.PlaceController.places
 GET     /place/:id                  controllers.PlaceController.place(id: Long)
 POST    /place/:userId/:placeId     controllers.PlaceController.followPlace(userId: Long, placeId: Long)
 GET     /places/:pattern            controllers.PlaceController.placesStartingWith(pattern: String)
+POST    /places/createPlace         controllers.PlaceController.createPlace
 
 ################################## Infos ################################################
 GET    /infos                       controllers.Application.infos

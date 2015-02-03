@@ -13,7 +13,7 @@ import scala.io.Source
 import play.api.mvc.Results._
 
 object Test extends Controller{
-  var token = "CAAJZCFQiqd2cBALgIhwnVBjNibfgRctH9BOZCdORb7q9CV8ZCq3BwjWZBLTeSo0UaldCJOJLDgn0LhD672XKWVIpAZCWxPWwZBET1V0E2facbMt9tGx7LpCdT5V4zO9cbqLHmcDHXWNmmrOe4lMRk0FvAwlZCl5LHXtENa3D157k0GxIIn8TK2G2Ag48ZAMnZBhhnIYKm8hfIKqgyPBr9U7ZBjzv16ZA6WzmZC8ZD"
+  var token = "CAAJZCFQiqd2cBAJwWOXWeXh9VpypZA2qCibNiYBkWt0LPwzCMmZBqOHsKWVV1skif8UrcYE3x57HSwjAvymCzbCZCJPWbGlH3wPt99ZB1lNvx6odZCIaQHe1GQ0aJqYdYy8eYv4m2fWlDrl68ZCWZBjeAefiAySrz9f21Ejrz4AuZCPZB0w5gHIRXFVVstY8trTs7Dj5qedp1RcLf5C1W0NEf6jZAANQ31vBfcZD"
 
   def returnListOfIdsFromPlaces(resp : play.api.libs.ws.Response): List[String] = {
     var ids: List[String] = List()
