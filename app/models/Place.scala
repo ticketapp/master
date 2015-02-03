@@ -55,9 +55,9 @@ object Place {
   def save(place: Place): Long = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("INSERT into places(name, addressId, facebookId, description, webSite, " +
-          "capacity, openingHours) values ({name}, {addressId}, {facebookId}, " +
-          "{description}, {webSite})").on(
+        SQL("INSERT into places(name, addressId, facebookId, description, webSite, capacity, openingHours) " +
+          "values ({name}, {addressId}, {facebookId}, {description}, {webSite}, {capacity}, {openingHours})"
+        ).on(
           'name -> place.name,
           'addressId -> place.addressId,
           'facebookId -> place.facebookId,
