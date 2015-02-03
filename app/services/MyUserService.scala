@@ -45,24 +45,24 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
   }
 
   def save(user: Identity): Identity = {
+    implicit val oAuth1InfoWrites = new Writes[OAuth1Info] {
+      def writes(oAuth1Info: OAuth1Info) = Json.obj(
+        "token" -> JsString(oAuth1Info.token),
+        "secret" -> JsString(oAuth1Info.secret) )
+    }
     implicit val oAuth2InfoWrites = new Writes[OAuth2Info] {
       def writes(oAuth2Info: OAuth2Info) = Json.obj(
         "accessToken" -> JsString(oAuth2Info.accessToken),
         "tokenType" -> Json.toJson(oAuth2Info.tokenType),
         "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
-        "refreshToken" -> Json.toJson(oAuth2Info.refreshToken))
+        "refreshToken" -> Json.toJson(oAuth2Info.refreshToken) )
     }
-/*
-    implicit val oAuth2InfoWrites = new Writes[OAuth2Info] {
-      def writes(oAuth2Info: OAuth2Info) = Json.obj(
-        "accessToken" -> JsString(oAuth2Info.accessToken),
-        "tokenType" -> Json.toJson(oAuth2Info.tokenType),
-        "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
-        "refreshToken" -> Json.toJson(oAuth2Info.refreshToken))
+    implicit val passwordInfoWrites = new Writes[PasswordInfo] {
+      def writes(passwordInfo: PasswordInfo) = Json.obj(
+        "hasher" -> JsString(passwordInfo.hasher),
+        "password" -> JsString(passwordInfo.password),
+        "salt" -> Json.toJson(passwordInfo.salt) )
     }
-*/
-
-    println("user.oAuth2Info.toJson.stringify : " + Json.stringify(Json.toJson(user.oAuth2Info)))
 
     try {
       DB.withConnection { implicit connection =>
@@ -79,9 +79,9 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
           'email -> user.email,
           'avatarUrl -> user.avatarUrl,
           'authMethod -> user.authMethod.method,
-          'oAuth1Info -> None, //Json.stringify(Json.toJson(user.oAuth1Info)),
+          'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info)),
           'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info)),
-          'passwordInfo -> None//Json.stringify(Json.toJson(user.passwordInfo))
+          'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo))
         ).executeUpdate()
       }
     } catch {
@@ -169,53 +169,49 @@ case class SSIdentity(
 
 
 object USERS {
+  val FIELDS_LESS_ID = "userId, providerId, firstName, lastName, fullName, email, " +
+    "avatarUrl, authMethod, oAuth1Info, oAuth2Info, passwordInfo"
+  val FIELDS = "id, " + FIELDS_LESS_ID
 
-val FIELDS_LESS_ID = "userId, providerId, firstName, lastName, fullName, email, " +
-  "avatarUrl, authMethod, oAuth1Info, oAuth2Info, passwordInfo"
-val FIELDS = "id, " + FIELDS_LESS_ID
-
-val parser = {
-  get[Pk[Long]]("id") ~
-    get[String]("userId") ~
-    get[String]("providerId") ~
-    get[String]("firstName") ~
-    get[String]("lastName") ~
-    get[String]("fullName") ~
-    get[Option[String]]("email") ~
-    get[Option[String]]("avatarUrl") ~
-    get[String]("authMethod") ~
-    get[Option[String]]("oAuth1Info") ~
-    get[Option[String]]("oAuth2Info") ~
-    get[Option[String]]("passwordInfo") map {
-    case id~userId~providerId~firstName~lastName~fullName
-      ~email~avatarUrl~authMethod~oAuth1Info~oAuth2Info
-      ~passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
-      firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
-      None, None,None)
+  val parser = {
+    get[Pk[Long]]("id") ~
+      get[String]("userId") ~
+      get[String]("providerId") ~
+      get[String]("firstName") ~
+      get[String]("lastName") ~
+      get[String]("fullName") ~
+      get[Option[String]]("email") ~
+      get[Option[String]]("avatarUrl") ~
+      get[String]("authMethod") ~
+      get[Option[String]]("oAuth1Info") ~
+      get[Option[String]]("oAuth2Info") ~
+      get[Option[String]]("passwordInfo") map {
+      case id ~ userId ~ providerId ~ firstName ~ lastName ~ fullName
+        ~ email ~ avatarUrl ~ authMethod ~ oAuth1Info ~ oAuth2Info
+        ~ passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
+        firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
+        None, None, None)
       //getOAuth1Info(oAuth1Info), getOAuth2Info(oAuth2Info), getPasswordInfo(passwordInfo))
+    }
   }
-}
 
-/*def getOAuth1Info(value: Option[String]) : Option[OAuth1Info] = value match {
-  case Some(o) => {
-    Option.apply(Json.fromJson(Json.parse(o)))
-  }
-  case None => None
-}
-
-def getOAuth2Info(value: Option[String]) : Option[OAuth2Info] = value match {
-  case Some(o) => {
-    Option.apply(Json.fromJson(Json.parse(o)))
-  }
-  case None => None
-}
-
-def getPasswordInfo(value: Option[String]) : Option[PasswordInfo] = value match {
-  case Some(o) => {
-    Option.apply(Json.fromJson(Json.parse(o)))
-  }
-  case None => None
-}*/
+  /*def getOAuth1Info(value: Option[String]) : Option[OAuth1Info] = value match {
+    case Some(o) => {
+      Option.apply(Json.fromJson(Json.parse(o)))
+    }
+    case None => None
+  }*/
+/*
+  def getOAuth2Info(value: Option[String]): Option[OAuth2Info] = value match {
+      Option.apply(Json.fromJson(Json.parse(o)))
+  }*/
+/*
+  def getPasswordInfo(value: Option[String]): Option[PasswordInfo] = value match {
+    case Some(o) => {
+      Option.apply(Json.fromJson(Json.parse(o)))
+    }
+    case None => None
+  }*/
 }
 
 object TOKENS {
