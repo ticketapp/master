@@ -119,7 +119,6 @@ INSERT into places(name) values ('eedzur');
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
   path                      VARCHAR(255) NOT NULL,
-  alt                       VARCHAR(255) NOT NULL,
   eventId                   BIGINT references events(eventId),
   userId                    BIGINT references users(userId),
   UNIQUE(path)

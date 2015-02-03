@@ -1,20 +1,19 @@
 package services
 
-import json.JsonHelper.oAuth1InfoReads
 import _root_.java.util.Date
 import anorm.SqlParser._
 import anorm._
 import com.fasterxml.jackson.databind.JsonNode
 import controllers.DAOException
-import play.libs.Json
-import play.api.libs.json._
-//import json.JsonWriters
 import org.joda.time.DateTime
 import play.api.db.DB
 import play.api.Play.current
 import play.api.{Logger, Application}
 import securesocial.core._
 import securesocial.core.providers.Token
+import play.api.libs.json.JsNumber
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import json.JsonHelper
 
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
@@ -46,98 +45,24 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
   }
 
   def save(user: Identity): Identity = {
-    /*println(user.oAuth1Info)
-    println("user.oAuth1Info.toJson : " + Json.toJson(user.oAuth1Info))*/
-
-
-    /*def writes(oAuth2Info: securesocial.core.OAuth2Info) = JsObject(Seq(
-      "accessToken" -> JsString(oAuth2Info.accessToken),
-      "tokenType" -> Json.toJson(oAuth2Info.tokenType),
-      "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
-      "refreshToken" -> Json.toJson(oAuth2Info.refreshToken)
-    ))*/
-
-
-
-
-
-    println("user.oAuth2Info : " + user.oAuth2Info)
-    println("user.oAuth2Info<getOrElse : " + user.oAuth2Info.getOrElse(None))
-    println("user.oAuth2Info.toJson : " + Json.toJson(user.oAuth2Info.getOrElse(None)))
-    println("user.oAuth2Info.toJson.stringify : " + Json.stringify(Json.toJson(user.oAuth2Info)))
-
-
-
-    /*println(user.passwordInfo)
-
-
-    JsObject(
-      "id" -> JsNumber(5) ::
-        "username" -> JsString("sfsfsdf") ::
-        "age" -> JsNumber(4) :: Nil
-    )
-
-
-    var test2 = user.oAuth2Info
-    var test1 = user.oAuth1Info
-    println(test2)
-    println(test1)
-
-
-    user.oAuth2Info match {
-      case Some(o) => {
-        val accessTokenVal = o.accessToken
-        o.tokenType match {
-          case Some(tokenTypeValue) =>
-            val tokenTypeVal =  tokenTypeValue
-          case None =>
-        }
-        o.expiresIn match {
-          case Some(expiresInValue) =>
-            val expiresInVal = expiresInValue
-          case None => val expiresInVal = None
-        }
-        o.refreshToken match {
-          case Some(refreshTokenValue) =>
-            val refreshTokenVal = refreshTokenValue
-          case None => val refreshTokenVal = None
-        }
-      }
-      case None =>
+    implicit val oAuth2InfoWrites = new Writes[OAuth2Info] {
+      def writes(oAuth2Info: OAuth2Info) = Json.obj(
+        "accessToken" -> JsString(oAuth2Info.accessToken),
+        "tokenType" -> Json.toJson(oAuth2Info.tokenType),
+        "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
+        "refreshToken" -> Json.toJson(oAuth2Info.refreshToken))
     }
+/*
+    implicit val oAuth2InfoWrites = new Writes[OAuth2Info] {
+      def writes(oAuth2Info: OAuth2Info) = Json.obj(
+        "accessToken" -> JsString(oAuth2Info.accessToken),
+        "tokenType" -> Json.toJson(oAuth2Info.tokenType),
+        "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
+        "refreshToken" -> Json.toJson(oAuth2Info.refreshToken))
+    }
+*/
 
-    var oAuth2InfoJson: JsValue = JsObject(Seq(
-      "accessToken" -> JsString("sqdqsd")
-    ))
-
-
-    /*user.oAuth2Info match {
-      case Some(o) => {
-        val accessTokenVal = o.accessToken
-        o.tokenType match {
-          case Some(tokenTypeValue) =>
-            val tokenTypeVal = tokenTypeValue
-          case None => val tokenTypeVal = None
-        }
-        o.expiresIn match {
-          case Some(expiresInValue) =>
-            val expiresInVal = expiresInValue
-          case None => val expiresInVal = None
-        }
-        o.refreshToken match {
-          case Some(refreshTokenValue) =>
-            val refreshTokenVal = refreshTokenValue
-          case None => val refreshTokenVal = None
-        }
-      }
-      case None =>
-      /*JsObject(Seq(
-        "accessToken" -> JsString(o.accessToken),
-        "tokenType" -> o.tokenType,
-        "expiresIn" -> o.expiresIn,
-        "refreshToken" -> o.refreshToken
-      ))*/
-    }*/*/
+    println("user.oAuth2Info.toJson.stringify : " + Json.stringify(Json.toJson(user.oAuth2Info)))
 
     try {
       DB.withConnection { implicit connection =>
@@ -154,9 +79,9 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
           'email -> user.email,
           'avatarUrl -> user.avatarUrl,
           'authMethod -> user.authMethod.method,
-          'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info.getOrElse(None))),
-          'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info.getOrElse(None))),
-          'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo.getOrElse(None)))
+          'oAuth1Info -> None, //Json.stringify(Json.toJson(user.oAuth1Info)),
+          'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info)),
+          'passwordInfo -> None//Json.stringify(Json.toJson(user.passwordInfo))
         ).executeUpdate()
       }
     } catch {
@@ -230,81 +155,81 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
 }
 
 case class SSIdentity(
-                       id: Option[Long],
-                       identityId: IdentityId,
-                       firstName: String,
-                       lastName: String,
-                       fullName: String,
-                       email: Option[String],
-                       avatarUrl: Option[String],
-                       authMethod: AuthenticationMethod,
-                       oAuth1Info: Option[OAuth1Info] = None,
-                       oAuth2Info: Option[OAuth2Info] = None,
-                       passwordInfo: Option[PasswordInfo] = None) extends Identity {}
+                     id: Option[Long],
+                     identityId: IdentityId,
+                     firstName: String,
+                     lastName: String,
+                     fullName: String,
+                     email: Option[String],
+                     avatarUrl: Option[String],
+                     authMethod: AuthenticationMethod,
+                     oAuth1Info: Option[OAuth1Info] = None,
+                     oAuth2Info: Option[OAuth2Info] = None,
+                     passwordInfo: Option[PasswordInfo] = None) extends Identity {}
 
 
 object USERS {
 
-  val FIELDS_LESS_ID = "userId, providerId, firstName, lastName, fullName, email, " +
-    "avatarUrl, authMethod, oAuth1Info, oAuth2Info, passwordInfo"
-  val FIELDS = "id, " + FIELDS_LESS_ID
+val FIELDS_LESS_ID = "userId, providerId, firstName, lastName, fullName, email, " +
+  "avatarUrl, authMethod, oAuth1Info, oAuth2Info, passwordInfo"
+val FIELDS = "id, " + FIELDS_LESS_ID
 
-  val parser = {
-    get[Pk[Long]]("id") ~
-      get[String]("userId") ~
-      get[String]("providerId") ~
-      get[String]("firstName") ~
-      get[String]("lastName") ~
-      get[String]("fullName") ~
-      get[Option[String]]("email") ~
-      get[Option[String]]("avatarUrl") ~
-      get[String]("authMethod") ~
-      get[Option[String]]("oAuth1Info") ~
-      get[Option[String]]("oAuth2Info") ~
-      get[Option[String]]("passwordInfo") map {
-      case id~userId~providerId~firstName~lastName~fullName
-        ~email~avatarUrl~authMethod~oAuth1Info~oAuth2Info
-        ~passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
-        firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
-        None, None,None)
-        //getOAuth1Info(oAuth1Info), getOAuth2Info(oAuth2Info), getPasswordInfo(passwordInfo))
-    }
+val parser = {
+  get[Pk[Long]]("id") ~
+    get[String]("userId") ~
+    get[String]("providerId") ~
+    get[String]("firstName") ~
+    get[String]("lastName") ~
+    get[String]("fullName") ~
+    get[Option[String]]("email") ~
+    get[Option[String]]("avatarUrl") ~
+    get[String]("authMethod") ~
+    get[Option[String]]("oAuth1Info") ~
+    get[Option[String]]("oAuth2Info") ~
+    get[Option[String]]("passwordInfo") map {
+    case id~userId~providerId~firstName~lastName~fullName
+      ~email~avatarUrl~authMethod~oAuth1Info~oAuth2Info
+      ~passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
+      firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
+      None, None,None)
+      //getOAuth1Info(oAuth1Info), getOAuth2Info(oAuth2Info), getPasswordInfo(passwordInfo))
   }
+}
 
-  def getOAuth1Info(value: Option[String]) : Option[OAuth1Info] = value match {
-    case Some(o) => {
-      Option.apply(Json.fromJson(Json.parse(o), classOf[OAuth1Info]))
-    }
-    case None => None
+/*def getOAuth1Info(value: Option[String]) : Option[OAuth1Info] = value match {
+  case Some(o) => {
+    Option.apply(Json.fromJson(Json.parse(o)))
   }
+  case None => None
+}
 
-  def getOAuth2Info(value: Option[String]) : Option[OAuth2Info] = value match {
-    case Some(o) => {
-      Option.apply(Json.fromJson(Json.parse(o), classOf[OAuth2Info]))
-    }
-    case None => None
+def getOAuth2Info(value: Option[String]) : Option[OAuth2Info] = value match {
+  case Some(o) => {
+    Option.apply(Json.fromJson(Json.parse(o)))
   }
+  case None => None
+}
 
-  def getPasswordInfo(value: Option[String]) : Option[PasswordInfo] = value match {
-    case Some(o) => {
-      Option.apply(Json.fromJson(Json.parse(o), classOf[PasswordInfo]))
-    }
-    case None => None
+def getPasswordInfo(value: Option[String]) : Option[PasswordInfo] = value match {
+  case Some(o) => {
+    Option.apply(Json.fromJson(Json.parse(o)))
   }
+  case None => None
+}*/
 }
 
 object TOKENS {
 
-  val FIELDS = "id, email, creationTime, expirationTime, isSignUp"
+val FIELDS = "id, email, creationTime, expirationTime, isSignUp"
 
-  val parser = {
-    get[String]("id") ~
-      get[String]("email") ~
-      get[Date]("creationTime") ~
-      get[Date]("expirationTime") ~
-      get[Boolean]("isSignUp") map {
-      case id~email~creationTime~expirationTime~isSignUp =>
-        Token(id, email, new DateTime(creationTime), new DateTime(expirationTime), isSignUp)
-    }
+val parser = {
+  get[String]("id") ~
+    get[String]("email") ~
+    get[Date]("creationTime") ~
+    get[Date]("expirationTime") ~
+    get[Boolean]("isSignUp") map {
+    case id~email~creationTime~expirationTime~isSignUp =>
+      Token(id, email, new DateTime(creationTime), new DateTime(expirationTime), isSignUp)
   }
+}
 }

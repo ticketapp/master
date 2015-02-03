@@ -107,7 +107,7 @@ object Event {
         LIMIT 20""").as(EventParser *)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
-        artists = Artist.findAllByEvent(e).toList))
+        artists = Artist.findAllByEvent(e).toList) )
     }
   }
 

@@ -1,27 +1,12 @@
 package json
 
 import models._
-import play.api.libs.json._
-import play.api.libs.json.JsString
-import play.api.libs.functional.syntax
 import securesocial.core.{OAuth2Info, OAuth1Info}
-import scala.collection.Traversable
-import scala.Traversable
-import play.api.libs.json.Json._
-import play.api.libs.json.JsArray
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsString
-import scala.Some
 import play.api.libs.json.JsNumber
-import play.api.libs.json.{JsString, _}
-import play.api.libs.json.DefaultWrites
-import scala.BigDecimal.javaBigDecimal2bigDecimal
-
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 object JsonHelper {
-
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
     def writes(o : java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(o))
   }
@@ -31,8 +16,8 @@ object JsonHelper {
     (JsPath \ "secret").read[String]
     )(OAuth1Info.apply _)
 
-  implicit val oauth2InfoWrites: Writes[OAuth2Info] =
-    Json.writes[OAuth2Info]
+
+
 
   implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
   implicit val account63Writes: Writes[Account63] = Json.writes[Account63]
@@ -45,23 +30,4 @@ object JsonHelper {
   implicit val account4686Writes: Writes[Account4686] = Json.writes[Account4686]
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
   implicit val eventWrites = Json.writes[Event]
-  /*
-    implicit val userReads: Reads[User] = (
-      (__ \ "id").read[Long] ~
-        (__ \ "email").read[String] ~
-        (__ \ "login").read[String] ~
-        (__ \ "password").readNullable[String] ~
-        (__ \ "profile").read[UserProfile]
-      )(User.apply _)
-
-    implicit val userWrites = new Writes[User] {
-      def writes(user: User) = Json.obj(
-        "id" -> user.id,
-        "email" -> user.email,
-        "login" -> user.login,
-        "app/json/JsonWriters.scala"
-
-      99L,
-      )
-    }*/
 }

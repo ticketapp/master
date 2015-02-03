@@ -39,15 +39,15 @@ object Place {
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
       get[String]("name") ~
-      get[Option[Long]]("addressID") ~
+      get[Option[Long]]("addressId") ~
       get[Option[String]]("facebookId") ~
       get[Option[String]]("description") ~
       get[Option[String]]("webSite") ~
       get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") map {
-        case placeId ~ name ~ addressID ~ facebookId ~ description ~ webSite ~
+        case placeId ~ name ~ addressId ~ facebookId ~ description ~ webSite ~
            capacity ~ openingHours =>
-          Place(placeId, name, addressID, facebookId, description, webSite,
+          Place(placeId, name, addressId, facebookId, description, webSite,
             capacity, openingHours)
     }
   }
@@ -56,7 +56,7 @@ object Place {
     try {
       DB.withConnection { implicit connection =>
         SQL("INSERT into places(name, addressId, facebookId, facebookImage, description, webSite, " +
-          "capacity, openingHours) values ({name}, {addressID}, {facebookId}, " +
+          "capacity, openingHours) values ({name}, {addressId}, {facebookId}, " +
           "{description}, {webSite})").on(
           'name -> place.name,
           'addressId -> place.addressId,
@@ -68,7 +68,7 @@ object Place {
         ).executeInsert().get
       }
     } catch {
-      case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
+      case e: Exception => throw new DAOException("Cannot create place : " + e.getMessage)
     }
   }
 

@@ -64,7 +64,7 @@ object Scheduler {
       eventDescription, startTime, endTime, 16, List(), List(), List(), List()))
 
     Event.saveEventPlaceRelation(eventId, placeId)
-    Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), "Image de l'événement", Some(eventId), None))
+    Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
   }
 
   def returnListOfIdsFromEvents(resp : Response): List[String] = {
