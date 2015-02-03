@@ -9,7 +9,7 @@ object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
 
-    Akka.system.scheduler.schedule(0 seconds, 1 minutes) {
+    Akka.system.scheduler.schedule(0 seconds, 12 hours) {
       Scheduler.start
     }
     /*play.api.Play.mode(app) match {

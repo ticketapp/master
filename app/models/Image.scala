@@ -8,7 +8,6 @@ import play.api.Play.current
 
 case class Image (imageId: Long,
                   path: String,
-                  alt: String,
                   eventId: Option[Long] = None,
                   userId: Option[Long] = None)
 
@@ -17,17 +16,16 @@ object Image {
 
   implicit val imageWrites = Json.writes[Image]
 
-  def formApply(path: String,  alt: String) = new Image(-1L, path, alt)
-  def formUnapply(image: Image) = Some((image.path, image.alt))
+  def formApply(path: String,  alt: String) = new Image(-1L, path)
+  def formUnapply(image: Image) = Some((image.path))
 
   private val ImageParser: RowParser[Image] = {
     get[Long]("imageId") ~
     get[String]("path") ~
-    get[String]("alt") ~
     get[Option[Long]]("eventId") ~
     get[Option[Long]]("userId") map {
-      case placeId ~ path ~ alt ~ eventId ~ userId =>
-        Image(placeId, path, alt, eventId, userId)
+      case imageId ~ path ~ eventId ~ userId =>
+        Image(imageId, path, eventId, userId)
     }
   }
 
@@ -52,17 +50,15 @@ object Image {
         .as(ImageParser.singleOpt)
     }
   }
-/*
-  def save(name: String) = {
+
+  def save(image: Image) = {
     DB.withConnection { implicit connection =>
-      SQL("""
-            INSERT INTO images(name)
-            VALUES({name})
-          """).on(
-          'name -> name
-        ).executeUpdate
+      SQL(""" INSERT INTO images(path, eventId, userId) VALUES({path}, {eventId}, {userId}) """)
+        .on(
+          'path -> image.path,
+          'eventId -> image.eventId,
+          'userId -> image.userId
+        ).executeInsert()
     }
   }
-  */
-
 }
