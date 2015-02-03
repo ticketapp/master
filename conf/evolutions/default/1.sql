@@ -26,15 +26,15 @@ CREATE TABLE infos (
   title                     TEXT NOT NULL,
   content                   TEXT
 );
-INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuse');
+INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuse');
 INSERT INTO infos (title, content) VALUES ('infos2', 'une info qui va déchirer');
-INSERT INTO infos (title, content) VALUES ('infos3', 'J - 70 avant la béta :) :)');
-INSERT INTO infos (title, content) VALUES ('infos3', 'fuserie');
+INSERT INTO infos (title, content) VALUES ('infos3', 'J - 69 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('infos3', 'fuseerie');
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
   creationDateTime          TIMESTAMP DEFAULT  current_timestamp NOT NULL,
-  facebookId                BIGINT,
+  facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
   UNIQUE(name),
   UNIQUE(facebookId)
@@ -53,6 +53,14 @@ INSERT INTO users (email, nickname, password, profile)
 VALUES ('admin@global.local', 'admin', '$2a$12$L/rFVHZonEAmydEfZyYR.exvJuDdMY6kX7BIdXcam.voTxeBc7YwK', 'Admin');
 INSERT INTO users (email, nickname, password, profile)
 VALUES ('user@global.local', 'user', '$2a$12$3.UvEUatM.2VbYEI2Y.YKeqn3QNc/k0h9S0Vde2vqvzScKt74ofaS', 'User');
+
+CREATE TABLE organizers (
+    organizerId             SERIAL PRIMARY KEY,
+    creationDateTime        TIMESTAMP DEFAULT current_timestamp NOT NULL,
+    facebookId              VARCHAR(63),
+    verified                BOOLEAN DEFAULT FALSE NOT NULL,
+    UNIQUE(facebookId)
+);
 
 CREATE TABLE users_login (
   id                        SERIAL PRIMARY KEY,
@@ -79,7 +87,7 @@ CREATE TABLE users_token (
 
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,
-  facebookId                VARCHAR(255),
+  facebookId                VARCHAR(63),
   isPublic                  boolean NOT NULL,
   isActive                  boolean NOT NULL,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
@@ -93,12 +101,11 @@ CREATE TABLE events (
   UNIQUE(facebookId)
 );
 
-
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
   addressID                 BIGINT references addresses(addressId),
-  facebookId                VARCHAR(31),
+  facebookId                VARCHAR(63),
   description               TEXT,
   webSite                   VARCHAR(255),
   facebookMiniature         VARCHAR(255),
@@ -107,7 +114,7 @@ CREATE TABLE places (
   UNIQUE(facebookId)
 );
 INSERT into places(name, facebookId) values ('withFbId', '117030545096697');
-INSERT into places(name) values ('eedzr');
+INSERT into places(name) values ('eedzur');
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
@@ -332,10 +339,16 @@ CREATE TABLE eventsPlaces (
     PRIMARY KEY (eventId, placeId)
 );
 
-CREATE TABLE eventsUsers (
+CREATE TABLE eventsOrganizers (
     eventId INT REFERENCES events (eventId),
+    organizerId INT REFERENCES organizers(organizerId),
+    PRIMARY KEY (eventId, organizerId)
+);
+
+CREATE TABLE usersOrganizers (
     userId INT REFERENCES users (userId),
-    PRIMARY KEY (eventId, userId)
+    organizerId INT REFERENCES organizers(organizerId),
+    PRIMARY KEY (userId, organizerId)
 );
 
 CREATE TABLE eventsArtists (
@@ -353,7 +366,8 @@ CREATE TABLE usersArtists (
 
 # --- !Downs
 DROP TABLE IF EXISTS eventsPlaces;
-DROP TABLE IF EXISTS eventsUsers;
+DROP TABLE IF EXISTS eventsOrganizers;
+DROP TABLE IF EXISTS usersOrganizers;
 DROP TABLE IF EXISTS eventsArtists;
 DROP TABLE IF EXISTS usersArtists;
 DROP TABLE IF EXISTS eventsFollowed;
@@ -385,6 +399,7 @@ DROP TABLE IF EXISTS places;
 DROP TABLE IF EXISTS amountDue;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS organizers;
 DROP TABLE IF EXISTS users_login, users_token;
 DROP TABLE IF EXISTS artists;
 DROP TABLE IF EXISTS clients;

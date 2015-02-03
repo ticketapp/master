@@ -52,17 +52,16 @@ object Image {
         .as(ImageParser.singleOpt)
     }
   }
-/*
-  def save(name: String) = {
+
+  def save(image: Image) = {
     DB.withConnection { implicit connection =>
-      SQL("""
-            INSERT INTO images(name)
-            VALUES({name})
-          """).on(
-          'name -> name
-        ).executeUpdate
+      SQL(""" INSERT INTO images(path, alt, eventId, userId) VALUES({path}, {alt}, {eventId}, {userId}) """)
+        .on(
+          'path -> image.path,
+          'alt -> image.alt,
+          'eventId -> image.eventId,
+          'userId -> image.userId
+        ).executeInsert()
     }
   }
-  */
-
 }

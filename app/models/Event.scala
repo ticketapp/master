@@ -88,7 +88,6 @@ object Event {
         .as(EventParser.singleOpt)
       eventResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
-        users = User.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList,
         tariffs = Tariff.findAllByEvent(e).toList))
     }
@@ -108,7 +107,6 @@ object Event {
         LIMIT 20""").as(EventParser *)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
-        users = User.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList))
     }
   }
@@ -120,11 +118,10 @@ object Event {
 
 
      */
-    var patternLowCase = pattern.toLowerCase()
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
-          .on('patternLowCase -> patternLowCase)
+          .on('patternLowCase -> pattern.toLowerCase())
           .as(EventParser *)
       }
     } catch {

@@ -6,8 +6,6 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import models.{Image, Tariff, Event}
 import json.JsonHelper._
-import scala.BigDecimal.javaBigDecimal2bigDecimal
-import java.math.BigDecimal
 
 
 object EventController extends Controller {

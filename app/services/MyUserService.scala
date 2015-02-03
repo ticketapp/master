@@ -154,9 +154,9 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
           'email -> user.email,
           'avatarUrl -> user.avatarUrl,
           'authMethod -> user.authMethod.method,
-          'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info)),
-          'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info)),
-          'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo))
+          'oAuth1Info -> Json.stringify(Json.toJson(user.oAuth1Info.getOrElse(None))),
+          'oAuth2Info -> Json.stringify(Json.toJson(user.oAuth2Info.getOrElse(None))),
+          'passwordInfo -> Json.stringify(Json.toJson(user.passwordInfo.getOrElse(None)))
         ).executeUpdate()
       }
     } catch {
