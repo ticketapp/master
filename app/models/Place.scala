@@ -55,7 +55,7 @@ object Place {
   def save(place: Place): Long = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("INSERT into places(name, addressId, facebookId, facebookImage, description, webSite, " +
+        SQL("INSERT into places(name, addressId, facebookId, description, webSite, " +
           "capacity, openingHours) values ({name}, {addressId}, {facebookId}, " +
           "{description}, {webSite})").on(
           'name -> place.name,
@@ -77,26 +77,6 @@ object Place {
       SQL("SELECT * FROM places").as(PlaceParser *)
     }
   }
-/*
- private val EventParser: RowParser[Event] = {
-    get[Long]("eventId") ~
-    get[Option[String]]("facebookId") ~
-    get[Boolean]("isPublic") ~
-    get[Boolean]("isActive") ~
-    get[Date]("creationDateTime") ~
-    get[String]("name") ~
-    get[Option[Date]]("startSellingTime") ~
-    get[Option[Date]]("endSellingTime") ~
-    get[String]("description") ~
-    get[Date]("startTime") ~
-    get[Option[Date]]("endTime") ~
-    get[Int]("ageRestriction")  map {
-      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
-        ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction  =>
-        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
-    }
- */
 
   def findAllIdsAndFacebookIds = {
     Try(
