@@ -159,7 +159,7 @@ opacity: 0;}
 		#pages-nav .right{margin-right:10px;}
 		#pages-nav .right.active{background-color:#faa732;}
 		#pages-nav .right.active h3{color:#ffffff;}
-		#pages-nav li a {color: #fff;}
+		/*#pages-nav li a {color: #fff;}*/
 		#pages-nav li a h3 {color: #a5a5a5; padding: 0 15px; height: 50px; line-height: 50px;  margin:0;}
 		#pages-nav li a h3:hover{color:white;}
 		#logo{border-radius:5px;}
