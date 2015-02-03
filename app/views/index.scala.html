@@ -3,10 +3,9 @@
 <nav id="pages-nav" data-ng-controller="scrollCtrl" id="top">
     <ul nav-menu="active">
 	    <li class="left" id="logo">
-	        <a href="#/"><img class="logo" src="assets/img/logo.png" alt="" ng-click="gotoTop()"><!--{{asset('img/logo.png')}}--></a>
+	        <h3><a href="#/" class="logo" ng-click="gotoTop()">TicketApp</a></h3>
 	    </li>
-        <div class="left" ng-controller="searchCtrl">
-
+        <li class="left" ng-controller="searchCtrl">
             <md-input-container md-theme="docs-dark">
                 <label>Search</label>
                 <input ng-model="research" ng-change="search()">
@@ -34,7 +33,10 @@
                     <hr/>
                 </div>
             </div>
-        </div>
+        </li>
+        <li ng-controller="searchCtrl" class="left margin0">
+            <button ng-click="createPlaces()" class="padding0 height50">CreatePlaces</button>
+        </li>
     <!--<li class="right">
         <div data-ng-controller="connectCtrl" class="btn btn-warning signIn" ng-click="open()">Sign In</div>
     </li>-->

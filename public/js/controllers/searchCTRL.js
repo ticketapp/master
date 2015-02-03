@@ -102,7 +102,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$filter', function($scope, $ht
                 // or server returns response with an error status.
             });
     }
-    function createPlaces () {
+     $scope.createPlaces = function () {
         var places = [];
         var placeName =[];
         var txtFile = new XMLHttpRequest();
@@ -122,7 +122,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$filter', function($scope, $ht
                     }
                 }
             }
-        }
+        };
         txtFile.send(null);
         function getPlacesByName(placeName) {
             $http.get('https://graph.facebook.com/v2.2/search?q=' + placeName + '&type=page&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
@@ -158,30 +158,25 @@ app.controller('searchCtrl', ['$scope', '$http', '$filter', function($scope, $ht
                             places.splice(m, 1);
                         }
                     }
-                    if (data.location.country != 'France') {
+                    if (data.location.country != undefined && data.location.country != 'France') {
                         flag = 1;
                     }
                     if (flag == 0){
-                        $http.post('/places', {
+                        $http.post('/places/createPlace', {
                             name: data.name,
                             facebookId: data.id,
-                            checkins: data.checkins,
-                            cover:data.cover.source,
+                            capacity: data.checkins,
                             description:data.description,
-                            likes:data.likes,
-                            link:data.link,
-                            location:data.location,
-                            phone:data.phone,
-                            website:data.website,
-                            picture:data.picture
+                            webSite:data.website
                         })
                     }
                 }).
                 error(function(data, status, headers, config) {
+                    console.log(data);
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
                 });
         }
-    } createPlaces()
+    }
 
 }]);
