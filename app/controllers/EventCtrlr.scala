@@ -14,7 +14,7 @@ object EventController extends Controller {
   }
 
   def eventsByPlace(placeId: Long) = Action {
-    Ok(Json.toJson(Event.findAllByPlaces(placeId)))
+    Ok(Json.toJson(Event.findAllByPlace(placeId)))
   }
 
   def event(id: Long) = Action {

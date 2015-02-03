@@ -112,7 +112,7 @@ object Event {
   }
 
 
-  def findAllByPlaces(placeId: Long) = {
+  def findAllByPlace(placeId: Long) = {
   DB.withConnection { implicit connection =>
       val eventsResultSet = SQL(
         """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
