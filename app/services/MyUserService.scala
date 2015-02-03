@@ -202,9 +202,14 @@ object USERS {
     case None => None
   }*/
 /*
-  def getOAuth2Info(value: Option[String]): Option[OAuth2Info] = value match {
-      Option.apply(Json.fromJson(Json.parse(o)))
+  def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] =  {
+    oAuth2InfoOptionString match {
+      case Some(value) => Option.apply(Json.fromJson(Json.parse(value)))
+      case None => None
+    }
   }*/
+
+
 /*
   def getPasswordInfo(value: Option[String]): Option[PasswordInfo] = value match {
     case Some(o) => {
