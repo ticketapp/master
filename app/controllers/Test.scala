@@ -91,7 +91,7 @@ object Test extends Controller{
     //val event =
     //println(event)
     Event.save(new Event(-1L, facebookId, true, true, new Date, name, None, None,
-      eventDescription, startTime, endTime, 16, List(), List(), List(), List(), List()))
+      eventDescription, startTime, endTime, 16, List(), List(), List(), List()))
   }
 
 

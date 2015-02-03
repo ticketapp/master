@@ -75,8 +75,8 @@ object Event {
     get[Int]("ageRestriction")  map {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
         ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction  =>
-        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
+        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime,
+          description, startTime, endTime, ageRestriction, List(), List(), List(), List())
     }
   }
 

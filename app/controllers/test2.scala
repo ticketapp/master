@@ -15,7 +15,7 @@ import play.api.mvc.Results._
 import scala.util.{Failure, Success, Try}
 
 object Test2 extends Controller {
-  var token = "CAAJZCFQiqd2cBALTNOP3V4jHT4hgYLKSIdpyBOVL1n97KPlZAJtddkJ5xUcihUoJ9dpGd8a90JHsAvNDO7I78qyfHZB74ZBlMqVUsZCyZCT0N3edh9xj1RErK1ttHJq2ZAgXOZAg2Atq01FFFQ63uA1D2TtuxnynDV6kmpMqeswDhrM2V2JfMzG0mx51cssLUqnpyZCigCOfmNBtYcX6vZC4NaXEWQVv4FiMIZD"
+  var token = "CAAJZCFQiqd2cBAMb4duQetTO168VgGEaF3N06HIueS6b1zE6hdt7FG2z4MwOwxSl9M4Yiy2pGZCMHHXuTQ7VFfjah3AxFJG9KujqoaJrD5PuKcI29BC6YdZBxalX3dw4KlKdmmYmHn7v2Eq8kQ4i8T2kyAMOs3d6o4jhxZCEPtg6hDL3nNJ3FjlDedMxPJKevZBGXAOmqoSE7gV2dVIB0olaNeU9TaiQZD"
 
   def formatEventDescription(eventDescription: String): String = {
     val eventDesc = eventDescription.replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>")
@@ -32,7 +32,7 @@ object Test2 extends Controller {
       "</div>"
   }
 
-  def saveEvent(eventDescription: String, eventResp: Response, placeFacebookId: String) = {
+  def saveEvent(eventDescription: String, eventResp: Response, placeId: Long) = {
     val eventJson = eventResp.json
     //println(eventJson)
 
@@ -53,7 +53,7 @@ object Test2 extends Controller {
     val eventId = Event.save(new Event(-1L, facebookId, true, true, new Date, name, None, None,
       eventDescription, startTime, endTime, 16, List(), List(), List(), List()))
 
-    Event.saveEventPlaceRelation(eventId, placeFacebookId)
+    Event.saveEventPlaceRelation(eventId, placeId)
   }
 
   def returnListOfIdsFromEvents(resp : Response): List[String] = {
@@ -65,10 +65,10 @@ object Test2 extends Controller {
     ids
   }
 
-  def saveEventsOfPlace(placeFacebookId: String) = {
+  def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
     for {
       events <- WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/?access_token=" + token).get
-      //_ = println(events.json)
+      _ = println(events.json)
 
       eventsId = returnListOfIdsFromEvents(events)
       //_ = println(eventsId)
@@ -84,26 +84,17 @@ object Test2 extends Controller {
         val description = Json.stringify(response.json \ "description")
         val name = Json.stringify(response.json \ "name")
         val imgPath = Json.stringify(response.json \ "cover" \ "source")
-        saveEvent(addBannerToEventDescription(description, name, imgPath), response, placeFacebookId)
+        saveEvent(addBannerToEventDescription(description, name, imgPath), response, placeId)
       } )
     }
   }
-  /*
-  probleme ici : placefacebookId au lieu de palceId
-  probleme ici : placefacebookId au lieu de palceId
-  probleme ici : placefacebookId au lieu de palceId
-  probleme ici : placefacebookId au lieu de palceId
-  probleme ici : placefacebookId au lieu de palceId
-  probleme ici : placefacebookId au lieu de palceId
-  probleme ici : placefacebookId au lieu de palceId
-   */
 
   def test2 = Action {
-    Place.findAllFacebookIds match {
+    Place.findAllIdsAndFacebookIds match {
       case Failure(f) => Ok("Il y a eu une erreur :\n" + f + "\n")
-      case Success(listPlaceIdFromDatabase) => {
-        listPlaceIdFromDatabase.flatten.foreach(placeFbId =>
-          saveEventsOfPlace(placeFbId)
+      case Success(listPlacesIdAndFbIdFromDatabase) => {
+        listPlacesIdAndFbIdFromDatabase.foreach( placeIdAndFbId =>
+          saveEventsOfPlace(placeIdAndFbId._1, placeIdAndFbId._2)
         )
         Ok("Okay\n")
       }

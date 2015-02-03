@@ -77,14 +77,35 @@ object Place {
       SQL("SELECT * FROM places").as(PlaceParser *)
     }
   }
+/*
+ private val EventParser: RowParser[Event] = {
+    get[Long]("eventId") ~
+    get[Option[String]]("facebookId") ~
+    get[Boolean]("isPublic") ~
+    get[Boolean]("isActive") ~
+    get[Date]("creationDateTime") ~
+    get[String]("name") ~
+    get[Option[Date]]("startSellingTime") ~
+    get[Option[Date]]("endSellingTime") ~
+    get[String]("description") ~
+    get[Date]("startTime") ~
+    get[Option[Date]]("endTime") ~
+    get[Int]("ageRestriction")  map {
+      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
+        ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction  =>
+        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
+          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
+    }
+ */
 
-
-  def findAllFacebookIds = {
+  def findAllIdsAndFacebookIds = {
     Try(
       DB.withConnection { implicit connection =>
-        SQL("SELECT facebookId from places").as(get[Option[String]]("facebookId") *) //poser la question SO
-        //comment faire pour ne pas avoir les None dans la liste
-        }
+        SQL("SELECT placeId, facebookId from places WHERE facebookId IS NOT NULL")
+          .as((get[Long]("placeId") ~
+            get[String]("facebookId") map {
+              case placeId ~ facebookId => (placeId, facebookId) } ) *)
+            }
     )
   }
 
