@@ -97,13 +97,17 @@ object Event {
   }
 
   def findAll() = {
+    /*
+    change limit by variable
+     */
     DB.withConnection { implicit connection =>
       val eventsResultSet = SQL(
-        """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime, events.name,
-        events.startSellingTime, events.endSellingTime, events.description, events.startTime, events.endTime,
-        events.ageRestriction
+        """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
+            events.name, events.startSellingTime, events.endSellingTime, events.description, events.startTime,
+            events.endTime, events.ageRestriction
         FROM events
-        ORDER BY events.creationDateTime DESC""").as(EventParser *)
+        ORDER BY events.creationDateTime DESC
+        LIMIT 20""").as(EventParser *)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         users = User.findAllByEvent(e).toList,
@@ -155,8 +159,24 @@ object Event {
       case e: Exception => throw new DAOException("Cannot save event: " + e.getMessage)
     }
 
-    //save tariffs
-    (event.tariffs).foreach(tariff =>
+    //save places
+    for (place <- event.places) {
+      val placeIdSaved = Place.save(place)
+      try {
+        DB.withConnection { implicit connection =>
+          SQL( """INSERT INTO eventsPlaces (eventId, placeId)
+            VALUES ({eventId}, {placeId})""").on(
+              'eventId -> eventIdToReturn,
+              'placeId -> placeIdSaved
+            ).executeInsert().get
+        }
+      } catch {
+        case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
+      }
+    }
+
+    //save tariffs remplacer par save(tariff) + enventIdToReturn
+    event.tariffs.foreach( tariff =>
       try {
         DB.withConnection { implicit connection =>
           SQL("""INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)

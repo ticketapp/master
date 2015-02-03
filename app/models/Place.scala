@@ -42,7 +42,7 @@ object Place {
     }
   }
 
-  def savePlace(place: Place): Long = {
+  def save(place: Place): Long = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into artists(name, addressID, facebookId, facebookImage, description, webSite, " +

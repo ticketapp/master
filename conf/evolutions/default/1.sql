@@ -104,7 +104,7 @@ INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime
                     endSellingTime, description, startTime,
                     endTime, ageRestriction)
 VALUES (true, true, '1991-02-22 00:00:00', 'event1', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
-        'descriptionblablablalblagl zae az e', '1991-02-22 00:00:00',
+        'descriptionblasssqdodblassdqdsdblalqsdblagl zae az e', '1991-02-22 00:00:00',
         '1991-02-22 00:00:00', 16);
 INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime,
                     endSellingTime, description, startTime,
@@ -122,9 +122,8 @@ INSERT INTO events (isPublic, isActive, creationDateTime, name, startSellingTime
                     endSellingTime, description, startTime,
                     endTime, ageRestriction)
 VALUES (true, true, '1991-02-22 00:00:00', 'DJDKLS', '1991-02-22 00:00:00', '1991-02-22 00:00:00',
-        'yoo oy yoyoyoyoyooyoyoy zaeqq az e', '1991-02-22 00:00:00',
+        'yoo oy yoyoyoyoyooydoyoy zaeqeq az e', '1991-02-22 00:00:00',
         '1991-02-22 00:00:00', 16);
-
 
 
 CREATE TABLE places (
@@ -137,7 +136,8 @@ CREATE TABLE places (
   webSite                   VARCHAR(255),
   facebookMiniature         VARCHAR(255),
   capacity                  INT,
-  openingHours              VARCHAR(255)
+  openingHours              VARCHAR(255),
+  UNIQUE(facebookId)
 );
 INSERT INTO places (name, addressID) VALUES ('une palceqsdqsdqsdsd ', 1);
 INSERT INTO places (name, addressID) VALUES ('placse2', 2);

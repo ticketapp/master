@@ -1,16 +1,8 @@
-	
-	app.controller ('EventViewCtrl', function ($scope, EventFactory, $routeParams ){
-	var event = EventFactory.getEvent($routeParams.id).then(function(event){
-    $scope.newComment = {};
-	$scope.name = event.nomEvent;
-	$scope.artistes = event.artistes;
-    $scope.event = event;
-    $scope.comments = event.comments
-	}, function(msg){
-	alert (msg) ;
-	});
-    $scope.addComment = function(){
-        $scope.event.comments.push($scope.newComment);       
-        $scope.newComment = {};
-    }
-	});
+app.controller ('EventViewCtrl', function ($scope, EventFactory, $routeParams, $http ){
+    $http.get('/event/' + $routeParams.id)
+        .success(function(data, status){
+            $scope.event = data;
+        }).error(function(data, status){
+            console.log(data);
+        });
+});
