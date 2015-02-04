@@ -8,7 +8,7 @@
             <div class="configuration" data-ng-hide="Config">
                 <h3>Evénement déjà créé sur facebook ?</h3>
                 <h4>GetEventByUrl</h4>
-                <input ng-model="eventFbUrl" placeholder="Event Facebook" ng-change="GetEventByUrl()">
+                <input ng-model="eventFbUrl" placeholder="Event Facebook" ng-change="GetEventById(eventFbUrl)">
                 <h4>SearchEvent</h4>
                 <input ng-model="eventFbName" placeholder="Event Facebook" ng-change="searchEvent()">
                 <div ng-click="GetEventById(SearchEvent.id)" ng-repeat="SearchEvent in searchEvents">{{SearchEvent.name}}</div>

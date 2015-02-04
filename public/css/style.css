@@ -32,7 +32,7 @@
 
         /*pages*/
         .pages_contain{margin-right:auto; margin-left:auto; width:99%;}
-        .wrapper-outer {width: 100%; padding-top:50px; color:black; padding-bottom: 700px;}
+        .wrapper-outer {width: 100%; padding-top:50px; color:black; padding-bottom: 200px;}
         .footer{background-color:black; clear: both; position: relative; z-index: 10; height: 200px; margin-top: -200px;}
         .footer_inner{width:95%; margin:auto;}
 
@@ -57,7 +57,7 @@
         .parallax-content {
             max-width: 100%;
             position: relative;
-            top: 500px;
+            margin-top: 500px;
             padding: 50px;
             font-size: 20px;
             background-color: #fff;

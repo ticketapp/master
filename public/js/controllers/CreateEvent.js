@@ -5,21 +5,10 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     $scope.newEvent.artists = [];
     $scope.newEvent.tarifs = [];
     $scope.eventFb = false;
-    $scope.GetEventByUrl = function(){
-        $http.get('https://graph.facebook.com/v2.2/' + $scope.eventFbUrl + '/?' +  'access_token=CAACEdEose0cBALtZBj9UeqIqhIZAAnst83rxAf6eYHzBGEFRb1dny3lh9ZAoVOcATwZBL5zZC08FKq90MdGP5ZCqmjBIfYydkwSiI7OPC0OwFgqFxxPxgu4RrUCGmSABS5LLQ0gZCMA25bBSXne1Pbsi10p9dFytP7BNayOGuMrVCpLNZB0mOGLUR8nLpn4VrktFmUBbBvH9H7ow3hmxCcslaEIT3c4wqfkZD').
-            success(function(data, status, headers, config) {
-                console.log(data);
-            }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-            });
-    };
     $scope.searchEvent = function(){
-        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAACEdEose0cBALtZBj9UeqIqhIZAAnst83rxAf6eYHzBGEFRb1dny3lh9ZAoVOcATwZBL5zZC08FKq90MdGP5ZCqmjBIfYydkwSiI7OPC0OwFgqFxxPxgu4RrUCGmSABS5LLQ0gZCMA25bBSXne1Pbsi10p9dFytP7BNayOGuMrVCpLNZB0mOGLUR8nLpn4VrktFmUBbBvH9H7ow3hmxCcslaEIT3c4wqfkZD').
+        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAACEdEose0cBANuiPanW8ZBQ3TYx6eQn220vpZAuJNp3hTmPZA7sue4V7t7JCExx9QGmNFJg5jjk2kbrvZBZA6taX9ZA5IAh1oMUtvERJ08ny6s1g2qKEtv25JiBEE5cQ8XXcazlRRmPsmH7pDY2g4ak7omBFKuohfiwGBZAWdFDNnDCDBMvu5RtNAMjd3fAvNJDnDHGbT3OuUWfaP6ZCnZCzkLpxNIQAZCYoZD').
             success(function(data, status, headers, config) {
                 console.log(data.data);
-
                 $scope.searchEvents = data.data;
             }).
             error(function(data, status, headers, config) {
@@ -31,7 +20,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     $scope.GetEventById = function(id){
         var scopeReady = false;
         var cover = false;
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=CAACEdEose0cBALtZBj9UeqIqhIZAAnst83rxAf6eYHzBGEFRb1dny3lh9ZAoVOcATwZBL5zZC08FKq90MdGP5ZCqmjBIfYydkwSiI7OPC0OwFgqFxxPxgu4RrUCGmSABS5LLQ0gZCMA25bBSXne1Pbsi10p9dFytP7BNayOGuMrVCpLNZB0mOGLUR8nLpn4VrktFmUBbBvH9H7ow3hmxCcslaEIT3c4wqfkZD').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
             success(function(data, status, headers, config) {
                 console.log(data);
                 //$scope.newEvent = data;
@@ -65,7 +54,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
             });
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=cover&access_token=CAACEdEose0cBALtZBj9UeqIqhIZAAnst83rxAf6eYHzBGEFRb1dny3lh9ZAoVOcATwZBL5zZC08FKq90MdGP5ZCqmjBIfYydkwSiI7OPC0OwFgqFxxPxgu4RrUCGmSABS5LLQ0gZCMA25bBSXne1Pbsi10p9dFytP7BNayOGuMrVCpLNZB0mOGLUR8nLpn4VrktFmUBbBvH9H7ow3hmxCcslaEIT3c4wqfkZD').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=cover&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
             success(function(data, status, headers, config) {
                 $scope.newEvent.img = data.cover.source;
                 cover = true;
@@ -82,6 +71,50 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
                 console.log($scope.content);
                 document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>' + '<div class="columns large-12">' +  $scope.content + '</div>';
                 $scope.eventFb = true;
+                var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S]\W/g);
+                console.log(searchArtists);
+                $scope.artists = [];
+                $scope.artistesFb = [];
+                for (var i = 0; i<searchArtists.length; i++) {
+                    searchArtist(searchArtists[i]);
+                }
+                function searchArtist (artist) {
+                    $http.get('/artists/'+ artist).
+                        success(function(data, status, headers, config) {
+                            //console.log(data);
+                            $scope.artists.push(data);
+                            console.log($scope.artists)
+                        }).
+                        error(function(data, status, headers, config) {
+                            $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=200&type=page&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
+                                success(function(data, status, headers, config) {
+                                    $scope.data = data.data;
+                                    var flag = 0;
+                                    console.log($scope.data);
+                                    for (var i=0; i < $scope.data.length; i++) {
+                                        if ($scope.data[i].category == 'Musician/band') {
+                                            for (var j=0; j < $scope.artists.length; j++) {
+                                                if($scope.artistes[j].facebookId == $scope.data[i].id) {
+                                                    flag = 1;
+                                                    break;
+                                                }
+                                            }
+                                            if(flag == 0) {
+                                                $scope.artistesFb.push($scope.data[i]);
+                                                console.log($scope.artistesFb);
+                                            } else {
+                                                flag = 0;
+                                            }
+                                        }
+                                    }
+
+                                }).
+                                error(function(data, status, headers, config) {
+                                    // called asynchronously if an error occurs
+                                    // or server returns response with an error status.
+                                });
+                        });
+                }
             } else {
                 insert();
             }
@@ -105,7 +138,6 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
         $scope.newEvent.endDate = $scope.newEvent.endDate.getFullYear() + '-' + $scope.newEvent.endDate.getMonth()+1 + '-' + $scope.newEvent.endDate.getDate();
         $scope.newEvent.startTime = $scope.newEvent.startTime.getFullYear() + '-' + $scope.newEvent.startTime.getMonth()+1 + '-' + $scope.newEvent.startTime.getDate();
         $scope.newEvent.endTime = $scope.newEvent.endTime.getFullYear() + '-' + $scope.newEvent.endTime.getMonth()+1 + '-' + $scope.newEvent.endTime.getDate();
-
         $http.post('/createEvent', {
             name: $scope.newEvent.name,
             startSellingTime: $scope.newEvent.startDate,
