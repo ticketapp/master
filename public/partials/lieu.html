@@ -1,39 +1,32 @@
 <div id="banprofil">
-    <img src="https://scontent-a-fra.xx.fbcdn.net/hphotos-ash3/t1.0-9/580205_10151517016104368_981116153_n.jpg" alt="" >
+    <img src="{{place.images[0].path}}" alt="{{place.name}}" >
 </div>
 <div id="profil_contenu">
     <div id="photo_profil">
-        <img src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash2/t1.0-1/c24.72.600.600/s160x160/480201_10151516943909368_1443976049_n.jpg" alt="">
+        <img src="{{place.images[1].path}}" alt="{{place.name}} logo">
     </div>
     <div class="headerprofil">
-        <div id="name" class="span7">
-            <b data-ng-model="name">{{lieu.name}}</b>
-        </div>
+        <b>{{place.name}}</b>
+        <div class="large-12">{{place.description}}</div>
         <a href="#" class="btn btn-warning btn_event"> + Suivre</a>
         <a href="#" class="btn btn-warning btn_event">Itineraire</a>
-        <a href="http://{{lieu.siteWeb}}" class="row-fluid left">{{lieu.siteWeb}}</a>
+        <a href="{{place.webSite}}" class="row-fluid left">{{place.webSite}}</a>
     </div>
-    <div data-ng-controller="TabsCtrl" class="contentprofil">
-        <tabset>
-            <tab data-heading="Evenements">
-                <div class="tab-pane active">
-                    <div id="events_contener" data-ng-controller="EventsCtrl">
-                        <ul>
-                            <li class="event_min_contener data-ng-event" data-ng-repeat="event in events | filter:{lieux:lieu.name}">
-
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </tab>
-            <tab data-heading="Vidéos">
-                <div class="tab-pane active ng-video">
-                </div>
-            </tab>
-            <tab data-heading="Musique">
-                <div class="tab-pane active ng-musique">
-                </div>
-            </tab>
-        </tabset>
-    </div>
+    <tabset class="contentprofil">
+        <tab data-heading="Evenements">
+            <div class="tab-pane active">
+                <ul id="events_contener" data-ng-controller="EventsCtrl" layout="row" layout-wrap>
+                    <li class="data-ng-event" data-ng-repeat="event in events" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+                </ul>
+            </div>
+        </tab>
+        <tab data-heading="Vidéos">
+            <div class="tab-pane active ng-video">
+            </div>
+        </tab>
+        <tab data-heading="Musique">
+            <div class="tab-pane active ng-musique">
+            </div>
+        </tab>
+    </tabset>
 </div>

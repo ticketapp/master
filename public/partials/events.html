@@ -1,9 +1,7 @@
 <!--<div class=" row-fluid ng-search"></div>-->
-<div class="pages_contain">
-	<div id="events_contener" data-ng-controller="EventsCtrl"><br/>
-		<ul>
-			<li class="event_min_contener data-ng-event" data-ng-repeat="event in events">
-			</li>
-		</ul>
-	</div> 
+<ul id="events_contener" data-ng-controller="EventsCtrl" layout="row" layout-wrap>
+    <li class="data-ng-event" data-ng-repeat="event in events" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+</ul>
+<div layout="row" layout-align="center center">
+    <button class="column large-5">More</button>
 </div>

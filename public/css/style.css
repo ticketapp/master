@@ -32,14 +32,14 @@
 
         /*pages*/
         .pages_contain{margin-right:auto; margin-left:auto; width:99%;}
-        .wrapper-outer {width: 100%; padding-top:50px; color:black; padding-bottom: 12em;}
-        .footer{background-color:black; clear: both; position: relative; z-index: 10; height: 12em; margin-top: -12em;}
+        .wrapper-outer {width: 100%; padding-top:50px; color:black; padding-bottom: 700px;}
+        .footer{background-color:black; clear: both; position: relative; z-index: 10; height: 200px; margin-top: -200px;}
         .footer_inner{width:95%; margin:auto;}
 
         /*wysiwyg*/
         .parallax-background {
             background-color: #0078A0;
-            height: 620px;
+            height: 100%;
             background-repeat: no-repeat;
             -webkit-background-size: cover;
             -moz-background-size: cover;
@@ -53,7 +53,6 @@
             font-size: 50px;
             color: #fff;
             text-align: center;
-            margin-top: 15%;
         }
         .parallax-content {
             max-width: 100%;
@@ -145,7 +144,7 @@ opacity: 0;}
 
          -webkit-animation-name: bounceOutLeft; -moz-animation-name: bounceOutLeft; -ms-animation-name: bounceOutLeft; -o-animation-name: bounceOutLeft;
        }
-       .animate-show.ng-hide-remove, .animate-show.active-add {
+       .animate-show.ng-hide-remove, .animate-show.active-add {position:absolute!important; top:0!important;
                 -webkit-animation-name: bounceInRight; -moz-animation-name: bounceInRight; -ms-animation-name: bounceInRight; -o-animation-name: bounceInRight;
               }
 
@@ -200,9 +199,9 @@ opacity: 0;}
 		
 		/*Events*/
 		#events_contener{margin:0;}
-		#events_contener>ul{margin:0;}
-        #events_contener>ul:hover>li{opacity:0.5;}
-        #events_contener>ul:hover>li:hover{opacity:1;}
+		#events_contener>li{display:block;}
+        #events_contener:hover>li{opacity:0.5;}
+        #events_contener:hover>li:hover{opacity:1;}
 
         #block_info{float: right; margin-top:5px; }
         #block_comment{margin-bottom:10px; margin-left:0;}

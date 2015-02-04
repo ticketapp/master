@@ -1,11 +1,9 @@
-<div class="home">
-    <div ng-controller="CarouselCtrl">
-        <div class="switch-container" ng-switch="elementEnCours.title">
-            <div ng-repeat="info in infos" class="animate-show" ng-show="elementEnCours.title == info.title">
-                <h2 ng-bind-html="info.title"></h2>
-                <div ng-bind-html="info.content"></div>
-            </div>
-        </div>
+<div ng-controller="CarouselCtrl" class="parallax-background ">
+    <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-show="elementEnCours == info">
+        <h2 ng-bind-html="info.title"></h2>
+        <div ng-bind-html="info.content"></div>
     </div>
-    <div class=" data-ng-events"></div>
 </div>
+<div class="parallax-content data-ng-events">
+</div>
+

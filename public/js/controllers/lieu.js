@@ -1,8 +1,7 @@
 	
-	app.controller ('LieuCtrl', function ($scope, LieuFactory, $routeParams ){
-	var lieu = LieuFactory.getLieu($routeParams.id).then(function(lieu){
-    $scope.lieu = lieu
-	}, function(msg){
-	alert (msg) ;
-	})
+	app.controller ('PlaceCtrl', function ($scope, $http, $routeParams ){
+        $http.get('/place/'+ $routeParams.id).
+            success(function (data, status, headers, config){
+                $scope.place = data;
+            })
 	});

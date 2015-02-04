@@ -26,7 +26,7 @@ FAIRE DES UPDATES SI LEVENT EXISTE DEJA
 
  */
 object Scheduler {
-  var token = "CAAJZCFQiqd2cBAI9seuJssvyRZCLmmBbKWECHULYJtcEEAwn4NskB5jRgrbl7i4rlR3IzUtkaeg6rxNHZA43BXPn8hmqffs03SpnwAL2B7iG6euqowJJjfZAOsSdRgY1WTaBr6wmyIiE4fJ7ngZADuxT4Kb7sigifQoQUBNKnPdAn5PDRqYVOagxfcG3PVeOkZBKGZBau7g3XXToNgia3PaPgmsvoJVD9gZD"
+  var token = "CAACEdEose0cBANW7J7Ie7nWZCfk6MatSoGVDlhsia7dGUU3CDj7z40Jkq7mM0SnArvZA5olzuLAHdmm6NAduaKCMWFzoUQAGJiCydWpexgIbcQY8mEdZCIXh868hGUSrnh3PAbL7ViOlrVkGBalLncrMeCjYZAwgiYGKI3Q011WVVuoozB8XCPWFyardBN5f5piFduwRcJen962CyACW9qfUOXUr3R8ZD"
 
   def formatEventDescription(eventDescription: String): String = {
     val eventDesc = eventDescription.replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>")
