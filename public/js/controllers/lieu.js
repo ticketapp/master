@@ -1,6 +1,6 @@
 	
 	app.controller ('PlaceCtrl', function ($scope, $http, $routeParams ){
-        $http.get('/place/'+ $routeParams.id).
+        $http.get('/places/'+ $routeParams.id).
             success(function (data, status, headers, config){
                 $scope.place = data;
             });
