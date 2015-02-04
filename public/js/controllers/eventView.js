@@ -1,5 +1,5 @@
 app.controller ('EventViewCtrl', function ($scope, EventFactory, $routeParams, $http ){
-    $http.get('/event/' + $routeParams.id)
+    $http.get('/events/' + $routeParams.id)
         .success(function(data, status){
             $scope.event = data;
             console.log(data);
