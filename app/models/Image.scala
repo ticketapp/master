@@ -6,6 +6,8 @@ import play.api.db.DB
 import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
 
+import scala.util.Try
+
 case class Image (imageId: Long,
                   path: String,
                   eventId: Option[Long] = None,
@@ -39,6 +41,16 @@ object Image {
     DB.withConnection { implicit connection =>
       SQL("select * from images where eventId = {eventId}")
         .on('eventId -> event.eventId)
+        .as(ImageParser *)
+    }
+  }
+
+  def findAllByPlace(placeId: Long): Seq[Image] = {
+    DB.withConnection { implicit connection =>
+      SQL( """SELECT *
+             FROM Images
+             WHERE placeId = {placeId}""")
+        .on('placeId -> placeId)
         .as(ImageParser *)
     }
   }

@@ -22,7 +22,8 @@ case class Place (placeId: Long,
                   description: Option[String] = None,
                   webSite: Option[String] = None,
                   capacity: Option[Int] = None,
-                  openingHours: Option[String] = None)
+                  openingHours: Option[String] = None,
+                  images: List[Image] = List())
 
 object Place {
   implicit val placeWrites = Json.writes[Place]
@@ -72,9 +73,10 @@ object Place {
     }
   }
 
-  def findAll(): Seq[Place] = {
+  def findAll: Seq[Place] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM places").as(PlaceParser *)
+      SQL("SELECT * FROM places").as(PlaceParser *).map(p => p.copy(
+        images = Image.findAllByPlace(p.placeId).toList) )
     }
   }
 
@@ -89,15 +91,6 @@ object Place {
     )
   }
 
-  def findAllByEvent(event: Event): Seq[Place] = {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM eventsPlaces eP
-             INNER JOIN places s ON s.placeId = eP.placeId where eP.eventId = {eventId}""")
-        .on('eventId -> event.eventId)
-        .as(PlaceParser *)
-    }
-  }
 
   def findAllStartingWith(pattern: String): Seq[Place] = {
     /*
@@ -106,11 +99,10 @@ object Place {
 
 
      */
-    var patternLowCase = pattern.toLowerCase()
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM places WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 5")
-          .on('patternLowCase -> patternLowCase)
+          .on('patternLowCase -> pattern.toLowerCase)
           .as(PlaceParser *)
       }
     } catch {
@@ -123,7 +115,8 @@ object Place {
       SQL("SELECT * from places WHERE placeId = {placeId}")
         .on('placeId -> placeId)
         .as(PlaceParser.singleOpt)
-    }
+    }.map(p => p.copy(
+    images = Image.findAllByPlace(p.placeId).toList) )
   }
 
   def followPlace(userId : Long, placeId : Long): Long = {

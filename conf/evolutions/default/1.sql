@@ -27,9 +27,9 @@ CREATE TABLE infos (
   content                   TEXT
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuse');
-INSERT INTO infos (title, content) VALUES ('infos2', 'une info qui va déchirer');
-INSERT INTO infos (title, content) VALUES ('infos3', 'J - 68 avant la béta :) :)');
-INSERT INTO infos (title, content) VALUES ('infos4', 'fuseerie');
+INSERT INTO infos (title, content) VALUES ('info 2', 'une info qui va déchirer');
+INSERT INTO infos (title, content) VALUES ('info 3', 'J - 68 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('info 4', 'fuserie');
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
