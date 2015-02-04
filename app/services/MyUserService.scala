@@ -226,13 +226,6 @@ object USERS {
       case None => None
     }
   }
-
-/*
-    implicit val oAuth1InfoReads: Reads[OAuth1Info] = (
-      (JsPath \ "token").read[String] and
-        (JsPath \ "secret").read[String]
-      )(OAuth1Info.apply _)
-*/
 }
 
 object TOKENS {
