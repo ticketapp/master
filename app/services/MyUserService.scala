@@ -64,7 +64,6 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
       }
     }
 
-
     try {
       DB.withConnection { implicit connection =>
         SQL(s"""INSERT INTO users_login(${USERS.FIELDS_LESS_ID}) VALUES (
@@ -86,7 +85,7 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
         ).executeUpdate()
       }
     } catch {
-      case e: Exception => throw new DAOException("Cannot create user_login: " + e.getMessage)
+      case e: Exception => println("Cannot create user_login: " + e.getMessage)
     }
     user
   }

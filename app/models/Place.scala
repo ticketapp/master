@@ -69,7 +69,7 @@ object Place {
         ).executeInsert().get
       }
     } catch {
-      case e: Exception => throw new DAOException("Cannot create place : " + e.getMessage)
+      case e: Exception => println("Cannot create place : " + e.getMessage); 0
     }
   }
 

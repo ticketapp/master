@@ -75,7 +75,8 @@ CREATE TABLE users_login (
   authMethod                VARCHAR(255) NOT NULL,
   oAuth1Info                VARCHAR(255),
   oAuth2Info                VARCHAR(255),
-  passwordInfo              VARCHAR(255)
+  passwordInfo              VARCHAR(255),
+  UNIQUE(userId)
 );
 
 CREATE TABLE users_token (

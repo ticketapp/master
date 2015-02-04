@@ -14,13 +14,7 @@ import scala.util.{Failure, Success}
 
 
 
-
 FAIRE DES UPDATES SI LEVENT EXISTE DEJA
-
-
-
-https://www.playframework.com/documentation/2.1.1/ScalaJsonCombinators
-
 
 
 
@@ -75,8 +69,6 @@ object Scheduler {
     }
     ids
   }
-
-
 
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
     for {
