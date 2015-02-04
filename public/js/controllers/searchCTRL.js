@@ -1,4 +1,13 @@
 app.controller('searchCtrl', ['$scope', '$http', '$filter', function($scope, $http, $filter){
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position)
+            {
+                alert("Latitude : " + position.coords.latitude + ", longitude : " + position.coords.longitude);
+            }, function erreurPosition(error) {
+                }
+        );
+    } else {
+    }
     $scope.research = "";
     $scope.artistes = [];
     $scope.search = function(){
@@ -178,7 +187,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$filter', function($scope, $ht
                                         "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
                             }
                         }
-                        $http.post('/places/createPlace', {
+                        $http.post('/places/create', {
                             name: data.name,
                             facebookId: data.id,
                             capacity: data.checkins,

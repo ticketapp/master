@@ -168,7 +168,7 @@
     .maxHeight40{max-height:40em!important;}
     .maxHeight450{max-height:450px!important;}
     .maxHeight45{max-height:45em!important;}
-    .height100p{max-height:100%!important;}
+    .height100p{min-height:100%!important;}
 
     .minHeight50{min-height:50px!important;}
     .minHeight5{min-height:5em!important;}
