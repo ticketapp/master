@@ -17,31 +17,6 @@ object JsonHelper {
   implicit val oAuth1InfoReads = Json.reads[OAuth1Info]
   implicit val oAuth2InfoReads = Json.reads[OAuth2Info]
   implicit val passwordInfoReads = Json.reads[PasswordInfo]
-
-  /*implicit val oAuth1InfoWrites = new Writes[OAuth1Info] {
-    def writes(oAuth1Info: OAuth1Info) = Json.obj(
-      "token" -> JsString(oAuth1Info.token),
-      "secret" -> JsString(oAuth1Info.secret) )
-  }
-  = new Writes[OAuth2Info] {
-    def writes(oAuth2Info: OAuth2Info) = Json.obj(
-      "accessToken" -> JsString(oAuth2Info.accessToken),
-      "tokenType" -> Json.toJson(oAuth2Info.tokenType),
-      "expiresIn" -> Json.toJson(oAuth2Info.expiresIn),
-      "refreshToken" -> Json.toJson(oAuth2Info.refreshToken) )
-  }
-  implicit val passwordInfoWrites = new Writes[PasswordInfo] {
-    def writes(passwordInfo: PasswordInfo) = Json.obj(
-      "hasher" -> JsString(passwordInfo.hasher),
-      "password" -> JsString(passwordInfo.password),
-      "salt" -> Json.toJson(passwordInfo.salt) )
-  }*/
-  /*implicit val oAuth1InfoFormat = (
-    (__ \ "token").format[String] and
-      (__ \ "secret").format[String]
-    )(OAuth1Info.apply, unlift(OAuth1Info.unapply))*/
-
-
   implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
   implicit val account63Writes: Writes[Account63] = Json.writes[Account63]
   implicit val account403Writes: Writes[Account403] = Json.writes[Account403]

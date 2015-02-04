@@ -21,24 +21,24 @@ GET     /admin                     controllers.Admin.indexAdmin
 ################################## Events ###############################################
 GET     /events                    controllers.EventController.events
 GET     /events/:id                controllers.EventController.event(id: Long)
-POST    /createEvent               controllers.EventController.createEvent
-POST    /event/:userId/:eventId    controllers.EventController.followEvent(userId: Long, eventId: Long)
+POST    /events/create             controllers.EventController.createEvent
+POST    /events/:userId/:eventId   controllers.EventController.followEvent(userId: Long, eventId: Long)
 GET     /events/:pattern           controllers.EventController.eventsStartingWith(pattern: String)
 
 ################################## Artists ##############################################
 GET     /artists                    controllers.ArtistController.artists
 GET     /artists/:artistId          controllers.ArtistController.artist(artistId: Long)
-POST    /admin/createArtist         controllers.ArtistController.createArtist
-POST    /artist/:userId/:artistId   controllers.ArtistController.followArtist(userId: Long, artistId: Long)
-DELETE  /artist/:artistId           controllers.ArtistController.deleteArtist(artistId: Long)
+POST    /artists/createArtist       controllers.ArtistController.createArtist
+POST    /artists/:userId/:artistId  controllers.ArtistController.followArtist(userId: Long, artistId: Long)
+DELETE  /artists/:artistId          controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/:pattern           controllers.ArtistController.artistsStartingWith(pattern: String)
 
 ################################## Places ###############################################
 GET     /places                     controllers.PlaceController.places
 GET     /places/:id                 controllers.PlaceController.place(id: Long)
-POST    /place/:userId/:placeId     controllers.PlaceController.followPlace(userId: Long, placeId: Long)
+POST    /places/:userId/:placeId    controllers.PlaceController.followPlace(userId: Long, placeId: Long)
 GET     /places/:pattern            controllers.PlaceController.placesStartingWith(pattern: String)
-POST    /places/createPlace         controllers.PlaceController.createPlace
+POST    /places/create              controllers.PlaceController.createPlace
 GET     /places/:placeId/events     controllers.EventController.eventsByPlace(placeId: Long)
 
 ################################## Infos ################################################

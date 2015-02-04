@@ -195,19 +195,16 @@ object USERS {
         ~ passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
         firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
         None, returnOAuth2Info(oAuth2Info), None)
-      //getOAuth1Info(oAuth1Info), getOAuth2Info(oAuth2Info), getPasswordInfo(passwordInfo))
     }
   }
 
   def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] = {
     oAuth2InfoOptionString match {
-      case Some(value) => {
-        println(Json.parse(value))
-        println(Json.fromJson[OAuth2Info](Json.parse(value)))
-      }//Option.apply(Json.fromJson(Json.parse(value)))
+      case Some(value) => Json.fromJson[OAuth2Info](Json.parse(value)) match {
+        case JsSuccess(oAuth2Info, _) => Some(oAuth2Info)
+      }
       case None => None
     }
-    None
   }
 
 
