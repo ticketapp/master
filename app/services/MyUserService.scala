@@ -17,7 +17,14 @@ import play.api.libs.functional.syntax._
 import json.JsonHelper._
 
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
+/*
 
+
+faire en sorte que ca find si luser est déjà enregistré au save
+
+
+
+ */
   def find(id: IdentityId): Option[Identity] = {
     if ( Logger.isDebugEnabled ) {
       Logger.debug("Find identity by IdentityId: %s".format(id))
