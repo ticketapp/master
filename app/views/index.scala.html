@@ -6,9 +6,9 @@
 	        <h3><a href="#/" class="logo" ng-click="gotoTop()">TicketApp</a></h3>
 	    </li>
         <li class="left" ng-controller="searchCtrl">
-            <md-input-container md-theme="docs-dark">
+            <md-input-container md-theme="docs-dark" class="padding0 height50">
                 <label>Search</label>
-                <input ng-model="research" ng-change="search()">
+                <input ng-model="research" ng-change="search()" class="height20">
             </md-input-container>
             <div class="absolute ng-hide" style="background: #ffffff" ng-show="research.length != 0">
                 <div ng-show="events.length != 0">

@@ -154,7 +154,7 @@ opacity: 0;}
 		#pages-nav h4 {bottom: 40px; font-size: 14px; font-weight: 200; left: -120px; position: absolute; text-transform: uppercase;}
 		#pages-nav ul {display: inline-block; height:50px; width:100%; margin-left:0; overflow:hidden;}
 		#pages-nav li {display: inline-block; height:50px; line-height:50px;}
-		#pages-nav li input {margin:9px;}
+		#pages-nav li input {margin-bottom:5px;}
 		#pages-nav .right{margin-right:10px;}
 		#pages-nav .right.active{background-color:#faa732;}
 		#pages-nav .right.active h3{color:#ffffff;}
