@@ -29,7 +29,7 @@ CREATE TABLE infos (
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuse');
 INSERT INTO infos (title, content) VALUES ('infos2', 'une info qui va déchirer');
 INSERT INTO infos (title, content) VALUES ('infos3', 'J - 68 avant la béta :) :)');
-INSERT INTO infos (title, content) VALUES ('infos3', 'fuseerie');
+INSERT INTO infos (title, content) VALUES ('infos4', 'fuseerie');
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
