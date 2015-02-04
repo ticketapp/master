@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
 
 object PlaceController extends Controller {
   def places = Action {
-    Ok(Json.toJson(Place.findAll()))
+    Ok(Json.toJson(Place.findAll))
   }
 
   def place(id: Long) = Action {

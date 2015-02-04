@@ -194,43 +194,38 @@ object USERS {
         ~ email ~ avatarUrl ~ authMethod ~ oAuth1Info ~ oAuth2Info
         ~ passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
         firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
-        None, returnOAuth2Info(oAuth2Info), None)
+        returnOAuth1Info(oAuth1Info), returnOAuth2Info(oAuth2Info), returnPasswordInfo(passwordInfo))
     }
   }
 
-  def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] = {
-    oAuth2InfoOptionString match {
-      case Some(value) => Json.fromJson[OAuth2Info](Json.parse(value)) match {
-        case JsSuccess(oAuth2Info, _) => Some(oAuth2Info)
+  //ecrire une fonction pour les trois suivantes avec match type trois case et un default error
+  def returnOAuth1Info(oAuth1InfoOptionString: Option[String]): Option[OAuth1Info] = {
+    oAuth1InfoOptionString match {
+      case Some(value) => Json.fromJson[OAuth1Info](Json.parse(value)) match {
+        case JsSuccess(oAuth1Info, _) => Some(oAuth1Info)
+        case JsError(errors) => println("Errors in returnOAuth1Info : " + errors.mkString); None
       }
       case None => None
     }
   }
-
-
-/*
-    implicit val oAuth1InfoReads: Reads[OAuth1Info] = (
-      (JsPath \ "token").read[String] and
-        (JsPath \ "secret").read[String]
-      )(OAuth1Info.apply _)
-*/
-
-
-  /*def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] =  {
+  def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] = {
     oAuth2InfoOptionString match {
-      case Some(value) => Option.apply(Json.fromJson(Json.parse(value)))
+      case Some(value) => Json.fromJson[OAuth2Info](Json.parse(value)) match {
+        case JsSuccess(oAuth2Info, _) => Some(oAuth2Info)
+        case JsError(errors) => println("Errors in returnOAuth2Info : " + errors.mkString); None
+      }
       case None => None
     }
-  }*/
-
-
-/*
-  def getPasswordInfo(value: Option[String]): Option[PasswordInfo] = value match {
-    case Some(o) => {
-      Option.apply(Json.fromJson(Json.parse(o)))
+  }
+  def returnPasswordInfo(passwordInfoString: Option[String]): Option[PasswordInfo] = {
+    passwordInfoString match {
+      case Some(value) => Json.fromJson[PasswordInfo](Json.parse(value)) match {
+        case JsSuccess(passwordInfo, _) => Some(passwordInfo)
+        case JsError(errors) => println("Errors in returnPasswordInfo : " + errors.mkString); None
+      }
+      case None => None
     }
-    case None => None
-  }*/
+  }
 }
 
 object TOKENS {
