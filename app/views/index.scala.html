@@ -1,38 +1,12 @@
 @main(title = "Ticketapp") {
 
-<nav id="pages-nav" data-ng-controller="scrollCtrl" id="top">
+<nav id="pages-nav" id="top">
     <ul nav-menu="active">
-	    <li class="left" id="logo">
+	    <li class="left" id="logo" data-ng-controller="scrollCtrl">
 	        <h3><a href="#/" class="logo" ng-click="gotoTop()">TicketApp</a></h3>
 	    </li>
         <li class="left" ng-controller="searchCtrl">
-            <md-input-container md-theme="docs-dark" class="padding0 height50">
-                <label>Search</label>
-                <input ng-model="research" ng-change="search()" class="height20">
-            </md-input-container>
-            <div class="absolute ng-hide" style="background: #ffffff" ng-show="research.length != 0">
-                <div ng-show="events.length != 0">
-                    <b>Events</b>
-                    <a class="row" ng-click="$parent.research=''" href="#/event/{{event.eventId}}" ng-repeat="event in events | limitTo : 10">{{event.name}}</a>
-                    <hr/>
-                </div>
-                <div ng-show="artistes.length != 0 || artistesFb.length != 0">
-                    <b>Artistes</b>
-                    <a class="row" ng-click="$parent.research=''" href="#/artiste/{{artiste.artistId}}" ng-repeat="artiste in artistes | limitTo : 10">{{artiste.name}}</a>
-                    <a class="row" ng-click="GetArtisteById(artisteSearch.id, artisteSearch.name); $parent.research=''" ng-repeat="artisteSearch in artistesFb | limitTo : 10-artistes.length">{{artisteSearch.name}}</a>
-                    <hr/>
-                </div>
-                <div ng-show="places.length != 0">
-                    <b>Places</b>
-                    <a class="row" ng-click="$parent.research=''" href="#/lieu/{{place.placeId}}" ng-repeat="place in places | limitTo : 10">{{place.name}}</a>
-                    <hr/>
-                </div>
-                <div ng-show="users.length != 0">
-                    <b>Users</b>
-                    <a class="row" ng-click="$parent.research=''" href="#/user/{{user.userId}}" ng-repeat="user in users | limitTo : 10">{{user.nickname}}</a>
-                    <hr/>
-                </div>
-            </div>
+            <input id="searchTopBar" ng-model="$root.research" class="ng-hide">
         </li>
         <li ng-controller="searchCtrl" class="left margin0">
             <button ng-click="createPlaces()" class="padding0 height50">CreatePlaces</button>

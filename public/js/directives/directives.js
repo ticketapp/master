@@ -13,22 +13,25 @@ app.directive('ngEvents', function(){
 app.directive('ngSearch', function(){
     return{
         restrict : 'C',
-        templateUrl:'assets/partials/_searchEvent.html',
+        templateUrl:'assets/partials/_search.html',
+        controller:'searchCtrl',
         link : function(scope, element){
-            var positionElementInPage
+            var positionElementInPage;
             var flag = false;
             $(window).scroll(function() {
                 if (!flag){
-                positionElementInPage = $(element).offset().top;
+                positionElementInPage = $(element).find('#searchBar').offset().top;
                 flag = true;
                 }
                 if ($(window).scrollTop()>= positionElementInPage) {
                     // fixed
-                    $(element).addClass("floatable");
+                    $(element).find('#searchBar').addClass("ng-hide");
+                    $(document).find('#searchTopBar').removeClass("ng-hide");
 
                 } else {
                     // relative
-                    $(element).removeClass("floatable");
+                    $(element).find('#searchBar').removeClass("ng-hide");
+                    $(document).find('#searchTopBar').addClass("ng-hide");
                     flag = false;
                 }
             });

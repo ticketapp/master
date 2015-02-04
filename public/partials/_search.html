@@ -1,0 +1,57 @@
+<div id="searchBar">
+    <input ng-model="$root.research">
+    <input type="checkbox" ng-model="selAll">All {{selAll}}
+    <input type="checkbox" ng-model="selEvent">Ev
+    <input type="checkbox" ng-model="selArtist">Art
+    <input type="checkbox" ng-model="selPlace">Pl
+    <input type="checkbox" ng-model="selUsr">Usr
+</div>
+<div>
+    <ul id="events_contener" layout="row" layout-wrap>
+        <li ng-if="selEvent" class="data-ng-event" data-ng-repeat="event in events | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+        <li ng-if="selArtist" class="data-ng-event" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <img src="{{ artiste.images[0].path }}" alt="une belle image" class="min"/>
+                </div>
+                <div class=" text_evnt_min" >
+                    <a href="#/artiste/{{artiste.eventId}}"><h4>{{ artiste.name }}</h4></a>
+                </div>
+            </div>
+        </li>
+        <li ng-if="selArtist" data-ng-repeat="artisteFb in artistesFb | limitTo : limit - artistes.length - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <img src="{{ artisteFb.cover.source }}" alt="une belle image" class="min"/>
+                </div>
+                <div class=" text_evnt_min" >
+                    <a ng-click="GetArtisteById(artiste.id, artiste.name)"><h4>{{ artisteFb.name }}</h4></a>
+                </div>
+            </div>
+        </li>
+        <li ng-if="selPlace" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <img src="{{ place.images[0].path }}" alt="une belle image" class="min"/>
+                </div>
+                <div class=" text_evnt_min" >
+                    <a href="#/lieu/{{place.placeId}}"><h4>{{ place.name }}</h4></a>
+                </div>
+            </div>
+        </li>
+        <li ng-if="selUsr" class="data-ng-event" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <img src="{{ user.images[0].path }}" alt="une belle image" class="min"/>
+                </div>
+                <div class=" text_evnt_min" >
+                    <a href="#/user/{{user.userId}}"><h4>{{user.nickname}}</h4></a>
+                </div>
+            </div>
+        </li>
+    </ul>
+    <div ng-if="events.length + artistes.length + artistesFb.length + places.length + users.length > limit" layout="row" layout-align="center center">
+        <button ng-click="moreLimit()" class="column large-5">More</button>
+    </div>
+</div>
+

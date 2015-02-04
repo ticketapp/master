@@ -6,7 +6,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     $scope.newEvent.tarifs = [];
     $scope.eventFb = false;
     $scope.searchEvent = function(){
-        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAACEdEose0cBANuiPanW8ZBQ3TYx6eQn220vpZAuJNp3hTmPZA7sue4V7t7JCExx9QGmNFJg5jjk2kbrvZBZA6taX9ZA5IAh1oMUtvERJ08ny6s1g2qKEtv25JiBEE5cQ8XXcazlRRmPsmH7pDY2g4ak7omBFKuohfiwGBZAWdFDNnDCDBMvu5RtNAMjd3fAvNJDnDHGbT3OuUWfaP6ZCnZCzkLpxNIQAZCYoZD').
+        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAAUY6TFIL18BAGjacxgHOsfwWkZBKBVW3nD7BULQgV53qScUZAQWSkGqu4DLmFhBwnHNBLSTXKuZAPprqKEqigGR4w5CZA3jgP36qf0ZAgOJAn9KufsiNZAZAzQewEm1WZA717ue3H4arO4zZBoKfZCQla4KIxqqWhLDif5WxZABdBDrRZCZClICkqhTPWFobmERLuaZCFiPEJKJaokQCSTRVOfsSEQ9NDoWPJWT8ZD').
             success(function(data, status, headers, config) {
                 console.log(data.data);
                 $scope.searchEvents = data.data;
@@ -79,7 +79,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
                     searchArtist(searchArtists[i]);
                 }
                 function searchArtist (artist) {
-                    $http.get('/artists/'+ artist).
+                    $http.get('/artists/startWith/'+ artist).
                         success(function(data, status, headers, config) {
                             //console.log(data);
                             $scope.artists.push(data);

@@ -32,7 +32,7 @@
 
         /*pages*/
         .pages_contain{margin-right:auto; margin-left:auto; width:99%;}
-        .wrapper-outer {width: 100%; padding-top:50px; color:black; padding-bottom: 200px;}
+        .wrapper-outer {width: 100%; color:black; padding-bottom: 200px;}
         .footer{background-color:black; clear: both; position: relative; z-index: 10; height: 200px; margin-top: -200px;}
         .footer_inner{width:95%; margin:auto;}
 
@@ -149,8 +149,8 @@ opacity: 0;}
               }
 
 		/*Menu*/
-		#pages-nav .logo{max-height: 90%; margin: 2px 2px 0 2px;}
-		#pages-nav {font-size: 14px; height: 50px; position: fixed; text-align: center; width: 100%; z-index: 300; background-color:rgba(1, 1, 1, 0.84);}
+		#pages-nav .logo{max-height: 90%; margin: 2px 2px 0 2px; color: black}
+		#pages-nav {font-size: 14px; height: 50px; position: fixed; text-align: center; width: 100%; z-index: 300; background-color:rgba(1, 1, 1, 0.1);}
 		#pages-nav h4 {bottom: 40px; font-size: 14px; font-weight: 200; left: -120px; position: absolute; text-transform: uppercase;}
 		#pages-nav ul {display: inline-block; height:50px; width:100%; margin-left:0; overflow:hidden;}
 		#pages-nav li {display: inline-block; height:50px; line-height:50px;}
@@ -242,8 +242,8 @@ opacity: 0;}
 		#search{margin-bottom:0; line-height:45px; margin-left:0;}
 		#search_ville{line-height:45px; float:left; margin:0;}
 		#search_ville>input{margin:0;}
-		.ng-search{background-color: rgba(42, 105, 162, 0.15); border-bottom: solid 1px rgba(42, 105, 162, 0.08); margin:0;}
-		.ng-search>h4{color:black; line-height: 45px; float:left; margin:0 10px;}
+		/*.ng-search{background-color: rgba(42, 105, 162, 0.15); border-bottom: solid 1px rgba(42, 105, 162, 0.08); margin:0;}
+		.ng-search>h4{color:black; line-height: 45px; float:left; margin:0 10px;}*/
 
 
         /* MARKETING CONTENT -------------------------------------------------- */

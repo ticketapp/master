@@ -1,12 +1,12 @@
 app.factory ('EventFactory', function ($http, $q){
     var factory = {
         events : false,
-    getEvents : function(){
+    getEvents : function(research){
     var deferred = $q.defer();
     if(factory.events == true){
     deferred.resolve(factory.events);
     } else {
-    $http.get('/events')
+    $http.get('/events/startWith/'+ research)
         .success(function(data, status){
             factory.events = data;
             deferred.resolve(factory.events);
