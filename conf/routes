@@ -39,6 +39,7 @@ GET     /place/:id                  controllers.PlaceController.place(id: Long)
 POST    /place/:userId/:placeId     controllers.PlaceController.followPlace(userId: Long, placeId: Long)
 GET     /places/:pattern            controllers.PlaceController.placesStartingWith(pattern: String)
 POST    /places/createPlace         controllers.PlaceController.createPlace
+GET     /places/:placeId/events     controllers.EventController.eventsByPlace(placeId: Long)
 
 ################################## Infos ################################################
 GET    /infos                       controllers.Application.infos

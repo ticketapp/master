@@ -1,13 +1,13 @@
-<div id="banprofil">
+<div class="parallax-background">
     <img src="{{place.images[0].path}}" alt="{{place.name}}" >
 </div>
-<div id="profil_contenu">
+<div class="parallax-content">
     <div id="photo_profil">
         <img src="{{place.images[1].path}}" alt="{{place.name}} logo">
     </div>
     <div class="headerprofil">
         <b>{{place.name}}</b>
-        <div class="large-12">{{place.description}}</div>
+        <div class="large-12" data-ng-bind-html="place.description"></div>
         <a href="#" class="btn btn-warning btn_event"> + Suivre</a>
         <a href="#" class="btn btn-warning btn_event">Itineraire</a>
         <a href="{{place.webSite}}" class="row-fluid left">{{place.webSite}}</a>
@@ -15,7 +15,7 @@
     <tabset class="contentprofil">
         <tab data-heading="Evenements">
             <div class="tab-pane active">
-                <ul id="events_contener" data-ng-controller="EventsCtrl" layout="row" layout-wrap>
+                <ul id="events_contener" layout="row" layout-wrap>
                     <li class="data-ng-event" data-ng-repeat="event in events" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
                 </ul>
             </div>

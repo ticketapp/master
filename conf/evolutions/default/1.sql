@@ -36,6 +36,7 @@ CREATE TABLE artists (
   creationDateTime          TIMESTAMP DEFAULT  current_timestamp NOT NULL,
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
+  description               TEXT,
   UNIQUE(name),
   UNIQUE(facebookId)
 );
@@ -114,13 +115,17 @@ CREATE TABLE places (
   UNIQUE(facebookId)
 );
 INSERT into places(name, facebookId) values ('withFbId', '117030545096697');
-INSERT into places(name) values ('eedzur');
+INSERT into places(name) values ('eekdgdzur');
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
   path                      VARCHAR(255) NOT NULL,
+  category                  VARCHAR(31),
   eventId                   BIGINT references events(eventId),
   userId                    BIGINT references users(userId),
+  placeId                   BIGINT references places(placeId),
+  artistId                  BIGINT references artists(artistId),
+  infoId                    BIGINT references infos(infoId),
   UNIQUE(path)
 );
 ---INSERT INTO images (path, alt, eventId, userId) VALUES ('1.jpg', 'alt', 1, 1);

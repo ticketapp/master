@@ -19,14 +19,14 @@ FAIRE DES UPDATES SI LEVENT EXISTE DEJA
 
 
 
-
+https://www.playframework.com/documentation/2.1.1/ScalaJsonCombinators
 
 
 
 
  */
 object Scheduler {
-  var token = "CAACEdEose0cBANW7J7Ie7nWZCfk6MatSoGVDlhsia7dGUU3CDj7z40Jkq7mM0SnArvZA5olzuLAHdmm6NAduaKCMWFzoUQAGJiCydWpexgIbcQY8mEdZCIXh868hGUSrnh3PAbL7ViOlrVkGBalLncrMeCjYZAwgiYGKI3Q011WVVuoozB8XCPWFyardBN5f5piFduwRcJen962CyACW9qfUOXUr3R8ZD"
+  var token = "CAAJZCFQiqd2cBAGJZAoQWuOORCk5TRJVOPh60blX2XxAtN75Kd2ZB0n2cQWtZAiHiwOFnf4j5FZBwIDwthMmji4ZB1pU8Hhd3KwfKn7Y4ZBO5monYDDiKVmR3NJTxJtiERS17Ukva8qN0C1Q4raWPriFiAfMYtcutxFVAvnScbQo9VwZAWHIETGUMF5GpQrCRj1XSibcVvqkzk783F6LVG2XYDVV7rVbxIcZD"
 
   def formatEventDescription(eventDescription: String): String = {
     val eventDesc = eventDescription.replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>")

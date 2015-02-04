@@ -23,7 +23,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   }
 
   val artistBindingForm = Form(mapping(
-    "facebookId" -> longNumber(),
+    "facebookId" -> optional(nonEmptyText(2)),
     "artistName" -> nonEmptyText(2)
   )(Artist.formApply)(Artist.formUnapply)
   )

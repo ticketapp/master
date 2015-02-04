@@ -10,7 +10,11 @@ import json.JsonHelper._
 
 object EventController extends Controller {
   def events = Action {
-    Ok(Json.toJson(Event.findAll()))
+    Ok(Json.toJson(Event.findAll))
+  }
+
+  def eventsByPlace(placeId: Long) = Action {
+    Ok(Json.toJson(Event.findAllByPlace(placeId)))
   }
 
   def event(id: Long) = Action {
@@ -67,4 +71,6 @@ object EventController extends Controller {
     Event.followEvent(userId, eventId)
     Redirect(routes.Admin.indexAdmin())
   }
+
+
 }
