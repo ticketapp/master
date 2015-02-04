@@ -142,7 +142,9 @@ object Event {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase())
-          .as(EventParser *)
+          .as(EventParser *).map(e => e.copy(
+          images = Image.findAllByEvent(e).toList,
+          artists = Artist.findAllByEvent(e).toList) )
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Event.findAllStartingWith: " + e.getMessage)
