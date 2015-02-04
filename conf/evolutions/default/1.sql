@@ -28,7 +28,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuse');
 INSERT INTO infos (title, content) VALUES ('infos2', 'une info qui va déchirer');
-INSERT INTO infos (title, content) VALUES ('infos3', 'J - 69 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('infos3', 'J - 68 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('infos3', 'fuseerie');
 
 CREATE TABLE artists (
@@ -115,7 +115,7 @@ CREATE TABLE places (
   UNIQUE(facebookId)
 );
 INSERT into places(name, facebookId) values ('withFbId', '117030545096697');
-INSERT into places(name) values ('eekdgdzur');
+INSERT into places(name) values ('eekedgdzur');
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
@@ -397,8 +397,8 @@ DROP TABLE IF EXISTS account708;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS bills;
 DROP TABLE IF EXISTS comments;
-DROP TABLE IF EXISTS infos;
 DROP TABLE IF EXISTS images;
+DROP TABLE IF EXISTS infos;
 DROP TABLE IF EXISTS places;
 DROP TABLE IF EXISTS amountDue;
 DROP TABLE IF EXISTS events;
