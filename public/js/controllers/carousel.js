@@ -5,7 +5,7 @@ app.controller("CarouselCtrl",function($scope, $timeout, $http){
        updateInfo();
    }).error(function (data, status, headers, config) {
    });
-   var i = 0 ;
+   var i = -1 ;
    var done = false;
    function updateInfo(){
        if (!done) {
