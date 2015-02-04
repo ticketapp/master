@@ -26,7 +26,7 @@ https://www.playframework.com/documentation/2.1.1/ScalaJsonCombinators
 
  */
 object Scheduler {
-  var token = "CAAJZCFQiqd2cBAGJZAoQWuOORCk5TRJVOPh60blX2XxAtN75Kd2ZB0n2cQWtZAiHiwOFnf4j5FZBwIDwthMmji4ZB1pU8Hhd3KwfKn7Y4ZBO5monYDDiKVmR3NJTxJtiERS17Ukva8qN0C1Q4raWPriFiAfMYtcutxFVAvnScbQo9VwZAWHIETGUMF5GpQrCRj1XSibcVvqkzk783F6LVG2XYDVV7rVbxIcZD"
+  val token = play.Play.application.configuration.getString("facebook.token")
 
   def formatEventDescription(eventDescription: String): String = {
     val eventDesc = eventDescription.replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>")
@@ -75,6 +75,8 @@ object Scheduler {
     }
     ids
   }
+
+
 
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
     for {
