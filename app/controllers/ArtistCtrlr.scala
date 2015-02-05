@@ -28,7 +28,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   )(Artist.formApply)(Artist.formUnapply)
   )
 
-  def createArtist = SecuredAction(ajaxCall = true) { implicit request =>
+  def createArtist = Action { implicit request =>
     try {
       artistBindingForm.bindFromRequest().fold(
         formWithErrors => BadRequest(formWithErrors.errorsAsJson),

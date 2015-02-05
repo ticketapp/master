@@ -1,20 +1,23 @@
 # --- !Ups
 CREATE TABLE addresses (
-  addressID                 SERIAL PRIMARY KEY,
-  city                      VARCHAR(127) NOT NULL,
-  CP                        VARCHAR(15) NOT NULL,
-  address                   VARCHAR(255) NOT NULL,
-  geographicPoint           point
+  addressId                 SERIAL PRIMARY KEY,
+  isEvent                   BOOLEAN NOT NULL,
+  isPlace                   BOOLEAN NOT NULL,
+  geographicPoint           point,
+  city                      VARCHAR(127),
+  CP                        VARCHAR(15),
+  address                   VARCHAR(255)
 );
-
+CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.7681787, 4.8157134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.46841787, 4.887134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (FALSE, TRUE, '(45.53787, 4.8127134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(41.4681787, 4.9157134)');
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
   totalPrice                INT NOT NULL
 );
-INSERT INTO orders (totalPrice) VALUES (80);
-INSERT INTO orders (totalPrice) VALUES (80);
-
 
 CREATE TABLE comments (
   commentId                 SERIAL PRIMARY KEY,
@@ -28,7 +31,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuse');
 INSERT INTO infos (title, content) VALUES ('info 2', 'une info qui va déchirer');
-INSERT INTO infos (title, content) VALUES ('info 3', 'J - 68 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('info 3', 'J - 67 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('info 4', 'fuserie');
 
 CREATE TABLE artists (
@@ -350,6 +353,13 @@ CREATE TABLE eventsOrganizers (
     PRIMARY KEY (eventId, organizerId)
 );
 
+CREATE TABLE eventsAddresses (
+    eventId INT REFERENCES events (eventId),
+    addressId INT REFERENCES addresses(addressId),
+    PRIMARY KEY (eventId, addressId)
+);
+---INSERT INTO eventsAddresses VALUES(1, 1);
+
 CREATE TABLE usersOrganizers (
     userId INT REFERENCES users (userId),
     organizerId INT REFERENCES organizers(organizerId),
@@ -372,6 +382,7 @@ CREATE TABLE usersArtists (
 # --- !Downs
 DROP TABLE IF EXISTS eventsPlaces;
 DROP TABLE IF EXISTS eventsOrganizers;
+DROP TABLE IF EXISTS eventsAddresses;
 DROP TABLE IF EXISTS usersOrganizers;
 DROP TABLE IF EXISTS eventsArtists;
 DROP TABLE IF EXISTS usersArtists;

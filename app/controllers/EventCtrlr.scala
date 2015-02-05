@@ -8,7 +8,7 @@ import models.{Image, Tariff, Event}
 import json.JsonHelper._
 
 
-object EventController extends Controller {
+object EventController extends Controller with securesocial.core.SecureSocial {
   def events = Action {
     Ok(Json.toJson(Event.findAll))
   }
@@ -67,10 +67,12 @@ object EventController extends Controller {
     )
   }
 
-  def followEvent(userId : Long, eventId : Long) = Action {
+  def followEvent(userId : Long, eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
     Event.followEvent(userId, eventId)
     Redirect(routes.Admin.indexAdmin())
   }
 
-
+  def findEventsInCircle(peripheral: String) = Action {
+    Ok(Json.toJson(Event.findAllInCircle(peripheral)))
+  }
 }

@@ -78,7 +78,7 @@ object Scheduler {
         WS.url("https://graph.facebook.com/v2.2/" + eventId +
           "?fields=cover,description,name,start_time,end_time,owner" + "&access_token=" + token
         ).get) )
-    } yield  {
+    } yield {
       listOfEvents.map(response => {
         val description = Json.stringify(response.json \ "description")
         val name = Json.stringify(response.json \ "name")
