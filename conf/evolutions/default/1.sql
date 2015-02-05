@@ -9,7 +9,7 @@ CREATE TABLE addresses (
   address                   VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.7681787, 4.8157134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.768177, 4.8157134)');
 INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.46841787, 4.887134)');
 INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (FALSE, TRUE, '(45.53787, 4.8127134)');
 INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(41.4681787, 4.9157134)');
