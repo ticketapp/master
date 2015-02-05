@@ -56,6 +56,37 @@ object Scheduler {
 
     //ecrire une méthode test si existe générale dans un service ??
     //et update levent
+
+
+    /*
+
+    plus changer links non http
+
+    formate events @
+
+    enregistrements des artistes avec verif facebook cote serveur
+
+    sur la page creation event : est il connecté avec fb
+
+      prix dans le formatage + relations avec tarif
+
+       acheter un ticket : {
+        envoyer prix dans events
+        enregistrer tarifs a lenregistement de levent
+        + vérifier actions compta
+
+       }
+       aritstes :  recherche full text
+       events connecté ou pas : lesquels envoyer
+
+       lolo :
+
+
+       les events st pas recherchables avec lap token pour que les gens soit poussé à se connecter
+       donc on pourra pas : seule solution que je vois : avoir toutes les places et ts les festis ca devrait le faire
+       non?
+
+     */
     Event.save(new Event(-1L, facebookId, true, true, new Date, name, None, None,
       eventDescription, startTime, endTime, 16, List(), List(), List(), List()) ) match {
       case 0 =>
