@@ -17,13 +17,13 @@ object Scheduler {
       .replaceAll("""\\n""", " <br/>").replaceAll("""\\t""", "    ")
 
     val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
-    linkPattern.replaceAllIn(eventDesc, m => "<a href='" + m.group(0) + "'>" + m.group(0) + "</a>")
+    linkPattern.replaceAllIn(eventDesc, m => "<a href='http://" + m.group(3) + "'>" + m.group(3) + "</a>")
   }
 
   def addBannerToEventDescription(eventDescription: String, eventName: String, imgPath: String): String = {
     "<img class='width100p' src=" + imgPath  +
       "/><div class='columns large-12'><h2>" + eventName.replaceAll("\"", "") +
-      "</h2></div><div class='columns large-12'>" +  formatEventDescription(eventDescription.substring(1).dropRight(1)) +
+      "</h2></div><div class='columns large-12'>" + formatEventDescription(eventDescription.substring(1).dropRight(1)) +
       "</div>"
   }
 
@@ -32,16 +32,22 @@ object Scheduler {
 
     val name = Json.stringify(eventJson \ "name").replaceAll("\"", "")
     val facebookId = Some(Json.stringify(eventJson \ "id").replaceAll("\"", ""))
-    val startTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm")
-      .parse(Json.stringify(eventJson \ "start_time").replaceAll("\"", "")
-      .replace("T", " ").replace(""":\d\d+\d\d\d""", ""))
-    var endTime: Option[Date] = None
 
-    (eventJson \ "end_time").as[Option[String]] match {
-      case Some(a) => endTime = Some(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm")
-        .parse(Json.stringify(eventJson \ "end_time").replaceAll("\"", "")
-        .replace("T", " ").replace(""":\d\d+\d\d\d""", "")))
-      case _ =>
+    val startTimeString = Json.stringify(eventJson \ "start_time").replaceAll("\"", "").replace("T", " ")
+    val startTime = startTimeString.length match {
+      case i if i <= 10 => new java.text.SimpleDateFormat("yyyy-MM-dd").parse(startTimeString)
+      case i if i <= 13 => new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(startTimeString)
+      case _ => new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(startTimeString)
+    }
+
+    val endTimeString = (eventJson \ "end_time").as[Option[String]]
+    val endTime = endTimeString match {
+      case Some(a) => a.length match {
+        case i if i <= 10 => Some(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(startTimeString))
+        case i if i <= 13 => Some(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(startTimeString))
+        case _ => Some(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(startTimeString))
+      }
+      case _ => None
     }
 
     val event: Event = new Event(-1L, facebookId, true, true, new Date, name, None, None,

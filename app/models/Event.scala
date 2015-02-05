@@ -163,7 +163,7 @@ object Event {
   def save(event: Event): Long = {
     var eventIdToReturn: Long = 0
     Utilities.testIfExist("facebookId", event.facebookId) match {
-      case true => println("Event already in database")
+      case true => //println("Event already in database")
       case false => try { DB.withConnection { implicit connection =>
         eventIdToReturn = SQL( """ INSERT INTO
             events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
@@ -181,7 +181,11 @@ object Event {
             'startTime -> event.startTime,
             'endTime -> event.endTime,
             'ageRestriction -> event.ageRestriction
-          ).executeInsert().get
+          ).executeInsert() match {
+            case None => 0
+            case Some(i: Long) => i
+            case _ => throw new DAOException("Cannot save event: (Event.save method) ")
+          }
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
@@ -215,6 +219,7 @@ object Event {
             startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
             {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}
    */
+
   def update(event: Event): Unit = {
     DB.withConnection { implicit connection =>
       SQL("""UPDATE events

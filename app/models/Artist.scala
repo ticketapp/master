@@ -2,11 +2,17 @@ package models
 
 import anorm.SqlParser._
 import anorm._
-import controllers.DAOException
+import controllers._
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 import java.util.Date
+import play.api.libs.ws.Response
+import scala.concurrent.Future
+import play.api.libs.json._
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.ws.WS
+import scala.util.{Failure, Success}
 
 
 /**
@@ -20,6 +26,8 @@ case class Artist (artistId: Long,
 
 
 object Artist {
+  val token = play.Play.application.configuration.getString("facebook.token")
+
   implicit val artistWrites = Json.writes[Artist]
 
   private val ArtistParser: RowParser[Artist] = {
@@ -59,12 +67,7 @@ object Artist {
 
 
   def findAllStartingWith(pattern: String): Seq[Artist] = {
-    /*
 
-    Security with the string? Need to escape it?
-
-
-     */
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM artists WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
@@ -80,6 +83,15 @@ object Artist {
   def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
 
   def saveArtist(artist: Artist): Long = {
+    WS.url("https://graph.facebook.com/v2.2/" + artist.facebookId + token).get onComplete {
+      case Success(artist) => val category = Json.stringify(artist.json \ "category")
+        val categoryList = Json.stringify(artist.json \ "category_list")
+        println(category)
+        println(categoryList)
+
+      case Failure(f) => throw new WebServiceException("Cannot make the facebook call: " + f.getMessage)
+    }
+
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
