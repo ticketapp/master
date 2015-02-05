@@ -1,4 +1,4 @@
-app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', function($rootScope, $http, $scope, EventFactory){
+app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', function($rootScope, $http, $scope, $location){
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position)
             {
@@ -8,10 +8,43 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
         );
     } else {
     }
-    for (var i =0; i< $scope.length; i++) {
-        console.log($scope)
+    function location() {
+        console.log($location.path());
+        if ($location.path() == '/' || $location.path() == '/search') {
+            $rootScope.home = true;
+            $rootScope.pathArt = false;
+            $rootScope.pathEvent = false;
+            $rootScope.pathUsr = false;
+        } else if ($location.path().indexOf('/artiste') > -1){
+            $rootScope.pathArt = true;
+            $rootScope.home = false;
+            $rootScope.pathEvent = false;
+            $rootScope.pathUsr = false;
+        } else if ($location.path().indexOf('/event') > -1){
+            rootScope.pathEvent = true;
+            $rootScope.pathArt = false;
+            $rootScope.home = false;
+            $rootScope.pathUsr = false;
+        } else if ($location.path().indexOf('/user') > -1){
+            $rootScope.pathUsr = true;
+            $rootScope.pathArt = false;
+            $rootScope.pathEvent = false;
+            $rootScope.home = false;
+        }
     }
-    $scope.research = "";
+    location();
+    $scope.$on('$locationChangeSuccess', function(){
+        location()
+    });
+    var _research = '';
+    $scope.research = function(newName) {
+        if (angular.isDefined(newName)) {
+            _research = newName;
+            console.log("Setting research var, launch search method");
+            search();
+        }
+        return _research;
+    };
     $rootScope.limit = 12;
     $rootScope.moreLimit = function () {
         $rootScope.limit = $rootScope.limit + 12;
@@ -36,10 +69,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
             // called asynchronously if an error occurs
             // or server returns response with an error status.
         });
-    $rootScope.$watch('research', function(newVal, oldVal){
-        console.log(newVal + "/event/" + oldVal);
-        search()
-    });
     $rootScope.$watch('selAll', function(newVal, oldVal){
         console.log(newVal + "//" + oldVal);
         console.log($rootScope.selArtist);
@@ -48,49 +77,52 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
             $rootScope.selArtist = true;
             $rootScope.selPlace = true;
             $rootScope.selUsr = true;
-        } else {
-            $rootScope.selEvent = true;
-            $rootScope.selArtist = false;
-            $rootScope.selPlace = false;
-            $rootScope.selUsr = false;
         }
         search()
     });
     $rootScope.$watch('selEvent', function(newVal, oldVal){
         if (newVal == false) {
             $rootScope.selAll = false;
-        } else if ($rootScope.artiste == true && $rootScope.selUsr == true && $rootScope.selPlace == true) {
-            $rootScope.selAll = true;
+        } else if($rootScope.selAll == false) {
+            $rootScope.selArtist = false;
+            $rootScope.selUsr = false;
+            $rootScope.selPlace = false;
         }
         search()
     });
     $rootScope.$watch('selArtist', function(newVal, oldVal){
         if (newVal == false) {
             $rootScope.selAll = false;
-        } else if ($rootScope.selUsr == true && $rootScope.selEvent == true && $rootScope.selPlace == true) {
-            $rootScope.selAll = true;
+        } else if($rootScope.selAll == false) {
+            $rootScope.selEvent = false;
+            $rootScope.selUsr = false;
+            $rootScope.selPlace = false;
         }
         search()
     });
     $rootScope.$watch('selPlace', function(newVal, oldVal){
         if (newVal == false) {
             $rootScope.selAll = false;
-        } else if ($rootScope.artiste == true && $rootScope.selUsr == true && $rootScope.selEvent == true) {
-            $rootScope.selAll = true;
+        } else if($rootScope.selAll == false) {
+            $rootScope.selEvent = false;
+            $rootScope.selUsr = false;
+            $rootScope.selArtist = false;
         }
         search()
     });
     $rootScope.$watch('selUsr', function(newVal, oldVal){
         if (newVal == false) {
             $rootScope.selAll = false;
-        } else if ($rootScope.artiste == true && $rootScope.selEvent == true && $rootScope.selPlace == true) {
-            $rootScope.selAll = true;
+        } else if($rootScope.selAll == false) {
+            $rootScope.selEvent = false;
+            $rootScope.selPlace = false;
+            $rootScope.selArtist = false;
         }
         search()
     });
 
     function search (){
-        if ($rootScope.research.length == 0) {
+        if (_research.length == 0) {
             $rootScope.events = $rootScope.eventsBase;
             $rootScope.artistes = [];
             $rootScope.artistesFb = [];
@@ -99,7 +131,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
         } else {
             if ($rootScope.selArtist == true) {
                 console.log("artist")
-                $http.get('/artists/startWith/'+$rootScope.research).
+                $http.get('/artists/startWith/'+_research).
                     success(function(data, status, headers, config) {
                         //console.log(data);
                         $rootScope.artistes = data;
@@ -110,7 +142,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
                     });
                 if ($rootScope.artistes.length < $rootScope.limit) {
                     console.log("artistFb")
-                    $http.get('https://graph.facebook.com/v2.2/search?q='+ $rootScope.research + '&limit=200&type=page&fields=name,cover,id,category&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+                    $http.get('https://graph.facebook.com/v2.2/search?q='+ _research + '&limit=200&type=page&fields=name,cover,id,category,likes&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
                         success(function(data, status, headers, config) {
                             $rootScope.artistesFb = [];
                             //$rootScope.artistesFb = data.data;
@@ -125,11 +157,15 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
                                         }
                                     }
                                     if(flag == 0) {
-
-                                        //$rootScope.GetArtisteById($rootScope.data[i]);
-                                        $rootScope.artistesFb.push($rootScope.data[i]);
-                                        console.log($rootScope.data[i]);
-                                        if ($rootScope.artistesFb.length == $rootScope.limit) {
+                                        var newArtist =[];
+                                        newArtist.artistId = $rootScope.data[i].id;
+                                        newArtist.name =$rootScope.data[i].name;
+                                        newArtist.likes =$rootScope.data[i].likes;
+                                        newArtist.images =[];
+                                        newArtist.images.push({path: $rootScope.data[i].cover.source});
+                                        $rootScope.artistesFb.push(newArtist);
+                                        console.log($rootScope.artistesFb);
+                                        if ($rootScope.artistesFb.length == $rootScope.limit + 12 || $rootScope.artistes.length == $rootScope.limit + 24) {
                                             console.log($rootScope.artistesFb)
                                             break;
                                         }
@@ -147,7 +183,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
                 }
             }
             if ($rootScope.selPlace == true) {
-                $http.get('/places/startWith/'+$rootScope.research).
+                $http.get('/places/startWith/'+_research).
                     success(function(data, status, headers, config) {
                         //console.log(data);
                         $rootScope.places = data;
@@ -158,7 +194,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
                     });
             }
             if ($rootScope.selUsr == true) {
-                $http.get('/users/startWith/'+$rootScope.research).
+                $http.get('/users/startWith/'+_research).
                     success(function(data, status, headers, config) {
                         //console.log(data);
                         $rootScope.users = data;
@@ -169,7 +205,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
                     });
             }
             if ($rootScope.selEvent == true) {
-                $http.get('/events/startWith/' + $rootScope.research).
+                $http.get('/events/startWith/' + _research).
                     success(function (data, status, headers, config) {
                         //console.log(data);
                         $rootScope.events = data;
@@ -194,7 +230,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', 'EventFactory', f
     };
 
     function createArtiste () {
-        $http.post('/admin/createArtist', {artistName : $rootScope.artiste.name, facebookId: $rootScope.artiste.id}).
+        $http.post('artists/createArtist', {artistName : $rootScope.artiste.name, facebookId: $rootScope.artiste.id}).
             success(function(data, status, headers, config) {
                 window.location.href =('#/artiste/' + data);
                 console.log(data)

@@ -9,5 +9,7 @@ app.config(function($routeProvider){
     .when('/user/:id',{templateUrl:'assets/partials/user.html', controller : 'UsersCtrl'})
     .when('/lieu/:id',{templateUrl:'assets/partials/lieu.html', controller : 'PlaceCtrl'})
     .when('/createEvent',{templateUrl:'assets/partials/createEvent.html', controller : 'EventsCtrl'})
+    .when('/search',{templateUrl:'assets/partials/search.html'})
+        .otherwise('/')
 });
 

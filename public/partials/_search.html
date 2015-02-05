@@ -1,6 +1,6 @@
-<div id="searchBar">
-    <input ng-model="$root.research">
-    <input type="checkbox" ng-model="selAll">All {{selAll}}
+<div id="searchBlock">
+    <input id="searchBar" ng-model="$root.research" ng-click="goSearch()" ng-model-options="{ getterSetter: true }">
+    <input type="checkbox" ng-model="selAll">All
     <input type="checkbox" ng-model="selEvent">Ev
     <input type="checkbox" ng-model="selArtist">Art
     <input type="checkbox" ng-model="selPlace">Pl
@@ -8,28 +8,28 @@
 </div>
 <div>
     <ul id="events_contener" layout="row" layout-wrap>
-        <li ng-if="selEvent" class="data-ng-event" data-ng-repeat="event in events | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
-        <li ng-if="selArtist" class="data-ng-event" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li ng-if="selEvent" class="min_contener data-ng-event" data-ng-repeat="event in events | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+        <li ng-if="selArtist" class="min_contener" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ artiste.images[0].path }}" alt="une belle image" class="min"/>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a href="#/artiste/{{artiste.eventId}}"><h4>{{ artiste.name }}</h4></a>
+                    <a href="#/artiste/{{artiste.artistId}}"><h4>{{ artiste.name }}</h4></a>
                 </div>
             </div>
         </li>
-        <li ng-if="selArtist" data-ng-repeat="artisteFb in artistesFb | limitTo : limit - artistes.length - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li class="min_contener" ng-if="selArtist" data-ng-repeat="artisteFb in artistesFb | orderBy:likes:reverse = true | limitTo : limit - artistes.length - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
-                    <img src="{{ artisteFb.cover.source }}" alt="une belle image" class="min"/>
+                    <img src="{{ artisteFb.images[0].path }}" alt="une belle image" class="min"/>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a ng-click="GetArtisteById(artiste.id, artiste.name)"><h4>{{ artisteFb.name }}</h4></a>
+                    <a ng-click="GetArtisteById(artisteFb.artistId)"><h4>{{ artisteFb.name }} / {{artisteFb.likes}}</h4></a>
                 </div>
             </div>
         </li>
-        <li ng-if="selPlace" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li class="min_contener" ng-if="selPlace" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ place.images[0].path }}" alt="une belle image" class="min"/>
@@ -39,7 +39,7 @@
                 </div>
             </div>
         </li>
-        <li ng-if="selUsr" class="data-ng-event" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li class="min_contener" ng-if="selUsr" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ user.images[0].path }}" alt="une belle image" class="min"/>

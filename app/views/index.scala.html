@@ -5,8 +5,15 @@
 	    <li class="left" id="logo" data-ng-controller="scrollCtrl">
 	        <h3><a href="#/" class="logo" ng-click="gotoTop()">TicketApp</a></h3>
 	    </li>
-        <li class="left" ng-controller="searchCtrl">
-            <input id="searchTopBar" ng-model="$root.research" class="ng-hide">
+        <li ng-controller="searchCtrl" class="left">
+            <div ng-if="home">
+                <input class="ng-hide" id="searchTopBar" ng-model="$root.research" ng-model-options="{ getterSetter: true }" >
+                <!--<input type="checkbox" ng-model="selAll">All
+                <input type="checkbox" ng-model="selEvent">Ev
+                <input type="checkbox" ng-model="selArtist">Art
+                <input type="checkbox" ng-model="selPlace">Pl
+                <input type="checkbox" ng-model="selUsr">Usr-->
+            </div>
         </li>
         <li ng-controller="searchCtrl" class="left margin0">
             <button ng-click="createPlaces()" class="padding0 height50">CreatePlaces</button>

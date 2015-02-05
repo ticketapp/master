@@ -18,24 +18,31 @@ app.directive('ngSearch', function(){
         link : function(scope, element){
             var positionElementInPage;
             var flag = false;
+            if ($(element).find('#searchBar').offset().top < 50) {
+                // fixed
+                $(element).find('#searchBlock').addClass("ng-hide");
+                $(element).find('#events_contener').addClass("marginTop50 paddingTop10");
+                $(document).find('#searchTopBar').removeClass("ng-hide").focus();
+
+            }
             $(window).scroll(function() {
                 if (!flag){
                 positionElementInPage = $(element).find('#searchBar').offset().top;
                 flag = true;
                 }
-                if ($(window).scrollTop()>= positionElementInPage) {
+                if ($(window).scrollTop()>= positionElementInPage - 60) {
                     // fixed
-                    $(element).find('#searchBar').addClass("ng-hide");
-                    $(document).find('#searchTopBar').removeClass("ng-hide");
+                    $(element).find('#searchBlock').addClass("ng-hide");
+                    $(document).find('#searchTopBar').removeClass("ng-hide").focus();
+                    $(element).find('#events_contener').addClass("marginTop50 paddingTop10");
 
                 } else {
                     // relative
-                    $(element).find('#searchBar').removeClass("ng-hide");
+                    $(element).find('#searchBlock').removeClass("ng-hide");
                     $(document).find('#searchTopBar').addClass("ng-hide");
                     flag = false;
                 }
             });
-
         }
     }
 });
