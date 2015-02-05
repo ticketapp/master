@@ -54,11 +54,16 @@ object Scheduler {
       case _ =>
     }
 
-    val eventId = Event.save(new Event(-1L, facebookId, true, true, new Date, name, None, None,
-      eventDescription, startTime, endTime, 16, List(), List(), List(), List()))
-
-    Event.saveEventPlaceRelation(eventId, placeId)
-    Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
+    //ecrire une méthode test si existe générale dans un service ??
+    //et update levent
+    Event.save(new Event(-1L, facebookId, true, true, new Date, name, None, None,
+      eventDescription, startTime, endTime, 16, List(), List(), List(), List()) ) match {
+      case 0 =>
+      case eventId => {
+        Event.saveEventPlaceRelation(eventId, placeId)
+        Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
+      }
+    }
   }
 
   def returnListOfIdsFromEvents(resp : Response): List[String] = {
@@ -71,20 +76,21 @@ object Scheduler {
   }
 
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
-    for {
-      events <- WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/?access_token=" + token).get
-
-      listOfEvents <- Future.sequence(returnListOfIdsFromEvents(events).map( eventId =>
+    WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/?access_token=" +
+      token).get onComplete {
+      case Success(events) => returnListOfIdsFromEvents(events).map( eventId =>
         WS.url("https://graph.facebook.com/v2.2/" + eventId +
-          "?fields=cover,description,name,start_time,end_time,owner" + "&access_token=" + token
-        ).get) )
-    } yield  {
-      listOfEvents.map(response => {
-        val description = Json.stringify(response.json \ "description")
-        val name = Json.stringify(response.json \ "name")
-        val imgPath = Json.stringify(response.json \ "cover" \ "source")
-        saveEvent(addBannerToEventDescription(description, name, imgPath), response, placeId, imgPath)
-      } )
+          "?fields=cover,description,name,start_time,end_time,owner" + "&access_token=" + token)
+          .get onComplete {
+          case Success(eventDetailed) =>  val description = Json.stringify(eventDetailed.json \ "description")
+            val name = Json.stringify(eventDetailed.json \ "name")
+            val imgPath = Json.stringify(eventDetailed.json \ "cover" \ "source")
+            saveEvent(addBannerToEventDescription(description, name, imgPath), eventDetailed, placeId, imgPath)
+
+          case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
+        } )
+
+      case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
     }
   }
 

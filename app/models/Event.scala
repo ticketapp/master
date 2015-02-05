@@ -52,29 +52,29 @@ object Event {
 
     val images = List()
     new Event(-1L, None, true, true, new Date, name, startSellingTime, endSellingTime, description, startTime,
-              endTime, ageRestriction, images, List(), List(), tariffs.toList)//newTariffs.toList)
+      endTime, ageRestriction, images, List(), List(), tariffs.toList) //newTariffs.toList)
   }
 
   def formUnapply(event: Event): Option[(String, Option[Date], Option[Date], String, Date, Option[Date], Int, Seq[Tariff])] = {
     Some((event.name, event.startSellingTime, event.endSellingTime, event.description, event.startTime,
-          event.endTime, event.ageRestriction, event.tariffs.toSeq))
+      event.endTime, event.ageRestriction, event.tariffs.toSeq))
   }
 
   private val EventParser: RowParser[Event] = {
     get[Long]("eventId") ~
-    get[Option[String]]("facebookId") ~
-    get[Boolean]("isPublic") ~
-    get[Boolean]("isActive") ~
-    get[Date]("creationDateTime") ~
-    get[String]("name") ~
-    get[Option[Date]]("startSellingTime") ~
-    get[Option[Date]]("endSellingTime") ~
-    get[String]("description") ~
-    get[Date]("startTime") ~
-    get[Option[Date]]("endTime") ~
-    get[Int]("ageRestriction")  map {
+      get[Option[String]]("facebookId") ~
+      get[Boolean]("isPublic") ~
+      get[Boolean]("isActive") ~
+      get[Date]("creationDateTime") ~
+      get[String]("name") ~
+      get[Option[Date]]("startSellingTime") ~
+      get[Option[Date]]("endSellingTime") ~
+      get[String]("description") ~
+      get[Date]("startTime") ~
+      get[Option[Date]]("endTime") ~
+      get[Int]("ageRestriction") map {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
-        ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction  =>
+        ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction =>
         Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime,
           description, startTime, endTime, ageRestriction, List(), List(), List(), List())
     }
@@ -107,13 +107,13 @@ object Event {
         LIMIT 20""").as(EventParser *)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
-        artists = Artist.findAllByEvent(e).toList) )
+        artists = Artist.findAllByEvent(e).toList))
     }
   }
 
 
   def findAllByPlace(placeId: Long) = {
-  DB.withConnection { implicit connection =>
+    DB.withConnection { implicit connection =>
       val eventsResultSet = SQL(
         """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
             s.name, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
@@ -122,27 +122,31 @@ object Event {
         INNER JOIN events s ON s.eventId = eP.eventId
         WHERE eP.placeId = {placeId}
         ORDER BY s.creationDateTime DESC
-        LIMIT 20""" )
+        LIMIT 20""")
         .on('placeId -> placeId)
         .as(EventParser *)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
-        artists = Artist.findAllByEvent(e).toList) )
+        artists = Artist.findAllByEvent(e).toList))
     }
   }
 
   def findAllStartingWith(pattern: String): Seq[Event] = {
     /*
-
     Security with the string? Need to escape it?
+    case insensitive :
+    To create an index on the expression lower(title), allowing efficient case-insensitive searches:
 
-
+    CREATE INDEX ON films ((lower(title)));
+    http://www.postgresql.org/docs/9.1/static/sql-createindex.html
      */
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase())
-          .as(EventParser *)
+          .as(EventParser *).map(e => e.copy(
+          images = Image.findAllByEvent(e).toList,
+          artists = Artist.findAllByEvent(e).toList))
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Event.findAllStartingWith: " + e.getMessage)
@@ -151,33 +155,46 @@ object Event {
 
   def save(event: Event): Long = {
     var eventIdToReturn: Long = 0
+    /*try {
+      eventIdToReturn = DB.withConnection { implicit connection =>
+        SQL( """SELECT exists(PERFORM 1 from events where {facebookId} = 12 LIMIT 1)"""
+    }*/
     try {
       eventIdToReturn = DB.withConnection { implicit connection =>
-        SQL("""insert into events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-          startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
-          {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction})""").on(
-          'facebookId -> event.facebookId,
-          'isPublic -> event.isPublic,
-          'isActive -> event.isActive,
-          'creationDateTime -> event.creationDateTime,
-          'name -> event.name,
-          'startSellingTime -> event.startSellingTime,
-          'endSellingTime -> event.endSellingTime,
-          'description -> event.description,
-          'startTime -> event.startTime,
-          'endTime -> event.endTime,
-          'ageRestriction -> event.ageRestriction
-        ).executeInsert().get
+        SQL("""SELECT exists(SELECT 1 FROM events where facebookId={facebookId} LIMIT 1)""")
+          .on(
+            'facebookId -> event.facebookId )
+          .execute() match {
+            case true => println("Event already in database"); eventIdToReturn
+            case false => SQL(""" INSERT INTO
+              events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
+              startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
+              {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}) """ )
+              .on(
+                'facebookId -> event.facebookId,
+                'isPublic -> event.isPublic,
+                'isActive -> event.isActive,
+                'creationDateTime -> event.creationDateTime,
+                'name -> event.name,
+                'startSellingTime -> event.startSellingTime,
+                'endSellingTime -> event.endSellingTime,
+                'description -> event.description,
+                'startTime -> event.startTime,
+                'endTime -> event.endTime,
+                'ageRestriction -> event.ageRestriction
+              ).executeInsert().get
+          }
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save event: " + e.getMessage)
     }
-
+      eventIdToReturn
     //save tariffs remplacer par save(tariff) + eventIdToReturn
-    event.tariffs.foreach( tariff =>
+      /*
+    event.tariffs.foreach(tariff =>
       try {
         DB.withConnection { implicit connection =>
-          SQL("""INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)
+          SQL( """INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)
             VALUES ({denomination}, {nbTicketToSell}, {price}, {startTime}, {endTime}, {eventId})""").on(
               'denomination -> tariff.denomination,
               'nbTicketToSell -> tariff.nbTicketToSell,
@@ -190,8 +207,7 @@ object Event {
       } catch {
         case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
       }
-    )
-    eventIdToReturn
+    )*/
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Long = {
@@ -208,7 +224,7 @@ object Event {
     }
   }
 
-  def followEvent(userId : Long, eventId : Long): Long = {
+  def followEvent(userId: Long, eventId: Long): Long = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into eventsFollowed(userId, eventId) values ({userId}, {eventId})").on(
@@ -220,4 +236,24 @@ object Event {
       case e: Exception => throw new DAOException("Cannot follow event: " + e.getMessage)
     }
   }
+
+  def findAllInCircle(peripheral: String) = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("""SELECT *
+          FROM events e
+          JOIN eventsAddresses eA on e.eventId = eA.eventId
+          JOIN addresses a ON a.addressId = eA.eventId
+          WHERE a.isEvent = TRUE
+          ORDER BY a.geographicPoint <-> point {point} LIMIT 10"""").on(
+          'point -> "'(45.768350899999994, 4.8155775)'"
+        ).as(EventParser *).map(e => e.copy(
+            images = Image.findAllByEvent(e).toList,
+            artists = Artist.findAllByEvent(e).toList) )
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method Event.findAllInCircle: " + e.getMessage)
+    }
+  }
 }
+
