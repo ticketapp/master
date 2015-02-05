@@ -2,26 +2,25 @@
 
 <nav id="pages-nav" id="top">
     <ul nav-menu="active">
-	    <li class="left" id="logo" data-ng-controller="scrollCtrl">
+	    <li class="left column large-1 margin0 padding0" id="logo" data-ng-controller="scrollCtrl">
 	        <h3><a href="#/" class="logo" ng-click="gotoTop()">TicketApp</a></h3>
 	    </li>
-        <li ng-controller="searchCtrl" class="left">
-            <div ng-if="home">
-                <input class="ng-hide" id="searchTopBar" ng-model="$root.research" ng-model-options="{ getterSetter: true }" >
-                <!--<input type="checkbox" ng-model="selAll">All
-                <input type="checkbox" ng-model="selEvent">Ev
-                <input type="checkbox" ng-model="selArtist">Art
-                <input type="checkbox" ng-model="selPlace">Pl
-                <input type="checkbox" ng-model="selUsr">Usr-->
+        <li class="left column large-9 margin0 padding0">
+            <div ng-if="$root.home" id="searchTopBlock" class="column large-12">
+                <input id="searchTopBar" ng-model="$root.research" ng-model-options="{ getterSetter: true }" >
+                <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox" ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)" ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">Events</label>
+                <label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox" ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)" ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">Artists</label>
+                <label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox" ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)" ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">Places</label>
+                <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox" ng-click="$root.activUsr = !$root.activUsr; $root.selPlace($root.activUsr)" ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">Users</label>
             </div>
         </li>
-        <li ng-controller="searchCtrl" class="left margin0">
+        <li ng-controller="searchCtrl" class="left margin0 column large-1 margin0 padding0">
             <button ng-click="createPlaces()" class="padding0 height50">CreatePlaces</button>
         </li>
     <!--<li class="right">
         <div data-ng-controller="connectCtrl" class="btn btn-warning signIn" ng-click="open()">Sign In</div>
     </li>-->
-    <li class="right">
+    <li class="right column large-1 margin0 padding0">
         <img data-ng-controller="toolsCtrl" src="assets/img/user1.png" class="connect" ng-click="open()"/>
         </li>
     </ul>

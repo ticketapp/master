@@ -8,34 +8,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         );
     } else {
     }
-    function location() {
-        console.log($location.path());
-        if ($location.path() == '/' || $location.path() == '/search') {
-            $rootScope.home = true;
-            $rootScope.pathArt = false;
-            $rootScope.pathEvent = false;
-            $rootScope.pathUsr = false;
-        } else if ($location.path().indexOf('/artiste') > -1){
-            $rootScope.pathArt = true;
-            $rootScope.home = false;
-            $rootScope.pathEvent = false;
-            $rootScope.pathUsr = false;
-        } else if ($location.path().indexOf('/event') > -1){
-            rootScope.pathEvent = true;
-            $rootScope.pathArt = false;
-            $rootScope.home = false;
-            $rootScope.pathUsr = false;
-        } else if ($location.path().indexOf('/user') > -1){
-            $rootScope.pathUsr = true;
-            $rootScope.pathArt = false;
-            $rootScope.pathEvent = false;
-            $rootScope.home = false;
-        }
-    }
-    location();
-    $scope.$on('$locationChangeSuccess', function(){
-        location()
-    });
     var _research = '';
     $scope.research = function(newName) {
         if (angular.isDefined(newName)) {
@@ -45,15 +17,51 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         }
         return _research;
     };
+    var _selArtist = false;
+    $scope.selArtist = function(newName) {
+        if (angular.isDefined(newName)) {
+            _selArtist = newName;
+            console.log("Setting research var, launch search method");
+            console.log(_selArtist)
+            search();
+        }
+        return _selArtist;
+    };
+    var _selEvent = true;
+    $scope.selEvent = function(newName) {
+        if (angular.isDefined(newName)) {
+            _selEvent = newName;
+            console.log("Setting research var, launch search method");
+            search();
+        }
+        return _selEvent;
+    };
+    var _selPlace = false;
+    $scope.selPlace = function(newName) {
+        if (angular.isDefined(newName)) {
+            _selPlace = newName;
+            console.log("Setting research var, launch search method");
+            search();
+        }
+        return _selPlace;
+    };
+    var _selUsr = false;
+    $scope.selUsr = function(newName) {
+        if (angular.isDefined(newName)) {
+            _selUsr = newName;
+            console.log("Setting research var, launch search method");
+            search();
+        }
+        return _selUsr;
+    };
+    $rootScope.activArtist = _selArtist;
+    $rootScope.activEvent = _selEvent;
+    $rootScope.activPlace = _selPlace;
+    $rootScope.activUsr = _selUsr;
     $rootScope.limit = 12;
     $rootScope.moreLimit = function () {
         $rootScope.limit = $rootScope.limit + 12;
     };
-    $rootScope.selAll = true;
-    $rootScope.selEvent = true;
-    $rootScope.selArtist = true;
-    $rootScope.selPlace = true;
-    $rootScope.selUsr = true;
     $rootScope.artistes = [];
     $rootScope.artistesFb = [];
     $rootScope.users = [];
@@ -69,59 +77,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
             // called asynchronously if an error occurs
             // or server returns response with an error status.
         });
-    $rootScope.$watch('selAll', function(newVal, oldVal){
-        console.log(newVal + "//" + oldVal);
-        console.log($rootScope.selArtist);
-        if (newVal == true) {
-            $rootScope.selEvent = true;
-            $rootScope.selArtist = true;
-            $rootScope.selPlace = true;
-            $rootScope.selUsr = true;
-        }
-        search()
-    });
-    $rootScope.$watch('selEvent', function(newVal, oldVal){
-        if (newVal == false) {
-            $rootScope.selAll = false;
-        } else if($rootScope.selAll == false) {
-            $rootScope.selArtist = false;
-            $rootScope.selUsr = false;
-            $rootScope.selPlace = false;
-        }
-        search()
-    });
-    $rootScope.$watch('selArtist', function(newVal, oldVal){
-        if (newVal == false) {
-            $rootScope.selAll = false;
-        } else if($rootScope.selAll == false) {
-            $rootScope.selEvent = false;
-            $rootScope.selUsr = false;
-            $rootScope.selPlace = false;
-        }
-        search()
-    });
-    $rootScope.$watch('selPlace', function(newVal, oldVal){
-        if (newVal == false) {
-            $rootScope.selAll = false;
-        } else if($rootScope.selAll == false) {
-            $rootScope.selEvent = false;
-            $rootScope.selUsr = false;
-            $rootScope.selArtist = false;
-        }
-        search()
-    });
-    $rootScope.$watch('selUsr', function(newVal, oldVal){
-        if (newVal == false) {
-            $rootScope.selAll = false;
-        } else if($rootScope.selAll == false) {
-            $rootScope.selEvent = false;
-            $rootScope.selPlace = false;
-            $rootScope.selArtist = false;
-        }
-        search()
-    });
-
     function search (){
+        $rootScope.activArtist = _selArtist;
+        $rootScope.activEvent = _selEvent;
+        $rootScope.activPlace = _selPlace;
+        $rootScope.activUsr = _selUsr;
         if (_research.length == 0) {
             $rootScope.events = $rootScope.eventsBase;
             $rootScope.artistes = [];
@@ -129,7 +89,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
             $rootScope.users = [];
             $rootScope.places = [];
         } else {
-            if ($rootScope.selArtist == true) {
+            if (_selArtist == true) {
                 console.log("artist")
                 $http.get('/artists/startWith/'+_research).
                     success(function(data, status, headers, config) {
@@ -182,7 +142,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
                         });
                 }
             }
-            if ($rootScope.selPlace == true) {
+            if (_selPlace == true) {
                 $http.get('/places/startWith/'+_research).
                     success(function(data, status, headers, config) {
                         //console.log(data);
@@ -193,7 +153,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
                         // or server returns response with an error status.
                     });
             }
-            if ($rootScope.selUsr == true) {
+            if (_selUsr == true) {
                 $http.get('/users/startWith/'+_research).
                     success(function(data, status, headers, config) {
                         //console.log(data);
@@ -204,7 +164,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
                         // or server returns response with an error status.
                     });
             }
-            if ($rootScope.selEvent == true) {
+            if (_selEvent == true) {
                 $http.get('/events/startWith/' + _research).
                     success(function (data, status, headers, config) {
                         //console.log(data);
