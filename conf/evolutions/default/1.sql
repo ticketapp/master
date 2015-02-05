@@ -9,8 +9,8 @@ CREATE TABLE addresses (
   address                   VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.7681717, 4.8157134)');
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.46841787, 4.887134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.17681717, 4.8157134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.461841787, 4.887134)');
 INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (FALSE, TRUE, '(45.53787, 4.8127134)');
 INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(41.4681787, 4.9157134)');
 
@@ -113,7 +113,7 @@ CREATE TABLE places (
   facebookId                VARCHAR(63),
   description               TEXT,
   webSite                   VARCHAR(255),
-  facebookMiniature         VARCHAR(255),
+  facebookMiniature         text,
   capacity                  INT,
   openingHours              VARCHAR(255),
   UNIQUE(facebookId)
