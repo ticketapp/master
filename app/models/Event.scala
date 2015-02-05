@@ -155,29 +155,42 @@ object Event {
 
   def save(event: Event): Long = {
     var eventIdToReturn: Long = 0
+    /*try {
+      eventIdToReturn = DB.withConnection { implicit connection =>
+        SQL( """SELECT exists(PERFORM 1 from events where {facebookId} = 12 LIMIT 1)"""
+    }*/
     try {
       eventIdToReturn = DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-          startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
-          {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction})""").on(
-            'facebookId -> event.facebookId,
-            'isPublic -> event.isPublic,
-            'isActive -> event.isActive,
-            'creationDateTime -> event.creationDateTime,
-            'name -> event.name,
-            'startSellingTime -> event.startSellingTime,
-            'endSellingTime -> event.endSellingTime,
-            'description -> event.description,
-            'startTime -> event.startTime,
-            'endTime -> event.endTime,
-            'ageRestriction -> event.ageRestriction
-          ).executeInsert().get
+        SQL("""SELECT exists(SELECT 1 FROM events where facebookId={facebookId} LIMIT 1)""")
+          .on(
+            'facebookId -> event.facebookId )
+          .execute() match {
+            case true => println("Event already in database"); eventIdToReturn
+            case false => SQL(""" INSERT INTO
+              events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
+              startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
+              {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}) """ )
+              .on(
+                'facebookId -> event.facebookId,
+                'isPublic -> event.isPublic,
+                'isActive -> event.isActive,
+                'creationDateTime -> event.creationDateTime,
+                'name -> event.name,
+                'startSellingTime -> event.startSellingTime,
+                'endSellingTime -> event.endSellingTime,
+                'description -> event.description,
+                'startTime -> event.startTime,
+                'endTime -> event.endTime,
+                'ageRestriction -> event.ageRestriction
+              ).executeInsert().get
+          }
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save event: " + e.getMessage)
     }
-
+      eventIdToReturn
     //save tariffs remplacer par save(tariff) + eventIdToReturn
+      /*
     event.tariffs.foreach(tariff =>
       try {
         DB.withConnection { implicit connection =>
@@ -194,8 +207,7 @@ object Event {
       } catch {
         case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
       }
-    )
-    eventIdToReturn
+    )*/
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Long = {

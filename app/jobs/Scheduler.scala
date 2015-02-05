@@ -54,11 +54,16 @@ object Scheduler {
       case _ =>
     }
 
-    val eventId = Event.save(new Event(-1L, facebookId, true, true, new Date, name, None, None,
-      eventDescription, startTime, endTime, 16, List(), List(), List(), List()))
-
-    Event.saveEventPlaceRelation(eventId, placeId)
-    Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
+    //ecrire une méthode test si existe générale dans un service ??
+    //et update levent
+    Event.save(new Event(-1L, facebookId, true, true, new Date, name, None, None,
+      eventDescription, startTime, endTime, 16, List(), List(), List(), List()) ) match {
+      case 0 =>
+      case eventId => {
+        Event.saveEventPlaceRelation(eventId, placeId)
+        Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
+      }
+    }
   }
 
   def returnListOfIdsFromEvents(resp : Response): List[String] = {
@@ -69,15 +74,7 @@ object Scheduler {
     }
     ids
   }
-/*
 
- val eventFuture = WS.url("https://graph.facebook.com/v2.2/ez.dubstep.night&access_token=" + token).get
-    eventFuture onComplete {
-      case Success(posts) => println(posts)
-      case Failure(t) => println("An error has occured: " + t.getMessage)
-    }
-    println("avant ??")
- */
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/?access_token=" +
       token).get onComplete {
@@ -92,6 +89,7 @@ object Scheduler {
 
           case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
         } )
+
       case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
     }
   }
