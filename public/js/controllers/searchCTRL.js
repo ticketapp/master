@@ -118,21 +118,21 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
             if (_selArtist == true) {
                 $scope.artistes = $filter('filter')($scope.artistes, {name :  _research});
                 var scopeIdList = [];
-                $scope.artistes.forEach(getArtistId);
                 function getArtistId(el, index, array) {
                     scopeIdList.push(el.artistId);
                 }
+                $scope.artistes.forEach(getArtistId);
                 $http.get('/artists/containing/'+_research).
                     success(function(data, status, headers, config) {
                         if ($scope.artistes.length == 0) {
                             $scope.artistes = data;
                         }
-                        data.forEach(uploadArtistes);
                         function uploadArtistes(el, index, array) {
                             if (scopeIdList.indexOf(el.artistId) == -1) {
                                 $scope.artistes.push(el);
                             }
                         }
+                        data.forEach(uploadArtistes);
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -141,21 +141,20 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                 if ($scope.artistes.length < $scope.limit) {
                     $scope.artistesFb = $filter('filter')($scope.artistesFb, {name :  _research});
                     var artistFbIdList = [];
-                    $scope.artistesFb.forEach(getArtistFbId);
-                    $scope.artistes.forEach(getArtistFbIdInArtists);
                     function getArtistFbId(el) {
                         artistFbIdList.push(el.artistId);
                     }
                     function getArtistFbIdInArtists (el) {
                         artistFbIdList.push(el.facebookId);
                     }
+                    $scope.artistesFb.forEach(getArtistFbId);
+                    $scope.artistes.forEach(getArtistFbIdInArtists);
                     $http.get('https://graph.facebook.com/v2.2/search?q='+ _research + '&limit=200&type=page&fields=name,cover,id,category,likes&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
                         success(function(data, status, headers, config) {
                             $scope.data = data.data;
                             if ($scope.artistesFb.length == 0) {
                                 $scope.artistesFb = [];
                             }
-                            $scope.data.forEach(updateArtistFb);
                             function updateArtistFb (el, index, array) {
                                 if (artistFbIdList.indexOf(el.id) == -1 && el.category == 'Musician/band') {
                                     var newArtist =[];
@@ -167,6 +166,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                     $scope.artistesFb.push(newArtist);
                                 }
                             }
+                            $scope.data.forEach(updateArtistFb);
                         }).
                         error(function(data, status, headers, config) {
                             // called asynchronously if an error occurs
@@ -177,21 +177,21 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
             if (_selPlace == true) {
                 $scope.places = $filter('filter')($scope.places, {name :  _research});
                 var scopeIdList = [];
-                $scope.users.forEach(getPlaceId);
                 function getPlaceId(el, index, array) {
                     scopeIdList.push(el.placeId);
                 }
+                $scope.users.forEach(getPlaceId);
                 $http.get('/places/containing/'+_research).
                     success(function(data, status, headers, config) {
                         if ($scope.places.length == 0) {
                             $scope.places = data;
-                        } else {
-                            data.forEach(uploadPlaces);
+                        } else {;
                             function uploadPlaces(el, index, array) {
                                 if (scopeIdList.indexOf(el.placeId) == -1) {
                                     $scope.places.push(el);
                                 }
                             }
+                            data.forEach(uploadPlaces)
                         }
                     }).
                     error(function(data, status, headers, config) {
@@ -202,21 +202,21 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
             if (_selUsr == true) {
                 $scope.users = $filter('filter')($scope.users, {nickname :  _research});
                 var scopeIdList = [];
-                $scope.users.forEach(getUsersId);
                 function getUsersId(el, index, array) {
                     scopeIdList.push(el.userId);
                 }
+                $scope.users.forEach(getUsersId);
                 $http.get('/users/containing/'+_research).
                     success(function(data, status, headers, config) {
                         if ($scope.users.length == 0) {
                             $scope.users = data;
                         } else {
-                            data.forEach(uploadUsers);
                             function uploadUsers(el, index, array) {
                                 if (scopeIdList.indexOf(el.userId) == -1) {
                                     $scope.users.push(el);
                                 }
                             }
+                            data.forEach(uploadUsers);
                         }
                     }).
                     error(function(data, status, headers, config) {
@@ -227,22 +227,22 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
             if (_selEvent == true) {
                 var scopeIdList = [];
                 $scope.events = $filter('filter')($scope.events, {name :  _research});
-                $scope.events.forEach(getEventsId);
                 function getEventsId(el, index, array) {
                     scopeIdList.push(el.eventId);
                 }
+                $scope.events.forEach(getEventsId);
                 $http.get('/events/containing/' + _research).
                     success(function (data, status, headers, config) {
                         console.log(data);
                         if ($scope.events.length == 0) {
                             $scope.events = data;
                         } else {
-                            data.forEach(uploadEvents);
                             function uploadEvents(el, index, array) {
-                               if (scopeIdList.indexOf(el.eventId) == -1) {
-                                   $scope.events.push(el);
-                               }
+                                if (scopeIdList.indexOf(el.eventId) == -1) {
+                                    $scope.events.push(el);
+                                }
                             }
+                            data.forEach(uploadEvents);
                         }
                     }).
                     error(function (data, status, headers, config) {
