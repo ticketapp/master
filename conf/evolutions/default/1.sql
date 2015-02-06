@@ -5,14 +5,14 @@ CREATE TABLE addresses (
   isPlace                   BOOLEAN NOT NULL,
   geographicPoint           point,
   city                      VARCHAR(127),
-  CP                        VARCHAR(15),
-  address                   VARCHAR(255)
+  zip                       VARCHAR(15),
+  street                    VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.17681717, 4.8157134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(44.176812717, 4.9157134)');
 INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.461841787, 4.887134)');
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (FALSE, TRUE, '(45.53787, 4.8127134)');
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(41.4681787, 4.9157134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (FALSE, TRUE, '(43.53187, 4.847134)');
+INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(41.4681787, 5.9157134)');
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
@@ -29,10 +29,10 @@ CREATE TABLE infos (
   title                     TEXT NOT NULL,
   content                   TEXT
 );
-INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuse');
-INSERT INTO infos (title, content) VALUES ('info 2', 'une info qui va déchirer');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 65 avant la béta :) :)');
-INSERT INTO infos (title, content) VALUES ('info 4', 'fuserie');
+INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
+INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 64 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
@@ -112,13 +112,13 @@ CREATE TABLE places (
   addressID                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
   description               TEXT,
-  webSite                   VARCHAR(255),
+  webSite                   TEXT,
   facebookMiniature         text,
   capacity                  INT,
   openingHours              VARCHAR(255),
   UNIQUE(facebookId)
 );
-INSERT into places(name, facebookId) values ('withFbId', '117030545096697');
+INSERT into places(name, facebookId) values ('Le transbordeur', '117030545096697');
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
@@ -357,7 +357,7 @@ CREATE TABLE eventsAddresses (
     addressId INT REFERENCES addresses(addressId),
     PRIMARY KEY (eventId, addressId)
 );
----INSERT INTO eventsAddresses VALUES(1, 1);
+---INSERT INTO eventsAddresses VALUES(1, 2);
 
 CREATE TABLE usersOrganizers (
     userId INT REFERENCES users (userId),

@@ -6,7 +6,7 @@ import play.api.libs.ws.Response
 import scala.concurrent.Future
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
-import models.{Place, Event, Image}
+import models.{Place, Event, Image, Address}
 import scala.util.{Failure, Success}
 
 object Scheduler {
@@ -31,11 +31,24 @@ object Scheduler {
     val eventJson = eventResp.json
     //println(s"$eventJson")
 
-    val address = eventJson \ "venue"
-    println(s"$address")
+    val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
+      case Some(latitude) => {
+        (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
+          case Some(longitude) => Some(s"$latitude, $longitude")
+          case _ => None
+        }
+      }
+      case _ => None
+    }
+    val street = (eventJson \ "venue" \ "street").as[Option[String]]
+    val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
+    val city = (eventJson \ "venue" \ "city").as[Option[String]]
+    val address: Address = new Address(-1l, true, false, geographicPoint, city, zip, street) // + tester si
+    //l'adresse est vide
 
     val name = Json.stringify(eventJson \ "name").replaceAll("\"", "")
     val facebookId = Some(Json.stringify(eventJson \ "id").replaceAll("\"", ""))
+    //println(facebookId) 783881178345234
 
     val startTimeString = Json.stringify(eventJson \ "start_time").replaceAll("\"", "").replace("T", " ")
     val startTime = startTimeString.length match {
@@ -60,10 +73,9 @@ object Scheduler {
     Event.save(event) match {
       case None => Event.update(event) //delete old imgs and insert news
       case Some(eventId) => {
-        if (imgPath.replaceAll("\"", "") != "null") {
-          Event.saveEventPlaceRelation(eventId, placeId)
-          Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
-        }
+        Address.saveAddressAndEventRelation(address, eventId)
+        Event.saveEventPlaceRelation(eventId, placeId)
+        if (imgPath.replaceAll("\"", "") != "null") Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
       }
     }
   }

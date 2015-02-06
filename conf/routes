@@ -24,8 +24,11 @@ GET     /events/:id                 controllers.EventController.event(id: Long)
 POST    /events/create              controllers.EventController.createEvent
 POST    /events/:userId/:eventId    controllers.EventController.followEvent(userId: Long, eventId: Long)
 GET     /events/containing/:pattern controllers.EventController.findEventsContaining(pattern: String)
-GET     /events/circle/             controllers.EventController.findEventsInCircle(peripheral = "")
-GET     /events/circle/:peripheral  controllers.EventController.findEventsInCircle(peripheral: String)
+#GET     /events/circle/             controllers.EventController.findEventsInCircle(center = "")
+GET     /events/circle/:center       controllers.EventController.findEventsInCircle(center: String)
+
+#(centerLatitude: FLOAT, centerLongitude: FLOAT)
+#/events/circle/:centerLatitude/:centerLongitude
 
 ################################## Artists ##############################################
 GET     /artists                        controllers.ArtistController.artists
