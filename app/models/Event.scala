@@ -118,7 +118,6 @@ object Event {
     }
   }
 
-
   def findAllByPlace(placeId: Long) = {
     DB.withConnection { implicit connection =>
       val eventsResultSet = SQL(
@@ -139,14 +138,6 @@ object Event {
   }
 
   def findAllStartingWith(pattern: String): Seq[Event] = {
-    /*
-    Security with the string? Need to escape it?
-    case insensitive :
-    To create an index on the expression lower(title), allowing efficient case-insensitive searches:
-
-    CREATE INDEX ON films ((lower(title)));
-    http://www.postgresql.org/docs/9.1/static/sql-createindex.html
-     */
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
@@ -160,12 +151,11 @@ object Event {
     }
   }
 
-  def save(event: Event): Long = {
-    var eventIdToReturn: Long = 0
+  def save(event: Event): Option[Long] = {
     Utilities.testIfExist("facebookId", event.facebookId) match {
-      case true => //println("Event already in database")
+      case true => None
       case false => try { DB.withConnection { implicit connection =>
-        eventIdToReturn = SQL( """ INSERT INTO
+        SQL( """INSERT INTO
             events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
             startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
             {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}) """)
@@ -182,16 +172,14 @@ object Event {
             'endTime -> event.endTime,
             'ageRestriction -> event.ageRestriction
           ).executeInsert() match {
-            case None => 0
-            case Some(i: Long) => i
-            case _ => throw new DAOException("Cannot save event: (Event.save method) ")
+            case None => None
+            case Some(i: Long) => Some(i)
           }
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
       }
     }
-      eventIdToReturn
     //save tariffs remplacer par save(tariff) + eventIdToReturn
       /*
     event.tariffs.foreach(tariff =>
@@ -241,14 +229,14 @@ object Event {
 
    */
 
-  def saveEventPlaceRelation(eventId: Long, placeId: Long): Long = {
+  def saveEventPlaceRelation(eventId: Long, placeId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL( """INSERT INTO eventsPlaces (eventId, placeId)
           VALUES ({eventId}, {placeId})""").on(
             'eventId -> eventId,
             'placeId -> placeId
-          ).executeInsert().get
+          ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save in eventsPlaces : " + e.getMessage)
@@ -269,15 +257,15 @@ object Event {
   }
 
   def findAllInCircle(peripheral: String) = {
+    val point = "'(45.768350899999994, 4.8155775)'"
     try {
       DB.withConnection { implicit connection =>
-        SQL("""SELECT *
+        SQL(s"""SELECT *
           FROM events e
           JOIN eventsAddresses eA on e.eventId = eA.eventId
           JOIN addresses a ON a.addressId = eA.eventId
           WHERE a.isEvent = TRUE
-          ORDER BY a.geographicPoint <-> point {point} LIMIT 10"""").on(
-          'point -> "'(45.768350899999994, 4.8155775)'"
+          ORDER BY a.geographicPoint <-> point $point LIMIT 10"""
         ).as(EventParser *).map(e => e.copy(
             images = Image.findAllByEvent(e).toList,
             artists = Artist.findAllByEvent(e).toList) )

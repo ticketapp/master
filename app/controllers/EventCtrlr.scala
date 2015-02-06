@@ -60,9 +60,10 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     eventBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       event => {
-        val eventId = Event.save(event)
-        //Redirect(routes.Admin.indexAdmin())
-        Ok(Json.toJson(Event.find(eventId)))
+        Event.save(event) match {
+          case Some(eventId) => Ok(Json.toJson(Event.find(eventId)))
+          case None => Ok(Json.toJson("The event couldn't be saved"))
+        }
       }
     )
   }
