@@ -62,31 +62,28 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
     $rootScope.artistesFb = [];
     $rootScope.users = [];
     $rootScope.places = [];
-    $rootScope.eventsBase = [];
     $rootScope.events = [];
-    $rootScope.events = $http.get('/events').
-        success(function(data, status, headers, config) {
-            if (data != []) {
-                console.log(data)
-                $rootScope.events = data;
-                $rootScope.eventsBase = data;
-            }
-        }).
-        error(function(data, status, headers, config) {
-            // called asynchronously if an error occurs
-            // or server returns response with an error status.
-        });
+    search();
     function search (){
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
         $rootScope.activPlace = _selPlace;
         $rootScope.activUsr = _selUsr;
         if (_research.length == 0) {
-            $rootScope.events = $rootScope.eventsBase;
+            if (_selEvent == true) {
+                $http.get('/events').
+                    success(function (data, status, headers, config) {
+                            $rootScope.events = data;
+                            $rootScope.eventsBase = data;
+                    }).
+                    error(function (data, status, headers, config) {
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                    });
+            }
             if (_selArtist == true) {
                 $http.get('/artists').
                     success(function (data, status, headers, config) {
-                        //console.log(data);
                         $rootScope.artistes = data;
                     }).
                     error(function (data, status, headers, config) {
