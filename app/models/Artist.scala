@@ -65,17 +65,15 @@ object Artist {
     }
   }
 
-
-  def findAllStartingWith(pattern: String): Seq[Artist] = {
-
+  def findAllContaining(pattern: String): Seq[Artist] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM artists WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
+        SQL("SELECT * FROM artists WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
           .as(ArtistParser *)
       }
     } catch {
-      case e: Exception => throw new DAOException("Problem with the method Artist.findAllStartingWith: " + e.getMessage)
+      case e: Exception => throw new DAOException("Problem with the method Artist.findAllContaining: " + e.getMessage)
     }
   }
 

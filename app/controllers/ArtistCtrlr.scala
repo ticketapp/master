@@ -18,8 +18,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Artist.find(artistId)))
   }
 
-  def artistsStartingWith(pattern: String) = Action {
-    Ok(Json.toJson(Artist.findAllStartingWith(pattern)))
+  def findArtistsContaining(pattern: String) = Action {
+    Ok(Json.toJson(Artist.findAllContaining(pattern)))
   }
 
   val artistBindingForm = Form(mapping(

@@ -8,6 +8,7 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
+import services.Utilities
 
 import scala.util.Try
 
@@ -53,23 +54,26 @@ object Place {
     }
   }
 
-  def save(place: Place): Long = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("INSERT into places(name, addressId, facebookId, description, webSite, capacity, openingHours) " +
-          "values ({name}, {addressId}, {facebookId}, {description}, {webSite}, {capacity}, {openingHours})"
-        ).on(
-          'name -> place.name,
-          'addressId -> place.addressId,
-          'facebookId -> place.facebookId,
-          'description -> place.description,
-          'webSite -> place.webSite,
-          'capacity -> place.capacity,
-          'openingHours -> place.openingHours
-        ).executeInsert().get
+  def save(place: Place): Option[Long] = {
+    Utilities.testIfExist("places", "facebookId", place.facebookId) match {
+      case true => None
+      case false => try {
+        DB.withConnection { implicit connection =>
+          SQL("INSERT into places(name, addressId, facebookId, description, webSite, capacity, openingHours) " +
+            "values ({name}, {addressId}, {facebookId}, {description}, {webSite}, {capacity}, {openingHours})"
+          ).on(
+              'name -> place.name,
+              'addressId -> place.addressId,
+              'facebookId -> place.facebookId,
+              'description -> place.description,
+              'webSite -> place.webSite,
+              'capacity -> place.capacity,
+              'openingHours -> place.openingHours
+            ).executeInsert()
+        }
+      } catch {
+        case e: Exception => throw new DAOException("Cannot save place: " + e.getMessage)
       }
-    } catch {
-      case e: Exception => println("Cannot create place : " + e.getMessage); 0
     }
   }
 
@@ -92,23 +96,18 @@ object Place {
   }
 
 
-  def findAllStartingWith(pattern: String): Seq[Place] = {
-    /*
-
-    Security with the string? Need to escape it?
-
-
-     */
+  def findAllContaining(pattern: String): Seq[Place] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM places WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 5")
+        SQL("SELECT * FROM places WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 5")
           .on('patternLowCase -> pattern.toLowerCase)
           .as(PlaceParser *)
       }
     } catch {
-      case e: Exception => throw new DAOException("Problem with the method Place.findAllStartingWith: " + e.getMessage)
+      case e: Exception => throw new DAOException("Problem with the method Place.findAllContaining: " + e.getMessage)
     }
   }
+
 
   def find(placeId: Long): Option[Place] = {
     DB.withConnection { implicit connection =>

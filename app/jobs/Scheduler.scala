@@ -29,6 +29,10 @@ object Scheduler {
 
   def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
+    //println(s"$eventJson")
+
+    val address = eventJson \ "venue"
+    println(s"$address")
 
     val name = Json.stringify(eventJson \ "name").replaceAll("\"", "")
     val facebookId = Some(Json.stringify(eventJson \ "id").replaceAll("\"", ""))
@@ -56,8 +60,10 @@ object Scheduler {
     Event.save(event) match {
       case None => Event.update(event) //delete old imgs and insert news
       case Some(eventId) => {
-        Event.saveEventPlaceRelation(eventId, placeId)
-        Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
+        if (imgPath.replaceAll("\"", "") != "null") {
+          Event.saveEventPlaceRelation(eventId, placeId)
+          Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
+        }
       }
     }
   }
@@ -76,7 +82,7 @@ object Scheduler {
       token).get onComplete {
       case Success(events) => returnListOfIdsFromEvents(events).map( eventId =>
         WS.url("https://graph.facebook.com/v2.2/" + eventId +
-          "?fields=cover,description,name,start_time,end_time,owner" + "&access_token=" + token)
+          "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
           .get onComplete {
           case Success(eventDetailed) =>  val description = Json.stringify(eventDetailed.json \ "description")
             val name = Json.stringify(eventDetailed.json \ "name")

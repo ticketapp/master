@@ -46,22 +46,15 @@ object User {
     }
   }
 
-  def findAllStartingWith(pattern: String): Seq[User] = {
-    /*
-
-    Security with the string? Need to escape it?
-
-
-     */
-    var patternLowCase = pattern.toLowerCase()
+  def findAllContaining(pattern: String): Seq[User] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM users WHERE LOWER(nickname) LIKE {patternLowCase} || '%' LIMIT 3")
-          .on('patternLowCase -> patternLowCase)
+        SQL("SELECT * FROM users WHERE LOWER(nickname) LIKE '%'||{patternLowCase}||'%' LIMIT 3")
+          .on('patternLowCase -> pattern.toLowerCase())
           .as(UserParser *)
       }
     } catch {
-      case e: Exception => throw new DAOException("Problem with the method User.findAllStartingWith: " + e.getMessage)
+      case e: Exception => throw new DAOException("Problem with the method User.findAllContaining: " + e.getMessage)
     }
   }
 

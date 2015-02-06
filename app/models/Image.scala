@@ -2,11 +2,12 @@ package models
 
 import anorm.SqlParser._
 import anorm._
+import controllers.DAOException
 import play.api.db.DB
 import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
-
 import scala.util.Try
+import services.Utilities
 
 case class Image (imageId: Long,
                   path: String,
@@ -18,14 +19,15 @@ object Image {
 
   implicit val imageWrites = Json.writes[Image]
 
-  def formApply(path: String,  alt: String) = new Image(-1L, path)
+  def formApply(path: String, alt: String) = new Image(-1L, path)
+
   def formUnapply(image: Image) = Some((image.path))
 
   private val ImageParser: RowParser[Image] = {
     get[Long]("imageId") ~
-    get[String]("path") ~
-    get[Option[Long]]("eventId") ~
-    get[Option[Long]]("userId") map {
+      get[String]("path") ~
+      get[Option[Long]]("eventId") ~
+      get[Option[Long]]("userId") map {
       case imageId ~ path ~ eventId ~ userId =>
         Image(imageId, path, eventId, userId)
     }
@@ -64,13 +66,20 @@ object Image {
   }
 
   def save(image: Image) = {
-    DB.withConnection { implicit connection =>
-      SQL(""" INSERT INTO images(path, eventId, userId) VALUES({path}, {eventId}, {userId}) """)
-        .on(
-          'path -> image.path,
-          'eventId -> image.eventId,
-          'userId -> image.userId
-        ).executeInsert()
+    Utilities.testIfExist("images", "path", image.path) match {
+      case true => None
+      case false => try {
+        DB.withConnection { implicit connection =>
+          SQL( """ INSERT INTO images(path, eventId, userId) VALUES({path}, {eventId}, {userId}) """)
+            .on(
+              'path -> image.path,
+              'eventId -> image.eventId,
+              'userId -> image.userId
+            ).executeInsert()
+        }
+      } catch {
+        case e: Exception => throw new DAOException("Cannot save image: " + e.getMessage)
+      }
     }
   }
 }

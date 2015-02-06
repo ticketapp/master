@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.EventController._
 import models.{Artist, Place}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -21,8 +22,8 @@ object PlaceController extends Controller {
     Ok(Json.toJson(Place.find(id)))
   }
 
-  def placesStartingWith(pattern: String) = Action {
-    Ok(Json.toJson(Place.findAllStartingWith(pattern)))
+  def findPlacesContaining(pattern: String) = Action {
+    Ok(Json.toJson(Place.findAllContaining(pattern)))
   }
 
   def deletePlace(placeId: Long): Int = {
@@ -53,9 +54,10 @@ object PlaceController extends Controller {
     placeBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       place => {
-        val placeId = Place.save(place)
-        //Redirect(routes.Admin.indexAdmin())
-        Ok(Json.toJson(Place.find(placeId)))
+        Place.save(place) match {
+          case Some(eventId) => Ok(Json.toJson(Place.find(eventId)))
+          case None => Ok(Json.toJson("The place couldn't be saved"))
+        }
       }
     )
   }

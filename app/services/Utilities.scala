@@ -12,7 +12,7 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 
 object Utilities {
-  def testIfExist(fieldName: String, valueAnyType: Any): Boolean = {
+  def testIfExist(table: String, fieldName: String, valueAnyType: Any): Boolean = {
     val value = valueAnyType match {
       case Some(v: Int) => v
       case Some(v: String) => v
@@ -22,7 +22,7 @@ object Utilities {
     }
     try {
       DB.withConnection { implicit connection =>
-        SQL(s"""SELECT exists(SELECT 1 FROM events where $fieldName={value} LIMIT 1)"""
+        SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName={value} LIMIT 1)"""
         ).on(
             "value" -> value
           ).as(scalar[Boolean].single)//.singleOpt _)

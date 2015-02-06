@@ -137,22 +137,22 @@ object Event {
     }
   }
 
-  def findAllStartingWith(pattern: String): Seq[Event] = {
+  def findAllContaining(pattern: String): Seq[Event] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM events WHERE LOWER(name) LIKE {patternLowCase} || '%' LIMIT 10")
+        SQL("SELECT * FROM events WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase())
           .as(EventParser *).map(e => e.copy(
           images = Image.findAllByEvent(e).toList,
           artists = Artist.findAllByEvent(e).toList))
       }
     } catch {
-      case e: Exception => throw new DAOException("Problem with the method Event.findAllStartingWith: " + e.getMessage)
+      case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
     }
   }
 
   def save(event: Event): Option[Long] = {
-    Utilities.testIfExist("facebookId", event.facebookId) match {
+    Utilities.testIfExist("events", "facebookId", event.facebookId) match {
       case true => None
       case false => try { DB.withConnection { implicit connection =>
         SQL( """INSERT INTO
@@ -240,6 +240,20 @@ object Event {
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save in eventsPlaces : " + e.getMessage)
+    }
+  }
+
+  def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """INSERT INTO eventsPlaces (eventId, placeId)
+          VALUES ({eventId}, {placeId})""").on(
+            'eventId -> eventId,
+            'placeId -> addressId
+          ).executeInsert()
+      }
+    } catch {
+      case e: Exception => throw new DAOException("saveEventAddressRelation: " + e.getMessage)
     }
   }
 
