@@ -209,17 +209,24 @@ object Event {
    */
 
   def update(event: Event): Unit = {
-    DB.withConnection { implicit connection =>
-      SQL("""UPDATE events
-        SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
-        WHERE facebookId={facebookId}"""
-      ).on(
-        'facebookId -> event.facebookId,
-        'name -> event.name,
-        'description -> event.description,
-        'startTime -> event.startTime,
-        'endTime -> event.endTime
-      ).executeUpdate()
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """UPDATE events
+          SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
+          WHERE facebookId={facebookId}"""
+        ).on(
+          'facebookId -> event.facebookId,
+          'name -> event.name,
+          'description -> event.description,
+          'startTime -> event.startTime,
+          'endTime -> event.endTime
+          ).executeUpdate() match {
+          case 1 =>
+          case _ =>
+        }
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot update event: " + e.getMessage)
     }
   }
 
@@ -257,21 +264,20 @@ object Event {
     }
   }
 
-  def followEvent(userId: Long, eventId: Long): Long = {
+  def followEvent(userId: Long, eventId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into eventsFollowed(userId, eventId) values ({userId}, {eventId})").on(
           'userId -> userId,
           'eventId -> eventId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot follow event: " + e.getMessage)
     }
   }
 
-  def findAllInCircle(peripheral: String) = {
-    val point = "'(45.768350899999994, 4.8155775)'"
+  def findAllInCircle(center: String) = {
     try {
       DB.withConnection { implicit connection =>
         SQL(s"""SELECT *
@@ -279,7 +285,7 @@ object Event {
           JOIN eventsAddresses eA on e.eventId = eA.eventId
           JOIN addresses a ON a.addressId = eA.eventId
           WHERE a.isEvent = TRUE
-          ORDER BY a.geographicPoint <-> point $point LIMIT 10"""
+          ORDER BY a.geographicPoint <-> point '$center' LIMIT 10"""
         ).as(EventParser *).map(e => e.copy(
             images = Image.findAllByEvent(e).toList,
             artists = Artist.findAllByEvent(e).toList) )
