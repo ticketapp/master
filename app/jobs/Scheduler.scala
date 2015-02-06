@@ -52,9 +52,10 @@ object Scheduler {
 
     val event: Event = new Event(-1L, facebookId, true, true, new Date, name, None, None,
       eventDescription, startTime, endTime, 16, List(), List(), List(), List())
+
     Event.save(event) match {
-      case 0 => Event.update(event) //delete old imgs and insert news
-      case eventId => {
+      case None => Event.update(event) //delete old imgs and insert news
+      case Some(eventId) => {
         Event.saveEventPlaceRelation(eventId, placeId)
         Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
       }
@@ -81,10 +82,8 @@ object Scheduler {
             val name = Json.stringify(eventDetailed.json \ "name")
             val imgPath = Json.stringify(eventDetailed.json \ "cover" \ "source")
             saveEvent(addBannerToEventDescription(description, name, imgPath), eventDetailed, placeId, imgPath)
-
           case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
         } )
-
       case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
     }
   }

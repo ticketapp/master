@@ -1,5 +1,6 @@
 package services
 
+import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
 import models._
@@ -11,14 +12,20 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 
 object Utilities {
-  def testIfExist(fieldName: String, value: Any): Boolean = {
+  def testIfExist(fieldName: String, valueAnyType: Any): Boolean = {
+    val value = valueAnyType match {
+      case Some(v: Int) => v
+      case Some(v: String) => v
+      case v: Int => v
+      case v: String => v
+      case _ => None
+    }
     try {
       DB.withConnection { implicit connection =>
-        SQL( """SELECT exists(SELECT 1 FROM events where {fieldName}={checker} LIMIT 1)""")
-          .on(
-            'fieldName -> fieldName,
-            'checker -> value)
-          .execute()
+        SQL(s"""SELECT exists(SELECT 1 FROM events where $fieldName={value} LIMIT 1)"""
+        ).on(
+            "value" -> value
+          ).as(scalar[Boolean].single)//.singleOpt _)
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot select in database with method Utilities.testIfExistById: " +

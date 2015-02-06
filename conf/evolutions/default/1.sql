@@ -31,7 +31,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Ticketapp, la billetterie qui fuuuuuuuuuuuuuuuuuuuuuuuuuse');
 INSERT INTO infos (title, content) VALUES ('info 2', 'une info qui va déchirer');
-INSERT INTO infos (title, content) VALUES ('info 3', 'J - 67 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('info 3', 'J - 66 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('info 4', 'fuserie');
 
 CREATE TABLE artists (
@@ -119,7 +119,6 @@ CREATE TABLE places (
   UNIQUE(facebookId)
 );
 INSERT into places(name, facebookId) values ('withFbId', '117030545096697');
-INSERT into places(name) values ('eekedgdzur');
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
@@ -371,7 +370,6 @@ CREATE TABLE eventsArtists (
     artistId INT REFERENCES artists (artistId),
     PRIMARY KEY (eventId, artistId)
 );
-
 
 CREATE TABLE usersArtists (
     userId INT REFERENCES users (userId),
