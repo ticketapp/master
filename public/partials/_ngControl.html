@@ -1,10 +1,13 @@
-<div class="fixed right height100p zIndex1" style="width: 70px!important;">
-    <ul class="float-right" style="margin-top:150px">
+<div class="width100p fixed top" ng-if="$root.pathEvent" style="height: 100px; background: rgba(82, 122, 255, 0.23)">
+    {{event.name}}
+</div>
+<div class="fixed right height100p zIndex1 generalControlsContener">
+    <ul class="float-right">
+        <li ng-if="!$root.home" class="generalControls float-right" >
+            <a href="#/" class="button"><i class="fi-home"></i></a>
+        </li>
         <li ng-if="!$root.home" class="generalControls float-right">
             <button ng-click="back()" class="alert"><i class="fi-x"></i></button>
-        </li>
-        <li class="generalControls float-right">
-            <button ng-click="createPlaces()"><i class="fi-plus"></i></button>
         </li>
         <li class="generalControls float-right" data-ng-controller="toolsCtrl" ng-click="open()">
             <button><i class="fi-thumbnails"></i></button>
@@ -12,18 +15,21 @@
         <li ng-if="!$root.home && !$root.pathSearch" class="generalControls float-right">
             <a href="#/search" class="button"><i class="fi-magnifying-glass"></i></a>
         </li>
+        <li ng-if="!$root.home && !$root.pathSearch" class="generalControls float-right">
+            <a href="#/search" class="button"><i class="fi-share"></i></a>
+        </li>
         <li ng-if="$root.pathArt" class="generalControls float-right">
             <button><i class="fi-play"></i></button>
         </li>
         <li ng-if="$root.pathEvent" class="generalControls float-right">
             <button ng-click="generate()"><i class="fi-shopping-cart"></i></button>
         </li>
+        <li class="generalControls float-right">
+            <button ng-click="createPlaces()"><i class="fi-plus"></i></button>
+        </li>
     </ul>
 </div>
-
-
-
-<!--<div ng-if="buy == true" class="absolute top left zIndex2 right bottom height100p" style="background: rgba(0,0,0,0.3)">
+<div ng-if="buy == true" class="absolute top left zIndex2 right bottom height100p" style="background: rgba(0,0,0,0.3)">
     <div style="margin-top: 15%; background-img:url('{{ $parent.event.images[0].path }}');" class="column padding0 large-6 large-centered">
         <div class="column large-12 paddingRight0"  style="background-image:url('{{ $parent.event.images[0].path }}'); background-color: #ffffff">
             <div class="column large-4 padding0">
@@ -35,4 +41,4 @@
             </div>
         </div>
     </div>
-</div>-->
+</div>

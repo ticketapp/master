@@ -8,7 +8,7 @@ app.config(function($routeProvider, $locationProvider){
     .when('/artiste/:id',{templateUrl: 'assets/partials/artiste.html', controller : 'ArtistesCtrl'})
     .when('/user/:id',{templateUrl:'assets/partials/user.html', controller : 'UsersCtrl'})
     .when('/lieu/:id',{templateUrl:'assets/partials/lieu.html', controller : 'PlaceCtrl'})
-    .when('/createEvent',{templateUrl:'assets/partials/createEvent.html', controller : 'EventsCtrl'})
+    .when('/createEvent',{templateUrl:'assets/partials/createEvent.html', controller : 'CreateEventCtrl'})
     .when('/search',{templateUrl:'assets/partials/search.html'})
         .otherwise('/');
 });

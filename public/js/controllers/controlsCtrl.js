@@ -1,32 +1,40 @@
-app.controller ('controlsCtrl', function ($scope, EventFactory, $routeParams, $http, $timeout, $rootScope ){
-    if ($rootScope.pathEvent == true) {
-        $http.get('/events/' + $routeParams.id)
-            .success(function(data, status){
-                $scope.event = data;
-                console.log(data.name);
-            }).error(function(data, status){
-                console.log(data);
-            });
-        $scope.buy = false;
-        $scope.generate = function() {
-            $scope.buy = true;
-            $timeout(function () {
-                var qrcode = new QRCode(document.getElementById("qrcode"), {
-                    width: 100,
-                    height: 100
+app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$rootScope',
+    function ($scope, $location, $http, $timeout, $rootScope ){
+    $scope.buy = false;
+    function getEvent () {
+        if ($location.path().indexOf('/event/') > -1) {
+            matched = $location.path().match(/\d.*/);
+            $http.get('/events/' + matched[0])
+                .success(function(data, status){
+                    $scope.event = data;
+                    console.log(data);
+                }).error(function(data, status){
+                    console.log(data);
                 });
+            $scope.generate = function() {
+                $scope.buy = true;
+                $timeout(function () {
+                    var qrcode = new QRCode(document.getElementById("qrcode"), {
+                        width: 100,
+                        height: 100
+                    });
 
-                function makeCode() {
-                    var code = '51151515155151515';
-                    qrcode.makeCode(code);
-                }
-                makeCode();
-            }, 100)
-        };
-        $scope.end = function () {
-            $scope.buy = false;
+                    function makeCode() {
+                        var code = '51151515155151515';
+                        qrcode.makeCode(code);
+                    }
+                    makeCode();
+                }, 100)
+            };
+            $scope.end = function () {
+                $scope.buy = false;
+            }
         }
     }
+    getEvent();
+    $scope.$on('$locationChangeSuccess', function(){
+        getEvent()
+    });
     $scope.back =  function () {
         history.back();
         $scope.$apply();
@@ -124,4 +132,4 @@ app.controller ('controlsCtrl', function ($scope, EventFactory, $routeParams, $h
                 });
         }
     }
-});
+}]);

@@ -19,31 +19,28 @@ app.directive('ngSearch', function(){
             var positionElementInPage;
             var flag = false;
             if (window.location.hash.indexOf('search')>-1) {
-                // fixed
-                $(element).find('#searchBlock').addClass("ng-hide");
-                $(element).find('#events_contener').addClass("marginTop50 paddingTop10");
                 $(document).find('#searchTopBlock').removeClass("ng-hide");
                 $(document).find('#searchTopBar').focus();
-            }
-            $(window).scroll(function() {
-                if (!flag){
-                positionElementInPage = $(element).find('#searchBar').offset().top;
-                flag = true;
-                }
-                if ($(window).scrollTop()>= positionElementInPage - 60) {
-                    // fixed
-                    $(element).find('#searchBlock').addClass("ng-hide");
-                    $(document).find('#searchTopBlock').removeClass("ng-hide");
-                    $(document).find('#searchTopBar').focus();
-                    $(element).find('#events_contener').addClass("marginTop50 paddingTop10");
+            } else {
+                $(window).scroll(function() {
+                    if (!flag){
+                    positionElementInPage = $(element).find('#searchBar').offset().top;
+                    flag = true;
+                    }
+                    if ($(window).scrollTop()>= positionElementInPage - 60) {
+                        // fixed
+                        $(element).find('#searchBlock').addClass("ng-hide");
+                        $(document).find('#searchTopBlock').removeClass("ng-hide");
+                        $(document).find('#searchTopBar').focus();
 
-                } else {
-                    // relative
-                    $(element).find('#searchBlock').removeClass("ng-hide");
-                    $(document).find('#searchTopBlock').addClass("ng-hide");
-                    flag = false;
-                }
-            });
+                    } else {
+                        // relative
+                        $(element).find('#searchBlock').removeClass("ng-hide");
+                        $(document).find('#searchTopBlock').addClass("ng-hide");
+                        flag = false;
+                    }
+                });
+            }
         }
     }
 });

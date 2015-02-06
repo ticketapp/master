@@ -79,7 +79,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
                     searchArtist(searchArtists[i]);
                 }
                 function searchArtist (artist) {
-                    $http.get('/artists/startWith/'+ artist).
+                    $http.get('/artists/contaning/'+ artist).
                         success(function(data, status, headers, config) {
                             //console.log(data);
                             $scope.artists.push(data);

@@ -2,6 +2,10 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
     function ($scope, $rootScope, $location, $anchorScroll, $timeout) {
       $scope.gotoTop = '';
         function location() {
+            $timeout(function(){
+                $location.hash('top');
+                $anchorScroll();
+            }, 200);
             if ($location.path() == '/') {
                 $rootScope.home = true;
                 $rootScope.pathArt = false;
@@ -24,7 +28,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 $rootScope.pathPlace = false;
                 $rootScope.pathSearch = false;
             } else if ($location.path().indexOf('/event') > -1){
-                rootScope.pathEvent = true;
+                $rootScope.pathEvent = true;
                 $rootScope.pathArt = false;
                 $rootScope.home = false;
                 $rootScope.pathUsr = false;
@@ -60,17 +64,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.activEvent = true;
         $rootScope.activPlace = false;
         $rootScope.activUsr = false;
-      $scope.$on("$routeChangeSuccess", function(event, next, current){
-          $timeout(function(){
-              $scope.gotoTop = function() {
-                // set the location.hash to the id of
-                // the element you wish to scroll to.
-                $location.hash('top');
-                // call $anchorScroll()
-                $anchorScroll();
-              };
-          }, 200);
-      });
 
     }
 

@@ -1,21 +1,19 @@
 @main(title = "Ticketapp") {
 
-<nav id="pages-nav" id="top">
-    <ul nav-menu="active">
-	    <li class="left column large-1 margin0 padding0" id="logo" data-ng-controller="scrollCtrl">
-	        <h3><a href="#/" class="logo" ng-click="gotoTop()">TicketApp</a></h3>
-	    </li>
-        <li class="left column large-11 margin0 padding0">
-            <div ng-if="$root.home || $root.pathSearch" ng-show="$root.pathSearch" id="searchTopBlock" class="ng-hide column large-12">
-                <input id="searchTopBar" ng-model="$root.research" ng-model-options="{ getterSetter: true }" >
+<!--<nav id="pages-nav" id="top">
+    <ul nav-menu="active" data-ng-controller="scrollCtrl">
+	    -->
+        <div id="top" class="left column width100p fixed margin0 padding0" data-ng-controller="scrollCtrl">
+            <div ng-if="$root.home || $root.pathSearch" ng-show="$root.pathSearch" id="searchTopBlock" class="ng-hide width100p">
                 <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox" ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)" ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">Events</label>
                 <label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox" ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)" ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">Artists</label>
                 <label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox" ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)" ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">Places</label>
                 <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox" ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)" ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">Users</label>
+                <input id="searchTopBar" placeholder="Search" ng-model="$root.research" ng-model-options="{ getterSetter: true }" >
             </div>
-        </li>
-    </ul>
-</nav>
+        </div>
+    <!--</ul>
+</nav>-->
 <div id="contener">
     <ng-controls></ng-controls>
     <div data-ng-view class="wrapper-outer row">
