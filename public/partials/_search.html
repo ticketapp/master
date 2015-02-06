@@ -7,8 +7,8 @@
 </div>
 <div>
     <ul id="events_contener" layout="row" layout-wrap>
-        <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event" data-ng-repeat="event in events | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
-        <li ng-if="$root.activArtist && artistes.length > 0" class="min_contener" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li ng-show="$root.activEvent && events.length > 0" class="min_contener data-ng-event" data-ng-repeat="event in events  | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+        <li ng-show="$root.activArtist && artistes.length > 0" class="min_contener" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ artiste.images[0].path }}" alt="une belle image" class="min"/>
@@ -18,7 +18,7 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener" ng-if="$root.activArtist && artistesFb.length > 0" data-ng-repeat="artisteFb in artistesFb | orderBy:likes:reverse = true | limitTo : limit - artistes.length - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li class="min_contener" ng-show="$root.activArtist && artistesFb.length > 0" data-ng-repeat="artisteFb in artistesFb | orderBy:likes:reverse = true | limitTo : limit - artistes.length - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ artisteFb.images[0].path }}" alt="une belle image" class="min"/>
@@ -28,7 +28,7 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener" ng-if="$root.activPlace && places.length > 0" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li class="min_contener" ng-show="$root.activPlace && places.length > 0" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ place.images[0].path }}" alt="une belle image" class="min"/>
@@ -38,7 +38,7 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener" ng-if="$root.activUsr && users.length > 0" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li class="min_contener" ng-show="$root.activUsr && users.length > 0" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ user.images[0].path }}" alt="une belle image" class="min"/>
