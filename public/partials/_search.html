@@ -1,14 +1,13 @@
-<div id="searchBlock" class="column large-6 large-offset-3">
+<div id="searchBlock" class="column large-6 large-offset-3" ng-if="!$root.pathSearch">
     <input id="searchBar" placeholder="Search" ng-model="$root.research" ng-click="goSearch()" ng-model-options="{ getterSetter: true }">
     <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox" ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)" ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">Events</label>
     <label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox" ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)" ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">Artists</label>
     <label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox" ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)" ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">Places</label>
-    <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox" ng-click="$root.activUsr = !$root.activUsr; $root.selPlace($root.activUsr)" ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">Users</label>
-
+    <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox" ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)" ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">Users</label>
 </div>
 <div>
     <ul id="events_contener" layout="row" layout-wrap>
-        <li ng-if="$root.activEvent" class="min_contener data-ng-event" data-ng-repeat="event in events | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+        <li ng-if="$root.activEvent && $root.events.length > 0" class="min_contener data-ng-event" data-ng-repeat="event in events | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
         <li ng-if="$root.activArtist" class="min_contener" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">

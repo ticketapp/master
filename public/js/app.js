@@ -1,6 +1,6 @@
 var app = angular.module('MonApp',['ngAnimate', 'ngAria', 'ngMessages', 'ngMaterial', 'ngRoute', 'ngSanitize', 'mm.foundation', 'colorpicker.module']);
 
-app.config(function($routeProvider){
+app.config(function($routeProvider, $locationProvider){
     $routeProvider
     .when('/', {templateUrl: 'assets/partials/home.html'})
     .when('/events',{templateUrl: 'assets/partials/events.html'})
@@ -10,6 +10,6 @@ app.config(function($routeProvider){
     .when('/lieu/:id',{templateUrl:'assets/partials/lieu.html', controller : 'PlaceCtrl'})
     .when('/createEvent',{templateUrl:'assets/partials/createEvent.html', controller : 'EventsCtrl'})
     .when('/search',{templateUrl:'assets/partials/search.html'})
-        .otherwise('/')
+        .otherwise('/');
 });
 

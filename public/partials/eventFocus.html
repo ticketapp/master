@@ -1,24 +1,5 @@
 <div ng-bind-html="event.description"></div>
-<div class="fixed right height100p zIndex1" style="width: 70px!important;">
-    <ul class="float-right" style="margin-top:150px">
-        <li style="display: block;">
-            <button ng-click="generate()"><i class="fi-bitcoin"></i></button>
-        </li>
-    </ul>
-</div>
-<div ng-if="buy == true" class="absolute top left zIndex2 right bottom height100p" style="background: rgba(0,0,0,0.3)">
-    <div style="margin-top: 15%; background-img:url('{{ $parent.event.images[0].path }}');" class="column padding0 large-6 large-centered">
-        <div class="column large-12 paddingRight0"  style="background-image:url('{{ $parent.event.images[0].path }}'); background-color: #ffffff">
-            <div class="column large-4 padding0">
-                <div id="qrcode" style="width:100px; height:100px; margin-top:15px; border: solid 2px; border-color: #ffffff"></div>
-            </div>
-            <div class="column large-8 center" style="background: rgba(0,0,0,0.3);">
-                <h2 style="color: #ffffff">{{$parent.event.name}}</h2>
-                <button ng-click="end()" class="column large-6 large-offset-3">OK</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 
 

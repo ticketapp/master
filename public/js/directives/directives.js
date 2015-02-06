@@ -18,18 +18,12 @@ app.directive('ngSearch', function(){
         link : function(scope, element){
             var positionElementInPage;
             var flag = false;
-            if ($(element).find('#searchBar').offset().top < 50) {
+            if (window.location.hash.indexOf('search')>-1) {
                 // fixed
                 $(element).find('#searchBlock').addClass("ng-hide");
                 $(element).find('#events_contener').addClass("marginTop50 paddingTop10");
                 $(document).find('#searchTopBlock').removeClass("ng-hide");
                 $(document).find('#searchTopBar').focus();
-
-            } else {
-                // relative
-                $(element).find('#searchBlock').removeClass("ng-hide");
-                $(document).find('#searchTopBlock').addClass("ng-hide");
-                flag = false;
             }
             $(window).scroll(function() {
                 if (!flag){
@@ -60,6 +54,14 @@ app.directive('ngVideo', function(){
       templateUrl:'assets/partials/_video.html'
     }
               
+});
+app.directive('ngControls', function(){
+    return{
+      restrict : 'E',
+      controller: 'controlsCtrl',
+      templateUrl:'assets/partials/_ngControl.html'
+    }
+
 });
 
 app.directive('ngMusique', function(){

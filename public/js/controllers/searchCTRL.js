@@ -17,7 +17,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         }
         return _research;
     };
-    var _selArtist = false;
+    var _selArtist = $rootScope.activArtist;
     $scope.selArtist = function(newName) {
         if (angular.isDefined(newName)) {
             _selArtist = newName;
@@ -27,7 +27,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         }
         return _selArtist;
     };
-    var _selEvent = true;
+    var _selEvent = $rootScope.activEvent;
     $scope.selEvent = function(newName) {
         if (angular.isDefined(newName)) {
             _selEvent = newName;
@@ -36,7 +36,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         }
         return _selEvent;
     };
-    var _selPlace = false;
+    var _selPlace = $rootScope.activPlace;
     $scope.selPlace = function(newName) {
         if (angular.isDefined(newName)) {
             _selPlace = newName;
@@ -45,7 +45,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         }
         return _selPlace;
     };
-    var _selUsr = false;
+    var _selUsr = $rootScope.activUsr;
     $scope.selUsr = function(newName) {
         if (angular.isDefined(newName)) {
             _selUsr = newName;
@@ -54,10 +54,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         }
         return _selUsr;
     };
-    $rootScope.activArtist = _selArtist;
-    $rootScope.activEvent = _selEvent;
-    $rootScope.activPlace = _selPlace;
-    $rootScope.activUsr = _selUsr;
     $rootScope.limit = 12;
     $rootScope.moreLimit = function () {
         $rootScope.limit = $rootScope.limit + 12;
@@ -67,11 +63,14 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
     $rootScope.users = [];
     $rootScope.places = [];
     $rootScope.eventsBase = [];
-    $scope.events = $http.get('/events').
+    $rootScope.events = [];
+    $rootScope.events = $http.get('/events').
         success(function(data, status, headers, config) {
-            //console.log(data);
-            $rootScope.events = data;
-            $rootScope.eventsBase = data;
+            if (data != []) {
+                console.log(data)
+                $rootScope.events = data;
+                $rootScope.eventsBase = data;
+            }
         }).
         error(function(data, status, headers, config) {
             // called asynchronously if an error occurs
@@ -84,10 +83,40 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
         $rootScope.activUsr = _selUsr;
         if (_research.length == 0) {
             $rootScope.events = $rootScope.eventsBase;
-            $rootScope.artistes = [];
+            if (_selArtist == true) {
+                $http.get('/artists').
+                    success(function (data, status, headers, config) {
+                        //console.log(data);
+                        $rootScope.artistes = data;
+                    }).
+                    error(function (data, status, headers, config) {
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                    });
+            }
+            if (_selUsr == true) {
+                $http.get('/users').
+                    success(function(data, status, headers, config) {
+                        //console.log(data);
+                        $rootScope.users = data;
+                    }).
+                    error(function(data, status, headers, config) {
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                    });
+            }
+            if (_selPlace == true) {
+                $http.get('/places').
+                    success(function(data, status, headers, config) {
+                        //console.log(data);
+                        $rootScope.places = data;
+                    }).
+                    error(function(data, status, headers, config) {
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                    });
+            }
             $rootScope.artistesFb = [];
-            $rootScope.users = [];
-            $rootScope.places = [];
         } else {
             if (_selArtist == true) {
                 console.log("artist")
@@ -153,6 +182,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
                         // or server returns response with an error status.
                     });
             }
+            console.log('u' + _selUsr +'/ a' + _selArtist + '/ e' + _selEvent + '/ p' + _selPlace);
             if (_selUsr == true) {
                 $http.get('/users/startWith/'+_research).
                     success(function(data, status, headers, config) {
@@ -199,97 +229,5 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$location', func
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
             });
-    }
-     $rootScope.createPlaces = function () {
-        var places = [];
-        var placeName =[];
-        var txtFile = new XMLHttpRequest();
-        txtFile.open("GET", "/assets/json/salles.txt", true);
-        txtFile.onreadystatechange = function()
-        {
-            if (txtFile.readyState === 4) {  // document is ready to parse.
-                if (txtFile.status === 200) {  // file is found
-                    allText = txtFile.responseText;
-                    lines = txtFile.responseText.split("\n");
-                    for (var l=0; l<lines.length; l++) {
-                        if (lines[l] == "Salles de 400 à 1200 places") {
-                            placeName.push(lines[l-1].replace(/ /g, "+"));
-                            console.log(placeName)
-                            getPlacesByName(lines[l-1].replace(/ /g, "+"))
-                        }
-                    }
-                }
-            }
-        };
-        txtFile.send(null);
-        function getPlacesByName(placeName) {
-            $http.get('https://graph.facebook.com/v2.2/search?q=' + placeName + '&type=page&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
-                success(function (data, status, headers, config) {
-                    data = data.data;
-                    for (var iv = 0; iv < data.length; iv++) {
-                        if (data[iv].category == 'Concert venue' || data[iv].category == 'Club') {
-                            getPlacesById(data[iv]);
-                        } else if (data[iv].category_list != undefined) {
-                            for (ii = 0; ii < data[iv].category_list.length; ii++) {
-                                if (data[iv].category_list[ii].name == 'Concert Venue' || data[iv].category_list[ii].name == 'Club') {
-                                    getPlacesById(data[iv]);
-                                }
-                            }
-                        }
-                    }
-                }).
-                error(function (data, status, headers, config) {
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                });
-        }
-        function getPlacesById (searchPlaces) {
-            $http.get('https://graph.facebook.com/v2.2/'+ searchPlaces.id +'/?fields=checkins,cover,description,hours,id,likes,link,location,name,phone,website,picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
-                success(function(data, status, headers, config) {
-                    flag = 0;
-                    for (m = 0; m < places.length; m++) {
-                        if (places[m].id == data.id){
-                            flag = 1;
-                        } else if (places[m].location.latitude == data.location.latitude && places[m].location.longitude == data.location.longitude && places[m].likes > data.likes) {
-                            flag = 1;
-                        } else if (places[m].location.latitude == data.location.latitude && places[m].location.longitude == data.location.longitude && places[m].likes < data.likes) {
-                            places.splice(m, 1);
-                        }
-                    }
-                    if (data.location.country != undefined && data.location.country != 'France') {
-                        flag = 1;
-                    }
-                    if (flag == 0){
-                        var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
-                        data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
-                        data.description = data.description.replace(/(\n)/g, " <br/>");
-                        if (matchedLinks = data.description.match(links)) {
-                            var m = matchedLinks;
-                            var unique = [];
-                            for (var ii = 0; ii < m.length; ii++) {
-                                var current = m[ii];
-                                if (unique.indexOf(current) < 0) unique.push(current);
-                            }
-                            console.log(unique);
-                            for (var i=0; i < unique.length; i++) {
-                                data.description = data.description.replace(new RegExp(unique[i],"g"),
-                                        "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
-                            }
-                        }
-                        $http.post('/places/create', {
-                            name: data.name,
-                            facebookId: data.id,
-                            capacity: data.checkins,
-                            description:data.description,
-                            webSite:data.website
-                        })
-                    }
-                }).
-                error(function(data, status, headers, config) {
-                    console.log(data);
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                });
-        }
     }
 }]);
