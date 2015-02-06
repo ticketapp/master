@@ -28,6 +28,13 @@ case class Event(eventId: Long,
                  artists: List[Artist],
                  tariffs: List[Tariff])
 
+/*
+
+Virer les startsellingtime et endsellingtime car dépendent des tarifs??
+
+
+ */
+
 object Event {
   def formApply(name: String, startSellingTime: Option[Date], endSellingTime: Option[Date], description: String, startTime: Date,
                 endTime: Option[Date], ageRestriction: Int, tariffs: Seq[Tariff]
@@ -156,9 +163,9 @@ object Event {
   def save(event: Event): Long = {
     var eventIdToReturn: Long = 0
     Utilities.testIfExist("facebookId", event.facebookId) match {
-      case true => println("Event already in database"); eventIdToReturn
+      case true => //println("Event already in database")
       case false => try { DB.withConnection { implicit connection =>
-        SQL( """ INSERT INTO
+        eventIdToReturn = SQL( """ INSERT INTO
             events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
             startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
             {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}) """)
@@ -174,7 +181,11 @@ object Event {
             'startTime -> event.startTime,
             'endTime -> event.endTime,
             'ageRestriction -> event.ageRestriction
-          ).executeInsert().get
+          ).executeInsert() match {
+            case None => 0
+            case Some(i: Long) => i
+            case _ => throw new DAOException("Cannot save event: (Event.save method) ")
+          }
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
@@ -201,6 +212,34 @@ object Event {
       }
     )*/
   }
+
+  /*
+   INSERT INTO
+            events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
+            startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
+            {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}
+   */
+
+  def update(event: Event): Unit = {
+    DB.withConnection { implicit connection =>
+      SQL("""UPDATE events
+        SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
+        WHERE facebookId={facebookId}"""
+      ).on(
+        'facebookId -> event.facebookId,
+        'name -> event.name,
+        'description -> event.description,
+        'startTime -> event.startTime,
+        'endTime -> event.endTime
+      ).executeUpdate()
+    }
+  }
+
+ /*
+
+  def upsert(event: Event) = TODO
+
+   */
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Long = {
     try {
