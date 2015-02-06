@@ -64,7 +64,7 @@
             background: #008CBA;
         }
         #searchBlock {
-            margin-top : -120px;
+            margin-top : -110px;
             background: #ffffff;
             padding: 10px;
             transform: translate3d(0, -1px, 0);
@@ -85,7 +85,56 @@
             background: #007095;
             color: #ffffff;
         }
-
+        /*Controls right*/
+        .generalControls {
+            display: block;
+            margin-top: 5px;
+            width: 70px;
+            height: 55px;
+        }
+        .generalControls > button, .generalControls > .button {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            color:black;
+            line-height: 25px;
+        }
+        .generalControls:hover {
+            opacity: 1!important;
+            -webkit-animation-duration: .8s;
+            -moz-animation-duration:.8s;
+            -ms-animation-duration:.8s;
+            -o-animation-duration:.8s;
+            -webkit-animation-name: rubberBand;
+            -moz-animation-name: rubberBand;
+            -ms-animation-name: rubberBand;
+            -o-animation-name: rubberBand;
+        }
+        .generalControls.ng-enter, .generalControls.ng-leave {
+            -webkit-animation-duration: .8s;
+            -moz-animation-duration:.8s;
+            -ms-animation-duration:.8s;
+            -o-animation-duration:.8s;
+            -webkit-animation-fill-mode:both;
+            -moz-animation-fill-mode:both;
+            -ms-animation-fill-mode:both;
+            -o-animation-fill-mode:both;
+            -animation-fill-mode:both;
+            -webkit-transition:0.5s linear all;
+            transition:0.5s linear all;
+        }
+        .generalControls.ng-enter {
+            -webkit-animation-name: bounceInRight;
+            -moz-animation-name: bounceInRight;
+            -ms-animation-name: bounceInRight;
+            -o-animation-name: bounceInRight;
+        }
+        .generalControls.ng-leave {
+            -webkit-animation-name: bounceOutRight;
+            -moz-animation-name: bounceOutRight;
+            -ms-animation-name: bounceOutRight;
+            -o-animation-name: bounceOutRight;
+        }
         /*wysiwyg*/
         .parallax-background {
             background-color: #0078A0;
@@ -215,26 +264,6 @@ top: 0;
 		.signIn:hover{cursor:pointer;}
 
 
-
-
-        /* you can also define the transition style
-           on the base class as well (.repeat-item) */
-        .repeat-item.ng-enter,
-        .repeat-item.ng-leave {
-            -webkit-transition:0.5s linear all;
-            transition:0.5s linear all;
-        }
-
-        .repeat-item.ng-enter,
-        .repeat-item.ng-leave.ng-leave-active {
-            opacity:0;
-        }
-        .repeat-item.ng-leave,
-        .repeat-item.ng-enter.ng-enter-active {
-            opacity:1;
-        }
-
-
         /*video*/
         .video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
         .ng-lecture{bottom:-200px; right:0; position:fixed;}
@@ -245,7 +274,7 @@ top: 0;
         .lecteur_content{background-color:black;}
 		
 		/*Events*/
-		#events_contener{margin:0;}
+		#events_contener{margin:0; width: 100%;}
 		#events_contener>li{display:block;}
         #events_contener:hover>li{opacity:0.5;}
         #events_contener:hover>li:hover{opacity:1;}
