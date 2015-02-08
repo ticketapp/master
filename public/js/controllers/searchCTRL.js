@@ -149,7 +149,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                     }
                     $scope.artistesFb.forEach(getArtistFbId);
                     $scope.artistes.forEach(getArtistFbIdInArtists);
-                    $http.get('https://graph.facebook.com/v2.2/search?q='+ _research + '&limit=200&type=page&fields=name,cover,id,category,likes&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+                    $http.get('https://graph.facebook.com/v2.2/search?q='+ _research + '&limit=200&type=page&fields=name,cover,id,category,likes,link,website&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
                         success(function(data, status, headers, config) {
                             $scope.data = data.data;
                             if ($scope.artistesFb.length == 0) {
@@ -157,10 +157,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                             }
                             function updateArtistFb (el, index, array) {
                                 if (artistFbIdList.indexOf(el.id) == -1 && el.category == 'Musician/band') {
+                                    console.log(el)
                                     var newArtist =[];
                                     newArtist.artistId = el.id;
                                     newArtist.name = el.name;
                                     newArtist.likes = el.likes;
+                                    newArtist.link = el.link;
+                                    newArtist.website = el.website;
                                     newArtist.images =[];
                                     if (el.cover != undefined) {
                                         newArtist.images.push({path: el.cover.source});
@@ -185,18 +188,24 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                                             newArtist.tracks.push(newTrack);
                                                         }
                                                         data.forEach(addTrack);
-                                                        console.log(newArtist.tracks)
                                                     })
                                             }
-                                            if (elem.username.toUpperCase() == el.name.toUpperCase()) {
-                                                if (newArtist.soundcloud.length == 0) {
-                                                    newArtist.soundcloud = elem;
-                                                    findSouncloudTracks ()
-                                                } else if (elem.followers_count > newArtist.soundcloud.followers_count) {
-                                                    newArtist.soundcloud = elem;
-                                                    findSouncloudTracks()
-                                                }
-                                            }
+                                            $http.get('http://api.soundcloud.com/users/' + elem.id + '/web-profiles?client_id=f297807e1780623645f8f858637d4abb').
+                                                success(function (data, status, headers, config) {
+                                                    function getSouncloudUser (link) {
+                                                        console.log(link.url + "//" + el.link);
+                                                        if (link.url == el.link || el.website.indexOf(link.url) > -1) {
+                                                            if (newArtist.soundcloud.length == 0) {
+                                                                newArtist.soundcloud = elem;
+                                                                findSouncloudTracks ()
+                                                            } else if (elem.followers_count > newArtist.soundcloud.followers_count) {
+                                                                newArtist.soundcloud = elem;
+                                                                findSouncloudTracks()
+                                                            }
+                                                        }
+                                                    }
+                                                    data.forEach(getSouncloudUser)
+                                                });
                                         }
                                         users.forEach(getSoundcloudName)
                                     });
