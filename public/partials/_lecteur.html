@@ -2,5 +2,10 @@
     <a class="close">X</a>
     <a class="reduire"> - </a>
 </div>
-<div class="lecteur_content">
+<audio class="width100p" id="musicPlayer" autoplay controls="controls"></audio>
+<div ng-class="{onplay : track == trackActive}" class="column large-2" ng-click="play($index)" ng-repeat="track in playlist">
+    <img src="{{track.image}}" class="column large-6" />
+    {{track.artist}}
+    {{track.name}}
+    {{track.from}}
 </div>

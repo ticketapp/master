@@ -18,13 +18,14 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener" ng-show="$root.activArtist && artistesFb.length > 0" data-ng-repeat="artisteFb in artistesFb | orderBy:likes:reverse = true | limitTo : limit - artistes.length - events.length" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
+        <li class="min_contener" ng-show="$root.activArtist && artistesFb.length > 0" data-ng-repeat="artisteFb in artistesFb | limitTo : limit" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <img src="{{ artisteFb.images[0].path }}" alt="une belle image" class="min"/>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a ng-click="GetArtisteById(artisteFb.artistId)"><h4>{{ artisteFb.name }} / {{artisteFb.likes}}</h4></a>
+                    <a ng-click="GetArtisteById(artisteFb.artistId)"><h4>{{ artisteFb.name }}</h4></a>
+                    <i ng-show="artisteFb.tracks.length > 0" class="fi-play" ng-click="$root.addToPlaylist(artisteFb.tracks)"></i>
                 </div>
             </div>
         </li>

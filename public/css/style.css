@@ -76,8 +76,8 @@
             line-height: 50px;
             background: #008CBA;
         }
-        #searchTopBlock .inputName.active, #searchBlock .inputName.active {
-            background: #007095;
+        #searchTopBlock .inputName.active, #searchBlock .inputName.active, .inputName:hover {
+            background: #007095!important;
             color: #ffffff;
         }
         /*Controls right*/
@@ -267,8 +267,15 @@ top: 0;
 
 
         /*video*/
+        .onPlay {background: #007095}
         .video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
-        .ng-lecture{bottom:-200px; right:0; position:fixed;}
+        .ng-lecture{height: 120px;
+            bottom: 0;
+            position: fixed;
+            width: 100%;
+            background: white;
+            overflow-y: hidden;
+            overflow-x: auto;}
         .lecteur_controller{position:absolute; background-color:rgba(0, 0, 0, 0.7); display:none;}
         .ng-control{height:20px; background-color: rgba(42, 105, 162, 0.15); display:none;}
         .reduire{margin-left:10px; float: left; font-size: 35px; font-weight: bold; line-height: 15px; color: #000; text-shadow: 0 1px 0 #fff; opacity: .2; filter: alpha(opacity=20);}

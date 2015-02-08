@@ -162,7 +162,44 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                     newArtist.name = el.name;
                                     newArtist.likes = el.likes;
                                     newArtist.images =[];
-                                    newArtist.images.push({path: el.cover.source});
+                                    if (el.cover != undefined) {
+                                        newArtist.images.push({path: el.cover.source});
+                                    }
+                                    newArtist.soundcloud = [];
+                                    newArtist.tracks = [];
+                                    SC.initialize({
+                                        client_id: 'f297807e1780623645f8f858637d4abb'
+                                    });
+                                    SC.get('/users', { q: "'"+ el.name +"'"}, function(users) {
+                                        function getSoundcloudName (elem){
+                                            function findSouncloudTracks () {
+                                                $http.get('http://api.soundcloud.com/users/' + newArtist.soundcloud.id + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
+                                                    success(function (data, status, headers, config) {
+                                                        function addTrack (track) {
+                                                            var newTrack = [];
+                                                            newTrack.url = track.stream_url;
+                                                            newTrack.name = track.title;
+                                                            newTrack.from = 'soundcloud';
+                                                            newTrack.image = track.artwork_url;
+                                                            newTrack.artist = newArtist.name;
+                                                            newArtist.tracks.push(newTrack);
+                                                        }
+                                                        data.forEach(addTrack);
+                                                        console.log(newArtist.tracks)
+                                                    })
+                                            }
+                                            if (elem.username.toUpperCase() == el.name.toUpperCase()) {
+                                                if (newArtist.soundcloud.length == 0) {
+                                                    newArtist.soundcloud = elem;
+                                                    findSouncloudTracks ()
+                                                } else if (elem.followers_count > newArtist.soundcloud.followers_count) {
+                                                    newArtist.soundcloud = elem;
+                                                    findSouncloudTracks()
+                                                }
+                                            }
+                                        }
+                                        users.forEach(getSoundcloudName)
+                                    });
                                     $scope.artistesFb.push(newArtist);
                                 }
                             }

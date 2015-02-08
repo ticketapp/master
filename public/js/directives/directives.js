@@ -109,6 +109,7 @@ app.directive('ngLecteur', function(){
 app.directive('ngLecture', function(){
     return{
         restrict : 'C',
+        controller : 'lecteurCtrl',
         templateUrl : 'assets/partials/_lecteur.html'
     }
 });
