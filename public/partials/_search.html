@@ -24,7 +24,7 @@
                     <img src="{{ artisteFb.images[0].path }}" alt="une belle image" class="min"/>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a ng-click="GetArtisteById(artisteFb.artistId)"><h4>{{ artisteFb.name }}</h4></a>
+                    <a ng-click="createArtist(artisteFb)"><h4>{{ artisteFb.name }}</h4></a>
                     <i ng-show="artisteFb.tracks.length > 0" class="fi-play" ng-click="$root.addToPlaylist(artisteFb.tracks)"></i>
                 </div>
             </div>

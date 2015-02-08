@@ -267,7 +267,7 @@ top: 0;
 
 
         /*video*/
-        .onPlay {background: #007095}
+        .onplay {background: #007095}
         .video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
         .ng-lecture{height: 120px;
             bottom: 0;

@@ -156,8 +156,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                 $scope.artistesFb = [];
                             }
                             function updateArtistFb (el, index, array) {
-                                if (artistFbIdList.indexOf(el.id) == -1 && el.category == 'Musician/band') {
-                                    console.log(el)
+                                if (artistFbIdList.indexOf(el.id) == -1 && el.category == 'Musician/band' && el.cover != undefined) {
                                     var newArtist =[];
                                     newArtist.artistId = el.id;
                                     newArtist.name = el.name;
@@ -165,9 +164,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                     newArtist.link = el.link;
                                     newArtist.website = el.website;
                                     newArtist.images =[];
-                                    if (el.cover != undefined) {
-                                        newArtist.images.push({path: el.cover.source});
-                                    }
+                                    newArtist.images.push({path: el.cover.source});
                                     newArtist.soundcloud = [];
                                     newArtist.tracks = [];
                                     SC.initialize({
@@ -179,6 +176,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                                 $http.get('http://api.soundcloud.com/users/' + newArtist.soundcloud.id + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
                                                     success(function (data, status, headers, config) {
                                                         function addTrack (track) {
+                                                            console.log(track)
                                                             var newTrack = [];
                                                             newTrack.url = track.stream_url;
                                                             newTrack.name = track.title;
@@ -193,8 +191,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                             $http.get('http://api.soundcloud.com/users/' + elem.id + '/web-profiles?client_id=f297807e1780623645f8f858637d4abb').
                                                 success(function (data, status, headers, config) {
                                                     function getSouncloudUser (link) {
-                                                        console.log(link.url + "//" + el.link);
-                                                        if (link.url == el.link || el.website.indexOf(link.url) > -1) {
+                                                        var matchedId = link.url.match(/\d.*/);
+                                                        console.log(matchedId +'//' + el.id);
+                                                        if (link.url == el.link || matchedId.indexOf(el.id) || el.website.indexOf(link.url) > -1 || el.website.indexOf(elem.id) > -1) {
                                                             if (newArtist.soundcloud.length == 0) {
                                                                 newArtist.soundcloud = elem;
                                                                 findSouncloudTracks ()
@@ -298,20 +297,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
             }
         }
     }
-    $scope.GetArtisteById = function(id){
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?' +  'access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
-            success(function(data, status, headers, config) {
-                $scope.artiste = data;
-                createArtiste(data)
-            }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-            });
-    };
-
-    function createArtiste () {
-        $http.post('artists/createArtist', {artistName : $scope.artiste.name, facebookId: $scope.artiste.id}).
+    $scope.createArtist = function (artist) {
+        console.log(artist)
+        $http.post('artists/createArtist', {artistName : artist.name, facebookId: artist.id}).
             success(function(data, status, headers, config) {
                 window.location.href =('#/artiste/' + data);
             }).

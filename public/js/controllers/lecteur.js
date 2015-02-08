@@ -10,7 +10,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', function ($scope, $rootS
         $scope.play(i)
     };
     $scope.play = function (i) {
-        $scope.trackActive = $rootScope.playlist[i];
+        $scope.trackActive = i;
         console.log( $rootScope.playlist[i]);
         if ($rootScope.playlist[i].from == 'soundcloud') {
             document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
