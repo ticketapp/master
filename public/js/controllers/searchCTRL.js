@@ -170,11 +170,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                     SC.initialize({
                                         client_id: 'f297807e1780623645f8f858637d4abb'
                                     });
+                                    var soundcloudUrl = [];
                                     if (newArtist.website != undefined) {
                                         if (soundcloudUrl = newArtist.website.match(/soundcloud\W.*/)) {
                                             soundcloudUrl = soundcloudUrl[0].split(" ");
                                             for (var urls=0; urls < soundcloudUrl.length; urls++) {
-                                                var soundcloudNameMatched = soundcloudUrl[urls].substring(soundcloudUrl[urls].indexOf(".com/") + 5)
+                                                var soundcloudNameMatched = soundcloudUrl[urls].substring(soundcloudUrl[urls].indexOf(".com/") + 5);
+                                                console.log(soundcloudUrl);
                                                 $http.get('http://api.soundcloud.com/users/' + soundcloudNameMatched + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
                                                     success(function (data, status, headers, config) {
                                                         function addTrack(track) {
@@ -187,11 +189,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                                             newArtist.tracks.push(newTrack);
                                                         }
                                                         data.forEach(addTrack);
-                                                        
                                                     })
                                             }
                                         }
-                                    } else {
+                                    } if (newArtist.website == undefined || soundcloudUrl == null) {
                                         SC.get('/users', { q: "'" + el.name + "'"}, function (users) {
                                             function getSoundcloudName(elem) {
                                                 function findSouncloudTracks() {
