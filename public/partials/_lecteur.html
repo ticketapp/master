@@ -2,10 +2,14 @@
     <a class="close">X</a>
     <a class="reduire"> - </a>
 </div>
-<audio class="width100p" id="musicPlayer" autoplay controls="controls"></audio>
-<div ng-class="{onplay : $index == trackActive}" class="column large-2" ng-click="play($index)" ng-repeat="track in playlist">
-    <img src="{{track.image}}" class="column large-6" />
-    {{track.artist}}
-    {{track.name}}
-    {{track.from}}
+<audio class="width100p" id="musicPlayer" style="position: fixed" autoplay controls="controls"></audio>
+<div class="playlistContener">
+    <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" style="width: 200px; display:inline-block; white-space: normal;" ng-click="play($index)" ng-repeat="track in playlist track by $index">
+        <img src="{{track.image}}" class="column large-5 padding0" />
+        <div class="column large-7 padding0">
+            {{track.artist}}<br/>
+            {{track.name | limitTo: 30}}<br/>
+            {{track.from}}<br/>
+        </div>
+    </div>
 </div>

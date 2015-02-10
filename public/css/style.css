@@ -269,7 +269,16 @@ top: 0;
         /*video*/
         .onplay {background: #007095}
         .video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
-        .ng-lecture{height: 120px;
+        .playlistContener {overflow-x: scroll;
+            font-size: 11px;
+            width: auto;
+            overflow-y: hidden;
+            overflow-x: hidden;
+            white-space: nowrap;
+            display: inline-flex;
+            margin-top: 50px;}
+        .ng-lecture{
+            height : 200px;
             bottom: 0;
             position: fixed;
             width: 100%;
