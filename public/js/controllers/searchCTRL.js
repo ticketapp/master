@@ -170,13 +170,14 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                     SC.initialize({
                                         client_id: 'f297807e1780623645f8f858637d4abb'
                                     });
-                                    SC.get('/users', { q: "'"+ el.name +"'"}, function(users) {
-                                        function getSoundcloudName (elem){
-                                            function findSouncloudTracks () {
-                                                $http.get('http://api.soundcloud.com/users/' + newArtist.soundcloud.id + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
+                                    if (newArtist.website != undefined) {
+                                        if (soundcloudUrl = newArtist.website.match(/soundcloud\W.*/)) {
+                                            soundcloudUrl = soundcloudUrl[0].split(" ");
+                                            for (var urls=0; urls < soundcloudUrl.length; urls++) {
+                                                var soundcloudNameMatched = soundcloudUrl[urls].substring(soundcloudUrl[urls].indexOf(".com/") + 5)
+                                                $http.get('http://api.soundcloud.com/users/' + soundcloudNameMatched + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
                                                     success(function (data, status, headers, config) {
-                                                        function addTrack (track) {
-                                                            console.log(track)
+                                                        function addTrack(track) {
                                                             var newTrack = [];
                                                             newTrack.url = track.stream_url;
                                                             newTrack.name = track.title;
@@ -186,36 +187,60 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                                             newArtist.tracks.push(newTrack);
                                                         }
                                                         data.forEach(addTrack);
+                                                        
                                                     })
                                             }
-                                            $http.get('http://api.soundcloud.com/users/' + elem.id + '/web-profiles?client_id=f297807e1780623645f8f858637d4abb').
-                                                success(function (data, status, headers, config) {
-                                                    function getSouncloudUser (link) {
-                                                        var matchedId = link.url.match(/\d.*/);
-                                                        if (matchedId == null) {
-                                                            matchedId = ['0'];
-                                                        }
-                                                        if (el.website == undefined) {
-                                                            el.website = 'empty';
-                                                        }
-                                                        if (link.url == el.link || matchedId[0].indexOf(el.id) > -1 || el.website.indexOf(link.url) > -1 || el.website.indexOf(elem.id) > -1) {
+                                        }
+                                    } else {
+                                        SC.get('/users', { q: "'" + el.name + "'"}, function (users) {
+                                            function getSoundcloudName(elem) {
+                                                function findSouncloudTracks() {
+                                                    $http.get('http://api.soundcloud.com/users/' + newArtist.soundcloud.id + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
+                                                        success(function (data, status, headers, config) {
+                                                            function addTrack(track) {
+                                                                console.log(track)
+                                                                var newTrack = [];
+                                                                newTrack.url = track.stream_url;
+                                                                newTrack.name = track.title;
+                                                                newTrack.from = 'soundcloud';
+                                                                newTrack.image = track.artwork_url;
+                                                                newTrack.artist = newArtist.name;
+                                                                newArtist.tracks.push(newTrack);
+                                                            }
 
-                                                            console.log(elem);
-                                                            if (newArtist.soundcloud.length == 0) {
-                                                                newArtist.soundcloud = elem;
-                                                                findSouncloudTracks()
-                                                            } else if (elem.followers_count > newArtist.soundcloud.followers_count) {
-                                                                newArtist.soundcloud = elem;
-                                                                findSouncloudTracks()
+                                                            data.forEach(addTrack);
+                                                        })
+                                                }
 
+                                                $http.get('http://api.soundcloud.com/users/' + elem.id + '/web-profiles?client_id=f297807e1780623645f8f858637d4abb').
+                                                    success(function (data, status, headers, config) {
+                                                        function getSouncloudUser(link) {
+                                                            var matchedId = link.url.match(/\d.*/);
+                                                            if (matchedId == null) {
+                                                                matchedId = ['0'];
+                                                            }
+                                                            if (el.website == undefined) {
+                                                                el.website = 'empty';
+                                                            }
+                                                            if (link.url == el.link || matchedId[0].indexOf(el.id) > -1 || el.website.indexOf(link.url) > -1 || el.website.indexOf(elem.id) > -1) {
+                                                                if (newArtist.soundcloud.length == 0) {
+                                                                    newArtist.soundcloud = elem;
+                                                                    findSouncloudTracks()
+                                                                } else if (elem.followers_count > newArtist.soundcloud.followers_count) {
+                                                                    newArtist.soundcloud = elem;
+                                                                    findSouncloudTracks()
+
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                    data.forEach(getSouncloudUser)
-                                                });
-                                        }
-                                        users.forEach(getSoundcloudName)
-                                    });
+
+                                                        data.forEach(getSouncloudUser)
+                                                    });
+                                            }
+
+                                            users.forEach(getSoundcloudName)
+                                        });
+                                    }
                                     $scope.artistesFb.push(newArtist);
                                 }
                             }

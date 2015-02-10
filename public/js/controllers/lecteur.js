@@ -21,6 +21,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', function ($scope, $rootS
     $scope.play = function (i) {
         $scope.trackActive = i;
         if (i > 0) {
+            // not working use anchorscroll
             var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
             document.getElementsByClassName('ng-lecture')[0].scrollLeft = posTrackActive.left;
         }
