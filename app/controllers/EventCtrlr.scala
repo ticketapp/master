@@ -28,10 +28,9 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Event.findAllContaining(pattern)))
   }
 
-  val eventBindingForm = Form(mapping(
+  val eventBindingForm = Form(
+    mapping(
       "name" -> nonEmptyText(2),
-      "startSellingTime" -> optional(date),
-      "endSellingTime" -> optional(date),
       "description" -> nonEmptyText(2),
       "startTime" -> date,
       "endTime" -> optional(date),
@@ -40,21 +39,16 @@ object EventController extends Controller with securesocial.core.SecureSocial {
           "paths" -> text,
           "alts" -> text
         )(Image.formApply)(Image.formUnapply)),*/
-      "tariffs" -> seq( mapping(
-        "denominations" -> nonEmptyText,
-        "nbTicketToSells" -> number,
-        "prices" -> bigDecimal,
-        "startTimes" -> date,
-        "endTimes" -> date
-      )(Tariff.formApply)(Tariff.formUnapply))
+      "tariffs" -> seq(
+        mapping(
+          "denominations" -> nonEmptyText,
+          "nbTicketToSells" -> number,
+          "prices" -> bigDecimal,
+          "startTimes" -> date,
+          "endTimes" -> date
+        )(Tariff.formApply)(Tariff.formUnapply))
     )(Event.formApply)(Event.formUnapply)
   )
-    /*"denominations" -> list(text),
-  "nbTicketToSells" -> list(number),
-  "prices" -> list(bigDecimal),
-  "startTimes" -> list(date),
-  "endTimes" -> list(date)*/
-
 
   def createEvent = Action { implicit request =>
     eventBindingForm.bindFromRequest().fold(

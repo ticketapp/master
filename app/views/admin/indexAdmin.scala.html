@@ -1,4 +1,13 @@
 <h1>Index Administrateurs</h1>
+
+    <h2>test nested form</h2>
+    <form method="post" action="/admin/test2">
+        first name : <input type="text" name="firstname"> <br>
+        info 0 : <input type="text" name="informations[0].label"> <br>
+        info 1 : <input type="text" name="informations[1].label"> <br>
+        <input type="submit" value="test nested form" />
+    </form>
+
     <h2>Créer des tarifs</h2>
     <form name="tariffsForm" method="post" enctype="multipart/form-data" action="/upload">
         <input type="file" name="picture">

@@ -17,8 +17,6 @@ case class Event(eventId: Long,
                  isActive: Boolean,
                  creationDateTime: Date,
                  name: String,
-                 startSellingTime: Option[Date],
-                 endSellingTime: Option[Date],
                  description: String,
                  startTime: Date,
                  endTime: Option[Date],
@@ -28,42 +26,18 @@ case class Event(eventId: Long,
                  artists: List[Artist],
                  tariffs: List[Tariff])
 
-/*
-
-Virer les startsellingtime et endsellingtime car dépendent des tarifs??
-
-
- */
 
 object Event {
-  def formApply(name: String, startSellingTime: Option[Date], endSellingTime: Option[Date], description: String, startTime: Date,
-                endTime: Option[Date], ageRestriction: Int, tariffs: Seq[Tariff]
-                /*denominations: List[String], nbTicketToSells: List[Int], prices: List[BigDecimal],
-                startTimes: List[Date], endTimes: List[Date]*/): Event = {
-
-    println(tariffs)
-    /*(placeId: Long,
-      name: String,
-      eventId: Option[Long],
-      addressID: Option[Long])
-
-    var newPlaces = new ListBuffer[Place]()
-    (paths, alts).zipped.foreach((path, alt) => newPlaces += new Place(-1L, name, alt))
-
-    var newTariffs = new ListBuffer[Tariff]()
-    ((denominations, nbTicketToSells, prices).zipped, startTimes, endTimes).zipped.foreach { 
-        case ((denomination, nbTicketToSell, price), startTime, endTime) =>
-          newTariffs += new Tariff(-1L, denomination, nbTicketToSell, 0, price, startTime, endTime, -1L)
-      }
-*/
+  def formApply(name: String, description: String, startTime: Date, endTime: Option[Date], ageRestriction: Int,
+                tariffs: Seq[Tariff]): Event = {
 
     val images = List()
-    new Event(-1L, None, true, true, new Date, name, startSellingTime, endSellingTime, description, startTime,
+    new Event(-1L, None, true, true, new Date, name, description, startTime,
       endTime, ageRestriction, images, List(), List(), tariffs.toList) //newTariffs.toList)
   }
 
-  def formUnapply(event: Event): Option[(String, Option[Date], Option[Date], String, Date, Option[Date], Int, Seq[Tariff])] = {
-    Some((event.name, event.startSellingTime, event.endSellingTime, event.description, event.startTime,
+  def formUnapply(event: Event): Option[(String, String, Date, Option[Date], Int, Seq[Tariff])] = {
+    Some((event.name, event.description, event.startTime,
       event.endTime, event.ageRestriction, event.tariffs.toSeq))
   }
 
@@ -74,19 +48,16 @@ object Event {
       get[Boolean]("isActive") ~
       get[Date]("creationDateTime") ~
       get[String]("name") ~
-      get[Option[Date]]("startSellingTime") ~
-      get[Option[Date]]("endSellingTime") ~
       get[String]("description") ~
       get[Date]("startTime") ~
       get[Option[Date]]("endTime") ~
       get[Int]("ageRestriction") map {
-      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ startSellingTime
-        ~ endSellingTime ~ description ~ startTime ~ endTime ~ ageRestriction =>
-        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime,
-          description, startTime, endTime, ageRestriction, List(), List(), List(), List())
+      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ description ~ startTime ~ endTime
+        ~ ageRestriction =>
+        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, description, startTime, endTime,
+          ageRestriction, List(), List(), List(), List())
     }
   }
-
 
   def find(eventId: Long): Option[Event] = {
     DB.withConnection { implicit connection =>
@@ -154,59 +125,40 @@ object Event {
   def save(event: Event): Option[Long] = {
     Utilities.testIfExist("events", "facebookId", event.facebookId) match {
       case true => None
-      case false => try { DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO
-            events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-            startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
-            {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}) """)
-          .on(
-            'facebookId -> event.facebookId,
-            'isPublic -> event.isPublic,
-            'isActive -> event.isActive,
-            'creationDateTime -> event.creationDateTime,
-            'name -> event.name,
-            'startSellingTime -> event.startSellingTime,
-            'endSellingTime -> event.endSellingTime,
-            'description -> event.description,
-            'startTime -> event.startTime,
-            'endTime -> event.endTime,
-            'ageRestriction -> event.ageRestriction
-          ).executeInsert() match {
-            case None => None
-            case Some(i: Long) => Some(i)
-          }
+      case false => try {
+        DB.withConnection {
+          implicit connection =>
+            SQL( """INSERT INTO
+                events(facebookId, isPublic, isActive, creationDateTime, name, description, startTime, endTime,
+                ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
+                {description}, {startTime}, {endTime}, {ageRestriction}) """)
+              .on(
+                'facebookId -> event.facebookId,
+                'isPublic -> event.isPublic,
+                'isActive -> event.isActive,
+                'creationDateTime -> event.creationDateTime,
+                'name -> event.name,
+                'description -> event.description,
+                'startTime -> event.startTime,
+                'endTime -> event.endTime,
+                'ageRestriction -> event.ageRestriction
+              ).executeInsert() match {
+                case None => None
+                case Some(eventId) => {
+                  event.tariffs.foreach(tariff =>
+                    Tariff.save(tariff.copy(eventId = eventId))
+                  )
+                  Some(eventId)
+                }
+            }
+
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
       }
     }
-    //save tariffs remplacer par save(tariff) + eventIdToReturn
-      /*
-    event.tariffs.foreach(tariff =>
-      try {
-        DB.withConnection { implicit connection =>
-          SQL( """INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)
-            VALUES ({denomination}, {nbTicketToSell}, {price}, {startTime}, {endTime}, {eventId})""").on(
-              'denomination -> tariff.denomination,
-              'nbTicketToSell -> tariff.nbTicketToSell,
-              'price -> tariff.price,
-              'startTime -> tariff.startTime,
-              'endTime -> tariff.endTime,
-              'eventId -> eventIdToReturn
-            ).executeInsert().get
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
-      }
-    )*/
   }
 
-  /*
-   INSERT INTO
-            events(facebookId, isPublic, isActive, creationDateTime, name, startSellingTime, endSellingTime, description,
-            startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
-            {startSellingTime}, {endSellingTime}, {description}, {startTime}, {endTime}, {ageRestriction}
-   */
 
   def update(event: Event): Unit = {
     try {
@@ -230,11 +182,9 @@ object Event {
     }
   }
 
- /*
 
-  def upsert(event: Event) = TODO
+  //def upsert(event: Event) = TODO
 
-   */
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Option[Long] = {
     try {
@@ -285,7 +235,7 @@ object Event {
           JOIN eventsAddresses eA on e.eventId = eA.eventId
           JOIN addresses a ON a.addressId = eA.eventId
           WHERE a.isEvent = TRUE
-          ORDER BY a.geographicPoint <-> point '$center' LIMIT 10"""
+          ORDER BY a.geographicPoint <-> point '$center' LIMIT 50"""
         ).as(EventParser *).map(e => e.copy(
             images = Image.findAllByEvent(e).toList,
             artists = Artist.findAllByEvent(e).toList) )

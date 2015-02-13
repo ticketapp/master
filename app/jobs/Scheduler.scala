@@ -67,15 +67,16 @@ object Scheduler {
       case _ => None
     }
 
-    val event: Event = new Event(-1L, facebookId, true, true, new Date, name, None, None,
-      eventDescription, startTime, endTime, 16, List(), List(), List(), List())
+    val event: Event = new Event(-1L, facebookId, true, true, new Date, name, eventDescription, startTime, endTime, 16,
+      List(), List(), List(), List())
 
     Event.save(event) match {
       case None => Event.update(event) //delete old imgs and insert news
       case Some(eventId) => {
         Address.saveAddressAndEventRelation(address, eventId)
         Event.saveEventPlaceRelation(eventId, placeId)
-        if (imgPath.replaceAll("\"", "") != "null") Image.save(new Image(-1L, imgPath.replaceAll("\"", ""), Some(eventId), None))
+        if (imgPath.replaceAll("\"", "") != "null") Image.save(new Image(-1L, imgPath.replaceAll("\"", ""),
+          Some(eventId), None))
       }
     }
   }

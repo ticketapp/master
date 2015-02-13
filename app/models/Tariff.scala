@@ -72,15 +72,15 @@ object Tariff {
   def save(tariff: Tariff) = {
     try {
       DB.withConnection { implicit connection =>
-        SQL(
-          """INSERT INTO tariffs(denomination, nbTicketToSell, price, eventId)
-            VALUES({denomination}, {nbTicketToSell}, {price}, {eventId})
-          """).on(
-          'denomination -> tariff.denomination,
-          'nbTicketToSell -> tariff.nbTicketToSell,
-          'price -> tariff.price,
-          'tariffId -> tariff.eventId
-        ).executeInsert().get
+        SQL( """INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)
+            VALUES ({denomination}, {nbTicketToSell}, {price}, {startTime}, {endTime}, {eventId})""").on(
+            'denomination -> tariff.denomination,
+            'nbTicketToSell -> tariff.nbTicketToSell,
+            'price -> tariff.price,
+            'startTime -> tariff.startTime,
+            'endTime -> tariff.endTime,
+            'eventId -> tariff.eventId
+          ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
