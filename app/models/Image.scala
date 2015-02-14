@@ -4,16 +4,14 @@ import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
 import play.api.db.DB
-import play.api.libs.json.{Json, JsNull, Writes}
+import play.api.libs.json.Json
 import play.api.Play.current
-import scala.util.Try
 import services.Utilities
 
 case class Image (imageId: Long,
                   path: String,
                   eventId: Option[Long] = None,
                   userId: Option[Long] = None)
-
 
 object Image {
 
@@ -43,7 +41,7 @@ object Image {
     DB.withConnection { implicit connection =>
       SQL("select * from images where eventId = {eventId}")
         .on('eventId -> event.eventId)
-        .as(ImageParser *)
+        .as(ImageParser.*)
     }
   }
 
@@ -53,7 +51,7 @@ object Image {
              FROM Images
              WHERE placeId = {placeId}""")
         .on('placeId -> placeId)
-        .as(ImageParser *)
+        .as(ImageParser.*)
     }
   }
 
@@ -82,4 +80,20 @@ object Image {
       }
     }
   }
+
+  def saveEventImageRelation(eventId: Long, imageId: Long): Option[Long] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """INSERT INTO eventsImages (eventId, imageId)
+            VALUES ({eventId}, {imageId})""").on(
+            'eventId -> eventId,
+            'imageId -> imageId
+          ).executeInsert()
+      }
+    } catch {
+      case e: Exception => throw new DAOException("saveEventImageRelation: " + e.getMessage)
+    }
+  }
 }
+
+

@@ -1,11 +1,8 @@
 package controllers
 
-import play.api.data.Form
 import play.api.mvc._
 import play.api.libs.json.Json
 import models.{Info, Ticket}
-
-
 
 object Application extends Controller with securesocial.core.SecureSocial {
   def index = UserAwareAction { implicit request =>

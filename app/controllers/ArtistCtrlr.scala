@@ -1,13 +1,10 @@
 package controllers
 
-import anorm._
 import models.Artist
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.db.DB
 import play.api.mvc._
 import play.api.libs.json.Json
-
 
 object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action {

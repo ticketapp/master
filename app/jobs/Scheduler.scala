@@ -3,11 +3,11 @@ package jobs
 import java.util.Date
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
-import scala.concurrent.Future
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models.{Place, Event, Image, Address}
 import scala.util.{Failure, Success}
+import controllers.WebServiceException
 
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -32,12 +32,11 @@ object Scheduler {
     //println(s"$eventJson")
 
     val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
-      case Some(latitude) => {
+      case Some(latitude) =>
         (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
           case Some(longitude) => Some(s"$latitude, $longitude")
           case _ => None
         }
-      }
       case _ => None
     }
     val street = (eventJson \ "venue" \ "street").as[Option[String]]
@@ -72,12 +71,11 @@ object Scheduler {
 
     Event.save(event) match {
       case None => Event.update(event) //delete old imgs and insert news
-      case Some(eventId) => {
+      case Some(eventId) =>
         Address.saveAddressAndEventRelation(address, eventId)
-        Event.saveEventPlaceRelation(eventId, placeId)
+        Place.saveEventPlaceRelation(eventId, placeId)
         if (imgPath.replaceAll("\"", "") != "null") Image.save(new Image(-1L, imgPath.replaceAll("\"", ""),
           Some(eventId), None))
-      }
     }
   }
 
@@ -101,40 +99,19 @@ object Scheduler {
             val name = Json.stringify(eventDetailed.json \ "name")
             val imgPath = Json.stringify(eventDetailed.json \ "cover" \ "source")
             saveEvent(addBannerToEventDescription(description, name, imgPath), eventDetailed, placeId, imgPath)
-          case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
+          case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
         } )
-      case Failure(f) => println("An error has occurred in saveEventsOfPlace: " + f.getMessage)
+      case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
     }
   }
 
-  def start = {
+  def start() = {
     Place.findAllIdsAndFacebookIds match {
-      case Failure(f) => println("Erreur dans le scheduler :\n" + f + "\n")
-      case Success(listPlacesIdAndFbIdFromDatabase) => {
+      case Failure(f) => throw new WebServiceException("Error in scheduler : " + f.getMessage)
+      case Success(listPlacesIdAndFbIdFromDatabase) =>
         listPlacesIdAndFbIdFromDatabase.foreach( placeIdAndFbId =>
           saveEventsOfPlace(placeIdAndFbId._1, placeIdAndFbId._2)
         )
-      }
     }
   }
 }
-
-
-/*
-  def returnListOfIdsFromPlaces(resp : play.api.libs.ws.Response): List[String] = {
-    var ids: List[String] = List()
-    val responseData: JsValue = resp.json \ "data"
-    val responseDataCategory_list = responseData \\ "category_list"
-    var indexes: List[Int] = List()
-    val listCategoryWeWantToKeep = List(JsString("179943432047564"), JsString("299714525147")) //concert venue, club
-
-    for(j <- 0 until responseDataCategory_list.length) {
-      if (listCategoryWeWantToKeep.contains((responseDataCategory_list(j) \\ "id")(0)))
-        indexes = indexes :+ j
-    }
-
-    indexes.foreach{ x =>
-      ids = ids :+ Json.stringify(responseData(x) \ "id").replaceAll("\"", "")
-    }
-    ids
-  }*/

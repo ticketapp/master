@@ -4,7 +4,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
 import play.api.libs.json.Json
-import models.{Image, Tariff, Event}
+import models.{Tariff, Event}
 import json.JsonHelper._
 
 

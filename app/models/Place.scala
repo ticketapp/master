@@ -1,7 +1,5 @@
 package models
 
-import java.util.Date
-
 import anorm.SqlParser._
 import anorm._
 import play.api.db.DB
@@ -11,10 +9,6 @@ import controllers.DAOException
 import services.Utilities
 
 import scala.util.Try
-
-/**
- * Created by sim on 03/10/14.
- */
 
 case class Place (placeId: Long,
                   name: String,
@@ -79,7 +73,7 @@ object Place {
 
   def findAll: Seq[Place] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM places").as(PlaceParser *).map(p => p.copy(
+      SQL("SELECT * FROM places").as(PlaceParser.*).map(p => p.copy(
         images = Image.findAllByPlace(p.placeId).toList) )
     }
   }
@@ -101,7 +95,7 @@ object Place {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM places WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 5")
           .on('patternLowCase -> pattern.toLowerCase)
-          .as(PlaceParser *)
+          .as(PlaceParser.*)
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Place.findAllContaining: " + e.getMessage)
@@ -118,16 +112,30 @@ object Place {
     images = Image.findAllByPlace(p.placeId).toList) )
   }
 
-  def followPlace(userId : Long, placeId : Long): Long = {
+  def followPlace(userId : Long, placeId : Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into placesFollowed(userId, placeId) values ({userId}, {placeId})").on(
           'userId -> userId,
           'placeId -> placeId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot follow place: " + e.getMessage)
+    }
+  }
+
+  def saveEventPlaceRelation(eventId: Long, placeId: Long): Option[Long] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """INSERT INTO eventsPlaces (eventId, placeId)
+          VALUES ({eventId}, {placeId})""").on(
+            'eventId -> eventId,
+            'placeId -> placeId
+          ).executeInsert()
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot save in eventsPlaces : " + e.getMessage)
     }
   }
 }

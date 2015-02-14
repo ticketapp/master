@@ -33,7 +33,7 @@ object Address {
 
   def findAll(): Seq[Address] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from addresss").as(AddressParser *)
+      SQL("select * from addresss").as(AddressParser.*)
     }
   }
 
@@ -43,7 +43,7 @@ object Address {
              FROM eventsAddresss eA
              INNER JOIN addresss a ON a.addressId = eA.addressId where eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
-        .as(AddressParser *)
+        .as(AddressParser.*)
     }
   }
 
@@ -60,7 +60,7 @@ object Address {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM addresss WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
-          .as(AddressParser *)
+          .as(AddressParser.*)
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
@@ -131,7 +131,6 @@ object Address {
         case e: Exception => throw new DAOException("saveEventAddressRelation: " + e.getMessage)
       }
     }
-
 
   def deleteAddress(addressId: Long): Long = {
     try {

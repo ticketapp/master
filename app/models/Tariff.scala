@@ -3,15 +3,11 @@ package models
 import anorm.SqlParser._
 import anorm._
 import play.api.db.DB
-import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
 import java.util.Date
 import java.math.BigDecimal
 
-/**
- * Created by sim on 03/10/14.
- */
 case class Tariff (tariffId: Long,
                    denomination: String,
                    nbTicketToSell: Int,

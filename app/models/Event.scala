@@ -5,11 +5,8 @@ import play.api.db._
 import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
-import play.api.libs.json.Json
-import play.api.libs.json._
 import java.util.Date
 import services.Utilities
-import scala.collection.mutable.ListBuffer
 
 case class Event(eventId: Long,
                  facebookId: Option[String],
@@ -112,7 +109,7 @@ object Event {
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
-          .on('patternLowCase -> pattern.toLowerCase())
+          .on('patternLowCase -> pattern.toLowerCase)
           .as(EventParser *).map(e => e.copy(
           images = Image.findAllByEvent(e).toList,
           artists = Artist.findAllByEvent(e).toList))
@@ -144,12 +141,18 @@ object Event {
                 'ageRestriction -> event.ageRestriction
               ).executeInsert() match {
                 case None => None
-                case Some(eventId) => {
+                case Some(eventId: Long) =>
                   event.tariffs.foreach(tariff =>
                     Tariff.save(tariff.copy(eventId = eventId))
                   )
+                  event.images.foreach(image =>
+                    Image.save(image.copy(eventId = Some(eventId)))
+                  )
+
+                  //pareil pour artists mais faut que la relation soit enregistré aussi i.e si lartiste existe déjà
+                  //on renvoie son id déjà existant sinon le nouveau et on enregistre la relation avec
+                  // saveEventArtistRelation qui devrait être une méthode de artist
                   Some(eventId)
-                }
             }
 
         }
@@ -186,33 +189,7 @@ object Event {
   //def upsert(event: Event) = TODO
 
 
-  def saveEventPlaceRelation(eventId: Long, placeId: Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO eventsPlaces (eventId, placeId)
-          VALUES ({eventId}, {placeId})""").on(
-            'eventId -> eventId,
-            'placeId -> placeId
-          ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot save in eventsPlaces : " + e.getMessage)
-    }
-  }
 
-  def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO eventsPlaces (eventId, placeId)
-          VALUES ({eventId}, {placeId})""").on(
-            'eventId -> eventId,
-            'placeId -> addressId
-          ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("saveEventAddressRelation: " + e.getMessage)
-    }
-  }
 
   def followEvent(userId: Long, eventId: Long): Option[Long] = {
     try {
@@ -236,7 +213,7 @@ object Event {
           JOIN addresses a ON a.addressId = eA.eventId
           WHERE a.isEvent = TRUE
           ORDER BY a.geographicPoint <-> point '$center' LIMIT 50"""
-        ).as(EventParser *).map(e => e.copy(
+        ).as(EventParser.*).map(e => e.copy(
             images = Image.findAllByEvent(e).toList,
             artists = Artist.findAllByEvent(e).toList) )
       }

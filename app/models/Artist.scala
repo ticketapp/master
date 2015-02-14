@@ -2,7 +2,8 @@ package models
 
 import anorm.SqlParser._
 import anorm._
-import controllers._
+import controllers.DAOException
+import controllers.WebServiceException
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -14,10 +15,6 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WS
 import scala.util.{Failure, Success}
 
-
-/**
- * Created by simon on 03/10/14.
- */
 case class Artist (artistId: Long,
                    creationDateTime: Date,
                    facebookId: Option[String],
@@ -43,7 +40,7 @@ object Artist {
 
   def findAll(): Seq[Artist] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from artists").as(ArtistParser *)
+      SQL("select * from artists").as(ArtistParser.*)
     }
   }
 
@@ -53,7 +50,7 @@ object Artist {
              FROM eventsArtists eA
              INNER JOIN artists a ON a.artistId = eA.artistId where eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
-        .as(ArtistParser *)
+        .as(ArtistParser.*)
     }
   }
 
@@ -70,7 +67,7 @@ object Artist {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM artists WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
-          .as(ArtistParser *)
+          .as(ArtistParser.*)
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Artist.findAllContaining: " + e.getMessage)
@@ -80,10 +77,10 @@ object Artist {
   def formApply(facebookId: Option[String], name: String): Artist = new Artist(-1L, new Date, facebookId, name, None)
   def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
 
-  def saveArtist(artist: Artist): Long = {
+  def saveArtist(artist: Artist): Option[Long] = {
     WS.url("https://graph.facebook.com/v2.2/" + artist.facebookId + token).get onComplete {
-      case Success(artist) => val category = Json.stringify(artist.json \ "category")
-        val categoryList = Json.stringify(artist.json \ "category_list")
+      case Success(artistFound) => val category = Json.stringify(artistFound.json \ "category")
+        val categoryList = Json.stringify(artistFound.json \ "category_list")
         println(category)
         println(categoryList)
 
@@ -95,7 +92,7 @@ object Artist {
         SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
           'name -> artist.name,
           'facebookId -> artist.facebookId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
@@ -111,13 +108,13 @@ object Artist {
     }
   }
 
-  def followArtist(userId : Long, artistId : Long): Long = {
+  def followArtist(userId : Long, artistId : Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into artistsFollowed(userId, artistId) values ({userId}, {artistId})").on(
           'userId -> userId,
           'artistId -> artistId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot follow artist: " + e.getMessage)
