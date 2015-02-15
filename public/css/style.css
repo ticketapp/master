@@ -269,6 +269,14 @@ top: 0;
         /*video*/
         .onplay {background: #007095}
         .video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
+        #iframe-lecture {z-index: 9;
+            position: fixed;
+            margin-top: 10px;
+        }
+        #youtubePlayer{z-index: 9;
+            position: fixed;
+            bottom:13px;
+        }
         .playlistContener {overflow-x: scroll;
             font-size: 11px;
             width: auto;
@@ -276,7 +284,8 @@ top: 0;
             overflow-x: hidden;
             white-space: nowrap;
             display: inline-flex;
-            margin-top: 50px;}
+            margin-top: 50px;
+            margin-left: 220px}
         .ng-lecture{
             height : 200px;
             bottom: 0;
