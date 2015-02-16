@@ -155,6 +155,130 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                             //if ($scope.artistesFb.length == 0) {
                                 $scope.artistesFb = [];
                             //}
+                            function searchTracksEchonestTmh(newArtist) {
+                                function getSongsEcho(rep, images, echoname) {
+                                    $http.get('http://developer.echonest.com/api/v4/artist/songs?api_key=3ZYZKU3H3MKR2M59Z&id=' + rep[echoart].id + '&format=json&results=50').
+                                        success(function (data) {
+                                            var songs = data.response.songs;
+
+                                            /*function tracksToEmbed(song, artist) {
+                                                var track;
+                                                track = window.tomahkAPI.Track(song, artist, {
+                                                    width: 300,
+                                                    height: 300,
+                                                    disabledResolvers: [
+                                                        "SoundCloud",
+                                                        "Exfm",
+                                                        "Youtube"
+                                                        // options: "SoundCloud", "Officialfm", "Lastfm", "Jamendo", "Youtube", "Rdio", "SpotifyMetadata", "Deezer", "Exfm"
+                                                    ],
+                                                    handlers: {
+                                                        onloaded: function () {
+                                                            log(track.connection + ":\n  api loaded");
+                                                        },
+                                                        onended: function () {
+                                                            log(track.connection + ":\n  Song ended: " + track.artist + " - " + track.title);
+                                                        },
+                                                        onplayable: function () {
+                                                            log(track.connection + ":\n  playable");
+                                                        },
+                                                        onresolved: function (resolver, result) {
+                                                            log(track.connection + ":\n  Track found: " + resolver + " - " + result.track + " by " + result.artist);
+                                                        },
+                                                        ontimeupdate: function (timeupdate) {
+                                                            var currentTime = timeupdate.currentTime;
+                                                            var duration = timeupdate.duration;
+                                                            currentTime = parseInt(currentTime);
+                                                            duration = parseInt(duration);
+
+                                                            log(track.connection + ":\n  Time update: " + currentTime + " " + duration);
+                                                        }
+                                                    }
+                                                });
+                                                var newTrack = [];
+                                                newTrack.url = track.iframe.src.replace('autoplay=0', 'autoplay=1');
+                                                newTrack.name = track.title;
+                                                newTrack.from = 'tomahk';
+                                                newTrack.image = images[0].url;
+                                                newTrack.artist = track.artist;
+                                                newArtist.tracks.push(newTrack);
+                                                console.log(track)
+                                            }*/
+                                            function searchVideo (song, artist) {
+                                                $http.get('https://www.googleapis.com/youtube/v3/search?part=snippet&q='+ song+artist +'&type=video&videoCategoryId=10&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
+                                                    success(function(data){
+                                                        console.log(data);
+                                                        var newTrack = [];
+                                                        newTrack.url = data.items[0].id.videoId;
+                                                        newTrack.name = data.items[0].snippet.title;
+                                                        newTrack.from = 'youtube';
+                                                        newTrack.image = data.items[0].snippet.thumbnails.default.url;
+                                                        newTrack.artist = artist;
+                                                        newArtist.tracks.push(newTrack);
+                                                    })
+                                            }
+
+                                            for (var s = 0; s < songs.length; s++) {
+                                                //tracksToEmbed(songs[s].title, echoname)
+                                                searchVideo(songs[s].title, echoname)
+                                            }
+                                        })
+                                }
+
+                                $http.get('http://developer.echonest.com/api/v4/artist/search?api_key=3ZYZKU3H3MKR2M59Z&name=' + newArtist.name + '&format=json&bucket=urls&bucket=images&bucket=id:facebook').
+                                    success(function (data) {
+                                        var rep = data.response.artists;
+                                        console.log(rep)
+                                        for (echoart = 0; echoart < rep.length; echoart++) {
+                                            if (rep[echoart].foreign_ids != undefined) {
+                                                var id_fb = rep[echoart].foreign_ids[0].foreign_id.replace("facebook:artist:", "");
+                                                console.log(id_fb);
+                                                console.log(newArtist.artistId)
+                                                if (id_fb == newArtist.artistId) {
+                                                    var echoname = rep[echoart].name;
+                                                    var images = rep[echoart].images;
+                                                    getSongsEcho(rep, images, echoname);
+                                                }
+                                            } else if (rep[echoart].urls.official_url != undefined) {
+                                                var reformatUrl = rep[echoart].urls.official_url.substring(rep[echoart].urls.official_url.indexOf("http://") + 7);
+                                                reformatUrl = reformatUrl.replace("/", "");
+                                                if (newArtist.website.indexOf(reformatUrl) > -1) {
+                                                    var echoname = rep[echoart].name;
+                                                    var images = rep[echoart].images;
+                                                    getSongsEcho(rep, images, echoname);
+                                                }
+                                            }
+                                        }
+                                    });
+                                if (newArtist.tracks.length == 0) {
+                                    $http.get('http://developer.echonest.com/api/v4/artist/search?api_key=3ZYZKU3H3MKR2M59Z&name=' + _research + '&format=json&bucket=urls&bucket=images&bucket=id:facebook').
+                                        success(function (data) {
+                                            var rep = data.response.artists;
+                                            console.log(rep)
+                                            for (echoart = 0; echoart < rep.length; echoart++) {
+                                                if (rep[echoart].foreign_ids != undefined) {
+                                                    var id_fb = rep[echoart].foreign_ids[0].foreign_id.replace("facebook:artist:", "");
+                                                    console.log(id_fb);
+                                                    console.log(newArtist.artistId)
+                                                    if (id_fb == newArtist.artistId) {
+                                                        var echoname = rep[echoart].name;
+                                                        var images = rep[echoart].images;
+                                                        getSongsEcho(rep, images, echoname);
+                                                    }
+                                                } else if (rep[echoart].urls.official_url != undefined) {
+                                                    var reformatUrl = rep[echoart].urls.official_url.substring(rep[echoart].urls.official_url.indexOf("http://") + 7);
+                                                    reformatUrl = reformatUrl.replace("/", "");
+                                                    if (newArtist.website.indexOf(reformatUrl) > -1) {
+                                                        var echoname = rep[echoart].name;
+                                                        var images = rep[echoart].images;
+                                                        getSongsEcho(rep, images, echoname);
+                                                    }
+                                                }
+                                            }
+                                        });
+                                }
+                            }
+
                             function updateArtistFb (el, index, array) {
                                 if (el.category == 'Musician/band' && el.cover != undefined) {
                                     var newArtist =[];
@@ -167,6 +291,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                     newArtist.images.push({path: el.cover.source});
                                     newArtist.soundcloud = [];
                                     newArtist.tracks = [];
+                                    searchTracksEchonestTmh(newArtist);
                                     SC.initialize({
                                         client_id: 'f297807e1780623645f8f858637d4abb'
                                     });
@@ -238,7 +363,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                                         data.forEach(getSouncloudUser)
                                                     });
                                             }
-
                                             users.forEach(getSoundcloudName)
                                         });
                                     }
