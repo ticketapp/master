@@ -4,7 +4,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
 import play.api.libs.json.Json
-import models.{Tariff, Event}
+import models.{Image, Tariff, Event}
 import json.JsonHelper._
 
 
@@ -32,20 +32,19 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     mapping(
       "name" -> nonEmptyText(2),
       "description" -> nonEmptyText(2),
-      "startTime" -> date,
-      "endTime" -> optional(date),
+      "startTime" -> date("yyyy-MM-dd HH:mm"),
+      "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
       "ageRestriction" -> number,
-      /*"images" -> list( mapping(
-          "paths" -> text,
-          "alts" -> text
-        )(Image.formApply)(Image.formUnapply)),*/
-      "tariffs" -> seq(
+      "images" -> list( mapping(
+          "paths" -> text
+        )(Image.formApply)(Image.formUnapply)),
+      "tariffs" -> list(
         mapping(
           "denominations" -> nonEmptyText,
           "nbTicketToSells" -> number,
           "prices" -> bigDecimal,
-          "startTimes" -> date,
-          "endTimes" -> date
+          "startTimes" -> date("yyyy-MM-dd HH:mm"),
+          "endTimes" -> date("yyyy-MM-dd HH:mm")
         )(Tariff.formApply)(Tariff.formUnapply))
     )(Event.formApply)(Event.formUnapply)
   )

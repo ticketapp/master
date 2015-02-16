@@ -4,13 +4,13 @@ import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
 import controllers.WebServiceException
+import services.Utilities
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 import java.util.Date
 import play.api.libs.ws.Response
 import scala.concurrent.Future
-import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WS
 import scala.util.{Failure, Success}
@@ -98,6 +98,25 @@ object Artist {
       case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
     }
   }
+
+
+  def saveArtistAndEventRelation(artist: Artist): Option[Long] = {
+    Utilities.testIfExist("artists", "id", artist.artistId) match {
+      case true => None//on va chercher l'id de l'artiste dans la table et on le lie à l'id de l'event
+      case false => try {
+        DB.withConnection { implicit connection =>
+          SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
+            'name -> artist.name,
+            'facebookId -> artist.facebookId
+          ).executeInsert()
+          // + lier à l'id de l'event
+        }
+      } catch {
+        case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
+      }
+    }
+  }
+
 
 
   def deleteArtist(artistId: Long): Long = {

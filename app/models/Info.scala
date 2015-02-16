@@ -5,21 +5,13 @@ import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
 import play.api.libs.json.Json
-import play.api.libs.json._
-//import models.User
+
 
 case class Info(id: Long,
                 title: String,
                 content: String)
-//tariffsId
 
 object Info {
-  /*implicit def pkWrites[T : Writes]: Writes[Pk[T]] = Writes {
-    case anorm.Id(t) => implicitly[Writes[T]].writes(t)
-    case anorm.NotAssigned => JsNull
-  }*/
-  implicit val infoWrites = Json.writes[Info]
-
   private val InfoParser: RowParser[Info] = {
     get[Long]("infoId") ~
     get[String]("title") ~
@@ -31,8 +23,7 @@ object Info {
 
   def findAll() = {
     DB.withConnection { implicit connection =>
-      SQL(""" SELECT * from infos""").as(InfoParser *)
-
+      SQL(""" SELECT * from infos""").as(InfoParser.*)
     }
   }
 

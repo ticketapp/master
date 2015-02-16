@@ -26,16 +26,14 @@ case class Event(eventId: Long,
 
 object Event {
   def formApply(name: String, description: String, startTime: Date, endTime: Option[Date], ageRestriction: Int,
-                tariffs: Seq[Tariff]): Event = {
+                images: List[Image], tariffs: List[Tariff]): Event = {
 
-    val images = List()
     new Event(-1L, None, true, true, new Date, name, description, startTime,
-      endTime, ageRestriction, images, List(), List(), tariffs.toList) //newTariffs.toList)
+      endTime, ageRestriction, images, List(), List(), tariffs)
   }
 
-  def formUnapply(event: Event): Option[(String, String, Date, Option[Date], Int, Seq[Tariff])] = {
-    Some((event.name, event.description, event.startTime,
-      event.endTime, event.ageRestriction, event.tariffs.toSeq))
+  def formUnapply(event: Event): Option[(String, String, Date, Option[Date], Int, List[Image], List[Tariff])] = {
+    Some((event.name, event.description, event.startTime, event.endTime, event.ageRestriction, event.images, event.tariffs))
   }
 
   private val EventParser: RowParser[Event] = {
@@ -79,7 +77,7 @@ object Event {
             events.endTime, events.ageRestriction
         FROM events
         ORDER BY events.creationDateTime DESC
-        LIMIT 20""").as(EventParser *)
+        LIMIT 20""").as(EventParser.*)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList))
@@ -98,7 +96,7 @@ object Event {
         ORDER BY s.creationDateTime DESC
         LIMIT 20""")
         .on('placeId -> placeId)
-        .as(EventParser *)
+        .as(EventParser.*)
       eventsResultSet.map(e => e.copy(
         images = Image.findAllByEvent(e).toList,
         artists = Artist.findAllByEvent(e).toList))
@@ -110,7 +108,7 @@ object Event {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
-          .as(EventParser *).map(e => e.copy(
+          .as(EventParser.*).map(e => e.copy(
           images = Image.findAllByEvent(e).toList,
           artists = Artist.findAllByEvent(e).toList))
       }

@@ -7,7 +7,6 @@ import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
 import services.Utilities
-
 import scala.util.Try
 
 case class Place (placeId: Long,

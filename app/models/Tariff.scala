@@ -17,10 +17,8 @@ case class Tariff (tariffId: Long,
                    endTime: Date,
                    eventId: Long)
 
-
 object Tariff {
-  def formApply(denomination: String,  nbTicketToSell: Int, price: scala.BigDecimal, startTime: Date, endTime: Date)
-    = {
+  def formApply(denomination: String,  nbTicketToSell: Int, price: scala.BigDecimal, startTime: Date, endTime: Date) = {
     println("ok")
     new Tariff(-1L, denomination, nbTicketToSell, 0, price.bigDecimal, startTime, endTime, -1L)
   }
@@ -43,7 +41,7 @@ object Tariff {
 
   def findAll(): Seq[Tariff] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from tariffs").as(TariffParser *)
+      SQL("select * from tariffs").as(TariffParser.*)
     }
   }
 
@@ -61,7 +59,7 @@ object Tariff {
              FROM Tariffs
              WHERE eventId = {eventId}""")
         .on('eventId -> event.eventId)
-        .as(TariffParser *)
+        .as(TariffParser.*)
     }
   }
 

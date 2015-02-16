@@ -135,10 +135,7 @@ object Address {
   def deleteAddress(addressId: Long): Long = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("DELETE FROM address WHERE addressId={addressId}"
-        ).on(
-          'addressId -> addressId
-        ).executeUpdate()
+        SQL("""DELETE FROM address WHERE addressId={addressId}""").on('addressId -> addressId).executeUpdate()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)

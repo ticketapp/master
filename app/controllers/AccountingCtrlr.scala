@@ -9,21 +9,21 @@ import play.api.mvc._
 import play.api.Play.current
 
 object AccountingCtrlr extends Controller {
-  def createBankLine(amount: BigDecimal, debit: Boolean, paymentReference: Option[Int], orderId: Long) = {
+  def createBankLine(amount: BigDecimal, debit: Boolean, paymentReference: Option[Int], orderId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into bank(amount, debit, orderId) values ({amount}, {debit}, {orderId})").on(
           'amount -> amount,
           'debit -> debit,
           'orderId -> orderId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create bank line: " + e.getMessage)
     }
   }
 
-  def createAccount63Line(name: String, amount: BigDecimal, orderId: Long) = {
+  def createAccount63Line(name: String, amount: BigDecimal, orderId: Long): Option[Long] = {
     val amountTVA = amount * 5.5 / 100
     try {
       DB.withConnection { implicit connection =>
@@ -31,7 +31,7 @@ object AccountingCtrlr extends Controller {
           'name -> name,
           'amountTVA -> amountTVA,
           'orderId -> orderId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create a new line on account 63: " + e.getMessage)
@@ -39,7 +39,7 @@ object AccountingCtrlr extends Controller {
   }
 
 
-  def createAccount627Line(name: String, bankAccountCharge: BigDecimal, orderId: Long) = {
+  def createAccount627Line(name: String, bankAccountCharge: BigDecimal, orderId: Long): Option[Long] = {
     //val bankAccountCharge = amount * 1/100
     try {
       DB.withConnection { implicit connection =>
@@ -47,14 +47,14 @@ object AccountingCtrlr extends Controller {
           'name -> name,
           'bankAccountCharge -> bankAccountCharge,
           'orderId -> orderId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create a new line on account 627: " + e.getMessage)
     }
   }
 
-  def createAccount627LineAndBankLine(name: String, amount: BigDecimal, orderId: Long) = {
+  def createAccount627LineAndBankLine(name: String, amount: BigDecimal, orderId: Long): Option[Long] = {
     val bankAccountCharge = amount * 1/100
     val account627Id = createAccount627Line(name, bankAccountCharge, orderId)
     try {
@@ -64,42 +64,42 @@ object AccountingCtrlr extends Controller {
             'name -> name,
             'bankAccountCharge -> bankAccountCharge,
             'account627Id -> account627Id
-          ).executeInsert().get
+          ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create a new line on account 627: " + e.getMessage)
     }
   }
 
-  def createAccount4686Line(debit: Boolean, amount: BigDecimal,account63Id: BigInt) = {
+  def createAccount4686Line(debit: Boolean, amount: BigDecimal, account63Id: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into account4686(debit, amount, account63Id) values ({debit}, {amount}, {account63Id})").on(
           'debit -> debit,
           'amount -> amount,
           'account63Id -> account63Id
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create a new line on account 4686: " + e.getMessage)
     }
   }
 
-  def createAccount60Line(name: String, orgaReturn: BigDecimal, orderId: BigInt) = {
+  def createAccount60Line(name: String, orgaReturn: BigDecimal, orderId: BigInt): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into account60(name, amount, orderId) values ({name}, {orgaReturn}, {orderId})").on(
           'name -> name,
           'orgaReturn -> orgaReturn,
           'orderId -> orderId
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create a new line on account 60: " + e.getMessage)
     }
   }
 
-  def createAccount60LineAndAccount403Line(name: String, amount: BigDecimal, orderId: BigInt) = {
+  def createAccount60LineAndAccount403Line(name: String, amount: BigDecimal, orderId: BigInt): Option[Long] = {
     val orgaReturn = amount * 95/100
     val account60Id = createAccount60Line(name, orgaReturn, orderId)
     try {
@@ -108,7 +108,7 @@ object AccountingCtrlr extends Controller {
                 values ({orgaReturn}, false, {account60Id})""").on(
             'orgaReturn -> orgaReturn,
             'account60Id -> account60Id
-          ).executeInsert().get
+          ).executeInsert()
       }
     } catch {
       case e: Exception =>

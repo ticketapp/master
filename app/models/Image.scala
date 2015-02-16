@@ -17,7 +17,7 @@ object Image {
 
   implicit val imageWrites = Json.writes[Image]
 
-  def formApply(path: String, alt: String) = new Image(-1L, path)
+  def formApply(path: String) = new Image(-1L, path)
 
   def formUnapply(image: Image) = Some((image.path))
 
