@@ -138,16 +138,15 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
     };
 
     $scope.createNewEvent = function () {
-        
-        console.log($scope.newEvent.startTime);
-        //$scope.newEvent.startDate = $scope.newEvent.startDate.getFullYear() + '-' + $scope.newEvent.startDate.getMonth()+1 + '-' + $scope.newEvent.startDate.getDate();
-        //$scope.newEvent.endDate = $scope.newEvent.endDate.getFullYear() + '-' + $scope.newEvent.endDate.getMonth()+1 + '-' + $scope.newEvent.endDate.getDate();
-        //$scope.newEvent.startTime = $scope.newEvent.startTime.getFullYear() + '-' + $scope.newEvent.startTime.getMonth()+1 + '-' + $scope.newEvent.startTime.getDate();
-        //$scope.newEvent.endTime = $scope.newEvent.endTime.getFullYear() + '-' + $scope.newEvent.endTime.getMonth()+1 + '-' + $scope.newEvent.endTime.getDate();
+        for(var i = 0; i < $scope.newEvent.tarifs.length; i++) {
+            $scope.newEvent.tarifs[i].startTimes = $filter('date')($scope.newEvent.tarifs[i].startTimes, "yyyy-MM-dd " +
+                "HH:mm");
+            $scope.newEvent.tarifs[i].endTimes = $filter('date')($scope.newEvent.tarifs[i].endTimes, "yyyy-MM-dd " +
+                "HH:mm");
+        }
+
         $http.post('/events/create', {
             name: $scope.newEvent.name,
-            //startSellingTime: $scope.newEvent.startDate.getFullYear() + '-' + $scope.newEvent.startDate.getMonth()+1 + '-' + $scope.newEvent.startDate.getDate(),
-            //endSellingTime: $scope.newEvent.endDate.getFullYear() + '-' + $scope.newEvent.endDate.getMonth()+1 + '-' + $scope.newEvent.endDate.getDate(),
             description: $scope.newEvent.description,
             startTime: $filter('date')($scope.newEvent.startTime, "yyyy-MM-dd HH:mm"),
             endTime: $filter('date')($scope.newEvent.endTime, "yyyy-MM-dd HH:mm"),
@@ -156,7 +155,8 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
             places: $scope.newEvent.place,
             users: $scope.newEvent.user,
             artists: $scope.newEvent.artists,
-            tariffs: $scope.newEvent.tarifs
+            tariffs: $scope.newEvent.tarifs,
+
         }).
             success(function(data, status, headers, config) {
                 window.location.href =('#/event/' + data.eventId);
