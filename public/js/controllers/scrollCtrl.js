@@ -1,5 +1,14 @@
 app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll',
     function ($scope, $rootScope, $location, $anchorScroll, $timeout) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position)
+                {
+                    //alert("Latitude : " + position.coords.latitude + ", longitude : " + position.coords.longitude);
+                }, function erreurPosition(error) {
+                }
+            );
+        } else {
+        }
       $scope.gotoTop = '';
         function location() {
             $timeout(function(){

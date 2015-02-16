@@ -270,22 +270,21 @@ top: 0;
         .onplay {background: #007095}
         .video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
         #iframe-lecture {z-index: 9;
-            position: fixed;
+            position: absolute;
             margin-top: 10px;
         }
         #youtubePlayer{z-index: 9;
-            position: fixed;
+            position: absolute;
             bottom:13px;
         }
-        .playlistContener {overflow-x: scroll;
+        .playlistContener {
             font-size: 11px;
             width: auto;
             overflow-y: hidden;
             overflow-x: hidden;
             white-space: nowrap;
             display: inline-flex;
-            margin-top: 50px;
-            margin-left: 220px}
+            margin-top: 50px;}
         .ng-lecture{
             height : 200px;
             bottom: 0;
@@ -293,7 +292,7 @@ top: 0;
             width: 100%;
             background: white;
             overflow-y: hidden;
-            overflow-x: auto;}
+            overflow-x: hidden;}
         .lecteur_controller{position:absolute; background-color:rgba(0, 0, 0, 0.7); display:none;}
         .ng-control{height:20px; background-color: rgba(42, 105, 162, 0.15); display:none;}
         .reduire{margin-left:10px; float: left; font-size: 35px; font-weight: bold; line-height: 15px; color: #000; text-shadow: 0 1px 0 #fff; opacity: .2; filter: alpha(opacity=20);}

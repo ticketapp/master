@@ -20,23 +20,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
     };
     $scope.play = function (i) {
         $scope.trackActive = i;
-        if (i > 0) {
-            // not working use anchorscroll
-            var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-            document.getElementsByClassName('ng-lecture')[0].scrollLeft = posTrackActive.left;
-        }
         if ($rootScope.playlist[i].from == 'soundcloud') {
-            document.getElementById('iframe-lecture').classList.add('ng-hide');
             document.getElementById('youtubePlayer').classList.add('ng-hide');
             document.getElementById('musicPlayer').classList.remove('ng-hide');
-            document.getElementById('iframe-lecture').innerHTML = "";
-            document.getElementById('youtubePlayer').innerHTML = "";
+            document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
-        } else if ($rootScope.playlist[i].from == 'tomahk') {
-            document.getElementById('musicPlayer').pause();
-            document.getElementById('musicPlayer').classList.add('ng-hide');
-            document.getElementById('iframe-lecture').classList.remove('ng-hide');
-            document.getElementById('iframe-lecture').setAttribute('src', $rootScope.playlist[i].url);
+
         } else if ($rootScope.playlist[i].from == 'youtube') {
             document.getElementById('musicPlayer').pause();
             document.getElementById('musicPlayer').classList.add('ng-hide');
@@ -65,7 +54,19 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 }
             }
         }
-
+        if (i > 0) {
+            function goToTrackActive () {
+                if (document.getElementsByClassName('trackContener').length >= i) {
+                    $timeout(function() {
+                        var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
+                        document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 220;
+                    }, 10);
+                } else {
+                    goToTrackActive ()
+                }
+            }
+            goToTrackActive ()
+        }
         document.getElementById('musicPlayer').addEventListener('ended', function () {
             i++;
             $scope.play(i);

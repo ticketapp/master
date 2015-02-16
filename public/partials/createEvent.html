@@ -45,7 +45,7 @@
                 </md-input-container>
                 <md-input-container flex>
                     <label>Event StartDate</label>
-                    <input type="date" name="startSellingTime" placeholder="" required ng-model="newEvent.startDate"/><br/>
+                    <input type="date" name="startSellingTime" placeholder="" required ng-model="newEvent.startTime"/><br/>
                     <div ng-messages="createEventForm.startSellingTime.$error">
                         <div ng-message="required">This is required.</div>
                     </div>
@@ -59,7 +59,7 @@
                 </md-input-container>
                 <md-input-container flex>
                     <label>Event EndDate</label>
-                    <input type="date" name="endDate" required ng-model="newEvent.endDate"/><br/>
+                    <input type="date" name="endDate" required ng-model="newEvent.endTime"/><br/>
                     <div ng-messages="createEventForm.endDate.$error">
                         <div ng-message="required">This is required.</div>
                     </div>

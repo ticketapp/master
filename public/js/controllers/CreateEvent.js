@@ -1,10 +1,16 @@
-app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
+app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope, $http, $filter){
     $scope.newEvent = [];
     //$scope.newEvent.place = [];
     $scope.newEvent.user = [];
     $scope.newEvent.artists = [];
     $scope.newEvent.tarifs = [];
     $scope.eventFb = false;
+    $scope.newEvent.startTime = "";
+    $scope.newEvent.endTime = "";
+    $scope.newEvent.name = "";
+    $scope.newEvent.place = "";
+    $scope.newEvent.description = "";
+    $scope.newEvent.ageRestriction = 16;
     $scope.searchEvent = function(){
         $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAAUY6TFIL18BAGjacxgHOsfwWkZBKBVW3nD7BULQgV53qScUZAQWSkGqu4DLmFhBwnHNBLSTXKuZAPprqKEqigGR4w5CZA3jgP36qf0ZAgOJAn9KufsiNZAZAzQewEm1WZA717ue3H4arO4zZBoKfZCQla4KIxqqWhLDif5WxZABdBDrRZCZClICkqhTPWFobmERLuaZCFiPEJKJaokQCSTRVOfsSEQ9NDoWPJWT8ZD').
             success(function(data, status, headers, config) {
@@ -42,9 +48,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
                 }
                 $scope.newEvent.name = data.name;
                 $scope.newEvent.place = data.location;
-                $scope.newEvent.startDate = new Date(data.start_time);
                 $scope.newEvent.startTime = new Date(data.start_time);
-                $scope.newEvent.endDate = new Date(data.end_time);
                 $scope.newEvent.endTime = new Date(data.end_time);
                 scopeReady = true;
                 insert();
@@ -134,17 +138,19 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
     };
 
     $scope.createNewEvent = function () {
-        $scope.newEvent.startDate = $scope.newEvent.startDate.getFullYear() + '-' + $scope.newEvent.startDate.getMonth()+1 + '-' + $scope.newEvent.startDate.getDate();
-        $scope.newEvent.endDate = $scope.newEvent.endDate.getFullYear() + '-' + $scope.newEvent.endDate.getMonth()+1 + '-' + $scope.newEvent.endDate.getDate();
-        $scope.newEvent.startTime = $scope.newEvent.startTime.getFullYear() + '-' + $scope.newEvent.startTime.getMonth()+1 + '-' + $scope.newEvent.startTime.getDate();
-        $scope.newEvent.endTime = $scope.newEvent.endTime.getFullYear() + '-' + $scope.newEvent.endTime.getMonth()+1 + '-' + $scope.newEvent.endTime.getDate();
-        $http.post('/createEvent', {
+        
+        console.log($scope.newEvent.startTime);
+        //$scope.newEvent.startDate = $scope.newEvent.startDate.getFullYear() + '-' + $scope.newEvent.startDate.getMonth()+1 + '-' + $scope.newEvent.startDate.getDate();
+        //$scope.newEvent.endDate = $scope.newEvent.endDate.getFullYear() + '-' + $scope.newEvent.endDate.getMonth()+1 + '-' + $scope.newEvent.endDate.getDate();
+        //$scope.newEvent.startTime = $scope.newEvent.startTime.getFullYear() + '-' + $scope.newEvent.startTime.getMonth()+1 + '-' + $scope.newEvent.startTime.getDate();
+        //$scope.newEvent.endTime = $scope.newEvent.endTime.getFullYear() + '-' + $scope.newEvent.endTime.getMonth()+1 + '-' + $scope.newEvent.endTime.getDate();
+        $http.post('/events/create', {
             name: $scope.newEvent.name,
-            startSellingTime: $scope.newEvent.startDate,
-            endSellingTime: $scope.newEvent.endDate,
+            //startSellingTime: $scope.newEvent.startDate.getFullYear() + '-' + $scope.newEvent.startDate.getMonth()+1 + '-' + $scope.newEvent.startDate.getDate(),
+            //endSellingTime: $scope.newEvent.endDate.getFullYear() + '-' + $scope.newEvent.endDate.getMonth()+1 + '-' + $scope.newEvent.endDate.getDate(),
             description: $scope.newEvent.description,
-            startTime: $scope.newEvent.startTime,
-            endTime: $scope.newEvent.endTime,
+            startTime: $filter('date')($scope.newEvent.startTime, "yyyy-MM-dd HH:mm"),
+            endTime: $filter('date')($scope.newEvent.endTime, "yyyy-MM-dd HH:mm"),
             ageRestriction: $scope.newEvent.ageRestriction,
             images: $scope.newEvent.img,
             places: $scope.newEvent.place,
@@ -153,7 +159,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', function($scope, $http){
             tariffs: $scope.newEvent.tarifs
         }).
             success(function(data, status, headers, config) {
-                window.location.href =('#/event/' + data.id);
+                window.location.href =('#/event/' + data.eventId);
                 console.log(data)
             }).
             error(function(data, status, headers, config) {
