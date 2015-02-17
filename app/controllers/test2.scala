@@ -152,7 +152,7 @@ object Test2 extends Controller {
 "to_user_name": null
 }]""")
 
-
+/*
   val readMediaUrls: Reads[List[String]] = {
     Reads.seq((__ \ "media_url").read[String])
   }
@@ -189,7 +189,7 @@ object Test2 extends Controller {
       tweets.collect{ case (id, Some(url)) => (id, url) }
     }
   }
-
+*/
   // 6: Read tweets
 /*
   val readTweets: Reads[List[Tweet]] = {

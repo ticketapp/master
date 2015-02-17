@@ -135,7 +135,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                         });
                 }
                 console.log($scope.content);
-                document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>' + '<div class="columns large-12" id="desc">' +  $scope.content + '</div>';
+                document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>' + '<div class="descriptionContent"><div class="columns large-12">' +  $scope.content + '</div></div>';
                 $scope.eventFb = true;
                 var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S]\W/g);
                 console.log(searchArtists);
