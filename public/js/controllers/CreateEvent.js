@@ -11,8 +11,10 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
     $scope.newEvent.place = "";
     $scope.newEvent.description = "";
     $scope.newEvent.ageRestriction = 16;
+    $scope.content ="";
+    $scope.newEvent.img="";
     $scope.searchEvent = function(){
-        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAAUY6TFIL18BAGjacxgHOsfwWkZBKBVW3nD7BULQgV53qScUZAQWSkGqu4DLmFhBwnHNBLSTXKuZAPprqKEqigGR4w5CZA3jgP36qf0ZAgOJAn9KufsiNZAZAzQewEm1WZA717ue3H4arO4zZBoKfZCQla4KIxqqWhLDif5WxZABdBDrRZCZClICkqhTPWFobmERLuaZCFiPEJKJaokQCSTRVOfsSEQ9NDoWPJWT8ZD').
+        $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAAUY6TFIL18BAP1ir9hDkv5EqRZCMJ1hAZA1niWapeCQUNTUXQHNF0ofKPyGN2QZBQiHwMCQOaYzMPB0KD9oGRyrdL7T0gfz6dYM5xDQ9ZC2R4aPRvE1ZBKGYozfDhGRj7Vxb2ToeZAFXBYm7ZCPaCP96aIirwpEiyWjtAJJnjnj7WY5ymc25xt0ZBYaYIs73wab1YIpCtSy8KcB8WTlmHrxv0tS6wEgyzIZD').
             success(function(data, status, headers, config) {
                 console.log(data.data);
                 $scope.searchEvents = data.data;
@@ -73,7 +75,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
         function insert () {
             if (scopeReady == true && cover == true) {
                 console.log($scope.content);
-                document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>' + '<div class="columns large-12">' +  $scope.content + '</div>';
+                document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>' + '<div class="columns large-12" id="desc">' +  $scope.content + '</div>';
                 $scope.eventFb = true;
                 var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S]\W/g);
                 console.log(searchArtists);
@@ -90,11 +92,10 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                             console.log($scope.artists)
                         }).
                         error(function(data, status, headers, config) {
-                            $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=200&type=page&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
+                            $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=200&type=page&fields=id,category,name,link,website&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
                                 success(function(data, status, headers, config) {
                                     $scope.data = data.data;
                                     var flag = 0;
-                                    console.log($scope.data);
                                     for (var i=0; i < $scope.data.length; i++) {
                                         if ($scope.data[i].category == 'Musician/band') {
                                             for (var j=0; j < $scope.artists.length; j++) {
@@ -104,8 +105,12 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                                                 }
                                             }
                                             if(flag == 0) {
-                                                $scope.artistesFb.push($scope.data[i]);
-                                                console.log($scope.artistesFb);
+                                                if ($scope.content.indexOf($scope.data[i].id) > -1 || $scope.content.indexOf($scope.data[i].link.replace('https://www.', '')) > -1) {
+                                                    $scope.artistesFb.push($scope.data[i]);
+                                                    console.log($scope.artistesFb);
+                                                } else if ($scope.data[i].name.toLowerCase() == artist.toLocaleLowerCase()) {
+                                                    console.log($scope.artistesFb);
+                                                }
                                             } else {
                                                 flag = 0;
                                             }
@@ -125,8 +130,8 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
         }
     };
     $scope.addImg = function () {
-      if ($scope.newEvent.img != null && $scope.eventFb != true) {
-          document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>'
+      if ($scope.eventFb != true) {
+          document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div><div class="column large-12" id="desc">Ecrire Ici</div>'
       }
     };
     $scope.clearContent = function () {
@@ -155,7 +160,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
             places: $scope.newEvent.place,
             users: $scope.newEvent.user,
             artists: $scope.newEvent.artists,
-            tariffs: $scope.newEvent.tarifs,
+            tariffs: $scope.newEvent.tarifs
 
         }).
             success(function(data, status, headers, config) {

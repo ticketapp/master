@@ -80,6 +80,9 @@
             background: #007095!important;
             color: #ffffff;
         }
+        #eventInfo:hover {
+            margin-top : 0!important;
+        }
         /*Controls right*/
         .generalControls {
             display: block;
@@ -89,6 +92,9 @@
         }
         .generalControlsContener {
             width: 70px!important;
+        }
+        #generalControlsContener:hover {
+            margin-right: 0!important;
         }
         .generalControlsContener > ul {
             margin-top: 100px;

@@ -11,6 +11,14 @@
                 <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox" ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)" ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">Users</label>
                 <input id="searchTopBar" placeholder="Search" ng-model="$root.research" ng-model-options="{ getterSetter: true }" >
             </div>
+            <div class="width100p" style="background: #ffffff;" id="eventInfo" ng-if="$root.pathEvent">
+                <div style="height: 100px;">
+                    <h3 style="margin: 0">{{event.name}}</h3>
+                </div>
+                <div style="height: 20px" class="ng-hide" id="showInfo">
+                    <a ng-click="showInfo()">Show</a>
+                </div>
+            </div>
         </div>
     <!--</ul>
 </nav>-->
