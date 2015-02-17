@@ -25,7 +25,8 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                 // or server returns response with an error status.
             });
     };
-    $scope.GetEventById = function(id){
+    $scope.GetEventById = function(id) {
+        id = id.match(/\d.*/)[0];
         var scopeReady = false;
         var cover = false;
         $http.get('https://graph.facebook.com/v2.2/' + id + '/?access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
@@ -74,16 +75,6 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
             });
         function insert () {
             if (scopeReady == true && cover == true) {
-                console.log($scope.content);
-                document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>' + '<div class="columns large-12" id="desc">' +  $scope.content + '</div>';
-                $scope.eventFb = true;
-                var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S]\W/g);
-                console.log(searchArtists);
-                $scope.artists = [];
-                $scope.artistesFb = [];
-                for (var i = 0; i<searchArtists.length; i++) {
-                    searchArtist(searchArtists[i]);
-                }
                 function searchArtist (artist) {
                     $http.get('/artists/contaning/'+ artist).
                         success(function(data, status, headers, config) {
@@ -92,7 +83,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                             console.log($scope.artists)
                         }).
                         error(function(data, status, headers, config) {
-                            $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=200&type=page&fields=id,category,name,link,website&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
+                            $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=200&type=page&fields=id,category,name,link,website,likes&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
                                 success(function(data, status, headers, config) {
                                     $scope.data = data.data;
                                     var flag = 0;
@@ -108,8 +99,27 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                                                 if ($scope.content.indexOf($scope.data[i].id) > -1 || $scope.content.indexOf($scope.data[i].link.replace('https://www.', '')) > -1) {
                                                     $scope.artistesFb.push($scope.data[i]);
                                                     console.log($scope.artistesFb);
-                                                } else if ($scope.data[i].name.toLowerCase() == artist.toLocaleLowerCase()) {
-                                                    console.log($scope.artistesFb);
+                                                } else if ($scope.data[i].name.toLowerCase() == artist.toLowerCase() || $scope.data[i].name.toLowerCase() + " " == artist.toLowerCase()) {
+                                                    if ($scope.artistesFb.length > 0 ) {
+                                                        var findArt = false;
+                                                        for (var ii = 0; ii < $scope.artistesFb.length; ii++) {
+                                                            if ($scope.artistesFb[ii].name.toLowerCase() == $scope.data[i].name.toLowerCase()) {
+                                                                findArt = true;
+                                                                if ($scope.artistesFb[ii].likes < $scope.data[i].likes) {
+                                                                    $scope.artistesFb.splice($scope.artistesFb[ii]);
+                                                                    $scope.artistesFb.push($scope.data[i]);
+                                                                    console.log($scope.artistesFb);
+                                                                }
+                                                            }
+                                                        }
+                                                        if (findArt == false) {
+                                                            $scope.artistesFb.push($scope.data[i]);
+                                                            console.log($scope.artistesFb);
+                                                        }
+                                                    } else {
+                                                        $scope.artistesFb.push($scope.data[i])
+                                                        console.log($scope.artistesFb);
+                                                    }
                                                 }
                                             } else {
                                                 flag = 0;
@@ -123,6 +133,19 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                                     // or server returns response with an error status.
                                 });
                         });
+                }
+                console.log($scope.content);
+                document.getElementsByTagName('iframe')[0].contentDocument.getElementById('content').getElementsByTagName('div')[0].innerHTML = '<img class="width100p" src="' + $scope.newEvent.img + '"/>' + '<div class="columns large-12"><h2>' + $scope.newEvent.name + '</h2></div>' + '<div class="columns large-12" id="desc">' +  $scope.content + '</div>';
+                $scope.eventFb = true;
+                var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S]\W/g);
+                console.log(searchArtists);
+                $scope.artists = [];
+                $scope.artistesFb = [];
+                for (var i = 0; i<searchArtists.length; i++) {
+                    if (searchArtists[i].indexOf(' ') == 0) {
+                        searchArtists[i] = searchArtists[i].replace(' ', "");
+                    }
+                    searchArtist(searchArtists[i]);
                 }
             } else {
                 insert();
