@@ -16,7 +16,6 @@ GET     /test2                     controllers.Test2.test2
 
 ################################## Admin ################################################
 GET     /admin                     controllers.Admin.indexAdmin
-POST    /admin/test2               controllers.Test2.saveDateTest
 #POST    /admin/createTariff        controllers.Admin.createTariff
 
 ################################## Events ###############################################
@@ -38,6 +37,7 @@ POST    /artists/createArtist           controllers.ArtistController.createArtis
 POST    /artists/:userId/:artistId      controllers.ArtistController.followArtist(userId: Long, artistId: Long)
 DELETE  /artists/:artistId              controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/containing/:pattern    controllers.ArtistController.findArtistsContaining(pattern: String)
+GET     /artists/facebookContaining/:pattern    controllers.ArtistController.findFacebookArtistsContaining(pattern: String)
 
 ################################## Places ###############################################
 GET     /places                     controllers.PlaceController.places

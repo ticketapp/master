@@ -41,6 +41,10 @@ object Artist {
     }
   }
 
+  def formApply(facebookId: Option[String], name: String): Artist =
+    new Artist(-1L, new Date, facebookId, name, None, List(), List(), List())
+  def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
+
   def findAll(): List[Artist] = {
     DB.withConnection { implicit connection =>
       SQL("select * from artists").as(ArtistParser.*)
@@ -77,8 +81,23 @@ object Artist {
     }
   }
 
-  def formApply(facebookId: Option[String], name: String): Artist = new Artist(-1L, new Date, facebookId, name, None, List(), List(), List())
-  def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
+  def findFacebookArtistsContaining(pattern: String) = {//: Seq[Artist] = {
+    WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
+      + "&limit=400&type=page&fields=name,cover,id,category,likes,link,website&access_token=" + token).get onComplete {
+      case Success(pages) => Seq(new Artist(-1L, new Date(), Some(""), "", Some(""), List(), List(), List()))
+      case Failure(f) => throw new WebServiceException("Cannot make the facebook call (findFacebookArtistsContaining): "
+        + f.getMessage)
+    }
+    /*WS.url("https://graph.facebook.com/v2.2/" + artist.facebookId + token).get onComplete {
+  case Success(artistFound) => val category = Json.stringify(artistFound.json \ "category")
+    val categoryList = Json.stringify(artistFound.json \ "category_list")
+    println(category)
+    println(categoryList)
+
+  case Failure(f) => throw new WebServiceException("Cannot make the facebook call: " + f.getMessage)
+  }*/
+    //3eme arg : facebookId needed
+  }
 
   def save(artist: Artist): Option[Long] = {
     Utilities.testIfExist("artists", "name", artist.name) match {
@@ -106,15 +125,7 @@ object Artist {
       } catch {
         case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
       }
-    } 
-    /*WS.url("https://graph.facebook.com/v2.2/" + artist.facebookId + token).get onComplete {
-      case Success(artistFound) => val category = Json.stringify(artistFound.json \ "category")
-        val categoryList = Json.stringify(artistFound.json \ "category_list")
-        println(category)
-        println(categoryList)
-
-      case Failure(f) => throw new WebServiceException("Cannot make the facebook call: " + f.getMessage)
-    }*/
+    }
   }
 
   def returnArtistId(name: String): Long = {
@@ -146,7 +157,6 @@ object Artist {
       case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)
     }
   }
-
 
 
   def deleteArtist(artistId: Long): Long = {
