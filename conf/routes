@@ -10,7 +10,7 @@ GET     /                          controllers.Application.index
 #
 #
 GET     /test                      controllers.Test.test1
-GET     /test2                     controllers.Test2.test2
+GET     /test2/:pattern                     controllers.Test2.test2(pattern)
 #GET     /placesFacebookIds         controllers.PlaceController.placesFacebookIds
 
 

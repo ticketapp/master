@@ -193,6 +193,7 @@ object Test2 extends Controller {
   // 6: Read tweets
 
   case class Tweet(id: String, image: String)
+  case class Category(id: String)
 
   val readTweets: Reads[Seq[Tweet]] = {
     collectOnlyTweetsWithUrl.map { tweets =>
@@ -202,10 +203,48 @@ object Test2 extends Controller {
 
   // 7. Use the Reads classes to actually parse some JSON
 
- def test2 = Action {
-   val tweets = json.as[Seq[Tweet]](readTweets)
-   Ok("Got tweets: " + tweets)
- }
+  val token = play.Play.application.configuration.getString("facebook.token")
+
+  def test2(pattern: String) = Action {
+    val js = WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
+      + "&limit=30&type=page&fields=name,cover,id,category,likes,link,website&access_token=" + token).get.map {
+      response => println(response.json)
+    }
+
+    val value = Json.parse("""[{"name":"Azerbaïdjan","id":"109765775708835","category":"Musician/band","likes":80106,"link":"https://www.facebook.com/pages/Azerba%C3%AFdjan/109765775708835"}]""")
+
+    //1: read the category and the id
+    val readCategory: Reads[String] = (__ \ "category").read[String]
+
+    //2: read the id
+    val readId: Reads[String] = (__ \ "id").read[String]
+
+    /*val readOptionalCover: Reads[Option[Seq[String]]] = {
+      (__ \ "cover").readNullable(readMediaUrls)
+    }*/
+
+    val readIdAndCategory: Reads[(String, String)] =
+      readId.and(readCategory).apply((id: String, category: String) => (id, category))
+
+    val readAnArray: Reads[Seq[(String, String)]] = Reads.seq(readIdAndCategory)
+
+    val collectOnlyMusicians: Reads[Seq[(String)]] = {
+      readAnArray.map { pages =>
+        pages.collect{ case (id, "Musician/band") => id }
+      }
+    }
+
+    val readArtists: Reads[Seq[Category]] = {
+      collectOnlyMusicians.map { artists =>
+        artists.map{ case id => Category(id) }
+      }
+    }
+
+    val artists = value.as[Seq[Category]](readArtists)
+
+    val tweets = json.as[Seq[Tweet]](readTweets)
+    Ok("Got tweets: " + artists)
+  }
 
 /*
   def test2 = Action {
