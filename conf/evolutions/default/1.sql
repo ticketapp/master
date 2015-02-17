@@ -31,7 +31,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 64 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 59 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -62,8 +62,23 @@ CREATE TABLE organizers (
     organizerId             SERIAL PRIMARY KEY,
     creationDateTime        TIMESTAMP DEFAULT current_timestamp NOT NULL,
     facebookId              VARCHAR(63),
+    name                    VARCHAR(255) NOT NULL,
     verified                BOOLEAN DEFAULT FALSE NOT NULL,
-    UNIQUE(facebookId)
+    UNIQUE(facebookId),
+    UNIQUE(name)
+);
+
+CREATE TABLE genres (
+    genreId                 SERIAL PRIMARY KEY,
+    name                    VARCHAR(255) NOT NULL,
+    UNIQUE(name)
+);
+
+CREATE TABLE tracks (
+    trackId                 SERIAL PRIMARY KEY,
+    name                    VARCHAR(255) NOT NULL,
+    url                     VARCHAR(255) NOT NULL,
+    platform                VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE users_login (
@@ -129,6 +144,7 @@ CREATE TABLE images (
   placeId                   BIGINT references places(placeId),
   artistId                  BIGINT references artists(artistId),
   infoId                    BIGINT references infos(infoId),
+  trackId                   BIGINT references tracks(trackId),
   UNIQUE(path)
 );
 ---INSERT INTO images (path, alt, eventId, userId) VALUES ('1.jpg', 'alt', 1, 1);
@@ -377,6 +393,12 @@ CREATE TABLE usersArtists (
     PRIMARY KEY (userId, artistId)
 );
 
+CREATE TABLE genresArtists (
+    genreId INT REFERENCES genres (genreId),
+    artistId INT REFERENCES artists (artistId),
+    PRIMARY KEY (genreId, artistId)
+);
+
 # --- !Downs
 DROP TABLE IF EXISTS eventsPlaces;
 DROP TABLE IF EXISTS eventsOrganizers;
@@ -384,6 +406,7 @@ DROP TABLE IF EXISTS eventsAddresses;
 DROP TABLE IF EXISTS usersOrganizers;
 DROP TABLE IF EXISTS eventsArtists;
 DROP TABLE IF EXISTS usersArtists;
+DROP TABLE IF EXISTS genresArtists;
 DROP TABLE IF EXISTS eventsFollowed;
 DROP TABLE IF EXISTS artistsFollowed;
 DROP TABLE IF EXISTS placesFollowed;
@@ -413,6 +436,8 @@ DROP TABLE IF EXISTS places;
 DROP TABLE IF EXISTS amountDue;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS tracks;
+DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS organizers;
 DROP TABLE IF EXISTS users_login, users_token;
 DROP TABLE IF EXISTS artists;

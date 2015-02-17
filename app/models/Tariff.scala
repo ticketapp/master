@@ -39,7 +39,7 @@ object Tariff {
     }
   }
 
-  def findAll(): Seq[Tariff] = {
+  def findAll(): List[Tariff] = {
     DB.withConnection { implicit connection =>
       SQL("select * from tariffs").as(TariffParser.*)
     }
@@ -53,7 +53,7 @@ object Tariff {
     }
   }
 
-  def findAllByEvent(event: Event): Seq[Tariff] = {
+  def findAllByEvent(event: Event): List[Tariff] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM Tariffs

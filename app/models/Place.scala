@@ -22,14 +22,13 @@ case class Place (placeId: Long,
 object Place {
   implicit val placeWrites = Json.writes[Place]
 
-  def formApply(name: String, addressId : Option[Long], facebookId: Option[String],
-                description: Option[String], webSite: Option[String], capacity: Option[Int],
-                openingHours: Option[String]): Place =
+  def formApply(name: String, addressId : Option[Long], facebookId: Option[String], description: Option[String],
+                webSite: Option[String], capacity: Option[Int], openingHours: Option[String]): Place =
     new Place(-1L, name, addressId, facebookId, description, webSite, capacity, openingHours)
+
   def formUnapply(place: Place): Option[(String, Option[Long], Option[String], Option[String], Option[String],
-    Option[Int], Option[String])] =
-    Some((place.name, place.addressId, place.facebookId, place.description, place.webSite,
-      place.capacity, place.openingHours))
+    Option[Int], Option[String])] = Some((place.name, place.addressId, place.facebookId, place.description,
+    place.webSite, place.capacity, place.openingHours))
 
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
@@ -40,10 +39,8 @@ object Place {
       get[Option[String]]("webSite") ~
       get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") map {
-        case placeId ~ name ~ addressId ~ facebookId ~ description ~ webSite ~
-           capacity ~ openingHours =>
-          Place(placeId, name, addressId, facebookId, description, webSite,
-            capacity, openingHours)
+        case placeId ~ name ~ addressId ~ facebookId ~ description ~ webSite ~ capacity ~ openingHours =>
+          Place(placeId, name, addressId, facebookId, description, webSite, capacity, openingHours)
     }
   }
 
@@ -52,8 +49,8 @@ object Place {
       case true => None
       case false => try {
         DB.withConnection { implicit connection =>
-          SQL("INSERT into places(name, addressId, facebookId, description, webSite, capacity, openingHours) " +
-            "values ({name}, {addressId}, {facebookId}, {description}, {webSite}, {capacity}, {openingHours})"
+          SQL("""INSERT into places(name, addressId, facebookId, description, webSite, capacity, openingHours)
+            values ({name}, {addressId}, {facebookId}, {description}, {webSite}, {capacity}, {openingHours})"""
           ).on(
               'name -> place.name,
               'addressId -> place.addressId,
@@ -62,7 +59,14 @@ object Place {
               'webSite -> place.webSite,
               'capacity -> place.capacity,
               'openingHours -> place.openingHours
-            ).executeInsert()
+            ).executeInsert() match {
+            case None => None
+            case Some(placeId: Long) =>
+              place.images.foreach(image =>
+                Image.save(image.copy(placeId = Some(placeId)))
+              )
+              Some(placeId)
+          }
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot save place: " + e.getMessage)
@@ -87,7 +91,6 @@ object Place {
             }
     )
   }
-
 
   def findAllContaining(pattern: String): Seq[Place] = {
     try {

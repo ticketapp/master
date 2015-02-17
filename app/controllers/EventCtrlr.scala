@@ -4,7 +4,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
 import play.api.libs.json.Json
-import models.{Image, Tariff, Event}
+import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
 
 
@@ -36,7 +36,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
       "ageRestriction" -> number,
       "images" -> list( mapping(
-          "paths" -> text
+          "paths" -> nonEmptyText
         )(Image.formApply)(Image.formUnapply)),
       "tariffs" -> list(
         mapping(
@@ -45,9 +45,25 @@ object EventController extends Controller with securesocial.core.SecureSocial {
           "prices" -> bigDecimal,
           "startTimes" -> date("yyyy-MM-dd HH:mm"),
           "endTimes" -> date("yyyy-MM-dd HH:mm")
-        )(Tariff.formApply)(Tariff.formUnapply))
+        )(Tariff.formApply)(Tariff.formUnapply)),
+      "addresses" -> list(
+        mapping(
+          "cities" -> text(2),
+          "zips" -> text(2),
+          "streets" -> text(2)
+        )(Address.formApply)(Address.formUnapply))
     )(Event.formApply)(Event.formUnapply)
   )
+
+  /*
+  addressId: Long,
+                    isEvent: Boolean,
+                    isPlace: Boolean,
+                    geographicPoint: Option[String],
+                    city: Option[String],
+                    zip: Option[String],
+                    street: Option[String])
+   */
 
   def createEvent = Action { implicit request =>
     eventBindingForm.bindFromRequest().fold(

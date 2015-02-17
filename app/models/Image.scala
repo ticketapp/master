@@ -11,7 +11,9 @@ import services.Utilities
 case class Image (imageId: Long,
                   path: String,
                   eventId: Option[Long] = None,
-                  userId: Option[Long] = None)
+                  userId: Option[Long] = None,
+                  artistId: Option[Long] = None,
+                  placeId: Option[Long] = None)
 
 object Image {
 
@@ -25,19 +27,20 @@ object Image {
     get[Long]("imageId") ~
       get[String]("path") ~
       get[Option[Long]]("eventId") ~
-      get[Option[Long]]("userId") map {
-      case imageId ~ path ~ eventId ~ userId =>
-        Image(imageId, path, eventId, userId)
+      get[Option[Long]]("userId") ~
+      get[Option[Long]]("placeId") map {
+      case imageId ~ path ~ eventId ~ userId ~ placeId =>
+        Image(imageId, path, eventId, userId, placeId)
     }
   }
 
   def findAll(): Seq[Image] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from images").as(ImageParser *)
+      SQL("select * from images").as(ImageParser.*)
     }
   }
 
-  def findAllByEvent(event: Event): Seq[Image] = {
+  def findAllByEvent(event: Event): List[Image] = {
     DB.withConnection { implicit connection =>
       SQL("select * from images where eventId = {eventId}")
         .on('eventId -> event.eventId)
@@ -45,7 +48,7 @@ object Image {
     }
   }
 
-  def findAllByPlace(placeId: Long): Seq[Image] = {
+  def findAllByPlace(placeId: Long): List[Image] = {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *
              FROM Images

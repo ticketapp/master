@@ -18,6 +18,14 @@ case class Address (addressId: Long,
 object Address {
   implicit val addressWrites = Json.writes[Address]
 
+  implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
+    val MetaDataItem(qualified, nullable, clazz) = meta
+    value match {
+      case d: Any => Right(d.toString)
+      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass + " to Float for column " + qualified))
+    }
+  }
+
   private val AddressParser: RowParser[Address] = {
     get[Long]("addressId") ~
       get[Boolean]("isEvent") ~
@@ -27,21 +35,28 @@ object Address {
       get[Option[String]]("zip") ~
       get[Option[String]]("street") map {
       case addressId ~ isEvent ~ isPlace ~ geographicPoint ~ city ~ zip ~ street =>
-        Address(addressId, isEvent, isPlace, None, city, zip, street)
+        Address(addressId, isEvent, isPlace, geographicPoint, city, zip, street)
     }
   }
 
-  def findAll(): Seq[Address] = {
+  def formApply(city: String, zip: String, street: String) = {
+    new Address(-1L, true, false, None, Some(city), Some(zip), Some(street))
+  }
+  def formUnapply(address: Address): Option[(String, String, String)] =
+    Some((address.city.get, address.zip.get, address.street.get))
+  //def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
+
+  def findAll(): List[Address] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from addresss").as(AddressParser.*)
+      SQL("select * from addresses").as(AddressParser.*)
     }
   }
 
-  def findAllByEvent(event: Event): Seq[Address] = {
+  def findAllByEvent(event: Event): List[Address] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
-             FROM eventsAddresss eA
-             INNER JOIN addresss a ON a.addressId = eA.addressId where eA.eventId = {eventId}""")
+             FROM eventsAddresses eA
+             INNER JOIN addresses a ON a.addressId = eA.addressId where eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(AddressParser.*)
     }
@@ -49,7 +64,7 @@ object Address {
 
   def find(addressId: Long): Option[Address] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from addresss WHERE addressId = {addressId}")
+      SQL("SELECT * from addresses WHERE addressId = {addressId}")
         .on('addressId -> addressId)
         .as(AddressParser.singleOpt)
     }
@@ -58,7 +73,7 @@ object Address {
   def findAllContaining(pattern: String): Seq[Address] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM addresss WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
+        SQL("SELECT * FROM addresses WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
           .as(AddressParser.*)
       }
@@ -66,10 +81,6 @@ object Address {
       case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
     }
   }
-
-  //def formApply(facebookId: Option[String], name: String): Address = new Address(-1L, new Date, facebookId, name, None)
-  //def formUnapply(address: Address): Option[(Option[String], String)] = Some((address.facebookId, address.name))
-
 
   def saveAddressAndEventRelation(address: Address, id: Long): Option[Long] = {
     //, relationClass: String
@@ -135,7 +146,7 @@ object Address {
   def deleteAddress(addressId: Long): Long = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("""DELETE FROM address WHERE addressId={addressId}""").on('addressId -> addressId).executeUpdate()
+        SQL("""DELETE FROM addresses WHERE addressId={addressId}""").on('addressId -> addressId).executeUpdate()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)

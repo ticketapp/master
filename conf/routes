@@ -16,7 +16,7 @@ GET     /test2                     controllers.Test2.test2
 
 ################################## Admin ################################################
 GET     /admin                     controllers.Admin.indexAdmin
-POST    /admin/test2               controllers.Test2.saveContact
+POST    /admin/test2               controllers.Test2.saveDateTest
 #POST    /admin/createTariff        controllers.Admin.createTariff
 
 ################################## Events ###############################################

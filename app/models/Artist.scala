@@ -19,7 +19,10 @@ case class Artist (artistId: Long,
                    creationDateTime: Date,
                    facebookId: Option[String],
                    name: String,
-                   description: Option[String])
+                   description: Option[String],
+                   images: List[Image],
+                   genres: List[Genre],
+                   tracks: List[Track])
 
 
 object Artist {
@@ -34,17 +37,17 @@ object Artist {
       get[String]("name") ~
       get[Option[String]]("description") map {
       case artistId ~ creationDateTime ~ facebookId ~ name ~ description =>
-        Artist(artistId, creationDateTime, facebookId, name, description)
+        Artist(artistId, creationDateTime, facebookId, name, description, List(), List(), List())
     }
   }
 
-  def findAll(): Seq[Artist] = {
+  def findAll(): List[Artist] = {
     DB.withConnection { implicit connection =>
       SQL("select * from artists").as(ArtistParser.*)
     }
   }
 
-  def findAllByEvent(event: Event): Seq[Artist] = {
+  def findAllByEvent(event: Event): List[Artist] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM eventsArtists eA
@@ -74,46 +77,73 @@ object Artist {
     }
   }
 
-  def formApply(facebookId: Option[String], name: String): Artist = new Artist(-1L, new Date, facebookId, name, None)
+  def formApply(facebookId: Option[String], name: String): Artist = new Artist(-1L, new Date, facebookId, name, None, List(), List(), List())
   def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
 
-  def saveArtist(artist: Artist): Option[Long] = {
-    WS.url("https://graph.facebook.com/v2.2/" + artist.facebookId + token).get onComplete {
+  def save(artist: Artist): Option[Long] = {
+    Utilities.testIfExist("artists", "name", artist.name) match {
+      case true => Some(-1)
+      case false => try {
+        DB.withConnection { implicit connection =>
+          SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
+            'name -> artist.name,
+            'facebookId -> artist.facebookId
+          ).executeInsert() match {
+            case None => None
+            case Some(artistId: Long) =>
+              artist.images.foreach(image =>
+                Image.save(image.copy(artistId = Some(artistId)))
+              )
+              artist.genres.foreach(genre =>
+                Genre.saveGenreAndArtistRelation(genre, artistId)
+              )
+              artist.tracks.foreach(track =>
+                Track.saveTrackAndArtistRelation(track, artistId)
+              )
+              Some(artistId)
+          }
+        }
+      } catch {
+        case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
+      }
+    } 
+    /*WS.url("https://graph.facebook.com/v2.2/" + artist.facebookId + token).get onComplete {
       case Success(artistFound) => val category = Json.stringify(artistFound.json \ "category")
         val categoryList = Json.stringify(artistFound.json \ "category_list")
         println(category)
         println(categoryList)
 
       case Failure(f) => throw new WebServiceException("Cannot make the facebook call: " + f.getMessage)
-    }
+    }*/
+  }
 
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
-          'name -> artist.name,
-          'facebookId -> artist.facebookId
-        ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
+  def returnArtistId(name: String): Long = {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT artistId from artists WHERE name = {name}")
+        .on('name -> name)
+        .as(scalar[Long].single)
     }
   }
 
+  def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = {
+    save(artist) match {
+      case Some(-1) => saveEventArtistRelation(eventId, returnArtistId(artist.name))
+      case Some(i) => saveEventArtistRelation(eventId, i)
+      case None => None
+    }
+  }
 
-  def saveArtistAndEventRelation(artist: Artist): Option[Long] = {
-    Utilities.testIfExist("artists", "id", artist.artistId) match {
-      case true => None//on va chercher l'id de l'artiste dans la table et on le lie à l'id de l'event
-      case false => try {
-        DB.withConnection { implicit connection =>
-          SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
-            'name -> artist.name,
-            'facebookId -> artist.facebookId
+  def saveEventArtistRelation(eventId: Long, artistId: Long): Option[Long] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """INSERT INTO eventsArtists (eventId, artistId)
+          VALUES ({eventId}, {artistId})""").on(
+            'eventId -> eventId,
+            'artistId -> artistId
           ).executeInsert()
-          // + lier à l'id de l'event
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
       }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)
     }
   }
 

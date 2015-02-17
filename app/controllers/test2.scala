@@ -20,9 +20,26 @@ case class Contact(firstname: String,
 
 case class ContactInformation(label: String)
 
+case class DateTest(date: Date)
+
 object Test2 extends Controller {
-  val contactForm: Form[Contact] = Form(
-    // Defines a mapping that will handle Contact values
+  val dateForm: Form[DateTest] = Form(
+    mapping(
+      "date" -> date("yyyy-MM-dd HH:mm:ss")
+    )(DateTest.apply)(DateTest.unapply)
+  )
+
+  def saveDateTest = Action { implicit request =>
+    dateForm.bindFromRequest.fold(
+      formWithErrors => Ok("error"),
+      dateTest => {
+        println(dateTest)
+        Ok("Done")
+      }
+    )
+  }
+
+  /*val contactForm: Form[Contact] = Form(
     mapping(
       "firstname" -> nonEmptyText,
       // Defines a repeated mapping
@@ -42,7 +59,7 @@ object Test2 extends Controller {
         Ok("Done")
       }
     )
-  }
+  }*/
 
   def test2 = Action {
     Ok("Okay\n")

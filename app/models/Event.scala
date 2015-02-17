@@ -19,21 +19,23 @@ case class Event(eventId: Long,
                  endTime: Option[Date],
                  ageRestriction: Int,
                  images: List[Image],
-                 users: List[User],
+                 organizers: List[Organizer],
                  artists: List[Artist],
-                 tariffs: List[Tariff])
+                 tariffs: List[Tariff],
+                 addresses: List[Address])
 
 
 object Event {
   def formApply(name: String, description: String, startTime: Date, endTime: Option[Date], ageRestriction: Int,
-                images: List[Image], tariffs: List[Tariff]): Event = {
-
-    new Event(-1L, None, true, true, new Date, name, description, startTime,
-      endTime, ageRestriction, images, List(), List(), tariffs)
+                images: List[Image], tariffs: List[Tariff], addresses: List[Address]): Event = {
+    new Event(-1L, None, true, true, new Date, name, description, startTime, endTime, ageRestriction, images, List(),
+      List(), tariffs, addresses)
   }
 
-  def formUnapply(event: Event): Option[(String, String, Date, Option[Date], Int, List[Image], List[Tariff])] = {
-    Some((event.name, event.description, event.startTime, event.endTime, event.ageRestriction, event.images, event.tariffs))
+  def formUnapply(event: Event): Option[(String, String, Date, Option[Date], Int, List[Image], List[Tariff],
+    List[Address])] = {
+    Some((event.name, event.description, event.startTime, event.endTime, event.ageRestriction, event.images,
+      event.tariffs, event.addresses))
   }
 
   private val EventParser: RowParser[Event] = {
@@ -50,7 +52,7 @@ object Event {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ description ~ startTime ~ endTime
         ~ ageRestriction =>
         Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, description, startTime, endTime,
-          ageRestriction, List(), List(), List(), List())
+          ageRestriction, List(), List(), List(), List(), List())
     }
   }
 
@@ -60,9 +62,11 @@ object Event {
         .on('eventId -> eventId)
         .as(EventParser.singleOpt)
       eventResultSet.map(e => e.copy(
-        images = Image.findAllByEvent(e).toList,
-        artists = Artist.findAllByEvent(e).toList,
-        tariffs = Tariff.findAllByEvent(e).toList))
+        images = Image.findAllByEvent(e),
+        organizers = Organizer.findAllByEvent(e),
+        artists = Artist.findAllByEvent(e),
+        tariffs = Tariff.findAllByEvent(e),
+        addresses = Address.findAllByEvent(e)))
     }
   }
 
@@ -79,8 +83,11 @@ object Event {
         ORDER BY events.creationDateTime DESC
         LIMIT 20""").as(EventParser.*)
       eventsResultSet.map(e => e.copy(
-        images = Image.findAllByEvent(e).toList,
-        artists = Artist.findAllByEvent(e).toList))
+        images = Image.findAllByEvent(e),
+        organizers = Organizer.findAllByEvent(e),
+        artists = Artist.findAllByEvent(e),
+        tariffs = Tariff.findAllByEvent(e),
+        addresses = Address.findAllByEvent(e)))
     }
   }
 
@@ -140,26 +147,29 @@ object Event {
               ).executeInsert() match {
                 case None => None
                 case Some(eventId: Long) =>
+                  event.organizers.foreach(organizer =>
+                    Organizer.saveWithEventRelation(organizer, eventId)
+                  )
                   event.tariffs.foreach(tariff =>
                     Tariff.save(tariff.copy(eventId = eventId))
                   )
                   event.images.foreach(image =>
                     Image.save(image.copy(eventId = Some(eventId)))
                   )
-
-                  //pareil pour artists mais faut que la relation soit enregistré aussi i.e si lartiste existe déjà
+                  event.artists.foreach(image => image
+                    //Artist.saveWithEventRelation(artists.copy(eventId = Some(eventId)))
+                  )
+                  //pareil pour artists mais faut que la relation soit enregistrée aussi i.e si lartiste existe déjà
                   //on renvoie son id déjà existant sinon le nouveau et on enregistre la relation avec
                   // saveEventArtistRelation qui devrait être une méthode de artist
                   Some(eventId)
             }
-
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
       }
     }
   }
-
 
   def update(event: Event): Unit = {
     try {
