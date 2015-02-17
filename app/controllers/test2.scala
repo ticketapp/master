@@ -153,11 +153,11 @@ object Test2 extends Controller {
 }]""")
 
 
-  val readMediaUrls: Reads[List[String]] = {
+  val readMediaUrls: Reads[Seq[String]] = {
     Reads.seq((__ \ "media_url").read[String])
   }
 
-  val readOptionalEntities: Reads[Option[List[String]]] = {
+  val readOptionalEntities: Reads[Option[Seq[String]]] = {
     (__ \ "entities" \ "media").readNullable(readMediaUrls)
   }
 
@@ -178,40 +178,38 @@ object Test2 extends Controller {
     readId.and(readOnlyOneUrl).apply((id, maybeUrl) => (id, maybeUrl))
   }
 
-  val readAnArray: Reads[List[(String, Option[String])]] = {
+  val readAnArray: Reads[Seq[(String, Option[String])]] = {
     Reads.seq(readIdAndUrl)
   }
 
   // 5: Collecting only tweets with media
 
-  val collectOnlyTweetsWithUrl: Reads[List[(String, String)]] = {
+  val collectOnlyTweetsWithUrl: Reads[Seq[(String, String)]] = {
     readAnArray.map { tweets =>
       tweets.collect{ case (id, Some(url)) => (id, url) }
     }
   }
 
   // 6: Read tweets
-/*
-  val readTweets: Reads[List[Tweet]] = {
+
+  case class Tweet(id: String, image: String)
+
+  val readTweets: Reads[Seq[Tweet]] = {
     collectOnlyTweetsWithUrl.map { tweets =>
       tweets.map{ case (id, url) => Tweet(id, url) }
     }
-  }*/
+  }
 
   // 7. Use the Reads classes to actually parse some JSON
-  /*
- def index = Action {
- parseJson.map { json =>
- val tweets = json.as[List[Tweet]](readTweets)
- Ok("Got tweets: " + tweets)
+
+ def test2 = Action {
+   val tweets = json.as[Seq[Tweet]](readTweets)
+   Ok("Got tweets: " + tweets)
  }
- } */
 
-
-
-
+/*
   def test2 = Action {
     Ok("Okay\n")
-  }
+  }*/
 }
 
