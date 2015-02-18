@@ -14,23 +14,15 @@ object Scheduler {
 
   def formatEventDescription(eventDescription: String): String = {
     val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
-    linkPattern.replaceAllIn(eventDescription
+    "<div class='columns large-12'>" + linkPattern.replaceAllIn(eventDescription
       .replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>").replaceAll("""\\n""", " <br/>")
       .replaceAll("""\\t""", "    "), m => "<a href='http://" + m + "'>" + m + "</a>")
       .replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>").replaceAll("""\\n""", " <br/>")
-      .replaceAll("""\\t""", "    ").replaceAll("""</a>/""", "</a> ")
-  }
-
-  def addBannerToEventDescription(eventDescription: String, eventName: String, imgPath: String): String = {
-    "<img class='width100p' src=" + imgPath  +
-      "/><div class='columns large-12'><h2>" + eventName.replaceAll("\"", "") +
-      "</h2></div><div class='descriptionContent'><div class='columns large-12'>" + formatEventDescription(eventDescription.substring(1).dropRight(1)) +
-      "</div></div>"
+      .replaceAll("""\\t""", "    ").replaceAll("""</a>/""", "</a> ").substring(1).dropRight(1) + "</div>"
   }
 
   def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
-    //println(s"$eventJson")
 
     val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
       case Some(latitude) =>
@@ -104,7 +96,7 @@ object Scheduler {
           case Success(eventDetailed) =>  val description = Json.stringify(eventDetailed.json \ "description")
             val name = Json.stringify(eventDetailed.json \ "name")
             val imgPath = Json.stringify(eventDetailed.json \ "cover" \ "source")
-            saveEvent(addBannerToEventDescription(description, name, imgPath), eventDetailed, placeId, imgPath)
+            saveEvent(formatEventDescription(description), eventDetailed, placeId, imgPath)
           case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
         } )
       case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
