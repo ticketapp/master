@@ -100,11 +100,8 @@ object Test2 extends Controller {
   }
 
 
-
-
-/*
   def test2 = Action {
     Ok("Okay\n")
-  }*/
+  }
 }
 

@@ -1,5 +1,61 @@
-<div style="margin-top: 100px;" ng-bind-html="event.description"></div>
-
-
+<div class="parallax-background">
+    <img class="width100p" src="{{ event.images[0].path }}"/>
+</div>
+<div class="parallax-content column" style="background: #ffffff">
+    <div class="columns large-12">
+        <h2 id="eventTitle">{{event.name}}</h2>
+    </div>
+    <div class="descriptionContent column large-8 float-left" style="text-align: justify;">
+        <div ng-bind-html="event.description"></div>
+    </div>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <h2>Acheter des places</h2>
+        <li ng-repeat="tarif in event.tarifs" style="display: block;">
+            <h4>{{tarif.denominations}}</h4>
+            <h4 class="column large-4">{{tarif.prices}} €</h4>
+            <select class="column large-4">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                <option>7</option>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+            </select>
+            <button class="column large-4">Acheter</button>
+        </li>
+    </div>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <h2>Programmation</h2>
+        <li ng-repeat="artist in event.artists">
+            <a href="#/artiste/{{artist.id}}">{{artist.name}}</a>
+        </li>
+    </div>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <h2>Lieu</h2>
+        <div class="column large-4 absolute" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-left: 5px; margin-top: 5px; z-index: 1;">
+            <h4>{{event.place}}</h4>
+        </div>
+        <map
+             zoom="15"
+             center="[45.766299, 4.827338]"
+             scrollwheel="false"
+             navigationControl="false"
+             mapTypeControl="false"
+             scaleControl="false"
+             style="height: 300px"
+             class="width100p">
+            <marker id="contact" position="45.766299, 4.827338" icon="img/marker.png">
+            </marker>
+        </map>
+    </div>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <h2>Organisateur</h2>
+        <h3>{{event.organizers[0].name}}</h3>
+    </div>
+</div>
 
 
