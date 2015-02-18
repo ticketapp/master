@@ -1,4 +1,4 @@
-<div class="row-fluid formCreateContener">
+<div>
     <form name="createEventForm">
         <div>
         <h3>CREER UN NOUVEL EVENEMENT</h3>
@@ -12,16 +12,8 @@
                 <h4>SearchEvent</h4>
                 <input ng-model="eventFbName" placeholder="Event Facebook" ng-change="searchEvent()">
                 <div ng-click="GetEventById(SearchEvent.id)" ng-repeat="SearchEvent in searchEvents">{{SearchEvent.name}}</div>
-                <h5>Evénement Gratuit ?</h5>
-                <input type="radio" name="EvenementGratuit" data-ng-model="gratuit" value="oui">oui <br/>
-                <input type="radio" name="EvenementGratuit" data-ng-model="gratuit" value="non">non <br/>
-                <div class="tarifs" ng-show="gratuit == 'non'">
-                    <h3>Tarifs</h3>
-                    <input type="text" placeholder="newTarifName">
-                    <input type="text" placeholder="newTarifPrice">
-                    <input type="text" placeholder="newTarifNbTickets">
-                </div><br/>
-                <a class="btn btn-primary" data-ng-click="InfosGenerales = !InfosGenerales; Config = !Config; InfosGeneralesActive = !InfosGeneralesActive">Suivant</a>
+                <br/>
+                <a class="button" data-ng-click="InfosGenerales = !InfosGenerales; Config = !Config; InfosGeneralesActive = !InfosGeneralesActive">Suivant</a>
             </div>
             <div class="ng-hide" data-ng-show="InfosGenerales">
                 <div ng-show="eventFb != true">
@@ -97,130 +89,207 @@
                        ng-model="newEvent.tarifs[1].startTimes"/><br/>
                 <input type="date" name="endTimes[1]" placeholder="Fin des ventes pour ce tarif"
                        ng-model="newEvent.tarifs[1].endTimes"/><br/>
-                <a class="btn btn-primary" data-ng-click="Descriptif = !Descriptif; InfosGenerales = !InfosGenerales;
-                    DescriptifActive = !DescriptifActive; addImg()">Suivant</a>
+                <a class="button" data-ng-click="Descriptif = !Descriptif; InfosGenerales = !InfosGenerales;
+                    DescriptifActive = !DescriptifActive; addImg(); resizeInfo()">Suivant</a>
             </div>
             <div class="ng-hide" data-ng-show="Descriptif">
                 <h4>Contenu</h4>
-                <wysiwyg style="position: absolute;
-z-index: 100;
-left: 0;
-top: 0;
-margin-top: 49px;
-background: white;
-height: {{winHeight}};">
-                    <div class="control">
-                        <div class="float-left">
-                            <button ng-click="form = !form">A</button>
-                            <div class="absolute zIndex5" ng-show="form" style="background: #ffffff;">
-                                <button class="float-left" ng-click="format(&quot;bold&quot;)"><b>B</b></button>
-                                <button class="float-left" ng-click="format(&quot;italic&quot;)"><i>I</i></button>
-                                <button class="float-left" ng-click="format(&quot;Underline&quot;)"><u>U</u></button>
-                                <button class="float-left" ng-click="format(&quot;StrikeThrough&quot;)"><Strike>S</Strike></button>
-                            </div>
-                        </div>
-                        <div class="float-left">
-                            <button ng-click="Size = !Size">Size</button>
-                            <div ng-show="Size" class="absolute float-left zIndex5">
-                                <button class="float-left" ng-click="format(&quot;FontSize&quot;, 1)" >1 (petite)</button>
-                                <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;2&quot;)" >2</button>
-                                <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;3&quot;)" >3 (normale)</button>
-                                <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;4&quot;)" >4</button>
-                                <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;5&quot;)" >5</button>
-                                <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;6&quot;)" >6</button>
-                                <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;7&quot;)" >7 (grande)</button>
-                            </div>
-                        </div>
-                        <button class="float-left" ng-click="format(&quot;JustifyLeft&quot;)"><i class="fi-align-left"></i> </button>
-                        <button class="float-left" ng-click="format(&quot;JustifyCenter&quot;)"><i class="fi-align-center"></i></button>
-                        <button class="float-left" ng-click="format(&quot;JustifyRight&quot;)"><i class="fi-align-right"></i></button>
-                        <button class="float-left" ng-click="format(&quot;JustifyFull&quot;)"><i class="fi-align-justify"></i></button>
-                        <button class="float-left" ng-click="format(&quot;InsertUnOrderedList&quot;)"><i class="fi-list-bullet"></i></button>
-                        <button class="float-left" ng-click="format(&quot;InsertOrderedList&quot;)"><i class="fi-list-number"></i></button>
-                        <div class="float-left">
-                            <button ng-click="img = !img" ><i class="fi-photo"></i></button>
-                            <div ng-show="img" class="absolute zIndex5" style="background: #ffffff;">
-                                <input type="file" name="image_file"  fileread="newImg"/>
-                                <button  ng-click="addImage(newImg); img = !img">Ok</button>
-                            </div>
-                        </div>
-                        <div class="float-left">
-                            <button ng-click="Font = !Font" >Font</button>
-                            <div ng-show="Font" class="absolute zIndex5">
-                                <button class="float-left" ng-click="format(&quot;FontName&quot;, &quot;arial&quot;)" >Arial</button>
-                                <button class="float-left" ng-click="format(&quot;FontName&quot;, &quot;Verdana&quot;)" >Verdana</button>
-                            </div>
-                        </div>
-                        <div class="float-left">
-                            <button ng-click="bgColor = !bgColor" colorpicker="rgba" ng-model="background.color" ng-change="background(background.color)"><i class="fi-background-color"></i></button>
-                            <div class="small-2 large-2 columns float-left padding0 margin0 absolute" ng-show="bgColor">
-                                <input type="text" colorpicker="rgba" ng-model="background.color" ng-change="background(background.color)" class="ng-pristine ng-valid">
-                            </div>
-                        </div>
-                        <div class="float-left ">
-                            <button ng-click="ElementGrill = !ElementGrill" >ElementSize</button>
-                            <div ng-show="ElementGrill" class="absolute zIndex5">
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;1&quot;)" >1</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;2&quot;)" >2</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;3&quot;)" >3</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;4&quot;)" >4</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;5&quot;)" >5</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;6&quot;)" >6</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;7&quot;)" >7</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;8&quot;)" >8</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;9&quot;)" >9</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;10&quot;)" >10</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;11&quot;)" >11</button>
-                                <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;12&quot;)" >12</button>
-                            </div>
-                        </div>
-                        <div  class="float-left ">
-                            <button ng-click="float = !float" >float</button>
-                            <div ng-show="float" class="absolute zIndex5">
-                                <button class="float-left" ng-click="ElementFloat(&quot;float-&quot;, &quot;left&quot;)" >Float Left</button>
-                                <button class="float-left" ng-click="ElementFloat(&quot;float-&quot;, &quot;right&quot;)" >Float Right</button>
-                                <button class="float-left" ng-click="ElementFloat(&quot;float-&quot;, &quot;none&quot;)" >Float None</button>
-                            </div>
-                        </div>
-                        <button class="float-left" ng-click="remEl()"><i ng-click="remEl()" class="fi-x"></i></button>
-                        <div  class="float-left ">
-                            <button ng-click="temps = !temps" >Templates</button>
-                            <div ng-show="temps" class="absolute column large-4 right zIndex5">
-                                <div class="float-left marginBottom20" ng-repeat="template in template"  ng-click="useTemps(template.name); $parent.useTmp = '150px';" data-ng-bind-html="template.code" style="height: 400px; overflow: hidden;"></div>
-                            </div>
-                        </div>
-                        <button  ng-click="respContent()" class="float-left"><i class="fi-tablet-portrait"></i></button>
-                        <button  ng-click="maxWinWidth()" class="float-left"><i class="fi-monitor left"></i></button>
-                        <a ng-click="remEl()" class="float-left" id="remEl" ng-show="showRemEl"><i class="fi-x"></i></a>
-                        <ul id="ElSize">
-                        <a ng-click="showElementSize = !showElementSize" ng-show="showRemEl">{{sizeEl}}</a>
-                            <ul ng-show="showElementSize" class="absolute zIndex5">
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 1; ElementSize(&quot;large-&quot;, &quot;1&quot;)" >1/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 2; ElementSize(&quot;large-&quot;, &quot;2&quot;)" >2/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 3; ElementSize(&quot;large-&quot;, &quot;3&quot;)" >3/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 4; ElementSize(&quot;large-&quot;, &quot;4&quot;)" >4/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 5; ElementSize(&quot;large-&quot;, &quot;5&quot;)" >5/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 6; ElementSize(&quot;large-&quot;, &quot;6&quot;)" >6/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 7; ElementSize(&quot;large-&quot;, &quot;7&quot;)" >7/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 8; ElementSize(&quot;large-&quot;, &quot;8&quot;)" >8/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 9; ElementSize(&quot;large-&quot;, &quot;9&quot;)" >9/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 10; ElementSize(&quot;large-&quot;, &quot;10&quot;)" >10/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 11; ElementSize(&quot;large-&quot;, &quot;11&quot;)" >11/12</a></li>
-                                <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 12; ElementSize(&quot;large-&quot;, &quot;12&quot;)" >12/12</a></li>
-                            </ul>
-                        </ul>
+                <img class="width100p" src="{{newEvent.img}}"/>
+                <div style="margin-left: 2px">
+                    <div class="columns large-12">
+                        <h2 id="eventTitle">{{newEvent.name}}</h2>
                     </div>
-                    <iframe style="border: 0; height:400px; padding-bottom: {{useTmp}}" src="assets/partials/wysiwyg.html" width="{{winWidth}}" ></iframe>
-                    <a ng-click="useTmp = false" ng-show="useTmp" class="absolute" style="bottom: {{useTmp}}"><i class="fi-x"></i></a>
-                    <a ng-click="useTmp = '150px'" ng-show="!useTmp" class="absolute ng-hide" style="bottom: {{useTmp}}"><i class="fi-plus"></i></a>
-                    <div contenteditable="true" ng-show="useTmp" data-ng-bind-html="event.description" style="max-height: {{useTmp}}; background: #ffffff; overflow: auto;" class="absolute bottom column large-12"></div>
+                    <div class="descriptionContent column large-8 float-left" style="text-align: justify;">
+                        <wysiwyg style="
+        z-index: 100;
+        left: 0;
+        top: 0;
+        margin-top: 49px;
+        background: white;">
+                            <div class="control zIndex5" id="wysiwygControl">
+                                <div class="float-left">
+                                    <button ng-click="form = !form">A</button>
+                                    <div class="absolute zIndex5" ng-show="form" style="background: #ffffff;">
+                                        <button class="float-left" ng-click="format(&quot;bold&quot;)"><b>B</b></button>
+                                        <button class="float-left" ng-click="format(&quot;italic&quot;)"><i>I</i></button>
+                                        <button class="float-left" ng-click="format(&quot;Underline&quot;)"><u>U</u></button>
+                                        <button class="float-left" ng-click="format(&quot;StrikeThrough&quot;)"><Strike>S</Strike></button>
+                                    </div>
+                                </div>
+                                <div class="float-left">
+                                    <button ng-click="Size = !Size">Size</button>
+                                    <div ng-show="Size" class="absolute float-left zIndex5">
+                                        <button class="float-left" ng-click="format(&quot;FontSize&quot;, 1)" >1 (petite)</button>
+                                        <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;2&quot;)" >2</button>
+                                        <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;3&quot;)" >3 (normale)</button>
+                                        <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;4&quot;)" >4</button>
+                                        <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;5&quot;)" >5</button>
+                                        <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;6&quot;)" >6</button>
+                                        <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;7&quot;)" >7 (grande)</button>
+                                    </div>
+                                </div>
+                                <button class="float-left" ng-click="format(&quot;JustifyLeft&quot;)"><i class="fi-align-left"></i> </button>
+                                <button class="float-left" ng-click="format(&quot;JustifyCenter&quot;)"><i class="fi-align-center"></i></button>
+                                <button class="float-left" ng-click="format(&quot;JustifyRight&quot;)"><i class="fi-align-right"></i></button>
+                                <button class="float-left" ng-click="format(&quot;JustifyFull&quot;)"><i class="fi-align-justify"></i></button>
+                                <button class="float-left" ng-click="format(&quot;InsertUnOrderedList&quot;)"><i class="fi-list-bullet"></i></button>
+                                <button class="float-left" ng-click="format(&quot;InsertOrderedList&quot;)"><i class="fi-list-number"></i></button>
+                                <div class="float-left">
+                                    <button ng-click="img = !img" ><i class="fi-photo"></i></button>
+                                    <div ng-show="img" class="absolute zIndex5" style="background: #ffffff;">
+                                        <input type="file" name="image_file"  fileread="newImg"/>
+                                        <button  ng-click="addImage(newImg); img = !img">Ok</button>
+                                    </div>
+                                </div>
+                                <div class="float-left">
+                                    <button ng-click="Font = !Font" >Font</button>
+                                    <div ng-show="Font" class="absolute zIndex5">
+                                        <button class="float-left" ng-click="format(&quot;FontName&quot;, &quot;arial&quot;)" >Arial</button>
+                                        <button class="float-left" ng-click="format(&quot;FontName&quot;, &quot;Verdana&quot;)" >Verdana</button>
+                                    </div>
+                                </div>
+                                <div class="float-left">
+                                    <button ng-click="bgColor = !bgColor" colorpicker="rgba" ng-model="background.color" ng-change="background(background.color)"><i class="fi-background-color"></i></button>
+                                    <div class="small-2 large-2 columns float-left padding0 margin0 absolute" ng-show="bgColor">
+                                        <input type="text" colorpicker="rgba" ng-model="background.color" ng-change="background(background.color)" class="ng-pristine ng-valid">
+                                    </div>
+                                </div>
+                                <div class="float-left ">
+                                    <button ng-click="ElementGrill = !ElementGrill" >ElementSize</button>
+                                    <div ng-show="ElementGrill" class="absolute zIndex5">
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;1&quot;)" >1</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;2&quot;)" >2</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;3&quot;)" >3</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;4&quot;)" >4</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;5&quot;)" >5</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;6&quot;)" >6</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;7&quot;)" >7</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;8&quot;)" >8</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;9&quot;)" >9</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;10&quot;)" >10</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;11&quot;)" >11</button>
+                                        <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;12&quot;)" >12</button>
+                                    </div>
+                                </div>
+                                <div  class="float-left ">
+                                    <button ng-click="float = !float" >float</button>
+                                    <div ng-show="float" class="absolute zIndex5">
+                                        <button class="float-left" ng-click="ElementFloat(&quot;float-&quot;, &quot;left&quot;)" >Float Left</button>
+                                        <button class="float-left" ng-click="ElementFloat(&quot;float-&quot;, &quot;right&quot;)" >Float Right</button>
+                                        <button class="float-left" ng-click="ElementFloat(&quot;float-&quot;, &quot;none&quot;)" >Float None</button>
+                                    </div>
+                                </div>
+                                <!--<button class="float-left" ng-click="remEl()"><i ng-click="remEl()" class="fi-x"></i></button>
+                                <div  class="float-left ">
+                                    <button ng-click="temps = !temps" >Templates</button>
+                                    <div ng-show="temps" class="absolute column large-4 right zIndex5">
+                                        <div class="float-left marginBottom20" ng-repeat="template in template"  ng-click="useTemps(template.name); $parent.useTmp = '150px';" data-ng-bind-html="template.code" style="height: 400px; overflow: hidden;"></div>
+                                    </div>
+                                </div>
+                                <button  ng-click="respContent()" class="float-left"><i class="fi-tablet-portrait"></i></button>
+                                <button  ng-click="maxWinWidth()" class="float-left"><i class="fi-monitor left"></i></button>-->
+                                <a ng-click="remEl()" class="float-left" id="remEl" ng-show="showRemEl"><i class="fi-x"></i></a>
+                                <!--<ul id="ElSize">
+                                <a ng-click="showElementSize = !showElementSize" ng-show="showRemEl">{{sizeEl}}</a>
+                                    <ul ng-show="showElementSize" class="absolute zIndex5">
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 1; ElementSize(&quot;large-&quot;, &quot;1&quot;)" >1/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 2; ElementSize(&quot;large-&quot;, &quot;2&quot;)" >2/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 3; ElementSize(&quot;large-&quot;, &quot;3&quot;)" >3/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 4; ElementSize(&quot;large-&quot;, &quot;4&quot;)" >4/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 5; ElementSize(&quot;large-&quot;, &quot;5&quot;)" >5/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 6; ElementSize(&quot;large-&quot;, &quot;6&quot;)" >6/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 7; ElementSize(&quot;large-&quot;, &quot;7&quot;)" >7/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 8; ElementSize(&quot;large-&quot;, &quot;8&quot;)" >8/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 9; ElementSize(&quot;large-&quot;, &quot;9&quot;)" >9/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 10; ElementSize(&quot;large-&quot;, &quot;10&quot;)" >10/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 11; ElementSize(&quot;large-&quot;, &quot;11&quot;)" >11/12</a></li>
+                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 12; ElementSize(&quot;large-&quot;, &quot;12&quot;)" >12/12</a></li>
+                                    </ul>
+                                </ul>-->
+                            </div>
+                            <div ng-show="infoWy == true" class="column large-12 alert-box info" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-top: 10px; margin-bottom: 10px;">
+                                <h3>Vous pouvez ici modifier la description de votre événement.</h3>
+                                <a ng-click="infoWy = false" class="close">&times;</a>
+                            </div>
+                            <div id="content" class="row minHeight450 float-left"><div ng-init="event.description = 'ecrire ici'" contenteditable="true" class="column padding0"><div data-ng-bind-html="event.description"></div></div></div>
+                            <!--<iframe style="border: 0; padding-bottom: {{useTmp}}; width: 100%" src="assets/partials/wysiwyg.html"></iframe>-->
+                            <a ng-click="useTmp = false" ng-show="useTmp" style="bottom: {{useTmp}}"><i class="fi-x"></i></a>
+                            <a ng-click="useTmp = '150px'" ng-show="!useTmp" class="ng-hide" style="bottom: {{useTmp}}"><i class="fi-plus"></i></a>
+                            <div contenteditable="true" ng-show="useTmp" data-ng-bind-html="event.description" style="max-height: {{useTmp}}; background: #ffffff; overflow: auto;" class="absolute bottom column large-12"></div>
 
-                </wysiwyg>
-                <a class="absolute bottom right" style="z-index: 200" data-ng-click="Artists = !Artists; Descriptif = !Descriptif;
+                        </wysiwyg>
+                    </div>
+                    <div ng-show="infoDesc == true" class="column large-4 alert-box info" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-top: 10px; margin-bottom: 10px;">
+                        <h3>Vous pouvez ci-dessous modifier les informations liées à votre événement.</h3>
+                        <a ng-click="infoDesc = false" class="close">&times;</a>
+                    </div>
+                    <div class="column large-4 eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+                        <h2>Acheter des places</h2>
+                        <li ng-repeat="tarif in newEvent.tarifs" style="display: block;">
+                            <h4>{{tarif.denominations}}</h4>
+                            <h4 class="column large-4">{{tarif.prices}} €</h4>
+                            <select class="column large-4">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                                <option>8</option>
+                                <option>9</option>
+                                <option>10</option>
+                            </select>
+                            <button class="column large-4">Acheter</button>
+                        </li>
+                    </div>
+                    <div class="column large-4 eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+                        <h2>Programmation</h2>
+                        <li ng-repeat="artist in newEvent.artists">
+                            <a ng-click="alert('veuillez finir de remplir le formulaire')">{{artist.name}}</a><a ng-click="remArt($index)" class="float-right"><i class="fi-x"></i> supprimer cet artiste</a>
+                        </li>
+                        <a ng-click="addArt = true" class="button"><i class="fi-plus"></i> Add artist</a>
+                        <div ng-show="addArt" class="ng-hide">
+                            <input type="text" ng-minlength="2" ng-model="addNewArt.name" name="artistName" placeholder="Artist name" required>
+                            <div ng-messages="createEventForm.artistName.$error">
+                                <div ng-message="required">This is required.</div>
+                                <div ng-message="minlength">The name has to be more than 2 characters long.</div>
+                            </div>
+                            <input type="text" ng-model="addNewArt.facebok" placeholder="Artist facebook">
+                            <input type="text" ng-model="addNewArt.soundcloud" placeholder="Artist soundcloud">
+                            <input type="text" ng-model="addNewArt.siteWeb" placeholder="Artist siteweb">
+                            <a class="button" ng-click="addAnArtist()">Valider</a>
+                            <a class="button" ng-click="addArt = false">annuler</a>
+                        </div>
+                    </div>
+                    <div class="column large-4 eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+                        <h2>Lieu</h2>
+                        <div class="column large-4 absolute" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-left: 5px; margin-top: 5px; z-index: 1;">
+                            <h4>{{newEvent.place}}</h4>
+                        </div>
+                        <map ng-if="Descriptif"
+                             zoom="17"
+                             center="[45.766299, 4.827338]"
+                             scrollwheel="false"
+                             navigationControl="false"
+                             mapTypeControl="false"
+                             scaleControl="false"
+                             style="height: 300px"
+                             class="width100p">
+                            <marker id="contact" position="45.766299, 4.827338" icon="img/marker.png">
+                            </marker>
+                        </map>
+                    </div>
+                    <div class="column large-4 eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+                        <h2>Organisateur</h2>
+                        <h3>{{newEvent.user.name}}</h3>
+                    </div>
+                </div>
+                <a class="button float-left column" style="z-index: 200" data-ng-click="Artists = !Artists; Descriptif = !Descriptif;
                 ArtistsActive = !ArtistsActive; clearContent()">Suivant</a>
         </div>
         <div class="ng-hide" data-ng-show="Artists">
-            <a class="btn btn-primary" data-ng-click="Finalisation = !Finalisation; Artists = !Artists;
+            <a class="button" data-ng-click="Finalisation = !Finalisation; Artists = !Artists;
                 FinalisationActive = !FinalisationActive">Suivant</a>
         </div>
         <div class="ng-hide" data-ng-show="Finalisation">

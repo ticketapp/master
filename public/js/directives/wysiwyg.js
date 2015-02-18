@@ -4,7 +4,7 @@ app.directive('wysiwyg',function(){
         require: '?ngModel',
         controller : 'wysiwygCtrl',
         link : function(attr, element){
-            element.find('iframe').find('head').append('<link rel="stylesheet" href="styles/main.css">');
+            //element.find('iframe').find('head').append('<link rel="stylesheet" href="styles/main.css">');
         }
     }
 
@@ -268,7 +268,19 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
     var medium;
     var large;
     var respClass;
-
+    window.addEventListener('scroll', fixControl)
+    function fixControl () {
+        var controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
+        var titlePos = document.getElementById('eventTitle').getBoundingClientRect();
+        console.log(window.pageYOffset + '//' + titlePos.bottom)
+        if (controlPos.top <= 0) {
+            document.getElementById('wysiwygControl').style.position = 'fixed';
+            document.getElementById('wysiwygControl').style.top = 0;
+        } if (titlePos.bottom >= 0){
+            document.getElementById('wysiwygControl').style.position = 'relative';
+            controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
+        }
+    }
     $scope.sizeEl = "Size";
     $scope.maxWinWidth = function () {
         $scope.winWidth = window.innerWidth;
@@ -293,8 +305,8 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
     $scope.maxWinWidth();
     $scope.winHeight = window.innerHeight - 49 + "px";
     function wysinit () {
-        var wydoc = document.getElementsByTagName('iframe')[0].contentDocument;
-        console.log(wydoc)
+        //var document = document.getElementsByTagName('iframe')[0].contentDocument;
+        //console.log(document)
         $scope.template = [
             {'name': '1', 'code': '<div class="row"><div class="large-12 columns"><img class="width100p" src="http://placehold.it/1000x400&text=[img]"><hr></div></div><div class="row"><div class="large-4 columns"><img src="http://placehold.it/400x300&text=[img]"></div><div class="large-8 columns"><h4>This is a content section.</h4><div class="row"><div class="large-6 columns"><p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod commodo, chuck duis velit. Aute in reprehenderit, dolore aliqua non est magna in labore pig pork biltong. Eiusmod swine spare ribs reprehenderit culpa. Boudin aliqua adipisicing rump corned beef.</p></div><div class="large-6 columns"><p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p></div></div></div></div><div class="row"><div class="large-8 columns"><h4>This is a content section.</h4><p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod commodo, chuck duis velit. Aute in reprehenderit, dolore aliqua non est magna in labore pig pork biltong. Eiusmod swine spare ribs reprehenderit culpa. Boudin aliqua adipisicing rump corned beef.</p><p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p></div><div class="large-4 columns"><img src="http://placehold.it/400x300&text=[img]"></div></div>'},
             {'name': '2', 'code': '<div class="parallax-background" contenteditable="true">  <div class="intro-text" contenteditable="true" >    scroll for parallax!    <p><i class="fi-arrow-down"></i></p>  </div></div><div class="parallax-content" contenteditable="true">  <div contenteditable="true"><p>Bacon ipsum dolor sit amet chicken pork loin hamburger ball tip, swine tenderloin salami meatball boudin tri-tip fatback shank bacon. Pork salami kevin, brisket spare ribs strip steak ham hock porchetta. Pork belly short loin tail porchetta. Pork pig meatball, beef ribs doner jerky tri-tip hamburger filet mignon strip steak ball tip ham tail tongue corned beef.</p></div>  <div contenteditable="true"><p>Flank spare ribs capicola, strip steak biltong pancetta bresaola tri-tip cow landjaeger. Short ribs sirloin beef ribs, flank capicola ribeye turducken. Sirloin boudin andouille tail. Ham flank tail sausage t-bone, jerky landjaeger kevin porchetta ground round pork belly.</p></div>  <div contenteditable="true"><p>Pork loin doner biltong shoulder meatball flank. Sirloin shankle ground round tail, short loin prosciutto beef ribs salami pork pancetta kielbasa. Brisket spare ribs jerky filet mignon flank. Turducken ham sausage pork loin salami. Ball tip meatloaf shank pancetta hamburger meatball. Jowl beef pork loin tenderloin turducken, pastrami capicola filet mignon ham hock pork belly t-bone jerky ball tip kevin.</p></div>  <div contenteditable="true"><p>Filet mignon shank pastrami pork loin ham jerky corned beef chuck drumstick ribeye prosciutto pork belly tail. Beef leberkas brisket ham hock tenderloin tail tri-tip pork chop. Corned beef boudin andouille tail fatback chicken strip steak biltong pancetta pork loin tri-tip landjaeger pastrami kevin. Tongue spare ribs kevin ribeye shoulder swine.</p></div>  <div contenteditable="true"><p>Chicken kielbasa swine ham hock filet mignon strip steak bacon fatback pork t-bone. Ground round shankle tongue, jowl flank spare ribs beef leberkas ham boudin shank capicola short ribs. Drumstick pork loin turkey pork chop salami andouille pork belly. Short loin tongue tri-tip, hamburger filet mignon pastrami doner shoulder turkey ball tip t-bone jerky ham chicken.</p></div>  <div contenteditable="true"><p>Ground round flank pork loin salami, cow biltong hamburger swine brisket tongue tenderloin drumstick meatball. Biltong tongue salami ham shankle, leberkas meatloaf sirloin ball tip. Pork loin pastrami spare ribs beef capicola sausage kevin filet mignon pork chop. Bacon jerky turkey shoulder cow capicola ball tip shank. Ham tongue tail tri-tip kielbasa ham hock frankfurter meatball cow brisket. Shankle sausage filet mignon biltong pork loin. Short ribs spare ribs chuck pig meatloaf shoulder cow tail brisket biltong ball tip ham hock.</p></div></div>'}
@@ -303,7 +315,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
             for (var i = 0; i < $scope.template.length; i++) {
                 console.log(name);
                 if (name == $scope.template[i].name) {
-                    wydoc.getElementById("content").innerHTML = $scope.template[i].code;
+                    document.getElementById("content").innerHTML = $scope.template[i].code;
                 }
             }
         };
@@ -317,33 +329,33 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
         };
 
         $scope.format = function (a, b) {
-            if (wydoc.getSelection().toString().length > 0) {
-                wydoc.execCommand(a, false, b);
+            if (document.getSelection().toString().length > 0) {
+                document.execCommand(a, false, b);
             }
         };
         $scope.addClass = function (a) {
-            if (wydoc.getSelection().anchorNode.parentNode.className == a) {
-                var content = wydoc.getSelection().anchorNode.parentNode.classList;
+            if (document.getSelection().anchorNode.parentNode.className == a) {
+                var content = document.getSelection().anchorNode.parentNode.classList;
                 content.remove(a);
             } else {
-                wydoc.execCommand("insertHTML", false, "<span class='" + a + "'>" + wydoc.getSelection() + "</span>");
+                document.execCommand("insertHTML", false, "<span class='" + a + "'>" + document.getSelection() + "</span>");
             }
         };
         $scope.addImage = function (img) {
-            wydoc.execCommand("InsertImage", false, img);
-            var last = wydoc.getElementById("content").getElementsByTagName('img').length;
-            console.log(wydoc.getElementById("content").getElementsByTagName('img')[last - 1]);
-            wydoc.getElementById("content").getElementsByTagName('img')[last - 1].classList.add("width100p");
+            document.execCommand("InsertImage", false, img);
+            var last = document.getElementById("content").getElementsByTagName('img').length;
+            console.log(document.getElementById("content").getElementsByTagName('img')[last - 1]);
+            document.getElementById("content").getElementsByTagName('img')[last - 1].classList.add("width100p");
         };
         function ActiveElement(event) {
             $scope.showRemEl = false;
             var sidePoint = event.clientX;
             var sidePointY = event.clientY;
-            var toRemoveCss = wydoc.getElementById("content").getElementsByTagName('div');
-            var toRemoveSpanCss = wydoc.getElementById("content").getElementsByTagName('span');
+            var toRemoveCss = document.getElementById("content").getElementsByTagName('div');
+            var toRemoveSpanCss = document.getElementById("content").getElementsByTagName('span');
             var searchM;
             var imgFind = false;
-            var imgs = wydoc.getElementById("content").getElementsByTagName('img');
+            var imgs = document.getElementById("content").getElementsByTagName('img');
             for (i = 0; i < toRemoveCss.length; i++) {
                 toRemoveCss[i].style.boxShadow = "";
 
@@ -359,14 +371,14 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                 var posEl = imgs[ii].getBoundingClientRect();
                 if (sidePoint > posEl.left && sidePoint < posEl.right && sidePointY < posEl.bottom && sidePointY > posEl.top) {
                     imgFind = true;
-                    if (wydoc.getElementById("content").getElementsByTagName('img')[ii].parentNode.className.indexOf("imgContain") > -1) {
-                        searchM = wydoc.getElementById("content").getElementsByTagName('img')[ii].parentNode;
+                    if (document.getElementById("content").getElementsByTagName('img')[ii].parentNode.className.indexOf("imgContain") > -1) {
+                        searchM = document.getElementById("content").getElementsByTagName('img')[ii].parentNode;
                     } else {
-                        wydoc.getElementById("content").getElementsByTagName('img')[ii].outerHTML = '<div class="imgContain padding0">' + wydoc.getElementById("content").getElementsByTagName('img')[ii].outerHTML + '</div>'
-                        if (wydoc.getElementById("content").getElementsByTagName('img')[ii].className.indexOf("width100p") <= -1) {
-                            wydoc.getElementById("content").getElementsByTagName('img')[ii].classList.add("width100p");
+                        document.getElementById("content").getElementsByTagName('img')[ii].outerHTML = '<div class="imgContain padding0">' + document.getElementById("content").getElementsByTagName('img')[ii].outerHTML + '</div>'
+                        if (document.getElementById("content").getElementsByTagName('img')[ii].className.indexOf("width100p") <= -1) {
+                            document.getElementById("content").getElementsByTagName('img')[ii].classList.add("width100p");
                         }
-                        searchM = wydoc.getElementById("content").getElementsByTagName('img')[ii].parentNode
+                        searchM = document.getElementById("content").getElementsByTagName('img')[ii].parentNode
                     }
                 }
             }
@@ -377,10 +389,10 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                     m = searchM;
                     searchParent = false;
                 } else {
-                    if (wydoc.getSelection().anchorNode != null){
-                        searchM = wydoc.getSelection().anchorNode.parentElement;
+                    if (document.getSelection().anchorNode != null){
+                        searchM = document.getSelection().anchorNode.parentElement;
                     } else {
-                        searchM = wydoc.getElementById('content');
+                        searchM = document.getElementById('content');
                     console.log(searchM)
                     }
                 }
@@ -392,7 +404,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                             searchParent = false;
                             break;
                         case 'body':
-                            m = wydoc.getElementById("content");
+                            m = document.getElementById("content");
                             searchParent = false;
                             break;
                         default:
@@ -401,19 +413,23 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                     }
                 }
                 var rect = m.getBoundingClientRect();
+                console.log(m)
+                var scrollBase = window.pageYOffset;
                 function initControl () {
                 var posEl = m.getBoundingClientRect();
-                var wydocPos = document.getElementsByTagName('iframe')[0].getBoundingClientRect();
-                document.getElementById('remEl').style.position = "absolute";
-                document.getElementById('remEl').style.top = wydocPos.top - 72 + posEl.top + "px";
-                document.getElementById('remEl').style.left = wydocPos.left + posEl.right - 10 + "px";
-                document.getElementById('ElSize').style.position = "absolute";
-                document.getElementById('ElSize').style.top = wydocPos.top - 72 + posEl.top + "px";
-                document.getElementById('ElSize').style.left = wydocPos.left + posEl.right - 70 + "px";
+                document.getElementById('remEl').style.position = "fixed";
+                document.getElementById('remEl').style.zIndex = 10;
+                document.getElementById('remEl').style.top = posEl.top - 20 + "px";
+                document.getElementById('remEl').style.left =  posEl.right - 10 + "px";
+                /*document.getElementById('ElSize').style.position = "fixed";
+                document.getElementById('ElSize').style.zIndex = 10;
+                document.getElementById('ElSize').style.top =  posEl.top - 20 + "px";
+                document.getElementById('ElSize').style.left = posEl.right - 70 + "px";*/
                 $scope.showRemEl = true;
                 }
                 initControl();
-                wydoc.onmouseover = initControl;
+                document.onmouseover = initControl;
+                window.onscroll = initControl;
                 if (sidePoint > rect.right || sidePoint < rect.left || sidePointY < rect.top || sidePointY > rect.bottom) {
                     m = m.parentElement;
                     rect = m.getBoundingClientRect();
@@ -438,7 +454,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                         changeColumnClass()
                     }
                     else {
-                        range = wydoc.getSelection().getRangeAt(0);
+                        range = document.getSelection().getRangeAt(0);
                         if (range == range.commonAncestorContainer.data || range.endOffset == range.startOffset) {
                             if (range.commonAncestorContainer.parentElement.localName != "div") {
                                 var flag = true;
@@ -466,10 +482,10 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                                 }
                             } else {
                                 /*if (range.commonAncestorContainer.parentElement.id == "content") {
-                                    var div = wydoc.createElement("div");
+                                    var div = document.createElement("div");
                                     div.innerHTML = "<div  class='column float-left " + a + b + "'>" + range + "</div>";
                                     range.deleteContents();
-                                    var frag = wydoc.createDocumentFragment(), child;
+                                    var frag = document.createDocumentFragment(), child;
                                     while ((child = div.firstChild)) {
                                         frag.appendChild(child);
                                     }
@@ -482,10 +498,10 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                                 changeColumnClass();
                             }
                         } else {
-                            var div = wydoc.createElement("div");
+                            var div = document.createElement("div");
                             div.innerHTML = "<div  class='column float-left " + a + b + "'>" + range + "</div>";
                             range.deleteContents();
-                            var frag = wydoc.createDocumentFragment(), child;
+                            var frag = document.createDocumentFragment(), child;
                             while ((child = div.firstChild)) {
                                 frag.appendChild(child);
                             }
@@ -520,7 +536,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
 
                     function createNewColumn() {
                         console.log(range);
-                        wydoc.execCommand("insertHTML", false, "<div  class='column float-left " + a + b + "'>" + range + "</div>");
+                        document.execCommand("insertHTML", false, "<div  class='column float-left " + a + b + "'>" + range + "</div>");
                     }
                     initControl();
                 };
@@ -530,7 +546,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                         changeFloatClass();
                     }
                     else {
-                        range = wydoc.getSelection().getRangeAt(0);
+                        range = document.getSelection().getRangeAt(0);
                         if (range == range.commonAncestorContainer.data || range.endOffset == range.startOffset) {
                             if (range.commonAncestorContainer.parentElement.localName != "div") {
                                 var flag = true;
@@ -558,10 +574,10 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                                 }
                             } else {
                                 if (range.commonAncestorContainer.parentElement.id == "content") {
-                                    var div = wydoc.createElement("div");
+                                    var div = document.createElement("div");
                                     div.innerHTML = "<div  class='" + a + b + "'>" + range + "</div>";
                                     range.deleteContents();
-                                    var frag = wydoc.createDocumentFragment(), child;
+                                    var frag = document.createDocumentFragment(), child;
                                     while ((child = div.firstChild)) {
                                         frag.appendChild(child);
                                     }
@@ -572,10 +588,10 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                                 }
                             }
                         } else {
-                            var div = wydoc.createElement("div");
+                            var div = document.createElement("div");
                             div.innerHTML = "<div  class='" + a + b + "'>" + range + "</div>";
                             range.deleteContents();
-                            var frag = wydoc.createDocumentFragment(), child;
+                            var frag = document.createDocumentFragment(), child;
                             while ((child = div.firstChild)) {
                                 frag.appendChild(child);
                             }
@@ -606,7 +622,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                     }
 
                     function createNewFloat() {
-                        wydoc.execCommand("insertHTML", false, "<div  class='" + a + "'>" + range + "</div>");
+                        document.execCommand("insertHTML", false, "<div  class='" + a + "'>" + range + "</div>");
                         initControl();
                     }
                 };
@@ -614,11 +630,11 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                     var inner = m.innerHTML;
                     m.innerHTML = inner + "<div  class='column' contenteditable='true'>MyNewDiv</div>";
                 } else if (m.tagName == "WYSIWYG" || m.tagName == "BODY") {
-                    var contentElement = wydoc.getElementById('content').innerHTML;
-                    wydoc.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
-                } else if (wydoc.getElementById('content').innerHTML.indexOf(m.outerHTML) == -1) {
-                    var contentElement = wydoc.getElementById('content').innerHTML;
-                    wydoc.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
+                    var contentElement = document.getElementById('content').innerHTML;
+                    document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
+                } else if (document.getElementById('content').innerHTML.indexOf(m.outerHTML) == -1) {
+                    var contentElement = document.getElementById('content').innerHTML;
+                    document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
                 } else {
                     $scope.remEl = function () {
                         m.outerHTML = "";
@@ -819,10 +835,10 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
             }, 100);
         }
 
-        wydoc.getElementById("content").addEventListener("mousedown", ActiveElement, false);
+        document.getElementById("content").addEventListener("mousedown", ActiveElement, false);
     }
     var waitForIframe = setInterval(function () {
-        if (document.getElementsByTagName('iframe')[0].contentDocument.getElementById("content") != null) {
+        if (document.getElementById("content") != null) {
             wysinit();
             clearInterval(waitForIframe)
         }

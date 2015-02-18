@@ -24,8 +24,8 @@ object Scheduler {
   def addBannerToEventDescription(eventDescription: String, eventName: String, imgPath: String): String = {
     "<img class='width100p' src=" + imgPath  +
       "/><div class='columns large-12'><h2>" + eventName.replaceAll("\"", "") +
-      "</h2></div><div id='desc'>" + formatEventDescription(eventDescription.substring(1).dropRight(1)) +
-      "</div>"
+      "</h2></div><div class='descriptionContent'><div class='columns large-12'>" + formatEventDescription(eventDescription.substring(1).dropRight(1)) +
+      "</div></div>"
   }
 
   def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {

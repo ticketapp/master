@@ -1,7 +1,14 @@
 app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$rootScope',
     function ($scope, $location, $http, $timeout, $rootScope ){
     $scope.buy = false;
-
+    function otherListener () {
+        if (window.pageYOffset < 50) {
+            document.getElementById('generalControlsContener').style.marginRight = '0';
+        } else {
+            document.getElementById('generalControlsContener').style.marginRight = '-60px';
+        }
+    }
+    window.addEventListener('scroll', otherListener);
     function getEvent () {
         if ($location.path().indexOf('/event/') > -1) {
             matched = $location.path().match(/\d.*/);
