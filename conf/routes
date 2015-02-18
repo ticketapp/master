@@ -26,6 +26,7 @@ POST    /events/:userId/:eventId    controllers.EventController.followEvent(user
 GET     /events/containing/:pattern controllers.EventController.findEventsContaining(pattern: String)
 #GET     /events/circle/             controllers.EventController.findEventsInCircle(center = "")
 GET     /events/circle/:center       controllers.EventController.findEventsInCircle(center: String)
+GET     /events/city/:pattern       controllers.EventController.findEventsByCity(pattern: String)
 
 #(centerLatitude: FLOAT, centerLongitude: FLOAT)
 #/events/circle/:centerLatitude/:centerLongitude

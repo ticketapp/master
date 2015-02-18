@@ -22,7 +22,8 @@ object Address {
     val MetaDataItem(qualified, nullable, clazz) = meta
     value match {
       case d: Any => Right(d.toString)
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass + " to Float for column " + qualified))
+      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass +
+        " to Float for column " + qualified) )
     }
   }
 
@@ -62,11 +63,18 @@ object Address {
     }
   }
 
-  def find(addressId: Long): Option[Address] = {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * from addresses WHERE addressId = {addressId}")
-        .on('addressId -> addressId)
-        .as(AddressParser.singleOpt)
+  def find(addressId: Option[Long]): Option[Address] = {
+    addressId match {
+      case None => None
+      case Some(addressId) => try {
+        DB.withConnection { implicit connection =>
+          SQL("SELECT * from addresses WHERE addressId = {addressId}")
+            .on('addressId -> addressId)
+            .as(AddressParser.singleOpt)
+        }
+      } catch {
+        case e: Exception => throw new DAOException("Problem with the method Address.find: " + e.getMessage)
+      }
     }
   }
 

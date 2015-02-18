@@ -79,38 +79,23 @@ object Test2 extends Controller {
 
     val readTracksArray: Reads[Seq[(String, String, Option[String])]] = Reads.seq(readAllTrack)
 
-    /*val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, Option[String])]] = readAnArray.map { pages =>
-        pages.collect{ case (id, "Musician/band", Some(cover), webSite) => (id, cover, webSite) }
-    }*/
-
     val readTracks: Reads[Seq[TrackToReturn]] = readTracksArray.map { tracks =>
       tracks.map{ case (stream_url, title, artwork_url) => TrackToReturn(stream_url, title, artwork_url) }
     }
 
 
     WS.url("http://api.soundcloud.com/users/johnyalen/tracks?client_id=" + soundCloudClientId).get.map { response =>
-      /*val readErrors: Reads[Option[String]] = (__ \ "errors").readNullable
-      println("lkjkljkl")
-      readErrors.reads(response.json).map {
-        case Some(errorFound) => println("akljlkjkljlk")
-        case _ => println("x :")
-      }*/
-        /*match
-        {
-          case None => println("qeerr")
-          case _ => println("qeqsdqserr")
-        }*/
-
-      /*val tracksToReturn = response.json.as[Seq[TrackToReturn]](readTracks)
+      val tracksToReturn = response.json.as[Seq[TrackToReturn]](readTracks)
       for (track <- tracksToReturn) {
         track.artwork_url match {
           case Some(artwork_url) =>
           case None => //On va chercher l'image de l'user
         }
       }
-      Ok(Json.toJson(tracksToReturn))*/
-      Ok
+      Ok(Json.toJson(tracksToReturn))
     }
+
+
 
   }
 

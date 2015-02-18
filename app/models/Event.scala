@@ -124,6 +124,25 @@ object Event {
     }
   }
 
+
+  def findAllByCityPattern(cityPattern: String): Seq[Event] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("""SELECT *
+          FROM events e
+          JOIN eventsAddresses eA on e.eventId = eA.eventId
+          JOIN addresses a ON a.addressId = eA.eventId
+          WHERE a.isEvent = TRUE AND LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 50""")
+          .on('patternLowCase -> cityPattern.toLowerCase)
+          .as(EventParser.*).map(e => e.copy(
+            images = Image.findAllByEvent(e).toList,
+            artists = Artist.findAllByEvent(e).toList))
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
+    }
+  }
+
   def save(event: Event): Option[Long] = {
     Utilities.testIfExist("events", "facebookId", event.facebookId) match {
       case true => None
@@ -195,6 +214,8 @@ object Event {
 
 
   //def upsert(event: Event) = TODO
+
+
 
 
 

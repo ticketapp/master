@@ -31,7 +31,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 58 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 56 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -124,7 +124,7 @@ CREATE TABLE events (
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
-  addressID                 BIGINT references addresses(addressId),
+  addressId                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
   description               TEXT,
   webSite                   TEXT,

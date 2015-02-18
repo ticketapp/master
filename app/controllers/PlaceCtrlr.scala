@@ -41,7 +41,6 @@ object PlaceController extends Controller {
 
   val placeBindingForm = Form(mapping(
     "name" -> nonEmptyText(2),
-    "addressId" -> optional(longNumber),
     "facebookId" -> optional(nonEmptyText()),
     "description" -> optional(nonEmptyText(2)),
     "webSite" -> optional(nonEmptyText(4)),

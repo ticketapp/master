@@ -28,6 +28,10 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Event.findAllContaining(pattern)))
   }
 
+  def findEventsByCity(pattern: String) = Action {
+    Ok(Json.toJson(Event.findAllByCityPattern(pattern)))
+  }
+
   val eventBindingForm = Form(
     mapping(
       "name" -> nonEmptyText(2),

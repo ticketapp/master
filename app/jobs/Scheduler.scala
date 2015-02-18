@@ -63,17 +63,19 @@ object Scheduler {
     val readOwnerId = Json.stringify(eventJson \ "owner" \ "id").replaceAll("\"", "")
     val organizer = new Organizer(-1L, new Date, Some(readOwnerId), readOwnerName)
 
-
-    val event: Event = new Event(-1L, facebookId, true, true, new Date, name, eventDescription, startTime, endTime, 16,
+    var event: Event = new Event(-1L, facebookId, true, true, new Date, name, eventDescription, startTime, endTime, 16,
       List(), List(organizer), List(), List(), List(address))
+
+    imgPath.replaceAll("\"", "") match {
+      case "null" =>
+      case _ => event = event.copy( images = List(new Image(-1L, imgPath.replaceAll("\"", ""))))
+      }
 
     Event.save(event) match {
       case None => Event.update(event) //delete old imgs and insert news
       case Some(eventId) =>
         Address.saveAddressAndEventRelation(address, eventId)
         Place.saveEventPlaceRelation(eventId, placeId)
-        if (imgPath.replaceAll("\"", "") != "null") Image.save(new Image(-1L, imgPath.replaceAll("\"", ""),
-          Some(eventId), None))
     }
   }
 
@@ -94,7 +96,6 @@ object Scheduler {
           "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
           .get onComplete {
           case Success(eventDetailed) =>  val description = Json.stringify(eventDetailed.json \ "description")
-            val name = Json.stringify(eventDetailed.json \ "name")
             val imgPath = Json.stringify(eventDetailed.json \ "cover" \ "source")
             saveEvent(formatEventDescription(description), eventDetailed, placeId, imgPath)
           case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
