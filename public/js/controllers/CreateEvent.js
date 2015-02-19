@@ -1,4 +1,4 @@
-app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope, $http, $filter){
+app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', function($scope, $http, $filter, $tour){
     $scope.newEvent = [];
     //$scope.newEvent.place = [];
     $scope.newEvent.user = [];
@@ -20,12 +20,30 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
     $scope.addNewArt = [];
     $scope.content = '<div class="column large-12">ecrire ici</div>'
     $scope.imgSize = '100';
-    $scope.newSize = 12;
     $scope.maxlargeClass = 12;
+    $scope.infoG = true;
+    $scope.startTour = $tour.start;
     $scope.currencyFormatting = function(value) {
         return value.toString()
     };
-
+    function imagePlace () {
+        console.log(parseInt(document.getElementById('eventImg').style.left.match(/-?\d+/)[0]))
+    }
+    document.getElementById('eventImg').onmousedown = function (){
+        document.addEventListener('mouseup', function () {
+            if (parseInt(document.getElementById('eventImg').style.left.match(/-?\d+/)[0]) > 0) {
+                document.getElementById('eventImg').style.left = 0;
+            }
+            if (parseInt(document.getElementById('eventImg').style.top.match(/-?\d+/)[0]) > 0) {
+                document.getElementById('eventImg').style.top = 0;
+            }
+            if (parseInt(document.getElementById('eventImgContener').style.width.match(/-?\d+/)[0]) == 100) {
+                document.getElementById('eventImg').style.top = 0;
+                document.getElementById('eventImg').style.left = 0;
+            }
+            document.getElementById('eventImgContener').removeEventListener('mousemove', imagePlace);
+        });
+    };
     $scope.addAnArtist = function () {
         if ($scope.addNewArt.name.length > 1) {
             $scope.addArt = false;
@@ -70,7 +88,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
         id = id.match(/\d.*/)[0];
         var scopeReady = false;
         var cover = false;
-        $http.get('https://graph.facebook.com/v2.2/' + id + '/?access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+        $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=ticket_uri,id,name,start_time,owner,end_time,description,admins,venue,location&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
             success(function(data, status, headers, config) {
                 console.log(data);
                 //$scope.newEvent = data;
@@ -102,6 +120,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                     streets: data.venue.street,
                     zips: data.venue.zip
                 });
+                $scope.newEvent.ticketSeller = data.ticket_uri;
                 console.log($scope.newEvent.adresses)
                 scopeReady = true;
                 insert();
@@ -136,12 +155,12 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                             console.log($scope.artists)
                         }).
                         error(function(data, status, headers, config) {
-                            $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=200&type=page&fields=id,category,name,link,website,likes&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
+                            $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=400&type=page&fields=id,category,name,link,website,likes&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
                                 success(function(data, status, headers, config) {
                                     $scope.data = data.data;
                                     var flag = 0;
                                     for (var i=0; i < $scope.data.length; i++) {
-                                        if ($scope.data[i].category == 'Musician/band') {
+                                        if ($scope.data[i].category == 'Musician/band' || $scope.data[i].category == 'Artist') {
                                             for (var j=0; j < $scope.artists.length; j++) {
                                                 if($scope.artists[j].facebookId == $scope.data[i].id) {
                                                     flag = 1;
@@ -150,19 +169,52 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                                             }
                                             if(flag == 0) {
                                                 if ($scope.content.indexOf($scope.data[i].id) > -1 || $scope.content.indexOf($scope.data[i].link.replace('https://www.', '')) > -1) {
+                                                    $scope.data[i].verified = true;
+                                                    for (var iv = 0; iv < $scope.newEvent.artists.length; iv++) {
+                                                        var otherArt = $scope.newEvent.artists[iv].name.replace(/ /g, "").toLowerCase()
+                                                        var nameRefactor = $scope.data[i].name.replace(/ /g, "").toLowerCase()
+                                                        if (otherArt == nameRefactor) {
+                                                               $scope.newEvent.artists.splice(iv, 1);
+                                                        }
+                                                    }
+                                                    if ($scope.data[i].website != undefined) {
+                                                        $scope.data[i].website = $scope.data[i].website.split(" ")
+                                                        if ($scope.data[i].website.isString) {
+                                                            console.log($scope.data[i].website)
+                                                        }
+                                                    }
                                                     $scope.newEvent.artists.push($scope.data[i]);
                                                     console.log($scope.newEvent.artists);
                                                 } else if ($scope.data[i].name.toLowerCase() == artist.toLowerCase() || $scope.data[i].name.toLowerCase() + " " == artist.toLowerCase()) {
                                                     if ($scope.newEvent.artists.length > 0 ) {
                                                         var findArt = false;
-                                                        for (var ii = 0; ii < $scope.newEvent.artists.length; ii++) {
-                                                            if ($scope.newEvent.artists[ii].name.toLowerCase() == $scope.data[i].name.toLowerCase()) {
-                                                                findArt = true;
-                                                                if ($scope.newEvent.artists[ii].likes < $scope.data[i].likes) {
-                                                                    $scope.newEvent.artists.splice(ii, 1);
+                                                        var notSearch = false;
+                                                        function moreLike (artToCompar, ind){
+                                                            if (notSearch == false){
+                                                                if (artToCompar.likes < $scope.data[i].likes) {
+                                                                    $scope.newEvent.artists.splice(ind, 1);
+                                                                    if ($scope.data[i].website != undefined) {
+                                                                        $scope.data[i].website = $scope.data[i].website.split(" ")
+                                                                        if ($scope.data[i].website.isString) {
+                                                                            console.log($scope.data[i].website)
+                                                                        }
+                                                                    }
                                                                     $scope.newEvent.artists.push($scope.data[i]);
                                                                     console.log($scope.newEvent.artists);
                                                                 }
+                                                            }
+                                                        }
+                                                        for (var ii = 0; ii < $scope.newEvent.artists.length; ii++) {
+                                                            var otherArt = $scope.newEvent.artists[ii].name.replace(/ /g, "").toLowerCase()
+                                                            var nameRefactor = $scope.data[i].name.replace(/ /g, "").toLowerCase()
+                                                            if (otherArt == nameRefactor && $scope.newEvent.artists[ii].verified == true) {
+                                                                notSearch = true;
+                                                                findArt = true;
+                                                                console.log('find')
+                                                            }
+                                                            if (otherArt == nameRefactor && $scope.newEvent.artists[ii].verified != true) {
+                                                                findArt = true;
+                                                                moreLike($scope.newEvent.artists[ii], ii)
                                                             }
                                                         }
                                                         if (findArt == false) {
@@ -170,6 +222,12 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                                                             console.log($scope.newEvent.artists);
                                                         }
                                                     } else {
+                                                        if ($scope.data[i].website != undefined) {
+                                                            $scope.data[i].website = $scope.data[i].website.split(" ")
+                                                            if ($scope.data[i].website.isString) {
+                                                                console.log($scope.data[i].website)
+                                                            }
+                                                        }
                                                         $scope.newEvent.artists.push($scope.data[i])
                                                         console.log($scope.newEvent.artists);
                                                     }
@@ -188,7 +246,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                         });
                 }
                 console.log($scope.content);
-                $scope.event.description = $scope.content;
+                $scope.newEvent.description = $scope.content;
                 $scope.eventFb = true;
                 var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S].?\W/g);
                 console.log(searchArtists);
@@ -206,13 +264,13 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
     };
     $scope.addImg = function () {
       if ($scope.eventFb != true) {
-         $scope.event.description = $scope.content;
+         $scope.newEvent.description = $scope.content;
       }
     };
     $scope.clearContent = function () {
         $scope.newEvent.description = document.getElementById('content').innerHTML.replace(/contenteditable=\"true\"/g, "" );
         $scope.newEvent.description = document.getElementById('content').innerHTML.replace(/box-shadow: rgb(0, 140, 186) 0px 0px 0px 1px/g, "" );
-        $scope.newEvent.description = $scope.newEvent.description.replace("ng-init=\"event.description = 'ecrire ici'\"", "");
+        $scope.newEvent.description = $scope.newEvent.description.replace("ng-init=\"newEvent.description = 'ecrire ici'\"", "");
         $scope.newEvent.description = $scope.newEvent.description.replace("ng-binding", "");
         console.log($scope.newEvent)
     };

@@ -266,19 +266,21 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
     ];
     $scope.maxlargeClass = 12;
     $scope.$watch("newSize", function(newval) {
-        var val = newval.toString()
-        val = val.replace('.0', '');
-        if (val <= 12 && val >= 1) {
-            console.log(val);
-            $scope.ElementSize('large-', val);
+        if (newval != undefined) {
+            var val = newval.toString()
+            val = val.replace('.0', '');
+            if (val <= 12 && val >= 1) {
+                $scope.ElementSize('large-', val);
+            }
         }
     }, true);
     $scope.$watch("newOffset", function(newval) {
-        var val = newval.toString()
-        val = val.replace('.0', '');
-        if (val <= 12 && val >= 1) {
-            console.log(val);
-            $scope.ElementSize('large-offset-', val-1);
+        if (newval != undefined) {
+            var val = newval.toString()
+            val = val.replace('.0', '');
+            if (val <= 12 && val >= 1) {
+                $scope.ElementSize('large-offset-', val - 1);
+            }
         }
     }, true);
     var small;
@@ -522,16 +524,15 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                         } else {
                             $scope.maxlargeClass = 12
                         }
-                        if (del > -1) {
+                        /*if (del > -1) {
                             range.classList.remove(css);
                             range.classList.remove("column");
-                        } else if (change > -1) {
+                        }*/if (change > -1) {
                             // var pattern = new RegExp(a, /\d/);
                             if (a.indexOf('offset') > -1) {
                                 if (sizeMatched = range.className.match(/large-\d+/)) {
                                     if(parseInt(sizeMatched[0].match(/\d+/))) {
                                         $scope.maxlargeClass = 12 - parseInt(b);
-                                        console.log($scope.maxlargeClass)
                                         if(parseInt(sizeMatched[0].match(/\d+/)) + parseInt(b) >= 12) {
                                             //range.classList.remove(sizeMatched[0]);
                                             var maxSize = 'large-' + (12 - parseInt(b)).toString();
@@ -562,7 +563,6 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                                             var maxSize = 'large-' + (12 - parseInt(b)).toString();
                                             //range.classList.add(maxSize);
                                             $scope.newSize = (12 - parseInt(b)).toString() + '.0';
-                                            console.log($scope.newSize)
                                         }
                                     }
                                 }
