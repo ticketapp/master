@@ -18,7 +18,10 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
     $scope.newEvent.adresses = [];
     $scope.addArt = false;
     $scope.addNewArt = [];
+    $scope.content = '<div class="column large-12">ecrire ici</div>'
     $scope.imgSize = '100';
+    $scope.newSize = 12;
+    $scope.maxlargeClass = 12;
     $scope.currencyFormatting = function(value) {
         return value.toString()
     };

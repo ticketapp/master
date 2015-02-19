@@ -189,6 +189,8 @@
                                 <button  ng-click="respContent()" class="float-left"><i class="fi-tablet-portrait"></i></button>
                                 <button  ng-click="maxWinWidth()" class="float-left"><i class="fi-monitor left"></i></button>-->
                                 <a ng-click="remEl()" class="float-left" id="remEl" ng-show="showRemEl"><i class="fi-x"></i></a>
+                                <slider id="ElSize" class="column large-2" floor="1" ceiling="12" precision="1" ng-model="newOffset" ng-show="showRemEl"></slider>
+                                <slider id="ElSize" class="column large-2" floor="1" ceiling="{{maxlargeClass}}" precision="1" ng-model="newSize" ng-show="showRemEl"></slider>
                                 <!--<ul id="ElSize">
                                 <a ng-click="showElementSize = !showElementSize" ng-show="showRemEl">{{sizeEl}}</a>
                                     <ul ng-show="showElementSize" class="absolute zIndex5">
@@ -211,7 +213,7 @@
                                 <h3>Vous pouvez ici modifier la description de votre événement.</h3>
                                 <a ng-click="infoWy = false" class="close">&times;</a>
                             </div>
-                            <div id="content" class="row minHeight450 float-left"><div ng-init="event.description = 'ecrire ici'" contenteditable="true" class="column padding0"><div data-ng-bind-html="event.description"></div></div></div>
+                            <div id="content" class="width100p minHeight450 float-left"><div ng-init="event.description = 'ecrire ici'" contenteditable="true" class="column padding0"><div data-ng-bind-html="event.description"></div></div></div>
                             <!--<iframe style="border: 0; padding-bottom: {{useTmp}}; width: 100%" src="assets/partials/wysiwyg.html"></iframe>-->
                             <a ng-click="useTmp = false" ng-show="useTmp" style="bottom: {{useTmp}}"><i class="fi-x"></i></a>
                             <a ng-click="useTmp = '150px'" ng-show="!useTmp" class="ng-hide" style="bottom: {{useTmp}}"><i class="fi-plus"></i></a>

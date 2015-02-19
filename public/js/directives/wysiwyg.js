@@ -264,11 +264,27 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
         }
 
     ];
+    $scope.maxlargeClass = 12;
+    $scope.$watch("newSize", function(newval) {
+        var val = newval.toString()
+        val = val.replace('.0', '');
+        if (val <= 12 && val >= 1) {
+            console.log(val);
+            $scope.ElementSize('large-', val);
+        }
+    }, true);
+    $scope.$watch("newOffset", function(newval) {
+        var val = newval.toString()
+        val = val.replace('.0', '');
+        if (val <= 12 && val >= 1) {
+            console.log(val);
+            $scope.ElementSize('large-offset-', val-1);
+        }
+    }, true);
     var small;
     var medium;
     var large;
     var respClass;
-    $scope.sizeEl = "Size";
     $scope.maxWinWidth = function () {
         $scope.winWidth = window.innerWidth;
         if (window.innerWidth > 950) {
@@ -376,7 +392,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                     m = searchM;
                     searchParent = false;
                 } else {
-                    if (document.getSelection().anchorNode != null){
+                    if (document.getSelection().anchorNode != null  && document.getSelection().anchorNode.parentElement.tagName != 'A'){
                         searchM = document.getSelection().anchorNode.parentElement;
                     } else {
                         searchM = document.getElementById('content');
@@ -418,7 +434,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                 $scope.$on('$locationChangeStart', function () {
                     window.removeEventListener('scroll', initControl);
                     window.removeEventListener('mouseover', initControl)
-                })
+                });
                 if (sidePoint > rect.right || sidePoint < rect.left || sidePointY < rect.top || sidePointY > rect.bottom) {
                     m = m.parentElement;
                     rect = m.getBoundingClientRect();
@@ -431,25 +447,24 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                 };
                 $scope.ElementSize = function (a, b) {
                     $scope.sizeEl = b +"/12"
-                    if (small == true) {
+                    /*if (small == true) {
                         a = "small-"
                     } else if (medium == true) {
                         a = "medium-"
                     }else if (large == true) {
                         a = "large-"
-                    }
+                    }*/
                     if (imgFind == true) {
                         range = m;
                         changeColumnClass()
-                    }
-                    else {
+                    } else {
                         range = document.getSelection().getRangeAt(0);
-                        if (range == range.commonAncestorContainer.data || range.endOffset == range.startOffset) {
+                        if (range == range.commonAncestorContainer.data || range.endOffset == range.startOffset || range.commonAncestorContainer.parentElement.localName == 'a') {
                             if (range.commonAncestorContainer.parentElement.localName != "div") {
                                 var flag = true;
                                 var rangeSave = range.commonAncestorContainer.parentElement;
                                 while (flag == true) {
-                                    if (rangeSave.outerHTML == rangeSave.parentElement.innerHTML) {
+                                    if (rangeSave.outerHTML == rangeSave.parentElement.innerHTML || range.commonAncestorContainer.parentElement.localName == 'a') {
                                         if (rangeSave.parentElement.localName == "div") {
                                             flag = false;
                                             range = rangeSave;
@@ -502,11 +517,31 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                         var css = a + b;
                         var del = gridClass.indexOf(css);
                         var change = gridClass.indexOf(a);
+                        if (off = range.className.match(/offset-\d+/)) {
+                            $scope.maxlargeClass = 12 -  parseInt(off[0].match(/\d+/))
+                        } else {
+                            $scope.maxlargeClass = 12
+                        }
                         if (del > -1) {
                             range.classList.remove(css);
                             range.classList.remove("column");
                         } else if (change > -1) {
                             // var pattern = new RegExp(a, /\d/);
+                            if (a.indexOf('offset') > -1) {
+                                if (sizeMatched = range.className.match(/large-\d+/)) {
+                                    if(parseInt(sizeMatched[0].match(/\d+/))) {
+                                        $scope.maxlargeClass = 12 - parseInt(b);
+                                        console.log($scope.maxlargeClass)
+                                        if(parseInt(sizeMatched[0].match(/\d+/)) + parseInt(b) >= 12) {
+                                            //range.classList.remove(sizeMatched[0]);
+                                            var maxSize = 'large-' + (12 - parseInt(b)).toString();
+                                            //range.classList.add(maxSize);
+                                            $scope.newSize = (12 - parseInt(b)).toString() + '.0';
+                                            console.log($scope.newSize)
+                                        }
+                                    }
+                                }
+                            }
                             var pattern = new RegExp(a + "[0-9][0-9]?");
                             if (matched = gridClass.match(pattern)) {
                                 range.classList.remove(matched[0]);
@@ -517,6 +552,21 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                             }
                         } else {
                             range.classList.add(css);
+                            if (a.indexOf('offset') > -1) {
+                                if (sizeMatched = range.className.match(/large-\d+/)) {
+                                    if(parseInt(sizeMatched[0].match(/\d+/))) {
+                                        $scope.maxlargeClass = 12 - parseInt(b);
+                                        console.log($scope.maxlargeClass)
+                                        if(parseInt(sizeMatched[0].match(/\d+/)) + parseInt(b) >= 12) {
+                                            //range.classList.remove(sizeMatched[0]);
+                                            var maxSize = 'large-' + (12 - parseInt(b)).toString();
+                                            //range.classList.add(maxSize);
+                                            $scope.newSize = (12 - parseInt(b)).toString() + '.0';
+                                            console.log($scope.newSize)
+                                        }
+                                    }
+                                }
+                            }
                             if (gridClass.indexOf('float-left') <= -1) {
                                 range.classList.add('float-left');
                             }
@@ -616,14 +666,14 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                     }
                 };
                 if (m.id == "content") {
-                    var inner = m.innerHTML;
-                    m.innerHTML = inner + "<div  class='column' contenteditable='true'>MyNewDiv</div>";
+                    //var inner = m.innerHTML;
+                    //m.innerHTML = inner + "<div  class='column' contenteditable='true'>MyNewDiv</div>";
                 } else if (m.tagName == "WYSIWYG" || m.tagName == "BODY") {
-                    var contentElement = document.getElementById('content').innerHTML;
-                    document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
+                    //var contentElement = document.getElementById('content').innerHTML;
+                    //document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
                 } else if (document.getElementById('content').innerHTML.indexOf(m.outerHTML) == -1) {
-                    var contentElement = document.getElementById('content').innerHTML;
-                    document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
+                    //var contentElement = document.getElementById('content').innerHTML;
+                    //document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
                 } else {
                     $scope.remEl = function () {
                         m.outerHTML = "";
@@ -667,7 +717,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                         left = false;
                         initControl();
                     });
-                    m.parentElement.addEventListener("mousemove", function (event) {
+                    /*m.parentElement.addEventListener("mousemove", function (event) {
                         var cursorPosition = event.clientX;
                         if (event.clientX > rect.left && event.clientX < rect.left + 5) {
                             m.style.cursor = "col-resize";
@@ -819,12 +869,18 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                                 }
                             }
                         }
-                    });
+                    });*/
                 }
+                /*if (largeMatch = m.className.match(/large-\d+/)) {
+                   $scope.newSize = largeMatch[0].match(/\d+/)[0];
+                }
+                if (OffsetMatch = m.className.match(/large-offset-\d+/)) {
+                   $scope.newOffset = OffsetMatch[0].match(/\d+/)[0];
+                }*/
             }, 100);
         }
 
-        document.getElementById("content").addEventListener("mousedown", ActiveElement, false);
+        document.getElementById("content").addEventListener("mouseup", ActiveElement, false);
     }
     var waitForIframe = setInterval(function () {
         if (document.getElementById("content") != null) {
