@@ -175,12 +175,9 @@ object Event {
                   event.images.foreach(image =>
                     Image.save(image.copy(eventId = Some(eventId)))
                   )
-                  event.artists.foreach(image => image
-                    //Artist.saveWithEventRelation(artists.copy(eventId = Some(eventId)))
+                  event.artists.foreach(artist =>
+                    Artist.saveWithEventRelation(artist, eventId)
                   )
-                  //pareil pour artists mais faut que la relation soit enregistrée aussi i.e si lartiste existe déjà
-                  //on renvoie son id déjà existant sinon le nouveau et on enregistre la relation avec
-                  // saveEventArtistRelation qui devrait être une méthode de artist
                   Some(eventId)
             }
         }
