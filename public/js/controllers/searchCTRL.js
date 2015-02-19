@@ -108,11 +108,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
         } else {
             if (_selArtist == true) {
                 $scope.artistes = $filter('filter')($scope.artistes, {name :  _research});
-                var scopeIdList = [];
-                function getArtistId(el, index, array) {
-                    scopeIdList.push(el.artistId);
-                }
-                $scope.artistes.forEach(getArtistId);
+                var scopeIdList = $scope.artistes.map(function(artist) {
+                    return artist.artistId;
+                });
+
                 $http.get('/artists/containing/'+_research).
                     success(function(data, status, headers, config) {
                         if ($scope.artistes.length == 0) {

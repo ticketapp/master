@@ -11,10 +11,18 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
     $scope.newEvent.place = "";
     $scope.newEvent.description = "";
     $scope.newEvent.ageRestriction = 16;
+    $scope.newEvent.isPublic = true;
     $scope.content ="";
-    $scope.newEvent.img="";
+    $scope.newEvent.img=[];
+    $scope.newEvent.facebookId="";
+    $scope.newEvent.adresses = [];
     $scope.addArt = false;
     $scope.addNewArt = [];
+    $scope.imgSize = '100';
+    $scope.currencyFormatting = function(value) {
+        return value.toString()
+    };
+
     $scope.addAnArtist = function () {
         if ($scope.addNewArt.name.length > 1) {
             $scope.addArt = false;
@@ -80,10 +88,18 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                     }
                 }
                 $scope.newEvent.name = data.name;
+                $scope.newEvent.facebookId = data.id;
                 $scope.newEvent.place = data.location;
                 $scope.newEvent.startTime = new Date(data.start_time);
                 $scope.newEvent.endTime = new Date(data.end_time);
                 $scope.newEvent.user = data.owner;
+                $scope.newEvent.adresses.push({
+                    cities: data.venue.city,
+                    geographicPoints: data.venue.latitude + ', ' + data.venue.longitude,
+                    streets: data.venue.street,
+                    zips: data.venue.zip
+                });
+                console.log($scope.newEvent.adresses)
                 scopeReady = true;
                 insert();
                 console.log($scope.newEvent.startDate)
@@ -94,7 +110,10 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
             });
         $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=cover&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
             success(function(data, status, headers, config) {
-                $scope.newEvent.img = data.cover.source;
+                var img = {
+                    paths : data.cover.source
+                };
+                $scope.newEvent.img.push(img);
                 cover = true;
                 insert();
             }).
@@ -121,7 +140,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                                     for (var i=0; i < $scope.data.length; i++) {
                                         if ($scope.data[i].category == 'Musician/band') {
                                             for (var j=0; j < $scope.artists.length; j++) {
-                                                if($scope.artistes[j].facebookId == $scope.data[i].id) {
+                                                if($scope.artists[j].facebookId == $scope.data[i].id) {
                                                     flag = 1;
                                                     break;
                                                 }
@@ -168,7 +187,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
                 console.log($scope.content);
                 $scope.event.description = $scope.content;
                 $scope.eventFb = true;
-                var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S]\W/g);
+                var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S].?\W/g);
                 console.log(searchArtists);
                 $scope.artists = [];
                 for (var i = 0; i<searchArtists.length; i++) {
@@ -196,25 +215,33 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', function($scope,
     };
 
     $scope.createNewEvent = function () {
+        console.log($scope.newEvent.endTime);
         for(var i = 0; i < $scope.newEvent.tarifs.length; i++) {
             $scope.newEvent.tarifs[i].startTimes = $filter('date')($scope.newEvent.tarifs[i].startTimes, "yyyy-MM-dd " +
                 "HH:mm");
             $scope.newEvent.tarifs[i].endTimes = $filter('date')($scope.newEvent.tarifs[i].endTimes, "yyyy-MM-dd " +
                 "HH:mm");
         }
-
+        if ($scope.newEvent.endTime != 'Invalid Date') {
+            console.log($scope.newEvent.endTime);
+            $scope.newEvent.endTime = $filter('date')($scope.newEvent.endTime, "yyyy-MM-dd HH:mm")
+        }
+        console.log($scope.newEvent.place);
         $http.post('/events/create', {
             name: $scope.newEvent.name,
             description: $scope.newEvent.description,
             startTime: $filter('date')($scope.newEvent.startTime, "yyyy-MM-dd HH:mm"),
-            endTime: $filter('date')($scope.newEvent.endTime, "yyyy-MM-dd HH:mm"),
+            endTime: $scope.newEvent.endTime,
             ageRestriction: $scope.newEvent.ageRestriction,
             images: $scope.newEvent.img,
             places: $scope.newEvent.place,
             users: $scope.newEvent.user,
             artists: $scope.newEvent.artists,
-            tariffs: $scope.newEvent.tarifs
-
+            tariffs: $scope.newEvent.tarifs,
+            facebookId: $scope.newEvent.facebookId,
+            isPublic: $scope.newEvent.isPublic,
+            artists: $scope.artists,
+            addresses: $scope.newEvent.adresses
         }).
             success(function(data, status, headers, config) {
                 window.location.href =('#/event/' + data.eventId);

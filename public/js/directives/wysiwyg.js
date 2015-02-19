@@ -42,7 +42,7 @@ app.directive('Wysiwygcontent', ['$sce', function($sce) {
     };
 }]);
 
-app.controller('wysiwygCtrl', function($scope, $timeout){
+app.controller('wysiwygCtrl', function($scope, $timeout, $location){
     $scope.styles = [
         {
             'type':'button',
@@ -268,19 +268,6 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
     var medium;
     var large;
     var respClass;
-    window.addEventListener('scroll', fixControl)
-    function fixControl () {
-        var controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
-        var titlePos = document.getElementById('eventTitle').getBoundingClientRect();
-        console.log(window.pageYOffset + '//' + titlePos.bottom)
-        if (controlPos.top <= 0) {
-            document.getElementById('wysiwygControl').style.position = 'fixed';
-            document.getElementById('wysiwygControl').style.top = 0;
-        } if (titlePos.bottom >= 0){
-            document.getElementById('wysiwygControl').style.position = 'relative';
-            controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
-        }
-    }
     $scope.sizeEl = "Size";
     $scope.maxWinWidth = function () {
         $scope.winWidth = window.innerWidth;
@@ -413,8 +400,6 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                     }
                 }
                 var rect = m.getBoundingClientRect();
-                console.log(m)
-                var scrollBase = window.pageYOffset;
                 function initControl () {
                 var posEl = m.getBoundingClientRect();
                 document.getElementById('remEl').style.position = "fixed";
@@ -428,8 +413,12 @@ app.controller('wysiwygCtrl', function($scope, $timeout){
                 $scope.showRemEl = true;
                 }
                 initControl();
-                document.onmouseover = initControl;
-                window.onscroll = initControl;
+                document.addEventListener('mouseover', initControl);
+                window.addEventListener('scroll', initControl);
+                $scope.$on('$locationChangeStart', function () {
+                    window.removeEventListener('scroll', initControl);
+                    window.removeEventListener('mouseover', initControl)
+                })
                 if (sidePoint > rect.right || sidePoint < rect.left || sidePointY < rect.top || sidePointY > rect.bottom) {
                     m = m.parentElement;
                     rect = m.getBoundingClientRect();

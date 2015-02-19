@@ -1,4 +1,4 @@
-var app = angular.module('MonApp',['ngAnimate', 'ngAria', 'ngMessages', 'ngMaterial', 'ngRoute', 'ngSanitize', 'mm.foundation', 'colorpicker.module', 'ngMap']);
+var app = angular.module('MonApp',['ngAnimate', 'ngAria', 'ngMessages', 'ngMaterial', 'ngRoute', 'ngSanitize', 'mm.foundation', 'colorpicker.module', 'ngMap', 'uiSlider']);
 
 app.config(function($routeProvider, $locationProvider){
     $routeProvider
