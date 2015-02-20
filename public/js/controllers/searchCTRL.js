@@ -48,8 +48,20 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
     $scope.users = [];
     $scope.places = [];
     $scope.events = [];
-    search();
-
+    function imgHeight () {
+        var waitForContentMin = setTimeout(function () {
+            var content = document.getElementsByClassName('img_min_evnt');
+            console.log(content);
+            if (content.length > 0) {
+                clearInterval(waitForContentMin);
+                var newHeight = content[0].clientWidth * 0.376 + 'px';
+                for (var i = 0; i < content.length; i++) {
+                    content[i].style.height = newHeight;
+                    console.log(content[i].style.height);
+                }
+            }
+        }, 100)
+    }
     function search (){
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
@@ -62,6 +74,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                         if (data != $scope.events) {
                             $scope.events = data;
                         }
+                        imgHeight()
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -74,6 +87,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                         if (data != $scope.artistes) {
                             $scope.artistes = data;
                         }
+                        imgHeight()
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -86,6 +100,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                         if (data != $scope.users) {
                             $scope.users = data;
                         }
+                        imgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -98,6 +113,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                         if (data != $scope.places) {
                             $scope.places = data;
                         }
+                        imgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -117,6 +133,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                         if ($scope.artistes.length == 0) {
                             $scope.artistes = data;
                         }
+                        imgHeight()
                         function uploadArtistes(el, index, array) {
                             if (scopeIdList.indexOf(el.artistId) == -1) {
                                 $scope.artistes.push(el);
@@ -343,6 +360,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                    return
                                 }
                             }
+                            imgHeight()
 
                         }).
                         error(function(data, status, headers, config) {
@@ -370,6 +388,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                             }
                             data.forEach(uploadPlaces)
                         }
+                        imgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -395,6 +414,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                             }
                             data.forEach(uploadUsers);
                         }
+                        imgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -421,6 +441,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                             }
                             data.forEach(uploadEvents);
                         }
+                        imgHeight()
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -429,6 +450,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
             }
         }
     }
+    search();
     $scope.createArtist = function (artist) {
         console.log(artist)
         $http.post('artists/createArtist', {artistName : artist.name, facebookId: artist.id}).

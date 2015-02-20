@@ -1,9 +1,5 @@
 <div>
     <form name="createEventForm">
-        <!--<div>
-        <h3>CREER UN NOUVEL EVENEMENT</h3>
-        <h4 class="formRoute"><a class="Active">1.CONFIGURATION DE L'EVENEMENT > </a><a ng-class="{Active: InfosGeneralesActive}">2.INFOS GENERALES > </a><a ng-class="{Active: DescriptifActive}">3.DESCRIPTIF > </a><a ng-class="{Active: ArtistsActive}">4.ARTISTES > </a><a ng-class="{Active: FinalisationActive}">5. FINALISATION</a></h4>
-        </div>-->
         <div class="formCreateEvent">
             <div class="configuration" data-ng-hide="Config">
                 <h3>Evénement déjà créé sur facebook ?</h3>
@@ -13,12 +9,12 @@
                 <input ng-model="eventFbName" placeholder="Event Facebook" ng-change="searchEvent()">
                 <div ng-click="GetEventById(SearchEvent.id)" ng-repeat="SearchEvent in searchEvents">{{SearchEvent.name}}</div>
                 <br/>
-                <a class="button" data-ng-click="InfosGenerales = !InfosGenerales; Config = !Config; InfosGeneralesActive = !InfosGeneralesActive">Suivant</a>
+                <a class="button" data-ng-click="InfosGenerales = !InfosGenerales; Config = !Config; goTop();">Suivant</a>
             </div>
             <div class="ng-hide" data-ng-show="InfosGenerales">
                 <div ng-show="eventFb != true">
                     <h5>Image de l'événement</h5>
-                    <input type="file" name="image_file" id="image_file"  fileread="newEvent.img" /><br>
+                    <input type="file" name="image_file" id="image_file"  fileread="newEvent.img[0].paths" /><br>
                 </div>
                 <md-input-container flex>
                     <label>Event Name</label>
@@ -83,8 +79,10 @@
                        ng-model="newEvent.tarifs[1].startTimes"/><br/>
                 <input type="date" name="endTimes[1]" placeholder="Fin des ventes pour ce tarif"
                        ng-model="newEvent.tarifs[1].endTimes"/><br/>
+                <a class="button" data-ng-click="Config = !Config; InfosGenerales = !InfosGenerales;
+                 goTop()">prev</a>
                 <a class="button" data-ng-click="Descriptif = !Descriptif; InfosGenerales = !InfosGenerales;
-                    DescriptifActive = !DescriptifActive; addImg(); resizeInfo()">Suivant</a>
+                 addImg(); goTop()">Suivant</a>
             </div>
             <div class="ng-hide" data-ng-show="Descriptif">
                 <div class="parallax-background" style="background: #ffffff!important;">
@@ -132,12 +130,12 @@
                                             <button class="float-left" ng-click="format(&quot;StrikeThrough&quot;)"><Strike>S</Strike></button>
                                         </div>
                                     </div>
-                                    <div class="float-left">
-                                        <button ng-click="Size = !Size"
-                                                step-text="change here the size of text selected"
-                                                step-index="4"
-                                                step-placement="bottom">Size</button>
-                                        <div ng-show="Size" class="absolute float-left zIndex5">
+                                    <div class="float-left"
+                                         step-text="change here the size of text selected"
+                                         step-index="4"
+                                         step-placement="bottom">
+                                        <button ng-click="fontSize = !fontSize">Size</button>
+                                        <div ng-show="fontSize" class="absolute float-left zIndex5">
                                             <button class="float-left" ng-click="format(&quot;FontSize&quot;, 1)" >1 (petite)</button>
                                             <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;2&quot;)" >2</button>
                                             <button class="float-left" ng-click="format(&quot;FontSize&quot;, &quot;3&quot;)" >3 (normale)</button>
@@ -163,17 +161,9 @@
                                             <button class="float-left" ng-click="format(&quot;FontName&quot;, &quot;Verdana&quot;)" >Verdana</button>
                                         </div>
                                     </div>
+                                    <button ng-click="testResp()">testResp</button>
                                 </div>
                                 <div class="column large-12" style="background: #008CBA;">
-                                    <!--<button class="float-left" ng-click="remEl()"><i ng-click="remEl()" class="fi-x"></i></button>
-                                    <div  class="float-left ">
-                                        <button ng-click="temps = !temps" >Templates</button>
-                                        <div ng-show="temps" class="absolute column large-4 right zIndex5">
-                                            <div class="float-left marginBottom20" ng-repeat="template in template"  ng-click="useTemps(template.name); $parent.useTmp = '150px';" data-ng-bind-html="template.code" style="height: 400px; overflow: hidden;"></div>
-                                        </div>
-                                    </div>
-                                    <button  ng-click="respContent()" class="float-left"><i class="fi-tablet-portrait"></i></button>
-                                    <button  ng-click="maxWinWidth()" class="float-left"><i class="fi-monitor left"></i></button>-->
                                     <a ng-click="remEl()" class="float-left" id="remEl" ng-show="showRemEl"><i class="fi-x"></i></a>
                                     <div class="column large-3" style="background: #008CBA;">
                                         <slider class="column large-10" floor="1" ceiling="12" precision="1" ng-model="newOffset"></slider>
@@ -197,23 +187,6 @@
                                             <input type="text" colorpicker="rgba" ng-model="background.color" ng-change="background(background.color)" class="ng-pristine ng-valid">
                                         </div>
                                     </div>
-                                    <!--<div class="float-left ">
-                                        <button ng-click="ElementGrill = !ElementGrill" >ElementSize</button>
-                                        <div ng-show="ElementGrill" class="absolute zIndex5">
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;1&quot;)" >1</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;2&quot;)" >2</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;3&quot;)" >3</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;4&quot;)" >4</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;5&quot;)" >5</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;6&quot;)" >6</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;7&quot;)" >7</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;8&quot;)" >8</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;9&quot;)" >9</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;10&quot;)" >10</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;11&quot;)" >11</button>
-                                            <button class="float-left" ng-click="ElementSize(&quot;large-&quot;, &quot;12&quot;)" >12</button>
-                                        </div>
-                                    </div>-->
                                     <div  class="float-left "
                                           step-text="change here the position of the element selected"
                                           step-index="7"
@@ -225,6 +198,7 @@
                                             <button class="float-left" ng-click="ElementFloat(&quot;float-&quot;, &quot;none&quot;)" >Float None</button>
                                         </div>
                                     </div>
+                                    <button ng-click="addElement()" >Add element</button>
                                     <div class="column large-3 float-right" style="background: #008CBA;">
                                         <slider class="column large-10" floor="1" ceiling="{{maxlargeClass}}" precision="1" ng-model="newSize"></slider>
                                         <div step-text="change here the size of the element selected"
@@ -232,36 +206,23 @@
                                              step-placement="top">Change element's size</div>
                                     </div>
                                 </div>
-                                <!--<ul id="ElSize">
-                                <a ng-click="showElementSize = !showElementSize" ng-show="showRemEl">{{sizeEl}}</a>
-                                    <ul ng-show="showElementSize" class="absolute zIndex5">
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 1; ElementSize(&quot;large-&quot;, &quot;1&quot;)" >1/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 2; ElementSize(&quot;large-&quot;, &quot;2&quot;)" >2/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 3; ElementSize(&quot;large-&quot;, &quot;3&quot;)" >3/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 4; ElementSize(&quot;large-&quot;, &quot;4&quot;)" >4/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 5; ElementSize(&quot;large-&quot;, &quot;5&quot;)" >5/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 6; ElementSize(&quot;large-&quot;, &quot;6&quot;)" >6/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 7; ElementSize(&quot;large-&quot;, &quot;7&quot;)" >7/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 8; ElementSize(&quot;large-&quot;, &quot;8&quot;)" >8/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 9; ElementSize(&quot;large-&quot;, &quot;9&quot;)" >9/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 10; ElementSize(&quot;large-&quot;, &quot;10&quot;)" >10/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 11; ElementSize(&quot;large-&quot;, &quot;11&quot;)" >11/12</a></li>
-                                        <li style="display: block;"><a  ng-click="showElementSize = !showElementSize; sizeEl = 12; ElementSize(&quot;large-&quot;, &quot;12&quot;)" >12/12</a></li>
-                                    </ul>
-                                </ul>-->
                             </div>
                             <div ng-show="infoWy == true" class="column large-12 alert-box info" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-top: 10px; margin-bottom: 10px;">
                                 <h3>Vous pouvez ici modifier la description de votre événement.</h3>
                                 <a ng-click="infoWy = false" class="close">&times;</a>
                             </div>
-                            <div id="content" class="width100p minHeight450 float-left"><div ng-init="event.description = 'ecrire ici'" contenteditable="true" class="column padding0"
-                                                                                             step-text="change here the content of the event's decription"
-                                                                                             step-index="10"
-                                                                                             step-placement="top"><div data-ng-bind-html="newEvent.description"></div></div></div>
-                            <!--<iframe style="border: 0; padding-bottom: {{useTmp}}; width: 100%" src="assets/partials/wysiwyg.html"></iframe>-->
-                            <a ng-click="useTmp = false" ng-show="useTmp" style="bottom: {{useTmp}}"><i class="fi-x"></i></a>
+                            <div id="content" class="width100p minHeight450 float-left">
+                                <div ng-init="event.description = 'ecrire ici'" contenteditable="true"
+                                     class="column padding0"
+                                     step-text="change here the content of the event's decription"
+                                     step-index="10"
+                                     step-placement="top">
+                                    <div data-ng-bind-html="newEvent.description" id="scribHere"></div>
+                                </div>
+                            </div>
+                            <!--<a ng-click="useTmp = false" ng-show="useTmp" style="bottom: {{useTmp}}"><i class="fi-x"></i></a>
                             <a ng-click="useTmp = '150px'" ng-show="!useTmp" class="ng-hide" style="bottom: {{useTmp}}"><i class="fi-plus"></i></a>
-                            <div contenteditable="true" ng-show="useTmp" data-ng-bind-html="event.description" style="max-height: {{useTmp}}; background: #ffffff; overflow: auto;" class="absolute bottom column large-12"></div>
+                            <div contenteditable="true" ng-show="useTmp" data-ng-bind-html="event.description" style="max-height: {{useTmp}}; background: #ffffff; overflow: auto;" class="absolute bottom column large-12"></div>-->
 
                         </wysiwyg>
                     </div>
@@ -355,16 +316,20 @@
                         </map>
                     </div>
                     <div class="column large-12">
-                        <a class="button float-left" style="z-index: 200" data-ng-click="Artists = !Artists; Descriptif = !Descriptif;
-                    ArtistsActive = !ArtistsActive; clearContent(); removeScrollListener()">Suivant</a>
+                        <a class="button float-left" style="z-index: 200" data-ng-click="InfosGenerales = !InfosGenerales; Descriptif = !Descriptif;
+                         goTop()">prev</a>
+                        <a class="button float-left" style="z-index: 200" data-ng-click="Finalisation = !Finalisation; Descriptif = !Descriptif;
+                         clearContent(); goTop()">Suivant</a>
                     </div>
                 </div>
         </div>
-        <div class="ng-hide" data-ng-show="Artists">
-            <a class="button" data-ng-click="Finalisation = !Finalisation; Artists = !Artists;
-                FinalisationActive = !FinalisationActive">Suivant</a>
-        </div>
         <div class="ng-hide" data-ng-show="Finalisation">
+            <div class="column large-12 alert-box info" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-top: 10px; margin-bottom: 10px;">
+                <h3>
+                    En cliquant sur valider vous envoyer votre événenement à la validation,
+                    vous pourrez à tous moment y revenir pour le modifier
+                </h3>
+            </div>
             <button ng-click="createNewEvent()">Valider</button>
         </div>
     </div>

@@ -11,16 +11,17 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }
         $rootScope.window = 'large';
         function marginContent () {
-            var waitForContentParallax = setTimeout(function () {
-                console.log('yo');
-                var content = document.getElementsByClassName('parallax-content');
-                if (content.length > 0) {
-                    clearInterval(waitForContentParallax);
-                    for (var i = 0; i < content.length; i++) {
-                        content[i].style.marginTop = window.innerWidth * 0.37 + 'px';
+            if ($rootScope.home == false) {
+                var waitForContentParallax = setTimeout(function () {
+                    var content = document.getElementsByClassName('parallax-content');
+                    if (content.length > 0) {
+                        clearInterval(waitForContentParallax);
+                        for (var i = 0; i < content.length; i++) {
+                            content[i].style.marginTop = window.innerWidth * 0.376 + 'px';
+                        }
                     }
-                }
-            }, 100)
+                }, 100)
+            }
         }
         function respClass () {
                 marginContent();
@@ -64,9 +65,11 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }
         $scope.gotoTop = '';
         function location() {
+            marginContent();
             $timeout(function(){
-                $location.hash('top');
-                $anchorScroll();
+                /*$location.hash('top');
+                $anchorScroll();*/
+                window.scrollTo(0, 0);
             }, 200);
             if ($location.path() == '/') {
                 $rootScope.home = true;
