@@ -1,5 +1,5 @@
 app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http',
-    function ($scope, $rootScope, $location, $anchorScroll, $timeout, $http) {
+    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position)
                 {
@@ -9,6 +9,48 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             );
         } else {
         }
+        $rootScope.window = 'large';
+        function marginContent () {
+            var waitForContentParallax = setTimeout(function () {
+                console.log('yo');
+                var content = document.getElementsByClassName('parallax-content');
+                if (content.length > 0) {
+                    clearInterval(waitForContentParallax);
+                    for (var i = 0; i < content.length; i++) {
+                        content[i].style.marginTop = window.innerWidth * 0.37 + 'px';
+                    }
+                }
+            }, 100)
+        }
+        function respClass () {
+                marginContent();
+                if (window.innerWidth > 0 && window.innerWidth <= 640) {
+                    $scope.$apply(function () {
+                        $rootScope.window = 'small';
+                    });
+                } else if (window.innerWidth > 640 && window.innerWidth <= 1024) {
+                    $scope.$apply(function () {
+                        $rootScope.window = 'medium';
+                    });
+                } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
+                    $scope.$apply(function () {
+                        $rootScope.window = 'large';
+                    });
+                } else if (window.innerWidth > 1440 && window.innerWidth <= 1920) {
+                    $scope.$apply(function () {
+                        $rootScope.window = 'xlarge';
+                    });
+                } else if (window.innerWidth > 1920) {
+                    $scope.$apply(function () {
+                        $rootScope.window = 'xxlarge';
+                    });
+                }
+        }
+        $timeout(function () {
+            respClass ();
+        }, 0);
+        window.onresize = respClass;
+        angular.element(document).ready(marginContent());
         function fixControl () {
             var controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
             var titlePos = document.getElementById('eventTitle').getBoundingClientRect();
