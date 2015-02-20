@@ -2,8 +2,8 @@
     .fixed{position:fixed!important;}
     .relative{position:relative!important;}
     .absolute{position:absolute!important;}
-    .top{top:0!important;}
-    .bottom{bottom:0!important;}
+    .top0{top:0!important;}
+    .bottom0{bottom:0!important;}
     .left{left:0!important;}
     .right{right:0!important;}
     .float-left{float:left!important;}

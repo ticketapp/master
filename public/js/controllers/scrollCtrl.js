@@ -9,7 +9,18 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             );
         } else {
         }
-      $scope.gotoTop = '';
+        function fixControl () {
+            var controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
+            var titlePos = document.getElementById('eventTitle').getBoundingClientRect();
+            if (controlPos.top <= 0) {
+                document.getElementById('wysiwygControl').style.position = 'fixed';
+                document.getElementById('wysiwygControl').style.top = 0;
+            } if (titlePos.bottom >= 0){
+                document.getElementById('wysiwygControl').style.position = 'relative';
+                controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
+            }
+        }
+        $scope.gotoTop = '';
         function location() {
             $timeout(function(){
                 $location.hash('top');
@@ -65,6 +76,11 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 $rootScope.pathPlace = false;
                 $rootScope.pathSearch = false;
             }
+            if ($location.path().indexOf('/createEvent') > -1){
+                window.addEventListener('scroll', fixControl)
+            } else {
+                window.removeEventListener('scroll', fixControl)
+            }
         }
         $scope.$on('$locationChangeSuccess', function(){
             location()
@@ -74,7 +90,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.activPlace = false;
         $rootScope.activUsr = false;
 
-    }
+        }
 
 ]);
 
