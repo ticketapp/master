@@ -22,12 +22,12 @@ object Test2 extends Controller {
                             website: List[String],
                             link: String,
                             soundCloudTracks: List[SoundCloudTrack] = List())
-  implicit val artistToReturnWrites: Writes[FacebookArtist] = Json.writes[FacebookArtist]
+  implicit val facebookArtistWrites: Writes[FacebookArtist] = Json.writes[FacebookArtist]
 
   case class SoundCloudTrack(stream_url: String,
-                                     title: String,
-                                     artwork_url: Option[String] )
-  implicit val SoundCloudTrackWrites: Writes[SoundCloudTrack] = Json.writes[SoundCloudTrack]
+                             title: String,
+                             artwork_url: Option[String] )
+  implicit val soundCloudTrackWrites: Writes[SoundCloudTrack] = Json.writes[SoundCloudTrack]
 
   val token = play.Play.application.configuration.getString("facebook.token")
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
@@ -38,14 +38,15 @@ object Test2 extends Controller {
       case None => List()
       case Some(websitesFound) =>
         for (website <- websitesFound.split(" ").toList) {
-          listOfWebSitesToReturn = listOfWebSitesToReturn ::: website.split("www.").toList.filter(_ != "")
-            .filter(_ != "http://").filter(_ != "https://")
+          listOfWebSitesToReturn = listOfWebSitesToReturn ::: website.split("www.").toList
+            .filter(_ != "").filter(_ != "http://").filter(_ != "https://")
         }
         listOfWebSitesToReturn
     }
   }
 
   def findFacebookArtists(pattern: String): Future[Seq[FacebookArtist]] = {
+    //tout enlever pour mettre un implicit val reads
     val readCategory: Reads[String] = (__ \ "category").read[String]
     val readId: Reads[String] = (__ \ "id").read[String]
     val readCoverSource: Reads[String] = (__ \ "source").read[String]
@@ -57,8 +58,9 @@ object Test2 extends Controller {
         .apply((id: String, category: String, maybeCover: Option[String], website: Option[String], link: String)
       => (id, category, maybeCover, website, link))
     val readArtistsArray: Reads[Seq[(String, String, Option[String], Option[String], String)]] = Reads.seq(readAllArtist)
-    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, Option[String], String)]] = readArtistsArray.map { pages =>
-      pages.collect{ case (id, "Musician/band", Some(cover), websites, link) => (id, cover, websites, link) }
+    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, Option[String], String)]] = readArtistsArray.map {
+      pages =>
+        pages.collect{ case (id, "Musician/band", Some(cover), websites, link) => (id, cover, websites, link) }
     }
     val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
       artists.map{ case (id, cover, websites, link) =>
@@ -67,14 +69,22 @@ object Test2 extends Controller {
     }
 
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
-      + "&limit=100&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get
+      + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get
       .map { response =>
       (response.json \ "data").as[Seq[FacebookArtist]](readArtists)
     }
   }
 
+  implicit val soundCloudTracksReads = Json.reads[SoundCloudTrack]
+ /* implicit val soundCloudTracksReads: Reads[SoundCloudTrack] = (
+    (JsPath \ "stream_url").read[String] and
+      (JsPath \ "title").read[String] and
+      (JsPath \ "artwork_url").read[Option[String]]
+    )(SoundCloudTrack.apply _)*/
+
+
   def findSoundCloudTracks(artist: FacebookArtist): Future[FacebookArtist] = {
-    val readStream_url: Reads[String] = (__ \ "stream_url").read[String]
+    /*val readStream_url: Reads[String] = (__ \ "stream_url").read[String]
     val readTitle: Reads[String] = (__ \ "title").read[String]
     val readArtwork_url: Reads[Option[String]] = (__ \ "artwork_url").readNullable
     val readAllTrack: Reads[(String, String, Option[String])] =
@@ -82,9 +92,11 @@ object Test2 extends Controller {
         .apply((readStream_url: String, readTitle: String, readArtwork_url: Option[String])
       => (readStream_url, readTitle, readArtwork_url))
     val readTracksArray: Reads[List[(String, String, Option[String])]] = Reads.list(readAllTrack)
-    val readTracks: Reads[List[SoundCloudTrack]] = readTracksArray.map { tracks =>
+    val readTracks1: Reads[List[SoundCloudTrack]] = readTracksArray.map { tracks =>
       tracks.map{ case (stream_url, title, artwork_url) => SoundCloudTrack(stream_url, title, artwork_url) }
-    }
+    }*/
+
+    val readTracks: Reads[List[SoundCloudTrack]] = Reads.list(soundCloudTracksReads)
 
     var soundCloudLink: String = ""
     for (site <- artist.website) {
@@ -103,21 +115,53 @@ object Test2 extends Controller {
     }
   }
 
-  def test2(pattern: String) = Action.async {
-    var facebookArtistCompleted: List[FacebookArtist] = List()
 
-    findFacebookArtists(pattern).map { facebookArtists =>
+  def test(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
+    findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
+      //println(Json.toJson(facebookArtists))
       facebookArtists.map { facebookArtist =>
-        findSoundCloudTracks(facebookArtist).map { facebookArtistWSoundCloudTracks => //println(facebookArtistWSoundCloudTracks)
-          facebookArtistCompleted ::= facebookArtistWSoundCloudTracks
-        }
+        findSoundCloudTracks(facebookArtist)
+      }
+    }
+  }
+
+  def test2(pattern: String) = Action {
+
+    println(Json.toJson(SoundCloudTrack("ljkjk", "ljklkj", Some("lkjljk"))))
+    Ok(Json.toJson(FacebookArtist("lkj", "lkjkl", List("lkj"), "lkjk",
+      List())) )
+    //SoundCloudTrack("ljkjk", "ljklkj", Some("lkjljk"))
+
+
+    /*val testReturned: Future[Seq[Future[FacebookArtist]]] = test(pattern)
+    testReturned.flatMap { a: Seq[Future[FacebookArtist]] =>
+      val b = Future.sequence(a): Future[Seq[FacebookArtist]]
+      b.map { c: Seq[FacebookArtist] =>
+        //println(Json.toJson(c))
+        println(c)
+        Ok
+      }
+    }*/
+
+/*
+    var facebookArtistCompleted: List[FacebookArtist] = List()
+    var toBeReturned: List[FacebookArtist] = List()
+
+    findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
+      facebookArtists.map { facebookArtist: FacebookArtist =>
+        //toBeReturned ::= facebookArtist
+        //println(toBeReturned.length)
+          findSoundCloudTracks(facebookArtist).map { facebookArtistWSoundCloudTracks: FacebookArtist => //println(facebookArtistWSoundCloudTracks)
+            facebookArtistCompleted ::= facebookArtistWSoundCloudTracks
+            println(Json.toJson(facebookArtistCompleted))
+            //facebookArtistWSoundCloudTracks
+          }
       }
 
       Ok(Json.toJson(facebookArtistCompleted))
 
-      //Ok(Json.toJson(facebookArtists))
     }
-
+*/
 
 
     /*
