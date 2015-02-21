@@ -33,6 +33,7 @@ INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
 INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 56 avant la béta :) :)');
 
+
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (

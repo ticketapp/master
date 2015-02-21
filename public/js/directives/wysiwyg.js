@@ -338,6 +338,9 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                 document.execCommand(a, false, b);
             }
         };
+        $scope.addElement = function () {
+            document.getElementById('content').innerHTML = document.getElementById('content').innerHTML + "<div contenteditable='true' class='column'>Ecrire ici</div>";
+        }
         $scope.addClass = function (a) {
             if (document.getSelection().anchorNode.parentNode.className == a) {
                 var content = document.getSelection().anchorNode.parentNode.classList;
@@ -419,23 +422,28 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                 }
                 var rect = m.getBoundingClientRect();
                 function initControl () {
-                var posEl = m.getBoundingClientRect();
-                document.getElementById('remEl').style.position = "fixed";
-                document.getElementById('remEl').style.zIndex = 10;
-                document.getElementById('remEl').style.top = posEl.top - 20 + "px";
-                document.getElementById('remEl').style.left =  posEl.right - 10 + "px";
-                /*document.getElementById('ElSize').style.position = "fixed";
-                document.getElementById('ElSize').style.zIndex = 10;
-                document.getElementById('ElSize').style.top =  posEl.top - 20 + "px";
-                document.getElementById('ElSize').style.left = posEl.right - 70 + "px";*/
-                $scope.showRemEl = true;
+                    if (m != undefined && document.getElementById('remEl') != null) {
+                        var posEl = m.getBoundingClientRect();
+                        document.getElementById('remEl').style.position = "fixed";
+                        document.getElementById('remEl').style.zIndex = 10;
+                        document.getElementById('remEl').style.top = posEl.top - 20 + "px";
+                        document.getElementById('remEl').style.left = posEl.right - 10 + "px";
+                        /*document.getElementById('ElSize').style.position = "fixed";
+                         document.getElementById('ElSize').style.zIndex = 10;
+                         document.getElementById('ElSize').style.top =  posEl.top - 20 + "px";
+                         document.getElementById('ElSize').style.left = posEl.right - 70 + "px";*/
+                        $scope.showRemEl = true;
+                    } else {
+                        window.removeEventListener('scroll', initControl);
+                        document.removeEventListener('mouseover', initControl)
+                    }
                 }
                 initControl();
                 document.addEventListener('mouseover', initControl);
                 window.addEventListener('scroll', initControl);
                 $scope.$on('$locationChangeStart', function () {
                     window.removeEventListener('scroll', initControl);
-                    window.removeEventListener('mouseover', initControl)
+                    document.removeEventListener('mouseover', initControl)
                 });
                 if (sidePoint > rect.right || sidePoint < rect.left || sidePointY < rect.top || sidePointY > rect.bottom) {
                     m = m.parentElement;
@@ -666,14 +674,23 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                     }
                 };
                 if (m.id == "content") {
-                    //var inner = m.innerHTML;
-                    //m.innerHTML = inner + "<div  class='column' contenteditable='true'>MyNewDiv</div>";
+                    if (document.getElementById('content').innerHTML.length == 0) {
+                        console.log(1)
+                        var inner = m.innerHTML;
+                        document.getElementById('content').innerHTML = "<div  class='column' contenteditable='true'>Ecrire ici</div>";
+                    }
                 } else if (m.tagName == "WYSIWYG" || m.tagName == "BODY") {
-                    //var contentElement = document.getElementById('content').innerHTML;
-                    //document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
+                    console.log(2)
+                    var contentElement = document.getElementById('content').innerHTML;
+                    if (document.getElementById('content').innerHTML.length == 0) {
+                        document.getElementById('content').innerHTMLL = "<div contenteditable='true' class='column'>Ecrire ici</div>";
+                    }
                 } else if (document.getElementById('content').innerHTML.indexOf(m.outerHTML) == -1) {
-                    //var contentElement = document.getElementById('content').innerHTML;
-                    //document.getElementById('content').innerHTML = contentElement + "<div contenteditable='true' class='column'>MyNewDiv</div>";
+                    console.log(3)
+                    var contentElement = document.getElementById('content').innerHTML;
+                    if (document.getElementById('content').innerHTML.length == 0) {
+                        document.getElementById('content').innerHTML = "<div contenteditable='true' class='column'>Ecrire ici</div>";
+                    }
                 } else {
                     $scope.remEl = function () {
                         m.outerHTML = "";

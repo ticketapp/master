@@ -6,7 +6,7 @@
 <iframe id="iframe-lecture" style="display: none"></iframe>
 <div id="youtubePlayer">
 </div>
-<div class="playlistScroller" style="margin-left: 220px; overflow-x: auto;">
+<div class="playlistScroller" style="position: relative;top: 50px;margin-left: 220px; overflow-x: auto;">
     <div class="playlistContener">
         <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" style="width: 200px; display:inline-block; white-space: normal;" ng-click="play($index)" ng-repeat="track in playlist track by $index">
             <img src="{{track.image}}" class="column large-5 padding0" />

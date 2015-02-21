@@ -23,9 +23,15 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
     $scope.maxlargeClass = 12;
     $scope.infoG = true;
     $scope.startTour = $tour.start;
+    $scope.goTop = function () {
+        window.scrollTo(0, 0);
+    }
     $scope.currencyFormatting = function(value) {
         return value.toString()
     };
+    $scope.testResp = function () {
+        window.innerWidth = 950;
+    }
     function imagePlace () {
         console.log(parseInt(document.getElementById('eventImg').style.left.match(/-?\d+/)[0]))
     }
@@ -38,7 +44,9 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
                 document.getElementById('eventImg').style.top = 0;
             }
             if (parseInt(document.getElementById('eventImgContener').style.width.match(/-?\d+/)[0]) == 100) {
-                document.getElementById('eventImg').style.top = 0;
+                if (parseInt(document.getElementById('eventImg').style.top.match(/-?\d+/)[0]) > 0) {
+                    document.getElementById('eventImg').style.top = 0;
+                }
                 document.getElementById('eventImg').style.left = 0;
             }
             document.getElementById('eventImgContener').removeEventListener('mousemove', imagePlace);
