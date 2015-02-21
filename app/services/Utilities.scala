@@ -1,5 +1,7 @@
 package services
 
+import java.text.Normalizer
+
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
@@ -12,6 +14,10 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 
 object Utilities {
+  def normalizeString(string: String): String = {
+    Normalizer.normalize(string.replaceAll(" ", "+"), Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
+  }
+
   def stripChars(s:String, ch:String)= s filterNot (ch contains _)
 
   def testIfExist(table: String, fieldName: String, valueAnyType: Any): Boolean = {

@@ -17,7 +17,7 @@ import play.api.mvc.Results._
 import scala.util.{Failure, Success, Try}
 import play.api.libs.functional.syntax._
 import json.JsonHelper._
-import services.Utilities
+import services.Utilities.normalizeString
 
 /*
 follower counts SC
@@ -67,13 +67,15 @@ object Test2 extends Controller {
     val readLink: Reads[String] = (__ \ "link").read[String]
     val readAllArtist: Reads[(String, String, String, Option[String], Option[String], String)] =
       readName.and(readId).and(readCategory).and(readOptionalCover).and(readWebsites).and(readLink)
-        .apply((name: String, id: String, category: String, maybeCover: Option[String], website: Option[String], link: String)
-      => (name, id, category, maybeCover, website, link))
-    val readArtistsArray: Reads[Seq[(String, String, String, Option[String], Option[String], String)]] = Reads.seq(readAllArtist)
-    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, String, Option[String], String)]] = readArtistsArray.map {
-      pages =>
-        pages.collect{ case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link) }
-    }
+        .apply((name: String, id: String, category: String, maybeCover: Option[String], website: Option[String],
+                link: String) => (name, id, category, maybeCover, website, link))
+    val readArtistsArray = Reads.seq(readAllArtist)
+    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, String, Option[String], String)]] = readArtistsArray
+      .map { pages =>
+        pages.collect {
+          case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link)
+        }
+      }
     val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
       artists.map{ case (name, id, cover, websites, link) =>
         FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites), link)
@@ -109,8 +111,8 @@ object Test2 extends Controller {
 
   def findSoundCloudIds(namePattern: String): Future[Seq[Long]] = {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
-    WS.url("http://api.soundcloud.com/users?q=" + Utilities.stripChars(namePattern, "%").replace(" ", "+") +
-      "&client_id=" + soundCloudClientId).get().map { users =>
+    WS.url("http://api.soundcloud.com/users?q=" + normalizeString(namePattern) + "&client_id=" + soundCloudClientId)
+      .get().map { users =>
         users.json.as[Seq[Long]](readSoundCloudIds)
     }
   }
@@ -174,9 +176,8 @@ object Test2 extends Controller {
 
   def findEchonestArtistIds(artist: FacebookArtist): Future[List[(String, String)]] = { //=> (ARDDJUP12B3B35514F, List("facebook:artist:174132699276436"))
     WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
-      Utilities.stripChars(artist.name.replace(" ", "+"), "%\"") +
-      "&format=json&bucket=urls&bucket=images&bucket=id:facebook" )
-      .get().map { artists =>
+      normalizeString(artist.name) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
+      .map { artists =>
         //println("(findEchonestArtistIds) echonest return: " + artists.json)
         val artistsJson = artists.json \ "response" \ "artists"
         val facebookIds = artistsJson.as[Seq[(Option[String])]](Reads.seq((__ \\ "foreign_id").readNullable))
@@ -211,28 +212,11 @@ object Test2 extends Controller {
   def findEchonestSongs(echonestId: String): Future[List[String]] = {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     WS.url("http://developer.echonest.com/api/v4/artist/songs?api_key=" + echonestApiKey + "&id=" + echonestId +
-      "&format=json&results=50" ).get().map { songs =>
-      val jsonSongs = songs.json \ "response" \ "songs"
-      jsonSongs.as[List[Option[String]]](Reads.list(titleReads)).flatten.distinct
+      "&format=json&results=50").get().map { songs =>
+      println(songs.json)
+        (songs.json \ "response" \ "songs").as[List[Option[String]]](Reads.list(titleReads)).flatten.distinct
     }
   }
-
-  /*def findYoutubeVideos(trackTitle: String, artistName: String): Future[Seq[YoutubeTrack]] = {
-    implicit val youtubeTrackReads: Reads[YoutubeTrack] = (
-      (JsPath \ "id" \ "videoId").read[String] and
-      (JsPath \ "snippet" \ "title").read[String] and
-      (JsPath \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
-    )(YoutubeTrack.apply _)
-    WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q="+ trackTitle + artistName +
-      "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
-      println("\n######################")
-      println(trackTitle)
-      println((video.json \ "items"))
-      println((video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)))
-      println("######################\n")
-      (video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads))
-    }
-  }*/
 
   def findYoutubeVideos(tracksTitle: Seq[String], artistName: String): Future[Seq[YoutubeTrack]] = {
     implicit val youtubeTrackReads: Reads[YoutubeTrack] = (
@@ -244,8 +228,7 @@ object Test2 extends Controller {
     Future.sequence(
       tracksTitle.map { trackTitle =>
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
-          Utilities.stripChars(trackTitle.replace(" ", "+"), "%") +
-          Utilities.stripChars(artistName.replace(" ", "+"), "%") +
+          normalizeString(trackTitle) + normalizeString(artistName) +
           "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
           /*println("\n######################")
           println(trackTitle)
