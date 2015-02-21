@@ -95,8 +95,32 @@ object Scheduler {
         WS.url("https://graph.facebook.com/v2.2/" + eventId +
           "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
           .get onComplete {
-          case Success(eventDetailed) =>  val description = Json.stringify(eventDetailed.json \ "description")
-            val imgPath = Json.stringify(eventDetailed.json \ "cover" \ "source")
+          /*
+          val readName: Reads[String] = (__ \ "name").read[String]
+    val readCategory: Reads[String] = (__ \ "category").read[String]
+    val readId: Reads[String] = (__ \ "id").read[String]
+    val readCoverSource: Reads[String] = (__ \ "source").read[String]
+    val readOptionalCover: Reads[Option[String]] = (__ \ "cover").readNullable(readCoverSource)
+    val readWebsites: Reads[Option[String]] = (__ \ "website").readNullable
+    val readLink: Reads[String] = (__ \ "link").read[String]
+    val readAllArtist: Reads[(String, String, String, Option[String], Option[String], String)] =
+      readName.and(readId).and(readCategory).and(readOptionalCover).and(readWebsites).and(readLink)
+        .apply((name: String, id: String, category: String, maybeCover: Option[String], website: Option[String], link: String)
+      => (name, id, category, maybeCover, website, link))
+    val readArtistsArray: Reads[Seq[(String, String, String, Option[String], Option[String], String)]] = Reads.seq(readAllArtist)
+    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, String, Option[String], String)]] = readArtistsArray.map {
+      pages =>
+        pages.collect{ case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link) }
+    }
+    val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
+      artists.map{ case (name, id, cover, websites, link) =>
+        FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites), link)
+      }
+    }
+           */
+          case Success(eventDetailed) =>
+            val description = eventDetailed.json.as[String]((__ \ "description").read[String])
+            val imgPath = eventDetailed.json.as[String]((__ \ "cover" \ "source").read[String])
             saveEvent(formatEventDescription(description), eventDetailed, placeId, imgPath)
           case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
         } )

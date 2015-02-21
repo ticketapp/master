@@ -9,7 +9,7 @@ object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
 
-    Akka.system.scheduler.schedule(11 minutes, 12 hours) {
+    Akka.system.scheduler.schedule(11 seconds, 12 hours) {
       println("Scheduler started")
       Scheduler.start
     }
