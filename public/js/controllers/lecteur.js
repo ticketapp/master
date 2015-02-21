@@ -1,5 +1,6 @@
 app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', function ($scope, $rootScope, $timeout, $http){
     $rootScope.playlist = [];
+    $scope.showLecteur = true;
     var i = 0;
     function pushTrack (el) {
         $rootScope.playlist.push(el);

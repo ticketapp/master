@@ -1,19 +1,21 @@
-<div class="ng-control">
-    <a class="close">X</a>
-    <a class="reduire"> - </a>
+<div>
+    <!--<a class="close float-right">X</a>-->
+    <a class="reduire float-right" ng-click="showLecteur = !showLecteur"> - </a>
 </div>
-<audio class="width100p" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
-<iframe id="iframe-lecture" style="display: none"></iframe>
-<div id="youtubePlayer">
-</div>
-<div class="playlistScroller" style="position: relative;top: 50px;margin-left: 220px; overflow-x: auto;">
-    <div class="playlistContener">
-        <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" style="width: 200px; display:inline-block; white-space: normal;" ng-click="play($index)" ng-repeat="track in playlist track by $index">
-            <img src="{{track.image}}" class="column large-5 padding0" />
-            <div class="column large-7 padding0">
-                {{track.artist}}<br/>
-                {{track.name | limitTo: 30}}<br/>
-                {{track.from}}<br/>
+<div ng-show="showLecteur">
+    <audio class="width100p" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
+    <iframe id="iframe-lecture" style="display: none"></iframe>
+    <div id="youtubePlayer">
+    </div>
+    <div class="playlistScroller" style="position: relative;top: 50px;margin-left: 220px; overflow-x: auto;">
+        <div class="playlistContener">
+            <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" style="width: 200px; display:inline-block; white-space: normal;" ng-click="play($index)" ng-repeat="track in playlist track by $index">
+                <img src="{{track.image}}" class="column large-5 padding0" />
+                <div class="column large-7 padding0">
+                    {{track.artist}}<br/>
+                    {{track.name | limitTo: 30}}<br/>
+                    {{track.from}}<br/>
+                </div>
             </div>
         </div>
     </div>
