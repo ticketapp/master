@@ -180,9 +180,10 @@ object Test2 extends Controller {
       .map { artists =>
         //println("(findEchonestArtistIds) echonest return: " + artists.json)
         val artistsJson = artists.json \ "response" \ "artists"
-        val facebookIds = artistsJson.as[Seq[(Option[String])]](Reads.seq((__ \\ "foreign_id").readNullable))
+      println(artistsJson)
+        val facebookIds = artistsJson.asOpt[Seq[Option[String]]](Reads.seq((__ \\ "foreign_id").readNullable))
         var listIndexFacebookIds: List[Int] = List()
-        for ((maybeFbId, index) <- facebookIds.view.zipWithIndex) {
+        for ((maybeFbId, index) <- facebookIds.getOrElse(List()).view.zipWithIndex) {
           maybeFbId match {
             case Some(id) => listIndexFacebookIds = index +: listIndexFacebookIds
             case None =>
