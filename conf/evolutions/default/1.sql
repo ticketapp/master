@@ -138,7 +138,7 @@ INSERT into places(name, facebookId) values ('Le transbordeur', '117030545096697
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
-  path                      VARCHAR(255) NOT NULL,
+  path                      TEXT NOT NULL,
   category                  VARCHAR(31),
   eventId                   BIGINT references events(eventId),
   userId                    BIGINT references users(userId),

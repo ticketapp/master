@@ -1,5 +1,6 @@
 package json
 
+import controllers.Test2.{FacebookArtist, SoundCloudTrack}
 import models._
 import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
 import play.api.libs.json.JsNumber
@@ -29,5 +30,7 @@ object JsonHelper {
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
   implicit val eventWrites = Json.writes[Event]
   implicit val infoWrites: Writes[Info] = Json.writes[Info]
-
+  implicit val soundCloudTrackWrites: Writes[SoundCloudTrack] = Json.writes[SoundCloudTrack]
+  implicit val soundCloudTracksReads: Reads[SoundCloudTrack] = Json.reads[SoundCloudTrack]
+  implicit val facebookArtistWrites: Writes[FacebookArtist] = Json.writes[FacebookArtist]
 }

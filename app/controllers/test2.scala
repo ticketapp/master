@@ -7,6 +7,7 @@ import play.api.data.Forms._
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.mvc._
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -15,22 +16,32 @@ import scala.io.Source
 import play.api.mvc.Results._
 import scala.util.{Failure, Success, Try}
 import play.api.libs.functional.syntax._
+import json.JsonHelper._
+import services.Utilities
+
+/*
+follower counts SC
+écrire une fonction qui supprime les http https et les / (takeRight et dropRight) à la fin pour éviter redondance et pour plus de clarté
+rajouter des try catch pour les calls?
+sanitize url?? ask SO?
+ */
 
 object Test2 extends Controller {
-  case class FacebookArtist(id: String,
-                            cover: String,
-                            website: List[String],
-                            link: String,
-                            soundCloudTracks: List[SoundCloudTrack] = List())
-  implicit val facebookArtistWrites: Writes[FacebookArtist] = Json.writes[FacebookArtist]
-
+  val token = play.Play.application.configuration.getString("facebook.token")
+  val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
+  val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
+  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
   case class SoundCloudTrack(stream_url: String,
                              title: String,
                              artwork_url: Option[String] )
-  implicit val soundCloudTrackWrites: Writes[SoundCloudTrack] = Json.writes[SoundCloudTrack]
 
-  val token = play.Play.application.configuration.getString("facebook.token")
-  val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
+  case class FacebookArtist(name: String,
+                            id: String,
+                            cover: String,
+                            websites: List[String],
+                            link: String,
+                            soundCloudTracks: Option[List[SoundCloudTrack]] = None )
+
 
   def websitesStringToWebsitesList(websites: Option[String]): List[String] = {
     var listOfWebSitesToReturn: List[String] = List()
@@ -38,68 +49,50 @@ object Test2 extends Controller {
       case None => List()
       case Some(websitesFound) =>
         for (website <- websitesFound.split(" ").toList) {
-          listOfWebSitesToReturn = listOfWebSitesToReturn ::: website.split("www.").toList
-            .filter(_ != "").filter(_ != "http://").filter(_ != "https://")
+          listOfWebSitesToReturn = listOfWebSitesToReturn :::
+            """(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => " ").replace("www.", "").split(" ").toList
+              .filter(_ != "")//.replace()
         }
         listOfWebSitesToReturn
     }
   }
 
   def findFacebookArtists(pattern: String): Future[Seq[FacebookArtist]] = {
-    //tout enlever pour mettre un implicit val reads
+    val readName: Reads[String] = (__ \ "name").read[String]
     val readCategory: Reads[String] = (__ \ "category").read[String]
     val readId: Reads[String] = (__ \ "id").read[String]
     val readCoverSource: Reads[String] = (__ \ "source").read[String]
     val readOptionalCover: Reads[Option[String]] = (__ \ "cover").readNullable(readCoverSource)
     val readWebsites: Reads[Option[String]] = (__ \ "website").readNullable
     val readLink: Reads[String] = (__ \ "link").read[String]
-    val readAllArtist: Reads[(String, String, Option[String], Option[String], String)] =
-      readId.and(readCategory).and(readOptionalCover).and(readWebsites).and(readLink)
-        .apply((id: String, category: String, maybeCover: Option[String], website: Option[String], link: String)
-      => (id, category, maybeCover, website, link))
-    val readArtistsArray: Reads[Seq[(String, String, Option[String], Option[String], String)]] = Reads.seq(readAllArtist)
-    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, Option[String], String)]] = readArtistsArray.map {
+    val readAllArtist: Reads[(String, String, String, Option[String], Option[String], String)] =
+      readName.and(readId).and(readCategory).and(readOptionalCover).and(readWebsites).and(readLink)
+        .apply((name: String, id: String, category: String, maybeCover: Option[String], website: Option[String], link: String)
+      => (name, id, category, maybeCover, website, link))
+    val readArtistsArray: Reads[Seq[(String, String, String, Option[String], Option[String], String)]] = Reads.seq(readAllArtist)
+    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, String, Option[String], String)]] = readArtistsArray.map {
       pages =>
-        pages.collect{ case (id, "Musician/band", Some(cover), websites, link) => (id, cover, websites, link) }
+        pages.collect{ case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link) }
     }
     val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
-      artists.map{ case (id, cover, websites, link) =>
-        FacebookArtist(id, cover, websitesStringToWebsitesList(websites), link)
+      artists.map{ case (name, id, cover, websites, link) =>
+        FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites), link)
       }
     }
 
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
       + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get
       .map { response =>
+      //println(response.json \ "data")
       (response.json \ "data").as[Seq[FacebookArtist]](readArtists)
     }
   }
 
-  implicit val soundCloudTracksReads = Json.reads[SoundCloudTrack]
- /* implicit val soundCloudTracksReads: Reads[SoundCloudTrack] = (
-    (JsPath \ "stream_url").read[String] and
-      (JsPath \ "title").read[String] and
-      (JsPath \ "artwork_url").read[Option[String]]
-    )(SoundCloudTrack.apply _)*/
-
-
   def findSoundCloudTracks(artist: FacebookArtist): Future[FacebookArtist] = {
-    /*val readStream_url: Reads[String] = (__ \ "stream_url").read[String]
-    val readTitle: Reads[String] = (__ \ "title").read[String]
-    val readArtwork_url: Reads[Option[String]] = (__ \ "artwork_url").readNullable
-    val readAllTrack: Reads[(String, String, Option[String])] =
-      readStream_url.and(readTitle).and(readArtwork_url)
-        .apply((readStream_url: String, readTitle: String, readArtwork_url: Option[String])
-      => (readStream_url, readTitle, readArtwork_url))
-    val readTracksArray: Reads[List[(String, String, Option[String])]] = Reads.list(readAllTrack)
-    val readTracks1: Reads[List[SoundCloudTrack]] = readTracksArray.map { tracks =>
-      tracks.map{ case (stream_url, title, artwork_url) => SoundCloudTrack(stream_url, title, artwork_url) }
-    }*/
-
+    //rajouter une fonction qui va chercher l'image de l'user si pas d'image pour la track
     val readTracks: Reads[List[SoundCloudTrack]] = Reads.list(soundCloudTracksReads)
-
     var soundCloudLink: String = ""
-    for (site <- artist.website) {
+    for (site <- artist.websites) {
       site.indexOf("soundcloud.com") match {
         case -1 =>
         case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
@@ -109,110 +102,152 @@ object Test2 extends Controller {
     soundCloudLink match {
       case "" => Future { artist }
       case scLink => WS.url("http://api.soundcloud.com/users/" + scLink + "/tracks?client_id=" + soundCloudClientId)
-        .get.map { soundCloudTracks =>
-        artist.copy(soundCloudTracks = soundCloudTracks.json.as[List[SoundCloudTrack]](readTracks))
+        .get().map { soundCloudTracks =>
+        artist.copy(soundCloudTracks = soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks))
       }
     }
   }
 
+  def findSoundCloudIds(namePattern: String): Future[Seq[Long]] = {
+    val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
+    WS.url("http://api.soundcloud.com/users?q=" + Utilities.stripChars(namePattern, "%").replace(" ", "+") +
+      "&client_id=" + soundCloudClientId).get().map { users =>
+        users.json.as[Seq[Long]](readSoundCloudIds)
+    }
+  }
 
-  def test(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
+  def findSoundCloudWebsites(listIds: Seq[Long]): Future[Seq[(Long, Seq[String])]] = {
+    val readUrls: Reads[Seq[Option[String]]] = Reads.seq((__ \ "url").readNullable)
+    Future.sequence(
+      listIds.map { id =>
+        WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles?client_id=" + soundCloudClientId).get.map {
+          websites => (id, websites.json.as[Seq[Option[String]]](readUrls).flatten)
+        }
+      }
+    )
+  }
+
+  def compareArtistWebsitesWSCWebsitesAndAddTracks(artist: FacebookArtist, websitesAndIds: Seq[(Long, Seq[String])])
+  :Future[FacebookArtist] = {
+    //refaire une fonction soundcloudtracks search parce que redondance là
+    val readTracks: Reads[List[SoundCloudTrack]] = Reads.list(soundCloudTracksReads)
+    var matchedId: Long = 0
+    for (websitesAndId <- websitesAndIds) {
+      for (website <- websitesAndId._2) {
+        val site = """(https?:\/\/(www\.)?)""".r.replaceAllIn(website.replaceAll(" ", ""), p => "")
+        if (site == artist.link || artist.websites.indexOf(site) > -1) { matchedId = websitesAndId._1 }
+      }
+    }
+
+    if (matchedId != 0) {
+      WS.url("http://api.soundcloud.com/users/" + matchedId + "/tracks?client_id=" + soundCloudClientId)
+        .get().map { soundCloudTracks =>
+        //println(matchedId)
+        //println(soundCloudTracks.json.as[List[SoundCloudTrack]](readTracks))
+        artist.copy(soundCloudTracks = soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks))
+      }
+    } else {
+      Future{ artist }
+    }
+  }
+
+
+  def findSoundCloudTracksNotDefinedInFb(artist: FacebookArtist): Future[FacebookArtist] = {
+    artist.soundCloudTracks match {
+      case Some(tracks: List[soundCloudTracks]) if tracks.isEmpty =>
+        findSoundCloudIds(artist.name).flatMap { ids =>
+          findSoundCloudWebsites(ids).flatMap{ websitesAndIds =>
+            compareArtistWebsitesWSCWebsitesAndAddTracks(artist, websitesAndIds)
+          }
+        }
+      case _ => Future{ artist }
+    }
+  }
+
+  def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
     findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
-      //println(Json.toJson(facebookArtists))
       facebookArtists.map { facebookArtist =>
         findSoundCloudTracks(facebookArtist)
       }
     }
   }
 
-  def test2(pattern: String) = Action {
 
-    println(Json.toJson(SoundCloudTrack("ljkjk", "ljklkj", Some("lkjljk"))))
-    Ok(Json.toJson(FacebookArtist("lkj", "lkjkl", List("lkj"), "lkjk",
-      List())) )
-    //SoundCloudTrack("ljkjk", "ljklkj", Some("lkjljk"))
-
-
-    /*val testReturned: Future[Seq[Future[FacebookArtist]]] = test(pattern)
-    testReturned.flatMap { a: Seq[Future[FacebookArtist]] =>
-      val b = Future.sequence(a): Future[Seq[FacebookArtist]]
-      b.map { c: Seq[FacebookArtist] =>
-        //println(Json.toJson(c))
-        println(c)
-        Ok
-      }
-    }*/
-
-/*
-    var facebookArtistCompleted: List[FacebookArtist] = List()
-    var toBeReturned: List[FacebookArtist] = List()
-
-    findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
-      facebookArtists.map { facebookArtist: FacebookArtist =>
-        //toBeReturned ::= facebookArtist
-        //println(toBeReturned.length)
-          findSoundCloudTracks(facebookArtist).map { facebookArtistWSoundCloudTracks: FacebookArtist => //println(facebookArtistWSoundCloudTracks)
-            facebookArtistCompleted ::= facebookArtistWSoundCloudTracks
-            println(Json.toJson(facebookArtistCompleted))
-            //facebookArtistWSoundCloudTracks
-          }
-      }
-
-      Ok(Json.toJson(facebookArtistCompleted))
-
-    }
-*/
-
-
-    /*
-        /*
-        WS.url("http://api.soundcloud.com/users/johnyalen/tracks?client_id=" + soundCloudClientId).get.map { response =>
-          val tracksToReturn = response.json.as[Seq[SoundCloudTrack]](readTracks)
-          for (track <- tracksToReturn) {
-            track.artwork_url match {
-              case Some(artwork_url) =>
-              case None => //On va chercher l'image de l'user
-            }
-          }
-          Ok(Json.toJson(tracksToReturn))
-        }*/
-
-        val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
-
-        /*WS.url("http://api.soundcloud.com/users?q=jonny&client_id=" + soundCloudClientId).get.map {
-          response => println(response.json.as[Seq[Long]](readSoundCloudIds))
-            Ok
-        }*/
-
-
-        val listSoundCloudIds = List(44754718, 424376, 23008, 871737, 4507106, 37010262, 21683946, 6837207, 4674475,
-          7845914, 534200, 1278145, 51389792, 32179999, 23436369, 377909, 9262460, 5810328, 14124498, 12844042, 3400756,
-          31701859, 19463719, 66629, 70872423, 32858173, 245119, 1410509, 31313552, 94422, 22278231, 962651, 61839306,
-          2477273, 25424932, 19670762, 11833741, 38769243, 2356770, 13922620, 22914804, 96867217, 1376901, 40644, 29030604,
-          1267122, 6741016, 12040018, 21554984, 15162494)
-
-
-        val readUrls: Reads[Seq[Option[String]]] = Reads.seq((__ \ "url").readNullable)
-
-
-        for (id <- listSoundCloudIds) {
-          WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles?client_id=" + soundCloudClientId).get.map {
-            response => //println(response.json)
-              val websites = (id, response.json.as[Seq[Option[String]]](readUrls).flatten)
-              println(websites)
-
+  def findEchonestArtistIds(artist: FacebookArtist): Future[List[(String, String)]] = { //=> (ARDDJUP12B3B35514F, List("facebook:artist:174132699276436"))
+    WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
+      artist.name.replace(" ", "+") +
+      "&format=json&bucket=urls&bucket=images&bucket=id:facebook" )
+      .get().map { artists =>
+        val artistsJson = artists.json \ "response" \ "artists"
+        val facebookIds = artistsJson.as[Seq[(Option[String])]](Reads.seq((__ \\ "foreign_id").readNullable))
+        var listIndexFacebookIds: List[Int] = List()
+        for ((maybeFbId, index) <- facebookIds.view.zipWithIndex) {
+          maybeFbId match {
+            case Some(id) => listIndexFacebookIds = index +: listIndexFacebookIds
+            case None =>
           }
         }
 
-
-
-    /*
-        WS.url("http://api.soundcloud.com/users?q=jonny&client_id=" + soundCloudClientId).get.map {
-          response => Ok
-        }*/
-        */
+      listIndexFacebookIds.map { index: Int =>
+        ((artistsJson(index) \ "id").as[String], (artistsJson(index) \\ "foreign_id")(0).toString()
+          .replace("facebook:artist:", "") )
+      }
+    }
   }
 
+  def findEchonestIdCorrespondingToFacebookId(futureListIndexEchonestIdAndFacebookId: Future[List[(String, String)]],
+                                               artistId: String): Future[Option[String]] = {
+
+    futureListIndexEchonestIdAndFacebookId.map { listIndexEchonestIdAndFacebookId =>
+      var toBeReturned: Option[String] = None
+      for (tuple <- listIndexEchonestIdAndFacebookId) {
+        if (tuple._2.replaceAll("\"", "") == artistId)
+          toBeReturned = Some(tuple._1)
+      }
+      toBeReturned
+    }
+  }
+
+  def findEchonestSongs(echonestId: String) = {
+    val readName: Reads[String] = (__ \ "name").read[String]
+    WS.url("http://developer.echonest.com/api/v4/artist/songs?api_key=" + echonestApiKey + "&id=" + echonestId +
+      "&format=json&results=50" ).get().map { songs =>
+      val jsonSongs = songs.json \ "songs"
+      println(jsonSongs)
+    }
+  }
+
+  def findYoutubeVideos(trackTitle: String, artistName: String) = {
+    WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q="+ trackTitle + artistName +
+      "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { videos =>
+      println(videos.json)
+    }
+  }
+
+  def test2(pattern: String) = Action.async {
+    returnFutureArtistsWSoundCloudTracks(pattern).flatMap { seqFutureArtist: Seq[Future[FacebookArtist]] =>
+      val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
+      futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
+
+        var seqArtistWMoreSCTracks: ListBuffer[Future[FacebookArtist]] = ListBuffer()
+        seqArtist.flatMap { artist: FacebookArtist =>
+          findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(artist), artist.id).map { optiobalEchonestId =>
+            //println(optiobalEchonestId)
+            optiobalEchonestId match {
+              case None =>
+              case Some(echonestId) => findEchonestSongs(echonestId)
+            }
+          }
+          seqArtistWMoreSCTracks += findSoundCloudTracksNotDefinedInFb(artist)
+        }
+        val futureSeqArtistWMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqArtistWMoreSCTracks)
+        futureSeqArtistWMoreSCTracks.map { seqArtistWMoreSCTracksFinished =>
+
+          Ok(Json.toJson(seqArtistWMoreSCTracksFinished))
+        }
+      }
+    }
+  }
 
   def test2 = Action {
     Ok("Okay\n")

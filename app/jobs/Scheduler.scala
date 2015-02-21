@@ -17,8 +17,8 @@ object Scheduler {
     "<div class='columns large-12'>" + linkPattern.replaceAllIn(eventDescription
       .replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>").replaceAll("""\\n""", " <br/>")
       .replaceAll("""\\t""", "    "), m => "<a href='http://" + m + "'>" + m + "</a>")
-      .replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>").replaceAll("""\\n""", " <br/>")
-      .replaceAll("""\\t""", "    ").replaceAll("""</a>/""", "</a> ").substring(1).dropRight(1) + "</div>"
+        .replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>").replaceAll("""\\n""", " <br/>")
+        .replaceAll("""\\t""", "    ").replaceAll("""</a>/""", "</a> ").substring(1).dropRight(1) + "</div>"
   }
 
   def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {

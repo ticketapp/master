@@ -12,6 +12,8 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 
 object Utilities {
+  def stripChars(s:String, ch:String)= s filterNot (ch contains _)
+
   def testIfExist(table: String, fieldName: String, valueAnyType: Any): Boolean = {
     val value = valueAnyType match {
       case Some(v: Int) => v
