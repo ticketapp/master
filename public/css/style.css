@@ -318,7 +318,7 @@ top: 0;
 		.event_min_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
 		.block_event_min{margin:0 auto; box-shadow: 1px 1px 12px -5px rgba(85, 85, 85, 0.59); width:95%; border-radius: 0 0 3px 3px; color: black; max-height:100%; -webkit-transition: 0.4s, -webkit-transform 0.4s ease-in-out; -moz-transition: 0.4s, -moz-transform 0.4s ease-in-out; -o-transition: 0.4s, -o-transform 0.4s ease-in-out; -ms-transition: 0.4s, -ms-transform 0.4s ease-in-out;	transition: 0.4s, transform 0.4s ease-in-out;}
 		.block_event_min:hover{box-shadow: 1px 1px 12px -1px rgba(85, 85, 85, 0.59);/*-webkit-transform: scale(1.06); -moz-transform: scale(1.06);	-o-transform: scale(1.06); -ms-transform: scale(1.06); z-index: 100; opacity: 1;*/}
-		.img_min_evnt{width:100%}
+		.img_min_evnt{width:100%; overflow: hidden;}
 
         .text_evnt_min{margin:10px auto; width:95%}
 		.btn_event{float:right; margin:5px 5px 5px 0;}

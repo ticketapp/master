@@ -211,14 +211,11 @@
                                 <h3>Vous pouvez ici modifier la description de votre événement.</h3>
                                 <a ng-click="infoWy = false" class="close">&times;</a>
                             </div>
-                            <div id="content" class="width100p minHeight450 float-left">
-                                <div ng-init="event.description = 'ecrire ici'" contenteditable="true"
-                                     class="column padding0"
-                                     step-text="change here the content of the event's decription"
-                                     step-index="10"
-                                     step-placement="top">
-                                    <div data-ng-bind-html="newEvent.description" id="scribHere"></div>
-                                </div>
+                            <div id="content" class="width100p minHeight450 float-left" data-ng-bind-html="newEvent.description"
+                                 class="column padding0"
+                                 step-text="change here the content of the event's decription"
+                                 step-index="10"
+                                 step-placement="top">
                             </div>
                             <!--<a ng-click="useTmp = false" ng-show="useTmp" style="bottom: {{useTmp}}"><i class="fi-x"></i></a>
                             <a ng-click="useTmp = '150px'" ng-show="!useTmp" class="ng-hide" style="bottom: {{useTmp}}"><i class="fi-plus"></i></a>
