@@ -17,6 +17,10 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Event.findAllByPlace(placeId)))
   }
 
+  def eventsByOrganizer(organizerId: Long) = Action {
+    Ok(Json.toJson(Event.findAllByOrganizer(organizerId)))
+  }
+
   def event(id: Long) = Action {
     Event.find(id) match {
       case Some(x) => Ok(Json.toJson(x))

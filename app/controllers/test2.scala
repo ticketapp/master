@@ -175,7 +175,7 @@ object Test2 extends Controller {
 
   def findEchonestArtistIds(artist: FacebookArtist): Future[List[(String, String)]] = { //=> (ARDDJUP12B3B35514F, List("facebook:artist:174132699276436"))
     WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
-      Utilities.stripChars(artist.name.replace(" ", "+"), "%") +
+      Utilities.stripChars(artist.name.replace(" ", "+"), "%\"") +
       "&format=json&bucket=urls&bucket=images&bucket=id:facebook" )
       .get().map { artists =>
         //println("(findEchonestArtistIds) echonest return: " + artists.json)
@@ -244,7 +244,9 @@ object Test2 extends Controller {
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
-        WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q="+ trackTitle + artistName +
+        WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
+          Utilities.stripChars(trackTitle.replace(" ", "+"), "%") +
+          Utilities.stripChars(artistName.replace(" ", "+"), "%") +
           "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
           /*println("\n######################")
           println(trackTitle)
@@ -276,39 +278,20 @@ object Test2 extends Controller {
       val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
 
-        val seqArtistWMoreSCTracks = seqArtist.map { artist: FacebookArtist =>
+        val seqFutureArtistWMoreSCTracks: Seq[Future[FacebookArtist]] = seqArtist.map { artist: FacebookArtist =>
           findSoundCloudTracksNotDefinedInFb(artist)
         }
+        val futureSeqArtistWMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqFutureArtistWMoreSCTracks)
 
-
-
-        //var seqArtistWYoutubeTracks: ListBuffer[Future[FacebookArtist]] = ListBuffer()
-        //seqArtistWYoutubeTracks += returnFutureArtistWYoutubeTracks(artistWMoreSCTracksFinished)
-       /* val futureSequenceArtistWithMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqArtistWMoreSCTracks)
-
-        val sequenceArtistWithMoreSCTracks: Seq[FacebookArtist] =
-          futureSequenceArtistWithMoreSCTracks.map { seqArtistWMoreSCTracksFinished =>
-            seqArtistWMoreSCTracksFinished
-          }*/
-
-        /*
-        val test: Future[Seq[FacebookArtist]] = //Future.sequence(
-          futureSequenceArtistWithMoreSCTracks.map { seqArtistWMoreSCTracksFinished =>
-            seqArtistWMoreSCTracksFinished.map { artistWMoreSCTracksFinished =>
-              returnFutureArtistWYoutubeTracks(artistWMoreSCTracksFinished)
-            }
-          }*/
-        //)
-
-        /*val futureSeqArtistWYoutubeTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqArtistWYoutubeTracks)
-
-        futureSeqArtistWYoutubeTracks.map { seqArtistWYoutubeTracksFinished =>
-
-          println(seqArtistWYoutubeTracksFinished)
-        }*/
-
-        Future.sequence(seqArtistWMoreSCTracks).map { seqArtistWMoreSCTracksFinished =>
-          Ok(Json.toJson(seqArtistWMoreSCTracksFinished))
+        futureSeqArtistWMoreSCTracks.map { seqArtist =>
+          seqArtist.map { artist: FacebookArtist =>
+            returnFutureArtistWYoutubeTracks(artist)
+          }
+        }.flatMap { seqOfFuture =>
+          val futureOfSeq: Future[Seq[FacebookArtist]] = Future.sequence(seqOfFuture)
+          futureOfSeq.map { seq =>
+            Ok(Json.toJson(seq))
+          }
         }
       }
     }

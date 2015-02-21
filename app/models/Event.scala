@@ -58,15 +58,16 @@ object Event {
 
   def find(eventId: Long): Option[Event] = {
     DB.withConnection { implicit connection =>
-      val eventResultSet = SQL("SELECT * from events WHERE eventId = {eventId}")
+      SQL("SELECT * from events WHERE eventId = {eventId}")
         .on('eventId -> eventId)
         .as(EventParser.singleOpt)
-      eventResultSet.map(e => e.copy(
-        images = Image.findAllByEvent(e),
-        organizers = Organizer.findAllByEvent(e),
-        artists = Artist.findAllByEvent(e),
-        tariffs = Tariff.findAllByEvent(e),
-        addresses = Address.findAllByEvent(e)))
+        .map(e => e.copy(
+          images = Image.findAllByEvent(e),
+          organizers = Organizer.findAllByEvent(e),
+          artists = Artist.findAllByEvent(e),
+          tariffs = Tariff.findAllByEvent(e),
+          addresses = Address.findAllByEvent(e))
+        )
     }
   }
 
@@ -75,25 +76,27 @@ object Event {
     change limit by variable
      */
     DB.withConnection { implicit connection =>
-      val eventsResultSet = SQL(
+      SQL(
         """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
             events.name, events.startSellingTime, events.endSellingTime, events.description, events.startTime,
             events.endTime, events.ageRestriction
         FROM events
         ORDER BY events.creationDateTime DESC
-        LIMIT 20""").as(EventParser.*)
-      eventsResultSet.map(e => e.copy(
-        images = Image.findAllByEvent(e),
-        organizers = Organizer.findAllByEvent(e),
-        artists = Artist.findAllByEvent(e),
-        tariffs = Tariff.findAllByEvent(e),
-        addresses = Address.findAllByEvent(e)))
+        LIMIT 20"""
+      ).as(EventParser.*)
+        .map(e => e.copy(
+          images = Image.findAllByEvent(e),
+          organizers = Organizer.findAllByEvent(e),
+          artists = Artist.findAllByEvent(e),
+          tariffs = Tariff.findAllByEvent(e),
+          addresses = Address.findAllByEvent(e))
+        )
     }
   }
 
   def findAllByPlace(placeId: Long) = {
     DB.withConnection { implicit connection =>
-      val eventsResultSet = SQL(
+      SQL(
         """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
             s.name, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
             s.endTime, s.ageRestriction
@@ -101,12 +104,39 @@ object Event {
         INNER JOIN events s ON s.eventId = eP.eventId
         WHERE eP.placeId = {placeId}
         ORDER BY s.creationDateTime DESC
+        LIMIT 20"""
+      ).on('placeId -> placeId)
+      .as(EventParser.*)
+      .map(e => e.copy(
+        images = Image.findAllByEvent(e),
+        organizers = Organizer.findAllByEvent(e),
+        artists = Artist.findAllByEvent(e),
+        tariffs = Tariff.findAllByEvent(e),
+        addresses = Address.findAllByEvent(e))
+        )
+    }
+  }
+
+  def findAllByOrganizer(organizerId: Long) = {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
+            s.name, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
+            s.endTime, s.ageRestriction
+        FROM eventsOrganizers eO
+        INNER JOIN events s ON s.eventId = eO.eventId
+        WHERE eO.organizerId = {organizerId}
+        ORDER BY s.creationDateTime DESC
         LIMIT 20""")
-        .on('placeId -> placeId)
+        .on('organizerId -> organizerId)
         .as(EventParser.*)
-      eventsResultSet.map(e => e.copy(
-        images = Image.findAllByEvent(e).toList,
-        artists = Artist.findAllByEvent(e).toList))
+        .map(e => e.copy(
+          images = Image.findAllByEvent(e),
+          organizers = Organizer.findAllByEvent(e),
+          artists = Artist.findAllByEvent(e),
+          tariffs = Tariff.findAllByEvent(e),
+          addresses = Address.findAllByEvent(e))
+        )
     }
   }
 
@@ -115,12 +145,14 @@ object Event {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
-          .as(EventParser.*).map(e => e.copy(
-          images = Image.findAllByEvent(e),
-          organizers = Organizer.findAllByEvent(e),
-          artists = Artist.findAllByEvent(e),
-          tariffs = Tariff.findAllByEvent(e),
-          addresses = Address.findAllByEvent(e)))
+          .as(EventParser.*)
+          .map(e => e.copy(
+            images = Image.findAllByEvent(e),
+            organizers = Organizer.findAllByEvent(e),
+            artists = Artist.findAllByEvent(e),
+            tariffs = Tariff.findAllByEvent(e),
+            addresses = Address.findAllByEvent(e))
+          )
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
@@ -137,9 +169,14 @@ object Event {
           JOIN addresses a ON a.addressId = eA.eventId
           WHERE a.isEvent = TRUE AND LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 50""")
           .on('patternLowCase -> cityPattern.toLowerCase)
-          .as(EventParser.*).map(e => e.copy(
-            images = Image.findAllByEvent(e).toList,
-            artists = Artist.findAllByEvent(e).toList))
+          .as(EventParser.*)
+          .map(e => e.copy(
+            images = Image.findAllByEvent(e),
+            organizers = Organizer.findAllByEvent(e),
+            artists = Artist.findAllByEvent(e),
+            tariffs = Tariff.findAllByEvent(e),
+            addresses = Address.findAllByEvent(e))
+          )
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
@@ -242,9 +279,14 @@ object Event {
           JOIN addresses a ON a.addressId = eA.eventId
           WHERE a.isEvent = TRUE
           ORDER BY a.geographicPoint <-> point '$center' LIMIT 50"""
-        ).as(EventParser.*).map(e => e.copy(
-            images = Image.findAllByEvent(e).toList,
-            artists = Artist.findAllByEvent(e).toList) )
+        ).as(EventParser.*)
+          .map(e => e.copy(
+            images = Image.findAllByEvent(e),
+            organizers = Organizer.findAllByEvent(e),
+            artists = Artist.findAllByEvent(e),
+            tariffs = Tariff.findAllByEvent(e),
+            addresses = Address.findAllByEvent(e))
+          )
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Event.findAllInCircle: " + e.getMessage)

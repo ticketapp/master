@@ -1,14 +1,8 @@
 # Home page
 GET     /                          controllers.Application.index
 
-#
-#
-#
-#CHANGER POST PAR PUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#
-#
-#
-#
+
+
 GET     /test                      controllers.Test.test1
 GET     /test2/:pattern                     controllers.Test2.test2(pattern)
 #GET     /placesFacebookIds         controllers.PlaceController.placesFacebookIds
@@ -28,8 +22,6 @@ GET     /events/containing/:pattern controllers.EventController.findEventsContai
 GET     /events/circle/:center       controllers.EventController.findEventsInCircle(center: String)
 GET     /events/city/:pattern       controllers.EventController.findEventsByCity(pattern: String)
 
-#(centerLatitude: FLOAT, centerLongitude: FLOAT)
-#/events/circle/:centerLatitude/:centerLongitude
 
 ################################## Artists ##############################################
 GET     /artists                        controllers.ArtistController.artists
@@ -47,6 +39,14 @@ POST    /places/:userId/:placeId    controllers.PlaceController.followPlace(user
 GET     /places/containing/:pattern  controllers.PlaceController.findPlacesContaining(pattern: String)
 POST    /places/create              controllers.PlaceController.createPlace
 GET     /places/:placeId/events     controllers.EventController.eventsByPlace(placeId: Long)
+
+################################## Oragnizers ###############################################
+GET     /organizers                     controllers.OrganizerController.organizers
+GET     /organizers/:id                 controllers.OrganizerController.organizer(id: Long)
+POST    /organizers/:userId/:organizerId    controllers.OrganizerController.followOrganizer(userId: Long, organizerId: Long)
+GET     /organizers/containing/:pattern  controllers.OrganizerController.findOrganizersContaining(pattern: String)
+POST    /organizers/create              controllers.OrganizerController.createOrganizer
+GET     /organizers/:organizerId/events     controllers.EventController.eventsByOrganizer(organizerId: Long)
 
 ################################## Infos ################################################
 GET    /infos                       controllers.Application.infos
