@@ -116,8 +116,11 @@ object Event {
         SQL("SELECT * FROM events WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
           .as(EventParser.*).map(e => e.copy(
-          images = Image.findAllByEvent(e).toList,
-          artists = Artist.findAllByEvent(e).toList))
+          images = Image.findAllByEvent(e),
+          organizers = Organizer.findAllByEvent(e),
+          artists = Artist.findAllByEvent(e),
+          tariffs = Tariff.findAllByEvent(e),
+          addresses = Address.findAllByEvent(e)))
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)

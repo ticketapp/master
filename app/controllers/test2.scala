@@ -24,6 +24,8 @@ follower counts SC
 écrire une fonction qui supprime les http https et les / (takeRight et dropRight) à la fin pour éviter redondance et pour plus de clarté
 rajouter des try catch pour les calls?
 sanitize url?? ask SO?
+sctracks optionList to list ?
+parallelize soundcloud/echonest+youtube
  */
 
 object Test2 extends Controller {
@@ -31,17 +33,15 @@ object Test2 extends Controller {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-  case class SoundCloudTrack(stream_url: String,
-                             title: String,
-                             artwork_url: Option[String] )
-
+  case class SoundCloudTrack(stream_url: String, title: String, artwork_url: Option[String] )
+  case class YoutubeTrack(videoId: String, title: String, thumbnail: Option[String] )
   case class FacebookArtist(name: String,
                             id: String,
                             cover: String,
                             websites: List[String],
                             link: String,
-                            soundCloudTracks: Option[List[SoundCloudTrack]] = None )
-
+                            soundCloudTracks: Option[List[SoundCloudTrack]] = None,
+                            youtubeTracks: Seq[YoutubeTrack] = List() )
 
   def websitesStringToWebsitesList(websites: Option[String]): List[String] = {
     var listOfWebSitesToReturn: List[String] = List()
@@ -175,9 +175,10 @@ object Test2 extends Controller {
 
   def findEchonestArtistIds(artist: FacebookArtist): Future[List[(String, String)]] = { //=> (ARDDJUP12B3B35514F, List("facebook:artist:174132699276436"))
     WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
-      artist.name.replace(" ", "+") +
+      Utilities.stripChars(artist.name.replace(" ", "+"), "%") +
       "&format=json&bucket=urls&bucket=images&bucket=id:facebook" )
       .get().map { artists =>
+        //println("(findEchonestArtistIds) echonest return: " + artists.json)
         val artistsJson = artists.json \ "response" \ "artists"
         val facebookIds = artistsJson.as[Seq[(Option[String])]](Reads.seq((__ \\ "foreign_id").readNullable))
         var listIndexFacebookIds: List[Int] = List()
@@ -208,19 +209,65 @@ object Test2 extends Controller {
     }
   }
 
-  def findEchonestSongs(echonestId: String) = {
-    val readName: Reads[String] = (__ \ "name").read[String]
+  def findEchonestSongs(echonestId: String): Future[List[String]] = {
+    val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     WS.url("http://developer.echonest.com/api/v4/artist/songs?api_key=" + echonestApiKey + "&id=" + echonestId +
       "&format=json&results=50" ).get().map { songs =>
-      val jsonSongs = songs.json \ "songs"
-      println(jsonSongs)
+      val jsonSongs = songs.json \ "response" \ "songs"
+      jsonSongs.as[List[Option[String]]](Reads.list(titleReads)).flatten.distinct
     }
   }
 
-  def findYoutubeVideos(trackTitle: String, artistName: String) = {
+  /*def findYoutubeVideos(trackTitle: String, artistName: String): Future[Seq[YoutubeTrack]] = {
+    implicit val youtubeTrackReads: Reads[YoutubeTrack] = (
+      (JsPath \ "id" \ "videoId").read[String] and
+      (JsPath \ "snippet" \ "title").read[String] and
+      (JsPath \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
+    )(YoutubeTrack.apply _)
     WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q="+ trackTitle + artistName +
-      "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { videos =>
-      println(videos.json)
+      "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
+      println("\n######################")
+      println(trackTitle)
+      println((video.json \ "items"))
+      println((video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)))
+      println("######################\n")
+      (video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads))
+    }
+  }*/
+
+  def findYoutubeVideos(tracksTitle: Seq[String], artistName: String): Future[Seq[YoutubeTrack]] = {
+    implicit val youtubeTrackReads: Reads[YoutubeTrack] = (
+      (JsPath \ "id" \ "videoId").read[String] and
+        (JsPath \ "snippet" \ "title").read[String] and
+        (JsPath \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
+      )(YoutubeTrack.apply _)
+
+    Future.sequence(
+      tracksTitle.map { trackTitle =>
+        WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q="+ trackTitle + artistName +
+          "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
+          /*println("\n######################")
+          println(trackTitle)
+          println(video.json \ "items")
+          println((video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)))
+          println("######################\n")*/
+          (video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads))
+        }
+      }
+    ).map { seqOfSeqYoutubeTracks: Seq[Seq[YoutubeTrack]] =>
+      seqOfSeqYoutubeTracks.flatten
+    }
+  }
+
+  def returnFutureArtistWYoutubeTracks(artist: FacebookArtist): Future[FacebookArtist] = {
+    findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(artist), artist.id).flatMap {
+      case None => Future { artist }
+      case Some(echonestId) => findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Seq[String] =>
+        findYoutubeVideos(echonestSongsTitle, artist.name).map{ youtubeTracks =>
+          //println(artist.copy(youtubeTracks = youtubeTracks))
+          artist.copy(youtubeTracks = youtubeTracks)
+        }
+      }
     }
   }
 
@@ -229,20 +276,38 @@ object Test2 extends Controller {
       val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
 
-        var seqArtistWMoreSCTracks: ListBuffer[Future[FacebookArtist]] = ListBuffer()
-        seqArtist.flatMap { artist: FacebookArtist =>
-          findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(artist), artist.id).map { optiobalEchonestId =>
-            //println(optiobalEchonestId)
-            optiobalEchonestId match {
-              case None =>
-              case Some(echonestId) => findEchonestSongs(echonestId)
-            }
-          }
-          seqArtistWMoreSCTracks += findSoundCloudTracksNotDefinedInFb(artist)
+        val seqArtistWMoreSCTracks = seqArtist.map { artist: FacebookArtist =>
+          findSoundCloudTracksNotDefinedInFb(artist)
         }
-        val futureSeqArtistWMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqArtistWMoreSCTracks)
-        futureSeqArtistWMoreSCTracks.map { seqArtistWMoreSCTracksFinished =>
 
+
+
+        //var seqArtistWYoutubeTracks: ListBuffer[Future[FacebookArtist]] = ListBuffer()
+        //seqArtistWYoutubeTracks += returnFutureArtistWYoutubeTracks(artistWMoreSCTracksFinished)
+       /* val futureSequenceArtistWithMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqArtistWMoreSCTracks)
+
+        val sequenceArtistWithMoreSCTracks: Seq[FacebookArtist] =
+          futureSequenceArtistWithMoreSCTracks.map { seqArtistWMoreSCTracksFinished =>
+            seqArtistWMoreSCTracksFinished
+          }*/
+
+        /*
+        val test: Future[Seq[FacebookArtist]] = //Future.sequence(
+          futureSequenceArtistWithMoreSCTracks.map { seqArtistWMoreSCTracksFinished =>
+            seqArtistWMoreSCTracksFinished.map { artistWMoreSCTracksFinished =>
+              returnFutureArtistWYoutubeTracks(artistWMoreSCTracksFinished)
+            }
+          }*/
+        //)
+
+        /*val futureSeqArtistWYoutubeTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqArtistWYoutubeTracks)
+
+        futureSeqArtistWYoutubeTracks.map { seqArtistWYoutubeTracksFinished =>
+
+          println(seqArtistWYoutubeTracksFinished)
+        }*/
+
+        Future.sequence(seqArtistWMoreSCTracks).map { seqArtistWMoreSCTracksFinished =>
           Ok(Json.toJson(seqArtistWMoreSCTracksFinished))
         }
       }
