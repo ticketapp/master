@@ -270,26 +270,31 @@ object Event {
     }
   }
 
-  def findAllInCircle(center: String) = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL(s"""SELECT *
-          FROM events e
-          JOIN eventsAddresses eA on e.eventId = eA.eventId
-          JOIN addresses a ON a.addressId = eA.eventId
-          WHERE a.isEvent = TRUE
-          ORDER BY a.geographicPoint <-> point '$center' LIMIT 50"""
-        ).as(EventParser.*)
-          .map(e => e.copy(
-            images = Image.findAllByEvent(e),
-            organizers = Organizer.findAllByEvent(e),
-            artists = Artist.findAllByEvent(e),
-            tariffs = Tariff.findAllByEvent(e),
-            addresses = Address.findAllByEvent(e))
-          )
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Problem with the method Event.findAllInCircle: " + e.getMessage)
+  def findAllInCircle(center: String): List[Event] = {
+    val pattern = """(\(\d+\.\d*,\d+\.\d*\))""".r
+    center match {
+      case pattern(_) => println("ok")
+        try {
+          DB.withConnection { implicit connection =>
+            SQL(s"""SELECT *
+            FROM events e
+            JOIN eventsAddresses eA on e.eventId = eA.eventId
+            JOIN addresses a ON a.addressId = eA.eventId
+            WHERE a.isEvent = TRUE
+            ORDER BY a.geographicPoint <-> point '$center' LIMIT 50"""
+            ).as(EventParser.*)
+              .map(e => e.copy(
+              images = Image.findAllByEvent(e),
+              organizers = Organizer.findAllByEvent(e),
+              artists = Artist.findAllByEvent(e),
+              tariffs = Tariff.findAllByEvent(e),
+              addresses = Address.findAllByEvent(e))
+              )
+          }
+        } catch {
+          case e: Exception => throw new DAOException("Problem with the method Event.findAllInCircle: " + e.getMessage)
+        }
+      case _ => List()
     }
   }
 }

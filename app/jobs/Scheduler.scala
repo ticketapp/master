@@ -38,11 +38,12 @@ object Scheduler {
     val address: Address = new Address(-1l, true, false, geographicPoint, city, zip, street) // + tester si
     //l'adresse est vide
 
-    val name = Json.stringify(eventJson \ "name").replaceAll("\"", "")
-    val facebookId = Some(Json.stringify(eventJson \ "id").replaceAll("\"", ""))
+
+    val name = eventJson.as[String]((__ \ "name").read[String])
+    val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
     //println(facebookId) 783881178345234
 
-    val startTimeString = Json.stringify(eventJson \ "start_time").replaceAll("\"", "").replace("T", " ")
+    val startTimeString = eventJson.as[String]((__ \ "start_time").read[String]).replace("T", " ")
     val startTime = startTimeString.length match {
       case i if i <= 10 => new java.text.SimpleDateFormat("yyyy-MM-dd").parse(startTimeString)
       case i if i <= 13 => new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(startTimeString)
@@ -59,16 +60,16 @@ object Scheduler {
       case _ => None
     }
 
-    val readOwnerName = Json.stringify(eventJson \ "owner" \ "name").replaceAll("\"", "")
-    val readOwnerId = Json.stringify(eventJson \ "owner" \ "id").replaceAll("\"", "")
+    val readOwnerName = eventJson.as[String]((__ \ "owner" \ "name").read[String])
+    val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
     val organizer = new Organizer(-1L, new Date, Some(readOwnerId), readOwnerName)
 
     var event: Event = new Event(-1L, facebookId, true, true, new Date, name, eventDescription, startTime, endTime, 16,
       List(), List(organizer), List(), List(), List(address))
 
-    imgPath.replaceAll("\"", "") match {
+    imgPath match {
       case "null" =>
-      case _ => event = event.copy( images = List(new Image(-1L, imgPath.replaceAll("\"", ""))))
+      case _ => event = event.copy( images = List(new Image(-1L, imgPath)))
       }
 
     Event.save(event) match {
@@ -79,13 +80,9 @@ object Scheduler {
     }
   }
 
-  def returnListOfIdsFromEvents(resp : Response): List[String] = {
-    var ids: List[String] = List()
-    val responseDataIds = resp.json \ "data" \\ "id"
-    for(j <- responseDataIds) {
-      ids = ids :+ Json.stringify(j).replaceAll("\"", "")
-    }
-    ids
+  def returnListOfIdsFromEvents(resp : Response): Seq[String] = {
+    val readSoundFacebookIds: Reads[Seq[String]] = Reads.seq((__ \ "id").read[String])
+    (resp.json \ "data").as[Seq[String]](readSoundFacebookIds)
   }
 
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
@@ -95,29 +92,6 @@ object Scheduler {
         WS.url("https://graph.facebook.com/v2.2/" + eventId +
           "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
           .get onComplete {
-          /*
-          val readName: Reads[String] = (__ \ "name").read[String]
-    val readCategory: Reads[String] = (__ \ "category").read[String]
-    val readId: Reads[String] = (__ \ "id").read[String]
-    val readCoverSource: Reads[String] = (__ \ "source").read[String]
-    val readOptionalCover: Reads[Option[String]] = (__ \ "cover").readNullable(readCoverSource)
-    val readWebsites: Reads[Option[String]] = (__ \ "website").readNullable
-    val readLink: Reads[String] = (__ \ "link").read[String]
-    val readAllArtist: Reads[(String, String, String, Option[String], Option[String], String)] =
-      readName.and(readId).and(readCategory).and(readOptionalCover).and(readWebsites).and(readLink)
-        .apply((name: String, id: String, category: String, maybeCover: Option[String], website: Option[String], link: String)
-      => (name, id, category, maybeCover, website, link))
-    val readArtistsArray: Reads[Seq[(String, String, String, Option[String], Option[String], String)]] = Reads.seq(readAllArtist)
-    val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, String, Option[String], String)]] = readArtistsArray.map {
-      pages =>
-        pages.collect{ case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link) }
-    }
-    val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
-      artists.map{ case (name, id, cover, websites, link) =>
-        FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites), link)
-      }
-    }
-           */
           case Success(eventDetailed) =>
             val description = eventDetailed.json.as[String]((__ \ "description").read[String])
             val imgPath = eventDetailed.json.as[String]((__ \ "cover" \ "source").read[String])

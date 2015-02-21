@@ -79,7 +79,6 @@ object Test2 extends Controller {
         FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites), link)
       }
     }
-
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
       + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get
       .map { response =>

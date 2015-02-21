@@ -40,7 +40,7 @@ GET     /places/containing/:pattern  controllers.PlaceController.findPlacesConta
 POST    /places/create              controllers.PlaceController.createPlace
 GET     /places/:placeId/events     controllers.EventController.eventsByPlace(placeId: Long)
 
-################################## Oragnizers ###############################################
+################################## Organizers ###############################################
 GET     /organizers                     controllers.OrganizerController.organizers
 GET     /organizers/:id                 controllers.OrganizerController.organizer(id: Long)
 POST    /organizers/:userId/:organizerId    controllers.OrganizerController.followOrganizer(userId: Long, organizerId: Long)
