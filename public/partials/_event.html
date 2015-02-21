@@ -6,10 +6,10 @@
         <a href="#/event/{{event.eventId}}"><h4 style="height: 2.8em;
 overflow: hidden;">{{ event.name }}</h4></a>
         Par
-        <a href="#/user/{{user.id}}" class="custom-trigger" data-ng-repeat="user in event.users"
+        <a href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
            data-tooltip-placement="bottom"
-           data-tooltip-html-unsafe="<div><img src='assets/img/2.jpg'/><a href='#/user/{{user.id}}'><h4>{{nickname}}</h4></a></div>"
-           data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover">{{ user.nickname }} </a>
+           data-tooltip-html-unsafe="<div><img src='assets/img/2.jpg'/><a href='#/user/{{organizer.organizerId}}'><h4>{{organizer.name}}</h4></a></div>"
+           data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover">{{ organizer.name }} </a>
 
         <br/>
         <div class="infos_event">

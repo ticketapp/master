@@ -301,7 +301,7 @@ top: 0;
             overflow-y: hidden;
             overflow-x: hidden;}
         .lecteur_controller{position:absolute; background-color:rgba(0, 0, 0, 0.7); display:none;}
-        .ng-control{height:20px; background-color: rgba(42, 105, 162, 0.15); display:none;}
+        .ng-control{height:20px;}
         .reduire{margin-left:10px; float: left; font-size: 35px; font-weight: bold; line-height: 15px; color: #000; text-shadow: 0 1px 0 #fff; opacity: .2; filter: alpha(opacity=20);}
         .restaurer{margin-left:10px; float: left; font-size: 20px; font-weight: bold; line-height: 20px; color: #000; text-shadow: 0 1px 0 #fff; opacity: .2; filter: alpha(opacity=20);}
         .lecteur_content{background-color:black;}

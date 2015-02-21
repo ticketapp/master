@@ -51,13 +51,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
     function imgHeight () {
         var waitForContentMin = setTimeout(function () {
             var content = document.getElementsByClassName('img_min_evnt');
-            console.log(content);
             if (content.length > 0) {
                 clearInterval(waitForContentMin);
                 var newHeight = content[0].clientWidth * 0.376 + 'px';
                 for (var i = 0; i < content.length; i++) {
                     content[i].style.height = newHeight;
-                    console.log(content[i].style.height);
                 }
             }
         }, 100)
@@ -166,7 +164,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                 function searchVideo (song, artist) {
                                     $http.get('https://www.googleapis.com/youtube/v3/search?part=snippet&q='+ song+artist +'&type=video&videoCategoryId=10&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
                                         success(function(data){
-                                            console.log(data);
                                             if (data.items.length != 0 && data.items[0].snippet.title.indexOf(artist) > -1) {
                                                 var newTrack = [];
                                                 newTrack.url = data.items[0].id.videoId;
@@ -190,13 +187,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                 $http.get('http://developer.echonest.com/api/v4/artist/search?api_key=3ZYZKU3H3MKR2M59Z&name=' + newArtist.name + '&format=json&bucket=urls&bucket=images&bucket=id:facebook').
                                     success(function (data) {
                                         var rep = data.response.artists;
-                                        console.log(rep)
                                         var find = false;
                                         for (echoart = 0; echoart < rep.length; echoart++) {
                                             if (rep[echoart].foreign_ids != undefined) {
                                                 var id_fb = rep[echoart].foreign_ids[0].foreign_id.replace("facebook:artist:", "");
-                                                console.log(id_fb);
-                                                console.log(newArtist.artistId)
                                                 if (id_fb == newArtist.artistId) {
                                                     var echoname = rep[echoart].name;
                                                     var images = rep[echoart].images;
@@ -218,14 +212,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                         if (find == false) {
                                             $http.get('http://developer.echonest.com/api/v4/artist/search?api_key=3ZYZKU3H3MKR2M59Z&name=' + _research + '&format=json&bucket=urls&bucket=images&bucket=id:facebook').
                                                 success(function (data) {
-                                                    console.log(newArtist)
                                                     var rep = data.response.artists;
-                                                    console.log(rep);
                                                     for (echoart = 0; echoart < rep.length; echoart++) {
                                                         if (rep[echoart].foreign_ids != undefined) {
                                                             var id_fb = rep[echoart].foreign_ids[0].foreign_id.replace("facebook:artist:", "");
-                                                            console.log(id_fb);
-                                                            console.log(newArtist.artistId)
                                                             if (id_fb == newArtist.artistId) {
                                                                 var echoname = rep[echoart].name;
                                                                 var images = rep[echoart].images;
@@ -260,7 +250,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
 
                             function updateArtistFb (el, index, array) {
                                 if (el.category == 'Musician/band' && el.cover != undefined) {
-                                    console.log(el)
                                     var newArtist =[];
                                     newArtist.artistId = el.id;
                                     newArtist.name = el.name;
@@ -284,7 +273,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                             for (var urls=0; urls < soundcloudUrl.length; urls++) {
                                                 if (soundcloudUrl[urls].indexOf('soundcloud') > -1) {
                                                     var soundcloudNameMatched = soundcloudUrl[urls].substring(soundcloudUrl[urls].indexOf(".com/") + 5);
-                                                    console.log(soundcloudUrl[urls]);
                                                     $http.get('http://api.soundcloud.com/users/' + soundcloudNameMatched + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
                                                         success(function (data, status, headers, config) {
                                                             function addTrack(track) {
@@ -308,7 +296,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                                                     $http.get('http://api.soundcloud.com/users/' + newArtist.soundcloud.id + '/tracks?client_id=f297807e1780623645f8f858637d4abb').
                                                         success(function (data, status, headers, config) {
                                                             function addTrack(track) {
-                                                                console.log(track)
                                                                 var newTrack = [];
                                                                 newTrack.url = track.stream_url;
                                                                 newTrack.name = track.title;
@@ -430,13 +417,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                 $scope.events.forEach(getEventsId);
                 $http.get('/events/containing/' + _research).
                     success(function (data, status, headers, config) {
-                        console.log(data);
                         if ($scope.events.length == 0) {
                             $scope.events = data;
                         } else {
                             function uploadEvents(el, index, array) {
                                 if (scopeIdList.indexOf(el.eventId) == -1) {
                                     $scope.events.push(el);
+                                    console.log(el)
                                 }
                             }
                             data.forEach(uploadEvents);
@@ -452,7 +439,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
     }
     search();
     $scope.createArtist = function (artist) {
-        console.log(artist)
         $http.post('artists/createArtist', {artistName : artist.name, facebookId: artist.id}).
             success(function(data, status, headers, config) {
                 window.location.href =('#/artiste/' + data);
