@@ -36,6 +36,7 @@ app.directive('ngSearch', function(){
                     } else {
                         // relative
                         $(element).find('#searchBlock').removeClass("ng-hide");
+                        $(element).find('#searchBlock').find('input').focus();
                         $(document).find('#searchTopBlock').addClass("ng-hide");
                         flag = false;
                     }

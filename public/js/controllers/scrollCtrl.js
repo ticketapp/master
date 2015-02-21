@@ -7,8 +7,8 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 }, function erreurPosition(error) {
                 }
             );
-        } else {
-        }
+        } /*else {
+        }*/
         $rootScope.window = 'large';
         function marginContent () {
             if ($rootScope.home == false) {
@@ -16,7 +16,8 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     var content = document.getElementsByClassName('parallax-content');
                     if (content.length > 0) {
                         clearInterval(waitForContentParallax);
-                        for (var i = 0; i < content.length; i++) {
+                        var contentLength = content.length;
+                        for (var i = 0; i < contentLength; i++) {
                             content[i].style.marginTop = window.innerWidth * 0.376 + 'px';
                         }
                     }
@@ -24,28 +25,28 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             }
         }
         function respClass () {
-                marginContent();
-                if (window.innerWidth > 0 && window.innerWidth <= 640) {
-                    $scope.$apply(function () {
-                        $rootScope.window = 'small';
-                    });
-                } else if (window.innerWidth > 640 && window.innerWidth <= 1024) {
-                    $scope.$apply(function () {
-                        $rootScope.window = 'medium';
-                    });
-                } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
-                    $scope.$apply(function () {
-                        $rootScope.window = 'large';
-                    });
-                } else if (window.innerWidth > 1440 && window.innerWidth <= 1920) {
-                    $scope.$apply(function () {
-                        $rootScope.window = 'xlarge';
-                    });
-                } else if (window.innerWidth > 1920) {
-                    $scope.$apply(function () {
-                        $rootScope.window = 'xxlarge';
-                    });
-                }
+            marginContent();
+            if (window.innerWidth > 0 && window.innerWidth <= 640) {
+                $scope.$apply(function () {
+                    $rootScope.window = 'small';
+                });
+            } else if (window.innerWidth > 640 && window.innerWidth <= 1024) {
+                $scope.$apply(function () {
+                    $rootScope.window = 'medium';
+                });
+            } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
+                $scope.$apply(function () {
+                    $rootScope.window = 'large';
+                });
+            } else if (window.innerWidth > 1440 && window.innerWidth <= 1920) {
+                $scope.$apply(function () {
+                    $rootScope.window = 'xlarge';
+                });
+            } else if (window.innerWidth > 1920) {
+                $scope.$apply(function () {
+                    $rootScope.window = 'xxlarge';
+                });
+            }
         }
         $timeout(function () {
             respClass ();
@@ -53,22 +54,19 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         window.onresize = respClass;
         angular.element(document).ready(marginContent());
         function fixControl () {
-            var controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
             var titlePos = document.getElementById('eventTitle').getBoundingClientRect();
-            if (controlPos.top <= 0) {
+            if (document.getElementById('wysiwygControl').getBoundingClientRect().top <= 0) {
                 document.getElementById('wysiwygControl').style.position = 'fixed';
                 document.getElementById('wysiwygControl').style.top = 0;
-            } if (titlePos.bottom >= 0){
+            }
+            if (titlePos.bottom >= 0) {
                 document.getElementById('wysiwygControl').style.position = 'relative';
-                controlPos = document.getElementById('wysiwygControl').getBoundingClientRect();
             }
         }
         $scope.gotoTop = '';
         function location() {
             marginContent();
-            $timeout(function(){
-                /*$location.hash('top');
-                $anchorScroll();*/
+            $timeout(function() {
                 window.scrollTo(0, 0);
             }, 200);
             if ($location.path() == '/') {
@@ -121,21 +119,19 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 $rootScope.pathPlace = false;
                 $rootScope.pathSearch = false;
             }
-            if ($location.path().indexOf('/createEvent') > -1){
+            if ($location.path().indexOf('/createEvent') > -1) {
                 window.addEventListener('scroll', fixControl)
             } else {
                 window.removeEventListener('scroll', fixControl)
             }
         }
-        $scope.$on('$locationChangeSuccess', function(){
+        $scope.$on('$locationChangeSuccess', function() {
             location()
         });
         $rootScope.activArtist = false;
         $rootScope.activEvent = true;
         $rootScope.activPlace = false;
         $rootScope.activUsr = false;
-
-        }
-
+    }
 ]);
 

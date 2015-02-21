@@ -32,16 +32,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('youtubePlayer').classList.remove('ng-hide');
             document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist[i].url);
-            var player = new YT.Player('youtubePlayer', {
-                height: '190',
-                width: '220',
-                videoId: $rootScope.playlist[i].url,
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-            // autoplay video
             function onPlayerReady(event) {
                 event.target.playVideo();
             }
@@ -53,6 +43,16 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     $scope.play(i);
                 }
             }
+            var player = new YT.Player('youtubePlayer', {
+                height: '190',
+                width: '220',
+                videoId: $rootScope.playlist[i].url,
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+
         }
         if (i > 0) {
             function goToTrackActive () {
