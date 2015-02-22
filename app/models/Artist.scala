@@ -79,24 +79,6 @@ object Artist {
     }
   }
 
-  def findFacebookArtistsContaining(pattern: String) = {//: Seq[Artist] = {
-    WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
-      + "&limit=400&type=page&fields=name,cover,id,category,likes,link,website&access_token=" + token).get onComplete {
-      case Success(pages) => Seq(new Artist(-1L, new Date(), Some(""), "", Some(""), List(), List(), List()))
-      case Failure(f) => throw new WebServiceException("Cannot make the facebook call (findFacebookArtistsContaining): "
-        + f.getMessage)
-    }
-    /*WS.url("https://graph.facebook.com/v2.2/" + artist.facebookId + token).get onComplete {
-  case Success(artistFound) => val category = Json.stringify(artistFound.json \ "category")
-    val categoryList = Json.stringify(artistFound.json \ "category_list")
-    println(category)
-    println(categoryList)
-
-  case Failure(f) => throw new WebServiceException("Cannot make the facebook call: " + f.getMessage)
-  }*/
-    //3eme arg : facebookId needed
-  }
-
   def save(artist: Artist): Option[Long] = {
     Utilities.testIfExist("artists", "name", artist.name) match {
       case true => Some(-1)
