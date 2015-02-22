@@ -32,13 +32,13 @@ object TicketController extends Controller {
 
   def buyTicket = Action {
     val orderId = Order.save(10)
-    AccountingCtrlr.createBankLine(10, true, null, orderId)
-    AccountingCtrlr.createAccount63Line("TVA", 10, orderId) match {
+    AccountingController.createBankLine(10, true, null, orderId)
+    AccountingController.createAccount63Line("TVA", 10, orderId) match {
       case None =>
-      case Some(account63Id) => AccountingCtrlr.createAccount4686Line(false, 10, account63Id)
+      case Some(account63Id) => AccountingController.createAccount4686Line(false, 10, account63Id)
     }
-    AccountingCtrlr.createAccount627LineAndBankLine("Pourcentage Banque", 10, orderId)
-    AccountingCtrlr.createAccount60LineAndAccount403Line("Pourcentage Orga", 10, orderId)
+    AccountingController.createAccount627LineAndBankLine("Pourcentage Banque", 10, orderId)
+    AccountingController.createAccount60LineAndAccount403Line("Pourcentage Orga", 10, orderId)
     Redirect(routes.Admin.indexAdmin())
   }
 }

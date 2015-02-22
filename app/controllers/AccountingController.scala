@@ -8,7 +8,7 @@ import play.api.libs.json.{JsArray, Json}
 import play.api.mvc._
 import play.api.Play.current
 
-object AccountingCtrlr extends Controller {
+object AccountingController extends Controller {
   def createBankLine(amount: BigDecimal, debit: Boolean, paymentReference: Option[Int], orderId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>

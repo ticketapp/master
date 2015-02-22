@@ -8,6 +8,7 @@ import play.api.libs.ws.WS
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
+import scala.annotation.tailrec
 import scala.concurrent.Future
 import services.Utilities.normalizeString
 import play.api.libs.functional.syntax._
@@ -114,6 +115,34 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
+  def findSoundCloudUserImageIfNoTrackImage(soundCloudLink: String, soundCloudTracks: List[SoundCloudTrack]):
+  Future[List[SoundCloudTrack]] = {
+    @tailrec
+    def isThereASoundCloudTrackWithoutImage(soundCloudTracks: List[SoundCloudTrack]): Boolean = {
+      soundCloudTracks match {
+        case x :: tail if x.artwork_url == None => true
+        case Nil => false
+        case x :: tail  => isThereASoundCloudTrackWithoutImage(tail)
+      }
+    }
+    if (isThereASoundCloudTrackWithoutImage(soundCloudTracks)) {
+      val readUrl: Reads[String] = (__ \ "avatar_url").read[String]
+      WS.url("http://api.soundcloud.com/users/" + normalizeString(soundCloudLink) + "?client_id=" +
+        soundCloudClientId).get().map { user =>
+        user.json.asOpt[String](readUrl) match {
+          case None => soundCloudTracks
+          case Some(imgUrl) =>
+            soundCloudTracks.map { soundCloudTrack =>
+              if (soundCloudTrack.artwork_url == None) soundCloudTrack.copy(artwork_url = Some(imgUrl))
+              else soundCloudTrack
+            }
+        }
+      }
+    } else {
+      Future { soundCloudTracks }
+    }
+  }
+
   def findSoundCloudTracks(artist: FacebookArtist): Future[FacebookArtist] = {
     //rajouter une fonction qui va chercher l'image de l'user si pas d'image pour la track
     val readTracks: Reads[List[SoundCloudTrack]] = Reads.list(soundCloudTracksReads)
@@ -127,9 +156,13 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
     soundCloudLink match {
       case "" => Future { artist }
-      case scLink => WS.url("http://api.soundcloud.com/users/" + scLink + "/tracks?client_id=" + soundCloudClientId)
-        .get().map { soundCloudTracks =>
-        artist.copy(soundCloudTracks = soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks))
+      case scLink => WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
+        soundCloudClientId).get().flatMap { soundCloudTracks =>
+          findSoundCloudUserImageIfNoTrackImage(scLink, soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks)
+            .getOrElse(List()))
+            .map { soundCloudTracksWMoreImages: List[SoundCloudTrack] =>
+              artist.copy(soundCloudTracks = Some(soundCloudTracksWMoreImages))
+            }
       }
     }
   }

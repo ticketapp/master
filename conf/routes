@@ -59,18 +59,18 @@ GET     /users/containing/:pattern  controllers.UserController.findUsersContaini
 GET     /users/:userId/tools        controllers.UserController.findToolsById(userId: Long)
 
 ################################## Buy ticket ###########################################
-GET     /buyTicket                  controllers.TicketCtrlr.buyTicket
+GET     /buyTicket                  controllers.TicketController.buyTicket
 
 ################################## Accounting ###########################################
-GET     /orgaPayment                controllers.AccountingCtrlr.orgaPayment
-GET     /totalToPay                 controllers.AccountingCtrlr.totalToPay
-GET     /account708                 controllers.AccountingCtrlr.account708
-GET     /account413                 controllers.AccountingCtrlr.account413
-GET     /account60                  controllers.AccountingCtrlr.account60
-GET     /account63                  controllers.AccountingCtrlr.account63
-GET     /account627                 controllers.AccountingCtrlr.account627
-GET     /account623                 controllers.AccountingCtrlr.account623
-GET     /account626                 controllers.AccountingCtrlr.account626
+GET     /orgaPayment                controllers.AccountingController.orgaPayment
+GET     /totalToPay                 controllers.AccountingController.totalToPay
+GET     /account708                 controllers.AccountingController.account708
+GET     /account413                 controllers.AccountingController.account413
+GET     /account60                  controllers.AccountingController.account60
+GET     /account63                  controllers.AccountingController.account63
+GET     /account627                 controllers.AccountingController.account627
+GET     /account623                 controllers.AccountingController.account623
+GET     /account626                 controllers.AccountingController.account626
 
 ################################## Upload #################################################
 POST    /upload                     controllers.Admin.upload
