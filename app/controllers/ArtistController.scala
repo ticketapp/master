@@ -144,7 +144,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   }
 
   def findSoundCloudTracks(artist: FacebookArtist): Future[FacebookArtist] = {
-    //rajouter une fonction qui va chercher l'image de l'user si pas d'image pour la track
     val readTracks: Reads[List[SoundCloudTrack]] = Reads.list(soundCloudTracksReads)
     var soundCloudLink: String = ""
     for (site <- artist.websites) {
@@ -188,7 +187,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
   def compareArtistWebsitesWSCWebsitesAndAddTracks(artist: FacebookArtist, websitesAndIds: Seq[(Long, Seq[String])])
   :Future[FacebookArtist] = {
-    //refaire une fonction soundcloudtracks search parce que redondance là
     val readTracks: Reads[List[SoundCloudTrack]] = Reads.list(soundCloudTracksReads)
     var matchedId: Long = 0
     for (websitesAndId <- websitesAndIds) {
@@ -207,7 +205,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       Future{ artist }
     }
   }
-
 
   def findSoundCloudTracksNotDefinedInFb(artist: FacebookArtist): Future[FacebookArtist] = {
     artist.soundCloudTracks match {
@@ -229,10 +226,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-
-  def findEchonestArtistIds(artist: FacebookArtist): Future[List[(String, String)]] = { //=> (ARDDJUP12B3B35514F, List("facebook:artist:174132699276436"))
+  def findEchonestArtistIds(artistName: String): Future[List[(String, String)]] = { //=> (ARDDJUP12B3B35514F, List("facebook:artist:174132699276436"))
     WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
-      normalizeString(artist.name) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
+      normalizeString(artistName) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
       .map { artists =>
       val artistsJson = artists.json \ "response" \ "artists"
       val facebookIds = artistsJson.asOpt[Seq[Option[String]]](Reads.seq((__ \\ "foreign_id").readNullable))
@@ -253,14 +249,13 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
   def findEchonestIdCorrespondingToFacebookId(futureListIndexEchonestIdAndFacebookId: Future[List[(String, String)]],
                                               artistId: String): Future[Option[String]] = {
-
     futureListIndexEchonestIdAndFacebookId.map { listIndexEchonestIdAndFacebookId =>
       var toBeReturned: Option[String] = None
       for (tuple <- listIndexEchonestIdAndFacebookId) {
-        if (tuple._2.replaceAll("\"", "") == artistId)
+        if (tuple._2.dropRight(1).substring(1) == artistId) //remove "
           toBeReturned = Some(tuple._1)
       }
-      toBeReturned
+      toBeReturned //si toBeReturned is empty => onre fait pareil avec la liste des ids de la recherche avec pattern au lieu de artist.name
     }
   }
 
@@ -292,14 +287,21 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def returnFutureArtistWYoutubeTracks(artist: FacebookArtist): Future[FacebookArtist] = {
-    findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(artist), artist.id).flatMap {
-      case None => Future { artist }
-      case Some(echonestId) => findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Seq[String] =>
-        findYoutubeVideos(echonestSongsTitle, artist.name).map{ youtubeTracks =>
-          artist.copy(youtubeTracks = youtubeTracks)
-        }
+  def futureArtistWYoutubeTracksByEchonestId(artist: FacebookArtist, echonestId: String): Future[FacebookArtist] = {
+    findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Seq[String] =>
+      findYoutubeVideos(echonestSongsTitle, artist.name).map{ youtubeTracks =>
+        artist.copy(youtubeTracks = youtubeTracks)
       }
+    }
+  }
+
+  def returnFutureArtistWYoutubeTracks(artist: FacebookArtist, pattern: String): Future[FacebookArtist] = {
+    findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(artist.name), artist.id).flatMap {
+      case None => findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(pattern), artist.id).flatMap {
+        case Some(echonestId) => futureArtistWYoutubeTracksByEchonestId(artist, echonestId)
+        case None => Future { artist }
+      }
+      case Some(echonestId) => futureArtistWYoutubeTracksByEchonestId(artist, echonestId)
     }
   }
 
@@ -315,11 +317,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
         futureSeqArtistWMoreSCTracks.map { seqArtist =>
           seqArtist.map { artist: FacebookArtist =>
-            returnFutureArtistWYoutubeTracks(artist)
+            returnFutureArtistWYoutubeTracks(artist, pattern)
           }
-        }.flatMap { seqOfFuture =>
-          val futureOfSeq: Future[Seq[FacebookArtist]] = Future.sequence(seqOfFuture)
-          futureOfSeq.map { seq =>
+        }.flatMap { seqOfFuture: Seq[Future[FacebookArtist]] =>
+          Future.sequence(seqOfFuture).map { seq =>
             Ok(Json.toJson(seq))
           }
         }
