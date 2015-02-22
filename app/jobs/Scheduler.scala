@@ -14,14 +14,13 @@ object Scheduler {
   val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
   def formatEventDescription(eventDescription: String): String = {
-    "<div class='columns large-12'>" + linkPattern.replaceAllIn(eventDescription
-      .replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>").replaceAll("""\\n""", " <br/>")
-      .replaceAll("""\\t""", "    "), m => "<a href='http://" + m + "'>" + m + "</a>")
-        .replaceAll("""\\n\\n""", " <br/><br/></div><div class='column large-12'>").replaceAll("""\\n""", " <br/>")
-        .replaceAll("""\\t""", "    ").replaceAll("""</a>/""", "</a> ").substring(1).dropRight(1) + "</div>"
+    linkPattern.replaceAllIn(eventDescription, m => "<a href='http://" + m + "'>" + m + "</a>")
+      .replaceAll("""\n\n""", "<br/><br/></div><div class='column large-12'>")
+      .replaceAll("""\n""", "<br/>")
+      .replaceAll("""\t""", "    ").replaceAll("""</a>/""", "</a> ") + "</div>"
   }
 
-  //def getOrganizerImage(org)
+  //def getOrganizerInfos(org)
 
   def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
@@ -62,6 +61,7 @@ object Scheduler {
       case _ => None
     }
 
+    //println(eventJson \ "owner")
     val readOwnerName = eventJson.as[String]((__ \ "owner" \ "name").read[String])
     val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
     val organizer = new Organizer(-1L, new Date, Some(readOwnerId), readOwnerName)
@@ -77,7 +77,7 @@ object Scheduler {
     Event.save(event) match {
       case None => Event.update(event) //delete old imgs and insert news
       case Some(eventId) =>
-        println(eventId + event.images.toString())
+        //println(eventId + event.images.toString())
         Address.saveAddressAndEventRelation(address, eventId)
         Place.saveEventPlaceRelation(eventId, placeId)
     }

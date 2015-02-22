@@ -313,7 +313,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
         val seqFutureArtistWMoreSCTracks: Seq[Future[FacebookArtist]] = seqArtist.map { artist: FacebookArtist =>
           findSoundCloudTracksNotDefinedInFb(artist).map { a: FacebookArtist =>
-            println(a)
+            println("#############################\n" + a.name + "\n" + a.soundCloudTracks.toString() + "\n#############################")
           }
           findSoundCloudTracksNotDefinedInFb(artist)
         }
