@@ -32,7 +32,7 @@ object User {
 
   def findAll(): Seq[User] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from users").as(UserParser *)
+      SQL("select * from users").as(UserParser.*)
     }
   }
 
@@ -42,7 +42,7 @@ object User {
              FROM eventsUsers eU
              INNER JOIN users s ON s.userId = eU.userId where eU.eventId = {eventId}""")
         .on('eventId -> event.eventId)
-        .as(UserParser *)
+        .as(UserParser.*)
     }
   }
 
@@ -50,8 +50,8 @@ object User {
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM users WHERE LOWER(nickname) LIKE '%'||{patternLowCase}||'%' LIMIT 3")
-          .on('patternLowCase -> pattern.toLowerCase())
-          .as(UserParser *)
+          .on('patternLowCase -> pattern.toLowerCase)
+          .as(UserParser.*)
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method User.findAllContaining: " + e.getMessage)
@@ -73,7 +73,7 @@ object User {
     Some((user.email, user.nickname, user.password, user.profile))
 
 
-  def saveUser(user: User) = {
+  def saveUser(user: User): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL(
@@ -84,7 +84,7 @@ object User {
             'nickname -> user.nickname,
             'password -> user.password,
             'profile -> user.profile
-        ).executeInsert().get
+        ).executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save user: " + e.getMessage)

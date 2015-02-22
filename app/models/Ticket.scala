@@ -25,7 +25,6 @@ case class Ticket (ticketId: Long,
 object Ticket {
   implicit val ticketWrites = Json.writes[Ticket]
 
-
   private val TicketParser: RowParser[Ticket] = {
     get[Long]("ticketId") ~
       get[Boolean]("isValid") ~

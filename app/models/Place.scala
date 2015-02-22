@@ -88,6 +88,16 @@ object Place {
     }
   }
 
+  def findAllByEvent(event: Event): List[Place] = {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT *
+             FROM eventsPlaces eA
+             INNER JOIN places a ON a.placeId = eA.placeId where eA.eventId = {eventId}""")
+        .on('eventId -> event.eventId)
+        .as(PlaceParser.*)
+    }
+  }
+
   def findAllIdsAndFacebookIds = {
     Try(
       DB.withConnection { implicit connection =>

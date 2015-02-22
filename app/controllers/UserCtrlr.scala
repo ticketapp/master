@@ -7,7 +7,7 @@ import play.api.Play.current
 import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
-import models.User
+import models.{Tool, User}
 //import java.util.Date
 
 object UserController extends Controller {
@@ -21,6 +21,26 @@ object UserController extends Controller {
 
   def findUsersContaining(pattern: String) = Action {
     Ok(Json.toJson(User.findAllContaining(pattern)))
+  }
+
+  def findToolsById(userId: Long) = Action {
+    Ok(Json.toJson(Tool.findByUserId(userId)))
+  }
+
+  val toolsBindingForm = Form(mapping(
+    "tools" -> nonEmptyText(2),
+    "userId" -> longNumber()
+  )(Tool.formApply)(Tool.formUnapply)
+  )
+
+  def createTools = Action { implicit request =>
+    userBindingForm.bindFromRequest().fold(
+      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
+      user => {
+        User.saveUser(user)
+        Redirect(routes.UserController.user(1))
+      }
+    )
   }
 
   val userBindingForm = Form(mapping(

@@ -177,6 +177,12 @@ CREATE TABLE tickets (
 ---  tariffId                 BIGINT REFERENCES tariffs(tariffId)
 ---);
 
+CREATE TABLE usersTools (
+  tools                     VARCHAR(255) NOT NULL,
+  userId                    BIGINT REFERENCES users(userId),
+  PRIMARY KEY (userId)
+);
+INSERT INTO usersTools (tools, userId) VALUES ('tool1, tool2, tool3', 1);
 
 ---############################## ACCOUNTING ###################################
 
@@ -411,6 +417,7 @@ DROP TABLE IF EXISTS eventsFollowed;
 DROP TABLE IF EXISTS artistsFollowed;
 DROP TABLE IF EXISTS placesFollowed;
 DROP TABLE IF EXISTS usersFollowed;
+DROP TABLE IF EXISTS usersTools;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
@@ -427,6 +434,7 @@ DROP TABLE IF EXISTS account623;
 DROP TABLE IF EXISTS account4686;
 DROP TABLE IF EXISTS account63;
 DROP TABLE IF EXISTS account708;
+DROP TABLE IF EXISTS usersTools;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS bills;
 DROP TABLE IF EXISTS comments;

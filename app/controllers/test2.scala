@@ -84,7 +84,6 @@ object Test2 extends Controller {
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
       + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get
       .map { response =>
-      //println(response.json \ "data")
       (response.json \ "data").as[Seq[FacebookArtist]](readArtists)
     }
   }
@@ -143,8 +142,6 @@ object Test2 extends Controller {
     if (matchedId != 0) {
       WS.url("http://api.soundcloud.com/users/" + matchedId + "/tracks?client_id=" + soundCloudClientId)
         .get().map { soundCloudTracks =>
-        //println(matchedId)
-        //println(soundCloudTracks.json.as[List[SoundCloudTrack]](readTracks))
         artist.copy(soundCloudTracks = soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks))
       }
     } else {
@@ -178,9 +175,7 @@ object Test2 extends Controller {
     WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
       normalizeString(artist.name) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
       .map { artists =>
-        //println("(findEchonestArtistIds) echonest return: " + artists.json)
         val artistsJson = artists.json \ "response" \ "artists"
-      println(artistsJson)
         val facebookIds = artistsJson.asOpt[Seq[Option[String]]](Reads.seq((__ \\ "foreign_id").readNullable))
         var listIndexFacebookIds: List[Int] = List()
         for ((maybeFbId, index) <- facebookIds.getOrElse(List()).view.zipWithIndex) {
@@ -214,7 +209,6 @@ object Test2 extends Controller {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     WS.url("http://developer.echonest.com/api/v4/artist/songs?api_key=" + echonestApiKey + "&id=" + echonestId +
       "&format=json&results=50").get().map { songs =>
-      println(songs.json)
         (songs.json \ "response" \ "songs").as[List[Option[String]]](Reads.list(titleReads)).flatten.distinct
     }
   }
@@ -231,11 +225,6 @@ object Test2 extends Controller {
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
           normalizeString(trackTitle) + normalizeString(artistName) +
           "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
-          /*println("\n######################")
-          println(trackTitle)
-          println(video.json \ "items")
-          println((video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)))
-          println("######################\n")*/
           (video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads))
         }
       }
@@ -249,7 +238,6 @@ object Test2 extends Controller {
       case None => Future { artist }
       case Some(echonestId) => findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Seq[String] =>
         findYoutubeVideos(echonestSongsTitle, artist.name).map{ youtubeTracks =>
-          //println(artist.copy(youtubeTracks = youtubeTracks))
           artist.copy(youtubeTracks = youtubeTracks)
         }
       }

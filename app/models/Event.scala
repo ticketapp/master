@@ -22,7 +22,8 @@ case class Event(eventId: Long,
                  organizers: List[Organizer],
                  artists: List[Artist],
                  tariffs: List[Tariff],
-                 addresses: List[Address])
+                 addresses: List[Address],
+                 places: List[Place] = List())
 
 
 object Event {
@@ -66,6 +67,7 @@ object Event {
           organizers = Organizer.findAllByEvent(e),
           artists = Artist.findAllByEvent(e),
           tariffs = Tariff.findAllByEvent(e),
+          places = Place.findAllByEvent(e),
           addresses = Address.findAllByEvent(e))
         )
     }
@@ -89,6 +91,7 @@ object Event {
           organizers = Organizer.findAllByEvent(e),
           artists = Artist.findAllByEvent(e),
           tariffs = Tariff.findAllByEvent(e),
+          places = Place.findAllByEvent(e),
           addresses = Address.findAllByEvent(e))
         )
     }
@@ -106,13 +109,14 @@ object Event {
         ORDER BY s.creationDateTime DESC
         LIMIT 20"""
       ).on('placeId -> placeId)
-      .as(EventParser.*)
-      .map(e => e.copy(
-        images = Image.findAllByEvent(e),
-        organizers = Organizer.findAllByEvent(e),
-        artists = Artist.findAllByEvent(e),
-        tariffs = Tariff.findAllByEvent(e),
-        addresses = Address.findAllByEvent(e))
+        .as(EventParser.*)
+        .map(e => e.copy(
+          images = Image.findAllByEvent(e),
+          organizers = Organizer.findAllByEvent(e),
+          artists = Artist.findAllByEvent(e),
+          tariffs = Tariff.findAllByEvent(e),
+          places = Place.findAllByEvent(e),
+          addresses = Address.findAllByEvent(e))
         )
     }
   }
@@ -135,6 +139,7 @@ object Event {
           organizers = Organizer.findAllByEvent(e),
           artists = Artist.findAllByEvent(e),
           tariffs = Tariff.findAllByEvent(e),
+          places = Place.findAllByEvent(e),
           addresses = Address.findAllByEvent(e))
         )
     }
@@ -175,6 +180,7 @@ object Event {
             organizers = Organizer.findAllByEvent(e),
             artists = Artist.findAllByEvent(e),
             tariffs = Tariff.findAllByEvent(e),
+            places = Place.findAllByEvent(e),
             addresses = Address.findAllByEvent(e))
           )
       }

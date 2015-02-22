@@ -49,12 +49,14 @@ POST    /organizers/create              controllers.OrganizerController.createOr
 GET     /organizers/:organizerId/events     controllers.EventController.eventsByOrganizer(organizerId: Long)
 
 ################################## Infos ################################################
-GET    /infos                       controllers.Application.infos
+GET     /infos                      controllers.Application.infos
+
 
 ################################## Users ################################################
 GET     /users                      controllers.UserController.users
 GET     /users/:id                  controllers.UserController.user(id: Long)
 GET     /users/containing/:pattern  controllers.UserController.findUsersContaining(pattern: String)
+GET     /users/:userId/tools        controllers.UserController.findToolsById(userId: Long)
 
 ################################## Buy ticket ###########################################
 GET     /buyTicket                  controllers.TicketCtrlr.buyTicket
