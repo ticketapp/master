@@ -1,7 +1,6 @@
 package controllers
 
-import controllers.EventController._
-import models.{Artist, Place}
+import models.Place
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db._
@@ -9,9 +8,7 @@ import play.api.Play.current
 import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
-
-import scala.util.{Failure, Success}
-
+import json.JsonHelper.placeWrites
 
 object PlaceController extends Controller {
   def places = Action {

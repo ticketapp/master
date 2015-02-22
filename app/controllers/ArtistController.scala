@@ -1,37 +1,61 @@
 package controllers
 
-import java.io.{IOException, FileNotFoundException}
-import java.util.Date
-import play.api.data._
+import json.JsonHelper._
+import models.Artist
+import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.ws.WS
-import play.api.libs.ws.Response
 import play.api.mvc._
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
-import models.{Place, Event}
-import scala.io.Source
-import play.api.mvc.Results._
-import scala.util.{Failure, Success, Try}
-import play.api.libs.functional.syntax._
-import json.JsonHelper._
+import scala.concurrent.Future
 import services.Utilities.normalizeString
+import play.api.libs.functional.syntax._
 
-/*
-follower counts SC
-écrire une fonction qui supprime les http https et les / (takeRight et dropRight) à la fin pour éviter redondance et pour plus de clarté
-rajouter des try catch pour les calls?
-sanitize url?? ask SO?
-sctracks optionList to list ?
-parallelize soundcloud/echonest+youtube
+object ArtistController extends Controller with securesocial.core.SecureSocial {
+  def artists = Action {
+    Ok(Json.toJson(Artist.findAll()))
+  }
 
-donner les fb ids dans la requête pour limiter les requêtes?
- */
+  def artist(artistId: Long) = Action {
+    Ok(Json.toJson(Artist.find(artistId)))
+  }
 
-object Test2 extends Controller {
- /* val token = play.Play.application.configuration.getString("facebook.token")
+  def findArtistsContaining(pattern: String) = Action {
+    Ok(Json.toJson(Artist.findAllContaining(pattern)))
+  }
+
+
+  val artistBindingForm = Form( mapping(
+      "facebookId" -> optional(nonEmptyText(2)),
+      "artistName" -> nonEmptyText(2)
+    )(Artist.formApply)(Artist.formUnapply)
+  )
+
+  def createArtist = Action { implicit request =>
+    try {
+      artistBindingForm.bindFromRequest().fold(
+        formWithErrors => BadRequest(formWithErrors.errorsAsJson),
+        artist => {
+          Ok(Json.toJson(Artist.save(artist)))
+        }
+      )
+    } catch {
+      case e: Exception => InternalServerError(e.getMessage)
+    }
+  }
+
+  def deleteArtist(artistId: Long) = Action {
+    Artist.deleteArtist(artistId)
+    Redirect(routes.Admin.indexAdmin())
+  }
+
+  def followArtist(userId : Long, artistId : Long) = Action {
+    Artist.followArtist(userId, artistId)
+    Redirect(routes.Admin.indexAdmin())
+  }
+
+  val token = play.Play.application.configuration.getString("facebook.token")
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
@@ -53,7 +77,7 @@ object Test2 extends Controller {
         for (website <- websitesFound.split(" ").toList) {
           listOfWebSitesToReturn = listOfWebSitesToReturn :::
             """(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => " ").replace("www.", "").split(" ").toList
-              .filter(_ != "")//.replace()
+              .filter(_ != "")
         }
         listOfWebSitesToReturn
     }
@@ -74,17 +98,17 @@ object Test2 extends Controller {
     val readArtistsArray = Reads.seq(readAllArtist)
     val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, String, Option[String], String)]] = readArtistsArray
       .map { pages =>
-        pages.collect {
-          case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link)
-        }
+      pages.collect {
+        case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link)
       }
+    }
     val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
       artists.map{ case (name, id, cover, websites, link) =>
         FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites), link)
       }
     }
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
-      + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get
+      + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get()
       .map { response =>
       (response.json \ "data").as[Seq[FacebookArtist]](readArtists)
     }
@@ -114,7 +138,7 @@ object Test2 extends Controller {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     WS.url("http://api.soundcloud.com/users?q=" + normalizeString(namePattern) + "&client_id=" + soundCloudClientId)
       .get().map { users =>
-        users.json.as[Seq[Long]](readSoundCloudIds)
+      users.json.as[Seq[Long]](readSoundCloudIds)
     }
   }
 
@@ -122,7 +146,7 @@ object Test2 extends Controller {
     val readUrls: Reads[Seq[Option[String]]] = Reads.seq((__ \ "url").readNullable)
     Future.sequence(
       listIds.map { id =>
-        WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles?client_id=" + soundCloudClientId).get.map {
+        WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles?client_id=" + soundCloudClientId).get().map {
           websites => (id, websites.json.as[Seq[Option[String]]](readUrls).flatten)
         }
       }
@@ -177,15 +201,15 @@ object Test2 extends Controller {
     WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
       normalizeString(artist.name) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
       .map { artists =>
-        val artistsJson = artists.json \ "response" \ "artists"
-        val facebookIds = artistsJson.asOpt[Seq[Option[String]]](Reads.seq((__ \\ "foreign_id").readNullable))
-        var listIndexFacebookIds: List[Int] = List()
-        for ((maybeFbId, index) <- facebookIds.getOrElse(List()).view.zipWithIndex) {
-          maybeFbId match {
-            case Some(id) => listIndexFacebookIds = index +: listIndexFacebookIds
-            case None =>
-          }
+      val artistsJson = artists.json \ "response" \ "artists"
+      val facebookIds = artistsJson.asOpt[Seq[Option[String]]](Reads.seq((__ \\ "foreign_id").readNullable))
+      var listIndexFacebookIds: List[Int] = List()
+      for ((maybeFbId, index) <- facebookIds.getOrElse(List()).view.zipWithIndex) {
+        maybeFbId match {
+          case Some(id) => listIndexFacebookIds = index +: listIndexFacebookIds
+          case None =>
         }
+      }
 
       listIndexFacebookIds.map { index: Int =>
         ((artistsJson(index) \ "id").as[String], (artistsJson(index) \\ "foreign_id")(0).toString()
@@ -195,7 +219,7 @@ object Test2 extends Controller {
   }
 
   def findEchonestIdCorrespondingToFacebookId(futureListIndexEchonestIdAndFacebookId: Future[List[(String, String)]],
-                                               artistId: String): Future[Option[String]] = {
+                                              artistId: String): Future[Option[String]] = {
 
     futureListIndexEchonestIdAndFacebookId.map { listIndexEchonestIdAndFacebookId =>
       var toBeReturned: Option[String] = None
@@ -211,7 +235,7 @@ object Test2 extends Controller {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     WS.url("http://developer.echonest.com/api/v4/artist/songs?api_key=" + echonestApiKey + "&id=" + echonestId +
       "&format=json&results=50").get().map { songs =>
-        (songs.json \ "response" \ "songs").as[List[Option[String]]](Reads.list(titleReads)).flatten.distinct
+      (songs.json \ "response" \ "songs").as[List[Option[String]]](Reads.list(titleReads)).flatten.distinct
     }
   }
 
@@ -246,7 +270,7 @@ object Test2 extends Controller {
     }
   }
 
-  def test2(pattern: String) = Action.async {
+  def findFacebookArtistsContaining(pattern: String) = Action.async {
     returnFutureArtistsWSoundCloudTracks(pattern).flatMap { seqFutureArtist: Seq[Future[FacebookArtist]] =>
       val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
@@ -268,10 +292,5 @@ object Test2 extends Controller {
         }
       }
     }
-  }*/
-
-  def test2 = Action {
-    Ok("Okay\n")
   }
 }
-

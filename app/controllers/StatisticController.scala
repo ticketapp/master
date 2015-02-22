@@ -8,6 +8,6 @@ import play.api.mvc._
 import models._
 import play.api.libs.json.Json
 
-object StatisticCtrlr extends Controller {
+object StatisticController extends Controller {
 
 }

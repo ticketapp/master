@@ -4,8 +4,9 @@ import anorm.SqlParser._
 import anorm._
 import controllers._
 import play.api.db.DB
-import play.api.libs.json.Json
 import play.api.Play.current
+import services.Utilities.geographicPointToString
+
 
 case class Address (addressId: Long,
                     isEvent: Boolean,
@@ -16,17 +17,6 @@ case class Address (addressId: Long,
                     street: Option[String])
 
 object Address {
-  implicit val addressWrites = Json.writes[Address]
-
-  implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case d: Any => Right(d.toString)
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass +
-        " to Float for column " + qualified) )
-    }
-  }
-
   private val AddressParser: RowParser[Address] = {
     get[Long]("addressId") ~
       get[Boolean]("isEvent") ~

@@ -6,7 +6,7 @@ import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
 import java.util.Date
-import services.Utilities
+import services.Utilities.{testIfExist, geographicPointToString}
 
 case class Event(eventId: Long,
                  facebookId: Option[String],
@@ -78,7 +78,7 @@ object Event {
 
   def findAll = {
     /*
-    change limit by variable
+    change limit by variable?
      */
     DB.withConnection { implicit connection =>
       SQL(
@@ -162,11 +162,12 @@ object Event {
             .on('patternLowCase -> pattern.toLowerCase)
             .as(EventParser.*)
             .map(e => e.copy(
-            images = Image.findAllByEvent(e),
-            organizers = Organizer.findAllByEvent(e),
-            artists = Artist.findAllByEvent(e),
-            tariffs = Tariff.findAllByEvent(e),
-            addresses = Address.findAllByEvent(e))
+              images = Image.findAllByEvent(e),
+              organizers = Organizer.findAllByEvent(e),
+              artists = Artist.findAllByEvent(e),
+              tariffs = Tariff.findAllByEvent(e),
+              places = Place.findAllByEvent(e),
+              addresses = Address.findAllByEvent(e))
             )
         }
       } catch {
@@ -202,47 +203,56 @@ object Event {
   }
 
   def save(event: Event): Option[Long] = {
-    Utilities.testIfExist("events", "facebookId", event.facebookId) match {
+    testIfExist("events", "facebookId", event.facebookId) match {
       case true => None
-      case false => try {
-        DB.withConnection {
-          implicit connection =>
-            SQL( """INSERT INTO
+      case false =>
+        val pattern = """(\(\d+\.\d*,\d+\.\d*\))""".r
+        val geographicPoint = event.geographicPoint.getOrElse("")
+        geographicPoint match {
+          case pattern(_) =>
+            try {
+              DB.withConnection {
+                implicit connection =>
+                  SQL( s"""INSERT INTO
                 events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description, startTime,
                 endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
-                {geographicPoint}, {description}, {startTime}, {endTime}, {ageRestriction}) """)
-              .on(
-                'facebookId -> event.facebookId,
-                'isPublic -> event.isPublic,
-                'isActive -> event.isActive,
-                'creationDateTime -> event.creationDateTime,
-                'name -> event.name,
-                'geographicPoint -> event.geographicPoint,
-                'description -> event.description,
-                'startTime -> event.startTime,
-                'endTime -> event.endTime,
-                'ageRestriction -> event.ageRestriction
-              ).executeInsert() match {
-                case None => None
-                case Some(eventId: Long) =>
-                  event.organizers.foreach(organizer =>
-                    Organizer.saveWithEventRelation(organizer, eventId)
-                  )
-                  event.tariffs.foreach(tariff =>
-                    Tariff.save(tariff.copy(eventId = eventId))
-                  )
-                  event.images.foreach(image =>
-                    Image.save(image.copy(eventId = Some(eventId)))
-                  )
-                  event.artists.foreach(artist =>
-                    Artist.saveWithEventRelation(artist, eventId)
-                  )
-                  Some(eventId)
+                point '$geographicPoint', {description}, {startTime}, {endTime}, {ageRestriction}) """)
+                    .on(
+                      'facebookId -> event.facebookId,
+                      'isPublic -> event.isPublic,
+                      'isActive -> event.isActive,
+                      'creationDateTime -> event.creationDateTime,
+                      'name -> event.name,
+                      'geographicPoint -> event.geographicPoint,
+                      'description -> event.description,
+                      'startTime -> event.startTime,
+                      'endTime -> event.endTime,
+                      'ageRestriction -> event.ageRestriction
+                    ).executeInsert() match {
+                    case None => None
+                    case Some(eventId: Long) =>
+                      event.organizers.foreach(organizer =>
+                        Organizer.saveWithEventRelation(organizer, eventId)
+                      )
+                      event.tariffs.foreach(tariff =>
+                        Tariff.save(tariff.copy(eventId = eventId))
+                      )
+                      event.images.foreach(image =>
+                        Image.save(image.copy(eventId = Some(eventId)))
+                      )
+                      event.artists.foreach(artist =>
+                        Artist.saveWithEventRelation(artist, eventId)
+                      )
+                      Some(eventId)
+                  }
+              }
+            } catch {
+              case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
             }
+          case _ =>
+            println("geographicPoint not conform")
+            None
         }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
-      }
     }
   }
 

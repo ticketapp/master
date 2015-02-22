@@ -14,6 +14,14 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 
 object Utilities {
+  implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
+    val MetaDataItem(qualified, nullable, clazz) = meta
+    value match {
+      case d: Any => Right(d.toString)
+      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass +
+        " to Float for column " + qualified) )
+    }
+  }
   def normalizeString(string: String): String = {
     Normalizer.normalize(string.replaceAll(" ", "+"), Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
   }

@@ -27,7 +27,7 @@ object Scheduler {
     val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
       case Some(latitude) =>
         (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
-          case Some(longitude) => Some(s"$latitude, $longitude")
+          case Some(longitude) => Some(s"($latitude,$longitude)")
           case _ => None
         }
       case _ => None

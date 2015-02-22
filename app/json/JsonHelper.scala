@@ -1,6 +1,7 @@
 package json
 
-import controllers.Test2.{YoutubeTrack, FacebookArtist, SoundCloudTrack}
+import controllers.ArtistController.{FacebookArtist, YoutubeTrack, SoundCloudTrack}
+//import controllers.Test2.{YoutubeTrack, FacebookArtist, SoundCloudTrack}
 import models._
 import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
 import play.api.libs.json.JsNumber
@@ -28,11 +29,12 @@ object JsonHelper {
   implicit val account708Writes: Writes[Account708] = Json.writes[Account708]
   implicit val account4686Writes: Writes[Account4686] = Json.writes[Account4686]
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
+  implicit val addressWrites = Json.writes[Address]
+  implicit val placeWrites = Json.writes[Place]
   implicit val eventWrites = Json.writes[Event]
   implicit val infoWrites: Writes[Info] = Json.writes[Info]
   implicit val soundCloudTrackWrites: Writes[SoundCloudTrack] = Json.writes[SoundCloudTrack]
   implicit val soundCloudTracksReads: Reads[SoundCloudTrack] = Json.reads[SoundCloudTrack]
   implicit val youtubeTrackWrites: Writes[YoutubeTrack] = Json.writes[YoutubeTrack]
-  //implicit val youtubeTracksReads: Reads[YoutubeTrack] = Json.reads[YoutubeTrack]
   implicit val facebookArtistWrites: Writes[FacebookArtist] = Json.writes[FacebookArtist]
 }

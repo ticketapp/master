@@ -3,7 +3,6 @@ package models
 import anorm.SqlParser._
 import anorm._
 import play.api.db.DB
-import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
 import services.Utilities
@@ -20,8 +19,6 @@ case class Place (placeId: Long,
                   address : Option[Address] = None)
 
 object Place {
-  implicit val placeWrites = Json.writes[Place]
-
   def formApply(name: String, facebookId: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String]): Place =
     new Place(-1L, name, facebookId, description, webSite, capacity, openingHours)
