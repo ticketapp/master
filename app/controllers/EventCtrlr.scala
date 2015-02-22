@@ -28,8 +28,8 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def findEventsContaining(pattern: String) = Action {
-    Ok(Json.toJson(Event.findAllContaining(pattern)))
+  def findEventsContaining(pattern: String, center: String) = Action {
+    Ok(Json.toJson(Event.findAllContaining(pattern, center)))
   }
 
   def findEventsByCity(pattern: String) = Action {
@@ -39,6 +39,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
   val eventBindingForm = Form(
     mapping(
       "name" -> nonEmptyText(2),
+      "geographicPoint" -> optional(nonEmptyText(3)),
       "description" -> nonEmptyText(2),
       "startTime" -> date("yyyy-MM-dd HH:mm"),
       "endTime" -> optional(date("yyyy-MM-dd HH:mm")),

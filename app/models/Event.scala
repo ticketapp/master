@@ -14,6 +14,7 @@ case class Event(eventId: Long,
                  isActive: Boolean,
                  creationDateTime: Date,
                  name: String,
+                 geographicPoint: Option[String],
                  description: String,
                  startTime: Date,
                  endTime: Option[Date],
@@ -27,16 +28,17 @@ case class Event(eventId: Long,
 
 
 object Event {
-  def formApply(name: String, description: String, startTime: Date, endTime: Option[Date], ageRestriction: Int,
-                images: List[Image], tariffs: List[Tariff], addresses: List[Address]): Event = {
-    new Event(-1L, None, true, true, new Date, name, description, startTime, endTime, ageRestriction, images, List(),
-      List(), tariffs, addresses)
+  def formApply(name: String, geographicPoint: Option[String], description: String, startTime: Date,
+                endTime: Option[Date], ageRestriction: Int, images: List[Image], tariffs: List[Tariff],
+                addresses: List[Address]): Event = {
+    new Event(-1L, None, true, true, new Date, name, geographicPoint, description, startTime, endTime, ageRestriction,
+      images, List(), List(), tariffs, addresses)
   }
 
-  def formUnapply(event: Event): Option[(String, String, Date, Option[Date], Int, List[Image], List[Tariff],
-    List[Address])] = {
-    Some((event.name, event.description, event.startTime, event.endTime, event.ageRestriction, event.images,
-      event.tariffs, event.addresses))
+  def formUnapply(event: Event): Option[(String, Option[String], String, Date, Option[Date], Int, List[Image],
+    List[Tariff], List[Address])] = {
+    Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,
+      event.images, event.tariffs, event.addresses))
   }
 
   private val EventParser: RowParser[Event] = {
@@ -46,14 +48,15 @@ object Event {
       get[Boolean]("isActive") ~
       get[Date]("creationDateTime") ~
       get[String]("name") ~
+      get[Option[String]]("geographicPoint") ~
       get[String]("description") ~
       get[Date]("startTime") ~
       get[Option[Date]]("endTime") ~
       get[Int]("ageRestriction") map {
-      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ description ~ startTime ~ endTime
-        ~ ageRestriction =>
-        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, description, startTime, endTime,
-          ageRestriction, List(), List(), List(), List(), List())
+      case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ geographicPoint ~ description ~
+        startTime ~ endTime ~ ageRestriction =>
+        Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
+          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
     }
   }
 
@@ -80,7 +83,7 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
-            events.name, events.startSellingTime, events.endSellingTime, events.description, events.startTime,
+            events.name, events.geographicPoint, events.description, events.startTime,
             events.endTime, events.ageRestriction
         FROM events
         ORDER BY events.creationDateTime DESC
@@ -101,7 +104,7 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
-            s.name, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
+            s.name, s.geographicPoint, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
             s.endTime, s.ageRestriction
         FROM eventsPlaces eP
         INNER JOIN events s ON s.eventId = eP.eventId
@@ -125,7 +128,7 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
-            s.name, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
+            s.name, s.geographicPoint, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
             s.endTime, s.ageRestriction
         FROM eventsOrganizers eO
         INNER JOIN events s ON s.eventId = eO.eventId
@@ -145,22 +148,31 @@ object Event {
     }
   }
 
-  def findAllContaining(pattern: String): Seq[Event] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM events WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
-          .on('patternLowCase -> pattern.toLowerCase)
-          .as(EventParser.*)
-          .map(e => e.copy(
+  def findAllContaining(pattern: String, center: String): Seq[Event] = {
+    val patternRegex = """(\(\d+\.\d*,\d+\.\d*\))""".r
+    center match {
+      case patternRegex(_) =>
+      try {
+        DB.withConnection { implicit connection =>
+          SQL( s"""SELECT *
+          FROM events WHERE LOWER(name)
+          LIKE '%'||{patternLowCase}||'%'
+          ORDER BY geographicPoint <-> point '$center'
+          LIMIT 20""")
+            .on('patternLowCase -> pattern.toLowerCase)
+            .as(EventParser.*)
+            .map(e => e.copy(
             images = Image.findAllByEvent(e),
             organizers = Organizer.findAllByEvent(e),
             artists = Artist.findAllByEvent(e),
             tariffs = Tariff.findAllByEvent(e),
             addresses = Address.findAllByEvent(e))
-          )
+            )
+        }
+      } catch {
+        case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
       }
-    } catch {
-      case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
+    case _ => Seq()
     }
   }
 
@@ -196,15 +208,16 @@ object Event {
         DB.withConnection {
           implicit connection =>
             SQL( """INSERT INTO
-                events(facebookId, isPublic, isActive, creationDateTime, name, description, startTime, endTime,
-                ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
-                {description}, {startTime}, {endTime}, {ageRestriction}) """)
+                events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description, startTime,
+                endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
+                {geographicPoint}, {description}, {startTime}, {endTime}, {ageRestriction}) """)
               .on(
                 'facebookId -> event.facebookId,
                 'isPublic -> event.isPublic,
                 'isActive -> event.isActive,
                 'creationDateTime -> event.creationDateTime,
                 'name -> event.name,
+                'geographicPoint -> event.geographicPoint,
                 'description -> event.description,
                 'startTime -> event.startTime,
                 'endTime -> event.endTime,
@@ -261,8 +274,6 @@ object Event {
 
 
 
-
-
   def followEvent(userId: Long, eventId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
@@ -279,7 +290,7 @@ object Event {
   def findAllInCircle(center: String): List[Event] = {
     val pattern = """(\(\d+\.\d*,\d+\.\d*\))""".r
     center match {
-      case pattern(_) => println("ok")
+      case pattern(_) =>
         try {
           DB.withConnection { implicit connection =>
             SQL(s"""SELECT *

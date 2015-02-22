@@ -64,8 +64,8 @@ object Scheduler {
     val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
     val organizer = new Organizer(-1L, new Date, Some(readOwnerId), readOwnerName)
 
-    var event: Event = new Event(-1L, facebookId, true, true, new Date, name, eventDescription, startTime, endTime, 16,
-      List(), List(organizer), List(), List(), List(address))
+    var event: Event = new Event(-1L, facebookId, true, true, new Date, name, geographicPoint, eventDescription,
+      startTime, endTime, 16, List(), List(organizer), List(), List(), List(address))
 
     imgPath match {
       case "null" =>
