@@ -311,11 +311,11 @@ object Event {
             ORDER BY a.geographicPoint <-> point '$center' LIMIT 50"""
             ).as(EventParser.*)
               .map(e => e.copy(
-              images = Image.findAllByEvent(e),
-              organizers = Organizer.findAllByEvent(e),
-              artists = Artist.findAllByEvent(e),
-              tariffs = Tariff.findAllByEvent(e),
-              addresses = Address.findAllByEvent(e))
+                images = Image.findAllByEvent(e),
+                organizers = Organizer.findAllByEvent(e),
+                artists = Artist.findAllByEvent(e),
+                tariffs = Tariff.findAllByEvent(e),
+                addresses = Address.findAllByEvent(e))
               )
           }
         } catch {

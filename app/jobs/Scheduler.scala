@@ -6,8 +6,10 @@ import play.api.libs.ws.Response
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import controllers.WebServiceException
+import play.api.libs.functional.syntax._
 
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -15,12 +17,38 @@ object Scheduler {
 
   def formatEventDescription(eventDescription: String): String = {
     linkPattern.replaceAllIn(eventDescription, m => "<a href='http://" + m + "'>" + m + "</a>")
-      .replaceAll("""\n\n""", "<br/><br/></div><div class='column large-12'>")
-      .replaceAll("""\n""", "<br/>")
-      .replaceAll("""\t""", "    ").replaceAll("""</a>/""", "</a> ") + "</div>"
+      .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
+      .replaceAll( """\n""", "<br/>")
+      .replaceAll( """\t""", "    ").replaceAll( """</a>/""", "</a> ") + "</div>"
   }
 
-  //def getOrganizerInfos(org)
+  def createNewImageIfSourceExists(source: Option[String]): List[Image] = {
+    source match {
+      case Some(path) => List(new Image(-1, path))
+      case None => List()
+    }
+  }
+
+
+  def getOrganizerInfos(organizerId: String): Future[List[Organizer]] = {
+    val readOrganizer = (
+        (__ \ "name").read[String] and
+        (__ \ "description").readNullable[String] and
+        (__ \ "cover" \ "source").readNullable[String] and
+        (__ \ "phone").readNullable[String] and
+        (__ \ "public_transit").readNullable[String] and
+        (__ \ "website").readNullable[String]
+      ).apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
+               public_transit: Option[String], website: Option[String]) =>
+        Organizer(-1L, Some(organizerId), name, description, phone, public_transit, website, verified = false,
+          createNewImageIfSourceExists(source)) )
+
+    WS.url("https://graph.facebook.com/v2.2/" + organizerId +
+      "?fields=name,description,cover%7Bsource%7D,location,phone,public_transit,website&access_token=" + token).get()
+      .map { organizer =>
+        organizer.json.asOpt[Organizer](readOrganizer).toList
+      }
+  }
 
   def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
@@ -36,7 +64,7 @@ object Scheduler {
     val street = (eventJson \ "venue" \ "street").as[Option[String]]
     val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
     val city = (eventJson \ "venue" \ "city").as[Option[String]]
-    val address: Address = new Address(-1l, true, false, geographicPoint, city, zip, street)
+    val address: Address = new Address(-1l, geographicPoint, city, zip, street)
      // + tester si
     //l'adresse est vide
 
@@ -61,25 +89,23 @@ object Scheduler {
       case _ => None
     }
 
-    //println(eventJson \ "owner")
-    val readOwnerName = eventJson.as[String]((__ \ "owner" \ "name").read[String])
     val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
-    val organizer = new Organizer(-1L, new Date, Some(readOwnerId), readOwnerName)
+    getOrganizerInfos(readOwnerId).map { organizer =>
+      var event: Event = new Event(-1L, facebookId, true, true, new Date, name, geographicPoint, eventDescription,
+        startTime, endTime, 16, List(), organizer, List(), List(), List(address))
 
-    var event: Event = new Event(-1L, facebookId, true, true, new Date, name, geographicPoint, eventDescription,
-      startTime, endTime, 16, List(), List(organizer), List(), List(), List(address))
-
-    imgPath match {
-      case "null" =>
-      case _ => event = event.copy( images = List(new Image(-1L, imgPath)))
+      imgPath match {
+        case "null" =>
+        case _ => event = event.copy( images = List(new Image(-1L, imgPath)))
       }
 
-    Event.save(event) match {
-      case None => Event.update(event) //delete old imgs and insert news
-      case Some(eventId) =>
-        //println(eventId + event.images.toString())
-        Address.saveAddressAndEventRelation(address, eventId)
-        Place.saveEventPlaceRelation(eventId, placeId)
+      Event.save(event) match {
+        case None => Event.update(event) //delete old imgs and insert news
+        case Some(eventId) =>
+          //println(eventId + event.images.toString())
+          Address.saveAddressAndEventRelation(address, eventId)
+          Place.saveEventPlaceRelation(eventId, placeId)
+      }
     }
   }
 

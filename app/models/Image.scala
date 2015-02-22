@@ -13,12 +13,10 @@ case class Image (imageId: Long,
                   eventId: Option[Long] = None,
                   userId: Option[Long] = None,
                   artistId: Option[Long] = None,
-                  placeId: Option[Long] = None)
+                  placeId: Option[Long] = None,
+                  organizerId: Option[Long] = None)
 
 object Image {
-
-  implicit val imageWrites = Json.writes[Image]
-
   def formApply(path: String) = new Image(-1L, path)
 
   def formUnapply(image: Image) = Some(image.path)
@@ -28,9 +26,10 @@ object Image {
       get[String]("path") ~
       get[Option[Long]]("eventId") ~
       get[Option[Long]]("userId") ~
-      get[Option[Long]]("placeId") map {
-      case imageId ~ path ~ eventId ~ userId ~ placeId =>
-        Image(imageId, path, eventId, userId, placeId)
+      get[Option[Long]]("placeId") ~
+      get[Option[Long]]("organizerId") map {
+      case imageId ~ path ~ eventId ~ userId ~ placeId ~ organizerId=>
+        Image(imageId, path, eventId, userId, placeId, organizerId)
     }
   }
 
@@ -58,6 +57,16 @@ object Image {
     }
   }
 
+  def findAllByOrganizer(organizerId: Long): List[Image] = {
+    DB.withConnection { implicit connection =>
+      SQL( """SELECT *
+             FROM Images
+             WHERE organizerId = {organizerId}""")
+        .on('organizerId -> organizerId)
+        .as(ImageParser.*)
+    }
+  }
+
   def find(imageId: Long): Option[Image] = {
     DB.withConnection { implicit connection =>
       SQL("SELECT * from images WHERE placeId = {imageId}")
@@ -67,18 +76,21 @@ object Image {
   }
 
   def save(image: Image): Option[Long] = {
-    //println(image)
+    println(image)
     Utilities.testIfExist("images", "path", image.path) match {
       case true =>
         println("Image path already in database")
         None
       case false => try {
         DB.withConnection { implicit connection =>
-          SQL( """ INSERT INTO images(path, eventId, userId) VALUES({path}, {eventId}, {userId}) """)
+          SQL(""" INSERT INTO images(path, eventId, userId, placeId, organizerId)
+              VALUES({path}, {eventId}, {userId}, {placeId}, {organizerId}) """.stripMargin)
             .on(
               'path -> image.path,
               'eventId -> image.eventId,
-              'userId -> image.userId
+              'userId -> image.userId,
+              'placeId -> image.placeId,
+              'organizerId -> image.organizerId
             ).executeInsert()
         }
       } catch {

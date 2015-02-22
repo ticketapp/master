@@ -1,7 +1,6 @@
 package controllers
 
-import controllers.EventController._
-import models.{Artist, Organizer}
+import models.Organizer
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db._
@@ -9,13 +8,11 @@ import play.api.Play.current
 import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
-
-import scala.util.{Failure, Success}
-
+import json.JsonHelper.organizerWrites
 
 object OrganizerController extends Controller {
   def organizers = Action {
-    Ok(Json.toJson(Organizer.findAll))
+    Ok(Json.toJson(Organizer.findAll()))
   }
 
   def organizer(id: Long) = Action {

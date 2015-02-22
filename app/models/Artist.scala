@@ -28,8 +28,6 @@ case class Artist (artistId: Long,
 object Artist {
   val token = play.Play.application.configuration.getString("facebook.token")
 
-  implicit val artistWrites = Json.writes[Artist]
-
   private val ArtistParser: RowParser[Artist] = {
     get[Long]("artistId") ~
       get[Date]("creationDateTime") ~

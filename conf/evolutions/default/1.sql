@@ -1,18 +1,16 @@
 # --- !Ups
 CREATE TABLE addresses (
   addressId                 SERIAL PRIMARY KEY,
-  isEvent                   BOOLEAN NOT NULL,
-  isPlace                   BOOLEAN NOT NULL,
   geographicPoint           point,
   city                      VARCHAR(127),
   zip                       VARCHAR(15),
   street                    VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(44.176812717, 4.9157134)');
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(45.461841787, 4.187134)');
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (FALSE, TRUE, '(43.53187, 4.847134)');
-INSERT INTO addresses (isEvent, isPlace, geographicPoint) VALUES (TRUE, FALSE, '(41.4681787, 5.9157134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(44.176812717, 4.9157134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(45.461841787, 4.187134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.847134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(41.4681787, 5.9157134)');
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
@@ -31,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 46 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 44 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -60,9 +58,12 @@ VALUES ('user@global.local', 'user', '$2a$12$3.UvEUatM.2VbYEI2Y.YKeqn3QNc/k0h9S0
 
 CREATE TABLE organizers (
     organizerId             SERIAL PRIMARY KEY,
-    creationDateTime        TIMESTAMP DEFAULT current_timestamp NOT NULL,
     facebookId              VARCHAR(63),
     name                    VARCHAR(255) NOT NULL,
+    description             TEXT,
+    phone                   VARCHAR(15),
+    publicTransit           TEXT,
+    website                 VARCHAR(255),
     verified                BOOLEAN DEFAULT FALSE NOT NULL,
     UNIQUE(facebookId),
     UNIQUE(name)
@@ -142,6 +143,7 @@ CREATE TABLE images (
   eventId                   BIGINT references events(eventId),
   userId                    BIGINT references users(userId),
   placeId                   BIGINT references places(placeId),
+  organizerId               BIGINT references organizers(organizerId),
   artistId                  BIGINT references artists(artistId),
   infoId                    BIGINT references infos(infoId),
   trackId                   BIGINT references tracks(trackId),

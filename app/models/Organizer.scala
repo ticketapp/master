@@ -16,31 +16,39 @@ import play.api.libs.ws.WS
 import scala.util.{Failure, Success}
 
 case class Organizer (organizerId: Long,
-                      creationDateTime: Date,
-                      facebookId: Option[String],
+                      facebookId: Option[String] = None,
                       name: String,
+                      description: Option[String] = None,
+                      phone: Option[String] = None,
+                      publicTransit: Option[String] = None,
+                      website: Option[String] = None,
                       verified: Boolean = false,
                       images: List[Image] = List())
 
 object Organizer {
   val token = play.Play.application.configuration.getString("facebook.token")
 
-  implicit val organizerWrites = Json.writes[Organizer]
-
   private val OrganizerParser: RowParser[Organizer] = {
     get[Long]("organizerId") ~
-      get[Date]("creationDateTime") ~
       get[Option[String]]("facebookId") ~
       get[String]("name") ~
+      get[Option[String]]("description") ~
+      get[Option[String]]("phone") ~
+      get[Option[String]]("publicTransit") ~
+      get[Option[String]]("website") ~
       get[Boolean]("verified") map {
-      case organizerId ~ creationDateTime ~ facebookId ~ name ~ verified =>
-        Organizer(organizerId, creationDateTime, facebookId, name, verified)
+      case organizerId ~ facebookId ~ name ~ description ~ phone ~ publicTransit ~ website ~ verified =>
+        Organizer(organizerId, facebookId, name, description, phone, publicTransit, website, verified)
     }
   }
 
   def findAll(): List[Organizer] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from organizers").as(OrganizerParser.*)
+      SQL("select * from organizers")
+        .as(OrganizerParser.*)
+        .map(o => o.copy(
+          images = Image.findAllByOrganizer(o.organizerId)
+        ))
     }
   }
 
@@ -51,6 +59,9 @@ object Organizer {
              INNER JOIN organizers a ON a.organizerId = eA.organizerId where eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(OrganizerParser.*)
+        .map(o => o.copy(
+          images = Image.findAllByOrganizer(o.organizerId)
+        ))
     }
   }
 
@@ -59,6 +70,9 @@ object Organizer {
       SQL("SELECT * from organizers WHERE organizerId = {organizerId}")
         .on('organizerId -> organizerId)
         .as(OrganizerParser.singleOpt)
+        .map(o => o.copy(
+          images = Image.findAllByOrganizer(o.organizerId)
+        ))
     }
   }
 
@@ -68,6 +82,9 @@ object Organizer {
         SQL("SELECT * FROM organizers WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
           .as(OrganizerParser.*)
+          .map(o => o.copy(
+            images = Image.findAllByOrganizer(o.organizerId)
+        ))
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Organizer.findAllContaining: "
@@ -75,7 +92,7 @@ object Organizer {
     }
   }
 
-  def formApply(facebookId: Option[String], name: String): Organizer = new Organizer(-1L, new Date, facebookId, name)
+  def formApply(facebookId: Option[String], name: String): Organizer = new Organizer(-1L, facebookId, name)
   def formUnapply(organizer: Organizer): Option[(Option[String], String)] = Some((organizer.facebookId, organizer.name))
 
   def save(organizer: Organizer): Option[Long] = {
@@ -84,10 +101,23 @@ object Organizer {
       case false => try {
         //println(organizer.name)
         DB.withConnection { implicit connection =>
-          SQL("INSERT INTO organizers(name, facebookId) VALUES ({name}, {facebookId})").on(
-            'name -> organizer.name,
-            'facebookId -> organizer.facebookId
-          ).executeInsert()
+          SQL("""INSERT INTO organizers(name, facebookId, description, phone, publicTransit, website)
+            VALUES ({name}, {facebookId}, {description}, {phone}, {publicTransit}, {website})""")
+            .on(
+              'name -> organizer.name,
+              'facebookId -> organizer.facebookId,
+              'description -> organizer.description ,
+              'phone -> organizer.phone,
+              'publicTransit -> organizer.publicTransit,
+              'website -> organizer.website
+          ).executeInsert() match {
+            case None => None
+            case Some(organizerId: Long) =>
+              organizer.images.foreach( image =>
+                Image.save(image.copy(organizerId = Some(organizerId)))
+              )
+              Some(organizerId)
+          }
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot create organizer: " + e.getMessage + organizer.name)

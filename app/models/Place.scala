@@ -37,7 +37,8 @@ object Place {
       get[Option[String]]("openingHours") ~
       get[Option[Long]]("addressId") map {
         case placeId ~ name ~ facebookId ~ description ~ webSite ~ capacity ~ openingHours ~ addressId =>
-          Place(placeId, name, facebookId, description, webSite, capacity, openingHours, List(), Address.find(addressId))
+          Place(placeId, name, facebookId, description, webSite, capacity, openingHours, List(),
+            Address.find(addressId.getOrElse(-1)))
     }
   }
 

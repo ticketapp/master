@@ -9,8 +9,6 @@ import services.Utilities.geographicPointToString
 
 
 case class Address (addressId: Long,
-                    isEvent: Boolean,
-                    isPlace: Boolean,
                     geographicPoint: Option[String],
                     city: Option[String],
                     zip: Option[String],
@@ -19,19 +17,17 @@ case class Address (addressId: Long,
 object Address {
   private val AddressParser: RowParser[Address] = {
     get[Long]("addressId") ~
-      get[Boolean]("isEvent") ~
-      get[Boolean]("isPlace") ~
       get[Option[String]]("geographicPoint") ~
       get[Option[String]]("city") ~
       get[Option[String]]("zip") ~
       get[Option[String]]("street") map {
-      case addressId ~ isEvent ~ isPlace ~ geographicPoint ~ city ~ zip ~ street =>
-        Address(addressId, isEvent, isPlace, geographicPoint, city, zip, street)
+      case addressId ~ geographicPoint ~ city ~ zip ~ street =>
+        Address(addressId, geographicPoint, city, zip, street)
     }
   }
 
   def formApply(city: String, zip: String, street: String) = {
-    new Address(-1L, true, false, None, Some(city), Some(zip), Some(street))
+    new Address(-1L, None, Some(city), Some(zip), Some(street))
   }
   def formUnapply(address: Address): Option[(String, String, String)] =
     Some((address.city.get, address.zip.get, address.street.get))
@@ -53,20 +49,18 @@ object Address {
     }
   }
 
-  def find(addressId: Option[Long]): Option[Address] = {
-    addressId match {
-      case None => None
-      case Some(addressId) => try {
-        DB.withConnection { implicit connection =>
-          SQL("SELECT * from addresses WHERE addressId = {addressId}")
-            .on('addressId -> addressId)
-            .as(AddressParser.singleOpt)
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Problem with the method Address.find: " + e.getMessage)
+  def find(addressId: Long): Option[Address] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("SELECT * from addresses WHERE addressId = {addressId}")
+          .on('addressId -> addressId)
+          .as(AddressParser.singleOpt)
       }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method Address.find: " + e.getMessage)
     }
   }
+
 
   def findAllContaining(pattern: String): Seq[Address] = {
     try {
@@ -88,11 +82,9 @@ object Address {
       case None =>
         try {
           DB.withConnection { implicit connection =>
-            SQL( s"""INSERT into addresses(isEvent, isPlace, city, zip, street)
-          values ({isEvent}, {isPlace}, {city}, {zip}, {street})"""
+            SQL( s"""INSERT into addresses(city, zip, street)
+              values ({city}, {zip}, {street})"""
             ).on(
-                'isEvent -> address.isEvent,
-                'isPlace -> address.isPlace,
                 'city -> address.city,
                 'zip -> address.zip,
                 'street -> address.street
@@ -108,11 +100,9 @@ object Address {
       case Some(geoPoint: String) => try {
         val geoPointValue = geoPoint
         DB.withConnection { implicit connection =>
-          SQL( s"""INSERT into addresses(isEvent, isPlace, geographicPoint, city, zip, street)
-          values ({isEvent}, {isPlace}, point '$geoPointValue', {city}, {zip}, {street})"""
+          SQL( s"""INSERT into addresses(geographicPoint, city, zip, street)
+          values (point '$geoPointValue', {city}, {zip}, {street})"""
           ).on(
-              'isEvent -> address.isEvent,
-              'isPlace -> address.isPlace,
               'city -> address.city,
               'zip -> address.zip,
               'street -> address.street
