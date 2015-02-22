@@ -104,7 +104,7 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
-            s.name, s.geographicPoint, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
+            s.name, s.geographicPoint, s.description, s.startTime,
             s.endTime, s.ageRestriction
         FROM eventsPlaces eP
         INNER JOIN events s ON s.eventId = eP.eventId
@@ -128,7 +128,7 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
-            s.name, s.geographicPoint, s.startSellingTime, s.endSellingTime, s.description, s.startTime,
+            s.name, s.geographicPoint, s.description, s.startTime,
             s.endTime, s.ageRestriction
         FROM eventsOrganizers eO
         INNER JOIN events s ON s.eventId = eO.eventId

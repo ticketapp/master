@@ -21,6 +21,8 @@ object Scheduler {
         .replaceAll("""\\t""", "    ").replaceAll("""</a>/""", "</a> ").substring(1).dropRight(1) + "</div>"
   }
 
+  //def getOrganizerImage(org)
+
   def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
 
@@ -35,9 +37,9 @@ object Scheduler {
     val street = (eventJson \ "venue" \ "street").as[Option[String]]
     val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
     val city = (eventJson \ "venue" \ "city").as[Option[String]]
-    val address: Address = new Address(-1l, true, false, geographicPoint, city, zip, street) // + tester si
+    val address: Address = new Address(-1l, true, false, geographicPoint, city, zip, street)
+     // + tester si
     //l'adresse est vide
-
 
     val name = eventJson.as[String]((__ \ "name").read[String])
     val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
@@ -75,6 +77,7 @@ object Scheduler {
     Event.save(event) match {
       case None => Event.update(event) //delete old imgs and insert news
       case Some(eventId) =>
+        println(eventId + event.images.toString())
         Address.saveAddressAndEventRelation(address, eventId)
         Place.saveEventPlaceRelation(eventId, placeId)
     }

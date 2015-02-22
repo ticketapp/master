@@ -44,7 +44,7 @@ GET     /places/:placeId/events     controllers.EventController.eventsByPlace(pl
 GET     /organizers                     controllers.OrganizerController.organizers
 GET     /organizers/:id                 controllers.OrganizerController.organizer(id: Long)
 POST    /organizers/:userId/:organizerId    controllers.OrganizerController.followOrganizer(userId: Long, organizerId: Long)
-GET     /organizers/containing/:pattern  controllers.OrganizerController.findOrganizersContaining(pattern: String)
+GET     /organizers/containing/:pattern     controllers.OrganizerController.findOrganizersContaining(pattern: String)
 POST    /organizers/create              controllers.OrganizerController.createOrganizer
 GET     /organizers/:organizerId/events     controllers.EventController.eventsByOrganizer(organizerId: Long)
 

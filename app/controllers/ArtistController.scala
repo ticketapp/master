@@ -67,7 +67,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
                             cover: String,
                             websites: List[String],
                             link: String,
-                            soundCloudTracks: Option[List[SoundCloudTrack]] = None,
+                            soundCloudTracks: List[SoundCloudTrack] = List(),
                             youtubeTracks: Seq[YoutubeTrack] = List() )
 
   def websitesStringToWebsitesList(websites: Option[String]): List[String] = {
@@ -111,7 +111,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
       + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,likes,link,website&access_token=" + token).get()
       .map { response =>
-      (response.json \ "data").as[Seq[FacebookArtist]](readArtists)
+      (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtists).getOrElse(Seq())
     }
   }
 
@@ -160,7 +160,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           findSoundCloudUserImageIfNoTrackImage(scLink, soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks)
             .getOrElse(List()))
             .map { soundCloudTracksWMoreImages: List[SoundCloudTrack] =>
-              artist.copy(soundCloudTracks = Some(soundCloudTracksWMoreImages))
+              artist.copy(soundCloudTracks = soundCloudTracksWMoreImages)
             }
       }
     }
@@ -170,7 +170,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     WS.url("http://api.soundcloud.com/users?q=" + normalizeString(namePattern) + "&client_id=" + soundCloudClientId)
       .get().map { users =>
-      users.json.as[Seq[Long]](readSoundCloudIds)
+      users.json.asOpt[Seq[Long]](readSoundCloudIds).getOrElse(Seq())
     }
   }
 
@@ -179,7 +179,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Future.sequence(
       listIds.map { id =>
         WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles?client_id=" + soundCloudClientId).get().map {
-          websites => (id, websites.json.as[Seq[Option[String]]](readUrls).flatten)
+          websites => (id, websites.json.asOpt[Seq[Option[String]]](readUrls).getOrElse(Seq()).flatten)
         }
       }
     )
@@ -199,7 +199,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     if (matchedId != 0) {
       WS.url("http://api.soundcloud.com/users/" + matchedId + "/tracks?client_id=" + soundCloudClientId)
         .get().map { soundCloudTracks =>
-        artist.copy(soundCloudTracks = soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks))
+        artist.copy(soundCloudTracks = soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks).getOrElse(List()))
       }
     } else {
       Future{ artist }
@@ -208,7 +208,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
   def findSoundCloudTracksNotDefinedInFb(artist: FacebookArtist): Future[FacebookArtist] = {
     artist.soundCloudTracks match {
-      case Some(tracks: List[soundCloudTracks]) if tracks.isEmpty =>
+      case tracks: List[soundCloudTracks] if tracks.isEmpty =>
         findSoundCloudIds(artist.name).flatMap { ids =>
           findSoundCloudWebsites(ids).flatMap{ websitesAndIds =>
             compareArtistWebsitesWSCWebsitesAndAddTracks(artist, websitesAndIds)
@@ -241,7 +241,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       }
 
       listIndexFacebookIds.map { index: Int =>
-        ((artistsJson(index) \ "id").as[String], (artistsJson(index) \\ "foreign_id")(0).toString()
+        ((artistsJson(index) \ "id").asOpt[String].getOrElse(""), (artistsJson(index) \\ "foreign_id")(0).toString()
           .replace("facebook:artist:", "") )
       }
     }
@@ -263,7 +263,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     WS.url("http://developer.echonest.com/api/v4/artist/songs?api_key=" + echonestApiKey + "&id=" + echonestId +
       "&format=json&results=50").get().map { songs =>
-      (songs.json \ "response" \ "songs").as[List[Option[String]]](Reads.list(titleReads)).flatten.distinct
+      (songs.json \ "response" \ "songs").asOpt[List[Option[String]]](Reads.list(titleReads)).getOrElse(List())
+        .flatten.distinct
     }
   }
 
@@ -279,7 +280,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
           normalizeString(trackTitle) + normalizeString(artistName) +
           "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
-          (video.json \ "items").as[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads))
+          (video.json \ "items").asOpt[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)).getOrElse(Seq())
         }
       }
     ).map { seqOfSeqYoutubeTracks: Seq[Seq[YoutubeTrack]] =>
@@ -311,6 +312,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
 
         val seqFutureArtistWMoreSCTracks: Seq[Future[FacebookArtist]] = seqArtist.map { artist: FacebookArtist =>
+          findSoundCloudTracksNotDefinedInFb(artist).map { a: FacebookArtist =>
+            println(a)
+          }
           findSoundCloudTracksNotDefinedInFb(artist)
         }
         val futureSeqArtistWMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqFutureArtistWMoreSCTracks)

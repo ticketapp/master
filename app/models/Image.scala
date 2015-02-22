@@ -21,7 +21,7 @@ object Image {
 
   def formApply(path: String) = new Image(-1L, path)
 
-  def formUnapply(image: Image) = Some((image.path))
+  def formUnapply(image: Image) = Some(image.path)
 
   private val ImageParser: RowParser[Image] = {
     get[Long]("imageId") ~
@@ -66,9 +66,12 @@ object Image {
     }
   }
 
-  def save(image: Image) = {
+  def save(image: Image): Option[Long] = {
+    //println(image)
     Utilities.testIfExist("images", "path", image.path) match {
-      case true => None
+      case true =>
+        println("Image path already in database")
+        None
       case false => try {
         DB.withConnection { implicit connection =>
           SQL( """ INSERT INTO images(path, eventId, userId) VALUES({path}, {eventId}, {userId}) """)

@@ -16,10 +16,11 @@ import play.api.libs.ws.WS
 import scala.util.{Failure, Success}
 
 case class Organizer (organizerId: Long,
-                   creationDateTime: Date,
-                   facebookId: Option[String],
-                   name: String,
-                   verified: Boolean = false)
+                      creationDateTime: Date,
+                      facebookId: Option[String],
+                      name: String,
+                      verified: Boolean = false,
+                      images: List[Image] = List())
 
 object Organizer {
   val token = play.Play.application.configuration.getString("facebook.token")
