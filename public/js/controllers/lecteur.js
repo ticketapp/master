@@ -18,6 +18,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         var last = $rootScope.playlist.length;
         tracks.forEach(pushTrack);
         $scope.play(last)
+        console.log($rootScope.playlist)
     };
     $scope.play = function (i) {
         $scope.trackActive = i;
