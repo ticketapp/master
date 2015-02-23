@@ -3,9 +3,9 @@
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
-        <h2 id="eventTitle" class="column large-10">{{event.name}}</h2>
+        <h2 id="eventTitle" class="column large-10" style="margin-top:0">{{event.name}}</h2>
+        <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
     </div>
-    <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
     <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
         <div ng-bind-html="event.description" id="eventDescBind"></div>
     </div>
@@ -37,10 +37,14 @@
     </div>
     <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
         <h2>Organisateur</h2>
-        <a href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
-           data-tooltip-placement="bottom"
-           data-tooltip-html-unsafe="<div><img src='assets/img/2.jpg'/><a href='#/user/{{organizer.organizerId}}'><h4>{{organizer.name}}</h4></a></div>"
-           data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover"> <h3>{{ organizer.name }}</h3></a>
+            <div data-ng-repeat="organizer in event.organizers">
+            <img src="{{organizer.images[0].path}}" class="relative width100p"/>
+            <a href="#/user/{{organizer.organizerId}}" class="custom-trigger"
+               data-tooltip-placement="bottom"
+               data-tooltip-html-unsafe="<div><div style='height:112.8px; overflow:hidden;'><img src='{{ organizer.images[0].path }}'/></div><a href='#/user/{{organizer.organizerId}}'><h4 class='column large-6'>{{organizer.name}}</h4></a><button style='margin-top:5px; float:right'>Suivre</button></div>"
+               data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover"><h3>{{ organizer.name }}</h3></a>
+            <div style="text-align: justify;" data-ng-bind-html="organizer.description"></div>
+        </div>
     </div>
     <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
         <h2>Lieu</h2>
