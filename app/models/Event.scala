@@ -284,7 +284,7 @@ object Event {
 
 
 
-  def followEvent(userId: Long, eventId: Long): Option[Long] = {
+  def followEvent(userId: String, eventId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("insert into eventsFollowed(userId, eventId) values ({userId}, {eventId})").on(

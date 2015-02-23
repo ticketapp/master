@@ -26,8 +26,10 @@ rajouter des try catch pour les calls?
 sanitize url?? ask SO?
 sctracks optionList to list ?
 parallelize soundcloud/echonest+youtube
-
+verifier que le nom de lartiste soit bien dans le titre dans les youtube tracks
+renvoyer les 20 avec le plus like
 donner les fb ids dans la requête pour limiter les requêtes?
+regarder le next de facebook
  */
 
 object Test2 extends Controller {

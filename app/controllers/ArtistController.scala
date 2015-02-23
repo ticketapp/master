@@ -51,8 +51,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Redirect(routes.Admin.indexAdmin())
   }
 
-  def followArtist(userId : Long, artistId : Long) = Action {
-    Artist.followArtist(userId, artistId)
+  def followArtist(artistId : Long) = Action {
+    //Artist.followArtist(userId, artistId)
     Redirect(routes.Admin.indexAdmin())
   }
 
@@ -83,6 +83,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     websites match {
       case None => List()
       case Some(websitesFound) =>
+        //.split list (donc to array) et ensuite tolist??? surement pas top cette fonction...
         for (website <- websitesFound.split(" ").toList) {
           listOfWebSitesToReturn = listOfWebSitesToReturn :::
             """(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => " ").replace("www.", "").split(" ").toList
@@ -167,7 +168,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     soundCloudLink match {
       case "" => Future { artist }
       case scLink =>
-        WS.url("http://api.soundcloud.com/users/" + "rone-music" + "/tracks?client_id=" + //normalizeString(scLink)
+        WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
         soundCloudClientId).get().flatMap { soundCloudTracks =>
           /*println("#########################")
           println(scLink + "|")
@@ -318,6 +319,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
+        println(trackTitle)
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
           normalizeString(trackTitle) + normalizeString(artistName) +
           "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
@@ -354,8 +356,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
 
         val seqFutureArtistWMoreSCTracks: Seq[Future[FacebookArtist]] = seqArtist.map { artist: FacebookArtist =>
-          findSoundCloudTracksNotDefinedInFb(artist).map { a: FacebookArtist =>
-          }
           findSoundCloudTracksNotDefinedInFb(artist)
         }
         val futureSeqArtistWMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqFutureArtistWMoreSCTracks)

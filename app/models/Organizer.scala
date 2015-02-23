@@ -163,8 +163,8 @@ object Organizer {
     }
   }
 
-  def followOrganizer(userId : Long, organizerId : Long): Option[Long] = {
-    try {
+  def followOrganizer(organizerId : Long) = {//: Option[Long] = {
+    /*try {
       DB.withConnection { implicit connection =>
         SQL("insert into organizersFollowed(userId, organizerId) values ({userId}, {organizerId})").on(
           'userId -> userId,
@@ -173,6 +173,6 @@ object Organizer {
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot follow organizer: " + e.getMessage)
-    }
+    }*/
   }
 }

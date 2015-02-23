@@ -86,9 +86,21 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     )
   }
 
-  def followEvent(userId : Long, eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Event.followEvent(userId, eventId)
-    Redirect(routes.Admin.indexAdmin())
+  /*
+  def index = UserAwareAction { implicit request =>
+    Ticket.createQrCode(2)
+    val userName = request.user match {
+      case Some(user) => user.fullName
+      case _ => "guest"
+    }
+    println("Hello %s".format(userName))
+    Ok(views.html.index())
+  }
+   */
+
+  def followEvent(eventId : Long) = SecuredAction { implicit request =>
+    Event.followEvent(request.user.identityId.userId, eventId)
+    Ok(Json.toJson("Event well saved"))
   }
 
   def findEventsInCircle(peripheral: String) = Action {

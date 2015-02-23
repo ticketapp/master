@@ -31,8 +31,8 @@ object PlaceController extends Controller {
     }
   }
 
-  def followPlace(userId : Long, placeId : Long) = Action {
-    Place.followPlace(userId, placeId)
+  def followPlace(placeId : Long) = Action {
+    Place.followPlace(placeId)
     Redirect(routes.Admin.indexAdmin())
   }
 

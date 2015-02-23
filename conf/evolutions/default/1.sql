@@ -42,20 +42,6 @@ CREATE TABLE artists (
   UNIQUE(facebookId)
 );
 
-CREATE TABLE users (
-  userId                    SERIAL PRIMARY KEY,
-  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
-  email                     VARCHAR(255) NOT NULL,
-  nickname                  VARCHAR(255) NOT NULL,
-  password                  VARCHAR(255) NOT NULL,
-  profile                   VARCHAR(255) NOT NULL,
-  UNIQUE(email)
-);
-INSERT INTO users (email, nickname, password, profile)
-VALUES ('admin@global.local', 'admin', '$2a$12$L/rFVHZonEAmydEfZyYR.exvJuDdMY6kX7BIdXcam.voTxeBc7YwK', 'Admin');
-INSERT INTO users (email, nickname, password, profile)
-VALUES ('user@global.local', 'user', '$2a$12$3.UvEUatM.2VbYEI2Y.YKeqn3QNc/k0h9S0Vde2vqvzScKt74ofaS', 'User');
-
 CREATE TABLE organizers (
     organizerId             SERIAL PRIMARY KEY,
     facebookId              VARCHAR(63),
@@ -70,17 +56,32 @@ CREATE TABLE organizers (
 );
 
 CREATE TABLE genres (
-    genreId                 SERIAL PRIMARY KEY,
-    name                    VARCHAR(255) NOT NULL,
-    UNIQUE(name)
+  genreId                 SERIAL PRIMARY KEY,
+  name                    VARCHAR(255) NOT NULL,
+  UNIQUE(name)
 );
 
 CREATE TABLE tracks (
-    trackId                 SERIAL PRIMARY KEY,
-    name                    VARCHAR(255) NOT NULL,
-    url                     VARCHAR(255) NOT NULL,
-    platform                VARCHAR(255) NOT NULL
+  trackId                 SERIAL PRIMARY KEY,
+  name                    VARCHAR(255) NOT NULL,
+  url                     VARCHAR(255) NOT NULL,
+  platform                VARCHAR(255) NOT NULL
 );
+
+
+CREATE TABLE users (
+  userId                    SERIAL PRIMARY KEY,
+  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  email                     VARCHAR(255) NOT NULL,
+  nickname                  VARCHAR(255) NOT NULL,
+  password                  VARCHAR(255) NOT NULL,
+  profile                   VARCHAR(255) NOT NULL,
+  UNIQUE(email)
+);
+INSERT INTO users (email, nickname, password, profile)
+VALUES ('admin@global.local', 'admin', '$2a$12$L/rFVHZonEAmydEfZyYR.exvJuDdMY6kX7BIdXcam.voTxeBc7YwK', 'Admin');
+INSERT INTO users (email, nickname, password, profile)
+VALUES ('user@global.local', 'user', '$2a$12$3.UvEUatM.2VbYEI2Y.YKeqn3QNc/k0h9S0Vde2vqvzScKt74ofaS', 'User');
 
 CREATE TABLE users_login (
   id                        SERIAL PRIMARY KEY,
@@ -341,7 +342,7 @@ CREATE TABLE account623 (
 
 
 CREATE TABLE eventsFollowed (
-  userId                   INT REFERENCES users(userId),
+  userId                   VARCHAR(255) REFERENCES users_login(userId),
   eventId                  INT REFERENCES events(eventId),
   PRIMARY KEY (userId, eventId)
 );

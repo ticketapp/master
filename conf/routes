@@ -1,65 +1,64 @@
 # Home page
-GET     /                          controllers.Application.index
+GET     /                               controllers.Application.index
 
 
-
-GET     /test                      controllers.Test.test1
-#GET     /test2/:pattern                     controllers.Test2.test2(pattern)
-#GET     /placesFacebookIds         controllers.PlaceController.placesFacebookIds
+GET     /test                           controllers.Test.test1
+#GET     /test2/:pattern                controllers.Test2.test2(pattern)
+#GET     /placesFacebookIds             controllers.PlaceController.placesFacebookIds
 
 
 ################################## Admin ################################################
-GET     /admin                     controllers.Admin.indexAdmin
-#POST    /admin/createTariff        controllers.Admin.createTariff
+GET     /admin                          controllers.Admin.indexAdmin
+#POST    /admin/createTariff            controllers.Admin.createTariff
 
 ################################## Events ###############################################
-GET     /events                     controllers.EventController.events
-GET     /events/:id                 controllers.EventController.event(id: Long)
-POST    /events/create              controllers.EventController.createEvent
-POST    /events/:userId/:eventId    controllers.EventController.followEvent(userId: Long, eventId: Long)
+GET     /events                         controllers.EventController.events
+GET     /events/:id                     controllers.EventController.event(id: Long)
+POST    /events/create                  controllers.EventController.createEvent
+POST    /events/:eventId/follow         controllers.EventController.followEvent(eventId: Long)
 GET     /events/containing/:pattern/:center     controllers.EventController.findEventsContaining(pattern: String, center:String)
-#GET     /events/circle/            controllers.EventController.findEventsInCircle(center = "")
-GET     /events/circle/:center      controllers.EventController.findEventsInCircle(center: String)
-GET     /events/city/:pattern       controllers.EventController.findEventsByCity(pattern: String)
+#GET     /events/circle/                controllers.EventController.findEventsInCircle(center = "")
+GET     /events/circle/:center          controllers.EventController.findEventsInCircle(center: String)
+GET     /events/city/:pattern           controllers.EventController.findEventsByCity(pattern: String)
 
 
 ################################## Artists ##############################################
 GET     /artists                        controllers.ArtistController.artists
 GET     /artists/:id                    controllers.ArtistController.artist(id: Long)
 POST    /artists/createArtist           controllers.ArtistController.createArtist
-POST    /artists/:userId/:artistId      controllers.ArtistController.followArtist(userId: Long, artistId: Long)
+POST    /artists/:artistId/follow       controllers.ArtistController.followArtist(artistId: Long)
 DELETE  /artists/:artistId              controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/containing/:pattern    controllers.ArtistController.findArtistsContaining(pattern: String)
 GET     /artists/facebookContaining/:pattern    controllers.ArtistController.findFacebookArtistsContaining(pattern: String)
 
 ################################## Places ###############################################
-GET     /places                     controllers.PlaceController.places
-GET     /places/:id                 controllers.PlaceController.place(id: Long)
-POST    /places/:userId/:placeId    controllers.PlaceController.followPlace(userId: Long, placeId: Long)
-GET     /places/containing/:pattern  controllers.PlaceController.findPlacesContaining(pattern: String)
-POST    /places/create              controllers.PlaceController.createPlace
-GET     /places/:placeId/events     controllers.EventController.eventsByPlace(placeId: Long)
+GET     /places                         controllers.PlaceController.places
+GET     /places/:id                     controllers.PlaceController.place(id: Long)
+POST    /places/:placeId/follow         controllers.PlaceController.followPlace(placeId: Long)
+GET     /places/containing/:pattern     controllers.PlaceController.findPlacesContaining(pattern: String)
+POST    /places/create                  controllers.PlaceController.createPlace
+GET     /places/:placeId/events         controllers.EventController.eventsByPlace(placeId: Long)
 
 ################################## Organizers ###############################################
 GET     /organizers                     controllers.OrganizerController.organizers
 GET     /organizers/:id                 controllers.OrganizerController.organizer(id: Long)
-POST    /organizers/:userId/:organizerId    controllers.OrganizerController.followOrganizer(userId: Long, organizerId: Long)
-GET     /organizers/containing/:pattern     controllers.OrganizerController.findOrganizersContaining(pattern: String)
+POST    /organizers/:organizerId/follow controllers.OrganizerController.followOrganizer(organizerId: Long)
+GET     /organizers/containing/:pattern controllers.OrganizerController.findOrganizersContaining(pattern: String)
 POST    /organizers/create              controllers.OrganizerController.createOrganizer
-GET     /organizers/:organizerId/events     controllers.EventController.eventsByOrganizer(organizerId: Long)
+GET     /organizers/:organizerId/events controllers.EventController.eventsByOrganizer(organizerId: Long)
 
 ################################## Infos ################################################
-GET     /infos                      controllers.Application.infos
+GET     /infos                          controllers.Application.infos
 
 
 ################################## Users ################################################
-GET     /users                      controllers.UserController.users
-GET     /users/:id                  controllers.UserController.user(id: Long)
-GET     /users/containing/:pattern  controllers.UserController.findUsersContaining(pattern: String)
-GET     /users/:userId/tools        controllers.UserController.findToolsById(userId: Long)
+GET     /users                          controllers.UserController.users
+GET     /users/:id                      controllers.UserController.user(id: Long)
+GET     /users/containing/:pattern      controllers.UserController.findUsersContaining(pattern: String)
+GET     /users/:userId/tools            controllers.UserController.findToolsById(userId: Long)
 
 ################################## Buy ticket ###########################################
-GET     /buyTicket                  controllers.TicketController.buyTicket
+GET     /buyTicket                      controllers.TicketController.buyTicket
 
 ################################## Accounting ###########################################
 GET     /orgaPayment                controllers.AccountingController.orgaPayment

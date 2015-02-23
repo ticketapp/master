@@ -1,6 +1,7 @@
 package jobs
 
 import java.util.Date
+import controllers.ArtistController.FacebookArtist
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.libs.json._
@@ -8,7 +9,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import models._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import controllers.WebServiceException
+import controllers.{ArtistController, WebServiceException}
 import play.api.libs.functional.syntax._
 
 object Scheduler {
@@ -29,6 +30,9 @@ object Scheduler {
     }
   }
 
+  def splitArtistNamesInTitle(title: String): List[String] = {
+    "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
+  }
 
   def getOrganizerInfos(organizerId: String): Future[List[Organizer]] = {
     val readOrganizer = (
@@ -69,6 +73,16 @@ object Scheduler {
     //l'adresse est vide
 
     val name = eventJson.as[String]((__ \ "name").read[String])
+
+
+
+    val listArtistsFromTitle: List[String] = splitArtistNamesInTitle(name)
+    println(listArtistsFromTitle)
+
+
+
+
+
     val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
     //println(facebookId) 783881178345234
 

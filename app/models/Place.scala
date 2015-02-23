@@ -129,8 +129,8 @@ object Place {
     images = Image.findAllByPlace(p.placeId).toList) )
   }
 
-  def followPlace(userId : Long, placeId : Long): Option[Long] = {
-    try {
+  def followPlace(placeId : Long)={//: Option[Long] = {
+    /*try {
       DB.withConnection { implicit connection =>
         SQL("insert into placesFollowed(userId, placeId) values ({userId}, {placeId})").on(
           'userId -> userId,
@@ -139,7 +139,7 @@ object Place {
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot follow place: " + e.getMessage)
-    }
+    }*/
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Option[Long] = {

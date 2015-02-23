@@ -31,8 +31,8 @@ object OrganizerController extends Controller {
     }
   }
 
-  def followOrganizer(userId : Long, organizerId : Long) = Action {
-    Organizer.followOrganizer(userId, organizerId)
+  def followOrganizer(organizerId : Long) = Action {
+    Organizer.followOrganizer(organizerId)
     Redirect(routes.Admin.indexAdmin())
   }
 
