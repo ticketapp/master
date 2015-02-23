@@ -1,20 +1,25 @@
-<div>
+<div class="zIndex1">
     <!--<a class="close float-right">X</a>-->
     <a ng-click="showLecteur = !showLecteur"><i class="fi-plus"></i> </a>
+    <a ng-click="playPause()">Play/pause</a>
 </div>
 <div ng-show="showLecteur">
-    <audio class="width100p" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
-    <iframe id="iframe-lecture" style="display: none"></iframe>
+    <audio class="width100p ng-hide" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
+    <iframe id="iframe-lecture" class="ng-hide" style="display: none"></iframe>
     <div id="youtubePlayer">
     </div>
-    <div class="playlistScroller" style="position: relative;top: 50px;margin-left: 220px; overflow-x: auto;">
+    <div class="playlistScroller" style="position: relative; overflow-x: auto;">
         <div class="playlistContener">
-            <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" style="width: 200px; display:inline-block; white-space: normal;" ng-click="play($index)" ng-repeat="track in playlist track by $index">
-                <img src="{{track.image}}" class="column large-5 padding0" />
-                <div class="column large-7 padding0">
-                    {{track.artist}}<br/>
-                    {{track.title | limitTo: 30}}<br/>
-                    {{track.from}}<br/>
+            <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" style="width: 200px; display:inline-block; white-space: normal;" ng-repeat="track in playlist track by $index">
+                <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
+                <div ng-click="play($index)">
+                    <div class="img-circularPlayer" style="background-image: url('{{track.image}}');">
+                    </div>
+                    <div class="trackInfos">
+                        {{track.artist}}<br/>
+                        {{track.title | limitTo: 30}}<br/>
+                        {{track.from}}<br/>
+                    </div>
                 </div>
             </div>
         </div>

@@ -193,7 +193,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
         }
     }
     function searchArtistFb () {
-        if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _research.length >= 2) {
+        if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _research.length >= 2 && _selArtist == true) {
             var artistFbIdList = [];
             function getArtistFbId(el) {
                 artistFbIdList.push(el.artistId);
@@ -256,10 +256,24 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
                 // or server returns response with an error status.
             });
     };
+    var typingTimer;
+    var doneTypingInterval = 1000;
+    $scope.research = function(newName) {
+        if (angular.isDefined(newName)) {
+            _research = newName;
+            if (_selArtist == true) {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(searchArtistFb, doneTypingInterval);
+            }
+            search();
+        }
+        return _research;
+    };
     $scope.selArtist = function(newName) {
         if (angular.isDefined(newName)) {
             _selArtist = newName;
             search();
+            searchArtistFb();
         }
         return _selArtist;
     };
@@ -283,18 +297,5 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
             search();
         }
         return _selUsr;
-    };
-    var typingTimer;
-    var doneTypingInterval = 1000;
-    $scope.research = function(newName) {
-        if (angular.isDefined(newName)) {
-            _research = newName;
-            if (_selArtist == true) {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(searchArtistFb, doneTypingInterval);
-            }
-            search();
-        }
-        return _research;
     };
 }]);
