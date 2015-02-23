@@ -1,6 +1,15 @@
 app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope',
     function ($scope, $routeParams, $http, $rootScope ){
     $scope.map = false;
+    $scope.follow = function (id) {
+    $http.post('/events/'+ id + '/follow').
+        success(function (data) {
+            console.log(data)
+        }).
+        error(function (data) {
+            console.log(data)
+        })
+    };
     $http.get('/events/' + $routeParams.id)
         .success(function(data, status){
             data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace("(", "");

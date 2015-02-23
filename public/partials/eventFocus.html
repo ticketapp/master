@@ -3,8 +3,9 @@
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
-        <h2 id="eventTitle">{{event.name}}</h2>
+        <h2 id="eventTitle" class="column large-10">{{event.name}}</h2>
     </div>
+    <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
     <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
         <div ng-bind-html="event.description" id="eventDescBind"></div>
     </div>
