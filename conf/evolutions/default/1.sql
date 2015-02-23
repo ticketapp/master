@@ -91,10 +91,10 @@ CREATE TABLE users_login (
   lastName                  VARCHAR(255) NOT NULL,
   fullName                  VARCHAR(255) NOT NULL,
   email                     VARCHAR(255),
-  avatarUrl                 VARCHAR(255),
+  avatarUrl                 TEXT,
   authMethod                VARCHAR(255) NOT NULL,
-  oAuth1Info                VARCHAR(255),
-  oAuth2Info                VARCHAR(255),
+  oAuth1Info                TEXT,
+  oAuth2Info                TEXT,
   passwordInfo              VARCHAR(255),
   UNIQUE(userId)
 );
@@ -115,7 +115,7 @@ CREATE TABLE events (
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
   geographicPoint           point,
-  description               TEXT NOT NULL,
+  description               TEXT,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP,
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
@@ -342,8 +342,8 @@ CREATE TABLE account623 (
 
 
 CREATE TABLE eventsFollowed (
-  userId                   VARCHAR(255) REFERENCES users_login(userId),
-  eventId                  INT REFERENCES events(eventId),
+  userId                   INT REFERENCES users_login(id),
+  eventId                  BIGINT REFERENCES events(eventId),
   PRIMARY KEY (userId, eventId)
 );
 

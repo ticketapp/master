@@ -16,11 +16,16 @@ object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
   val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
-  def formatEventDescription(eventDescription: String): String = {
-    linkPattern.replaceAllIn(eventDescription, m => "<a href='http://" + m + "'>" + m + "</a>")
-      .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
-      .replaceAll( """\n""", "<br/>")
-      .replaceAll( """\t""", "    ").replaceAll( """</a>/""", "</a> ") + "</div>"
+  def formatDescription(description: Option[String]): Option[String] = {
+    description match {
+      case None => None
+      case Some(desc) => Some("<div class='column large-12'>" +
+        linkPattern.replaceAllIn(desc, m => "<a href='http://" + m + "'>" + m + "</a>")
+        .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
+        .replaceAll( """\n""", "<br/>")
+        .replaceAll( """\t""", "    ").replaceAll( """</a>/""", "</a> ") + "</div>")
+    }
+
   }
 
   def createNewImageIfSourceExists(source: Option[String]): List[Image] = {
@@ -44,7 +49,8 @@ object Scheduler {
         (__ \ "website").readNullable[String]
       ).apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
                public_transit: Option[String], website: Option[String]) =>
-        Organizer(-1L, Some(organizerId), name, description, phone, public_transit, website, verified = false,
+        Organizer(-1L, Some(organizerId), name, formatDescription(description),
+          phone, public_transit, website, verified = false,
           createNewImageIfSourceExists(source)) )
 
     WS.url("https://graph.facebook.com/v2.2/" + organizerId +
@@ -54,7 +60,7 @@ object Scheduler {
       }
   }
 
-  def saveEvent(eventDescription: String, eventResp: Response, placeId: Long, imgPath: String) = {
+  def saveEvent(eventDescription: Option[String], eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
 
     val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
@@ -136,9 +142,9 @@ object Scheduler {
           "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
           .get onComplete {
           case Success(eventDetailed) =>
-            val description = eventDetailed.json.as[String]((__ \ "description").read[String])
+            val description = eventDetailed.json.asOpt[String]((__ \ "description").read[String])
             val imgPath = eventDetailed.json.as[String]((__ \ "cover" \ "source").read[String])
-            saveEvent(formatEventDescription(description), eventDetailed, placeId, imgPath)
+            saveEvent(formatDescription(description), eventDetailed, placeId, imgPath)
           case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
         } )
       case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)

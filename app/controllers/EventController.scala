@@ -40,7 +40,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     mapping(
       "name" -> nonEmptyText(2),
       "geographicPoint" -> optional(nonEmptyText(3)),
-      "description" -> nonEmptyText(2),
+      "description" -> optional(nonEmptyText(2)),
       "startTime" -> date("yyyy-MM-dd HH:mm"),
       "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
       "ageRestriction" -> number,
@@ -64,16 +64,6 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     )(Event.formApply)(Event.formUnapply)
   )
 
-  /*
-  addressId: Long,
-                    isEvent: Boolean,
-                    isPlace: Boolean,
-                    geographicPoint: Option[String],
-                    city: Option[String],
-                    zip: Option[String],
-                    street: Option[String])
-   */
-
   def createEvent = Action { implicit request =>
     eventBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
@@ -86,21 +76,10 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     )
   }
 
-  /*
-  def index = UserAwareAction { implicit request =>
-    Ticket.createQrCode(2)
-    val userName = request.user match {
-      case Some(user) => user.fullName
-      case _ => "guest"
-    }
-    println("Hello %s".format(userName))
-    Ok(views.html.index())
-  }
-   */
-
   def followEvent(eventId : Long) = SecuredAction { implicit request =>
     Event.followEvent(request.user.identityId.userId, eventId)
-    Ok(Json.toJson("Event well saved"))
+    //Redirect(request.getHeader("referer"))
+    Ok
   }
 
   def findEventsInCircle(peripheral: String) = Action {

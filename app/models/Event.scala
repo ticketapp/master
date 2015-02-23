@@ -15,7 +15,7 @@ case class Event(eventId: Long,
                  creationDateTime: Date,
                  name: String,
                  geographicPoint: Option[String],
-                 description: String,
+                 description: Option[String],
                  startTime: Date,
                  endTime: Option[Date],
                  ageRestriction: Int,
@@ -28,14 +28,14 @@ case class Event(eventId: Long,
 
 
 object Event {
-  def formApply(name: String, geographicPoint: Option[String], description: String, startTime: Date,
+  def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
                 endTime: Option[Date], ageRestriction: Int, images: List[Image], tariffs: List[Tariff],
                 addresses: List[Address]): Event = {
     new Event(-1L, None, true, true, new Date, name, geographicPoint, description, startTime, endTime, ageRestriction,
       images, List(), List(), tariffs, addresses)
   }
 
-  def formUnapply(event: Event): Option[(String, Option[String], String, Date, Option[Date], Int, List[Image],
+  def formUnapply(event: Event): Option[(String, Option[String], Option[String], Date, Option[Date], Int, List[Image],
     List[Tariff], List[Address])] = {
     Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,
       event.images, event.tariffs, event.addresses))
@@ -49,7 +49,7 @@ object Event {
       get[Date]("creationDateTime") ~
       get[String]("name") ~
       get[Option[String]]("geographicPoint") ~
-      get[String]("description") ~
+      get[Option[String]]("description") ~
       get[Date]("startTime") ~
       get[Option[Date]]("endTime") ~
       get[Int]("ageRestriction") map {
@@ -287,10 +287,17 @@ object Event {
   def followEvent(userId: String, eventId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("insert into eventsFollowed(userId, eventId) values ({userId}, {eventId})").on(
-          'userId -> userId,
-          'eventId -> eventId
-        ).executeInsert()
+        SQL("""select id from users_login where userId = {userId}"""
+        ).on(
+          'userId -> userId
+        ).as(scalar[Option[Long]].single) match {
+          case None => throw new DAOException("Cannot follow event: didn't find id with this userId")
+          case Some(id) => SQL("""INSERT INTO eventsFollowed(userId, eventId)
+          VALUES ({userId}, {eventId})""").on(
+              'userId -> id,
+              'eventId -> eventId
+            ).executeInsert()
+        }
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot follow event: " + e.getMessage)
