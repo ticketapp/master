@@ -149,7 +149,7 @@ object Event {
   }
 
   def findAllContaining(pattern: String, center: String): Seq[Event] = {
-    val patternRegex = """(\(\d+\.\d*,\d+\.\d*\))""".r
+    val patternRegex = """(\(-?\d+\.\d*,-?\d+\.\d*\))""".r
     center match {
       case patternRegex(_) =>
       try {

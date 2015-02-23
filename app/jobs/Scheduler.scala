@@ -7,6 +7,7 @@ import play.api.libs.ws.Response
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
+import services.Utilities._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import controllers.{ArtistController, WebServiceException}
@@ -14,6 +15,7 @@ import play.api.libs.functional.syntax._
 
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
+  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
   val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
   def formatDescription(description: Option[String]): Option[String] = {
@@ -63,17 +65,29 @@ object Scheduler {
   def saveEvent(eventDescription: Option[String], eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
 
-    val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
+    /*val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
       case Some(latitude) =>
         (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
           case Some(longitude) => Some(s"($latitude,$longitude)")
           case _ => None
         }
       case _ => None
-    }
+    }*/
     val street = (eventJson \ "venue" \ "street").as[Option[String]]
     val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
     val city = (eventJson \ "venue" \ "city").as[Option[String]]
+
+
+    WS.url("https://maps.googleapis.com/maps/api/geocode/json?address=" +
+      normalizeString(street.getOrElse("").replaceAll("+", "")) +
+        normalizeString(zip.getOrElse("").replaceAll("+", "")) +
+        normalizeString(city.getOrElse("").replaceAll("+", "")) +
+        "&key=" + youtubeKey).get().map { geographicPoint =>
+          println(geographicPoint.json)
+    }
+
+    val geographicPoint = None
+
     val address: Address = new Address(-1l, geographicPoint, city, zip, street)
      // + tester si
     //l'adresse est vide
