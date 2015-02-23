@@ -293,7 +293,6 @@ top: 0;
             display: inline-flex;
             margin-top: 50px;}
         .ng-lecture{
-            height : 200px;
             bottom: 0;
             position: fixed;
             width: 100%;

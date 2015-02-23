@@ -12,21 +12,7 @@
         <a href="#" class="btn btn-warning btn_event">Itineraire</a>
         <a href="{{place.webSite}}" class="row-fluid left">{{place.webSite}}</a>
     </div>
-    <tabset class="contentprofil">
-        <tab data-heading="Evenements">
-            <div class="tab-pane active">
-                <ul id="events_contener" layout="row" layout-wrap>
-                    <li class="data-ng-event" data-ng-repeat="event in events" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
-                </ul>
-            </div>
-        </tab>
-        <tab data-heading="Vidéos">
-            <div class="tab-pane active ng-video">
-            </div>
-        </tab>
-        <tab data-heading="Musique">
-            <div class="tab-pane active ng-musique">
-            </div>
-        </tab>
-    </tabset>
+    <ul id="events_contener" layout="row" layout-wrap>
+        <li class="data-ng-event margin0" data-ng-repeat="event in events" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+    </ul>
 </div>

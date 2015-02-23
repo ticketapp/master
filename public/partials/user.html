@@ -1,9 +1,44 @@
-<div id="banprofil">
-    <img src="assets/img/1.jpg" alt="">
+<div class="parallax-background" style="background: #ffffff!important;">
+    <img class="width100p" src="{{ organizer.images[0].path }}"/>
 </div>
-<div class="column large-12" id="profil_contenu">
-    <div>
-        <img src="assets/img/min.jpg" alt="">
+<div class="parallax-content column" style="background: #ffffff">
+    <div class="columns large-12">
+        <h2 id="eventTitle">{{organizer.name}}</h2>
+    </div>
+    <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
+        <ul id="events_contener" class="margin0" layout="row" layout-wrap>
+            <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents" flex-gt-lg="50" flex-md="50" flex-gt-md="50" flex-sm="100"></li>
+        </ul>
+    </div>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <h3>{{organizer.name}}</h3>
+    </div>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <h2>Lieu</h2>
+        <!--<div class="column large-4 absolute" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-left: 5px; margin-top: 5px; z-index: 1;">
+            <h4>{{event.place}}</h4>
+            <div style="font-size: 12px;">
+                {{event.addresses[0].street}}<br/>
+                {{event.addresses[0].zip}}
+                {{event.addresses[0].city}}
+            </div>
+        </div>-->
+        <map ng-if="map"
+             zoom="15"
+             center="[{{event.addresses[0].geographicPoint}}]"
+             scrollwheel="false"
+             navigationControl="false"
+             mapTypeControl="false"
+             scaleControl="false"
+             style="height: 300px"
+             class="width100p">
+            <marker visible="true" position="{{event.addresses[0].geographicPoint}}" icon="../assets/img/marker.png">
+            </marker>
+        </map>
+    </div>
+    <div ng-if="$root.window == 'small' || $root.window == 'medium'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
+        <div ng-bind-html="event.description"></div>
     </div>
 </div>
-<b  class="column large-12" data-ng-model="name">{{user.nickname}}</b>
+
+

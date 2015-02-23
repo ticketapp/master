@@ -1,6 +1,6 @@
 <div>
     <!--<a class="close float-right">X</a>-->
-    <a class="reduire float-right" ng-click="showLecteur = !showLecteur"> - </a>
+    <a ng-click="showLecteur = !showLecteur"><i class="fi-plus"></i> </a>
 </div>
 <div ng-show="showLecteur">
     <audio class="width100p" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
@@ -13,7 +13,7 @@
                 <img src="{{track.image}}" class="column large-5 padding0" />
                 <div class="column large-7 padding0">
                     {{track.artist}}<br/>
-                    {{track.name | limitTo: 30}}<br/>
+                    {{track.title | limitTo: 30}}<br/>
                     {{track.from}}<br/>
                 </div>
             </div>

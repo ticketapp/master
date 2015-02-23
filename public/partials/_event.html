@@ -8,16 +8,17 @@ overflow: hidden;">{{ event.name }}</h4></a>
         Par
         <a href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
            data-tooltip-placement="bottom"
-           data-tooltip-html-unsafe="<div><img src='assets/img/2.jpg'/><a href='#/user/{{organizer.organizerId}}'><h4>{{organizer.name}}</h4></a></div>"
+           data-tooltip-html-unsafe="<div><div style='height:112.8px; overflow:hidden;'><img src='{{ organizer.images[0].path }}'/></div><a href='#/user/{{organizer.organizerId}}'><h4 class='column large-6'>{{organizer.name}}</h4></a><button style='margin-top:5px; float:right'>Suivre</button></div>"
            data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover">{{ organizer.name }} </a>
 
         <br/>
         <div class="infos_event">
-            <i class="icon-calendar"></i>{{ event.startSellingTime | date:'dd.MM' }}
-            <i class="icon-time"></i> {{ event.startSellingTime | date:'hh:mm' }} <br/>
+            <i class="icon-calendar"></i>{{ event.startTime | date:'dd/MM' }}
+            <i class="icon-time"></i> {{ event.startTime | date:'HH:mm' }}<b ng-show="event.endTime"> - </b>
+            <i class="icon-calendar"></i>{{ event.endTime | date:'dd/MM' }}
+            <i class="icon-time"></i> {{ event.endTime | date:'HH:mm' }} <br/>
             <i class="icon-map-marker"></i>
-            <a href="#/lieu/{{ place.name }}" data-ng-repeat="place in event.places">{{ place.name }}</a>
-            <a href="#/lieu/{{event.nickname}}" data-ng-repeat="nickname in event.users.nickname" >{{ nickname }} </a>
+            <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a>
         </div>
         <br/>
         <div class="description_event_min">
