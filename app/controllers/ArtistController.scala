@@ -212,7 +212,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     WS.url("http://api.soundcloud.com/users?q=" + normalizeString(namePattern) + "&client_id=" + soundCloudClientId)
       .get().map { users =>
-      users.json.asOpt[Seq[Long]](readSoundCloudIds).getOrElse(Seq())
+      users.json.asOpt[Seq[Long]](readSoundCloudIds).getOrElse(Seq.empty)
     }
   }
 
@@ -221,7 +221,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Future.sequence(
       listIds.map { id =>
         WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles?client_id=" + soundCloudClientId).get().map {
-          websites => (id, websites.json.asOpt[Seq[Option[String]]](readUrls).getOrElse(Seq()).flatten)
+          websites => (id, websites.json.asOpt[Seq[Option[String]]](readUrls).getOrElse(Seq.empty).flatten)
         }
       }
     )
