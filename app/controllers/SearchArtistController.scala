@@ -113,24 +113,25 @@ object SearchArtistController extends Controller {
       }
     }
 
-  def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
-    var soundCloudLink: String = ""
-    for (site <- artist.websites) {
-      site.indexOf("soundcloud.com") match {
-        case -1 =>
-        case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
+    def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
+      var soundCloudLink: String = ""
+      for (site <- artist.websites) {
+        site.indexOf("soundcloud.com") match {
+          case -1 =>
+          case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
+        }
+      }
+      soundCloudLink match {
+        case "" => Future { artist.soundCloudTracks }
+        case scLink => findSoundCloudTracks(scLink)
       }
     }
-    soundCloudLink match {
-      case "" => Future { artist.soundCloudTracks }
-      case scLink => findSoundCloudTracks(scLink)
-    }
-  }
 
     def findSoundCloudTracks(scLink: String): Future[Seq[SoundCloudTrack]] = {
       val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTracksReads)
       WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
         soundCloudClientId).get().flatMap { soundCloudTracks =>
+        println(scLink)
         /*if (scLink == "rone-music") {
           println(soundCloudTracks.json)
           println(soundCloudTracks.json.as[Seq[SoundCloudTrack]](readTracks))
@@ -161,9 +162,6 @@ object SearchArtistController extends Controller {
 
     def compareArtistWebsitesWSCWebsitesAndAddTracks(artist: FacebookArtist, websitesAndIds: Seq[(Long, Seq[String])])
     :Future[Seq[SoundCloudTrack]] = {
-      /*println(websitesAndIds)
-      println(artist.link)
-      println(artist.websites)*/
       var matchedId: Long = 0
       for (websitesAndId <- websitesAndIds) {
         for (website <- websitesAndId._2) {
@@ -193,7 +191,7 @@ object SearchArtistController extends Controller {
     def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
       findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
         facebookArtists.map { facebookArtist =>
-          findSoundCloudTracks(facebookArtist.name).map { soundCloudTracks =>
+          findSoundCloudTracksForArtist(facebookArtist).map { soundCloudTracks =>
             facebookArtist.copy(soundCloudTracks = soundCloudTracks)
           }
         }
