@@ -28,9 +28,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
 
   val artistBindingForm = Form( mapping(
-      "facebookId" -> optional(nonEmptyText(2)),
-      "artistName" -> nonEmptyText(2)
-    )(Artist.formApply)(Artist.formUnapply)
+    "facebookId" -> optional(nonEmptyText(2)),
+    "artistName" -> nonEmptyText(2)
+  )(Artist.formApply)(Artist.formUnapply)
   )
 
   def createArtist = Action { implicit request =>
@@ -67,7 +67,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
                             cover: String,
                             websites: List[String],
                             link: String,
-                            soundCloudTracks: Seq[SoundCloudTrack] = List(),
+                            soundCloudTracks: List[SoundCloudTrack] = List(),
                             youtubeTracks: Seq[YoutubeTrack] = List() )
 
 
@@ -88,7 +88,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           listOfWebSitesToReturn = listOfWebSitesToReturn :::
             """(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => " ").replace("www.", "").split(" ").toList
               .filter(_ != "").map { site =>
-                removeLastSlashIfExists(site.toLowerCase)
+              removeLastSlashIfExists(site.toLowerCase)
             }
         }
         listOfWebSitesToReturn
@@ -123,7 +123,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
       + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
       .map { response =>
-      println("ok")
       (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtists).getOrElse(Seq()).take(20)
     }
   }
@@ -170,22 +169,20 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       case "" => Future { artist }
       case scLink =>
         WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
-        soundCloudClientId).get().flatMap { soundCloudTracks =>
+          soundCloudClientId).get().flatMap { soundCloudTracks =>
           findSoundCloudUserImageIfNoTrackImage(scLink, soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks)
             .getOrElse(List()))
             .map { soundCloudTracksWMoreImages: List[SoundCloudTrack] =>
-              artist.copy(soundCloudTracks = soundCloudTracksWMoreImages)
-            }
-      }
+            artist.copy(soundCloudTracks = soundCloudTracksWMoreImages)
+          }
+        }
     }
   }
 
   def findSoundCloudIds(namePattern: String): Future[Seq[Long]] = {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     WS.url("http://api.soundcloud.com/users?q=" + normalizeString(namePattern) + "&client_id=" + soundCloudClientId)
-      .get().map { users =>
-      users.json.asOpt[Seq[Long]](readSoundCloudIds).getOrElse(Seq.empty)
-    }
+      .get().map { _.json.asOpt[Seq[Long]](readSoundCloudIds).getOrElse(Seq.empty) }
   }
 
   def findSoundCloudWebsites(listIds: Seq[Long]): Future[Seq[(Long, Seq[String])]] = {
@@ -199,31 +196,46 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     )
   }
 
-  def compareArtistWebsitesWSCWebsitesAndAddTracks(artistName: String, artistLink: String, artistWebsites: Seq[String],
-                                                   websitesAndIds: Seq[(Long, Seq[String])]):
-  Future[Seq[SoundCloudTrack]] = {
-    val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTracksReads)
+  def compareArtistWebsitesWSCWebsitesAndAddTracks(artist: FacebookArtist, websitesAndIds: Seq[(Long, Seq[String])])
+  :Future[FacebookArtist] = {
+    val readTracks: Reads[List[SoundCloudTrack]] = Reads.list(soundCloudTracksReads)
     var matchedId: Long = 0
     for (websitesAndId <- websitesAndIds) {
       for (website <- websitesAndId._2) {
         val site = removeLastSlashIfExists("""(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => "").toLowerCase )
-        if (site == artistLink || artistWebsites.indexOf(site) > -1)
-          matchedId = websitesAndId._1
+        println("artistId" + artist.id + "site: " + site + " artistLink: " + artist.link + " artist.websites: " + artist.websites)
+        if (site == artist.link || artist.websites.indexOf(site) > -1)
+          println("\n\n\n\nYEAHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n\n")
+        matchedId = websitesAndId._1
       }
     }
 
-    if (matchedId != 0)
+    if (matchedId != 0) {
       WS.url("http://api.soundcloud.com/users/" + matchedId + "/tracks?client_id=" + soundCloudClientId)
-        .get().map { _.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq.empty) }
-    else
-      Future{ Seq.empty }
+        .get().map { soundCloudTracks =>
+        artist.copy(soundCloudTracks = soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks).getOrElse(List()))
+      }
+    } else {
+      Future{ artist }
+    }
   }
 
-  def findSoundCloudTracksNotDefinedInFb(artistName: String, artistLink: String, artistWebsites: Seq[String]):
-  Future[Seq[SoundCloudTrack]] = {
-    findSoundCloudIds(artistName).flatMap { ids =>
-      findSoundCloudWebsites(ids).flatMap { websitesAndIds =>
-        compareArtistWebsitesWSCWebsitesAndAddTracks(artistName, artistLink, artistWebsites, websitesAndIds)
+  def findSoundCloudTracksNotDefinedInFb(artist: FacebookArtist): Future[FacebookArtist] = {
+    artist.soundCloudTracks match {
+      case tracks: List[soundCloudTracks] if tracks.isEmpty =>
+        findSoundCloudIds(artist.name).flatMap { ids =>
+          findSoundCloudWebsites(ids).flatMap{ websitesAndIds =>
+            compareArtistWebsitesWSCWebsitesAndAddTracks(artist, websitesAndIds)
+          }
+        }
+      case _ => Future{ artist }
+    }
+  }
+
+  def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
+    findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
+      facebookArtists.map { facebookArtist =>
+        findSoundCloudTracks(facebookArtist)
       }
     }
   }
@@ -279,7 +291,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
-        println(trackTitle)
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
           normalizeString(trackTitle) + normalizeString(artistName) +
           "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
@@ -307,45 +318,14 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
-    findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
-      facebookArtists.map { facebookArtist =>
-        findSoundCloudTracks(facebookArtist)
-      }
-    }
-  }
-
   def findFacebookArtistsContaining(pattern: String) = Action.async {
     val sanitizedPattern = normalizeString(pattern.replaceAll(" ", "+"))
-
-
-    //val facebookArtist = findFacebookArtists(sanitizedPattern)
-    /*returnFutureArtistsWSoundCloudTracks(sanitizedPattern).map { seqFutureArtistWSoundCloudTracks: Seq[Future[FacebookArtist]] =>
-      val futureSeqArtistWSoundCloudTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqFutureArtistWSoundCloudTracks)
-      val artistWMoreSoundCloudTracks: Future[Seq[Future[FacebookArtist]]] =
-        futureSeqArtistWSoundCloudTracks.map { seqArtist: Seq[FacebookArtist] =>
-          seqArtist.map { findSoundCloudTracksNotDefinedInFb }
-      }
-
-      for {
-
-      } yield {
-
-      }
-    }*/
-
-
     returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { seqFutureArtist: Seq[Future[FacebookArtist]] =>
       val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
 
         val seqFutureArtistWMoreSCTracks: Seq[Future[FacebookArtist]] = seqArtist.map { artist: FacebookArtist =>
-          artist.soundCloudTracks match {
-            case sCTracks if sCTracks.isEmpty => Future { artist }
-            case _ => findSoundCloudTracksNotDefinedInFb(artist.name, artist.link, artist.websites).map { soundCloudTracks =>
-              artist.copy (soundCloudTracks = soundCloudTracks)
-            }
-          }
+          findSoundCloudTracksNotDefinedInFb(artist)
         }
         val futureSeqArtistWMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqFutureArtistWMoreSCTracks)
 
