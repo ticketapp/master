@@ -311,7 +311,7 @@ top: 0;
         }
         .trackContener {
             opacity: 0.6;
-            margin: 10px;
+            margin: 5px;
             box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
         }
         .trackContener:hover {
