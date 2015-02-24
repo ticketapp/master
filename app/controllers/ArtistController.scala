@@ -88,7 +88,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           listOfWebSitesToReturn = listOfWebSitesToReturn :::
             """(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => " ").replace("www.", "").split(" ").toList
               .filter(_ != "").map { site =>
-                removeLastSlashIfExists(site)
+                removeLastSlashIfExists(site.toLowerCase)
             }
         }
         listOfWebSitesToReturn
@@ -116,7 +116,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     }
     val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
       artists.map{ case (name, id, cover, websites, link) =>
-        FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites), link)
+        FacebookArtist(name, id, cover, websitesStringToWebsitesList(websites),
+          removeLastSlashIfExists("""(https?:\/\/(www\.)?)""".r.replaceAllIn(link, p => "").toLowerCase))
       }
     }
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
@@ -170,38 +171,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       case scLink =>
         WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
         soundCloudClientId).get().flatMap { soundCloudTracks =>
-          /*println("#########################")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(scLink + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(normalizeString(scLink) + "|")
-          println(soundCloudTracks.json)*/
-          //println("#########################")
           findSoundCloudUserImageIfNoTrackImage(scLink, soundCloudTracks.json.asOpt[List[SoundCloudTrack]](readTracks)
             .getOrElse(List()))
             .map { soundCloudTracksWMoreImages: List[SoundCloudTrack] =>
-              //println(normalizeString(scLink))
-              //println(soundCloudTracksWMoreImages)
-              //println("#########################")
               artist.copy(soundCloudTracks = soundCloudTracksWMoreImages)
             }
       }
@@ -233,8 +205,11 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     var matchedId: Long = 0
     for (websitesAndId <- websitesAndIds) {
       for (website <- websitesAndId._2) {
-        val site = """(https?:\/\/(www\.)?)""".r.replaceAllIn(website.replaceAll(" ", ""), p => "")
-        if (site == artist.link || artist.websites.indexOf(site) > -1) { matchedId = websitesAndId._1 }
+        val site = removeLastSlashIfExists("""(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => "").toLowerCase )
+        println("artistId" + artist.id + "site: " + site + " artistLink: " + artist.link + " artist.websites: " + artist.websites)
+        if (site == artist.link || artist.websites.indexOf(site) > -1)
+          println("\n\n\n\nYEAHHHHHHHHHHHHHHHHHHHHHHHH\n\n\n\n")
+          matchedId = websitesAndId._1
       }
     }
 
