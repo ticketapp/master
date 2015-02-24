@@ -88,15 +88,14 @@ object SearchArtistController extends Controller {
     def findSoundCloudUserImageIfNoTrackImage(soundCloudLink: String, soundCloudTracks: Seq[SoundCloudTrack]):
     Future[Seq[SoundCloudTrack]] = {
       @tailrec
-      def isThereASoundCloudTrackWithoutImage(soundCloudTracks: Seq[SoundCloudTrack]): Boolean = {
-        soundCloudTracks.toList match {
+      def isThereASoundCloudTrackWithoutImage(soundCloudTracks: List[SoundCloudTrack]): Boolean = {
+        soundCloudTracks match {
           case x :: tail if x.artwork_url == None => true
           case Nil => false
           case x :: tail  => isThereASoundCloudTrackWithoutImage(tail)
         }
       }
-      if (isThereASoundCloudTrackWithoutImage(soundCloudTracks)) {
-        println("yes there is")
+      if (isThereASoundCloudTrackWithoutImage(soundCloudTracks.toList)) {
         val readUrl: Reads[String] = (__ \ "avatar_url").read[String]
         WS.url("http://api.soundcloud.com/users/" + normalizeString(soundCloudLink) + "?client_id=" +
           soundCloudClientId).get().map { user =>
@@ -114,24 +113,30 @@ object SearchArtistController extends Controller {
       }
     }
 
-    def findSoundCloudTracks(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
-      var soundCloudLink: String = ""
-      for (site <- artist.websites) {
-        site.indexOf("soundcloud.com") match {
-          case -1 =>
-          case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
-        }
+  def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
+    var soundCloudLink: String = ""
+    for (site <- artist.websites) {
+      site.indexOf("soundcloud.com") match {
+        case -1 =>
+        case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
       }
+    }
+    soundCloudLink match {
+      case "" => Future { artist.soundCloudTracks }
+      case scLink => findSoundCloudTracks(scLink)
+    }
+  }
 
-      soundCloudLink match {
-        case "" => Future { artist.soundCloudTracks }
-        case scLink =>
-          val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTracksReads)
-          WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
-            soundCloudClientId).get().flatMap { soundCloudTracks =>
-              findSoundCloudUserImageIfNoTrackImage(scLink,
-                soundCloudTracks.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq()) )
-          }
+    def findSoundCloudTracks(scLink: String): Future[Seq[SoundCloudTrack]] = {
+      val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTracksReads)
+      WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
+        soundCloudClientId).get().flatMap { soundCloudTracks =>
+        /*if (scLink == "rone-music") {
+          println(soundCloudTracks.json)
+          println(soundCloudTracks.json.as[Seq[SoundCloudTrack]](readTracks))
+        }*/
+        findSoundCloudUserImageIfNoTrackImage(scLink,
+          soundCloudTracks.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq()) )
       }
     }
 
@@ -167,18 +172,9 @@ object SearchArtistController extends Controller {
             matchedId = websitesAndId._1
         }
       }
-
-      if (matchedId != 0) {
-        val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTracksReads)
-        WS.url("http://api.soundcloud.com/users/" + matchedId + "/tracks?client_id=" + soundCloudClientId)
-          .get().map { a =>
-          /*if (artist.link == "facebook.com/roneofficial") {
-            println(a.json)
-            println(a.json.as[Seq[SoundCloudTrack]](readTracks))
-          }*/
-          a.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq())
-        }
-      } else
+      if (matchedId != 0)
+        findSoundCloudTracks(matchedId.toString)
+      else
         Future{ artist.soundCloudTracks }
     }
 
@@ -197,7 +193,7 @@ object SearchArtistController extends Controller {
     def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
       findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
         facebookArtists.map { facebookArtist =>
-          findSoundCloudTracks(facebookArtist).map { soundCloudTracks =>
+          findSoundCloudTracks(facebookArtist.name).map { soundCloudTracks =>
             facebookArtist.copy(soundCloudTracks = soundCloudTracks)
           }
         }
