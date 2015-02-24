@@ -26,11 +26,23 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         $rootScope.playlist.splice(index, 1);
     };
     $scope.play = function (i) {
+        if (typeof(updateProgressYt) != "undefined") {
+            clearInterval(updateProgressYt);
+        }
         $scope.trackActive = i;
+        $scope.prevTrack = function () {
+            i--;
+            $scope.play(i);
+        };
+        $scope.nextTrack = function () {
+            i++;
+            $scope.play(i);
+        };
         if ($rootScope.playlist[i].from == 'soundcloud') {
             //document.getElementById('youtubePlayer').classList.add('ng-hide');
             //document.getElementById('musicPlayer').classList.remove('ng-hide');
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
+            document.getElementById('musicPlayer').removeAttribute('src');
             document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
             play = true;
             $scope.playPause = function () {
@@ -42,6 +54,19 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     play = false;
                 }
             };
+            function updateProgress() {
+                var progress = document.getElementById("progress");
+                var value = 0;
+                console.log(document.getElementById('musicPlayer').duration);
+                console.log(document.getElementById('musicPlayer').currentTime);
+                if (document.getElementById('musicPlayer').currentTime > 0) {
+                    value = 100 / document.getElementById('musicPlayer').duration * document.getElementById('musicPlayer').currentTime;
+                    console.log(value)
+                }
+                progress.style.width = value + "%";
+                console.log(value)
+            }
+            document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
             if (i > 0) {
                 function goToTrackActive () {
                     if (document.getElementsByClassName('trackContener').length >= i) {
@@ -90,6 +115,30 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
 
             // when video ends
             function onPlayerStateChange(event) {
+                if (event.data === 1) {
+                    console.log('yoyo');
+                    var duration = event.target.getDuration();
+                    var curentDuration = event.target.getCurrentTime();
+                    updateProgressYt = setInterval(function () {
+                        curentDuration = event.target.getCurrentTime();
+                        console.log('yo');
+                        var prog = document.getElementById("progress");
+                        var val = 0;
+                        if (curentDuration > 0) {
+                            val = 100 / duration * curentDuration;
+                        }
+                        prog.style.width = val + "%";
+                        if (val == 100) {
+                            if (typeof(updateProgressYt) != "undefined") {
+                                clearInterval(updateProgressYt);
+                            }
+                        }
+                    }, 10);
+                } else {
+                    if (typeof(updateProgressYt) != "undefined") {
+                        clearInterval(updateProgressYt);
+                    }
+                }
                 if(event.data === 0) {
                     i++;
                     $scope.play(i);
@@ -109,7 +158,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             i++;
             $scope.play(i);
         });
-
     };
     //play(i)
 }]);

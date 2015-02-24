@@ -2,6 +2,11 @@
     <!--<a class="close float-right">X</a>-->
     <a ng-click="showLecteur = !showLecteur"><i class="fi-plus"></i> </a>
     <a ng-click="playPause()">Play/pause</a>
+    <a ng-click="prevTrack()">Prev</a>
+    <a ng-click="nextTrack()">Next</a>
+    <div id="progressBar" class="width100p">
+        <span id="progress" style=" background-color:#008CBA;height:2px;display:inline-block;"></span>
+    </div>
 </div>
 <div ng-show="showLecteur">
     <audio class="width100p ng-hide" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
@@ -17,7 +22,7 @@
                     </div>
                     <div class="trackInfos">
                         {{track.artist}}<br/>
-                        {{track.title | limitTo: 30}}<br/>
+                        {{track.title | limitTo: 32}}<br/>
                         {{track.from}}<br/>
                     </div>
                 </div>
