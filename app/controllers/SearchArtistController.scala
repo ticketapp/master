@@ -23,7 +23,7 @@ object SearchArtistController extends Controller {
                               websites: Seq[String],
                               link: String,
                               soundCloudTracks: Seq[SoundCloudTrack] = Seq(),
-                              youtubeTracks: Seq[YoutubeTrack] = Seq() )
+                              youtubeTracks: Set[YoutubeTrack] = Set() )
 
 
     def removeLastSlashIfExists(string: String): String  = {
@@ -128,7 +128,6 @@ object SearchArtistController extends Controller {
       }*/
       WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
         soundCloudClientId).get().flatMap { soundCloudTracks =>
-        println(scLink)
         findSoundCloudUserImageIfNoTrackImage(scLink,
           soundCloudTracks.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq()) )
       }
@@ -217,6 +216,7 @@ object SearchArtistController extends Controller {
       futureSeqIndexEchonestIdAndFacebookId.map { seqIndexEchonestIdAndFacebookId =>
         var toBeReturned: Option[String] = None
         for (tuple <- seqIndexEchonestIdAndFacebookId) {
+          println(tuple._2)
           if (tuple._2.dropRight(1).substring(1) == artistId) //remove "
             toBeReturned = Some(tuple._1)
         }
@@ -233,7 +233,7 @@ object SearchArtistController extends Controller {
       }
     }
 
-    def findYoutubeVideos(tracksTitle: Seq[String], artistName: String): Future[Seq[YoutubeTrack]] = {
+    def findYoutubeVideos(tracksTitle: Seq[String], artistName: String): Future[Set[YoutubeTrack]] = {
       implicit val youtubeTrackReads: Reads[YoutubeTrack] = (
         (JsPath \ "id" \ "videoId").read[String] and
           (JsPath \ "snippet" \ "title").read[String] and
@@ -245,25 +245,25 @@ object SearchArtistController extends Controller {
           WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
             normalizeString(trackTitle) + normalizeString(artistName) +
             "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
-            (video.json \ "items").asOpt[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)).getOrElse(Seq.empty)
+            (video.json \ "items").asOpt[Set[YoutubeTrack]](Reads.set(youtubeTrackReads))
+              .getOrElse(Seq.empty)
+              .filter(_.title.indexOf(artistName) > -1)
           }
         }
-      ).map { seqOfSeqYoutubeTracks: Seq[Seq[YoutubeTrack]] =>
-        seqOfSeqYoutubeTracks.flatten.distinct
-      }
+      ).map { _.toSet.flatten }
     }
 
-    def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Seq[YoutubeTrack]] = {
+    def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Set[YoutubeTrack]] = {
       findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Seq[String] =>
         findYoutubeVideos(echonestSongsTitle, artistName)
       }
     }
 
-    def returnFutureYoutubeTracks(artistName: String, artistId: String, pattern: String): Future[Seq[YoutubeTrack]] = {
+    def returnFutureYoutubeTracks(artistName: String, artistId: String, pattern: String): Future[Set[YoutubeTrack]] = {
       findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(artistName), artistId).flatMap {
         case None => findEchonestIdCorrespondingToFacebookId(findEchonestArtistIds(pattern), artistId).flatMap {
           case Some(echonestId) => futureYoutubeTracksByEchonestId(artistName, echonestId)
-          case None => Future { Seq.empty }
+          case None => Future { Set.empty }
         }
         case Some(echonestId) => futureYoutubeTracksByEchonestId(artistName, echonestId)
       }
