@@ -30,6 +30,7 @@ verifier que le nom de lartiste soit bien dans le titre dans les youtube tracks
 renvoyer les 20 avec le plus like
 donner les fb ids dans la requête pour limiter les requêtes?
 regarder le next de facebook
+chercher par id dans SC et comparer avec artist.id
  */
 
 object Test2 extends Controller {

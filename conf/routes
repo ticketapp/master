@@ -29,7 +29,7 @@ POST    /artists/createArtist           controllers.ArtistController.createArtis
 POST    /artists/:artistId/follow       controllers.ArtistController.followArtist(artistId: Long)
 DELETE  /artists/:artistId              controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/containing/:pattern    controllers.ArtistController.findArtistsContaining(pattern: String)
-GET     /artists/facebookContaining/:pattern    controllers.ArtistController.findFacebookArtistsContaining(pattern: String)
+GET     /artists/facebookContaining/:pattern    controllers.SearchArtistController.findFacebookArtistsContaining(pattern: String)
 
 ################################## Places ###############################################
 GET     /places                         controllers.PlaceController.places

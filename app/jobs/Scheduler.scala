@@ -1,7 +1,7 @@
 package jobs
 
 import java.util.Date
-import controllers.ArtistController.FacebookArtist
+import controllers.SearchArtistController.FacebookArtist
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.libs.json._
@@ -10,7 +10,7 @@ import models._
 import services.Utilities._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import controllers.{ArtistController, WebServiceException}
+import controllers.WebServiceException
 import play.api.libs.functional.syntax._
 
 object Scheduler {

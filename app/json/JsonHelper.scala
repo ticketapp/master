@@ -1,6 +1,6 @@
 package json
 
-import controllers.ArtistController.{FacebookArtist, YoutubeTrack, SoundCloudTrack}
+import controllers.SearchArtistController.{FacebookArtist, YoutubeTrack, SoundCloudTrack}
 //import controllers.Test2.{YoutubeTrack, FacebookArtist, SoundCloudTrack}
 import models._
 import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
