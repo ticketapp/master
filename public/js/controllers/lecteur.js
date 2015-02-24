@@ -89,7 +89,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 event.target.playVideo();
                 $scope.onPlay = true;
                 $scope.playPause = function () {
-                    if (play == false) {
+                    if ($scope.onPlay == false) {
                         event.target.playVideo();
                         $scope.onPlay = true;
                     } else {
