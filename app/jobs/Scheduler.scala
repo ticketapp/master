@@ -1,7 +1,7 @@
 package jobs
 
 import java.util.Date
-import controllers.ArtistController.FacebookArtist
+import controllers.SearchArtistController.FacebookArtist
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.libs.json._
@@ -10,7 +10,7 @@ import models._
 import services.Utilities._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import controllers.{ArtistController, WebServiceException}
+import controllers.WebServiceException
 import play.api.libs.functional.syntax._
 
 object Scheduler {
@@ -62,29 +62,37 @@ object Scheduler {
       }
   }
 
+  def getGeographicPoint(street: Option[String], zip: Option[String], city: Option[String]): Future[String] = {
+    /*val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
+          case Some(latitude) =>
+            (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
+              case Some(longitude) => Some(s"($latitude,$longitude)")
+              case _ => None
+            }
+          case _ => None
+        }*/
+    WS.url("https://maps.googleapis.com/maps/api/geocode/json?address=" +
+      normalizeString(street.getOrElse("").replaceAll(" ", "+")) +
+      normalizeString(zip.getOrElse("").replaceAll(" ", "+")) +
+      normalizeString(city.getOrElse("").replaceAll(" ", "+")) +
+      "&key=" + youtubeKey).get().map { geographicPoint =>
+
+      //verify JsUndefined :
+      /*(geographicPoint.json \ "results")(0) \ "geometry" \ "location" \ "lat" +
+      (geographicPoint.json \ "results")(0) \ "geometry" \ "location" \ "lng"*/
+      ""
+    }
+
+  }
+
   def saveEvent(eventDescription: Option[String], eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
 
-    /*val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
-      case Some(latitude) =>
-        (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
-          case Some(longitude) => Some(s"($latitude,$longitude)")
-          case _ => None
-        }
-      case _ => None
-    }*/
+
+    //println(eventJson)
     val street = (eventJson \ "venue" \ "street").as[Option[String]]
     val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
     val city = (eventJson \ "venue" \ "city").as[Option[String]]
-
-
-    WS.url("https://maps.googleapis.com/maps/api/geocode/json?address=" +
-      normalizeString(street.getOrElse("").replaceAll("+", "")) +
-        normalizeString(zip.getOrElse("").replaceAll("+", "")) +
-        normalizeString(city.getOrElse("").replaceAll("+", "")) +
-        "&key=" + youtubeKey).get().map { geographicPoint =>
-          println(geographicPoint.json)
-    }
 
     val geographicPoint = None
 
