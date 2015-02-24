@@ -2,14 +2,13 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
     $rootScope.playlist = [];
     $scope.showLecteur = true;
     $scope.playPause = "";
-    var play = false;
+    $scope.onPlay = false;
     var i = 0;
     function pushTrack (el) {
         $rootScope.playlist.push(el);
     }
     $rootScope.addToPlaylist = function (tracks) {
         if ($rootScope.playlist.length == 0) {
-            document.getElementById('contener').style.paddingBottom = '400px';
             tracks.forEach(pushTrack);
             $scope.play(i)
         } else {
@@ -19,7 +18,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
     $rootScope.addAndPlay = function (tracks) {
         var last = $rootScope.playlist.length;
         tracks.forEach(pushTrack);
-        $scope.play(last)
+        $scope.play(last);
         console.log($rootScope.playlist)
     };
     $scope.closeTrack = function (index) {
@@ -29,6 +28,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         if (typeof(updateProgressYt) != "undefined") {
             clearInterval(updateProgressYt);
         }
+        document.getElementById('musicPlayer').removeEventListener('ended', nextSoundT, false);
+        document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         $scope.trackActive = i;
         $scope.prevTrack = function () {
             i--;
@@ -39,19 +40,17 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             $scope.play(i);
         };
         if ($rootScope.playlist[i].from == 'soundcloud') {
-            //document.getElementById('youtubePlayer').classList.add('ng-hide');
-            //document.getElementById('musicPlayer').classList.remove('ng-hide');
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').removeAttribute('src');
             document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
-            play = true;
+            $scope.onPlay = true;
             $scope.playPause = function () {
-                if (play == false) {
+                if ($scope.onPlay == false) {
                     document.getElementById('musicPlayer').play();
-                    play = true;
+                    $scope.onPlay = true;
                 } else {
                     document.getElementById('musicPlayer').pause();
-                    play = false;
+                    $scope.onPlay = false;
                 }
             };
             function updateProgress() {
@@ -72,7 +71,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     if (document.getElementsByClassName('trackContener').length >= i) {
                         $timeout(function() {
                             var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                            document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left;
+                            document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
                         }, 100);
                     } else {
                         goToTrackActive ()
@@ -88,14 +87,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist[i].url);
             function onPlayerReady(event) {
                 event.target.playVideo();
-                play = true;
+                $scope.onPlay = true;
                 $scope.playPause = function () {
                     if (play == false) {
                         event.target.playVideo();
-                        play = true;
+                        $scope.onPlay = true;
                     } else {
                         event.target.pauseVideo();
-                        play = false;
+                        $scope.onPlay = false;
                     }
                 };
                 if (i > 0) {
@@ -103,7 +102,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                         if (document.getElementsByClassName('trackContener').length >= i) {
                             $timeout(function() {
                                 var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                                document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left;
+                                document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
                             }, 100);
                         } else {
                             goToTrackActive ()
@@ -112,8 +111,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     goToTrackActive ()
                 }
             }
-
-            // when video ends
             function onPlayerStateChange(event) {
                 if (event.data === 1) {
                     var duration = event.target.getDuration();
@@ -156,10 +153,10 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 }
             });
         }
-        document.getElementById('musicPlayer').addEventListener('ended', function () {
+        function nextSoundT () {
             i++;
             $scope.play(i);
-        });
+        }
+        document.getElementById('musicPlayer').addEventListener('ended', nextSoundT);
     };
-    //play(i)
 }]);
