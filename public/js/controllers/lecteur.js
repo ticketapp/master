@@ -28,7 +28,23 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         if (typeof(updateProgressYt) != "undefined") {
             clearInterval(updateProgressYt);
         }
-        document.getElementById('musicPlayer').removeEventListener('ended', nextSoundT, false);
+        function nextSoundT () {
+            i++;
+            $scope.play(i);
+        }
+        function updateProgress() {
+            var progress = document.getElementById("progress");
+            var value = 0;
+            if (document.getElementById('musicPlayer').currentTime > 0) {
+                value = 100 / document.getElementById('musicPlayer').duration * document.getElementById('musicPlayer').currentTime;
+            }
+            progress.style.width = value + "%";
+            var ct = new Date(document.getElementById('musicPlayer').currentTime*1000);
+            var durat = new Date(document.getElementById('musicPlayer').duration*1000);
+            document.getElementById('currentTime').innerHTML = ct.getMinutes() + ':' + ct.getSeconds() +
+                ' / ' + durat.getMinutes() + ':' + durat.getSeconds();
+        }
+        document.getElementById('musicPlayer').removeEventListener('ended', nextSoundT);
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         $scope.trackActive = i;
         $scope.prevTrack = function () {
@@ -53,18 +69,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     $scope.onPlay = false;
                 }
             };
-            function updateProgress() {
-                var progress = document.getElementById("progress");
-                var value = 0;
-                if (document.getElementById('musicPlayer').currentTime > 0) {
-                    value = 100 / document.getElementById('musicPlayer').duration * document.getElementById('musicPlayer').currentTime;
-                }
-                progress.style.width = value + "%";
-                var ct = new Date(document.getElementById('musicPlayer').currentTime*1000);
-                var durat = new Date(document.getElementById('musicPlayer').duration*1000);
-                document.getElementById('currentTime').innerHTML = ct.getMinutes() + ':' + ct.getSeconds() +
-                    ' / ' + durat.getMinutes() + ':' + durat.getSeconds();
-            }
             document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
             if (i > 0) {
                 function goToTrackActive () {
@@ -152,10 +156,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     'onStateChange': onPlayerStateChange
                 }
             });
-        }
-        function nextSoundT () {
-            i++;
-            $scope.play(i);
         }
         document.getElementById('musicPlayer').addEventListener('ended', nextSoundT);
     };
