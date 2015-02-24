@@ -57,14 +57,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             function updateProgress() {
                 var progress = document.getElementById("progress");
                 var value = 0;
-                console.log(document.getElementById('musicPlayer').duration);
-                console.log(document.getElementById('musicPlayer').currentTime);
                 if (document.getElementById('musicPlayer').currentTime > 0) {
                     value = 100 / document.getElementById('musicPlayer').duration * document.getElementById('musicPlayer').currentTime;
-                    console.log(value)
                 }
                 progress.style.width = value + "%";
-                console.log(value)
+                var ct = new Date(document.getElementById('musicPlayer').currentTime*1000);
+                var durat = new Date(document.getElementById('musicPlayer').duration*1000);
+                document.getElementById('currentTime').innerHTML = ct.getMinutes() + ':' + ct.getSeconds() +
+                    ' / ' + durat.getMinutes() + ':' + durat.getSeconds();
             }
             document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
             if (i > 0) {
@@ -116,24 +116,26 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             // when video ends
             function onPlayerStateChange(event) {
                 if (event.data === 1) {
-                    console.log('yoyo');
                     var duration = event.target.getDuration();
                     var curentDuration = event.target.getCurrentTime();
                     updateProgressYt = setInterval(function () {
                         curentDuration = event.target.getCurrentTime();
-                        console.log('yo');
                         var prog = document.getElementById("progress");
                         var val = 0;
                         if (curentDuration > 0) {
                             val = 100 / duration * curentDuration;
                         }
                         prog.style.width = val + "%";
+                        var cty = new Date(curentDuration*1000);
+                        var duraty = new Date(duration*1000);
+                        document.getElementById('currentTime').innerHTML = cty.getMinutes() + ':' + cty.getSeconds() +
+                            ' / ' + duraty.getMinutes() + ':' + duraty.getSeconds();
                         if (val == 100) {
                             if (typeof(updateProgressYt) != "undefined") {
                                 clearInterval(updateProgressYt);
                             }
                         }
-                    }, 10);
+                    }, 100);
                 } else {
                     if (typeof(updateProgressYt) != "undefined") {
                         clearInterval(updateProgressYt);

@@ -193,7 +193,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
         }
     }
     function searchArtistFb () {
-        if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _research.length >= 2 && _selArtist == true) {
+        if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _selArtist == true) {
             var artistFbIdList = [];
             function getArtistFbId(el) {
                 artistFbIdList.push(el.artistId);
