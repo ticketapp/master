@@ -1,9 +1,6 @@
 package controllers
 
 import json.JsonHelper._
-import models.Artist
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.libs.ws.WS
 import play.api.mvc._
 import play.api.libs.json._
@@ -18,7 +15,7 @@ object SearchArtistController extends Controller {
     val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
     val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
     val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-    case class SoundCloudTrack(stream_url: String, title: String, artwork_url: Option[String] )
+    case class SoundCloudTrack(stream_url: Option[String], title: Option[String], artwork_url: Option[String] )
     case class YoutubeTrack(videoId: String, title: String, thumbnail: Option[String] )
     case class FacebookArtist(name: String,
                               id: String,
@@ -66,22 +63,17 @@ object SearchArtistController extends Controller {
           .apply((name: String, id: String, category: String, maybeCover: Option[String], website: Option[String],
                   link: String) => (name, id, category, maybeCover, website, link))
       val readArtistsArray = Reads.seq(readAllArtist)
-      val collectOnlyMusiciansWithCover: Reads[Seq[(String, String, String, Option[String], String)]] = readArtistsArray
-        .map { pages =>
-        pages.collect {
-          case (name, id, "Musician/band", Some(cover), websites, link) => (name, id, cover, websites, link)
-        }
-      }
-      val readArtists: Reads[Seq[FacebookArtist]] = collectOnlyMusiciansWithCover.map { artists =>
-        artists.map{ case (name, id, cover, websites, link) =>
+      val readArtistsWithCover: Reads[Seq[FacebookArtist]] = readArtistsArray.map { artists =>
+        artists.collect{ case (name, id, "Musician/band", Some(cover), websites, link) =>
           FacebookArtist(name, id, cover, websitesStringToWebsitesSeq(websites),
             removeLastSlashIfExists("""(https?:\/\/(www\.)?)""".r.replaceAllIn(link, p => "").toLowerCase))
         }
       }
+
       WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
         + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
         .map { response =>
-        (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtists).getOrElse(Seq()).take(20)
+        (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse(Seq()).take(20)
       }
     }
 
@@ -113,28 +105,30 @@ object SearchArtistController extends Controller {
       }
     }
 
-  def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
-    var soundCloudLink: String = ""
-    for (site <- artist.websites) {
-      site.indexOf("soundcloud.com") match {
-        case -1 =>
-        case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
+    def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
+      var soundCloudLink: String = ""
+      for (site <- artist.websites) {
+        site.indexOf("soundcloud.com") match {
+          case -1 =>
+          case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
+        }
+      }
+      soundCloudLink match {
+        case "" => Future { artist.soundCloudTracks }
+        case scLink => findSoundCloudTracks(scLink)
       }
     }
-    soundCloudLink match {
-      case "" => Future { artist.soundCloudTracks }
-      case scLink => findSoundCloudTracks(scLink)
-    }
-  }
 
     def findSoundCloudTracks(scLink: String): Future[Seq[SoundCloudTrack]] = {
       val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTracksReads)
+      /*val collectOnlyTracksWithUrlAndTitle = readTracks.map { tracks =>
+        tracks.collect {
+          case (Some(url), Some(title), imageSource) => SoundCloudTrack(url)
+        }
+      }*/
       WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
         soundCloudClientId).get().flatMap { soundCloudTracks =>
-        /*if (scLink == "rone-music") {
-          println(soundCloudTracks.json)
-          println(soundCloudTracks.json.as[Seq[SoundCloudTrack]](readTracks))
-        }*/
+        println(scLink)
         findSoundCloudUserImageIfNoTrackImage(scLink,
           soundCloudTracks.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq()) )
       }
@@ -161,9 +155,6 @@ object SearchArtistController extends Controller {
 
     def compareArtistWebsitesWSCWebsitesAndAddTracks(artist: FacebookArtist, websitesAndIds: Seq[(Long, Seq[String])])
     :Future[Seq[SoundCloudTrack]] = {
-      /*println(websitesAndIds)
-      println(artist.link)
-      println(artist.websites)*/
       var matchedId: Long = 0
       for (websitesAndId <- websitesAndIds) {
         for (website <- websitesAndId._2) {
@@ -193,7 +184,7 @@ object SearchArtistController extends Controller {
     def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
       findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
         facebookArtists.map { facebookArtist =>
-          findSoundCloudTracks(facebookArtist.name).map { soundCloudTracks =>
+          findSoundCloudTracksForArtist(facebookArtist).map { soundCloudTracks =>
             facebookArtist.copy(soundCloudTracks = soundCloudTracks)
           }
         }
@@ -254,7 +245,7 @@ object SearchArtistController extends Controller {
           WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
             normalizeString(trackTitle) + normalizeString(artistName) +
             "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
-            (video.json \ "items").asOpt[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)).getOrElse(Seq())
+            (video.json \ "items").asOpt[Seq[YoutubeTrack]](Reads.seq(youtubeTrackReads)).getOrElse(Seq.empty)
           }
         }
       ).map { seqOfSeqYoutubeTracks: Seq[Seq[YoutubeTrack]] =>

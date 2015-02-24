@@ -32,6 +32,10 @@ donner les fb ids dans la requête pour limiter les requêtes?
 regarder le next de facebook
 chercher par id dans SC et comparer avec artist.id
 soundcloudtracks non valides : tout aller chercher comme option string et prendre que celles avec titre et stream_url
+ apostrophes
+ aller chercher les artistes d'une lettre et deux lettres
+ enlever 0.1 par lettre en plus au temps de latence à partir de trois
+ mathieu chedid
  */
 
 object Test2 extends Controller {

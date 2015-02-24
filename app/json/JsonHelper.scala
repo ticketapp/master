@@ -39,5 +39,6 @@ object JsonHelper {
   implicit val soundCloudTrackWrites: Writes[SoundCloudTrack] = Json.writes[SoundCloudTrack]
   implicit val soundCloudTracksReads: Reads[SoundCloudTrack] = Json.reads[SoundCloudTrack]
   implicit val youtubeTrackWrites: Writes[YoutubeTrack] = Json.writes[YoutubeTrack]
+  implicit val youtubeTrackReads: Reads[YoutubeTrack] = Json.reads[YoutubeTrack]
   implicit val facebookArtistWrites: Writes[FacebookArtist] = Json.writes[FacebookArtist]
 }
