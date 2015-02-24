@@ -31,6 +31,7 @@ renvoyer les 20 avec le plus like
 donner les fb ids dans la requête pour limiter les requêtes?
 regarder le next de facebook
 chercher par id dans SC et comparer avec artist.id
+soundcloudtracks non valides : tout aller chercher comme option string et prendre que celles avec titre et stream_url
  */
 
 object Test2 extends Controller {
