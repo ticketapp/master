@@ -1,22 +1,29 @@
-<div class="zIndex1">
+<div class="zIndex1 column large-12">
     <!--<a class="close float-right">X</a>-->
-    <a ng-click="showLecteur = !showLecteur"><i class="fi-plus"></i> </a>
-    <a ng-click="playPause()">Play/pause</a>
-    <a ng-click="prevTrack()">Prev</a>
-    <a ng-click="nextTrack()">Next</a>
-    <div id="currentTime"></div>
-    <div id="progressBar" class="width100p">
-        <span id="progress" style=" background-color:#008CBA;height:2px;display:inline-block;"></span>
+    <a ng-click="showLecteur = !showLecteur" class="float-left"><i class="fi-plus"></i></a>
+    <div class="column large-10 large-centered">
+        <div class="float-left column small-1">
+            <i ng-if="!onPlay" class="fi-play" ng-click="playPause()"></i>
+            <i ng-if="onPlay" class="fi-pause" ng-click="playPause()"></i>
+            <i class="fi-previous float-right" ng-click="prevTrack()"></i>
+        </div>
+        <div id="progressBar" class="progress small-9 primary float-left round">
+            <span id="progress" class="meter"></span>
+        </div>
+        <div class="column small-2">
+            <div class="float-left" id="currentTime"></div>
+            <i class="fi-next float-right" ng-click="nextTrack()"></i>
+        </div>
     </div>
 </div>
-<div ng-show="showLecteur">
+<div ng-show="showLecteur" class="width100p float-left">
     <audio class="width100p ng-hide" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
     <iframe id="iframe-lecture" class="ng-hide" style="display: none"></iframe>
     <div id="youtubePlayer">
     </div>
     <div class="playlistScroller" style="position: relative; overflow-x: auto;">
         <div class="playlistContener">
-            <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" style="width: 200px; display:inline-block; white-space: normal;" ng-repeat="track in playlist track by $index">
+            <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" ng-repeat="track in playlist track by $index">
                 <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
                 <div ng-click="play($index)">
                     <div class="img-circularPlayer" style="background-image: url('{{track.image}}');">
