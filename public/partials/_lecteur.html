@@ -1,6 +1,7 @@
 <div class="zIndex1 column large-12">
     <!--<a class="close float-right">X</a>-->
     <a ng-click="showLecteur = !showLecteur" class="float-left"><i class="fi-plus"></i></a>
+    <a ng-click="remPlaylist()"><i class="fi-trash float-left"></i></a>
     <div class="column large-10 large-centered">
         <div class="float-left column small-1">
             <i ng-if="!onPlay" class="fi-play" ng-click="playPause()"></i>
@@ -8,7 +9,7 @@
             <i class="fi-previous float-right" ng-click="prevTrack()"></i>
         </div>
         <div id="progressBar" class="progress small-9 primary float-left round">
-            <span id="progress" class="meter"></span>
+            <span id="progress" class="meter" style="width: 0%"></span>
         </div>
         <div class="column small-2">
             <div class="float-left" id="currentTime"></div>
@@ -17,7 +18,7 @@
     </div>
 </div>
 <div ng-show="showLecteur" class="width100p float-left">
-    <audio class="width100p ng-hide" id="musicPlayer" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/190409785" style="position: fixed" autoplay controls="controls"></audio>
+    <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>
     <iframe id="iframe-lecture" class="ng-hide" style="display: none"></iframe>
     <div id="youtubePlayer">
     </div>
