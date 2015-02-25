@@ -14,7 +14,7 @@ INSERT INTO addresses (geographicPoint) VALUES ('(41.4681787, 5.9157134)');
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
-  totalPrice                INT NOT NULL
+  totalPrice                NUMERIC NOT NULL
 );
 
 CREATE TABLE comments (
@@ -366,49 +366,71 @@ CREATE TABLE usersFollowed (
 );
 
 CREATE TABLE eventsPlaces (
-    eventId INT REFERENCES events (eventId),
-    placeId INT REFERENCES places (placeId),
+    eventId                 INT REFERENCES events (eventId),
+    placeId                 INT REFERENCES places (placeId),
     PRIMARY KEY (eventId, placeId)
 );
 
 CREATE TABLE eventsOrganizers (
-    eventId INT REFERENCES events (eventId),
-    organizerId INT REFERENCES organizers(organizerId),
+    eventId                 INT REFERENCES events (eventId),
+    organizerId             INT REFERENCES organizers(organizerId),
     PRIMARY KEY (eventId, organizerId)
 );
 
 CREATE TABLE eventsAddresses (
-    eventId INT REFERENCES events (eventId),
-    addressId INT REFERENCES addresses(addressId),
+    eventId                 INT REFERENCES events (eventId),
+    addressId               INT REFERENCES addresses(addressId),
     PRIMARY KEY (eventId, addressId)
 );
 ---INSERT INTO eventsAddresses VALUES(1, 2);
 
 CREATE TABLE usersOrganizers (
-    userId INT REFERENCES users (userId),
-    organizerId INT REFERENCES organizers(organizerId),
+    userId                  INT REFERENCES users (userId),
+    organizerId             INT REFERENCES organizers(organizerId),
     PRIMARY KEY (userId, organizerId)
 );
 
 CREATE TABLE eventsArtists (
-    eventId INT REFERENCES events (eventId),
-    artistId INT REFERENCES artists (artistId),
+    eventId                 INT REFERENCES events (eventId),
+    artistId                INT REFERENCES artists (artistId),
     PRIMARY KEY (eventId, artistId)
 );
 
 CREATE TABLE usersArtists (
-    userId INT REFERENCES users (userId),
-    artistId INT REFERENCES artists (artistId),
+    userId                  INT REFERENCES users (userId),
+    artistId                INT REFERENCES artists (artistId),
     PRIMARY KEY (userId, artistId)
 );
 
 CREATE TABLE genresArtists (
-    genreId INT REFERENCES genres (genreId),
-    artistId INT REFERENCES artists (artistId),
+    genreId                 INT REFERENCES genres (genreId),
+    artistId                INT REFERENCES artists (artistId),
     PRIMARY KEY (genreId, artistId)
 );
 
+CREATE TABLE playlists (
+    playlistId              SERIAL PRIMARY KEY,
+    imageId                 BIGINT REFERENCES image(iamgeId),
+    name                    VARCHAR 255 NOT NULL
+);
+
+CREATE TABLE playlistTracks (
+    playlistId              INT REFERENCES playlists (playlistId),
+    tracksId                INT REFERENCES tracks (tracksId),
+    PRIMARY KEY (playlistId, tracksId)
+);
+
+CREATE TABLE usersPlaylists (
+    userId                  INT REFERENCES users (userId),
+    playlistId              INT REFERENCES playlists (playlistId),
+    PRIMARY KEY (userId, playlistId)
+);
+
+
 # --- !Downs
+DROP TABLE IF EXISTS usersPlaylists;
+DROP TABLE IF EXISTS playlistTracks;
+DROP TABLE IF EXISTS playlists;
 DROP TABLE IF EXISTS eventsPlaces;
 DROP TABLE IF EXISTS eventsOrganizers;
 DROP TABLE IF EXISTS eventsAddresses;
