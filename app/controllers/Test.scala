@@ -32,12 +32,41 @@ object Test extends Controller{
     (in, out)
   }*/
 
+  def mock(serviceName: String) = {
+    val start = System.currentTimeMillis()
+    def getLatency(r: Any): Long = System.currentTimeMillis() - start
+    val token = play.Play.application.configuration.getString("facebook.token")
+    val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
+    val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
+    val youtubeKey = play.Play.application.configuration.getString("youtube.key")
+    serviceName match {
+      case "a" =>
+        WS.url("http://api.soundcloud.com/users/rone-music?client_id=" +
+          soundCloudClientId).get().map { response => Json.toJson("yo")}
+      case "b" =>
+        WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
+          + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+          .map { response => Json.toJson("sacoche!!!")}
+      case _ => WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
+        + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+        .map { response => Json.toJson("???!!!")}
+    }
+  }
+
+
   def test1 = Action {
     //val yo = Enumerator.generateM[JsValue](Future { Option(Json.toJson("yo\n")) })
     val yo = Enumerator("a", "b", "c", "d")
     //val tcho = Enumerator("tcho")
 
     //val yoTcho = yo.andThen(tcho)
-    Ok.chunked(yo)
+
+    val a = Enumerator.flatten(mock("a").map { str => Enumerator(str + "\n") })
+    val b = Enumerator.flatten(mock("b").map { str => Enumerator(str + "\n") })
+
+
+    val body = a.andThen(b)
+
+    Ok.chunked(body)
   }
 }
