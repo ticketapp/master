@@ -55,14 +55,21 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         min = min >= 10 ? min : '0' + min;
         sec = Math.floor( sec % 60 );
         sec = sec >= 10 ? sec : '0' + sec;
-        return min + ':' + sec;
+        if (min >= 60) {
+            hr = Math.floor(min / 60);
+            min = Math.floor(min % 60);
+            min = min >= 10 ? min : '0' + min;
+            return hr + ':' + min + ':' + sec;
+        } else {
+            return min + ':' + sec;
+        }
     }
     $scope.play = function (i) {
-        played.push($rootScope.playlist.tracks[i].title);
-        if (typeof(updateProgressYt) != "undefined") {
-            clearInterval(updateProgressYt);
-        }
-        function nextSoundT () {
+        $scope.prevTrack = function () {
+            i--;
+            $scope.play(i);
+        };
+        $scope.nextTrack = function () {
             if ($scope.shuffle == true) {
                 i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                 shuffle()
@@ -70,6 +77,10 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 i++;
                 $scope.play(i);
             }
+        };
+        played.push($rootScope.playlist.tracks[i].title);
+        if (typeof(updateProgressYt) != "undefined") {
+            clearInterval(updateProgressYt);
         }
         function updateProgress() {
             var progress = document.getElementById("progress");
@@ -87,7 +98,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             if (index == $rootScope.playlist.tracks.length && index == i) {
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                 document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
-                document.getElementById('musicPlayer').removeEventListener('ended', nextSoundT);
+                document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
                 document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
             }
         };
@@ -96,25 +107,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             played = [];
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
-            document.getElementById('musicPlayer').removeEventListener('ended', nextSoundT);
+            document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
             document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         };
-        document.getElementById('musicPlayer').removeEventListener('ended', nextSoundT);
+        document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         $scope.trackActive = i;
-        $scope.prevTrack = function () {
-            i--;
-            $scope.play(i);
-        };
-        $scope.nextTrack = function () {
-            if ($scope.shuffle == true) {
-                i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
-                shuffle()
-            } else {
-                i++;
-                $scope.play(i);
-            }
-        };
         if ($rootScope.playlist.tracks[i].from == 'soundcloud') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
@@ -221,13 +219,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     }
                 }
                 if(event.data === 0) {
-                    if ($scope.shuffle == true) {
-                        i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
-                        shuffle()
-                    } else {
-                        i++;
-                        $scope.play(i);
-                    }
+                    $scope.nextTrack()
                 }
             }
             var player = new YT.Player('youtubePlayer', {
@@ -240,6 +232,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 }
             });
         }
-        document.getElementById('musicPlayer').addEventListener('ended', nextSoundT);
+        document.getElementById('musicPlayer').addEventListener('ended', $scope.nextTrack);
     };
 }]);
