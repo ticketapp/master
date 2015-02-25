@@ -123,6 +123,29 @@ object Event {
     }
   }
 
+  def findAllByGenre(genreId: Long) = {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """ SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
+            e.name, e.geographicPoint, e.description, e.startTime,
+            e.endTime, e.ageRestriction
+        FROM eventsGenres eG
+        INNER JOIN events e ON e.eventId = eG.eventId
+        WHERE eG.genreId = {genreId}
+        ORDER BY e.creationDateTime DESC
+        LIMIT 20"""
+      ).on('genreId -> genreId)
+        .as(EventParser.*)
+        .map(e => e.copy(
+          images = Image.findAllByEvent(e),
+          organizers = Organizer.findAllByEvent(e),
+          artists = Artist.findAllByEvent(e),
+          tariffs = Tariff.findAllByEvent(e),
+          addresses = Address.findAllByEvent(e))
+        )
+    }
+  }
+
   def findAllByOrganizer(organizerId: Long) = {
     DB.withConnection { implicit connection =>
       SQL(

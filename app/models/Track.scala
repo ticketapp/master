@@ -36,6 +36,16 @@ object Track {
     }
   }
 
+  def findTracksByPlaylistId(playlistId: Long): Seq[Track] = {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT *
+             FROM playlistsTracks pT
+             INNER JOIN tracks t ON t.trackId = pT.trackId where pT.eventId = {eventId}""")
+        .on('playlistId -> playlistId)
+        .as(TrackParser.*)
+    }
+  }
+
   def find(trackId: Long): Option[Track] = {
     DB.withConnection { implicit connection =>
       SQL("SELECT * from tracks WHERE trackId = {trackId}")
@@ -53,6 +63,38 @@ object Track {
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Track.findAllContaining: " + e.getMessage)
+    }
+  }
+
+
+  def saveTrackAndPlaylistRelation(track: Track, id: Long): Option[Long] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( s"""INSERT into tracks(name)
+        values ({name})"""
+        ).on(
+            'name -> track.name
+          ).executeInsert() match {
+          case Some(x: Long) => savePlaylistTrackRelation(id, x)
+          case _ => None
+        }
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot create track: " + e.getMessage)
+    }
+  }
+
+  def savePlaylistTrackRelation(playlistId: Long, trackId: Long): Option[Long] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( """INSERT INTO playlistsTracks (playlistId, trackId)
+            VALUES ({playlistId}, {trackId})""").on(
+            'playlistId -> playlistId,
+            'trackId -> trackId
+          ).executeInsert()
+      }
+    } catch {
+      case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
     }
   }
 

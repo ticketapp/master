@@ -7,14 +7,14 @@ CREATE TABLE addresses (
   street                    VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (geographicPoint) VALUES ('(44.14682717, 4.9157134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(44.17641271, 4.9157134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(45.461841787, 4.187134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.847134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(41.4681787, 5.9157134)');
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
-  totalPrice                NUMERIC NOT NULL
+  totalPrice                INT NOT NULL
 );
 
 CREATE TABLE comments (
@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 39 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 43 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -56,27 +56,26 @@ CREATE TABLE organizers (
 );
 
 CREATE TABLE genres (
-  genreId                 SERIAL PRIMARY KEY,
-  name                    VARCHAR(255) NOT NULL,
-  UNIQUE(name)
+    genreId                 SERIAL PRIMARY KEY,
+    name                    VARCHAR(255) NOT NULL,
+    UNIQUE(name)
 );
 
 CREATE TABLE tracks (
-  trackId                 SERIAL PRIMARY KEY,
-  name                    VARCHAR(255) NOT NULL,
-  url                     VARCHAR(255) NOT NULL,
-  platform                VARCHAR(255) NOT NULL
+    trackId                 SERIAL PRIMARY KEY,
+    name                    VARCHAR(255) NOT NULL,
+    url                     VARCHAR(255) NOT NULL,
+    platform                VARCHAR(255) NOT NULL
 );
 
-
 CREATE TABLE users (
-  userId                    SERIAL PRIMARY KEY,
-  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
-  email                     VARCHAR(255) NOT NULL,
-  nickname                  VARCHAR(255) NOT NULL,
-  password                  VARCHAR(255) NOT NULL,
-  profile                   VARCHAR(255) NOT NULL,
-  UNIQUE(email)
+    userId                    SERIAL PRIMARY KEY,
+    creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
+    email                     VARCHAR(255) NOT NULL,
+    nickname                  VARCHAR(255) NOT NULL,
+    password                  VARCHAR(255) NOT NULL,
+    profile                   VARCHAR(255) NOT NULL,
+    UNIQUE(email)
 );
 INSERT INTO users (email, nickname, password, profile)
 VALUES ('admin@global.local', 'admin', '$2a$12$L/rFVHZonEAmydEfZyYR.exvJuDdMY6kX7BIdXcam.voTxeBc7YwK', 'Admin');
@@ -106,6 +105,7 @@ CREATE TABLE users_token (
   expirationTime            TIMESTAMP NOT NULL,
   isSignUp                  BOOLEAN NOT NULL
 );
+
 
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,
@@ -366,58 +366,69 @@ CREATE TABLE usersFollowed (
 );
 
 CREATE TABLE eventsPlaces (
-    eventId                 INT REFERENCES events (eventId),
-    placeId                 INT REFERENCES places (placeId),
+    eventId INT REFERENCES events (eventId),
+    placeId INT REFERENCES places (placeId),
     PRIMARY KEY (eventId, placeId)
 );
 
 CREATE TABLE eventsOrganizers (
-    eventId                 INT REFERENCES events (eventId),
-    organizerId             INT REFERENCES organizers(organizerId),
+    eventId INT REFERENCES events (eventId),
+    organizerId INT REFERENCES organizers(organizerId),
     PRIMARY KEY (eventId, organizerId)
 );
 
 CREATE TABLE eventsAddresses (
-    eventId                 INT REFERENCES events (eventId),
-    addressId               INT REFERENCES addresses(addressId),
+    eventId INT REFERENCES events (eventId),
+    addressId INT REFERENCES addresses(addressId),
     PRIMARY KEY (eventId, addressId)
 );
 ---INSERT INTO eventsAddresses VALUES(1, 2);
 
 CREATE TABLE usersOrganizers (
-    userId                  INT REFERENCES users (userId),
-    organizerId             INT REFERENCES organizers(organizerId),
+    userId INT REFERENCES users (userId),
+    organizerId INT REFERENCES organizers(organizerId),
     PRIMARY KEY (userId, organizerId)
 );
 
 CREATE TABLE eventsArtists (
-    eventId                 INT REFERENCES events (eventId),
-    artistId                INT REFERENCES artists (artistId),
+    eventId INT REFERENCES events (eventId),
+    artistId INT REFERENCES artists (artistId),
     PRIMARY KEY (eventId, artistId)
 );
 
 CREATE TABLE usersArtists (
-    userId                  INT REFERENCES users (userId),
-    artistId                INT REFERENCES artists (artistId),
+    userId INT REFERENCES users (userId),
+    artistId INT REFERENCES artists (artistId),
     PRIMARY KEY (userId, artistId)
 );
 
 CREATE TABLE genresArtists (
-    genreId                 INT REFERENCES genres (genreId),
-    artistId                INT REFERENCES artists (artistId),
+    genreId INT REFERENCES genres (genreId),
+    artistId INT REFERENCES artists (artistId),
     PRIMARY KEY (genreId, artistId)
 );
 
 CREATE TABLE playlists (
     playlistId              SERIAL PRIMARY KEY,
-    name                    VARCHAR 255 NOT NULL
+    name                    VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE playlistTracks (
+    playlistId              BIGINT REFERENCES playlists (playlistId),
+    trackId                 BIGINT REFERENCES tracks (trackId),
+    PRIMARY KEY (playlistId, trackId)
+);
+
+CREATE TABLE usersPlaylists (
+    userId                  BIGINT REFERENCES users (userId),
+    playlistId              BIGINT REFERENCES playlists (playlistId),
+    PRIMARY KEY (userId, playlistId)
 );
 
 
-
-
 # --- !Downs
-
+DROP TABLE IF EXISTS usersPlaylists;
+DROP TABLE IF EXISTS playlistTracks;
 DROP TABLE IF EXISTS playlists;
 DROP TABLE IF EXISTS eventsPlaces;
 DROP TABLE IF EXISTS eventsOrganizers;
