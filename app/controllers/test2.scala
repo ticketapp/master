@@ -35,7 +35,8 @@ soundcloudtracks non valides : tout aller chercher comme option string et prendr
  aller chercher les artistes d'une lettre et deux lettres
  enlever 0.1 par lettre en plus au temps de latence à partir de trois
  mathieu chedid
- un seul amtch echonest : la prendre et lier à la page fb qi à le plus de followers
+ search hendrix
+ un seul amtch echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
  */
 
 object Test2 extends Controller {

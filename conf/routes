@@ -47,6 +47,8 @@ GET     /organizers/containing/:pattern controllers.OrganizerController.findOrga
 POST    /organizers/create              controllers.OrganizerController.createOrganizer
 GET     /organizers/:organizerId/events controllers.EventController.eventsByOrganizer(organizerId: Long)
 
+################################# Playlists ############################################
+
 ################################## Infos ################################################
 GET     /infos                          controllers.Application.infos
 
@@ -55,7 +57,9 @@ GET     /infos                          controllers.Application.infos
 GET     /users                          controllers.UserController.users
 GET     /users/:id                      controllers.UserController.user(id: Long)
 GET     /users/containing/:pattern      controllers.UserController.findUsersContaining(pattern: String)
-GET     /users/:userId/tools            controllers.UserController.findToolsById(userId: Long)
+GET     /users/:userId/tools            controllers.UserController.findToolsByUserId(userId: Long)
+GET     /users/:userId/playlists        controllers.PlaylistController.findByUserId(userId: Long)
+
 
 ################################## Buy ticket ###########################################
 GET     /buyTicket                      controllers.TicketController.buyTicket

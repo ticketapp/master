@@ -210,6 +210,7 @@ object SearchArtistController extends Controller {
       WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
         normalizeString(artistName) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
         .map { artists =>
+        println((artists.json \ "response" \ "artists"))
         (artists.json \ "response" \ "artists")
           .asOpt(keepOnlyValidTuples)
           .getOrElse(Seq.empty)

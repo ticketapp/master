@@ -7,7 +7,7 @@ CREATE TABLE addresses (
   street                    VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (geographicPoint) VALUES ('(44.176812717, 4.9157134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(44.14682717, 4.9157134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(45.461841787, 4.187134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.847134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(41.4681787, 5.9157134)');
@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 44 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 39 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -410,26 +410,14 @@ CREATE TABLE genresArtists (
 
 CREATE TABLE playlists (
     playlistId              SERIAL PRIMARY KEY,
-    imageId                 BIGINT REFERENCES image(iamgeId),
     name                    VARCHAR 255 NOT NULL
 );
 
-CREATE TABLE playlistTracks (
-    playlistId              INT REFERENCES playlists (playlistId),
-    tracksId                INT REFERENCES tracks (tracksId),
-    PRIMARY KEY (playlistId, tracksId)
-);
 
-CREATE TABLE usersPlaylists (
-    userId                  INT REFERENCES users (userId),
-    playlistId              INT REFERENCES playlists (playlistId),
-    PRIMARY KEY (userId, playlistId)
-);
 
 
 # --- !Downs
-DROP TABLE IF EXISTS usersPlaylists;
-DROP TABLE IF EXISTS playlistTracks;
+
 DROP TABLE IF EXISTS playlists;
 DROP TABLE IF EXISTS eventsPlaces;
 DROP TABLE IF EXISTS eventsOrganizers;

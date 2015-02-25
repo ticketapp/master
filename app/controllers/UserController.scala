@@ -23,7 +23,7 @@ object UserController extends Controller {
     Ok(Json.toJson(User.findAllContaining(pattern)))
   }
 
-  def findToolsById(userId: Long) = Action {
+  def findToolsByUserId(userId: Long) = Action {
     Ok(Json.toJson(Tool.findByUserId(userId)))
   }
 
