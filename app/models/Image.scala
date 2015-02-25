@@ -57,6 +57,16 @@ object Image {
     }
   }
 
+  def findAllByArtist(artistId: Long): List[Image] = {
+    DB.withConnection { implicit connection =>
+      SQL( """SELECT *
+             FROM Images
+             WHERE artistId = {artistId}""")
+        .on('artistId -> artistId)
+        .as(ImageParser.*)
+    }
+  }
+  
   def findAllByOrganizer(organizerId: Long): List[Image] = {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *

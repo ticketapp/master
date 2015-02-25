@@ -56,16 +56,16 @@ object Test extends Controller{
 
   def test1 = Action {
     //val yo = Enumerator.generateM[JsValue](Future { Option(Json.toJson("yo\n")) })
-    val yo = Enumerator("a", "b", "c", "d")
+    val yo = Enumerator(Seq("a", "b", "c", "d"))
     //val tcho = Enumerator("tcho")
 
     //val yoTcho = yo.andThen(tcho)
 
-    val a = Enumerator.flatten(mock("a").map { str => Enumerator(str + "\n") })
-    val b = Enumerator.flatten(mock("b").map { str => Enumerator(str + "\n") })
+    val a = Enumerator.flatten(mock("a").map { str => Enumerator(Json.toJson(Map("champ" -> str))) })
+    val b = Enumerator.flatten(mock("b").map { str => Enumerator(Json.toJson(Map("champ" -> str))) })
 
 
-    val body = a.andThen(b)
+    val body = Enumerator.interleave(b, a)
 
     Ok.chunked(body)
   }

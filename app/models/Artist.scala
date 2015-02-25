@@ -24,7 +24,6 @@ case class Artist (artistId: Long,
                    genres: List[Genre],
                    tracks: List[Track])
 
-
 object Artist {
   val token = play.Play.application.configuration.getString("facebook.token")
 
@@ -64,6 +63,11 @@ object Artist {
       SQL("SELECT * from artists WHERE artistId = {artistId}")
         .on('artistId -> artistId)
         .as(ArtistParser.singleOpt)
+        .map(artist =>
+          artist.copy(
+            images = Image.findAllByArtist(artistId)
+          )
+        )
     }
   }
 
@@ -73,6 +77,11 @@ object Artist {
         SQL("SELECT * FROM artists WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
           .as(ArtistParser.*)
+          .map(artist =>
+            artist.copy(
+              images = Image.findAllByArtist(artist.artistId)
+            )
+          )
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Artist.findAllContaining: " + e.getMessage)
