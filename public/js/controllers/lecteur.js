@@ -82,6 +82,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                     $scope.onPlay = false;
                 }
             };
+            document.getElementById("progressBar").onclick = function (event) {
+                document.getElementById('musicPlayer').currentTime =
+                    document.getElementById('musicPlayer').duration * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
+                    / document.getElementById("progressBar").clientWidth)
+            };
             document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
             if (i > 0) {
                 function goToTrackActive () {
@@ -113,6 +118,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                         event.target.pauseVideo();
                         $scope.onPlay = false;
                     }
+                };
+                var yPlayer = event.target;
+                document.getElementById("progressBar").onclick = function (event) {
+                    var newPos = yPlayer.getDuration() * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
+                        / document.getElementById("progressBar").clientWidth);
+                    yPlayer.seekTo(newPos, true);
+                    $scope.onPlay = true;
+                    yPlayer.playVideo();
                 };
                 if (i > 0) {
                     function goToTrackActive () {
