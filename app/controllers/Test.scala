@@ -34,7 +34,7 @@ object Test extends Controller{
 
   def test1 = Action {
     //val yo = Enumerator.generateM[JsValue](Future { Option(Json.toJson("yo\n")) })
-    val yo = Enumerator("345", "123", "476", "187687")
+    val yo = Enumerator("a", "b", "c", "d")
     //val tcho = Enumerator("tcho")
 
     //val yoTcho = yo.andThen(tcho)
