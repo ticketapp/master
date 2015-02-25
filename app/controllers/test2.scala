@@ -22,7 +22,6 @@ import services.Utilities.normalizeString
 /*
 follower counts SC
 écrire une fonction qui supprime les http https et les / (takeRight et dropRight) à la fin pour éviter redondance et pour plus de clarté
-rajouter des try catch pour les calls?
 sanitize url?? ask SO?
 sctracks optionList to list ?
 parallelize soundcloud/echonest+youtube

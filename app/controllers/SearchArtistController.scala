@@ -224,16 +224,17 @@ object SearchArtistController extends Controller {
       }
     }
 
-    def findEchonestSongs(echonestId: String): Future[Seq[String]] = {
+    def findEchonestSongs(echonestId: String): Future[Set[String]] = {
       val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
       WS.url("http://developer.echonest.com/api/v4/artist/songs?api_key=" + echonestApiKey + "&id=" + echonestId +
         "&format=json&results=50").get().map { songs =>
-        (songs.json \ "response" \ "songs").asOpt[Seq[Option[String]]](Reads.seq(titleReads)).getOrElse(Seq())
-          .flatten.distinct
+        (songs.json \ "response" \ "songs").asOpt[Set[Option[String]]](Reads.set(titleReads))
+          .getOrElse(Set.empty)
+          .flatten
       }
     }
 
-    def findYoutubeVideos(tracksTitle: Seq[String], artistName: String): Future[Set[YoutubeTrack]] = {
+    def findYoutubeVideos(tracksTitle: Set[String], artistName: String): Future[Set[YoutubeTrack]] = {
       implicit val youtubeTrackReads: Reads[YoutubeTrack] = (
         (JsPath \ "id" \ "videoId").read[String] and
           (JsPath \ "snippet" \ "title").read[String] and
@@ -254,7 +255,7 @@ object SearchArtistController extends Controller {
     }
 
     def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Set[YoutubeTrack]] = {
-      findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Seq[String] =>
+      findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Set[String] =>
         findYoutubeVideos(echonestSongsTitle, artistName)
       }
     }
