@@ -192,48 +192,27 @@ object SearchArtistController extends Controller {
     }
 
     def returnSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
-      /*
-      val readName: Reads[String] = (__ \ "name").read[String]
-      val readCategory: Reads[String] = (__ \ "category").read[String]
-      val readId: Reads[String] = (__ \ "id").read[String]
-      val readCoverSource: Reads[String] = (__ \ "source").read[String]
-      val readOptionalCover: Reads[Option[String]] = (__ \ "cover").readNullable(readCoverSource)
-      val readWebsites: Reads[Option[String]] = (__ \ "website").readNullable
-      val readLink: Reads[String] = (__ \ "link").read[String]
-      val readAllArtist: Reads[(String, String, String, Option[String], Option[String], String)] =
-        readName.and(readId).and(readCategory).and(readOptionalCover).and(readWebsites).and(readLink)
-          .apply((name: String, id: String, category: String, maybeCover: Option[String], website: Option[String],
-                  link: String) => (name, id, category, maybeCover, website, link))
-      val readArtistsArray = Reads.seq(readAllArtist)
-      val readArtistsWithCover: Reads[Seq[FacebookArtist]] = readArtistsArray.map { artists =>
-        artists.collect{ case (name, id, "Musician/band", Some(cover), websites, link) =>
-          FacebookArtist(name, id, cover, websitesStringToWebsitesSeq(websites),
-            removeLastSlashIfExists("""(https?:\/\/(www\.)?)""".r.replaceAllIn(link, p => "").toLowerCase))
+      def cleanFacebookId(implicit r: Reads[String]): Reads[String] = r.map(_.substring(17)) //17 = "facebook:artist:".length
+      val TupleEnIdFbIdReads = (
+        (__ \ "id").read[String] and
+          (__ \ "foreign_ids").lazyReadNullable(
+            Reads.seq( cleanFacebookId( (__ \ "foreign_id").read[String] ) )
+          )
+          tupled
+        )
+
+      val keepOnlyValidTuples = Reads.seq(TupleEnIdFbIdReads).map { tuples =>
+        tuples.collect {
+          case (echonestId: String, Some(facebookId: Seq[String])) => (echonestId, facebookId(0))
         }
       }
-      */
-      val readFacebookId: Reads[String] = (__ \ "foreign_id").read[String]
-      //val readFacebookId = Reads[String] = (__ \ "foreign_id").read[String]
-      println(artistName)
+
       WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
         normalizeString(artistName) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
         .map { artists =>
-        val artistsJson = artists.json \ "response" \ "artists"
-        println(artistsJson)
-        println("\n\n\n\n\n")
-        val facebookIds = artistsJson.asOpt[Seq[Option[String]]](Reads.seq((__ \\ "foreign_id").readNullable))
-        var seqIndexFacebookIds: Seq[Int] = Seq.empty
-        for ((maybeFbId, index) <- facebookIds.getOrElse(Seq.empty).view.zipWithIndex) {
-          maybeFbId match {
-            case Some(id) => seqIndexFacebookIds = index +: seqIndexFacebookIds
-            case None =>
-          }
-        }
-
-        seqIndexFacebookIds.map { index: Int =>
-          ((artistsJson(index) \ "id").asOpt[String].getOrElse(""),
-            (artistsJson(index) \\ "foreign_id")(0).toString().replace("facebook:artist:", "") )
-        }
+        (artists.json \ "response" \ "artists")
+          .asOpt(keepOnlyValidTuples)
+          .getOrElse(Seq.empty)
       }
     }
 
@@ -242,8 +221,7 @@ object SearchArtistController extends Controller {
       futureSeqIndexEchonestIdAndFacebookId.map { seqIndexEchonestIdAndFacebookId =>
         var toBeReturned: Option[String] = None
         for (tuple <- seqIndexEchonestIdAndFacebookId) {
-          //println(tuple._2)
-          if (tuple._2.dropRight(1).substring(1) == artistId) //remove "
+          if (tuple._2 == artistId)
             toBeReturned = Some(tuple._1)
         }
         toBeReturned //si toBeReturned is empty => onre fait pareil avec la seqe des ids de la recherche avec pattern au lieu de artist.name
@@ -296,6 +274,29 @@ object SearchArtistController extends Controller {
         case Some(echonestId) => futureYoutubeTracksByEchonestId(artistName, echonestId)
       }
     }
+
+
+  def mock(serviceName: String) = {
+    val start = System.currentTimeMillis()
+    def getLatency(r: Any): Long = System.currentTimeMillis() - start
+    val token = play.Play.application.configuration.getString("facebook.token")
+    val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
+    val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
+    val youtubeKey = play.Play.application.configuration.getString("youtube.key")
+    serviceName match {
+      case "a" =>
+        WS.url("http://api.soundcloud.com/users/rone-music?client_id=" +
+          soundCloudClientId).get().map { response => Json.toJson("yo")}
+      case "b" =>
+        WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
+          + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+          .map { response => Json.toJson("sacoche!!!")}
+      case _ => WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
+        + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+        .map { response => Json.toJson("???!!!")}
+    }
+  }
+
   def findFacebookArtistsContaining(pattern: String) = Action.async {
     /*
     returnFutureArtistsWSoundCloudTracks(sanitizedPattern).map { seqFutureArtistWSoundCloudTracks: Seq[Future[FacebookArtist]] =>
@@ -312,6 +313,19 @@ object SearchArtistController extends Controller {
       }
     }*/
     val sanitizedPattern = normalizeString(pattern.replaceAll(" ", "+"))
+    /*
+    returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { resp =>
+      Future.sequence(resp).map { a =>
+        val b = Enumerator(Json.toJson(Seq("lkjlkj", "kljlkjlkj", "kljlkjljlj", "kljlkjljk")))
+        val c = Enumerator.flatten(mock("a").map { str => Enumerator(Json.toJson(Map("champ" -> str))) })
+        val d = Enumerator(Json.toJson(a))
+
+        val e = Enumerator.interleave(b, c, d)
+
+        Ok.chunked(e)
+        //Ok(Json.toJson(a))
+      }
+    }*/
     returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { seqFutureArtist: Seq[Future[FacebookArtist]] =>
       val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
