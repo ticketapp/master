@@ -37,6 +37,10 @@ soundcloudtracks non valides : tout aller chercher comme option string et prendr
  mathieu chedid
  search hendrix
  un seul amtch echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
+ array vide retournés?
+ virer soundcloudtracks et youtubetracks de FacebookArtist
+ virer soundcloudtracks sans url ou sans title
+ renvoyer : facebookartistId : { tracks }
  */
 
 object Test2 extends Controller {

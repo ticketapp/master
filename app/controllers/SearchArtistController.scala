@@ -17,10 +17,11 @@ object SearchArtistController extends Controller {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-  case class SoundCloudTrack(//facebookArtistId: String = "",
+  case class SoundCloudTrack(facebookArtistId: String,
                              stream_url: Option[String],
                              title: Option[String],
-                             artwork_url: Option[String] )
+                             artwork_url: Option[String],
+                             from: String)
   case class YoutubeTrack(facebookArtistId: String,
                           url: String,
                           title: String,
@@ -124,12 +125,19 @@ object SearchArtistController extends Controller {
     }
     soundCloudLink match {
       case "" => Future { artist.soundCloudTracks }
-      case scLink => findSoundCloudTracks(scLink)
+      case scLink => findSoundCloudTracks(scLink, artist.id)
     }
   }
 
-  def findSoundCloudTracks(scLink: String): Future[Seq[SoundCloudTrack]] = {
-    val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTracksReads)
+  def findSoundCloudTracks(scLink: String, facebookArtistId: String): Future[Seq[SoundCloudTrack]] = {
+    val soundCloudTrackReads: Reads[SoundCloudTrack] = (
+      (__ \ "stream_url").readNullable[String] and
+        (__ \ "title").readNullable[String] and
+        (__ \ "artwork_url").readNullable[String]
+      )((url: Option[String], title: Option[String], thumbnail: Option[String]) =>
+        SoundCloudTrack(facebookArtistId, url, title, thumbnail, "soundcloud"))
+
+    val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTrackReads)
     /*val collectOnlyTracksWithUrlAndTitle = readTracks.map { tracks =>
       tracks.collect {
         case (Some(url), Some(title), imageSource) => SoundCloudTrack(url)
@@ -137,6 +145,7 @@ object SearchArtistController extends Controller {
     }*/
     WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
       soundCloudClientId).get().flatMap { soundCloudTracks =>
+      println(soundCloudTracks.json)
       findSoundCloudUserImageIfNoTrackImage(scLink,
         soundCloudTracks.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq()) )
     }
@@ -172,7 +181,7 @@ object SearchArtistController extends Controller {
       }
     }
     if (matchedId != 0)
-      findSoundCloudTracks(matchedId.toString)
+      findSoundCloudTracks(matchedId.toString, artist.id)
     else
       Future{ artist.soundCloudTracks }
   }
