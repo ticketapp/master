@@ -10,7 +10,6 @@ import scala.annotation.tailrec
 import scala.concurrent.Future
 import services.Utilities.normalizeString
 import play.api.libs.functional.syntax._
-import scala.util.{Success, Failure}
 
 object SearchArtistController extends Controller {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -18,9 +17,9 @@ object SearchArtistController extends Controller {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
   case class SoundCloudTrack(facebookArtistId: String,
-                             stream_url: Option[String],
+                             url: Option[String],
                              title: Option[String],
-                             artwork_url: Option[String],
+                             thumbnail: Option[String],
                              from: String)
   case class YoutubeTrack(facebookArtistId: String,
                           url: String,
@@ -92,7 +91,7 @@ object SearchArtistController extends Controller {
     @tailrec
     def isThereASoundCloudTrackWithoutImage(soundCloudTracks: List[SoundCloudTrack]): Boolean = {
       soundCloudTracks match {
-        case x :: tail if x.artwork_url == None => true
+        case x :: tail if x.url == None => true
         case Nil => false
         case x :: tail  => isThereASoundCloudTrackWithoutImage(tail)
       }
@@ -105,7 +104,7 @@ object SearchArtistController extends Controller {
           case None => soundCloudTracks
           case Some(imgUrl) =>
             soundCloudTracks.map { soundCloudTrack =>
-              if (soundCloudTrack.artwork_url == None) soundCloudTrack.copy(artwork_url = Some(imgUrl))
+              if (soundCloudTrack.url == None) soundCloudTrack.copy(url = Some(imgUrl))
               else soundCloudTrack
             }
         }
