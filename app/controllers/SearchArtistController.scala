@@ -6,7 +6,6 @@ import play.api.libs.ws.WS
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
-import scala.annotation.tailrec
 import scala.concurrent.Future
 import services.Utilities.normalizeString
 import play.api.libs.functional.syntax._
@@ -26,9 +25,7 @@ object SearchArtistController extends Controller {
                             id: String,
                             cover: String,
                             websites: Seq[String],
-                            link: String,
-                            soundCloudTracks: Seq[Track] = Seq.empty,
-                            youtubeTracks: Set[Track] = Set.empty )
+                            link: String)
 
 
   def removeLastSlashIfExists(string: String): String  = {
@@ -39,19 +36,13 @@ object SearchArtistController extends Controller {
   }
 
   def websitesStringToWebsitesSeq(websites: Option[String]): Seq[String] = {
-    var seqOfWebSitesToReturn: Seq[String] = Seq()
     websites match {
-      case None => Seq()
-      case Some(websitesFound) =>
-        //.split seq (donc to array) et ensuite toseq??? surement pas top cette fonction...
-        for (website <- websitesFound.split(" ").toSeq) {
-          seqOfWebSitesToReturn = seqOfWebSitesToReturn ++
-            """(https?:\/\/(www\.)?)""".r.replaceAllIn(website, p => " ").replace("www.", "").split(" ").toSeq
-              .filter(_ != "").map { site =>
-              removeLastSlashIfExists(site.toLowerCase)
-            }
+      case None => Seq.empty
+      case Some(websites: String) =>
+        """(https?:\/\/(www\.)?)""".r.replaceAllIn(websites, p => " ").replace("www.", "")
+          .split(" ").map { site =>
+          removeLastSlashIfExists(site.toLowerCase)
         }
-        seqOfWebSitesToReturn
     }
   }
 
@@ -92,7 +83,7 @@ object SearchArtistController extends Controller {
       }
     }
     soundCloudLink match {
-      case "" => Future { artist.soundCloudTracks }
+      case "" => findSoundCloudTracksNotDefinedInFb(artist)
       case scLink => findSoundCloudTracks(scLink)
     }
   }
@@ -148,18 +139,14 @@ object SearchArtistController extends Controller {
     if (matchedId != 0)
       findSoundCloudTracks(matchedId.toString)
     else
-      Future{ artist.soundCloudTracks }
+      Future{ Seq.empty }
   }
 
   def findSoundCloudTracksNotDefinedInFb(artist: FacebookArtist): Future[Seq[Track]] = {
-    artist.soundCloudTracks match {
-      case tracks: Seq[soundCloudTracks] if tracks.isEmpty =>
-        findSoundCloudIds(artist.name).flatMap { ids =>
-          findSoundCloudWebsites(ids).flatMap{ websitesAndIds =>
-            compareArtistWebsitesWSCWebsitesAndAddTracks(artist, websitesAndIds)
-          }
-        }
-      case _ => Future{ artist.soundCloudTracks }
+    findSoundCloudIds(artist.name).flatMap { ids =>
+      findSoundCloudWebsites(ids).flatMap{ websitesAndIds =>
+        compareArtistWebsitesWSCWebsitesAndAddTracks(artist, websitesAndIds)
+      }
     }
   }
 
@@ -256,8 +243,6 @@ object SearchArtistController extends Controller {
     val sanitizedPattern = normalizeString(pattern.replaceAll(" ", "+"))
 
     findFacebookArtists(sanitizedPattern).map { facebookArtists =>
-
-
       val futureSoundCloudTracks = Future.sequence(
         facebookArtists.map { artist =>
           findSoundCloudTracksForArtist(artist).map { soundCloudTracks =>
@@ -284,47 +269,10 @@ object SearchArtistController extends Controller {
         }
       )
 
-
       val enumerators = Enumerator.interleave(
         Enumerator( Json.toJson(facebookArtists) ), soundCloudTracksEnumerator, youtubeTracksEnumerator
       )
-
       Ok.chunked(enumerators)
     }
   }
 }
-/*
-  def mock(serviceName: String) = {
-    val start = System.currentTimeMillis()
-    def getLatency(r: Any): Long = System.currentTimeMillis() - start
-    val token = play.Play.application.configuration.getString("facebook.token")
-    val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
-    val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
-    val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-    serviceName match {
-      case "a" =>
-        WS.url("http://api.soundcloud.com/users/rone-music?client_id=" +
-          soundCloudClientId).get().map { response => Json.toJson("yo")}
-      case "b" =>
-        WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
-          + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
-          .map { response => Json.toJson("sacoche!!!")}
-      case _ => WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
-        + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
-        .map { response => Json.toJson("???!!!")}
-    }
-  }
- */
-/*
-   returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { resp =>
-     Future.sequence(resp).map { a =>
-       val b = Enumerator(Json.toJson(Seq("lkjlkj", "kljlkjlkj", "kljlkjljlj", "kljlkjljk")))
-       val c = Enumerator.flatten(mock("a").map { str => Enumerator(Json.toJson(Map("champ" -> str))) })
-       val d = Enumerator(Json.toJson(a))
-
-       val e = Enumerator.interleave(b, c, d)
-
-       Ok.chunked(e)
-       //Ok(Json.toJson(a))
-     }
-   }*/
