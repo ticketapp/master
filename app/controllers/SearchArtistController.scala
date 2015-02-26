@@ -21,7 +21,7 @@ object SearchArtistController extends Controller {
                              stream_url: Option[String],
                              title: Option[String],
                              artwork_url: Option[String] )
-  case class YoutubeTrack(//facebookArtistId: String,
+  case class YoutubeTrack(facebookArtistId: String,
                           videoId: String,
                           title: String,
                           thumbnail: Option[String] )
@@ -222,7 +222,7 @@ object SearchArtistController extends Controller {
         if (tuple._2 == artistId)
           toBeReturned = Some(tuple._1)
       }
-      toBeReturned //si toBeReturned is empty => on refait pareil avec la seq des ids de la recherche avec pattern au lieu de artist.name
+      toBeReturned
     }
   }
 
@@ -236,14 +236,14 @@ object SearchArtistController extends Controller {
     }
   }
 
-  def findYoutubeVideos(tracksTitle: Set[String], artistName: String):
+  def findYoutubeVideos(tracksTitle: Set[String], artistName: String, facebookArtistId: String):
   Future[Set[YoutubeTrack]] = {
-
     val youtubeTrackReads: Reads[YoutubeTrack] = (
       (__ \ "id" \ "videoId").read[String] and
         (__ \ "snippet" \ "title").read[String] and
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
-      )(YoutubeTrack)
+      )((videoId: String, title: String, thumbnail: Option[String]) =>
+        YoutubeTrack(facebookArtistId, videoId, title, thumbnail))
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
@@ -258,9 +258,10 @@ object SearchArtistController extends Controller {
     ).map { _.toSet.flatten }
   }
 
-  def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Set[YoutubeTrack]] = {
+  def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String, facebookArtistId: String):
+  Future[Set[YoutubeTrack]] = {
     findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Set[String] =>
-      findYoutubeVideos(echonestSongsTitle, artistName)
+      findYoutubeVideos(echonestSongsTitle, artistName, facebookArtistId)
     }
   }
 
@@ -268,20 +269,20 @@ object SearchArtistController extends Controller {
     findEchonestIdCorrespondingToFacebookId(returnSeqTupleEchonestIdFacebookId(artistName), artistId).flatMap {
       case None => findEchonestIdCorrespondingToFacebookId(returnSeqTupleEchonestIdFacebookId(pattern), artistId)
         .flatMap {
-        case Some(echonestId) => futureYoutubeTracksByEchonestId(artistName, echonestId)
+        case Some(echonestId) => futureYoutubeTracksByEchonestId(artistName, echonestId, artistId)
         case None => Future { Set.empty }
       }
-      case Some(echonestId) => futureYoutubeTracksByEchonestId(artistName, echonestId)
+      case Some(echonestId) => futureYoutubeTracksByEchonestId(artistName, echonestId, artistId)
     }
   }
 
   def findFacebookArtistsContaining(pattern: String) = Action.async {
     val sanitizedPattern = normalizeString(pattern.replaceAll(" ", "+"))
 
-    findFacebookArtists(sanitizedPattern).map { futureFacebookArtists =>
+    findFacebookArtists(sanitizedPattern).map { facebookArtists =>
 
       val futureSoundCloudTracks = Future.sequence(
-        futureFacebookArtists.map { artist =>
+        facebookArtists.map { artist =>
           findSoundCloudTracksForArtist(artist)
         }
       )
@@ -292,7 +293,7 @@ object SearchArtistController extends Controller {
       )
 
       val futureYoutubeTracks = Future.sequence(
-        futureFacebookArtists.map { artist =>
+        facebookArtists.map { artist =>
           returnFutureYoutubeTracks(artist.name, artist.id, sanitizedPattern)
         }
       )
@@ -303,7 +304,9 @@ object SearchArtistController extends Controller {
       )
 
 
-      val enumerators = Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
+      val enumerators = Enumerator.interleave(
+        Enumerator( Json.toJson(facebookArtists) ), soundCloudTracksEnumerator, youtubeTracksEnumerator
+      )
 
       Ok.chunked(enumerators)
     }
