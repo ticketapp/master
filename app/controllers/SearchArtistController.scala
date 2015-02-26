@@ -24,7 +24,8 @@ object SearchArtistController extends Controller {
   case class YoutubeTrack(facebookArtistId: String,
                           videoId: String,
                           title: String,
-                          thumbnail: Option[String] )
+                          thumbnail: Option[String],
+                          from: String)
   case class FacebookArtist(name: String,
                             id: String,
                             cover: String,
@@ -243,7 +244,7 @@ object SearchArtistController extends Controller {
         (__ \ "snippet" \ "title").read[String] and
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
       )((videoId: String, title: String, thumbnail: Option[String]) =>
-        YoutubeTrack(facebookArtistId, videoId, title, thumbnail))
+        YoutubeTrack(facebookArtistId, videoId, title, thumbnail, "youtube"))
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
