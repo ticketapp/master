@@ -27,7 +27,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         imgHeight()
     };
     function search (){
-        $scope.items = [];
+        /*$scope.items = [];
         oboe.get('/test')
             .start(function (data, etc) {
                 console.log("Dude! We're goin'!", data, etc);
@@ -42,7 +42,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             })
             .fail(function (error) {
                 console.log("Error: ", error);
-            });
+            });*/
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
         $rootScope.activPlace = _selPlace;
