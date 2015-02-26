@@ -197,7 +197,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _selArtist == true) {
             var artistFbIdList = [];
             function getArtistFbId(el) {
-                artistFbIdList.push(el.artistId);
+                artistFbIdList.push(el.id);
             }
             function getArtistFbIdInArtists (el) {
                 artistFbIdList.push(el.facebookId);
@@ -208,29 +208,31 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 .start(function (data, etc) {
                     console.log("Dude! We're goin'!", data, etc);
                 })
-                .node('champ.*', function (value) {
+                /*.node('champ.*', function (value) {
                     $scope.items.push(value);
-                })
+                })*/
                 .done(function (value) {
                     function updateArtsitFb (artistInfo) {
                         if (artistInfo.name != undefined) {
-                            artistInfo.tracks = [];
-                            $scope.artistesFb.push(artistInfo);
-                            $scope.$apply();
-                            imgHeight()
+                            if (artistFbIdList.indexOf(artistInfo.id) < 0) {
+                                artistInfo.tracks = [];
+                                $scope.artistesFb.push(artistInfo);
+                                $scope.$apply();
+                                imgHeight()
+                            }
                         } else {
+                            console.log();
                             var artFbIdSearch = $scope.artistesFb.length;
-                            function pushTrack (newtrack) {
-                                console.log(newtrack);
-                                for (var art = 0; art < artFbIdSearch; art++) {
-                                    if (newtrack.facebookArtistId == $scope.artistesFb[art].id) {
-                                        newtrack.artist = $scope.artistesFb[art].name;
-                                        $scope.artistesFb[art].tracks.push(newtrack);
+                            var tracksIdFb = Object.keys(artistInfo)[0];
+                            console.log(artistInfo[tracksIdFb]);
+                            for (var art = 0; art < artFbIdSearch; art++) {
+                                if (tracksIdFb == $scope.artistesFb[art].id) {
+                                    if (tracksIdFb == $scope.artistesFb[art].id) {
+                                        $scope.artistesFb[art].tracks = $scope.artistesFb[art].tracks.concat(artistInfo[tracksIdFb]);
                                         $scope.$apply();
                                     }
                                 }
                             }
-                            artistInfo.forEach(pushTrack)
                         }
                     }
                     value.forEach(updateArtsitFb);
@@ -252,11 +254,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
     };
     var typingTimer;
-    var doneTypingInterval = 1000;
+    var doneTypingInterval = 600;
     $scope.research = function(newName) {
         if (angular.isDefined(newName)) {
             _research = newName;
-            if (_selArtist == true) {
+            if (_selArtist == true && _research.length > 2) {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(searchArtistFb, doneTypingInterval);
             }
