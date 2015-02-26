@@ -17,8 +17,14 @@ object SearchArtistController extends Controller {
     val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
     val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
     val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-    case class SoundCloudTrack(stream_url: Option[String], title: Option[String], artwork_url: Option[String] )
-    case class YoutubeTrack(videoId: String, title: String, thumbnail: Option[String] )
+    case class SoundCloudTrack(//facebookArtistId: String = "",
+                               stream_url: Option[String],
+                               title: Option[String],
+                               artwork_url: Option[String] )
+    case class YoutubeTrack(//facebookArtistId: String,
+                            videoId: String,
+                            title: String,
+                            thumbnail: Option[String] )
     case class FacebookArtist(name: String,
                               id: String,
                               cover: String,
@@ -232,18 +238,24 @@ object SearchArtistController extends Controller {
       }
     }
 
-    def findYoutubeVideos(tracksTitle: Set[String], artistName: String): Future[Set[YoutubeTrack]] = {
+    def findYoutubeVideos(tracksTitle: Set[String], artistName: String):
+    Future[Set[YoutubeTrack]] = {
+      /*def myApply(videoId: String, title: String, url: Option[String], facebookId: String): YoutubeTrack = {
+        YoutubeTrack(facebookId, videoId, title, url)
+      }*/
+
       implicit val youtubeTrackReads: Reads[YoutubeTrack] = (
         (JsPath \ "id" \ "videoId").read[String] and
           (JsPath \ "snippet" \ "title").read[String] and
           (JsPath \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
-        )(YoutubeTrack.apply _)
+        )(YoutubeTrack)
 
       Future.sequence(
         tracksTitle.map { trackTitle =>
           WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
             normalizeString(trackTitle) + normalizeString(artistName) +
             "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
+            println((video.json \ "items").asOpt[Set[YoutubeTrack]](Reads.set(youtubeTrackReads)))
             (video.json \ "items").asOpt[Set[YoutubeTrack]](Reads.set(youtubeTrackReads))
               .getOrElse(Seq.empty)
               .filter(_.title.indexOf(artistName) > -1)
@@ -269,17 +281,6 @@ object SearchArtistController extends Controller {
       }
     }
 
-
-
-  def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
-    findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
-      facebookArtists.map { facebookArtist =>
-        findSoundCloudTracksForArtist(facebookArtist).map { soundCloudTracks =>
-          facebookArtist.copy(soundCloudTracks = soundCloudTracks)
-        }
-      }
-    }
-  }
 
   def findFacebookArtistsContaining(pattern: String) = Action.async {
     val sanitizedPattern = normalizeString(pattern.replaceAll(" ", "+"))
@@ -313,34 +314,6 @@ object SearchArtistController extends Controller {
 
       Ok.chunked(enumerators)
     }
-
-
-
-    /*returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { seqFutureArtist: Seq[Future[FacebookArtist]] =>
-      val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
-      futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
-
-        val seqFutureArtistWMoreSCTracks: Seq[Future[FacebookArtist]] = seqArtist.map { artist: FacebookArtist =>
-          findSoundCloudTracksNotDefinedInFb(artist).map { soundCloudTracksNotDefinedInFb =>
-            artist.copy(soundCloudTracks = soundCloudTracksNotDefinedInFb)
-          }
-        }
-        val futureSeqArtistWMoreSCTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqFutureArtistWMoreSCTracks)
-
-        futureSeqArtistWMoreSCTracks.map { seqArtist =>
-          seqArtist.map { artist: FacebookArtist =>
-            returnFutureYoutubeTracks(artist.name, artist.id, sanitizedPattern).map { youtubeTracks =>
-              artist.copy(youtubeTracks = youtubeTracks)
-            }
-          }
-        }.flatMap { seqOfFuture: Seq[Future[FacebookArtist]] =>
-          Future.sequence(seqOfFuture).map { seq =>
-            Enumerator(seq)
-            Ok(Json.toJson(seq))
-          }
-        }
-      }
-    }*/
   }
 }
 /*
