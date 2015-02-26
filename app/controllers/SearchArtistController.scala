@@ -22,7 +22,7 @@ object SearchArtistController extends Controller {
                              title: Option[String],
                              artwork_url: Option[String] )
   case class YoutubeTrack(facebookArtistId: String,
-                          videoId: String,
+                          url: String,
                           title: String,
                           thumbnail: Option[String],
                           from: String)
