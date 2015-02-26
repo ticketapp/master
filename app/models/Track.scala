@@ -7,7 +7,7 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 
-case class Track (trackId: Long, name: String)
+case class Track (trackId: Long, name: String)//, url: String, )
 
 object Track {
   implicit val trackWrites = Json.writes[Track]

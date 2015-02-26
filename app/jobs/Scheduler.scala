@@ -103,12 +103,8 @@ object Scheduler {
     val name = eventJson.as[String]((__ \ "name").read[String])
 
 
-
     val listArtistsFromTitle: List[String] = splitArtistNamesInTitle(name)
     println(listArtistsFromTitle)
-
-
-
 
 
     val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
