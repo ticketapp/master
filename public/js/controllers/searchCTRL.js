@@ -1,4 +1,4 @@
-app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', function($rootScope, $http, $scope, $filter){
+app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', function($rootScope, $http, $scope, $filter, oboe){
     $scope.limit = 12;
     $scope.artistes = [];
     $scope.artistesFb = [];
@@ -27,6 +27,22 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', functi
         imgHeight()
     };
     function search (){
+        $scope.items = [];
+        oboe.get('/test')
+            .start(function (data, etc) {
+                console.log("Dude! We're goin'!", data, etc);
+            })
+            .node('champ.*', function (value) {
+                $scope.items.push(value);
+            })
+            .done(function (value) {
+                $scope.items.push(value);
+                $scope.$apply();
+                console.log("It works! ", $scope.items);
+            })
+            .fail(function (error) {
+                console.log("Error: ", error);
+            });
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
         $rootScope.activPlace = _selPlace;
