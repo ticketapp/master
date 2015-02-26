@@ -26,23 +26,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         $scope.limit = $scope.limit + 12;
         imgHeight()
     };
-    function search (){
-        $scope.items = [];
-        oboe.get('/test')
-            .start(function (data, etc) {
-                console.log("Dude! We're goin'!", data, etc);
-            })
-            .node('champ.*', function (value) {
-                $scope.items.push(value);
-            })
-            .done(function (value) {
-                $scope.items.push(value);
-                $scope.$apply();
-                console.log("It works! ", $scope.items);
-            })
-            .fail(function (error) {
-                console.log("Error: ", error);
-            });
+    function search () {
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
         $rootScope.activPlace = _selPlace;
@@ -209,6 +193,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
     }
     function searchArtistFb () {
+        $scope.artistesFb = $filter('filter')($scope.artistesFb, {name :  _research});
         if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _selArtist == true) {
             var artistFbIdList = [];
             function getArtistFbId(el) {
@@ -219,45 +204,39 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             }
             $scope.artistesFb.forEach(getArtistFbId);
             $scope.artistes.forEach(getArtistFbIdInArtists);
-            $http.get('/artists/facebookContaining/'+_research).
-                success(function(data, status, headers, config) {
-                    if ($scope.artistesFb.length == 0) {
-                        $scope.artistesFb = data;
-                    } else {
-                        function uploadArtistesFb (el, index, array) {
-                            if (artistFbIdList.indexOf(el.artistId) == -1) {
-                                $scope.artistesFb.push(el);
+            oboe.get('/artists/facebookContaining/'+_research)
+                .start(function (data, etc) {
+                    console.log("Dude! We're goin'!", data, etc);
+                })
+                .node('champ.*', function (value) {
+                    $scope.items.push(value);
+                })
+                .done(function (value) {
+                    function updateArtsitFb (artistInfo) {
+                        if (artistInfo.name != undefined) {
+                            artistInfo.tracks = [];
+                            $scope.artistesFb.push(artistInfo);
+                            $scope.$apply();
+                            imgHeight()
+                        } else {
+                            var artFbIdSearch = $scope.artistesFb.length;
+                            function pushTrack (newtrack) {
+                                console.log(newtrack);
+                                for (var art = 0; art < artFbIdSearch; art++) {
+                                    if (newtrack.facebookArtistId == $scope.artistesFb[art].id) {
+                                        newtrack.artist = $scope.artistesFb[art].name;
+                                        $scope.artistesFb[art].tracks.push(newtrack);
+                                        $scope.$apply();
+                                    }
+                                }
                             }
+                            artistInfo.forEach(pushTrack)
                         }
-                        data.forEach(uploadArtistesFb);
                     }
-                    var artistsFbLength = $scope.artistesFb.length;
-                    for (var i = 0; i < artistsFbLength; i++) {
-                        $scope.artistesFb[i].tracks = [];
-                        var tracksSCLength = $scope.artistesFb[i].soundCloudTracks.length;
-                        var tracksYTLength = $scope.artistesFb[i].youtubeTracks.length;
-                        for (var ii =0; ii < tracksSCLength; ii++) {
-                            var newTrack = $scope.artistesFb[i].soundCloudTracks[ii];
-                            newTrack.from = 'soundcloud';
-                            newTrack.url = $scope.artistesFb[i].soundCloudTracks[ii].stream_url;
-                            newTrack.image = $scope.artistesFb[i].soundCloudTracks[ii].artwork_url;
-                            newTrack.artist = $scope.artistesFb[i].name;
-                            $scope.artistesFb[i].tracks.push(newTrack);
-                        }
-                        for (var v =0; v < tracksYTLength; v++) {
-                            var newTrack = $scope.artistesFb[i].youtubeTracks[v];
-                            newTrack.url = $scope.artistesFb[i].youtubeTracks[v].videoId;
-                            newTrack.from = 'youtube';
-                            newTrack.image = $scope.artistesFb[i].youtubeTracks[v].thumbnail;
-                            newTrack.artist = $scope.artistesFb[i].name;
-                            $scope.artistesFb[i].tracks.push(newTrack);
-                        }
-                        console.log($scope.artistesFb[i])
-                        imgHeight()
-                    }
-                }).
-                error(function(data, status, headers, config) {
-                    console.log(data);
+                    value.forEach(updateArtsitFb);
+                })
+                .fail(function (error) {
+                    console.log("Error: ", error);
                 });
         }
     }

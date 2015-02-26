@@ -46,7 +46,7 @@
             <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" ng-repeat="track in playlist.tracks track by $index">
                 <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
                 <div ng-click="play($index)">
-                    <div class="img-circularPlayer" style="background-image: url('{{track.image}}');">
+                    <div class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
                     </div>
                     <div class="trackInfos">
                         {{track.artist}}<br/>
