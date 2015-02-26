@@ -10,6 +10,7 @@ import scala.annotation.tailrec
 import scala.concurrent.Future
 import services.Utilities.normalizeString
 import play.api.libs.functional.syntax._
+import scala.util.{Success, Failure}
 
 object SearchArtistController extends Controller {
     val token = play.Play.application.configuration.getString("facebook.token")
@@ -181,15 +182,7 @@ object SearchArtistController extends Controller {
       }
     }
 
-    def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
-      findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
-        facebookArtists.map { facebookArtist =>
-          findSoundCloudTracksForArtist(facebookArtist).map { soundCloudTracks =>
-            facebookArtist.copy(soundCloudTracks = soundCloudTracks)
-          }
-        }
-      }
-    }
+
 
     def returnSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
       def cleanFacebookId(implicit r: Reads[String]): Reads[String] = r.map(_.substring(17)) //17 = "facebook:artist:".length
@@ -210,7 +203,7 @@ object SearchArtistController extends Controller {
       WS.url("http://developer.echonest.com/api/v4/artist/search?api_key=" + echonestApiKey + "&name=" +
         normalizeString(artistName) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
         .map { artists =>
-        println((artists.json \ "response" \ "artists"))
+        //println((artists.json \ "response" \ "artists"))
         (artists.json \ "response" \ "artists")
           .asOpt(keepOnlyValidTuples)
           .getOrElse(Seq.empty)
@@ -277,57 +270,53 @@ object SearchArtistController extends Controller {
     }
 
 
-  def mock(serviceName: String) = {
-    val start = System.currentTimeMillis()
-    def getLatency(r: Any): Long = System.currentTimeMillis() - start
-    val token = play.Play.application.configuration.getString("facebook.token")
-    val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
-    val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
-    val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-    serviceName match {
-      case "a" =>
-        WS.url("http://api.soundcloud.com/users/rone-music?client_id=" +
-          soundCloudClientId).get().map { response => Json.toJson("yo")}
-      case "b" =>
-        WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
-          + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
-          .map { response => Json.toJson("sacoche!!!")}
-      case _ => WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
-        + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
-        .map { response => Json.toJson("???!!!")}
+
+  def returnFutureArtistsWSoundCloudTracks(pattern: String): Future[Seq[Future[FacebookArtist]]] = {
+    findFacebookArtists(pattern).map { facebookArtists: Seq[FacebookArtist] =>
+      facebookArtists.map { facebookArtist =>
+        findSoundCloudTracksForArtist(facebookArtist).map { soundCloudTracks =>
+          facebookArtist.copy(soundCloudTracks = soundCloudTracks)
+        }
+      }
     }
   }
 
   def findFacebookArtistsContaining(pattern: String) = Action.async {
-    /*
-    returnFutureArtistsWSoundCloudTracks(sanitizedPattern).map { seqFutureArtistWSoundCloudTracks: Seq[Future[FacebookArtist]] =>
-      val futureSeqArtistWSoundCloudTracks: Future[Seq[FacebookArtist]] = Future.sequence(seqFutureArtistWSoundCloudTracks)
-      val artistWMoreSoundCloudTracks: Future[Seq[Future[FacebookArtist]]] =
-        futureSeqArtistWSoundCloudTracks.map { seqArtist: Seq[FacebookArtist] =>
-          seqArtist.map { findSoundCloudTracksNotDefinedInFb }
-      }
-
-      for {
-
-      } yield {
-
-      }
-    }*/
     val sanitizedPattern = normalizeString(pattern.replaceAll(" ", "+"))
-    /*
-    returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { resp =>
-      Future.sequence(resp).map { a =>
-        val b = Enumerator(Json.toJson(Seq("lkjlkj", "kljlkjlkj", "kljlkjljlj", "kljlkjljk")))
-        val c = Enumerator.flatten(mock("a").map { str => Enumerator(Json.toJson(Map("champ" -> str))) })
-        val d = Enumerator(Json.toJson(a))
 
-        val e = Enumerator.interleave(b, c, d)
+    findFacebookArtists(sanitizedPattern).map { futureFacebookArtists =>
 
-        Ok.chunked(e)
-        //Ok(Json.toJson(a))
-      }
-    }*/
-    returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { seqFutureArtist: Seq[Future[FacebookArtist]] =>
+      val futureSoundCloudTracks = Future.sequence(
+        futureFacebookArtists.map { artist =>
+          findSoundCloudTracksForArtist(artist)
+        }
+      )
+      val soundCloudTracksEnumerator = Enumerator.flatten(
+        futureSoundCloudTracks.map { soundCloudTracks =>
+          Enumerator( Json.toJson(soundCloudTracks) )
+        }
+      )
+
+      val futureYoutubeTracks = Future.sequence(
+        futureFacebookArtists.map { artist =>
+          returnFutureYoutubeTracks(artist.name, artist.id, sanitizedPattern)
+        }
+      )
+      val youtubeTracksEnumerator = Enumerator.flatten(
+        futureYoutubeTracks.map { youtubeTracks =>
+          Enumerator( Json.toJson(youtubeTracks) )
+        }
+      )
+
+
+      val enumerators = Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
+
+      Ok.chunked(enumerators)
+    }
+
+
+
+    /*returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { seqFutureArtist: Seq[Future[FacebookArtist]] =>
       val futureSeqArtist = Future.sequence(seqFutureArtist): Future[Seq[FacebookArtist]]
       futureSeqArtist.flatMap { seqArtist: Seq[FacebookArtist] =>
 
@@ -351,6 +340,42 @@ object SearchArtistController extends Controller {
           }
         }
       }
-    }
+    }*/
   }
 }
+/*
+
+  def mock(serviceName: String) = {
+    val start = System.currentTimeMillis()
+    def getLatency(r: Any): Long = System.currentTimeMillis() - start
+    val token = play.Play.application.configuration.getString("facebook.token")
+    val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
+    val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
+    val youtubeKey = play.Play.application.configuration.getString("youtube.key")
+    serviceName match {
+      case "a" =>
+        WS.url("http://api.soundcloud.com/users/rone-music?client_id=" +
+          soundCloudClientId).get().map { response => Json.toJson("yo")}
+      case "b" =>
+        WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
+          + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+          .map { response => Json.toJson("sacoche!!!")}
+      case _ => WS.url("https://graph.facebook.com/v2.2/search?q=" + "iam"
+        + "&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+        .map { response => Json.toJson("???!!!")}
+    }
+  }
+ */
+/*
+   returnFutureArtistsWSoundCloudTracks(sanitizedPattern).flatMap { resp =>
+     Future.sequence(resp).map { a =>
+       val b = Enumerator(Json.toJson(Seq("lkjlkj", "kljlkjlkj", "kljlkjljlj", "kljlkjljk")))
+       val c = Enumerator.flatten(mock("a").map { str => Enumerator(Json.toJson(Map("champ" -> str))) })
+       val d = Enumerator(Json.toJson(a))
+
+       val e = Enumerator.interleave(b, c, d)
+
+       Ok.chunked(e)
+       //Ok(Json.toJson(a))
+     }
+   }*/
