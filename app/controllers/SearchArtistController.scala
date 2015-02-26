@@ -30,8 +30,8 @@ object SearchArtistController extends Controller {
                             cover: String,
                             websites: Seq[String],
                             link: String,
-                            soundCloudTracks: Seq[SoundCloudTrack] = Seq(),
-                            youtubeTracks: Set[YoutubeTrack] = Set() )
+                            soundCloudTracks: Seq[SoundCloudTrack] = Seq.empty,
+                            youtubeTracks: Set[YoutubeTrack] = Set.empty )
 
 
   def removeLastSlashIfExists(string: String): String  = {

@@ -195,7 +195,7 @@ object Event {
       } catch {
         case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
       }
-    case _ => Seq()
+    case _ => Seq.empty
     }
   }
 
@@ -228,8 +228,10 @@ object Event {
     testIfExist("events", "facebookId", event.facebookId) match {
       case true => None
       case false =>
-        val pattern = """(\(\d+\.\d*,\d+\.\d*\))""".r
-        val geographicPoint = event.geographicPoint.getOrElse("")
+        //+ négatif
+        val pattern = """(\(\d+\.?\d*,\d+\.?\d*\))""".r
+        val geographicPoint = event.geographicPoint.getOrElse("(0,0)")
+        println(geographicPoint)
         geographicPoint match {
           case pattern(_) =>
             try {
