@@ -1,6 +1,6 @@
 package json
 
-import controllers.SearchArtistController.{FacebookArtist, YoutubeTrack, SoundCloudTrack}
+import controllers.SearchArtistController.{FacebookArtist, Track}
 //import controllers.Test2.{YoutubeTrack, FacebookArtist, SoundCloudTrack}
 import models._
 import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
@@ -36,9 +36,6 @@ object JsonHelper {
   implicit val organizerWrites = Json.writes[Organizer]
   implicit val eventWrites = Json.writes[Event]
   implicit val infoWrites: Writes[Info] = Json.writes[Info]
-  implicit val soundCloudTrackWrites: Writes[SoundCloudTrack] = Json.writes[SoundCloudTrack]
-  implicit val soundCloudTracksReads: Reads[SoundCloudTrack] = Json.reads[SoundCloudTrack]
-  implicit val youtubeTrackWrites: Writes[YoutubeTrack] = Json.writes[YoutubeTrack]
-  implicit val youtubeTrackReads: Reads[YoutubeTrack] = Json.reads[YoutubeTrack]
   implicit val facebookArtistWrites: Writes[FacebookArtist] = Json.writes[FacebookArtist]
+  implicit val trackWrites: Writes[Track] = Json.writes[Track]
 }
