@@ -16,10 +16,10 @@ object SearchArtistController extends Controller {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-  case class Track(facebookArtistId: String,
-                   url: Option[String],
+  case class Track(url: Option[String],
                    title: Option[String],
                    thumbnail: Option[String],
+                   avatarUrl: Option[String],
                    from: String)
 
   case class FacebookArtist(name: String,
@@ -82,33 +82,6 @@ object SearchArtistController extends Controller {
     }
   }
 
-  def findSoundCloudUserImageIfNoTrackImage(soundCloudLink: String, soundCloudTracks: Seq[Track]):
-  Future[Seq[Track]] = {
-    @tailrec
-    def isThereASoundCloudTrackWithoutImage(soundCloudTracks: List[Track]): Boolean = {
-      soundCloudTracks match {
-        case x :: tail if x.url == None => true
-        case Nil => false
-        case x :: tail  => isThereASoundCloudTrackWithoutImage(tail)
-      }
-    }
-    if (isThereASoundCloudTrackWithoutImage(soundCloudTracks.toList)) {
-      val readUrl: Reads[String] = (__ \ "avatar_url").read[String]
-      WS.url("http://api.soundcloud.com/users/" + normalizeString(soundCloudLink) + "?client_id=" +
-        soundCloudClientId).get().map { user =>
-        user.json.asOpt[String](readUrl) match {
-          case None => soundCloudTracks
-          case Some(imgUrl) =>
-            soundCloudTracks.map { soundCloudTrack =>
-              if (soundCloudTrack.url == None) soundCloudTrack.copy(url = Some(imgUrl))
-              else soundCloudTrack
-            }
-        }
-      }
-    } else {
-      Future { soundCloudTracks }
-    }
-  }
 
   def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[Track]] = {
     var soundCloudLink: String = ""
@@ -120,17 +93,18 @@ object SearchArtistController extends Controller {
     }
     soundCloudLink match {
       case "" => Future { artist.soundCloudTracks }
-      case scLink => findSoundCloudTracks(scLink, artist.id)
+      case scLink => findSoundCloudTracks(scLink)
     }
   }
 
-  def findSoundCloudTracks(scLink: String, facebookArtistId: String): Future[Seq[Track]] = {
+  def findSoundCloudTracks(scLink: String): Future[Seq[Track]] = {
     val soundCloudTrackReads: Reads[Track] = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
+        (__ \ "user" \ "avatar_url").readNullable[String] and
         (__ \ "artwork_url").readNullable[String]
-      )((url: Option[String], title: Option[String], thumbnail: Option[String]) =>
-        Track(facebookArtistId, url, title, thumbnail, "soundcloud"))
+      )((url: Option[String], title: Option[String], avatarUrl: Option[String], thumbnail: Option[String]) =>
+        Track(url, title, thumbnail, avatarUrl, "soundcloud"))
 
     val readTracks: Reads[Seq[Track]] = Reads.seq(soundCloudTrackReads)
     /*val collectOnlyTracksWithUrlAndTitle = readTracks.map { tracks =>
@@ -139,11 +113,7 @@ object SearchArtistController extends Controller {
       }
     }*/
     WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
-      soundCloudClientId).get().flatMap { soundCloudTracks =>
-      println(soundCloudTracks.json)
-      findSoundCloudUserImageIfNoTrackImage(scLink,
-        soundCloudTracks.json.asOpt[Seq[Track]](readTracks).getOrElse(Seq()) )
-    }
+      soundCloudClientId).get().map { _.json.asOpt[Seq[Track]](readTracks).getOrElse(Seq.empty) }
   }
 
   def findSoundCloudIds(namePattern: String): Future[Seq[Long]] = {
@@ -176,7 +146,7 @@ object SearchArtistController extends Controller {
       }
     }
     if (matchedId != 0)
-      findSoundCloudTracks(matchedId.toString, artist.id)
+      findSoundCloudTracks(matchedId.toString)
     else
       Future{ artist.soundCloudTracks }
   }
@@ -241,20 +211,21 @@ object SearchArtistController extends Controller {
     }
   }
 
-  def findYoutubeVideos(tracksTitle: Set[String], artistName: String, facebookArtistId: String):
+  def findYoutubeVideos(tracksTitle: Set[String], artistName: String):
   Future[Set[Track]] = {
     val youtubeTrackReads: Reads[Track] = (
       (__ \ "id" \ "videoId").read[Option[String]] and
         (__ \ "snippet" \ "title").read[Option[String]] and
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
       )((videoId: Option[String], title: Option[String], thumbnail: Option[String]) =>
-        Track(facebookArtistId, videoId, title, thumbnail, "youtube"))
+        Track(videoId, title, thumbnail, None, "youtube"))
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
           normalizeString(trackTitle) + normalizeString(artistName) +
-          "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
+          "&type=video&videoCategoryId=10&key=" + youtubeKey
+        ).get().map { video =>
           (video.json \ "items").asOpt[Set[Track]](Reads.set(youtubeTrackReads))
             .getOrElse(Seq.empty)
             .filter(_.title.getOrElse("").indexOf(artistName) > -1)
@@ -266,7 +237,7 @@ object SearchArtistController extends Controller {
   def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String, facebookArtistId: String):
   Future[Set[Track]] = {
     findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Set[String] =>
-      findYoutubeVideos(echonestSongsTitle, artistName, facebookArtistId)
+      findYoutubeVideos(echonestSongsTitle, artistName)
     }
   }
 
@@ -286,9 +257,12 @@ object SearchArtistController extends Controller {
 
     findFacebookArtists(sanitizedPattern).map { facebookArtists =>
 
+
       val futureSoundCloudTracks = Future.sequence(
         facebookArtists.map { artist =>
-          findSoundCloudTracksForArtist(artist)
+          findSoundCloudTracksForArtist(artist).map { soundCloudTracks =>
+            Map( artist.id -> soundCloudTracks )
+          }
         }
       )
       val soundCloudTracksEnumerator = Enumerator.flatten(
@@ -299,7 +273,9 @@ object SearchArtistController extends Controller {
 
       val futureYoutubeTracks = Future.sequence(
         facebookArtists.map { artist =>
-          returnFutureYoutubeTracks(artist.name, artist.id, sanitizedPattern)
+          returnFutureYoutubeTracks(artist.name, artist.id, sanitizedPattern).map { youtubeTracks =>
+            Map( artist.id -> youtubeTracks )
+          }
         }
       )
       val youtubeTracksEnumerator = Enumerator.flatten(
