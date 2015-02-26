@@ -29,8 +29,8 @@
                 </div>
                 <div class=" text_evnt_min" >
                     <a ng-click="createArtist(artisteFb)"><h4>{{ artisteFb.name }}</h4></a>
-                    <i ng-show="artisteFb.tracks.length > 0" class="fi-play-circle" style="font-size: 26px;" ng-click="$root.addAndPlay(artisteFb.tracks)"></i>
-                    <i ng-show="artisteFb.tracks.length > 0" class="fi-plus" style="font-size: 26px;" ng-click="$root.addToPlaylist(artisteFb.tracks)"></i>
+                    <i ng-show="artisteFb.tracks.length > 0" class="fi-play-circle" style="font-size: 26px;" ng-click="$root.addAndPlay(artisteFb.tracks, artisteFb.name)"></i>
+                    <i ng-show="artisteFb.tracks.length > 0" class="fi-plus" style="font-size: 26px;" ng-click="$root.addToPlaylist(artisteFb.tracks, artisteFb.name)"></i>
                 </div>
             </div>
         </li>

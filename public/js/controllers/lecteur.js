@@ -10,21 +10,40 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
     $scope.shuffle = false;
     var played = [];
     var i = 0;
-    function pushTrack (el) {
-        $rootScope.playlist.tracks.push(el);
+    function pushTrack (track, art) {
+        track.artist = art;
+        $rootScope.playlist.tracks.push(track);
     }
-    $rootScope.addToPlaylist = function (tracks) {
+    $rootScope.addToPlaylist = function (tracks, artist) {
         if ($rootScope.playlist.tracks.length == 0) {
-            tracks.forEach(pushTrack);
+            var tracksLenght = tracks.length;
+            for (var tr = 0; tr < tracksLenght; tr++) {
+                if (tracks[tr].thumbnail == undefined) {
+                    tracks[tr].thumbnail = tracks[tr].avatarUrl
+                }
+                pushTrack(tracks[tr], artist)
+            }
             $scope.play(i);
             played = [];
         } else {
-            tracks.forEach(pushTrack);
+            var tracksLenght = tracks.length;
+            for (var tr = 0; tr < tracksLenght; tr++) {
+                if (tracks[tr].thumbnail == undefined) {
+                    tracks[tr].thumbnail = tracks[tr].avatarUrl
+                }
+                pushTrack(tracks[tr], artist)
+            }
         }
     };
-    $rootScope.addAndPlay = function (tracks) {
+    $rootScope.addAndPlay = function (tracks, artist) {
         var last = $rootScope.playlist.tracks.length;
-        tracks.forEach(pushTrack);
+        var tracksLenght = tracks.length;
+        for (var tr = 0; tr < tracksLenght; tr++) {
+            if (tracks[tr].thumbnail == undefined) {
+                tracks[tr].thumbnail = tracks[tr].avatarUrl
+            }
+            pushTrack(tracks[tr], artist)
+        }
         $scope.play(last);
         console.log($rootScope.playlist.tracks);
         if ($rootScope.playlist.tracks.length == 0) {
