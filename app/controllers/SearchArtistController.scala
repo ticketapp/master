@@ -16,23 +16,19 @@ object SearchArtistController extends Controller {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-  case class SoundCloudTrack(facebookArtistId: String,
-                             url: Option[String],
-                             title: Option[String],
-                             thumbnail: Option[String],
-                             from: String)
-  case class YoutubeTrack(facebookArtistId: String,
-                          url: String,
-                          title: String,
-                          thumbnail: Option[String],
-                          from: String)
+  case class Track(facebookArtistId: String,
+                   url: Option[String],
+                   title: Option[String],
+                   thumbnail: Option[String],
+                   from: String)
+
   case class FacebookArtist(name: String,
                             id: String,
                             cover: String,
                             websites: Seq[String],
                             link: String,
-                            soundCloudTracks: Seq[SoundCloudTrack] = Seq.empty,
-                            youtubeTracks: Set[YoutubeTrack] = Set.empty )
+                            soundCloudTracks: Seq[Track] = Seq.empty,
+                            youtubeTracks: Set[Track] = Set.empty )
 
 
   def removeLastSlashIfExists(string: String): String  = {
@@ -86,10 +82,10 @@ object SearchArtistController extends Controller {
     }
   }
 
-  def findSoundCloudUserImageIfNoTrackImage(soundCloudLink: String, soundCloudTracks: Seq[SoundCloudTrack]):
-  Future[Seq[SoundCloudTrack]] = {
+  def findSoundCloudUserImageIfNoTrackImage(soundCloudLink: String, soundCloudTracks: Seq[Track]):
+  Future[Seq[Track]] = {
     @tailrec
-    def isThereASoundCloudTrackWithoutImage(soundCloudTracks: List[SoundCloudTrack]): Boolean = {
+    def isThereASoundCloudTrackWithoutImage(soundCloudTracks: List[Track]): Boolean = {
       soundCloudTracks match {
         case x :: tail if x.url == None => true
         case Nil => false
@@ -114,7 +110,7 @@ object SearchArtistController extends Controller {
     }
   }
 
-  def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
+  def findSoundCloudTracksForArtist(artist: FacebookArtist): Future[Seq[Track]] = {
     var soundCloudLink: String = ""
     for (site <- artist.websites) {
       site.indexOf("soundcloud.com") match {
@@ -128,25 +124,25 @@ object SearchArtistController extends Controller {
     }
   }
 
-  def findSoundCloudTracks(scLink: String, facebookArtistId: String): Future[Seq[SoundCloudTrack]] = {
-    val soundCloudTrackReads: Reads[SoundCloudTrack] = (
+  def findSoundCloudTracks(scLink: String, facebookArtistId: String): Future[Seq[Track]] = {
+    val soundCloudTrackReads: Reads[Track] = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
         (__ \ "artwork_url").readNullable[String]
       )((url: Option[String], title: Option[String], thumbnail: Option[String]) =>
-        SoundCloudTrack(facebookArtistId, url, title, thumbnail, "soundcloud"))
+        Track(facebookArtistId, url, title, thumbnail, "soundcloud"))
 
-    val readTracks: Reads[Seq[SoundCloudTrack]] = Reads.seq(soundCloudTrackReads)
+    val readTracks: Reads[Seq[Track]] = Reads.seq(soundCloudTrackReads)
     /*val collectOnlyTracksWithUrlAndTitle = readTracks.map { tracks =>
       tracks.collect {
-        case (Some(url), Some(title), imageSource) => SoundCloudTrack(url)
+        case (Some(url), Some(title), imageSource) => Track(url)
       }
     }*/
     WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
       soundCloudClientId).get().flatMap { soundCloudTracks =>
       println(soundCloudTracks.json)
       findSoundCloudUserImageIfNoTrackImage(scLink,
-        soundCloudTracks.json.asOpt[Seq[SoundCloudTrack]](readTracks).getOrElse(Seq()) )
+        soundCloudTracks.json.asOpt[Seq[Track]](readTracks).getOrElse(Seq()) )
     }
   }
 
@@ -170,7 +166,7 @@ object SearchArtistController extends Controller {
   }
 
   def compareArtistWebsitesWSCWebsitesAndAddTracks(artist: FacebookArtist, websitesAndIds: Seq[(Long, Seq[String])])
-  :Future[Seq[SoundCloudTrack]] = {
+  :Future[Seq[Track]] = {
     var matchedId: Long = 0
     for (websitesAndId <- websitesAndIds) {
       for (website <- websitesAndId._2) {
@@ -185,7 +181,7 @@ object SearchArtistController extends Controller {
       Future{ artist.soundCloudTracks }
   }
 
-  def findSoundCloudTracksNotDefinedInFb(artist: FacebookArtist): Future[Seq[SoundCloudTrack]] = {
+  def findSoundCloudTracksNotDefinedInFb(artist: FacebookArtist): Future[Seq[Track]] = {
     artist.soundCloudTracks match {
       case tracks: Seq[soundCloudTracks] if tracks.isEmpty =>
         findSoundCloudIds(artist.name).flatMap { ids =>
@@ -246,35 +242,35 @@ object SearchArtistController extends Controller {
   }
 
   def findYoutubeVideos(tracksTitle: Set[String], artistName: String, facebookArtistId: String):
-  Future[Set[YoutubeTrack]] = {
-    val youtubeTrackReads: Reads[YoutubeTrack] = (
-      (__ \ "id" \ "videoId").read[String] and
-        (__ \ "snippet" \ "title").read[String] and
+  Future[Set[Track]] = {
+    val youtubeTrackReads: Reads[Track] = (
+      (__ \ "id" \ "videoId").read[Option[String]] and
+        (__ \ "snippet" \ "title").read[Option[String]] and
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
-      )((videoId: String, title: String, thumbnail: Option[String]) =>
-        YoutubeTrack(facebookArtistId, videoId, title, thumbnail, "youtube"))
+      )((videoId: Option[String], title: Option[String], thumbnail: Option[String]) =>
+        Track(facebookArtistId, videoId, title, thumbnail, "youtube"))
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
           normalizeString(trackTitle) + normalizeString(artistName) +
           "&type=video&videoCategoryId=10&key=" + youtubeKey ).get().map { video =>
-          (video.json \ "items").asOpt[Set[YoutubeTrack]](Reads.set(youtubeTrackReads))
+          (video.json \ "items").asOpt[Set[Track]](Reads.set(youtubeTrackReads))
             .getOrElse(Seq.empty)
-            .filter(_.title.indexOf(artistName) > -1)
+            .filter(_.title.getOrElse("").indexOf(artistName) > -1)
         }
       }
     ).map { _.toSet.flatten }
   }
 
   def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String, facebookArtistId: String):
-  Future[Set[YoutubeTrack]] = {
+  Future[Set[Track]] = {
     findEchonestSongs(echonestId).flatMap { echonestSongsTitle: Set[String] =>
       findYoutubeVideos(echonestSongsTitle, artistName, facebookArtistId)
     }
   }
 
-  def returnFutureYoutubeTracks(artistName: String, artistId: String, pattern: String): Future[Set[YoutubeTrack]] = {
+  def returnFutureYoutubeTracks(artistName: String, artistId: String, pattern: String): Future[Set[Track]] = {
     findEchonestIdCorrespondingToFacebookId(returnSeqTupleEchonestIdFacebookId(artistName), artistId).flatMap {
       case None => findEchonestIdCorrespondingToFacebookId(returnSeqTupleEchonestIdFacebookId(pattern), artistId)
         .flatMap {
