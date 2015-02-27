@@ -21,6 +21,16 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                     if (document.getElementById('events_contener').innerHTML.length > 0) {
                         clearInterval(waitForBinding);
                         var eventInfoConteners = document.getElementsByClassName('eventInfo');
+                        if ($scope.orgaEvents.length == 1) {
+                            console.log('yo')
+                            document.getElementsByClassName('descriptionContent')[0].classList.remove('large-8');
+                            document.getElementsByClassName('descriptionContent')[0].classList.add('large-4');
+                            document.getElementsByClassName('data-ng-event')[0].setAttribute('flex-gt-lg', '100');
+                            for (var i = 0; i < eventInfoConteners.length; i++) {
+                                eventInfoConteners[i].classList.remove('large-4');
+                                eventInfoConteners[i].classList.add('large-8');
+                            }
+                        }
                         for (var i = 0; i < eventInfoConteners.length; i++) {
                             if (eventInfoConteners[i].offsetLeft < 30) {
                                 eventInfoConteners[i].classList.remove('large-4');
@@ -34,6 +44,15 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                     if (newval == 'large' || newval == 'xlarge' || newval == 'xxlarge') {
                         var waitForBinding = setInterval(function () {
                             if (document.getElementById('events_contener').innerHTML.length > 0) {
+                                clearInterval(waitForBinding);
+                                var eventInfoConteners = document.getElementsByClassName('eventInfo');
+                                for (var i = 0; i < eventInfoConteners.length; i++) {
+                                    if (eventInfoConteners[i].offsetLeft < 30) {
+                                        eventInfoConteners[i].classList.remove('large-4');
+                                        eventInfoConteners[i].classList.add('large-12');
+                                    }
+                                }
+                            } else {
                                 clearInterval(waitForBinding);
                                 var eventInfoConteners = document.getElementsByClassName('eventInfo');
                                 for (var i = 0; i < eventInfoConteners.length; i++) {
