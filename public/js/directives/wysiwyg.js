@@ -339,7 +339,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
             }
         };
         $scope.addElement = function () {
-            document.getElementById('content').innerHTML = document.getElementById('content').innerHTML + "<div contenteditable='true' class='column'>Ecrire ici</div>";
+            document.getElementById('content').innerHTML = document.getElementById('content').innerHTML + "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
         }
         $scope.addClass = function (a) {
             if (document.getSelection().anchorNode.parentNode.className == a) {
@@ -677,19 +677,19 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                     if (document.getElementById('content').innerHTML.length == 0) {
                         console.log(1)
                         var inner = m.innerHTML;
-                        document.getElementById('content').innerHTML = "<div  class='column' contenteditable='true'>Ecrire ici</div>";
+                        document.getElementById('content').innerHTML = "<div  class='column large-12' contenteditable='true'>Ecrire ici</div>";
                     }
                 } else if (m.tagName == "WYSIWYG" || m.tagName == "BODY") {
                     console.log(2)
                     var contentElement = document.getElementById('content').innerHTML;
                     if (document.getElementById('content').innerHTML.length == 0) {
-                        document.getElementById('content').innerHTMLL = "<div contenteditable='true' class='column'>Ecrire ici</div>";
+                        document.getElementById('content').innerHTMLL = "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
                     }
                 } else if (document.getElementById('content').innerHTML.indexOf(m.outerHTML) == -1) {
                     console.log(3)
                     var contentElement = document.getElementById('content').innerHTML;
                     if (document.getElementById('content').innerHTML.length == 0) {
-                        document.getElementById('content').innerHTML = "<div contenteditable='true' class='column'>Ecrire ici</div>";
+                        document.getElementById('content').innerHTML = "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
                     }
                 } else {
                     $scope.remEl = function () {
