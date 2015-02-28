@@ -45,7 +45,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             pushTrack(tracks[tr], artist)
         }
         $scope.play(last);
-        console.log($rootScope.playlist.tracks);
         if ($rootScope.playlist.tracks.length == 0) {
             played = [];
         }
@@ -179,6 +178,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             //document.getElementById('youtubePlayer').classList.remove('ng-hide');
             document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
             function onPlayerReady(event) {
+                console.log('youtube')
                 event.target.playVideo();
                 $scope.onPlay = true;
                 $scope.playPause = function () {

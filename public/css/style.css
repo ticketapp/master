@@ -382,6 +382,7 @@ top: 0;
 
 
         /*video*/
+        .hiddenVideo {margin-top:-10000px}
         .onplay {opacity: 1!important;}
         .video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
         #iframe-lecture {z-index: 9;

@@ -51,7 +51,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                         },100);
                     }
                 }, 100);
-            } else if ( $rootScope.window != 'small' || $rootScope.window != 'medium') {
+            } else {
                 $rootScope.$watch('window', function(newval) {
                     if (newval == 'large' || newval == 'xlarge' || newval == 'xxlarge') {
                         var waitForBinding = setInterval(function () {
