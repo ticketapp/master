@@ -9,7 +9,7 @@
         <a href="#" class="btn btn-warning btn_event">Itineraire</a>
         <a href="{{place.webSite}}" class="row-fluid left">{{place.webSite}}</a>
     </div>
-    <ul id="events_contener" layout="row" layout-wrap>
-        <li class="data-ng-event margin0" data-ng-repeat="event in events" flex-gt-lg="25" flex-md="50" flex-gt-md="33" flex-sm="100"></li>
+    <ul id="events_contener" class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
+        <li ng-show="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0" data-ng-repeat="event in events "></li>
     </ul>
 </div>

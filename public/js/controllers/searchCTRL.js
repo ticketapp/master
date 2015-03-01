@@ -215,10 +215,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     function updateArtsitFb (artistInfo) {
                         if (artistInfo.name != undefined) {
                             if (artistFbIdList.indexOf(artistInfo.id) < 0) {
+                                console.log(artistInfo);
                                 artistInfo.tracks = [];
+                                getArtistFbId(artistInfo.id);
                                 $scope.artistesFb.push(artistInfo);
+                                $scope.artistesFb = $filter('filter')($scope.artistesFb, {name :  _research});
                                 $scope.$apply();
-                                imgHeight()
+                                imgHeight();
                             }
                         } else {
                             console.log();
@@ -226,6 +229,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             var tracksIdFb = Object.keys(artistInfo)[0];
                             console.log(artistInfo[tracksIdFb]);
                             for (var art = 0; art < artFbIdSearch; art++) {
+                                console.log(tracksIdFb + '//' +$scope.artistesFb[art].id)
                                 if (tracksIdFb == $scope.artistesFb[art].id) {
                                     if (tracksIdFb == $scope.artistesFb[art].id) {
                                         $scope.artistesFb[art].tracks = $scope.artistesFb[art].tracks.concat(artistInfo[tracksIdFb]);
@@ -244,7 +248,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     search();
     $scope.createArtist = function (artist) {
-        $http.post('artists/createArtist', {artistName : artist.name, facebookId: artist.id}).
+            /*description: Option[String],
+            tracks: List[Track]*/
+        artist.images = [];
+        var img = {paths: artist.cover};
+        artist.images.push(img);
+        console.log(artist.images);
+        $http.post('artists/createArtist', {artistName : artist.name, facebookId: artist.id, images : artist.images}).
             success(function(data, status, headers, config) {
                 window.location.href =('#/artiste/' + data);
             }).

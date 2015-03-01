@@ -22,6 +22,17 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                         }
                     }
                 }, 100)
+            } else {
+                var waitForContentParallax = setTimeout(function () {
+                    var content = document.getElementsByClassName('parallax-content');
+                    if (content.length > 0) {
+                        clearInterval(waitForContentParallax);
+                        var contentLength = content.length;
+                        for (var i = 0; i < contentLength; i++) {
+                            content[i].style.marginTop = '500px';
+                        }
+                    }
+                }, 100)
             }
         }
         function respClass () {

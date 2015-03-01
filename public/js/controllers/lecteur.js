@@ -45,7 +45,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             pushTrack(tracks[tr], artist)
         }
         $scope.play(last);
-        console.log($rootScope.playlist.tracks);
         if ($rootScope.playlist.tracks.length == 0) {
             played = [];
         }
@@ -135,7 +134,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         if ($rootScope.playlist.tracks[i].from == 'soundcloud') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
-            document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist.tracks[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
+            if ($rootScope.playlist.tracks[i].url != undefined) {
+                document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist.tracks[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
+            } else {
+                $scope.nextTrack();
+            }
             $scope.onPlay = true;
             $scope.playPause = function () {
                 if ($scope.onPlay == false) {
@@ -175,6 +178,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
             //document.getElementById('youtubePlayer').classList.remove('ng-hide');
             document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
             function onPlayerReady(event) {
+                console.log('youtube')
                 event.target.playVideo();
                 $scope.onPlay = true;
                 $scope.playPause = function () {
@@ -247,7 +251,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 videoId: $rootScope.playlist.tracks[i].url,
                 events: {
                     'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
+                    'onStateChange': onPlayerStateChange,
+                    'onError' : function () {console.log(event);$scope.nextTrack()}
                 }
             });
         }
