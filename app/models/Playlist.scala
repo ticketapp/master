@@ -27,7 +27,6 @@ object Playlist {
     }
   }
 
-
   def findByUserId(userId: Long): Seq[Playlist] = {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *
