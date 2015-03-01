@@ -1,7 +1,7 @@
 package controllers
 
 import json.JsonHelper._
-import models.Artist
+import models.{Image, Artist}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
@@ -27,7 +27,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
   val artistBindingForm = Form( mapping(
     "facebookId" -> optional(nonEmptyText(2)),
-    "artistName" -> nonEmptyText(2)
+    "artistName" -> nonEmptyText(2),
+    "images" -> list( mapping(
+      "paths" -> nonEmptyText
+    )(Image.formApply)(Image.formUnapply))
   )(Artist.formApply)(Artist.formUnapply)
   )
 
@@ -53,7 +56,4 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     //Artist.followArtist(userId, artistId)
     Redirect(routes.Admin.indexAdmin())
   }
-
-
-
 }

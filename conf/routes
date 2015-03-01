@@ -3,6 +3,7 @@ GET     /                               controllers.Application.index
 
 
 GET     /test                           controllers.Test.test1
+GET     /test/:id                       controllers.Test.getEchoSongs(id)
 #GET     /test2/:pattern                controllers.Test2.test2(pattern)
 #GET     /placesFacebookIds             controllers.PlaceController.placesFacebookIds
 
@@ -29,7 +30,7 @@ POST    /artists/createArtist           controllers.ArtistController.createArtis
 POST    /artists/:artistId/follow       controllers.ArtistController.followArtist(artistId: Long)
 DELETE  /artists/:artistId              controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/containing/:pattern    controllers.ArtistController.findArtistsContaining(pattern: String)
-GET     /artists/facebookContaining/:pattern    controllers.SearchArtistController.findFacebookArtistsContaining(pattern: String)
+GET     /artists/facebookContaining/:pattern    controllers.SearchArtistController.getFacebookArtistsContaining(pattern: String)
 
 ################################## Places ###############################################
 GET     /places                         controllers.PlaceController.places

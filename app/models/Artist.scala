@@ -38,9 +38,10 @@ object Artist {
     }
   }
 
-  def formApply(facebookId: Option[String], name: String): Artist =
-    new Artist(-1L, new Date, facebookId, name, None, List(), List(), List())
-  def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
+  def formApply(facebookId: Option[String], name: String, images: List[Image]): Artist =
+    new Artist(-1L, new Date, facebookId, name, None, images, List(), List())
+  def formUnapply(artist: Artist): Option[(Option[String], String, List[Image])] =
+    Some((artist.facebookId, artist.name, artist.images))
 
   def findAll(): List[Artist] = {
     DB.withConnection { implicit connection =>
