@@ -12,6 +12,10 @@ case class Genre (genreId: Long, name: String)
 object Genre {
   implicit val genreWrites = Json.writes[Genre]
 
+  def formApply(name: String) = new Genre(-1L, name)
+
+  def formUnapply(genre: Genre) = Some(genre.name)
+
   private val GenreParser: RowParser[Genre] = {
     get[Long]("genreId") ~
       get[String]("name") map {

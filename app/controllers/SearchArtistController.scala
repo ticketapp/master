@@ -80,7 +80,7 @@ object SearchArtistController extends Controller {
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
       + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
       .map { response =>
-      (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse( Seq.empty ).take(20)
+      (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse( Seq.empty )//.take(20)
     }
   }
 
@@ -197,15 +197,8 @@ object SearchArtistController extends Controller {
     }
   }
 
-  def getTitleSetFromJson( jsValue: JsValue ): Set[ String ] = {
-    val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
-    (jsValue \ "response" \ "songs")
-      .asOpt[Set[Option[String]]](Reads.set(titleReads))
-      .getOrElse(Set.empty)
-      .flatten
-  }
-
-  def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[String]] = {
+  def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[JsValue]] = {
+    println(echonestArtistId)
     val endpoint = s"$echonestBaseUrl/artist/songs"
     val assembledUrl = s"$endpoint?api_key=$echonestApiKey&id=$echonestArtistId&format=json&start=$start&results=100"
     val response = WS.url(assembledUrl).get()
@@ -213,10 +206,11 @@ object SearchArtistController extends Controller {
 
     futureJson flatMap { result =>
       val total = (result \ "response" \ "total").asOpt[Int]
-      val songs = (result \ "response" \ "songs").asOpt[Set[String]]
+      val songs = (result \ "response" \ "songs").as[Set[JsValue]]
+
       total exists (_ > start + 100) match {
-        case false => Future.successful(getTitleSetFromJson(result))
-        case true => getEchonestSongs(start + 100, echonestArtistId) map (getTitleSetFromJson(result) ++ _)
+        case false => Future.successful(songs)
+        case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)
       }
     }
   }
@@ -267,7 +261,9 @@ object SearchArtistController extends Controller {
   }
 
   def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Set[Track]] = {
-    getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
+    getEchonestSongs(0, echonestId).map(_.map(_ \ "title").map(_.as[String]))
+      .flatMap { echonestSongsTitle: Set[String] =>
+      println(echonestSongsTitle)
       getYoutubeVideos(echonestSongsTitle, artistName)
     }
   }
@@ -330,7 +326,6 @@ object SearchArtistController extends Controller {
       )
       val youtubeTracksEnumerator = Enumerator.flatten(
         futureYoutubeTracks.map { youtubeTracks =>
-          println(youtubeTracks)
           Enumerator( Json.toJson(youtubeTracks) )
         }
       )

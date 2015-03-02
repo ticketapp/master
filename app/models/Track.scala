@@ -7,16 +7,22 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 
-case class Track (trackId: Long, name: String)//, url: String, )
+case class Track (trackId: Long, name: String, url: String, platform: String)
 
 object Track {
   implicit val trackWrites = Json.writes[Track]
 
+  def formApply(name: String, url: String, platform: String) = new Track(-1L, name, url, platform)
+
+  def formUnapply(track: Track) = Some(track.name, track.url ,track.platform)
+
   private val TrackParser: RowParser[Track] = {
     get[Long]("trackId") ~
-      get[String]("name") map {
-      case trackId ~ name =>
-        Track(trackId, name)
+      get[String]("name") ~
+      get[String]("url") ~
+      get[String]("platform") map {
+      case trackId ~ name ~ url ~ platform =>
+        Track(trackId, name, url, platform)
     }
   }
 

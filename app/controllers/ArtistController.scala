@@ -1,7 +1,7 @@
 package controllers
 
 import json.JsonHelper._
-import models.{Image, Artist}
+import models.{Genre, Image, Artist, Track}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
@@ -30,7 +30,15 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     "artistName" -> nonEmptyText(2),
     "images" -> list( mapping(
       "paths" -> nonEmptyText
-    )(Image.formApply)(Image.formUnapply))
+    )(Image.formApply)(Image.formUnapply)),
+    "genres" ->list( mapping(
+      "name" -> nonEmptyText
+    )(Genre.formApply)(Genre.formUnapply)),
+    "tracks" ->list( mapping(
+      "name" -> nonEmptyText,
+      "url" -> nonEmptyText,
+      "platform" -> nonEmptyText
+    )(Track.formApply)(Track.formUnapply))
   )(Artist.formApply)(Artist.formUnapply)
   )
 

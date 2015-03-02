@@ -38,10 +38,11 @@ object Artist {
     }
   }
 
-  def formApply(facebookId: Option[String], name: String, images: List[Image]): Artist =
-    new Artist(-1L, new Date, facebookId, name, None, images, List(), List())
-  def formUnapply(artist: Artist): Option[(Option[String], String, List[Image])] =
-    Some((artist.facebookId, artist.name, artist.images))
+  def formApply(facebookId: Option[String], name: String, images: List[Image], genres: List[Genre],
+                tracks: List[Track]): Artist =
+    new Artist(-1L, new Date, facebookId, name, None, images, genres, tracks)
+  def formUnapply(artist: Artist): Option[(Option[String], String, List[Image], List[Genre], List[Track])] =
+    Some((artist.facebookId, artist.name, artist.images, artist.genres, artist.tracks))
 
   def findAll(): List[Artist] = {
     DB.withConnection { implicit connection =>
@@ -67,6 +68,8 @@ object Artist {
         .map(artist =>
           artist.copy(
             images = Image.findAllByArtist(artistId)
+            //genres = Genre.findAllByArtist(artistId)
+            //tracks = Track.findAllByArtist(artistId)
           )
         )
     }
