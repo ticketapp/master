@@ -50,6 +50,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     success(function (data, status, headers, config) {
                         if (data != $scope.artistes) {
                             $scope.artistes = data;
+                            console.log($scope.artistes)
                         }
                         imgHeight()
                     }).
@@ -99,11 +100,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         }
                         function uploadArtistes(el, index, array) {
                             if (scopeIdList.indexOf(el.artistId) == -1) {
+                                scopeIdList.push(el.artistId);
                                 $scope.artistes.push(el);
                             }
                         }
                         data.forEach(uploadArtistes);
                         imgHeight()
+                        console.log($scope.artistes)
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -122,7 +125,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     success(function(data, status, headers, config) {
                         if ($scope.places.length == 0) {
                             $scope.places = data;
-                        } else {;
+                        } else {
                             function uploadPlaces(el, index, array) {
                                 if (scopeIdList.indexOf(el.placeId) == -1) {
                                     $scope.places.push(el);
@@ -228,7 +231,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             var tracksIdFb = Object.keys(artistInfo)[0];
                             console.log(artistInfo[tracksIdFb]);
                             for (var art = 0; art < artFbIdSearch; art++) {
-                                console.log(tracksIdFb + '//' +$scope.artistesFb[art].id);
                                 if (tracksIdFb == $scope.artistesFb[art].id) {
                                     if (tracksIdFb == $scope.artistesFb[art].id) {
                                         $scope.artistesFb[art].tracks = $scope.artistesFb[art].tracks.concat(artistInfo[tracksIdFb]);
@@ -241,7 +243,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     value.forEach(updateArtsitFb);
                 })
                 .fail(function (error) {
-                    console.log("Error: ", error, _research);
+                    console.log("Error: ", error);
                 });
         }
     }
