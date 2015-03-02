@@ -250,17 +250,23 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     search();
     $scope.createArtist = function (artist) {
-            /*description: Option[String],
-            tracks: List[Track]*/
         artist.images = [];
         var img = {path: artist.cover};
         artist.images.push(img);
-        console.log(artist.images);
-        $http.post('artists/createArtist', {artistName : artist.name, facebookId: artist.id, images : artist.images}).
+        console.log(artist.tracks);
+        $http.post('artists/createArtist', {
+            artistName : artist.name,
+            facebookId: artist.id,
+            images : artist.images,
+            tracks: artist.tracks,
+            description : artist.description,
+            genre : artist.genre
+        }).
             success(function(data, status, headers, config) {
                 window.location.href =('#/artiste/' + data);
             }).
             error(function(data, status, headers, config) {
+                console.log(data)
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
             });

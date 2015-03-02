@@ -12,15 +12,18 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
     var i = 0;
     function pushTrack (track, art) {
         track.artist = art;
+        track.title = track.title.replace(art + " - ", "");
+        track.title = track.title.replace(art + "-", "");
+        track.title = track.title.replace(art.toLowerCase() + " - ", "");
+        track.title = track.title.replace(art.toLowerCase() + "-", "");
+        track.title = track.title.replace(art.toUpperCase() + " - ", "");
+        track.title = track.title.replace(art.toUpperCase() + "-", "");
         $rootScope.playlist.tracks.push(track);
     }
     $rootScope.addToPlaylist = function (tracks, artist) {
         if ($rootScope.playlist.tracks.length == 0) {
             var tracksLenght = tracks.length;
             for (var tr = 0; tr < tracksLenght; tr++) {
-                if (tracks[tr].thumbnail == undefined) {
-                    tracks[tr].thumbnail = tracks[tr].avatarUrl
-                }
                 pushTrack(tracks[tr], artist)
             }
             $scope.play(i);
@@ -28,9 +31,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         } else {
             var tracksLenght = tracks.length;
             for (var tr = 0; tr < tracksLenght; tr++) {
-                if (tracks[tr].thumbnail == undefined) {
-                    tracks[tr].thumbnail = tracks[tr].avatarUrl
-                }
                 pushTrack(tracks[tr], artist)
             }
         }
@@ -39,9 +39,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         var last = $rootScope.playlist.tracks.length;
         var tracksLenght = tracks.length;
         for (var tr = 0; tr < tracksLenght; tr++) {
-            if (tracks[tr].thumbnail == undefined) {
-                tracks[tr].thumbnail = tracks[tr].avatarUrl
-            }
             pushTrack(tracks[tr], artist)
         }
         $scope.play(last);
@@ -263,8 +260,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         }
         document.getElementById('musicPlayer').addEventListener('ended', $scope.nextTrack);
     };
-    //name: String, tracks: Seq[Track]
-    //get[String]("name") ~
-    //get[String]("url") ~
-     //   get[String]("platform")
+    /*$scope.savePlaylist = function () {
+        $http.post('/playlist',
+        )
+    }*/
 }]);

@@ -46,11 +46,15 @@
             <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" ng-repeat="track in playlist.tracks track by $index">
                 <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
                 <div ng-click="play($index)">
-                    <div class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
+                    <div ng-if="track.thumbnail != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
+                    </div>
+                    <div ng-if="track.avatarUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.avatarUrl}}');">
+                    </div>
+                    <div ng-if="track.thumbnailUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
                     </div>
                     <div class="trackInfos">
                         {{track.artist}}<br/>
-                        {{track.title | limitTo: 32}}<br/>
+                        {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
                         {{track.platform}}<br/>
                     </div>
                 </div>

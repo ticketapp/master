@@ -17,7 +17,7 @@ object Track {
   implicit val trackWrites = Json.writes[Track]
 
   def formApply(title: String, url: String, platform: String, thumbnailUrl: Option[String],
-                userThumbnailUrl: Option[String]) = {
+  userThumbnailUrl: Option[String]): Track = {
     thumbnailUrl match {
       case Some(thumbnail: String) => new Track(-1L, title, url, platform, thumbnail)
       case None => userThumbnailUrl match {
@@ -28,6 +28,7 @@ object Track {
   }
 
   def formUnapply(track: Track) = Some(track.title, track.url, track.platform, Some(track.thumbnailUrl), None)
+
 
   private val TrackParser: RowParser[Track] = {
     get[Long]("trackId") ~
@@ -87,14 +88,16 @@ object Track {
     }
   }
 
-
   def saveTrackAndPlaylistRelation(track: Track, id: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( s"""INSERT into tracks(title)
-        values ({title})"""
+        SQL( s"""INSERT into tracks(title, url, platform, thumbnail)
+        values ({title}, {url}, {platform}, {thumbnailUrl})"""
         ).on(
-            'title -> track.title
+            'title -> track.title,
+            'url -> track.url,
+            'platform -> track.platform,
+            'thumbnailUrl -> track.thumbnailUrl
           ).executeInsert() match {
           case Some(x: Long) => savePlaylistTrackRelation(id, x)
           case _ => None
@@ -122,11 +125,14 @@ object Track {
   def saveTrackAndArtistRelation(track: Track, id: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( s"""INSERT into tracks(title)
-        values ({title})"""
-        ).on(
-            'title -> track.title
-          ).executeInsert() match {
+       SQL( s"""INSERT into tracks(title, url, platform, thumbnailUrl)
+               values ({title}, {url}, {platform}, {thumbnailUrl})"""
+       ).on(
+         'title -> track.title,
+         'url -> track.url,
+         'platform -> track.platform,
+         'thumbnailUrl -> track.thumbnailUrl
+       ).executeInsert() match {
           case Some(x: Long) => saveArtistTrackRelation(id, x)
           case _ => None
         }

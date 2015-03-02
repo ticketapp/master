@@ -12,6 +12,33 @@
         <h3>{{artiste.name}}</h3>
         <div data-ng-bind-html="artiste.description"></div>
     </div>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <div class="column large-12">
+            <h3 class="column large-6">Tracks</h3>
+            <input class="column large-6 marginTop20" ng-model="trackTitle" placeholder="filter tracks"/>
+            <div class="float-left column large-12">
+                <a ng-click="$root.addAndPlay(artiste.tracks, artiste.name)">Play all</a>
+                <a ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)">Add all</a>
+            </div>
+        </div>
+        <div ng-repeat="track in artiste.tracks | limitTo: trackLimit | filter : trackTitle" class="column tracksContener" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
+            <div ng-if="track.thumbnail != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
+            </div>
+            <div ng-if="track.avatarUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.avatarUrl}}');">
+            </div>
+            <div ng-if="track.thumbnailUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
+            </div>
+            <div class="column large-8">{{track.title}}</div>
+            <div class="column large-4">
+                <i class="fi-plus float-right" style="font-size: 26px;" ng-click="$root.addToPlaylist([track], artiste.name)"></i>
+                <i class="fi-play-circle float-right" style="font-size: 26px;" ng-click="$root.addAndPlay([track], artiste.name)"></i>
+            </div>
+        </div>
+        <div class="column large-12">
+            <button ng-if="trackLimit == 10" ng-click="$parent.trackLimit = 1000">All tracks</button>
+            <button ng-if="trackLimit == 1000" ng-click="$parent.trackLimit = 10">Less tracks</button>
+        </div>
+    </div>
     <ul id="events_contener" ng-if="$root.window == 'small' || $root.window == 'medium'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 small-block-grid-1 medium-block-grid-2 large-block-grid-4">
         <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents"></li>
     </ul>

@@ -34,13 +34,15 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       "genres" -> seq( mapping(
         "name" -> nonEmptyText
       )(Genre.formApply)(Genre.formUnapply)),
-      "tracks" -> seq( mapping(
-        "title" -> nonEmptyText,
-        "url" -> nonEmptyText,
-        "platform" -> nonEmptyText,
-        "thumbnail" -> optional(nonEmptyText),
-        "avatarUrl" -> optional(nonEmptyText)
-      )(Track.formApply)(Track.formUnapply))
+      "tracks" -> seq(
+        mapping(
+            "title" -> nonEmptyText,
+            "url" -> nonEmptyText,
+            "platform" -> nonEmptyText,
+            "thumbnail" -> optional(nonEmptyText),
+            "avatarUrl" -> optional(nonEmptyText)
+        )(Track.formApply)(Track.formUnapply)
+      )
     )(Artist.formApply)(Artist.formUnapply)
   )
 

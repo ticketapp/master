@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 39 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 38 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -66,7 +66,7 @@ CREATE TABLE tracks (
     title                   VARCHAR(255) NOT NULL,
     url                     TEXT NOT NULL,
     platform                VARCHAR(255) NOT NULL,
-    thumbnail               TEXT NOT NULL
+    thumbnailUrl            TEXT NOT NULL
 );
 
 CREATE TABLE users (

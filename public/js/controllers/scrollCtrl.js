@@ -137,7 +137,8 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             }
         }
         $scope.$on('$locationChangeSuccess', function() {
-            location()
+            location();
+            marginContent();
         });
         $rootScope.activArtist = false;
         $rootScope.activEvent = true;

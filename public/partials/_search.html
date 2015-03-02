@@ -8,7 +8,7 @@
 <div>
     <ul id="events_contener" ng-class="{padding50: $root.pathSearch}" class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
         <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0" data-ng-repeat="event in events  | limitTo : limit"></li>
-        <li ng-if="$root.activArtist && artistes.length > 0" class="min_contener margin0" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" >
+        <li ng-if="$root.activArtist && artistes.length > 0" class="min_contener margin0" data-ng-repeat="artiste in artistes | limitTo : limit" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -24,7 +24,7 @@
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <img src="{{ artisteFb.cover }}" alt="une belle image" class="min"/>
+                        <img ng-click="createArtist(artisteFb)" src="{{ artisteFb.cover }}" alt="une belle image" class="min"/>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >
