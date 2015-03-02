@@ -140,10 +140,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 $scope.nextTrack();
             }
             $scope.onPlay = true;
+            $scope.$apply();
             $scope.playPause = function () {
                 if ($scope.onPlay == false) {
                     document.getElementById('musicPlayer').play();
                     $scope.onPlay = true;
+                    $scope.$apply();
                 } else {
                     document.getElementById('musicPlayer').pause();
                     $scope.onPlay = false;
@@ -181,10 +183,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 console.log('youtube')
                 event.target.playVideo();
                 $scope.onPlay = true;
+                $scope.$apply();
                 $scope.playPause = function () {
                     if ($scope.onPlay == false) {
                         event.target.playVideo();
                         $scope.onPlay = true;
+                        $scope.$apply();
                     } else {
                         event.target.pauseVideo();
                         $scope.onPlay = false;
@@ -199,6 +203,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                         / document.getElementById("progressBar").clientWidth);
                     yPlayer.seekTo(newPos, true);
                     $scope.onPlay = true;
+                    $scope.$apply();
                     yPlayer.playVideo();
                 };
                 if (i > 0) {
