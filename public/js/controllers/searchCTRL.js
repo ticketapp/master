@@ -51,8 +51,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         if (data != $scope.artistes) {
                             $scope.artistes = data;
                             console.log($scope.artistes)
+                            imgHeight()
                         }
-                        imgHeight()
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -89,24 +89,26 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         } else {
             if (_selArtist == true) {
                 $scope.artistes = $filter('filter')($scope.artistes, {name :  _research});
-                var scopeIdList = $scope.artistes.map(function(artist) {
-                    return artist.artistId;
-                });
-
+                var artistIdList = [];
+                function getArtistFbIdInArtists (el) {
+                    artistIdList.push(el.facebookId);
+                }
+                $scope.artistes.forEach(getArtistFbIdInArtists);
                 $http.get('/artists/containing/'+_research).
                     success(function(data, status, headers, config) {
                         if ($scope.artistes.length == 0) {
                             $scope.artistes = data;
-                        }
-                        function uploadArtistes(el, index, array) {
-                            if (scopeIdList.indexOf(el.artistId) == -1) {
-                                scopeIdList.push(el.artistId);
-                                $scope.artistes.push(el);
+                        } else {
+                            function uploadArtistes(el, index, array) {
+                                if (scopeIdList.indexOf(el.artistId) == -1) {
+                                    artistIdList.push(el.artistId);
+                                    $scope.artistes.push(el);
+                                }
                             }
+
+                            data.forEach(uploadArtistes);
                         }
-                        data.forEach(uploadArtistes);
-                        imgHeight()
-                        console.log($scope.artistes)
+                        imgHeight();
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -222,7 +224,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 artistInfo.tracks = [];
                                 getArtistFbId(artistInfo.id);
                                 $scope.artistesFb.push(artistInfo);
-                                $scope.artistesFb = $filter('filter')($scope.artistesFb, {name :  _research});
                                 $scope.$apply();
                                 imgHeight();
                             }

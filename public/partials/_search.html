@@ -7,8 +7,8 @@
 </div>
 <div>
     <ul id="events_contener" ng-class="{padding50: $root.pathSearch}" class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
-        <li ng-show="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0" data-ng-repeat="event in events  | limitTo : limit"></li>
-        <li ng-show="$root.activArtist && artistes.length > 0" class="min_contener margin0" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" >
+        <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0" data-ng-repeat="event in events  | limitTo : limit"></li>
+        <li ng-if="$root.activArtist && artistes.length > 0" class="min_contener margin0" data-ng-repeat="artiste in artistes | limitTo : limit - events.length" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -20,7 +20,7 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener margin0" ng-show="$root.activArtist && artistesFb.length > 0" data-ng-repeat="artisteFb in artistesFb | limitTo : limit" >
+        <li class="min_contener margin0" ng-if="$root.activArtist && artistesFb.length > 0" data-ng-repeat="artisteFb in artistesFb | limitTo : limit" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -34,7 +34,7 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener margin0" ng-show="$root.activPlace && places.length > 0" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" >
+        <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -46,7 +46,7 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener margin0" ng-show="$root.activUsr && users.length > 0" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" >
+        <li class="min_contener margin0" ng-if="$root.activUsr && users.length > 0" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">

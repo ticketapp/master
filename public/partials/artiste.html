@@ -1,40 +1,20 @@
-<div id="banprofil">
-    <img src="https://scontent-a-fra.xx.fbcdn.net/hphotos-ash3/t1.0-9/580205_10151517016104368_981116153_n.jpg" alt="" >
+<div class="parallax-background" style="background: #ffffff!important;">
+    <img class="width100p" src="{{ artiste.images[0].path }}"/>
 </div>
-<div id="profil_contenu">
-    <div id="photo_profil">
-        <img src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash2/t1.0-1/c24.72.600.600/s160x160/480201_10151516943909368_1443976049_n.jpg" alt="">
+<div class="parallax-content column" style="background: #ffffff">
+    <div class="columns large-12">
+        <h2 id="eventTitle">{{artiste.name}}</h2>
     </div>
-    <div class="headerprofil">
-        <div id="name">
-            <b data-ng-model="name">{{artiste.name}}</b>
-        </div>
+    <ul id="events_contener" ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 large-block-grid-2">
+        <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents"></li>
+    </ul>
+    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+        <h3>{{artiste.name}}</h3>
+        <div data-ng-bind-html="artiste.description"></div>
     </div>
-
-    <div data-ng-controller="TabsCtrl" class="contentprofil">
-        <tabset>
-            <tab data-heading="Evenements">
-                <div class="tab-pane active">
-                    <div id="events_contener" data-ng-controller="EventsCtrl">
-                        <ul>
-                            <li class="event_min_contener data-ng-event" data-ng-repeat="event in events | filter:{artistes:name}">
-
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </tab>
-            <tab data-heading="Vidéos">
-                <div class="tab-pane active ng-video">
-                </div>
-            </tab>
-            <tab data-heading="Musique">
-                <div class="tab-pane active ng-musique">
-                </div>
-            </tab>
-            <tab data-ng-repeat="tab in tabs" data-heading="{{tab.title}}" data-active="tab.active" data-disabled="tab.disabled">
-                <div data-ng-bind-html="tab.content"></div>
-            </tab>
-        </tabset>
-    </div>
+    <ul id="events_contener" ng-if="$root.window == 'small' || $root.window == 'medium'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 small-block-grid-1 medium-block-grid-2 large-block-grid-4">
+        <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents"></li>
+    </ul>
 </div>
+
+

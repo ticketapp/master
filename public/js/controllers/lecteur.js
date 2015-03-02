@@ -131,7 +131,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         $scope.trackActive = i;
-        if ($rootScope.playlist.tracks[i].from == 'soundcloud') {
+        if ($rootScope.playlist.tracks[i].platform == 'Soundcloud') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             if ($rootScope.playlist.tracks[i].url != undefined) {
@@ -173,7 +173,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 }
                 goToTrackActive ()
             }
-        } else if ($rootScope.playlist.tracks[i].from == 'youtube') {
+        } else if ($rootScope.playlist.tracks[i].platform == 'Youtube') {
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             //document.getElementById('musicPlayer').classList.add('ng-hide');
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
@@ -263,4 +263,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         }
         document.getElementById('musicPlayer').addEventListener('ended', $scope.nextTrack);
     };
+    //name: String, tracks: Seq[Track]
+    //get[String]("name") ~
+    //get[String]("url") ~
+     //   get[String]("platform")
 }]);

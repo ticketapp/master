@@ -14,7 +14,7 @@
         <button>Save</button>
         <button ng-click="savePlaylist = !savePlaylist">cancel</button>
     </div>
-    <i ng-if="playlist.tracks[trackActive].from == 'youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
+    <i ng-if="playlist.tracks[trackActive].platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
     <i class="fi-volume float-left" ng-click="showVol = !showVol" style="margin: 0 4px;"></i>
     <md-slider ng-show="showVol" flex ng-change="volume()"
                ng-model="levelVol" min="0" max="100"
@@ -51,7 +51,7 @@
                     <div class="trackInfos">
                         {{track.artist}}<br/>
                         {{track.title | limitTo: 32}}<br/>
-                        {{track.from}}<br/>
+                        {{track.platform}}<br/>
                     </div>
                 </div>
             </div>
