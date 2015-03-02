@@ -42,18 +42,18 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                                 }
                             }
                         }*/
-                        setTimeout(function(){
+                        angular.element(document).ready(function () {
                             for (var i = 0; i < eventInfoConteners.length; i++) {
                                 if (eventInfoConteners[i].offsetLeft < 30) {
                                     eventInfoConteners[i].classList.remove('large-4');
                                     eventInfoConteners[i].classList.remove('large-8');
                                     eventInfoConteners[i].classList.add('large-12');
-                                    if (eventInfoConteners[i].innerHTML.indexOf('tracksContener') > -1) {
-                                        $scope.bigTracks = false;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+                                    if (eventInfoConteners[i].className.indexOf('tracksContener') > -1) {
+                                        $scope.bigTracks = false;
                                     }
                                 }
                             }
-                        },100);
+                        })
                     }
                 }, 100);
             } else {
