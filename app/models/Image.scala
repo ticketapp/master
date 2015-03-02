@@ -57,7 +57,7 @@ object Image {
     }
   }
 
-  def findAllByArtist(artistId: Long): List[Image] = {
+  def findAllByArtist(artistId: Long): Seq[Image] = {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *
              FROM Images

@@ -26,13 +26,14 @@ object Track {
     }
   }
 
-  def findAll(): List[Track] = {
+  def findAll(): Seq[Track] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from tracks").as(TrackParser.*)
+      SQL("select * from tracks")
+        .as(TrackParser.*)
     }
   }
 
-  def findAllByArtist(artistId: Long): List[Track] = {
+  def findAllByArtist(artistId: Long): Seq[Track] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM artistsTracks aT

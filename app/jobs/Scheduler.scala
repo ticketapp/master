@@ -110,6 +110,10 @@ object Scheduler {
     val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
     //println(facebookId) 783881178345234
 
+    def formateDate(date: JsValue): Option[Date] = date match {
+      case x => Option(new Date())
+    }
+
     val startTimeString = eventJson.as[String]((__ \ "start_time").read[String]).replace("T", " ")
     val startTime = startTimeString.length match {
       case i if i <= 10 => new java.text.SimpleDateFormat("yyyy-MM-dd").parse(startTimeString)

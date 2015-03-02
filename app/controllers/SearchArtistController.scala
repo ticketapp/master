@@ -20,7 +20,7 @@ object SearchArtistController extends Controller {
                    title: String,
                    thumbnail: Option[String],
                    avatarUrl: Option[String],
-                   from: String)
+                   platform: String)
 
   case class FacebookArtist(name: String,
                             id: String,
@@ -199,7 +199,7 @@ object SearchArtistController extends Controller {
   }
 
   def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[JsValue]] = {
-    println(echonestArtistId)
+    //println(echonestArtistId)
     val endpoint = s"$echonestBaseUrl/artist/songs"
     val assembledUrl = s"$endpoint?api_key=$echonestApiKey&id=$echonestArtistId&format=json&start=$start&results=100"
     val response = WS.url(assembledUrl).get()
@@ -241,7 +241,7 @@ object SearchArtistController extends Controller {
   }
 
   def getYoutubeVideos(tracksTitle: Set[String], artistName: String): Future[Set[Track]] = {
-    println(tracksTitle)
+    //println(tracksTitle)
     val youtubeTrackReads = (
       (__ \ "id" \ "videoId").read[Option[String]] and
         (__ \ "snippet" \ "title").read[Option[String]] and
@@ -332,6 +332,7 @@ object SearchArtistController extends Controller {
       val futureYoutubeTracks = Future.sequence(
         facebookArtists.map { facebookArtist =>
           returnFutureYoutubeTracks(facebookArtist, sanitizedPattern).map { youtubeTracks =>
+            println(facebookArtist.id)
             Map( facebookArtist.id -> youtubeTracks )
           }
         }

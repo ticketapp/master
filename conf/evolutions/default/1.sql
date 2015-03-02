@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 41 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 39 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -340,7 +340,6 @@ CREATE TABLE account623 (
     billId                  BIGINT REFERENCES bills(id)
 );
 
-
 CREATE TABLE eventsFollowed (
   userId                   INT REFERENCES users_login(id),
   eventId                  BIGINT REFERENCES events(eventId),
@@ -425,8 +424,15 @@ CREATE TABLE usersPlaylists (
     PRIMARY KEY (userId, playlistId)
 );
 
+CREATE TABLE artistsTracks (
+    artistId                BIGINT REFERENCES artists (artistId),
+    trackId                 BIGINT REFERENCES tracks (trackId),
+    PRIMARY KEY (artistId, trackId)
+);
+
 
 # --- !Downs
+DROP TABLE IF EXISTS artistsTracks;
 DROP TABLE IF EXISTS usersPlaylists;
 DROP TABLE IF EXISTS playlistTracks;
 DROP TABLE IF EXISTS playlists;

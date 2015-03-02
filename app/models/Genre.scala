@@ -21,13 +21,13 @@ object Genre {
     }
   }
 
-  def findAll(): List[Genre] = {
+  def findAll(): Seq[Genre] = {
     DB.withConnection { implicit connection =>
       SQL("select * from genres").as(GenreParser.*)
     }
   }
 
-  def findAllByEvent(event: Event): List[Genre] = {
+  def findAllByEvent(event: Event): Seq[Genre] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM eventsGenres eA
@@ -37,11 +37,11 @@ object Genre {
     }
   }
 
-  def findAllByArtist(artistId: Long): List[Genre] = {
+  def findAllByArtist(artistId: Long): Seq[Genre] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
-             FROM artistsGenres aG
-             INNER JOIN genres g ON g.genreId = aG.genreId where aG.artistId = {artistId}""")
+             FROM genresArtists gA
+             INNER JOIN genres g ON g.genreId = gA.genreId where gA.artistId = {artistId}""")
         .on('artistId -> artistId)
         .as(GenreParser.*)
     }

@@ -20,9 +20,9 @@ case class Artist (artistId: Long,
                    facebookId: Option[String],
                    name: String,
                    description: Option[String],
-                   images: List[Image],
-                   genres: List[Genre],
-                   tracks: List[Track])
+                   images: Seq[Image],
+                   genres: Seq[Genre],
+                   tracks: Seq[Track])
 
 object Artist {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -38,10 +38,10 @@ object Artist {
     }
   }
 
-  def formApply(facebookId: Option[String], name: String, images: List[Image], genres: List[Genre],
-                tracks: List[Track]): Artist =
+  def formApply(facebookId: Option[String], name: String, images: Seq[Image], genres: Seq[Genre],
+                tracks: Seq[Track]): Artist =
     new Artist(-1L, new Date, facebookId, name, None, images, genres, tracks)
-  def formUnapply(artist: Artist): Option[(Option[String], String, List[Image], List[Genre], List[Track])] =
+  def formUnapply(artist: Artist): Option[(Option[String], String, Seq[Image], Seq[Genre], Seq[Track])] =
     Some((artist.facebookId, artist.name, artist.images, artist.genres, artist.tracks))
 
   def findAll(): List[Artist] = {

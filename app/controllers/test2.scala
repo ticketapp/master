@@ -21,26 +21,14 @@ import services.Utilities.normalizeString
 
 /*
 follower counts SC
-écrire une fonction qui supprime les http https et les / (takeRight et dropRight) à la fin pour éviter redondance et pour plus de clarté
-sanitize url?? ask SO?
-sctracks optionList to list ?
-parallelize soundcloud/echonest+youtube
-verifier que le nom de lartiste soit bien dans le titre dans les youtube tracks
 renvoyer les 20 avec le plus like
 donner les fb ids dans la requête pour limiter les requêtes?
 regarder le next de facebook
-chercher par id dans SC et comparer avec artist.id
-soundcloudtracks non valides : tout aller chercher comme option string et prendre que celles avec titre et stream_url
- apostrophes
  aller chercher les artistes d'une lettre et deux lettres
  enlever 0.1 par lettre en plus au temps de latence à partir de trois
  mathieu chedid
- search hendrix
  un seul amtch echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
  array vide retournés?
- virer soundcloudtracks et youtubetracks de FacebookArtist
- virer soundcloudtracks sans url ou sans title
- renvoyer : facebookartistId : { tracks }
  */
 
 object Test2 extends Controller {
