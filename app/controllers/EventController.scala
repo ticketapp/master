@@ -7,7 +7,6 @@ import play.api.libs.json.Json
 import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
 
-
 object EventController extends Controller with securesocial.core.SecureSocial {
   def events = Action {
     Ok(Json.toJson(Event.findAll))

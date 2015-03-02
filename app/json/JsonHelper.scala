@@ -28,6 +28,7 @@ object JsonHelper {
   implicit val account627Writes: Writes[Account627] = Json.writes[Account627]
   implicit val account708Writes: Writes[Account708] = Json.writes[Account708]
   implicit val account4686Writes: Writes[Account4686] = Json.writes[Account4686]
+  implicit val genreWrites = Json.writes[Genre]
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
   implicit val imageWrites = Json.writes[Image]
   implicit val artistWrites = Json.writes[Artist]

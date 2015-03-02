@@ -10,10 +10,7 @@ import play.api.Play.current
 case class Genre (genreId: Long, name: String)
 
 object Genre {
-  implicit val genreWrites = Json.writes[Genre]
-
   def formApply(name: String) = new Genre(-1L, name)
-
   def formUnapply(genre: Genre) = Some(genre.name)
 
   private val GenreParser: RowParser[Genre] = {
@@ -36,6 +33,16 @@ object Genre {
              FROM eventsGenres eA
              INNER JOIN genres a ON a.genreId = eA.genreId where eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
+        .as(GenreParser.*)
+    }
+  }
+
+  def findAllByArtist(artistId: Long): List[Genre] = {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT *
+             FROM artistsGenres aG
+             INNER JOIN genres g ON g.genreId = aG.genreId where aG.artistId = {artistId}""")
+        .on('artistId -> artistId)
         .as(GenreParser.*)
     }
   }

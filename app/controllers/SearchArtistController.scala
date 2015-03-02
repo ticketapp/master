@@ -16,8 +16,8 @@ object SearchArtistController extends Controller {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val echonestBaseUrl = play.Play.application.configuration.getString("echonest.baseUrl")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-  case class Track(url: Option[String],
-                   title: Option[String],
+  case class Track(url: String,
+                   title: String,
                    thumbnail: Option[String],
                    avatarUrl: Option[String],
                    from: String)
@@ -99,22 +99,23 @@ object SearchArtistController extends Controller {
   }
 
   def getSoundCloudTracks(scLink: String): Future[Seq[Track]] = {
-    val soundCloudTrackReads: Reads[Track] = (
+    val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
         (__ \ "user" \ "avatar_url").readNullable[String] and
         (__ \ "artwork_url").readNullable[String]
       )((url: Option[String], title: Option[String], avatarUrl: Option[String], thumbnail: Option[String]) =>
-        Track(url, title, thumbnail, avatarUrl, "soundcloud"))
+        (url, title, thumbnail, avatarUrl))
 
-    val readTracks: Reads[Seq[Track]] = Reads.seq(soundCloudTrackReads)
-    /*val collectOnlyTracksWithUrlAndTitle = readTracks.map { tracks =>
+    val readTracks = Reads.seq(soundCloudTrackReads)
+    val collectOnlyTracksWithUrlAndTitle = readTracks.map { tracks =>
       tracks.collect {
-        case (Some(url), Some(title), imageSource) => Track(url)
+        case (Some(url: String), Some(title: String), imageSource, avatarUrl) =>
+          Track(url, title, imageSource, avatarUrl, "Soundcloud")
       }
-    }*/
+    }
     WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
-      soundCloudClientId).get().map { _.json.asOpt[Seq[Track]](readTracks).getOrElse(Seq.empty) }
+      soundCloudClientId).get().map { _.json.asOpt[Seq[Track]](collectOnlyTracksWithUrlAndTitle).getOrElse(Seq.empty) }
   }
 
   def getSoundCloudIds(namePattern: String): Future[Seq[Long]] = {
@@ -241,22 +242,32 @@ object SearchArtistController extends Controller {
 
   def getYoutubeVideos(tracksTitle: Set[String], artistName: String): Future[Set[Track]] = {
     println(tracksTitle)
-    val youtubeTrackReads: Reads[Track] = (
+    val youtubeTrackReads = (
       (__ \ "id" \ "videoId").read[Option[String]] and
         (__ \ "snippet" \ "title").read[Option[String]] and
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
       )((videoId: Option[String], title: Option[String], thumbnail: Option[String]) =>
-        Track(videoId, title, thumbnail, None, "youtube"))
+        (videoId, title, thumbnail))
+
+    val collectOnlyTracksWithUrlAndTitle = Reads.set(youtubeTrackReads).map { tracks =>
+      tracks.collect {
+        case (Some(url: String), Some(title: String), imageSource) =>
+          Track(url, title, imageSource, None, "Youtube")
+      }
+    }
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
         WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
           normalizeString(trackTitle) + normalizeString(artistName) +
           "&type=video&videoCategoryId=10&key=" + youtubeKey
-        ).get() map { video =>
-          (video.json \ "items").asOpt[Set[Track]](Reads.set(youtubeTrackReads))
+        ).get() map { videos =>
+          println((videos.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlAndTitle)
             .getOrElse(Set.empty)
-            .filter(_.title.getOrElse("").toLowerCase.indexOf(artistName.toLowerCase) > -1)
+            .filter(_.title.toLowerCase.indexOf(artistName.toLowerCase) > -1))
+          (videos.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlAndTitle)
+            .getOrElse(Set.empty)
+            .filter(_.title.toLowerCase.indexOf(artistName.toLowerCase) > -1)
         }
       }
     ).map { _.toSet.flatten }
