@@ -25,21 +25,22 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   }
 
 
-  val artistBindingForm = Form( mapping(
-    "facebookId" -> optional(nonEmptyText(2)),
-    "artistName" -> nonEmptyText(2),
-    "images" -> list( mapping(
-      "paths" -> nonEmptyText
-    )(Image.formApply)(Image.formUnapply)),
-    "genres" ->list( mapping(
-      "name" -> nonEmptyText
-    )(Genre.formApply)(Genre.formUnapply)),
-    "tracks" ->list( mapping(
-      "name" -> nonEmptyText,
-      "url" -> nonEmptyText,
-      "platform" -> nonEmptyText
-    )(Track.formApply)(Track.formUnapply))
-  )(Artist.formApply)(Artist.formUnapply)
+  val artistBindingForm = Form(
+    mapping(
+      "facebookId" -> optional(nonEmptyText(2)),
+      "artistName" -> nonEmptyText(2),
+      "images" -> list( mapping(
+        "paths" -> nonEmptyText
+      )(Image.formApply)(Image.formUnapply)),
+      "genres" ->list( mapping(
+        "name" -> nonEmptyText
+      )(Genre.formApply)(Genre.formUnapply)),
+      "tracks" ->list( mapping(
+        "name" -> nonEmptyText,
+        "url" -> nonEmptyText,
+        "platform" -> nonEmptyText
+      )(Track.formApply)(Track.formUnapply))
+    )(Artist.formApply)(Artist.formUnapply)
   )
 
   def createArtist = Action { implicit request =>

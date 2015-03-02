@@ -253,8 +253,8 @@ object SearchArtistController extends Controller {
           "&type=video&videoCategoryId=10&key=" + youtubeKey
         ).get() map { video =>
           (video.json \ "items").asOpt[Set[Track]](Reads.set(youtubeTrackReads))
-            .getOrElse(Seq.empty)
-            .filter(_.title.getOrElse("").indexOf(artistName) > -1)
+            .getOrElse(Set.empty)
+            .filter(_.title.getOrElse("").toLowerCase.indexOf(artistName) > -1)
         }
       }
     ).map { _.toSet.flatten }
