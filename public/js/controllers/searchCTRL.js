@@ -224,12 +224,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 imgHeight();
                             }
                         } else {
-                            console.log();
                             var artFbIdSearch = $scope.artistesFb.length;
                             var tracksIdFb = Object.keys(artistInfo)[0];
                             console.log(artistInfo[tracksIdFb]);
                             for (var art = 0; art < artFbIdSearch; art++) {
-                                console.log(tracksIdFb + '//' +$scope.artistesFb[art].id)
+                                console.log(tracksIdFb + '//' +$scope.artistesFb[art].id);
                                 if (tracksIdFb == $scope.artistesFb[art].id) {
                                     if (tracksIdFb == $scope.artistesFb[art].id) {
                                         $scope.artistesFb[art].tracks = $scope.artistesFb[art].tracks.concat(artistInfo[tracksIdFb]);
@@ -242,7 +241,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     value.forEach(updateArtsitFb);
                 })
                 .fail(function (error) {
-                    console.log("Error: ", error);
+                    console.log("Error: ", error, _research);
                 });
         }
     }
@@ -251,7 +250,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             /*description: Option[String],
             tracks: List[Track]*/
         artist.images = [];
-        var img = {paths: artist.cover};
+        var img = {path: artist.cover};
         artist.images.push(img);
         console.log(artist.images);
         $http.post('artists/createArtist', {artistName : artist.name, facebookId: artist.id, images : artist.images}).

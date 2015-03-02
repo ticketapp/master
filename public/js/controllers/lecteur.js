@@ -252,7 +252,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
                 events: {
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange,
-                    'onError' : function () {console.log(event);$scope.nextTrack()}
+                    'onError' : function () {$scope.nextTrack()}
                 }
             });
         }

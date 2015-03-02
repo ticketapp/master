@@ -305,7 +305,6 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 			images: $scope.newEvent.img,
 			places: $scope.newEvent.place,
 			users: $scope.newEvent.user,
-			artists: $scope.newEvent.artists,
 			tariffs: $scope.newEvent.tarifs,
 			facebookId: $scope.newEvent.facebookId,
 			isPublic: $scope.newEvent.isPublic,
