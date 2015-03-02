@@ -28,7 +28,6 @@ object Scheduler {
         .replaceAll( """\n""", "<br/>")
         .replaceAll( """\t""", "    ").replaceAll( """</a>/""", "</a> ") + "</div>")
     }
-
   }
 
   def createNewImageIfSourceExists(source: Option[String]): List[Image] = {

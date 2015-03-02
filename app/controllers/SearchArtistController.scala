@@ -9,6 +9,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import services.Utilities.normalizeString
 import play.api.libs.functional.syntax._
+import jobs.Scheduler.formatDescription
 
 object SearchArtistController extends Controller {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -72,10 +73,8 @@ object SearchArtistController extends Controller {
     val readArtistsWithCover: Reads[Seq[FacebookArtist]] = Reads.seq(readArtist).map { artists =>
       artists.collect{
         case (name: String, id, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
-          println(maybeDescription)
-          println(maybeGenre)
           FacebookArtist(name, id, cover, websitesStringToWebsitesSet(websites),
-            normalizeUrl(link), maybeDescription, maybeGenre )
+            normalizeUrl(link), formatDescription(maybeDescription), maybeGenre )
       }
     }
 
