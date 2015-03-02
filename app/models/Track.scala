@@ -7,22 +7,36 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 
-case class Track (trackId: Long, name: String, url: String, platform: String)
+case class Track (trackId: Long, 
+                  title: String, 
+                  url: String, 
+                  platform: String, 
+                  thumbnailUrl: String)
 
 object Track {
   implicit val trackWrites = Json.writes[Track]
 
-  def formApply(name: String, url: String, platform: String) = new Track(-1L, name, url, platform)
+  def formApply(title: String, url: String, platform: String, thumbnailUrl: Option[String],
+                userThumbnailUrl: Option[String]) = {
+    thumbnailUrl match {
+      case Some(thumbnail: String) => new Track(-1L, title, url, platform, thumbnail)
+      case None => userThumbnailUrl match {
+        case Some(userThumbnail: String) => new Track(-1L, title, url, platform, userThumbnail)
+        case None => throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
+      }
+    }
+  }
 
-  def formUnapply(track: Track) = Some(track.name, track.url ,track.platform)
+  def formUnapply(track: Track) = Some(track.title, track.url, track.platform, Some(track.thumbnailUrl), None)
 
   private val TrackParser: RowParser[Track] = {
     get[Long]("trackId") ~
-      get[String]("name") ~
+      get[String]("title") ~
       get[String]("url") ~
-      get[String]("platform") map {
-      case trackId ~ name ~ url ~ platform =>
-        Track(trackId, name, url, platform)
+      get[String]("platform") ~
+      get[String]("thumbnailUrl") map {
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl=>
+        Track(trackId, title, url, platform, thumbnailUrl)
     }
   }
 
@@ -64,7 +78,7 @@ object Track {
   def findAllContaining(pattern: String): Seq[Track] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM tracks WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
+        SQL("SELECT * FROM tracks WHERE LOWER(title) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
           .as(TrackParser.*)
       }
@@ -77,10 +91,10 @@ object Track {
   def saveTrackAndPlaylistRelation(track: Track, id: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( s"""INSERT into tracks(name)
-        values ({name})"""
+        SQL( s"""INSERT into tracks(title)
+        values ({title})"""
         ).on(
-            'name -> track.name
+            'title -> track.title
           ).executeInsert() match {
           case Some(x: Long) => savePlaylistTrackRelation(id, x)
           case _ => None
@@ -108,10 +122,10 @@ object Track {
   def saveTrackAndArtistRelation(track: Track, id: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( s"""INSERT into tracks(name)
-        values ({name})"""
+        SQL( s"""INSERT into tracks(title)
+        values ({title})"""
         ).on(
-            'name -> track.name
+            'title -> track.title
           ).executeInsert() match {
           case Some(x: Long) => saveArtistTrackRelation(id, x)
           case _ => None

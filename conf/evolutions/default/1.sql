@@ -63,9 +63,10 @@ CREATE TABLE genres (
 
 CREATE TABLE tracks (
     trackId                 SERIAL PRIMARY KEY,
-    name                    VARCHAR(255) NOT NULL,
+    title                   VARCHAR(255) NOT NULL,
     url                     TEXT NOT NULL,
-    platform                VARCHAR(255) NOT NULL
+    platform                VARCHAR(255) NOT NULL,
+    thumbnail               TEXT NOT NULL
 );
 
 CREATE TABLE users (

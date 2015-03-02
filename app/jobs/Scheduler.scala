@@ -11,6 +11,7 @@ import services.Utilities._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import controllers.WebServiceException
+import controllers.SearchArtistController._
 import play.api.libs.functional.syntax._
 
 object Scheduler {
@@ -39,6 +40,37 @@ object Scheduler {
 
   def splitArtistNamesInTitle(title: String): List[String] = {
     "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
+  }
+
+  def getFacebookArtists(pattern: String): Future[Seq[FacebookArtist]] = {
+    val readArtist = (
+      (__ \ "name").read[String] and
+        (__ \ "category").read[String] and
+        (__ \ "id").read[String] and
+        (__ \ "cover").readNullable[String](
+          (__ \ "source").read[String]
+        ) and
+        (__ \ "website").readNullable[String] and
+        (__ \ "link").read[String] and
+        (__ \ "description").readNullable[String] and
+        (__ \ "genre").readNullable[String]
+      ).apply((name: String, category: String, id: String, maybeCover: Option[String], website: Option[String],
+               link: String,  maybeDescription: Option[String], maybeGenre: Option[String]) =>
+      (name, id, category, maybeCover, website, link, maybeDescription, maybeGenre))
+
+    val readArtistsWithCover: Reads[Seq[FacebookArtist]] = Reads.seq(readArtist).map { artists =>
+      artists.collect{
+        case (name: String, id, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
+          FacebookArtist(name, id, cover, websitesStringToWebsitesSet(websites),
+            normalizeUrl(link), maybeDescription, maybeGenre )
+      }
+    }
+
+    WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
+      + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+      .map { response =>
+      (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse( Seq.empty ).take(20)
+    }
   }
 
   def getOrganizerInfos(organizerId: String): Future[List[Organizer]] = {
@@ -104,37 +136,29 @@ object Scheduler {
 
 
     val listArtistsFromTitle: List[String] = splitArtistNamesInTitle(name)
-    println(listArtistsFromTitle)
+    //println(listArtistsFromTitle)
 
 
     val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
     //println(facebookId) 783881178345234
 
-    def formateDate(date: JsValue): Option[Date] = date match {
-      case x => Option(new Date())
-    }
-
-    val startTimeString = eventJson.as[String]((__ \ "start_time").read[String]).replace("T", " ")
-    val startTime = startTimeString.length match {
-      case i if i <= 10 => new java.text.SimpleDateFormat("yyyy-MM-dd").parse(startTimeString)
-      case i if i <= 13 => new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(startTimeString)
-      case _ => new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(startTimeString)
-    }
-
-    val endTimeString = (eventJson \ "end_time").as[Option[String]]
-    val endTime = endTimeString match {
-      case Some(a) => a.length match {
-        case i if i <= 10 => Some(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(startTimeString))
-        case i if i <= 13 => Some(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(startTimeString))
-        case _ => Some(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(startTimeString))
+    def formateDate(date: JsValue): Option[Date] = date.asOpt[String] match {
+      case Some(dateFound: String) => val date = dateFound.replace("T", " ")
+        date.length match {
+        case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
+        case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
+        case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
       }
       case _ => None
     }
 
+    val startTime = formateDate(eventJson \ "start_time")
+    val endTime = formateDate(eventJson \ "end_time")
+
     val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
     getOrganizerInfos(readOwnerId).map { organizer =>
       var event: Event = new Event(-1L, facebookId, true, true, new Date, name, geographicPoint, eventDescription,
-        startTime, endTime, 16, List(), organizer, List(), List(), List(address))
+        startTime.getOrElse(new Date()), endTime, 16, List(), organizer, List(), List(), List(address))
 
       imgPath match {
         case "null" =>

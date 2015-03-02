@@ -208,11 +208,11 @@ object SearchArtistController extends Controller {
     futureJson flatMap { result =>
       val total = (result \ "response" \ "total").asOpt[Int]
       val songs = (result \ "response" \ "songs").as[Set[JsValue]]
-
-      total exists (_ > start + 100) match {
+      Future.successful(songs)
+      /*total exists (_ > start + 100) match {
         case false => Future.successful(songs)
         case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)
-      }
+      }*/
     }
   }
 
@@ -241,7 +241,6 @@ object SearchArtistController extends Controller {
   }
 
   def getYoutubeVideos(tracksTitle: Set[String], artistName: String): Future[Set[Track]] = {
-    //println(tracksTitle)
     val youtubeTrackReads = (
       (__ \ "id" \ "videoId").read[Option[String]] and
         (__ \ "snippet" \ "title").read[Option[String]] and
@@ -258,13 +257,10 @@ object SearchArtistController extends Controller {
 
     Future.sequence(
       tracksTitle.map { trackTitle =>
-        WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
-          normalizeString(trackTitle) + normalizeString(artistName) +
-          "&type=video&videoCategoryId=10&key=" + youtubeKey
-        ).get() map { videos =>
-          println((videos.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlAndTitle)
-            .getOrElse(Set.empty)
-            .filter(_.title.toLowerCase.indexOf(artistName.toLowerCase) > -1))
+        val url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + normalizeString(trackTitle) +
+          normalizeString(artistName) + "&type=video&videoCategoryId=10&key=" + youtubeKey
+
+        WS.url(url).get() map { videos =>
           (videos.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlAndTitle)
             .getOrElse(Set.empty)
             .filter(_.title.toLowerCase.indexOf(artistName.toLowerCase) > -1)
@@ -332,7 +328,6 @@ object SearchArtistController extends Controller {
       val futureYoutubeTracks = Future.sequence(
         facebookArtists.map { facebookArtist =>
           returnFutureYoutubeTracks(facebookArtist, sanitizedPattern).map { youtubeTracks =>
-            println(facebookArtist.id)
             Map( facebookArtist.id -> youtubeTracks )
           }
         }

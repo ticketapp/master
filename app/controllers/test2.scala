@@ -26,9 +26,9 @@ donner les fb ids dans la requête pour limiter les requêtes?
 regarder le next de facebook
  aller chercher les artistes d'une lettre et deux lettres
  enlever 0.1 par lettre en plus au temps de latence à partir de trois
- mathieu chedid
  un seul amtch echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
  array vide retournés?
+ hendrix : bug si getechoSongs recursif
  */
 
 object Test2 extends Controller {
