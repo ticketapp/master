@@ -93,14 +93,15 @@ object Image {
         None
       case false => try {
         DB.withConnection { implicit connection =>
-          SQL(""" INSERT INTO images(path, eventId, userId, placeId, organizerId)
-              VALUES({path}, {eventId}, {userId}, {placeId}, {organizerId}) """.stripMargin)
+          SQL("""INSERT INTO images(path, eventId, userId, placeId, organizerId, artistId)
+              VALUES({path}, {eventId}, {userId}, {placeId}, {organizerId}, {artistId})""")
             .on(
               'path -> image.path,
               'eventId -> image.eventId,
               'userId -> image.userId,
               'placeId -> image.placeId,
-              'organizerId -> image.organizerId
+              'organizerId -> image.organizerId,
+              'artistId -> image.artistId
             ).executeInsert()
         }
       } catch {

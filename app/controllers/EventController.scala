@@ -44,22 +44,23 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       "startTime" -> date("yyyy-MM-dd HH:mm"),
       "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
       "ageRestriction" -> number,
-      "images" -> list( mapping(
-          "paths" -> nonEmptyText
+      "images" -> list(
+        mapping(
+          "path" -> nonEmptyText
         )(Image.formApply)(Image.formUnapply)),
       "tariffs" -> list(
         mapping(
-          "denominations" -> nonEmptyText,
-          "nbTicketToSells" -> number,
-          "prices" -> bigDecimal,
-          "startTimes" -> date("yyyy-MM-dd HH:mm"),
-          "endTimes" -> date("yyyy-MM-dd HH:mm")
+          "denomination" -> nonEmptyText,
+          "nbTicketToSell" -> number,
+          "price" -> bigDecimal,
+          "startTime" -> date("yyyy-MM-dd HH:mm"),
+          "endTime" -> date("yyyy-MM-dd HH:mm")
         )(Tariff.formApply)(Tariff.formUnapply)),
       "addresses" -> list(
         mapping(
-          "cities" -> text(2),
-          "zips" -> text(2),
-          "streets" -> text(2)
+          "city" -> optional(text(2)),
+          "zip" -> optional(text(2)),
+          "street" -> optional(text(2))
         )(Address.formApply)(Address.formUnapply))
     )(Event.formApply)(Event.formUnapply)
   )

@@ -72,7 +72,7 @@ object SearchArtistController extends Controller {
     val readArtistsWithCover: Reads[Seq[FacebookArtist]] = Reads.seq(readArtist).map { artists =>
       artists.collect{
         case (name: String, id, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
-          FacebookArtist(name.toLowerCase, id, cover, websitesStringToWebsitesSet(websites),
+          FacebookArtist(name, id, cover, websitesStringToWebsitesSet(websites),
             normalizeUrl(link), maybeDescription, maybeGenre )
       }
     }
@@ -80,7 +80,7 @@ object SearchArtistController extends Controller {
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
       + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
       .map { response =>
-      (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse( Seq.empty )//.take(20)
+      (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse( Seq.empty ).take(20)
     }
   }
 
@@ -218,7 +218,8 @@ object SearchArtistController extends Controller {
   def isEchonestArtistFoundByFacebookArtistId(facebookArtistId: String, artistName: String): Future[Option[String]] = {
     WS.url(s"$echonestBaseUrl/artist/profile?api_key=" + echonestApiKey + "&id=facebook:artist:" +
       facebookArtistId + "&format=json").get().map { profile =>
-        if ( (profile.json \ "response" \ "artist" \ "name").asOpt[String].getOrElse("").toLowerCase == artistName) {
+        if ( (profile.json \ "response" \ "artist" \ "name").asOpt[String].getOrElse("").toLowerCase ==
+          artistName.toLowerCase) {
           (profile.json \ "response" \ "artist" \ "id").asOpt[String]
         }
         else
@@ -239,6 +240,7 @@ object SearchArtistController extends Controller {
   }
 
   def getYoutubeVideos(tracksTitle: Set[String], artistName: String): Future[Set[Track]] = {
+    println(tracksTitle)
     val youtubeTrackReads: Reads[Track] = (
       (__ \ "id" \ "videoId").read[Option[String]] and
         (__ \ "snippet" \ "title").read[Option[String]] and
@@ -254,7 +256,7 @@ object SearchArtistController extends Controller {
         ).get() map { video =>
           (video.json \ "items").asOpt[Set[Track]](Reads.set(youtubeTrackReads))
             .getOrElse(Set.empty)
-            .filter(_.title.getOrElse("").toLowerCase.indexOf(artistName) > -1)
+            .filter(_.title.getOrElse("").toLowerCase.indexOf(artistName.toLowerCase) > -1)
         }
       }
     ).map { _.toSet.flatten }
@@ -263,7 +265,6 @@ object SearchArtistController extends Controller {
   def futureYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Set[Track]] = {
     getEchonestSongs(0, echonestId).map(_.map(_ \ "title").map(_.as[String]))
       .flatMap { echonestSongsTitle: Set[String] =>
-      println(echonestSongsTitle)
       getYoutubeVideos(echonestSongsTitle, artistName)
     }
   }

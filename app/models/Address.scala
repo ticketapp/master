@@ -26,11 +26,11 @@ object Address {
     }
   }
 
-  def formApply(city: String, zip: String, street: String) = {
-    new Address(-1L, None, Some(city), Some(zip), Some(street))
+  def formApply(city: Option[String], zip: Option[String], street: Option[String]) = {
+    new Address(-1L, None, city, zip, street)
   }
-  def formUnapply(address: Address): Option[(String, String, String)] =
-    Some((address.city.get, address.zip.get, address.street.get))
+  def formUnapply(address: Address): Option[(Option[String], Option[String], Option[String])] =
+    Some((address.city, address.zip, address.street))
   //def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
 
   def findAll(): List[Address] = {
