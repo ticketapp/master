@@ -72,13 +72,15 @@ object SearchArtistController extends Controller {
     val readArtistsWithCover: Reads[Seq[FacebookArtist]] = Reads.seq(readArtist).map { artists =>
       artists.collect{
         case (name: String, id, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
+          println(maybeDescription)
+          println(maybeGenre)
           FacebookArtist(name, id, cover, websitesStringToWebsitesSet(websites),
             normalizeUrl(link), maybeDescription, maybeGenre )
       }
     }
 
     WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
-      + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
+      + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website,description,genre&access_token=" + token).get()
       .map { response =>
       (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse( Seq.empty ).take(20)
     }
