@@ -24,7 +24,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Artist.findAllContaining(pattern)))
   }
 
-
   val artistBindingForm = Form(
     mapping(
       "facebookId" -> optional(nonEmptyText(2)),

@@ -32,12 +32,12 @@ object Track {
     }
   }
 
-  def findAllByEvent(event: Event): List[Track] = {
+  def findAllByArtist(artistId: Long): List[Track] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
-             FROM eventsTracks eA
-             INNER JOIN tracks a ON a.trackId = eA.trackId where eA.eventId = {eventId}""")
-        .on('eventId -> event.eventId)
+             FROM artistsTracks aT
+             INNER JOIN tracks t ON t.trackId = aT.trackId where aT.artistId = {artistId}""")
+        .on('artistId -> artistId)
         .as(TrackParser.*)
     }
   }

@@ -46,7 +46,15 @@ object Artist {
 
   def findAll(): List[Artist] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from artists").as(ArtistParser.*)
+      SQL("select * from artists")
+        .as(ArtistParser.*)
+        .map(artist =>
+          artist.copy(
+            images = Image.findAllByArtist(artist.artistId),
+            genres = Genre.findAllByArtist(artist.artistId),
+            tracks = Track.findAllByArtist(artist.artistId)
+          )
+        )
     }
   }
 
@@ -57,6 +65,13 @@ object Artist {
              INNER JOIN artists a ON a.artistId = eA.artistId where eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(ArtistParser.*)
+        .map(artist =>
+          artist.copy(
+            images = Image.findAllByArtist(artist.artistId),
+            genres = Genre.findAllByArtist(artist.artistId),
+            tracks = Track.findAllByArtist(artist.artistId)
+          )
+        )
     }
   }
 
@@ -67,9 +82,9 @@ object Artist {
         .as(ArtistParser.singleOpt)
         .map(artist =>
           artist.copy(
-            images = Image.findAllByArtist(artistId)
-            //genres = Genre.findAllByArtist(artistId)
-            //tracks = Track.findAllByArtist(artistId)
+            images = Image.findAllByArtist(artistId),
+            genres = Genre.findAllByArtist(artistId),
+            tracks = Track.findAllByArtist(artistId)
           )
         )
     }
@@ -83,7 +98,9 @@ object Artist {
           .as(ArtistParser.*)
           .map(artist =>
             artist.copy(
-              images = Image.findAllByArtist(artist.artistId)
+              images = Image.findAllByArtist(artist.artistId),
+              genres = Genre.findAllByArtist(artist.artistId),
+              tracks = Track.findAllByArtist(artist.artistId)
             )
           )
       }
