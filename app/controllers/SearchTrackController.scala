@@ -18,23 +18,7 @@ import services.Utilities.{ normalizeUrl, normalizeString }
 object SearchTrackController extends Controller {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
-  val echonestBaseUrl = play.Play.application.configuration.getString("echonest.baseUrl")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-
-  def getSoundCloudTracksForArtist(artist: Artist): Future[Seq[Track]] = {
-    // regex indexOf directly list
-    var soundCloudLink: String = ""
-    for (site <- artist.websites) {
-      site.indexOf("soundcloud.com") match {
-        case -1 =>
-        case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
-      }
-    }
-    soundCloudLink match {
-      case "" => getSoundCloudTracksNotDefinedInFb(artist)
-      case scLink => getSoundCloudTracksWithLink(scLink)
-    }
-  }
 
   def readSoundCloudTracks(soundCloudResponse: Response): Seq[Track] = {
     val soundCloudTrackReads = (
@@ -62,25 +46,43 @@ object SearchTrackController extends Controller {
 
   def getSoundCloudTracksWithLink(scLink: String): Future[Seq[Track]] = {
     WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks")
-    .withQueryString("client_id" -> soundCloudClientId)
+      .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { readSoundCloudTracks }
   }
 
-  def getSoundCloudIds(namePattern: String): Future[Seq[Long]] = {
+  def readSoundCloudIds(soundCloudResponse: Response): Seq[Long] = {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
-    WS.url("http://api.soundcloud.com/users?q=" + normalizeString(namePattern) + "&client_id=" + soundCloudClientId)
-      .get().map { _.json.asOpt[Seq[Long]](readSoundCloudIds).getOrElse(Seq.empty) }
+    soundCloudResponse.json
+      .asOpt[Seq[Long]](readSoundCloudIds)
+      .getOrElse(Seq.empty)
   }
 
-  def getSoundCloudWebsites(seqIds: Seq[Long]): Future[Seq[(Long, Seq[String])]] = {
-    val readUrls: Reads[Seq[Option[String]]] = Reads.seq((__ \ "url").readNullable)
+  def getSoundCloudIdsForName(namePattern: String): Future[Seq[Long]] = {
+    WS.url("http://api.soundcloud.com/users")
+      .withQueryString(
+        "q" -> normalizeString(namePattern),
+        "client_id" -> soundCloudClientId)
+      .get()
+      .map { readSoundCloudIds }
+  }
+
+  def readSoundCloudWebsites(soundCloudResponse: Response): Seq[String] = {
+    val readSoundCloudUrls: Reads[Seq[String]] = Reads.seq((__ \ "url").read[String])
+    soundCloudResponse.json
+      .asOpt[Seq[String]](readSoundCloudUrls)
+      .getOrElse(Seq.empty)
+  }
+
+  //Should be improved
+  def getTupleIdAndSoundCloudWebsitesForIds(ids: Seq[Long]): Future[Seq[(Long, Seq[String])]] = {
     Future.sequence(
-      seqIds.map { id =>
-        WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles?client_id=" + soundCloudClientId).get().map {
-          websites => (id, websites.json.asOpt[Seq[Option[String]]](readUrls).getOrElse(Seq.empty).flatten.map {
-            website => normalizeUrl(website)
-          })
+      ids.map { id =>
+        WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles")
+          .withQueryString("client_id" -> soundCloudClientId)
+          .get()
+          .map { soundCloudResponse =>
+            (id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
         }
       }
     )
@@ -99,19 +101,35 @@ object SearchTrackController extends Controller {
     if (matchedId != 0)
       getSoundCloudTracksWithLink(matchedId.toString)
     else
-      Future{ Seq.empty }
+      Future { Seq.empty }
   }
 
   def getSoundCloudTracksNotDefinedInFb(artist: Artist): Future[Seq[Track]] = {
-    getSoundCloudIds(artist.name).flatMap { ids =>
-      getSoundCloudWebsites(ids).flatMap{ websitesAndIds =>
+    getSoundCloudIdsForName(artist.name).flatMap { ids =>
+      getTupleIdAndSoundCloudWebsitesForIds(ids).flatMap{ websitesAndIds =>
         compareArtistWebsitesWSCWebsitesAndAddTracks(artist, websitesAndIds)
       }
     }
   }
 
-  def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
-    def cleanFacebookId(implicit r: Reads[String]): Reads[String] = r.map(_.substring(16)) //16 = "facebook:artist:".length
+  def getSoundCloudTracksForArtist(artist: Artist): Future[Seq[Track]] = {
+    // regex indexOf directly list
+    var soundCloudLink: String = ""
+    for (site <- artist.websites) {
+      site.indexOf("soundcloud.com") match {
+        case -1 =>
+        case i => soundCloudLink = site.substring(i + 15) //15 = "soundcloud.com".length
+      }
+    }
+    soundCloudLink match {
+      case "" => getSoundCloudTracksNotDefinedInFb(artist)
+      case scLink => getSoundCloudTracksWithLink(scLink)
+    }
+  }
+
+  def readEchonestTupleIdFacebookId(echonestResponse: Response): Seq[(String, String)] = {
+    //16 = "facebook:artist:".length
+    def cleanFacebookId(implicit r: Reads[String]): Reads[String] = r.map(_.substring(16))
     val TupleEnIdFbIdReads = (
         (__ \ "id").read[String] and
           (__ \ "foreign_ids").lazyReadNullable(
@@ -120,19 +138,29 @@ object SearchTrackController extends Controller {
           tupled
         )
 
-    val keepOnlyValidTuples = Reads.seq(TupleEnIdFbIdReads).map { tuples =>
+    val collectOnlyValidTuples = Reads.seq(TupleEnIdFbIdReads).map { tuples =>
       tuples.collect {
-        case (echonestId: String, Some(facebookId: Seq[String])) if facebookId.nonEmpty => (echonestId, facebookId(0))
+        case (echonestId: String, Some(facebookId: Seq[String])) if facebookId.nonEmpty =>
+          (echonestId, facebookId(0))
       }
     }
 
-    WS.url(echonestBaseUrl + "/artist/search?api_key=" + echonestApiKey + "&name=" +
-      normalizeString(artistName) + "&format=json&bucket=urls&bucket=images&bucket=id:facebook" ).get()
-      .map { artists =>
-      (artists.json \ "response" \ "artists")
-        .asOpt(keepOnlyValidTuples)
-        .getOrElse(Seq.empty)
-    }
+    (echonestResponse.json \ "response" \ "artists")
+      .asOpt[Seq[(String, String)] ](collectOnlyValidTuples)
+      .getOrElse(Seq.empty)
+  }
+
+  def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
+    WS.url("http://developer.echonest.com/api/v4/artist/search")
+      .withQueryString(
+      "name=" -> normalizeString(artistName),
+      "format=" -> "json",
+      "bucket=" -> "urls",
+      "bucket=" -> "images",
+      "bucket=" -> "id:facebook",
+      "api_key=" -> echonestApiKey)
+      .get()
+      .map { readEchonestTupleIdFacebookId }
   }
 
   def getEchonestIdCorrespondingToFacebookId(futureSeqIndexEchonestIdAndFacebookId: Future[Seq[(String, String)]],
@@ -149,7 +177,7 @@ object SearchTrackController extends Controller {
 
   def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[JsValue]] = {
     //println(echonestArtistId)
-    val endpoint = s"$echonestBaseUrl/artist/songs"
+    val endpoint = s"http://developer.echonest.com/api/v4/artist/search/artist/songs"
     val assembledUrl = s"$endpoint?api_key=$echonestApiKey&id=$echonestArtistId&format=json&start=$start&results=100"
     val response = WS.url(assembledUrl).get()
     val futureJson = response map (_.json)
@@ -166,7 +194,7 @@ object SearchTrackController extends Controller {
   }
 
   def isEchonestArtistFoundByFacebookArtistId(facebookArtistId: String, artistName: String): Future[Option[String]] = {
-    WS.url(s"$echonestBaseUrl/artist/profile?api_key=" + echonestApiKey + "&id=facebook:artist:" +
+    WS.url(s"http://developer.echonest.com/api/v4/artist/search/artist/profile?api_key=" + echonestApiKey + "&id=facebook:artist:" +
       facebookArtistId + "&format=json").get().map { profile =>
       if ( (profile.json \ "response" \ "artist" \ "name").asOpt[String].getOrElse("").toLowerCase ==
         artistName.toLowerCase) {
@@ -179,7 +207,7 @@ object SearchTrackController extends Controller {
 
 
   def getEchonestArtistUrls(facebookArtistId: String): Future[(Option[String], Set[String])] = {
-    WS.url(s"$echonestBaseUrl/artist/urls?api_key=" + echonestApiKey + "&id=facebook:artist:" +
+    WS.url(s"http://developer.echonest.com/api/v4/artist/search/artist/urls?api_key=" + echonestApiKey + "&id=facebook:artist:" +
       facebookArtistId + "&format=json").get() map { urls =>
       urls.json \ "response" \ "urls" match {
         case json: JsObject => ((urls.json \ "response" \ "id").asOpt[String],

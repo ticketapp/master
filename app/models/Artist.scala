@@ -116,9 +116,10 @@ object Artist {
       case true => Some(-1)
       case false => try {
         DB.withConnection { implicit connection =>
-          SQL("insert into artists(name, facebookId) values ({name}, {facebookId})").on(
+          SQL("insert into artists(name, facebookId, websites) values ({name}, {facebookId}, {websites)").on(
             'name -> artist.name,
-            'facebookId -> artist.facebookId
+            'facebookId -> artist.facebookId,
+            'websites -> artist.websites
           ).executeInsert() match {
             case None => None
             case Some(artistId: Long) =>
