@@ -82,16 +82,16 @@ object Address {
       case None =>
         try {
           DB.withConnection { implicit connection =>
-            SQL( s"""INSERT into addresses(city, zip, street)
-              values ({city}, {zip}, {street})"""
-            ).on(
+            SQL( s"""INSERT INTO addresses(city, zip, street)
+              VALUES ({city}, {zip}, {street})""")
+              .on(
                 'city -> address.city,
                 'zip -> address.zip,
                 'street -> address.street
               ).executeInsert() match {
-              case Some(x: Long) => saveEventAddressRelation(id, x)
-              case _ => None
-            }
+                case Some(x: Long) => saveEventAddressRelation(id, x)
+                case _ => None
+              }
           }
         } catch {
           case e: Exception => throw new DAOException("Cannot create address: " + e.getMessage)
@@ -100,16 +100,16 @@ object Address {
       case Some(geoPoint: String) => try {
         val geoPointValue = geoPoint
         DB.withConnection { implicit connection =>
-          SQL( s"""INSERT into addresses(geographicPoint, city, zip, street)
-          values (point '$geoPointValue', {city}, {zip}, {street})"""
-          ).on(
+          SQL( s"""INSERT INTO addresses(geographicPoint, city, zip, street)
+            VALUES (point '$geoPointValue', {city}, {zip}, {street})""")
+            .on(
               'city -> address.city,
               'zip -> address.zip,
-              'street -> address.street
-            ).executeInsert() match {
-            case Some(x: Long) => saveEventAddressRelation(id, x)
-            case _ => None
-          }
+              'street -> address.street)
+            .executeInsert() match {
+              case Some(x: Long) => saveEventAddressRelation(id, x)
+              case _ => None
+            }
         }
       } catch {
         case e: Exception => throw new DAOException("Cannot create address: " + e.getMessage)

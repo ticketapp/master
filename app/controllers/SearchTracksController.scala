@@ -19,28 +19,14 @@ import controllers.SearchArtistsController._
 object SearchTracksController extends Controller {
   def getTracksForArtist(pattern: String) = Action.async {
     get20FacebookArtists(pattern).map { facebookArtists =>
-      val futureSoundCloudTracks = Future.sequence(
-        facebookArtists.map { facebookArtist =>
-          getSoundCloudTracksForArtist(facebookArtist).map { soundCloudTracks =>
-            Map(facebookArtist.facebookId.get -> soundCloudTracks)
-          }
-        }
-      )
       val soundCloudTracksEnumerator = Enumerator.flatten(
-        futureSoundCloudTracks.map { soundCloudTracks =>
+        getSoundCloudTracksForArtist(facebookArtists(0)).map { soundCloudTracks =>
           Enumerator(Json.toJson(soundCloudTracks))
         }
       )
 
-      val futureYoutubeTracks = Future.sequence(
-        facebookArtists.map { facebookArtist =>
-          getYoutubeTracksForArtist(facebookArtist, pattern).map { youtubeTracks =>
-            Map(facebookArtist.facebookId.get -> youtubeTracks)
-          }
-        }
-      )
       val youtubeTracksEnumerator = Enumerator.flatten(
-        futureYoutubeTracks.map { youtubeTracks =>
+        getYoutubeTracksForArtist(facebookArtists(0), pattern).map { youtubeTracks =>
           Enumerator(Json.toJson(youtubeTracks))
         }
       )
