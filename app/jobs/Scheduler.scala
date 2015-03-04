@@ -1,7 +1,6 @@
 package jobs
 
 import java.util.Date
-import controllers.SearchArtistController.FacebookArtist
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.libs.json._
@@ -41,36 +40,7 @@ object Scheduler {
     "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
   }
 
-  def getFacebookArtists(pattern: String): Future[Seq[FacebookArtist]] = {
-    val readArtist = (
-      (__ \ "name").read[String] and
-        (__ \ "category").read[String] and
-        (__ \ "id").read[String] and
-        (__ \ "cover").readNullable[String](
-          (__ \ "source").read[String]
-        ) and
-        (__ \ "website").readNullable[String] and
-        (__ \ "link").read[String] and
-        (__ \ "description").readNullable[String] and
-        (__ \ "genre").readNullable[String]
-      ).apply((name: String, category: String, id: String, maybeCover: Option[String], website: Option[String],
-               link: String,  maybeDescription: Option[String], maybeGenre: Option[String]) =>
-      (name, id, category, maybeCover, website, link, maybeDescription, maybeGenre))
 
-    val readArtistsWithCover: Reads[Seq[FacebookArtist]] = Reads.seq(readArtist).map { artists =>
-      artists.collect{
-        case (name: String, id, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
-          FacebookArtist(name, id, cover, websitesStringToWebsitesSet(websites),
-            normalizeUrl(link), maybeDescription, maybeGenre )
-      }
-    }
-
-    WS.url("https://graph.facebook.com/v2.2/search?q=" + pattern
-      + "&limit=400&type=page&fields=name,cover%7Bsource%7D,id,category,link,website&access_token=" + token).get()
-      .map { response =>
-      (response.json \ "data").asOpt[Seq[FacebookArtist]](readArtistsWithCover).getOrElse( Seq.empty ).take(20)
-    }
-  }
 
   def getOrganizerInfos(organizerId: String): Future[List[Organizer]] = {
     val readOrganizer = (

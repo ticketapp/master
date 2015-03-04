@@ -7,16 +7,15 @@ import json.JsonHelper._
 
 object Application extends Controller with securesocial.core.SecureSocial {
   def index = UserAwareAction { implicit request =>
-    Ticket.createQrCode(2)
-    val userName = request.user match {
-      case Some(user) => user.fullName
-      case _ => "guest"
+    val userConnected: Boolean = request.user match {
+      case Some(userConnected) => true
+      case _ => false
     }
-    println("Hello %s".format(userName))
-    Ok(views.html.index())
+    //println("Yo %s la sacoche".format(userName))
+    Ok(views.html.index(userConnected))
   }
 
-  /*#################### CAROUSSEL ########################*/
+  /*#################### CAROUSEL ########################*/
   def infos = Action {
     Ok(Json.toJson(Info.findAll()))
   }

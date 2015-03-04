@@ -37,13 +37,14 @@ object Genre {
     }
   }
 
-  def findAllByArtist(artistId: Long): Seq[Genre] = {
+  def findAllByArtist(artistId: Long): Set[Genre] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM genresArtists gA
              INNER JOIN genres g ON g.genreId = gA.genreId where gA.artistId = {artistId}""")
         .on('artistId -> artistId)
         .as(GenreParser.*)
+        .toSet
     }
   }
 

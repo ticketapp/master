@@ -28,6 +28,10 @@ object Utilities {
 
   def stripChars(s:String, ch:String)= s filterNot (ch contains _)
 
+  def normalizeUrl(website: String): String = {
+    """(https?:\/\/(www\.)?)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
+  }
+
   def testIfExist(table: String, fieldName: String, valueAnyType: Any): Boolean = {
     val value = valueAnyType match {
       case Some(v: Int) => v

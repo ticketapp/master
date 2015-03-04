@@ -48,13 +48,14 @@ object Track {
     }
   }
 
-  def findAllByArtist(artistId: Long): Seq[Track] = {
+  def findAllByArtist(artistId: Long): Set[Track] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM artistsTracks aT
              INNER JOIN tracks t ON t.trackId = aT.trackId where aT.artistId = {artistId}""")
         .on('artistId -> artistId)
         .as(TrackParser.*)
+        .toSet
     }
   }
 

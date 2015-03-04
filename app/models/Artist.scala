@@ -16,33 +16,34 @@ import play.api.libs.ws.WS
 import scala.util.{Failure, Success}
 
 case class Artist (artistId: Long,
-                   creationDateTime: Date,
                    facebookId: Option[String],
                    name: String,
                    description: Option[String],
-                   images: Seq[Image],
-                   genres: Seq[Genre],
-                   tracks: Seq[Track])
+                   websites: Set[String],
+                   images: Set[Image],
+                   genres: Set[Genre],
+                   tracks: Set[Track])
 
 object Artist {
   val token = play.Play.application.configuration.getString("facebook.token")
 
   private val ArtistParser: RowParser[Artist] = {
     get[Long]("artistId") ~
-      get[Date]("creationDateTime") ~
       get[Option[String]]("facebookId") ~
       get[String]("name") ~
+      get[Option[String]]("websites") ~
       get[Option[String]]("description") map {
-      case artistId ~ creationDateTime ~ facebookId ~ name ~ description =>
-        Artist(artistId, creationDateTime, facebookId, name, description, List(), List(), List())
+      case artistId ~ facebookId ~ name ~ description ~ websites =>
+        Artist(artistId, facebookId, name, description, websites.getOrElse("").split(",").toSet, Set(), Set(), Set())
     }
   }
 
-  def formApply(facebookId: Option[String], name: String, images: Seq[Image], genres: Seq[Genre],
+  def formApply(facebookId: Option[String], name: String, websites: Seq[String], images: Seq[Image], genres: Seq[Genre],
                 tracks: Seq[Track]): Artist =
-    new Artist(-1L, new Date, facebookId, name, None, images, genres, tracks)
-  def formUnapply(artist: Artist): Option[(Option[String], String, Seq[Image], Seq[Genre], Seq[Track])] =
-    Some((artist.facebookId, artist.name, artist.images, artist.genres, artist.tracks))
+    new Artist(-1L, facebookId, name, None, websites.toSet, images.toSet, genres.toSet, tracks.toSet)
+  def formUnapply(artist: Artist): Option[(Option[String], String, Seq[String], Seq[Image], Seq[Genre], Seq[Track])] =
+    Some((artist.facebookId, artist.name, artist.websites.toSeq, artist.images.toSeq, artist.genres.toSeq,
+      artist.tracks.toSeq))
 
   def findAll(): List[Artist] = {
     DB.withConnection { implicit connection =>
@@ -90,7 +91,7 @@ object Artist {
     }
   }
 
-  def findAllContaining(pattern: String): Seq[Artist] = {
+  def findAllContaining(pattern: String): Set[Artist] = {
     try {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM artists WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
@@ -103,6 +104,7 @@ object Artist {
               tracks = Track.findAllByArtist(artist.artistId)
             )
           )
+          .toSet
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Artist.findAllContaining: " + e.getMessage)

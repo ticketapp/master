@@ -57,13 +57,14 @@ object Image {
     }
   }
 
-  def findAllByArtist(artistId: Long): Seq[Image] = {
+  def findAllByArtist(artistId: Long): Set[Image] = {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *
              FROM Images
              WHERE artistId = {artistId}""")
         .on('artistId -> artistId)
         .as(ImageParser.*)
+        .toSet
     }
   }
   

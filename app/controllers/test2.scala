@@ -29,6 +29,7 @@ regarder le next de facebook
  un seul amtch echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
  array vide retournés?
  hendrix : bug si getechoSongs recursif
+strip prefix strip suffix
  */
 
 object Test2 extends Controller {
