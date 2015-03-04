@@ -31,8 +31,8 @@ object Artist {
     get[Long]("artistId") ~
       get[Option[String]]("facebookId") ~
       get[String]("name") ~
-      get[Option[String]]("websites") ~
-      get[Option[String]]("description") map {
+      get[Option[String]]("description") ~
+      get[Option[String]]("websites") map {
       case artistId ~ facebookId ~ name ~ description ~ websites =>
         Artist(artistId, facebookId, name, description, websites.getOrElse("").split(",").toSet, Set(), Set(), Set())
     }
@@ -118,12 +118,13 @@ object Artist {
       case false => try {
         DB.withConnection { implicit connection =>
           SQL(
-            """INSERT INTO artists(name, facebookId, websites)
-              VALUES ({name}, {facebookId}, {websites})""")
+            """INSERT INTO artists(facebookId, name, description, websites)
+              VALUES ({facebookId}, {name}, {description}, {websites})""")
             .on(
-            'name -> artist.name,
-            'facebookId -> artist.facebookId,
-            'websites -> artist.websites.mkString(","))
+              'facebookId -> artist.facebookId,
+              'name -> artist.name,
+              'description -> artist.description,
+              'websites -> artist.websites.mkString(","))
             .executeInsert() match {
               case None => None
               case Some(artistId: Long) =>
