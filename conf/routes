@@ -30,7 +30,8 @@ POST    /artists/createArtist           controllers.ArtistController.createArtis
 POST    /artists/:artistId/follow       controllers.ArtistController.followArtist(artistId: Long)
 DELETE  /artists/:artistId              controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/containing/:pattern    controllers.ArtistController.findArtistsContaining(pattern: String)
-GET     /artists/facebookContaining/:pattern    controllers.SearchArtistController.getFacebookArtistsContaining(pattern: String)
+GET     /artists/facebookContaining/:pattern    controllers.SearchArtistsController.getFacebookArtistsContaining(pattern: String)
+GET     /artists/:facebookArtistId/tracks       controllers.SearchTracksController.getTracksForArtist(facebookArtistId: String)
 
 ################################## Places ###############################################
 GET     /places                         controllers.PlaceController.places
@@ -49,6 +50,8 @@ POST    /organizers/create              controllers.OrganizerController.createOr
 GET     /organizers/:organizerId/events controllers.EventController.eventsByOrganizer(organizerId: Long)
 
 ################################# Playlists ############################################
+
+################################# Tracks ############################################
 
 ################################## Infos ################################################
 GET     /infos                          controllers.Application.infos

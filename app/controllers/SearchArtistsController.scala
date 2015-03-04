@@ -14,37 +14,25 @@ import models.Artist
 import models.Image
 import models.Genre
 
-object SearchArtistController extends Controller {
+object SearchArtistsController extends Controller {
   val token = play.Play.application.configuration.getString("facebook.token")
 
-  def websitesStringToWebsitesSet(websites: Option[String]): Set[String] = websites match {
-    case None => Set.empty
-    case Some(websites: String) =>
-      """((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
-        .filterNot(_ == "")
-        .map { _.trim.stripSuffix("/") }
-        .toSet
+  def getFacebookArtistsContaining(pattern: String) = Action.async {
+    get20FacebookArtists(pattern).map { artists =>
+      Ok(Json.toJson(artists))
+    }
   }
 
-  def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
-    case None => Set.empty
-    case Some(genres: String) =>
-      """([%/+,;]| - | & )""".r.split(genres.toLowerCase)
-        .map { _.trim } match {
-        case list if list.length != 1 => list.map { genreName =>
-          new Genre(-1L, genreName.stripSuffix("."))
-        }.toSet
-        case listOfOneItem => listOfOneItem(0) match {
-          case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
-            genre.contains("musik") =>
-            Set(new Genre(-1L, genre.stripSuffix(".")))
-          case genreWithoutForbiddenChars =>
-            genreWithoutForbiddenChars
-              .split("\\s+")
-              .map { genreName => new Genre(-1L, genreName.stripSuffix(".")) }
-              .toSet
-        }
-      }
+  def get20FacebookArtists(pattern: String): Future[Seq[Artist]] = {
+    WS.url("https://graph.facebook.com/v2.2/search")
+      .withQueryString(
+        "q" -> pattern,
+        "type" -> "page",
+        "limit" -> "400",
+        "fields" -> "name,cover{source},id,category,link,website,description,genre",
+        "access_token" -> token)
+      .get()
+      .map { readFacebookArtist(_).take(20) }
   }
 
   def readFacebookArtist(facebookResponse: Response): Seq[Artist] = {
@@ -79,23 +67,33 @@ object SearchArtistController extends Controller {
       .getOrElse(Seq.empty)
   }
 
-
-  def get20FacebookArtists(pattern: String): Future[Seq[Artist]] = {
-    WS.url("https://graph.facebook.com/v2.2/search")
-      .withQueryString(
-        "q" -> pattern,
-        "type" -> "page",
-        "limit" -> "400",
-        "fields" -> "name,cover{source},id,category,link,website,description,genre",
-        "access_token" -> token)
-      .get()
-      .map { readFacebookArtist(_).take(20) }
+  def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
+    case None => Set.empty
+    case Some(genres: String) =>
+      """([%/+,;]| - | & )""".r.split(genres.toLowerCase)
+        .map { _.trim } match {
+        case list if list.length != 1 => list.map { genreName =>
+          new Genre(-1L, genreName.stripSuffix("."))
+        }.toSet
+        case listOfOneItem => listOfOneItem(0) match {
+          case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
+            genre.contains("musik") =>
+            Set(new Genre(-1L, genre.stripSuffix(".")))
+          case genreWithoutForbiddenChars =>
+            genreWithoutForbiddenChars
+              .split("\\s+")
+              .map { genreName => new Genre(-1L, genreName.stripSuffix(".")) }
+              .toSet
+        }
+      }
   }
 
-
-  def getFacebookArtistsContaining(pattern: String) = Action.async {
-    get20FacebookArtists(pattern).map { artists =>
-      Ok(Json.toJson(artists))
-    }
+  def websitesStringToWebsitesSet(websites: Option[String]): Set[String] = websites match {
+    case None => Set.empty
+    case Some(websites: String) =>
+      """((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
+        .filterNot(_ == "")
+        .map { _.trim.stripSuffix("/") }
+        .toSet
   }
 }

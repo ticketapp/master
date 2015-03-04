@@ -10,7 +10,7 @@ import services.Utilities._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import controllers.WebServiceException
-import controllers.SearchArtistController._
+//import controllers.SearchArtistsController._
 import play.api.libs.functional.syntax._
 
 object Scheduler {
