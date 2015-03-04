@@ -107,7 +107,8 @@ object Artist {
           .toSet
       }
     } catch {
-      case e: Exception => throw new DAOException("Problem with the method Artist.findAllContaining: " + e.getMessage)
+      case e: Exception =>
+        throw new DAOException("Problem with the method Artist.findAllContaining: " + e.getMessage)
     }
   }
 
@@ -116,23 +117,26 @@ object Artist {
       case true => Some(-1)
       case false => try {
         DB.withConnection { implicit connection =>
-          SQL("insert into artists(name, facebookId, websites) values ({name}, {facebookId}, {websites})").on(
+          SQL(
+            """INSERT INTO artists(name, facebookId, websites)
+              VALUES ({name}, {facebookId}, {websites})""")
+            .on(
             'name -> artist.name,
             'facebookId -> artist.facebookId,
-            'websites -> artist.websites
-          ).executeInsert() match {
-            case None => None
-            case Some(artistId: Long) =>
-              artist.images.foreach(image =>
-                Image.save(image.copy(artistId = Some(artistId)))
-              )
-              artist.genres.foreach(genre =>
-                Genre.saveGenreAndArtistRelation(genre, artistId)
-              )
-              artist.tracks.foreach(track =>
-                Track.saveTrackAndArtistRelation(track, artistId)
-              )
-              Some(artistId)
+            'websites -> artist.websites.mkString(","))
+            .executeInsert() match {
+              case None => None
+              case Some(artistId: Long) =>
+                artist.images.foreach(image =>
+                  Image.save(image.copy(artistId = Some(artistId)))
+                )
+                artist.genres.foreach(genre =>
+                  Genre.saveGenreAndArtistRelation(genre, artistId)
+                )
+                artist.tracks.foreach(track =>
+                  Track.saveTrackAndArtistRelation(track, artistId)
+                )
+                Some(artistId)
           }
         }
       } catch {

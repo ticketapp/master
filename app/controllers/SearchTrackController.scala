@@ -176,10 +176,10 @@ object SearchTrackController extends Controller {
   }
 
   def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[JsValue]] = {
-    //println(echonestArtistId)
     val endpoint = s"http://developer.echonest.com/api/v4/artist/search/artist/songs"
     val assembledUrl = s"$endpoint?api_key=$echonestApiKey&id=$echonestArtistId&format=json&start=$start&results=100"
-    val response = WS.url(assembledUrl).get()
+    val response = WS.url("http://developer.echonest.com/api/v4/artist/search/artist/songs")
+      .get()
     val futureJson = response map (_.json)
 
     futureJson flatMap { result =>
