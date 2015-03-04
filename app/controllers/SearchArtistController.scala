@@ -9,7 +9,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import jobs.Scheduler.formatDescription
-import services.Utilities.{ normalizeUrl, normalizeString }
+import services.Utilities.normalizeUrl
 import models.Artist
 import models.Image
 import models.Genre
@@ -94,9 +94,7 @@ object SearchArtistController extends Controller {
 
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
-    val sanitizedPattern = normalizeString(pattern.replaceAll(" ", "+"))
-
-    get20FacebookArtists(sanitizedPattern).map { artists =>
+    get20FacebookArtists(pattern).map { artists =>
       Ok(Json.toJson(artists))
     }
   }

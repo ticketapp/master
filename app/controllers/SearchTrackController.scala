@@ -210,8 +210,14 @@ object SearchTrackController extends Controller {
 
 
   def getEchonestArtistUrls(facebookArtistId: String): Future[(Option[String], Set[String])] = {
-    WS.url(s"http://developer.echonest.com/api/v4/artist/search/artist/urls?api_key=" + echonestApiKey + "&id=facebook:artist:" +
-      facebookArtistId + "&format=json").get() map { urls =>
+    WS.url("http://developer.echonest.com/api/v4/artist/search/artist/urls")
+      .withQueryString(
+        "api_key" -> echonestApiKey,
+        "id" -> s"facebook:artist:$facebookArtistId",
+        "format" -> "json"
+      )
+      .get()
+      .map { urls =>
       urls.json \ "response" \ "urls" match {
         case json: JsObject => ((urls.json \ "response" \ "id").asOpt[String],
           json.values.map { url => normalizeUrl(url.as[String]) }.toSet)
