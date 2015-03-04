@@ -18,46 +18,37 @@ import controllers.SearchArtistsController._
 
 object SearchTracksController extends Controller {
   def getTracksForArtist(pattern: String) = Action.async {
-    get20FacebookArtists(pattern).map { _.map {
-      val futureYoutubeTracks =
-        getYoutubeTracksForArtist(facebookArtist, pattern)
-    }
+    get20FacebookArtists(pattern).map { facebookArtists =>
+      val futureSoundCloudTracks = Future.sequence(
+        facebookArtists.map { facebookArtist =>
+          getSoundCloudTracksForArtist(facebookArtist).map { soundCloudTracks =>
+            Map(facebookArtist.facebookId.get -> soundCloudTracks)
+          }
+        }
+      )
+      val soundCloudTracksEnumerator = Enumerator.flatten(
+        futureSoundCloudTracks.map { soundCloudTracks =>
+          Enumerator(Json.toJson(soundCloudTracks))
+        }
+      )
+
+      val futureYoutubeTracks = Future.sequence(
+        facebookArtists.map { facebookArtist =>
+          getYoutubeTracksForArtist(facebookArtist, pattern).map { youtubeTracks =>
+            Map(facebookArtist.facebookId.get -> youtubeTracks)
+          }
+        }
+      )
       val youtubeTracksEnumerator = Enumerator.flatten(
         futureYoutubeTracks.map { youtubeTracks =>
           Enumerator(Json.toJson(youtubeTracks))
         }
       )
-    }
 
-    val artists = get20FacebookArtists(pattern).map { artists =>
-      artists.map { a => getSoundCloudTracksForArtist(a) }
-    }
-
-      futureSoundCloudTracks.flatMap { soundCloudTracks =>
-        Ok(Json.toJson(soundCloudTracks))
-      }
-
-        /*val soundCloudTracksEnumerator = Enumerator.flatten(
-          futureSoundCloudTracks.map { soundCloudTracks =>
-            Enumerator( Json.toJson(soundCloudTracks) )
-          }
-        )*/
-
-
-      /*
-
-      val futureYoutubeTracks =
-          getYoutubeTracksForArtist(facebookArtist, pattern)
-
-      val youtubeTracksEnumerator = Enumerator.flatten(
-        futureYoutubeTracks.map { youtubeTracks =>
-          Enumerator( Json.toJson(youtubeTracks) )
-        }
+      val enumerators = Enumerator.interleave(
+        Enumerator(Json.toJson(facebookArtists)), soundCloudTracksEnumerator, youtubeTracksEnumerator
       )
-
-      val enumerators = Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
-      Ok.chunked(enumerators)*/
-
+      Ok.chunked(youtubeTracksEnumerator)
     }
   }
 }

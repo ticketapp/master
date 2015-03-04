@@ -18,7 +18,7 @@ object SearchYoutubeTracks {
     case Some(facebookId) =>
       getMaybeEchonestIdByFacebookId(facebookId, artist.name) flatMap {
         case Some(echonestId) => getYoutubeTracksByEchonestId(artist.name, echonestId)
-        case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
+        case None => Future { Set.empty }//getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
       }
   }
   
@@ -80,8 +80,9 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksByTitleAndArtistName(artistName: String, trackTitle: String): Future[Set[Track]] = {
-    WS.url("https://www.googleapis.com/youtube/v3/search?part=snippet")
+    WS.url("https://www.googleapis.com/youtube/v3/search")
       .withQueryString(
+        "part" -> "snippet",
         "q" -> (normalizeString(trackTitle) + normalizeString(artistName)),
         "type" -> "video",
         "videoCategoryId" -> "10",
