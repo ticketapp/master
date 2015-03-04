@@ -21,19 +21,28 @@ object SearchArtistController extends Controller {
     case None => Set.empty
     case Some(websites: String) =>
       """((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
+        .filterNot(_ == "")
         .map { _.trim.stripSuffix("/") }
         .toSet
   }
 
-  def genresStringToGenresSet(genres: Option[String]): Set[String] = genres match {
+  def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
     case None => Set.empty
     case Some(genres: String) =>
       """([%/+,;]| - | & )""".r.split(genres.toLowerCase)
         .map { _.trim } match {
-        case list if list.length != 1 => list.toSet
+        case list if list.length != 1 => list.map { genreName =>
+          new Genre(-1L, genreName.stripSuffix("."))
+        }.toSet
         case listOfOneItem => listOfOneItem(0) match {
-          case genre if genre.contains("'") => Set(genre)  //contains several chars?
-          case genreWithoutForbiddenChars => genreWithoutForbiddenChars.split("\\s+").toSet
+          case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
+            genre.contains("musik") =>
+            Set(new Genre(-1L, genre.stripSuffix(".")))
+          case genreWithoutForbiddenChars =>
+            genreWithoutForbiddenChars
+              .split("\\s+")
+              .map { genreName => new Genre(-1L, genreName.stripSuffix(".")) }
+              .toSet
         }
       }
   }
@@ -54,23 +63,19 @@ object SearchArtistController extends Controller {
                link: String, maybeDescription: Option[String], maybeGenre: Option[String]) =>
       (name, id, category, maybeCover, website, link, maybeDescription, maybeGenre))
 
-
-    val readArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
+    val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
         case (name, facebookId, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
           val websitesSeq = websitesStringToWebsitesSet(websites) + normalizeUrl(link)
           val images = Set(new Image(-1, cover))
           val description = formatDescription(maybeDescription)
-          val genres = maybeGenre match {
-            case Some(genre: String) => Set(new Genre(-1, genre))
-            case None => Set.empty[Genre]
-          }
+          val genres = genresStringToGenresSet(maybeGenre)
           Artist(-1, Option(facebookId), name, description, websitesSeq, images, genres, Set.empty)
       }
     }
 
     (facebookResponse.json \ "data")
-      .asOpt[Seq[Artist]](readArtistsWithCover)
+      .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
       .getOrElse(Seq.empty)
   }
 
@@ -79,10 +84,10 @@ object SearchArtistController extends Controller {
     WS.url("https://graph.facebook.com/v2.2/search")
       .withQueryString(
         "q" -> pattern,
-        "access_token" -> token,
         "type" -> "page",
         "limit" -> "400",
-        "fields" -> "name,cover{source},id,category,link,website,description,genre")
+        "fields" -> "name,cover{source},id,category,link,website,description,genre",
+        "access_token" -> token)
       .get()
       .map { readFacebookArtist(_).take(20) }
   }

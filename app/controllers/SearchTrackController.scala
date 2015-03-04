@@ -22,6 +22,7 @@ object SearchTrackController extends Controller {
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
   def getSoundCloudTracksForArtist(artist: Artist): Future[Seq[Track]] = {
+    // regex indexOf directly list
     var soundCloudLink: String = ""
     for (site <- artist.websites) {
       site.indexOf("soundcloud.com") match {
@@ -31,11 +32,11 @@ object SearchTrackController extends Controller {
     }
     soundCloudLink match {
       case "" => getSoundCloudTracksNotDefinedInFb(artist)
-      case scLink => getSoundCloudTracks(scLink)
+      case scLink => getSoundCloudTracksWithLink(scLink)
     }
   }
 
-  def getSoundCloudTracks(scLink: String): Future[Seq[Track]] = {
+  def readSoundCloudTracks(soundCloudResponse: Response): Seq[Track] = {
     val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
@@ -46,16 +47,7 @@ object SearchTrackController extends Controller {
 
     val readTracks = Reads.seq(soundCloudTrackReads)
 
-
-    /*
-case class Track (trackId: Long,
-                  title: String,
-                  url: String,
-                  platform: String,
-                  thumbnailUrl: String)
- */
-
-    val collectOnlyTracksWithUrlAndTitle = readTracks.map { tracks =>
+    val collectOnlyTracksWithUrlTitleAndThumbnail = readTracks.map { tracks =>
       tracks.collect {
         case (Some(url: String), Some(title: String), Some(thumbnailUrl: String), avatarUrl) =>
           Track(-1L, title, url, "Soundcloud", thumbnailUrl)
@@ -63,8 +55,16 @@ case class Track (trackId: Long,
           Track(-1L, title, url, "Soundcloud", avatarUrl)
       }
     }
-    WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks?client_id=" +
-      soundCloudClientId).get().map { _.json.asOpt[Seq[Track]](collectOnlyTracksWithUrlAndTitle).getOrElse(Seq.empty) }
+    soundCloudResponse.json
+      .asOpt[Seq[Track]](collectOnlyTracksWithUrlTitleAndThumbnail)
+      .getOrElse(Seq.empty)
+  }
+
+  def getSoundCloudTracksWithLink(scLink: String): Future[Seq[Track]] = {
+    WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks")
+    .withQueryString("client_id" -> soundCloudClientId)
+      .get()
+      .map { readSoundCloudTracks }
   }
 
   def getSoundCloudIds(namePattern: String): Future[Seq[Long]] = {
@@ -97,7 +97,7 @@ case class Track (trackId: Long,
       }
     }
     if (matchedId != 0)
-      getSoundCloudTracks(matchedId.toString)
+      getSoundCloudTracksWithLink(matchedId.toString)
     else
       Future{ Seq.empty }
   }
