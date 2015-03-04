@@ -116,7 +116,7 @@ object Artist {
       case true => Some(-1)
       case false => try {
         DB.withConnection { implicit connection =>
-          SQL("insert into artists(name, facebookId, websites) values ({name}, {facebookId}, {websites)").on(
+          SQL("insert into artists(name, facebookId, websites) values ({name}, {facebookId}, {websites})").on(
             'name -> artist.name,
             'facebookId -> artist.facebookId,
             'websites -> artist.websites
