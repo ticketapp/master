@@ -1,5 +1,5 @@
-app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http',
-    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http) {
+app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics',
+    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position)
                 {

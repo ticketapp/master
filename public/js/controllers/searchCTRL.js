@@ -155,7 +155,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             $scope.users = data;
                         } else {
                             function uploadUsers(el, index, array) {
-                                if (scopeIdList.indexOf(el.userId) == -1) {
+                                if ($scope.users.indexOf(el) < -1) {
                                     $scope.users.push(el);
                                 }
                             }
@@ -202,7 +202,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _selArtist == true) {
             var artistFbIdList = [];
             function getArtistFbId(el) {
-                artistFbIdList.push(el.id);
+                artistFbIdList.push(el.facebookId);
             }
             function getArtistFbIdInArtists (el) {
                 artistFbIdList.push(el.facebookId);
@@ -218,16 +218,15 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 })*/
                 .done(function (value) {
                     function updateArtsitFb (artistInfo) {
-                        if (artistInfo.name != undefined) {
-                            if (artistFbIdList.indexOf(artistInfo.id) < 0) {
+                        //if (artistInfo.name != undefined) {
+                            if ($scope.artistesFb.indexOf(artistInfo) < 0) {
                                 console.log(artistInfo);
                                 artistInfo.tracks = [];
-                                getArtistFbId(artistInfo.id);
                                 $scope.artistesFb.push(artistInfo);
                                 $scope.$apply();
                                 imgHeight();
                             }
-                        } else {
+                        /*} else {
                             var artFbIdSearch = $scope.artistesFb.length;
                             var tracksIdFb = Object.keys(artistInfo)[0];
                             console.log(artistInfo[tracksIdFb]);
@@ -239,7 +238,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                     }
                                 }
                             }
-                        }
+                        }*/
                     }
                     value.forEach(updateArtsitFb);
                 })
@@ -250,15 +249,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     search();
     $scope.createArtist = function (artist) {
-        artist.images = [];
-        var img = {path: artist.cover};
-        artist.images.push(img);
-        console.log(artist.tracks);
         $http.post('artists/createArtist', {
             artistName : artist.name,
-            facebookId: artist.id,
+            facebookId: artist.facebookId,
             images : artist.images,
-            tracks: artist.tracks,
+            websites : artist.websites,
             description : artist.description,
             genre : artist.genre
         }).

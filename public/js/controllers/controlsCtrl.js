@@ -9,10 +9,10 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
         }
     }
     window.addEventListener('scroll', otherListener);
-    function getEvent () {
+    /*function getEvent () {
         if ($location.path().indexOf('/event/') > -1) {
-            matched = $location.path().match(/\d.*/);
-            $http.get('/events/' + matched[0])
+            matched = $location.path().match(/\d.*//*);
+            /*$http.get('/events/' + matched[0])
                 .success(function(data, status){
                     $scope.event = data;
                     console.log(data);
@@ -39,10 +39,7 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
             }
         }
     }
-    getEvent();
-    $scope.$on('$locationChangeSuccess', function(){
-        getEvent()
-    });
+    getEvent();*/
     $scope.back =  function () {
         history.back();
         $scope.$apply();

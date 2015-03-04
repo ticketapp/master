@@ -22,7 +22,6 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                         clearInterval(waitForBinding);
                         var eventInfoConteners = document.getElementsByClassName('eventInfo');
                         if ($scope.orgaEvents.length == 1) {
-                            console.log('yo')
                             document.getElementsByClassName('descriptionContent')[0].classList.remove('large-8');
                             document.getElementsByClassName('descriptionContent')[0].classList.add('large-4');
                             document.getElementsByClassName('descriptionContent')[0].classList.add('paddingLeft0');
@@ -82,6 +81,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
     $http.get('/organizers/' + $routeParams.id)
         .success(function(data, status){
             $scope.organizer = data;
+            console.log(data)
         }).error(function(data, status){
         });
 });
