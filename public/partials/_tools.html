@@ -2,54 +2,9 @@
     <h3 class="modal-title">Tools</h3>
 </div>
 <div class="modal-body row-fluid">
-    <div ng-if="$root.connected == false">
-        <div class="column large-12">
-            <a href="/authenticate/facebook"> <img src="/assets/securesocial/images/providers/facebook.png"></a>
-            <a href="/authenticate/google"> <img src="/assets/securesocial/images/providers/google.png"></a>
-        </div>
-        <form ng-if="!signUp" action="http://localhost:9000/authenticate/userpass" class="form-horizontal" autocomplete="off" method="POST">
-            <fieldset>
-                <div class="control-group" id="username_field">
-                    <label class="control-label" for="username">Email</label>
-                    <div class="controls">
-                        <input type="text" id="username" name="username" value="" class="input-xlarge">
-                        <span class="help-block">Required</span>
-                    </div>
-                </div>
-                <div class="control-group" id="password_field">
-                    <label class="control-label" for="password">Password</label>
-                    <div class="controls">
-                        <input type="password" id="password" name="password" class="input-xlarge">
-                        <span class="help-block">Required</span>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </div>
-                <div class="clearfix">
-                    <a href="/reset"></a><p><a href="/reset">Did you forget your password? </a></p>
-                </div>
-                <div class="clearfix">
-                    <p>If you don't have an account with us yet you can sign up <a ng-click="$parent.signUp = !$parent.signUp">here</a></p>
-                </div>
-            </fieldset>
-        </form>
-        <form ng-if="signUp" action="http://localhost:9000/signup" class="form-horizontal" autocomplete="off" method="post">
-            <fieldset>
-                <div class="control-group  " id="email_field">
-                    <label class="control-label" for="email">Email</label>
-                    <div class="controls">
-                        <input type="text" id="email" name="email" value="" class="input-xlarge">
-                        <span class="help-block">Email, Required</span>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Create Account</button>
-                    <a class="btn" ng-click="$parent.signUp = !$parent.signUp">Cancel</a>
-                </div>
-            </fieldset>
-        </form>
-    </div>
+    <ng-connect ng-if="$root.connected == false">
+
+    </ng-connect>
     <div ng-if="$root.connected == true" ng-repeat="item in items" class="span4 toolsContener">
         <div data-ng-bind-html="item" ng-click="cancel()"></div>
     </div>

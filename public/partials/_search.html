@@ -1,44 +1,78 @@
 <div id="searchBlock" class="column large-6 large-offset-3 absolute" ng-if="!$root.pathSearch">
-    <input id="searchBar" placeholder="Search" ng-model="$root.research" ng-click="goSearch()" ng-model-options="{ getterSetter: true }">
-    <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox" ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)" ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">Events</label>
-    <label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox" ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)" ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">Artists</label>
-    <label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox" ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)" ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">Places</label>
-    <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox" ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)" ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">Users</label>
+    <input id="searchBar" placeholder="Search" ng-model="$root.research" ng-click="goSearch()"
+           ng-model-options="{ getterSetter: true }">
+    <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
+           ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)"
+           ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">
+        Events
+    </label>
+    <label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox"
+           ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)"
+           ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">
+        Artists
+    </label>
+    <label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox"
+           ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)"
+           ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">
+        Places
+    </label>
+    <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox"
+           ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)"
+           ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">
+        Users
+    </label>
 </div>
 <div>
-    <ul id="events_contener" ng-class="{padding50: $root.pathSearch}" class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
-        <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0" data-ng-repeat="event in events  | limitTo : limit"></li>
-        <li ng-if="$root.activArtist && artistes.length > 0" class="min_contener margin0" data-ng-repeat="artiste in artistes | limitTo : limit" >
+    <ul id="events_contener" ng-class="{padding50: $root.pathSearch}"
+        class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
+        <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0"
+            data-ng-repeat="event in events  | limitTo : limit">
+        </li>
+        <li ng-if="$root.activArtist && artists.length > 0" class="min_contener margin0"
+            data-ng-repeat="artist in artists | limitTo : limit" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <img src="{{artiste.images[0].path}}" alt="une belle image" class="min"/>
+                        <a href="#/artiste/{{artist.artistId}}">
+                            <img src="{{artist.images[0].path}}" alt="une belle image" class="min"/>
+                        </a>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a href="#/artiste/{{artiste.artistId}}"><h4>{{ artiste.name }}</h4></a>
+                    <a href="#/artiste/{{artist.artistId}}"><h4>{{ artist.name }}</h4></a>
                 </div>
             </div>
         </li>
-        <li class="min_contener margin0" ng-if="$root.activArtist && artistesFb.length > 0" data-ng-repeat="artisteFb in artistesFb | limitTo : limit" >
+        <li class="min_contener margin0" ng-if="$root.activArtist && artistsFb.length > 0"
+            data-ng-repeat="artistFb in artistsFb | limitTo : limit" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <img ng-click="createArtist(artisteFb)" src="{{ artisteFb.images[0].path }}" alt="une belle image" class="min"/>
+                        <img ng-click="createArtist(artistFb)"
+                             src="{{ artistFb.images[0].path }}"
+                             alt="une belle image" class="min"/>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a ng-click="createArtist(artisteFb)"><h4>{{ artisteFb.name }}</h4></a>
-                    <i ng-show="artisteFb.tracks.length > 0" class="fi-play-circle" style="font-size: 26px;" ng-click="$root.addAndPlay(artisteFb.tracks, artisteFb.name)"></i>
-                    <i ng-show="artisteFb.tracks.length > 0" class="fi-plus" style="font-size: 26px;" ng-click="$root.addToPlaylist(artisteFb.tracks, artisteFb.name)"></i>
+                    <a ng-click="createArtist(artistFb)"><h4>{{ artistFb.name }}</h4></a>
+                    <i ng-show="artistFb.tracks.length > 0" class="fi-play-circle"
+                       style="font-size: 26px;"
+                       ng-click="$root.addAndPlay(artistFb.tracks, artistFb.name)">
+                   </i>
+                    <i ng-show="artistFb.tracks.length > 0" class="fi-plus" style="font-size: 26px;"
+                       ng-click="$root.addToPlaylist(artistFb.tracks, artistFb.name)">
+                   </i>
                 </div>
             </div>
         </li>
-        <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0" data-ng-repeat="place in places | limitTo : limit - events.length - artistes.length - artistesFb.length" >
+        <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0"
+            data-ng-repeat="place in places | limitTo : limit - events.length - artists.length - artistsFb.length" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <img src="{{ place.images[0].path }}" alt="une belle image" class="min"/>
+                        <a href="#/lieu/{{place.placeId}}">
+                            <img src="{{ place.images[0].path }}" alt="une belle image" class="min"/>
+                        </a>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >
@@ -46,11 +80,15 @@
                 </div>
             </div>
         </li>
-        <li class="min_contener margin0" ng-if="$root.activUsr && users.length > 0" data-ng-repeat="user in users | limitTo : limit - events.length - artistes.length - artistesFb.length - places.length" >
+        <li class="min_contener margin0" ng-if="$root.activUsr && users.length > 0"
+            data-ng-repeat="user in users |
+            limitTo : limit - events.length - artists.length - artistsFb.length - places.length">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <img src="{{ user.images[0].path }}" alt="une belle image" class="min"/>
+                        <a href="#/user/{{user.userId}}">
+                            <img src="{{ user.images[0].path }}" alt="une belle image" class="min"/>
+                        </a>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >
@@ -59,7 +97,8 @@
             </div>
         </li>
     </ul>
-    <div ng-if="events.length + artistes.length + artistesFb.length + places.length + users.length > limit" layout="row" layout-align="center center">
+    <div ng-if="events.length + artists.length + artistsFb.length + places.length + users.length > limit"
+         layout="row" layout-align="center center">
         <button ng-click="moreLimit()" class="column large-5">More</button>
     </div>
 </div>

@@ -52,8 +52,9 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                     alert('vous suivez maintenant ' + $scope.event.name)
                 }).
                 error(function (data) {
-                    console.log(data);
-                    alert(data.error);
+                    if (data.error == 'Credentials required') {
+                        $scope.needConnect = true;
+                    }
                 })
         };
 }]);

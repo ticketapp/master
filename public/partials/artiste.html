@@ -3,7 +3,24 @@
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
-        <h2 id="eventTitle">{{artiste.name}}<a href="http://facebook.com/{{artiste.facebookId}}" target="_blank"><i class="fi-social-facebook float-right"></i></a></h2>
+        <h2 id="eventTitle">
+            {{artiste.name}}
+            <i ng-if="otherWebsite == true" class="float-right fi-plus" ng-click="$parent.showUrls = !$parent.showUrls" style="margin-left: 5px; cursor: pointer"></i>
+            <ul class="absolute zIndex4 right" ng-if="showUrls" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+                <li ng-repeat="website in artiste.websites" ng-if="website.name == 'website'" style="display: block; margin: 10px">
+                    <a href="http://www.{{website.url}}" target="_blank">{{website.url}}</a>
+                </li>
+            </ul>
+            <a ng-if="website.name != 'website'"
+               ng-repeat="website in artiste.websites"
+               href="http://www.{{website.url}}" target="_blank">
+                <i ng-class="{'fi-social-facebook' : website.name == 'facebook',
+                   'fi-social-twitter' : website.name == 'twitter',
+                   'fi-soundcloud' : website.name == 'soundcloud',
+                   'fi-mixcloud' : website.name == 'mixcloud'}"
+                   class="float-right" style="margin-left: 5px;"></i>
+            </a>
+        </h2>
     </div>
     <ul id="events_contener" ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 large-block-grid-2">
         <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents"></li>
