@@ -10,7 +10,9 @@ import services.Utilities._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import controllers.WebServiceException
+
 //import controllers.SearchArtistsController._
+
 import play.api.libs.functional.syntax._
 
 object Scheduler {
@@ -23,9 +25,9 @@ object Scheduler {
       case None => None
       case Some(desc) => Some("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m => "<a href='http://" + m + "'>" + m + "</a>")
-        .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
-        .replaceAll( """\n""", "<br/>")
-        .replaceAll( """\t""", "    ").replaceAll( """</a>/""", "</a> ") + "</div>")
+          .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
+          .replaceAll( """\n""", "<br/>")
+          .replaceAll( """\t""", "    ").replaceAll( """</a>/""", "</a> ") + "</div>")
     }
   }
 
@@ -41,10 +43,9 @@ object Scheduler {
   }
 
 
-
   def getOrganizerInfos(organizerId: String): Future[List[Organizer]] = {
     val readOrganizer = (
-        (__ \ "name").read[String] and
+      (__ \ "name").read[String] and
         (__ \ "description").readNullable[String] and
         (__ \ "cover" \ "source").readNullable[String] and
         (__ \ "phone").readNullable[String] and
@@ -52,15 +53,15 @@ object Scheduler {
         (__ \ "website").readNullable[String]
       ).apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
                public_transit: Option[String], website: Option[String]) =>
-        Organizer(-1L, Some(organizerId), name, formatDescription(description),
-          phone, public_transit, website, verified = false,
-          createNewImageIfSourceExists(source)) )
+      Organizer(-1L, Some(organizerId), name, formatDescription(description),
+        phone, public_transit, website, verified = false,
+        createNewImageIfSourceExists(source)))
 
     WS.url("https://graph.facebook.com/v2.2/" + organizerId +
       "?fields=name,description,cover%7Bsource%7D,location,phone,public_transit,website&access_token=" + token).get()
       .map { organizer =>
-        organizer.json.asOpt[Organizer](readOrganizer).toList
-      }
+      organizer.json.asOpt[Organizer](readOrganizer).toList
+    }
   }
 
   def getGeographicPoint(street: Option[String], zip: Option[String], city: Option[String]): Future[String] = {
@@ -98,7 +99,7 @@ object Scheduler {
     val geographicPoint = None
 
     val address: Address = new Address(-1l, geographicPoint, city, zip, street)
-     // + tester si
+    // + tester si
     //l'adresse est vide
 
     val name = eventJson.as[String]((__ \ "name").read[String])
@@ -114,10 +115,10 @@ object Scheduler {
     def formateDate(date: JsValue): Option[Date] = date.asOpt[String] match {
       case Some(dateFound: String) => val date = dateFound.replace("T", " ")
         date.length match {
-        case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
-        case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
-        case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
-      }
+          case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
+          case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
+          case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
+        }
       case _ => None
     }
 
@@ -131,7 +132,7 @@ object Scheduler {
 
       imgPath match {
         case "null" =>
-        case _ => event = event.copy( images = List(new Image(-1L, imgPath)))
+        case _ => event = event.copy(images = List(new Image(-1L, imgPath)))
       }
 
       Event.save(event) match {
@@ -144,7 +145,7 @@ object Scheduler {
     }
   }
 
-  def returnListOfIdsFromEvents(resp : Response): Seq[String] = {
+  def returnListOfIdsFromEvents(resp: Response): Seq[String] = {
     val readSoundFacebookIds: Reads[Seq[String]] = Reads.seq((__ \ "id").read[String])
     (resp.json \ "data").as[Seq[String]](readSoundFacebookIds)
   }
@@ -152,7 +153,7 @@ object Scheduler {
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/?access_token=" +
       token).get onComplete {
-      case Success(events) => returnListOfIdsFromEvents(events).map( eventId =>
+      case Success(events) => returnListOfIdsFromEvents(events).map(eventId =>
         WS.url("https://graph.facebook.com/v2.2/" + eventId +
           "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
           .get onComplete {
@@ -161,7 +162,7 @@ object Scheduler {
             val imgPath = eventDetailed.json.as[String]((__ \ "cover" \ "source").read[String])
             saveEvent(formatDescription(description), eventDetailed, placeId, imgPath)
           case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
-        } )
+        })
       case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
     }
   }
@@ -170,7 +171,7 @@ object Scheduler {
     Place.findAllIdsAndFacebookIds match {
       case Failure(f) => throw new WebServiceException("Error in scheduler : " + f.getMessage)
       case Success(listPlacesIdAndFbIdFromDatabase) =>
-        listPlacesIdAndFbIdFromDatabase.foreach( placeIdAndFbId =>
+        listPlacesIdAndFbIdFromDatabase.foreach(placeIdAndFbId =>
           saveEventsOfPlace(placeIdAndFbId._1, placeIdAndFbId._2)
         )
     }

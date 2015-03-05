@@ -39,6 +39,7 @@ object Address {
     }
   }
 
+
   def findAllByEvent(event: Event): List[Address] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *

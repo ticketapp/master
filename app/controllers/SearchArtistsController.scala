@@ -77,7 +77,7 @@ object SearchArtistsController extends Controller {
         }.toSet
         case listOfOneItem => listOfOneItem(0) match {
           case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
-            genre.contains("musik") =>
+            genre.contains("musik") || genre.contains("music") =>
             Set(new Genre(-1L, genre.stripSuffix(".")))
           case genreWithoutForbiddenChars =>
             genreWithoutForbiddenChars

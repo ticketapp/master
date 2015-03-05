@@ -18,7 +18,7 @@ object SearchYoutubeTracks {
     case Some(facebookId) =>
       getMaybeEchonestIdByFacebookId(facebookId, artist.name) flatMap {
         case Some(echonestId) => getYoutubeTracksByEchonestId(artist.name, echonestId)
-        case None => Future { Set.empty }//getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
+        case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
       }
   }
   
@@ -64,7 +64,7 @@ object SearchYoutubeTracks {
   }
   
   def getYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Set[Track]] = {
-    getEchonestSongs(0, echonestId).map(_.map(_ \ "title").map(_.as[String]))
+    getEchonestSongs(0, echonestId)//.map(_.map(_ \ "title").map(_.as[String]))
       .flatMap { echonestSongsTitle: Set[String] =>
         getYoutubeTracksByTitlesAndArtistName(echonestSongsTitle, artistName)
       }
@@ -74,9 +74,7 @@ object SearchYoutubeTracks {
     val eventuallyTracks = Future.sequence(
       tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artistName, _) }
     )
-    eventuallyTracks.map { _.flatten
-      .filter(_.title.toLowerCase.indexOf(artistName.toLowerCase) > -1)
-    }
+    eventuallyTracks.map { _.flatten.filter(_.title.toLowerCase.indexOf(artistName.toLowerCase) > -1) }
   }
 
   def getYoutubeTracksByTitleAndArtistName(artistName: String, trackTitle: String): Future[Set[Track]] = {
@@ -102,7 +100,7 @@ object SearchYoutubeTracks {
     val collectOnlyTracksWithUrlTitleAndImage = Reads.set(youtubeTrackReads).map { tracks =>
       tracks.collect {
         case (Some(url: String), Some(title: String), Some(imageSource: String)) =>
-          Track(-1L, url, title, imageSource, "Youtube")
+          Track(-1L, title, url, imageSource, "Youtube")
       }
     }
 
@@ -111,7 +109,7 @@ object SearchYoutubeTracks {
   }
   
   def getMaybeEchonestArtistUrls(facebookArtistId: String): Future[Option[(String, Set[String])]] = {
-    WS.url("http://developer.echonest.com/api/v4/artist/search/artist/urls")
+    WS.url("http://developer.echonest.com/api/v4/artist/urls")
       .withQueryString(
         "api_key" -> echonestApiKey,
         "id" -> s"facebook:artist:$facebookArtistId",
@@ -127,7 +125,7 @@ object SearchYoutubeTracks {
       None
     else {
       urlsJsValue match {
-        case urlsJsObject: JsObject => Option(id.get, readUrlsFromJsObject(urlsJsObject))
+        case urlsJsObject: JsObject => Option((id.get, readUrlsFromJsObject(urlsJsObject)))
         case _ => None
       }
     }
@@ -139,7 +137,7 @@ object SearchYoutubeTracks {
     }.toSet
   
   def getMaybeEchonestIdByFacebookId(facebookArtistId: String, artistName: String): Future[Option[String]] = {
-    WS.url("http://developer.echonest.com/api/v4/artist/search/artist/profile")
+    WS.url("http://developer.echonest.com/api/v4/artist/profile")
       .withQueryString(
         "api_key" -> echonestApiKey,
         "id" -> ("facebook:artist:" + facebookArtistId),
@@ -153,15 +151,16 @@ object SearchYoutubeTracks {
       .asOpt[String]
       .getOrElse("")
       .toLowerCase
-    if (echonestName == artistName.toLowerCase)
+    if (echonestName == artistName.toLowerCase) {
       (echonestResponse.json \ "response" \ "artist" \ "id").asOpt[String]
+    }
     else
       None
   }
 
-  def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[JsValue]] = {
-    //faire une inner foncion (+ un reader) pour start à 0
-    WS.url("http://developer.echonest.com/api/v4/artist/search/artist/songs")
+  def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[String]] = {
+    //faire une inner foncion pour start à 0
+    WS.url("http://developer.echonest.com/api/v4/artist/songs")
       .withQueryString(
         "api_key" -> echonestApiKey,
         "id" -> echonestArtistId,
@@ -171,15 +170,24 @@ object SearchYoutubeTracks {
       .get()
       .map (_.json)
       .flatMap { result =>
-      val total = (result \ "response" \ "total").asOpt[Int]
-      val songs = (result \ "response" \ "songs").as[Set[JsValue]]
-      Future.successful(songs)
-      /*total exists (_ > start + 100) match {
-        case false => Future.successful(songs)
-        case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)
-      }*/
-    }
+        val total = (result \ "response" \ "total").asOpt[Int]
+        val songs = readEchonestSongs(result)
+        total exists (_ > start + 100) match {
+          case false => Future.successful(songs)
+          case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)
+        }
+      }
   }
+
+  def readEchonestSongs(result: JsValue): Set[String] = {
+    val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
+    (result \ "response" \ "songs")
+      .asOpt[Set[Option[String]]](Reads.set(titleReads))
+      .getOrElse(Set.empty)
+      .flatten
+  }
+
+
 
   def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/search")

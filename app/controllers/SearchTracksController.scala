@@ -27,6 +27,7 @@ object SearchTracksController extends Controller {
 
       val youtubeTracksEnumerator = Enumerator.flatten(
         getYoutubeTracksForArtist(facebookArtists(0), pattern).map { youtubeTracks =>
+          println("youtubeTracks = " + youtubeTracks)
           Enumerator(Json.toJson(youtubeTracks))
         }
       )
