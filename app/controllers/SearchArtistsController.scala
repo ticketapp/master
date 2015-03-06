@@ -28,11 +28,11 @@ object SearchArtistsController extends Controller {
       .withQueryString(
         "q" -> pattern,
         "type" -> "page",
-        "limit" -> "400",
+        "limit" -> "1",
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
         "access_token" -> token)
       .get()
-      .map { readFacebookArtist(_).take(20) }
+      .map { a => println(a.json); readFacebookArtist(a).take(20) }
   }
 
   def readFacebookArtist(facebookResponse: Response): Seq[Artist] = {

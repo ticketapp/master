@@ -3,9 +3,6 @@ GET     /                               controllers.Application.index
 
 
 GET     /test                           controllers.Test.test1
-GET     /test/:id                       controllers.Test.getEchoSongs(id)
-#GET     /test2/:pattern                controllers.Test2.test2(pattern)
-#GET     /placesFacebookIds             controllers.PlaceController.placesFacebookIds
 
 
 ################################## Admin ################################################
@@ -53,6 +50,7 @@ GET     /organizers/:organizerId/events controllers.EventController.eventsByOrga
 
 ################################# Tracks ############################################
 
+
 ################################## Infos ################################################
 GET     /infos                          controllers.Application.infos
 
@@ -91,7 +89,7 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 
 # Login page
-GET     /login                      securesocial.controllers.LoginPage.login
+GET     /login                      securesocial.mycontrollers.LoginPage.login
 GET     /logout                     securesocial.controllers.LoginPage.logout
 
 # User Registration and password handling

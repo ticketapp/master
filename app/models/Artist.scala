@@ -18,11 +18,11 @@ import scala.util.{Failure, Success}
 case class Artist (artistId: Long,
                    facebookId: Option[String],
                    name: String,
-                   description: Option[String],
-                   websites: Set[String],
-                   images: Set[Image],
-                   genres: Set[Genre],
-                   tracks: Set[Track])
+                   description: Option[String] = None,
+                   websites: Set[String] = Set.empty,
+                   images: Set[Image] = Set.empty,
+                   genres: Set[Genre] = Set.empty,
+                   tracks: Set[Track] = Set.empty)
 
 object Artist {
   val token = play.Play.application.configuration.getString("facebook.token")
