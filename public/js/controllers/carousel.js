@@ -14,27 +14,16 @@ app.controller("CarouselCtrl",function($scope, $timeout, $http){
            } else {
                i++;
            }
-
            $scope.elementEnCours = $scope.infos[i];
            $timeout(updateInfo,8000);
       }
-   }
-    /*var searchPose = document.getElementById('events_contener').getBoundingClientRect();
-    $scope.goSearch = function () {
-        var scroll = setInterval(function () {
-                        if (window.scrollY < searchPose.top-50) {
-                            var scrollPos = window.scrollY;
-                            window.scrollTo(0, scrollPos + 4);
-                        } else {
-                            clearInterval(scroll);
-                            document.getElementById('searchTopBar').focus();
-                        }
-                    }, 1)
-                };*/
-   /*$('.switch-container').mouseenter(function(){
+   }/*
+   document.getElementsByClassName('parallax-background')[0].onmouseover = function(){
         done = true;
-     });
-   $('.switch-container').mouseleave(function(){
+       console.log('yo')
+     };
+   document.getElementsByClassName('parallax-background')[0].onmouseleave = function(){
        done = false;
-   });*/
+       console.log('yoyo')
+   };*/
 });

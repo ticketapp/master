@@ -1,7 +1,7 @@
 app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', function($rootScope, $http, $scope, $filter, oboe){
     $scope.limit = 12;
-    $scope.artistes = [];
-    $scope.artistesFb = [];
+    $scope.artists = [];
+    $scope.artistsFb = [];
     $scope.users = [];
     $scope.places = [];
     $scope.events = [];
@@ -10,7 +10,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
     var _research = '';
-    function imgHeight () {
+    function resizeImgHeight () {
         var waitForContentMin = setTimeout(function () {
             var content = document.getElementsByClassName('img_min_evnt');
             if (content.length > 0) {
@@ -24,7 +24,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     $scope.moreLimit = function () {
         $scope.limit = $scope.limit + 12;
-        imgHeight()
+        resizeImgHeight()
     };
     function search () {
         $rootScope.activArtist = _selArtist;
@@ -38,7 +38,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         if (data != $scope.events) {
                             $scope.events = data;
                         }
-                        imgHeight()
+                        resizeImgHeight()
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -48,10 +48,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             if (_selArtist == true) {
                 $http.get('/artists').
                     success(function (data, status, headers, config) {
-                        if (data != $scope.artistes) {
-                            $scope.artistes = data;
-                            console.log($scope.artistes)
-                            imgHeight()
+                        if (data != $scope.artists) {
+                            $scope.artists = data;
+                            resizeImgHeight()
                         }
                     }).
                     error(function (data, status, headers, config) {
@@ -65,7 +64,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         if (data != $scope.users) {
                             $scope.users = data;
                         }
-                        imgHeight()
+                        resizeImgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -78,43 +77,43 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         if (data != $scope.places) {
                             $scope.places = data;
                         }
-                        imgHeight()
+                        resizeImgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
                         // or server returns response with an error status.
                     });
             }
-            $scope.artistesFb = [];
+            $scope.artistsFb = [];
         } else {
             if (_selArtist == true) {
-                $scope.artistes = $filter('filter')($scope.artistes, {name :  _research});
+                $scope.artists = $filter('filter')($scope.artists, {name :  _research});
                 var artistIdList = [];
-                function getArtistFbIdInArtists (el) {
-                    artistIdList.push(el.facebookId);
+                function getAndPushFbIdInArtists (artist) {
+                    artistIdList.push(artist.facebookId);
                 }
-                $scope.artistes.forEach(getArtistFbIdInArtists);
+                $scope.artists.forEach(getAndPushFbIdInArtists);
                 $http.get('/artists/containing/'+_research).
                     success(function(data, status, headers, config) {
-                        if ($scope.artistes.length == 0) {
-                            $scope.artistes = data;
+                        if ($scope.artists.length == 0) {
+                            $scope.artists = data;
                         } else {
-                            function uploadArtistes(el, index, array) {
-                                if (scopeIdList.indexOf(el.artistId) == -1) {
-                                    artistIdList.push(el.artistId);
-                                    $scope.artistes.push(el);
+                            function uploadArtists(artist, index, array) {
+                                if (scopeIdList.indexOf(artist.artistId) == -1) {
+                                    artistIdList.push(artist.artistId);
+                                    $scope.artists.push(artist);
                                 }
                             }
 
-                            data.forEach(uploadArtistes);
+                            data.forEach(uploadArtists);
                         }
-                        imgHeight();
+                        resizeImgHeight();
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
                         // or server returns response with an error status.
                     });
-                $scope.artistesFb = $filter('filter')($scope.artistesFb, {name :  _research});
+                $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
             }
             if (_selPlace == true) {
                 $scope.places = $filter('filter')($scope.places, {name :  _research});
@@ -135,7 +134,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             }
                             data.forEach(uploadPlaces)
                         }
-                        imgHeight()
+                        resizeImgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -155,13 +154,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             $scope.users = data;
                         } else {
                             function uploadUsers(el, index, array) {
-                                if (scopeIdList.indexOf(el.userId) == -1) {
+                                if ($scope.users.indexOf(el) < -1) {
                                     $scope.users.push(el);
                                 }
                             }
                             data.forEach(uploadUsers);
                         }
-                        imgHeight()
+                        resizeImgHeight()
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -188,7 +187,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             }
                             data.forEach(uploadEvents);
                         }
-                        imgHeight()
+                        resizeImgHeight()
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -198,17 +197,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
     }
     function searchArtistFb () {
-        $scope.artistesFb = $filter('filter')($scope.artistesFb, {name :  _research});
-        if ($scope.artistes.length + $scope.artistesFb.length < $scope.limit && _selArtist == true) {
+        $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
+        if ($scope.artists.length + $scope.artistsFb.length < $scope.limit && _selArtist == true) {
             var artistFbIdList = [];
             function getArtistFbId(el) {
-                artistFbIdList.push(el.id);
+                artistFbIdList.push(el.facebookId);
             }
             function getArtistFbIdInArtists (el) {
                 artistFbIdList.push(el.facebookId);
             }
-            $scope.artistesFb.forEach(getArtistFbId);
-            $scope.artistes.forEach(getArtistFbIdInArtists);
+            $scope.artistsFb.forEach(getArtistFbId);
+            $scope.artists.forEach(getArtistFbIdInArtists);
             oboe.get('/artists/facebookContaining/'+_research)
                 .start(function (data, etc) {
                     console.log("Dude! We're goin'!", data, etc);
@@ -217,31 +216,30 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     $scope.items.push(value);
                 })*/
                 .done(function (value) {
-                    function updateArtsitFb (artistInfo) {
-                        if (artistInfo.name != undefined) {
-                            if (artistFbIdList.indexOf(artistInfo.id) < 0) {
+                    function updateArtistFb (artistInfo) {
+                        //if (artistInfo.name != undefined) {
+                            if ($scope.artistsFb.indexOf(artistInfo) < 0) {
                                 console.log(artistInfo);
                                 artistInfo.tracks = [];
-                                getArtistFbId(artistInfo.id);
-                                $scope.artistesFb.push(artistInfo);
+                                $scope.artistsFb.push(artistInfo);
                                 $scope.$apply();
-                                imgHeight();
+                                resizeImgHeight();
                             }
-                        } else {
-                            var artFbIdSearch = $scope.artistesFb.length;
+                        /*} else {
+                            var artFbIdSearch = $scope.artistsFb.length;
                             var tracksIdFb = Object.keys(artistInfo)[0];
                             console.log(artistInfo[tracksIdFb]);
                             for (var art = 0; art < artFbIdSearch; art++) {
-                                if (tracksIdFb == $scope.artistesFb[art].id) {
-                                    if (tracksIdFb == $scope.artistesFb[art].id) {
-                                        $scope.artistesFb[art].tracks = $scope.artistesFb[art].tracks.concat(artistInfo[tracksIdFb]);
+                                if (tracksIdFb == $scope.artistsFb[art].id) {
+                                    if (tracksIdFb == $scope.artistsFb[art].id) {
+                                        $scope.artistsFb[art].tracks = $scope.artistsFb[art].tracks.concat(artistInfo[tracksIdFb]);
                                         $scope.$apply();
                                     }
                                 }
                             }
-                        }
+                        }*/
                     }
-                    value.forEach(updateArtsitFb);
+                    value.forEach(updateArtistFb);
                 })
                 .fail(function (error) {
                     console.log("Error: ", error);
@@ -250,15 +248,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     search();
     $scope.createArtist = function (artist) {
-        artist.images = [];
-        var img = {path: artist.cover};
-        artist.images.push(img);
-        console.log(artist.tracks);
         $http.post('artists/createArtist', {
             artistName : artist.name,
-            facebookId: artist.id,
+            facebookId: artist.facebookId,
             images : artist.images,
-            tracks: artist.tracks,
+            websites : artist.websites,
             description : artist.description,
             genre : artist.genre
         }).

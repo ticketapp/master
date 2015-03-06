@@ -3,11 +3,10 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
     $scope.map = false;
     $http.get('/events/' + $routeParams.id)
         .success(function(data, status){
-            data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace("(", "");
+            /*data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace("(", "");
             data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(")", "");
-            data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(",", ", ");
+            data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(",", ", ");*/
             $scope.event = data;
-            $scope.map = true;
             console.log($scope.event);
             if (data.description.length > 0 && $rootScope.window != 'small' && $rootScope.window != 'medium') {
                 var waitForBinding = setInterval(function () {
@@ -20,6 +19,8 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                                 eventInfoConteners[i].classList.add('large-12');
                             }
                         }
+                        $scope.map = true;
+                        $scope.$apply();
                     }
                 }, 100);
             } else if ( $rootScope.window != 'small' || $rootScope.window != 'medium') {
@@ -36,6 +37,8 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                                     }
                                 }
                             }
+                            $scope.map = true;
+                            $scope.$apply();
                         }, 100);
                     }
                 })
@@ -49,8 +52,9 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                     alert('vous suivez maintenant ' + $scope.event.name)
                 }).
                 error(function (data) {
-                    console.log(data);
-                    alert(data.error);
+                    if (data.error == 'Credentials required') {
+                        $scope.needConnect = true;
+                    }
                 })
         };
 }]);

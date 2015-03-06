@@ -73,8 +73,10 @@
         <div ng-bind-html="event.description"></div>
     </div>
 </div>
-<div class="absolute top0 width100p" ng-if="errorFollow">
-    {{errorFollow}}
+<div class="fixed top0 width100p height100p" style="background: #ffffff" ng-if="needConnect">
+    <h1>Vous devez étre connecter pour suivre cet événement</h1>
+   <ng-connect></ng-connect>
+    <a class="button" ng-click="$parent.needConnect = false;">Annuler</a>
 </div>
 
 

@@ -114,6 +114,12 @@ app.directive('ngLecture', function(){
         templateUrl : 'assets/partials/_lecteur.html'
     }
 });
+app.directive('ngConnect', function(){
+    return{
+        restrict : 'E',
+        templateUrl : 'assets/partials/_connectForm.html'
+    }
+});
 
 app.directive('ngControl', function(){
     return{

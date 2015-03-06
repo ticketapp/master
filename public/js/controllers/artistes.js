@@ -87,6 +87,21 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $http.get('/artists/' + $routeParams.id)
         .success(function(data, status){
             $scope.artiste = data;
+            for (var i = 0; i < $scope.artiste.websites.length; i++) {
+                $scope.artiste.websites[i] = {url : $scope.artiste.websites[i]};
+                if ($scope.artiste.websites[i].url.indexOf('facebook') > -1) {
+                    $scope.artiste.websites[i].name = 'facebook';
+                } else if ($scope.artiste.websites[i].url.indexOf('twitter') > -1) {
+                    $scope.artiste.websites[i].name = 'twitter';
+                } else if ($scope.artiste.websites[i].url.indexOf('soundcloud') > -1) {
+                    $scope.artiste.websites[i].name = 'soundcloud';
+                } else if ($scope.artiste.websites[i].url.indexOf('mixcloud') > -1) {
+                    $scope.artiste.websites[i].name = 'mixcloud';
+                } else {
+                    $scope.artiste.websites[i].name = 'website';
+                    $scope.otherWebsite = true;
+                }
+            }
             console.log(data)
         }).error(function(data, status){
         });

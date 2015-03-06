@@ -138,7 +138,22 @@
         h1, h2, h3, h4, h5 {
         	 font-family: "Blanch-CapsInline";
         }*/
-
+        .fi-soundcloud {
+            background-image: url('../img/logoBlackSoundcloud.png');
+            width: 44px;
+            height: 31px;
+            background-size: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .fi-mixcloud {
+            background-image: url('../img/mixcloud-logo.png');
+            width: 44px;
+            height: 31px;
+            background-size: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
         /*pages*/
         .pages_contain{margin-right:auto; margin-left:auto; width:99%;}
         .wrapper-outer {width: 100%; color:black; padding-bottom: 200px;}

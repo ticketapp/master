@@ -1,4 +1,4 @@
-app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', function ($scope, $rootScope, $timeout, $http){
+app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', function ($scope, $rootScope, $timeout, $http, Angularytics){
     $rootScope.playlist = [];
     $rootScope.playlist.name = "";
     $rootScope.playlist.by = "";
@@ -41,6 +41,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', fun
         for (var tr = 0; tr < tracksLenght; tr++) {
             pushTrack(tracks[tr], artist)
         }
+        Angularytics.trackEvent("listen music", artist);
         $scope.play(last);
         if ($rootScope.playlist.tracks.length == 0) {
             played = [];

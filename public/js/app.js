@@ -1,6 +1,7 @@
-var app = angular.module('MonApp',['ngAnimate', 'ngAria', 'ngMessages', 'ngMaterial', 'ngRoute', 'ngSanitize', 'mm.foundation', 'colorpicker.module', 'ngMap', 'uiSlider', 'ng-oboe']);
+var app = angular.module('MonApp',['ngAnimate', 'ngAria', 'ngMessages', 'ngMaterial', 'ngRoute', 'ngSanitize', 'mm.foundation', 'colorpicker.module', 'ngMap', 'uiSlider', 'ng-oboe', 'angularytics']);
 
-app.config(function($routeProvider, $locationProvider){
+app.config(function($routeProvider, $locationProvider, AngularyticsProvider){
+    AngularyticsProvider.setEventHandlers(['Console', 'GoogleUniversal']);
     $routeProvider
     .when('/', {templateUrl: 'assets/partials/home.html'})
     .when('/events',{templateUrl: 'assets/partials/events.html'})
@@ -11,5 +12,7 @@ app.config(function($routeProvider, $locationProvider){
     .when('/createEvent',{templateUrl:'assets/partials/createEvent.html', controller : 'CreateEventCtrl'})
     .when('/search',{templateUrl:'assets/partials/search.html'})
         .otherwise('/');
+}).run(function(Angularytics) {
+    Angularytics.init();
 });
 

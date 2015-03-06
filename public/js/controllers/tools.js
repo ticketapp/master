@@ -1,9 +1,8 @@
-app.controller('toolsCtrl', function ($scope, $modal, $log) {
-
-     $scope.items = ['<a href="#/createEvent" class="btn btn-primary">Créer un évènement</a>'];
-    $scope.connected;
+app.controller('toolsCtrl', function ($scope, $modal, $log, $rootScope) {
+    $scope.items = ['<a href="#/createEvent" class="btn btn-primary">Créer un évènement</a>', '<a class="button" href="/logout">Logout</a>'];
+    $scope.connected = $rootScope.connected;
+    console.log($scope.connected)
     $scope.open = function () {
-
         var modalInstance = $modal.open({
             templateUrl: 'assets/partials/_tools.html',
             controller: 'ModalInstanceCtrl',
@@ -28,18 +27,11 @@ app.controller('toolsCtrl', function ($scope, $modal, $log) {
 // Please note that $modalInstance represents a modal window (instance) dependency.
 // It is not the same as the $modal service used above.
 
-app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope, items, connected) {
-
-    $rootScope.connected = connected;
+app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope, items, connected, $http) {
     $scope.items = items;
-    $scope.selected = {
-        item: $scope.items[0]
-    };
-
     $scope.ok = function () {
-        $modalInstance.close($scope.selected.item);
+        $modalInstance.close();
     };
-
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };

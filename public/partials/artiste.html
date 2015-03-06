@@ -3,19 +3,36 @@
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
-        <h2 id="eventTitle">{{artiste.name}}</h2>
+        <h2 id="eventTitle">
+            {{artiste.name}}
+            <i ng-if="otherWebsite == true" class="float-right fi-plus" ng-click="$parent.showUrls = !$parent.showUrls" style="margin-left: 5px; cursor: pointer"></i>
+            <ul class="absolute zIndex4 right" ng-if="showUrls" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+                <li ng-repeat="website in artiste.websites" ng-if="website.name == 'website'" style="display: block; margin: 10px">
+                    <a href="http://www.{{website.url}}" target="_blank">{{website.url}}</a>
+                </li>
+            </ul>
+            <a ng-if="website.name != 'website'"
+               ng-repeat="website in artiste.websites"
+               href="http://www.{{website.url}}" target="_blank">
+                <i ng-class="{'fi-social-facebook' : website.name == 'facebook',
+                   'fi-social-twitter' : website.name == 'twitter',
+                   'fi-soundcloud' : website.name == 'soundcloud',
+                   'fi-mixcloud' : website.name == 'mixcloud'}"
+                   class="float-right" style="margin-left: 5px;"></i>
+            </a>
+        </h2>
     </div>
     <ul id="events_contener" ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 large-block-grid-2">
         <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents"></li>
     </ul>
-    <div class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+    <div ng-if="artiste.description.length > 0" class="column large-4 float-left eventInfo" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
         <h3>{{artiste.name}}</h3>
         <div data-ng-bind-html="artiste.description"></div>
     </div>
     <div class="column large-4 float-left eventInfo tracksContener" style="box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
         <div class="column large-12">
             <h3 class="column large-6">Tracks</h3>
-            <input class="column large-6 marginTop20" ng-model="trackTitle" placeholder="filter tracks"/>
+            <input class="column large-6 marginTop20" ng-change="trackLimit = artiste.tracks.length;" ng-model="trackTitle" placeholder="filter tracks"/>
             <div class="float-left column large-12">
                 <a ng-click="$root.addAndPlay(artiste.tracks, artiste.name)">Play all</a>
                 <a ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)">Add all</a>
@@ -35,8 +52,8 @@
             </div>
         </div>
         <div class="column large-12">
-            <button ng-if="trackLimit == 10" ng-click="$parent.trackLimit = 1000">All tracks</button>
-            <button ng-if="trackLimit == 1000" ng-click="$parent.trackLimit = 10">Less tracks</button>
+            <button ng-if="trackLimit < artiste.tracks.length" ng-click="$parent.trackLimit = $parent.trackLimit + 10">More tracks</button>
+            <button ng-if="trackLimit > 10 && trackTitle.length < 1" ng-click="$parent.trackLimit = 10">Less tracks</button>
         </div>
     </div>
     <ul id="events_contener" ng-if="$root.window == 'small' || $root.window == 'medium'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 small-block-grid-1 medium-block-grid-2 large-block-grid-4">
