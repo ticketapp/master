@@ -19,9 +19,7 @@ import scala.util.{Success, Failure}
 import services.Utilities._
 
 object Test extends Controller {
-
   def test1 = WebSocket.using[String] { request =>
-
     //Concurrent.broadcast returns (Enumerator, Concurrent.Channel)
     val (out,channel) = Concurrent.broadcast[String]
 
