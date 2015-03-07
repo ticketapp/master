@@ -91,20 +91,20 @@ object SearchYoutubeTracks {
 
   def readYoutubeTracks(youtubeResponse: Response): Set[Track] = {
     val youtubeTrackReads = (
-      (__ \ "id" \ "videoId").read[Option[String]] and
-        (__ \ "snippet" \ "title").read[Option[String]] and
+      (__ \ "snippet" \ "title").read[Option[String]] and
+        (__ \ "id" \ "videoId").read[Option[String]] and
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
-      )((videoId: Option[String], title: Option[String], thumbnail: Option[String]) =>
-      (videoId, title, thumbnail))
+      )((title: Option[String], url: Option[String], thumbnailUrl: Option[String]) =>
+      (title, url, thumbnailUrl))
 
-    val collectOnlyTracksWithUrlTitleAndImage = Reads.set(youtubeTrackReads).map { tracks =>
+    val collectOnlyTracksWithUrlTitleAndThumbnailUrl = Reads.set(youtubeTrackReads).map { tracks =>
       tracks.collect {
-        case (Some(url: String), Some(title: String), Some(imageSource: String)) =>
-          Track(-1L, title, url, imageSource, "Youtube")
+        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String)) =>
+          Track(-1L, title, url, "Youtube", thumbnailUrl)
       }
     }
 
-    (youtubeResponse.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlTitleAndImage)
+    (youtubeResponse.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlTitleAndThumbnailUrl)
       .getOrElse(Set.empty)
   }
   
