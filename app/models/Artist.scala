@@ -19,6 +19,7 @@ case class Artist (artistId: Long,
                    facebookId: Option[String],
                    name: String,
                    description: Option[String] = None,
+                   facebookUrl: Option[String] = None,
                    websites: Set[String] = Set.empty,
                    images: Set[Image] = Set.empty,
                    genres: Set[Genre] = Set.empty,
@@ -32,23 +33,26 @@ object Artist {
       get[Option[String]]("facebookId") ~
       get[String]("name") ~
       get[Option[String]]("description") ~
+      get[Option[String]]("facebookUrl") ~
       get[Option[String]]("websites") map {
-      case artistId ~ facebookId ~ name ~ description ~ websites =>
-        Artist(artistId, facebookId, name, description, websites.getOrElse("").split(",").toSet, Set(), Set(), Set())
+      case artistId ~ facebookId ~ name ~ description ~ facebookUrl ~ websites =>
+        Artist(artistId, facebookId, name, description, facebookUrl,
+          websites.getOrElse("").split(",").toSet, Set(), Set(), Set())
     }
   }
 
-  def formApply(facebookId: Option[String], name: String, websites: Seq[String], images: Seq[Image], genres: Seq[Genre],
-                tracks: Seq[Track]): Artist =
-    new Artist(-1L, facebookId, name, None, websites.toSet, images.toSet, genres.toSet, tracks.toSet)
-  def formUnapply(artist: Artist) =
-    Option((artist.facebookId, artist.name, artist.websites.toSeq, artist.images.toSeq, artist.genres.toSeq,
-      artist.tracks.toSeq))
 
-  case class PatternAndArtist (pattern: String, artist: Artist)
-  def formWithPatternApply(pattern: String, artist: Artist) = new PatternAndArtist(pattern, artist)
-  def formWithPatternUnapply(patternAndArtist: PatternAndArtist) =
-    Option((patternAndArtist.pattern, patternAndArtist.artist))
+  def formApply(facebookId: Option[String], name: String, description: Option[String], facebookUrl: Option[String],
+                websites: Seq[String], images: Seq[Image], genres: Seq[Genre], tracks: Seq[Track]): Artist =
+    new Artist(-1L, facebookId, name, description, facebookUrl, websites.toSet, images.toSet, genres.toSet, tracks.toSet)
+  def formUnapply(artist: Artist) =
+    Option((artist.facebookId, artist.name, artist.description, artist.facebookUrl, artist.websites.toSeq,
+      artist.images.toSeq, artist.genres.toSeq, artist.tracks.toSeq))
+
+  case class PatternAndArtist (searchPattern: String, artist: Artist)
+  def formWithPatternApply(searchPattern: String, artist: Artist) = new PatternAndArtist(searchPattern, artist)
+  def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =
+    Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
 
 
   def findAll(): List[Artist] = {
@@ -97,11 +101,11 @@ object Artist {
     }
   }
 
-  def findAllContaining(pattern: String): Set[Artist] = {
+  def findAllContaining(searchPattern: String): Set[Artist] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM artists WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
-          .on('patternLowCase -> pattern.toLowerCase)
+        SQL("SELECT * FROM artists WHERE LOWER(name) LIKE '%'||{searchPatternLowCase}||'%' LIMIT 10")
+          .on('searchPatternLowCase -> searchPattern.toLowerCase)
           .as(ArtistParser.*)
           .map(artist =>
             artist.copy(

@@ -29,10 +29,12 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
   val artistBindingForm = Form(
     mapping(
-      "pattern" -> nonEmptyText(3),
+      "searchPattern" -> nonEmptyText(3),
       "artist" -> mapping(
         "facebookId" -> optional(nonEmptyText(2)),
         "artistName" -> nonEmptyText(2),
+        "description"  -> optional(nonEmptyText),
+        "facebookUrl"  -> optional(nonEmptyText),
         "websites" -> seq(nonEmptyText(4)),
         "images" -> seq(
           mapping(
@@ -70,7 +72,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           )
           val youtubeTracksEnumerator = Enumerator.flatten(
             getYoutubeTracksForArtist(patternAndArtist.artist.name, patternAndArtist.artist.facebookId.get,
-              patternAndArtist.pattern).map {
+              patternAndArtist.searchPattern).map {
               youtubeTracks =>
                 Enumerator(Json.toJson(youtubeTracks))
             }

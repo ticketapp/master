@@ -38,46 +38,47 @@ CREATE TABLE artists (
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
   description               TEXT,
+  facebookUrl               VARCHAR(255),
   websites                  TEXT,
   UNIQUE(name),
   UNIQUE(facebookId)
 );
 
 CREATE TABLE organizers (
-    organizerId             SERIAL PRIMARY KEY,
-    facebookId              VARCHAR(63),
-    name                    VARCHAR(255) NOT NULL,
-    description             TEXT,
-    phone                   VARCHAR(15),
-    publicTransit           TEXT,
-    website                 VARCHAR(255),
-    verified                BOOLEAN DEFAULT FALSE NOT NULL,
-    UNIQUE(facebookId),
-    UNIQUE(name)
+  organizerId             SERIAL PRIMARY KEY,
+  facebookId              VARCHAR(63),
+  name                    VARCHAR(255) NOT NULL,
+  description             TEXT,
+  phone                   VARCHAR(15),
+  publicTransit           TEXT,
+  website                 VARCHAR(255),
+  verified                BOOLEAN DEFAULT FALSE NOT NULL,
+  UNIQUE(facebookId),
+  UNIQUE(name)
 );
 
 CREATE TABLE genres (
-    genreId                 SERIAL PRIMARY KEY,
-    name                    VARCHAR(255) NOT NULL,
-    UNIQUE(name)
+  genreId                 SERIAL PRIMARY KEY,
+  name                    VARCHAR(255) NOT NULL,
+  UNIQUE(name)
 );
 
 CREATE TABLE tracks (
-    trackId                 SERIAL PRIMARY KEY,
-    title                   VARCHAR(255) NOT NULL,
-    url                     TEXT NOT NULL,
-    platform                VARCHAR(255) NOT NULL,
-    thumbnailUrl            TEXT NOT NULL
+  trackId                 SERIAL PRIMARY KEY,
+  title                   VARCHAR(255) NOT NULL,
+  url                     TEXT NOT NULL,
+  platform                VARCHAR(255) NOT NULL,
+  thumbnailUrl            TEXT NOT NULL
 );
 
 CREATE TABLE users (
-    userId                    SERIAL PRIMARY KEY,
-    creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    email                     VARCHAR(255) NOT NULL,
-    nickname                  VARCHAR(255) NOT NULL,
-    password                  VARCHAR(255) NOT NULL,
-    profile                   VARCHAR(255) NOT NULL,
-    UNIQUE(email)
+  userId                    SERIAL PRIMARY KEY,
+  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  email                     VARCHAR(255) NOT NULL,
+  nickname                  VARCHAR(255) NOT NULL,
+  password                  VARCHAR(255) NOT NULL,
+  profile                   VARCHAR(255) NOT NULL,
+  UNIQUE(email)
 );
 INSERT INTO users (email, nickname, password, profile)
 VALUES ('admin@global.local', 'admin', '$2a$12$L/rFVHZonEAmydEfZyYR.exvJuDdMY6kX7BIdXcam.voTxeBc7YwK', 'Admin');
@@ -194,152 +195,152 @@ INSERT INTO usersTools (tools, userId) VALUES ('tool1, tool2, tool3', 1);
 ---Vente de produits finis = account701 = table order
 
 CREATE TABLE clients (
-    clientId                SERIAL PRIMARY KEY,
-    name                    VARCHAR(255),
-    contactName             VARCHAR(255),
-    socialDenomination      VARCHAR(255),
-    addressID               BIGINT references addresses(addressID),
-    email                   VARCHAR(255),
-    UNIQUE(email)
+  clientId                SERIAL PRIMARY KEY,
+  name                    VARCHAR(255),
+  contactName             VARCHAR(255),
+  socialDenomination      VARCHAR(255),
+  addressID               BIGINT references addresses(addressID),
+  email                   VARCHAR(255),
+  UNIQUE(email)
 );
 
 CREATE TABLE bills (
-    id                      SERIAL PRIMARY KEY,
-    clientId                BIGINT REFERENCES clients(clientId),
-    billingDate             TIMESTAMP,
-    amountDue               INT,
-    endSellingTime          TIMESTAMP
-    --majorations impayés
+  id                      SERIAL PRIMARY KEY,
+  clientId                BIGINT REFERENCES clients(clientId),
+  billingDate             TIMESTAMP,
+  amountDue               INT,
+  endSellingTime          TIMESTAMP
+  --majorations impayés
 );
 
 
 --Produit activités annexes = compte 708
 CREATE TABLE account708 (
-    id                      SERIAL PRIMARY KEY,
-    date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
-    name                    VARCHAR(255) NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    clientId                BIGINT NOT NULL REFERENCES clients(clientId),
-    orderId                 BIGINT NOT NULL REFERENCES orders(orderId)
+  id                      SERIAL PRIMARY KEY,
+  date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  name                    VARCHAR(255) NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  clientId                BIGINT NOT NULL REFERENCES clients(clientId),
+  orderId                 BIGINT NOT NULL REFERENCES orders(orderId)
 );
 
 --Quand le client a payé sa facture
 CREATE TABLE account411 (
-    id                      SERIAL PRIMARY KEY,
-    clientId                BIGINT NOT NULL REFERENCES clients(clientId),
-    paymentDate             TIMESTAMP NOT NULL,
-    amount                  INT NOT NULL,
-    paymentMean             VARCHAR(255) NOT NULL
+  id                      SERIAL PRIMARY KEY,
+  clientId                BIGINT NOT NULL REFERENCES clients(clientId),
+  paymentDate             TIMESTAMP NOT NULL,
+  amount                  INT NOT NULL,
+  paymentMean             VARCHAR(255) NOT NULL
 );
 
 --Ce qui est dû par le client
 CREATE TABLE account413 (
-    id                      SERIAL PRIMARY KEY,
-    clientId                BIGINT REFERENCES clients(clientId),
-    date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    amount                  INT NOT NULL,
-    debit                   Boolean NOT NULL
+  id                      SERIAL PRIMARY KEY,
+  clientId                BIGINT REFERENCES clients(clientId),
+  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  amount                  INT NOT NULL,
+  debit                   Boolean NOT NULL
 );
 
 --Accomptes payés par les clients
 CREATE TABLE account4191 (
-    id                      SERIAL PRIMARY KEY,
-    clientId                BIGINT REFERENCES clients(clientId),
-    billId                  BIGINT REFERENCES bills(id),
-    paymentDate             TIMESTAMP NOT NULL,
-    amount                  INT NOT NULL,
-    paymentMean             VARCHAR(255) NOT NULL
+  id                      SERIAL PRIMARY KEY,
+  clientId                BIGINT REFERENCES clients(clientId),
+  billId                  BIGINT REFERENCES bills(id),
+  paymentDate             TIMESTAMP NOT NULL,
+  amount                  INT NOT NULL,
+  paymentMean             VARCHAR(255) NOT NULL
 );
 
 
 --associés, dividendes à payer
 CREATE TABLE account457 (
-    id                      SERIAL PRIMARY KEY,
-    date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
-    name                    VARCHAR(255) NOT NULL,
-    paymentReference        INT NOT NULL,
-    assemblyName            VARCHAR(255) NOT NULL
+  id                      SERIAL PRIMARY KEY,
+  date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  name                    VARCHAR(255) NOT NULL,
+  paymentReference        INT NOT NULL,
+  assemblyName            VARCHAR(255) NOT NULL
 );
 
 --impôts et taxes
 CREATE TABLE account63 (
-    id                      SERIAL PRIMARY KEY,
-    datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    name                    VARCHAR(255) NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    orderId                 BIGINT references orders(orderId),
-    account708Id            BIGINT references account708(id)
+  id                      SERIAL PRIMARY KEY,
+  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  name                    VARCHAR(255) NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  orderId                 BIGINT references orders(orderId),
+  account708Id            BIGINT references account708(id)
 );
 
 --diverses charges à payer
 CREATE TABLE account4686 (
-    id                      SERIAL PRIMARY KEY,
-    date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    name                    VARCHAR(255),
-    amount                  NUMERIC NOT NULL,
-    debit                   Boolean NOT NULL,
-    account63Id             BIGINT references account63(id)
+  id                      SERIAL PRIMARY KEY,
+  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  name                    VARCHAR(255),
+  amount                  NUMERIC NOT NULL,
+  debit                   Boolean NOT NULL,
+  account63Id             BIGINT references account63(id)
 );
 
 
 --achats
 CREATE TABLE account60 (
-    id                      SERIAL PRIMARY KEY,
-    datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    name                    VARCHAR(255) NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    paymentReference        INT,
-    orderId                 BIGINT REFERENCES orders(orderId)
+  id                      SERIAL PRIMARY KEY,
+  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  name                    VARCHAR(255) NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  paymentReference        INT,
+  orderId                 BIGINT REFERENCES orders(orderId)
 );
 
 --Fournisseurs à payer
 CREATE TABLE account403 (
-    id                      SERIAL PRIMARY KEY,
-    date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    debit                   Boolean NOT NULL, --#sinon debit
-    userId                  BIGINT REFERENCES users(userId),
-    account60Id             BIGINT REFERENCES account60(id)
+  id                      SERIAL PRIMARY KEY,
+  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  debit                   Boolean NOT NULL, --#sinon debit
+  userId                  BIGINT REFERENCES users(userId),
+  account60Id             BIGINT REFERENCES account60(id)
 );
 
 --frais postaux et telecoms
 CREATE TABLE account626 (
-    id                      SERIAL PRIMARY KEY,
-    datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    name                    VARCHAR(255) NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    paymentReference        INT NOT NULL
+  id                      SERIAL PRIMARY KEY,
+  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  name                    VARCHAR(255) NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  paymentReference        INT NOT NULL
 );
 
 --services bancaires
 CREATE TABLE account627 (
-    id                      SERIAL PRIMARY KEY,
-    datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    name                    VARCHAR(255) NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    orderId                 BIGINT REFERENCES orders(orderId)
+  id                      SERIAL PRIMARY KEY,
+  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  name                    VARCHAR(255) NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  orderId                 BIGINT REFERENCES orders(orderId)
 );
 
 
 CREATE TABLE bank ( --account512
-    id                      SERIAL PRIMARY KEY,
-    datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
-    name                    VARCHAR(255) DEFAULT 'tamere666' NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    debit                   Boolean NOT NULL,
-    paymentReference        INT DEFAULT 0 NOT NULL,
-    orderId                 BIGINT REFERENCES orders(orderId),
-    account627Id            BIGINT REFERENCES account627(id)
+  id                      SERIAL PRIMARY KEY,
+  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  name                    VARCHAR(255) DEFAULT 'tamere666' NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  debit                   Boolean NOT NULL,
+  paymentReference        INT DEFAULT 0 NOT NULL,
+  orderId                 BIGINT REFERENCES orders(orderId),
+  account627Id            BIGINT REFERENCES account627(id)
 );
 
 --publicité publications et relations publiques
 CREATE TABLE account623 (
-    id                      SERIAL PRIMARY KEY,
-    datePayment             TIMESTAMP DEFAULT  current_timestamp NOT NULL,
-    amount                  NUMERIC NOT NULL,
-    name                    VARCHAR(255) NOT NULL,
-    paymentReference        INT NOT NULL,
-    billId                  BIGINT REFERENCES bills(id)
+  id                      SERIAL PRIMARY KEY,
+  datePayment             TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  amount                  NUMERIC NOT NULL,
+  name                    VARCHAR(255) NOT NULL,
+  paymentReference        INT NOT NULL,
+  billId                  BIGINT REFERENCES bills(id)
 );
 
 CREATE TABLE eventsFollowed (
@@ -367,69 +368,69 @@ CREATE TABLE usersFollowed (
 );
 
 CREATE TABLE eventsPlaces (
-    eventId INT REFERENCES events (eventId),
-    placeId INT REFERENCES places (placeId),
-    PRIMARY KEY (eventId, placeId)
+  eventId INT REFERENCES events (eventId),
+  placeId INT REFERENCES places (placeId),
+  PRIMARY KEY (eventId, placeId)
 );
 
 CREATE TABLE eventsOrganizers (
-    eventId INT REFERENCES events (eventId),
-    organizerId INT REFERENCES organizers(organizerId),
-    PRIMARY KEY (eventId, organizerId)
+  eventId INT REFERENCES events (eventId),
+  organizerId INT REFERENCES organizers(organizerId),
+  PRIMARY KEY (eventId, organizerId)
 );
 
 CREATE TABLE eventsAddresses (
-    eventId INT REFERENCES events (eventId),
-    addressId INT REFERENCES addresses(addressId),
-    PRIMARY KEY (eventId, addressId)
+  eventId INT REFERENCES events (eventId),
+  addressId INT REFERENCES addresses(addressId),
+  PRIMARY KEY (eventId, addressId)
 );
 ---INSERT INTO eventsAddresses VALUES(1, 2);
 
 CREATE TABLE usersOrganizers (
-    userId INT REFERENCES users (userId),
-    organizerId INT REFERENCES organizers(organizerId),
-    PRIMARY KEY (userId, organizerId)
+  userId INT REFERENCES users (userId),
+  organizerId INT REFERENCES organizers(organizerId),
+  PRIMARY KEY (userId, organizerId)
 );
 
 CREATE TABLE eventsArtists (
-    eventId INT REFERENCES events (eventId),
-    artistId INT REFERENCES artists (artistId),
-    PRIMARY KEY (eventId, artistId)
+  eventId INT REFERENCES events (eventId),
+  artistId INT REFERENCES artists (artistId),
+  PRIMARY KEY (eventId, artistId)
 );
 
 CREATE TABLE usersArtists (
-    userId INT REFERENCES users (userId),
-    artistId INT REFERENCES artists (artistId),
-    PRIMARY KEY (userId, artistId)
+  userId INT REFERENCES users (userId),
+  artistId INT REFERENCES artists (artistId),
+  PRIMARY KEY (userId, artistId)
 );
 
 CREATE TABLE genresArtists (
-    genreId INT REFERENCES genres (genreId),
-    artistId INT REFERENCES artists (artistId),
-    PRIMARY KEY (genreId, artistId)
+  genreId INT REFERENCES genres (genreId),
+  artistId INT REFERENCES artists (artistId),
+  PRIMARY KEY (genreId, artistId)
 );
 
 CREATE TABLE playlists (
-    playlistId              SERIAL PRIMARY KEY,
-    name                    VARCHAR(255) NOT NULL
+  playlistId              SERIAL PRIMARY KEY,
+  name                    VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE playlistTracks (
-    playlistId              BIGINT REFERENCES playlists (playlistId),
-    trackId                 BIGINT REFERENCES tracks (trackId),
-    PRIMARY KEY (playlistId, trackId)
+  playlistId              BIGINT REFERENCES playlists (playlistId),
+  trackId                 BIGINT REFERENCES tracks (trackId),
+  PRIMARY KEY (playlistId, trackId)
 );
 
 CREATE TABLE usersPlaylists (
-    userId                  BIGINT REFERENCES users (userId),
-    playlistId              BIGINT REFERENCES playlists (playlistId),
-    PRIMARY KEY (userId, playlistId)
+  userId                  BIGINT REFERENCES users (userId),
+  playlistId              BIGINT REFERENCES playlists (playlistId),
+  PRIMARY KEY (userId, playlistId)
 );
 
 CREATE TABLE artistsTracks (
-    artistId                BIGINT REFERENCES artists (artistId),
-    trackId                 BIGINT REFERENCES tracks (trackId),
-    PRIMARY KEY (artistId, trackId)
+  artistId                BIGINT REFERENCES artists (artistId),
+  trackId                 BIGINT REFERENCES tracks (trackId),
+  PRIMARY KEY (artistId, trackId)
 );
 
 

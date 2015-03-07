@@ -54,11 +54,12 @@ object SearchArtistsController extends Controller {
     val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
         case (name, facebookId, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
-          val websitesSeq = websitesStringToWebsitesSet(websites) + normalizeUrl(link)
+          val facebookUrl = Option(normalizeUrl(link).substring("facebook.com/".length))
+          val websitesSeq = websitesStringToWebsitesSet(websites)
           val images = Set(new Image(-1, cover))
           val description = formatDescription(maybeDescription)
           val genres = genresStringToGenresSet(maybeGenre)
-          Artist(-1, Option(facebookId), name, description, websitesSeq, images, genres, Set.empty)
+          Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSeq, images, genres, Set.empty)
       }
     }
 
