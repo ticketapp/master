@@ -90,11 +90,11 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           Enumerator(Json.toJson(youtubeTracks))
       }
     )
-    val artistDatabaseIdEnumerator = {
-      val artistId = Artist.save(patternAndArtist.artist)
-        println(artistId)
-        Enumerator(Json.toJson(artistId))
-      }
+
+    val artistDatabaseIdEnumerator = Artist.save(patternAndArtist.artist) match {
+      case Some(artistIdFound) => Enumerator(Json.toJson(artistIdFound))
+      case None => Enumerator(Json.toJson(-1))
+    }
 
     Enumerator.interleave(artistDatabaseIdEnumerator, soundCloudTracksEnumerator, youtubeTracksEnumerator)
   }
