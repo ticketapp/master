@@ -92,7 +92,7 @@ object SearchArtistsController extends Controller {
     case None => Set.empty
     case Some(websites: String) =>
       """((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
-        .filterNot(_ == "")
+        .filter(_.nonEmpty)
         .map { _.trim.stripSuffix("/") }
         .toSet
   }

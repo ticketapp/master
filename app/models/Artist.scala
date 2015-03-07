@@ -41,13 +41,19 @@ object Artist {
   def formApply(facebookId: Option[String], name: String, websites: Seq[String], images: Seq[Image], genres: Seq[Genre],
                 tracks: Seq[Track]): Artist =
     new Artist(-1L, facebookId, name, None, websites.toSet, images.toSet, genres.toSet, tracks.toSet)
-  def formUnapply(artist: Artist): Option[(Option[String], String, Seq[String], Seq[Image], Seq[Genre], Seq[Track])] =
-    Some((artist.facebookId, artist.name, artist.websites.toSeq, artist.images.toSeq, artist.genres.toSeq,
+  def formUnapply(artist: Artist) =
+    Option((artist.facebookId, artist.name, artist.websites.toSeq, artist.images.toSeq, artist.genres.toSeq,
       artist.tracks.toSeq))
+
+  case class PatternAndArtist (pattern: String, artist: Artist)
+  def formWithPatternApply(pattern: String, artist: Artist) = new PatternAndArtist(pattern, artist)
+  def formWithPatternUnapply(patternAndArtist: PatternAndArtist) =
+    Option((patternAndArtist.pattern, patternAndArtist.artist))
+
 
   def findAll(): List[Artist] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from artists")
+      SQL("SELECT * FROM artists")
         .as(ArtistParser.*)
         .map(artist =>
           artist.copy(
@@ -125,7 +131,8 @@ object Artist {
               'name -> artist.name,
               'description -> artist.description,
               'websites -> artist.websites.mkString(","))
-            .executeInsert() match {
+            .executeInsert()
+            match {
               case None => None
               case Some(artistId: Long) =>
                 artist.images.foreach(image =>
