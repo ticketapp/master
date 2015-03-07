@@ -2,24 +2,24 @@
     <a href="/authenticate/facebook"> <img src="/assets/securesocial/images/providers/facebook.png"></a>
     <a href="/authenticate/google"> <img src="/assets/securesocial/images/providers/google.png"></a>
 </div>
-<form ng-if="!signUp" action="http://localhost:9000/authenticate/userpass" class="form-horizontal" autocomplete="off" method="POST">
+<form ng-if="!signUp" action="http://localhost:9000/authenticate/userpass" class="column large-12" autocomplete="off" method="POST">
     <fieldset>
-        <div class="control-group" id="username_field">
+        <div class="column large-12" id="username_field">
             <label class="control-label" for="username">Email</label>
-            <div class="controls">
+            <div class="column large-12">
                 <input type="text" id="username" name="username" value="" class="input-xlarge">
                 <span class="help-block">Required</span>
             </div>
         </div>
-        <div class="control-group" id="password_field">
+        <div class="column large-12" id="password_field">
             <label class="control-label" for="password">Password</label>
-            <div class="controls">
+            <div class="column large-12">
                 <input type="password" id="password" name="password" class="input-xlarge">
                 <span class="help-block">Required</span>
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn">Login</button>
         </div>
         <div class="clearfix">
             <a href="/reset"></a><p><a href="/reset">Did you forget your password? </a></p>
@@ -31,15 +31,15 @@
 </form>
 <form ng-if="signUp" action="http://localhost:9000/signup" class="form-horizontal" autocomplete="off" method="post">
     <fieldset>
-        <div class="control-group  " id="email_field">
+        <div class="column large-12  " id="email_field">
             <label class="control-label" for="email">Email</label>
-            <div class="controls">
+            <div class="column large-12">
                 <input type="text" id="email" name="email" value="" class="input-xlarge">
                 <span class="help-block">Email, Required</span>
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Create Account</button>
+            <button type="submit" class="btn">Create Account</button>
             <a class="btn" ng-click="$parent.signUp = !$parent.signUp">Cancel</a>
         </div>
     </fieldset>

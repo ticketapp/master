@@ -2,28 +2,19 @@
     <ul class="float-right">
         <li ng-if="!$root.home" class="generalControls float-right" >
             <a href="#/" class="button"><i class="fi-home"></i></a>
-        </li>
+        </li><!--
         <li ng-if="!$root.home" class="generalControls float-right">
             <button ng-click="back()" class="alert"><i class="fi-x"></i></button>
-        </li>
+        </li>-->
         <li class="generalControls float-right" data-ng-controller="toolsCtrl" ng-click="open()">
             <button><i class="fi-thumbnails"></i></button>
         </li>
         <li ng-if="!$root.home && !$root.pathSearch" class="generalControls float-right">
             <a href="#/search" class="button"><i class="fi-magnifying-glass"></i></a>
-        </li>
-        <li ng-if="!$root.home && !$root.pathSearch" class="generalControls float-right">
-            <a href="#/search" class="button"><i class="fi-share"></i></a>
-        </li>
-        <li ng-if="$root.pathArt" class="generalControls float-right">
-            <button><i class="fi-play"></i></button>
-        </li>
-        <li ng-if="$root.pathEvent" class="generalControls float-right">
-            <button ng-click="generate()"><i class="fi-shopping-cart"></i></button>
-        </li>
+        </li><!--
         <li class="generalControls float-right">
             <button ng-click="createPlaces()"><i class="fi-plus"></i></button>
-        </li>
+        </li>-->
     </ul>
 </div>
 <div ng-if="buy == true" class="absolute top left zIndex2 right bottom height100p" style="background: rgba(0,0,0,0.3)">
