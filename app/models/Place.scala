@@ -95,16 +95,36 @@ object Place {
         .as(PlaceParser.*)
     }
   }
+/*
+ private val ArtistParser: RowParser[Artist] = {
+    get[Long]("artistId") ~
+      get[Option[String]]("facebookId") ~
+      get[String]("name") ~
+      get[Option[String]]("description") ~
+      get[Option[String]]("facebookUrl") ~
+      get[Option[String]]("websites") map {
+      case artistId ~ facebookId ~ name ~ description ~ facebookUrl ~ websites =>
+        Artist(artistId, facebookId, name, description, facebookUrl,
+          websites.getOrElse("").split(",").toSet, Set(), Set(), Set())
+    }
+  }
+ */
+  def findAllIdsAndFacebookIds: Seq[(Long, String)] = {
+    try {
+      val placeIdFacebookIdParser = {
+        get[Long]("placeId") ~
+          get[String]("facebookId") map {
+          case placeId ~ facebookId => (placeId, facebookId)
+        }
+      }
 
-  def findAllIdsAndFacebookIds = {
-    Try(
       DB.withConnection { implicit connection =>
-        SQL("SELECT placeId, facebookId from places WHERE facebookId IS NOT NULL")
-          .as((get[Long]("placeId") ~
-            get[String]("facebookId") map {
-              case placeId ~ facebookId => (placeId, facebookId) } ).*)
-            }
-    )
+        SQL("SELECT placeId, facebookId FROM places WHERE facebookId IS NOT NULL")
+          .as(placeIdFacebookIdParser.*)
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Problem with the method Place.findAllContaining: " + e.getMessage)
+    }
   }
 
   def findAllContaining(pattern: String): Seq[Place] = {

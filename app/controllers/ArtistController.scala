@@ -1,6 +1,7 @@
 package controllers
 
 import json.JsonHelper._
+import models.Artist.PatternAndArtist
 import models.{Genre, Image, Artist, Track}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -65,30 +66,37 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {
-          val soundCloudTracksEnumerator = Enumerator.flatten(
-            getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-              Enumerator(Json.toJson(soundCloudTracks))
-            }
-          )
-          val youtubeTracksEnumerator = Enumerator.flatten(
-            getYoutubeTracksForArtist(patternAndArtist.artist.name, patternAndArtist.artist.facebookId.get,
-              patternAndArtist.searchPattern).map {
-              youtubeTracks =>
-                Enumerator(Json.toJson(youtubeTracks))
-            }
-          )
-
-          val artistDatabaseIdEnumerator = Enumerator(Json.toJson(Artist.save(patternAndArtist.artist)))
-
-          val enumerators = Enumerator.interleave(
-            artistDatabaseIdEnumerator, soundCloudTracksEnumerator, youtubeTracksEnumerator
-          )
-          Ok.chunked(enumerators)
+          println("ok")
+          Ok.chunked(getArtistIdAndTracks(patternAndArtist))
         }
       )
     } catch {
       case e: Exception => InternalServerError(e.getMessage)
     }
+  }
+
+  def getArtistIdAndTracks(patternAndArtist: PatternAndArtist) = {
+    val soundCloudTracksEnumerator = Enumerator.flatten(
+      getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
+        println(Json.toJson(soundCloudTracks))
+        Enumerator(Json.toJson(soundCloudTracks))
+      }
+    )
+    val youtubeTracksEnumerator = Enumerator.flatten(
+      getYoutubeTracksForArtist(patternAndArtist.artist.name, patternAndArtist.artist.facebookId.get,
+        patternAndArtist.searchPattern).map {
+        youtubeTracks =>
+          println(Json.toJson(youtubeTracks))
+          Enumerator(Json.toJson(youtubeTracks))
+      }
+    )
+    val artistDatabaseIdEnumerator = {
+      val artistId = Artist.save(patternAndArtist.artist)
+        println(artistId)
+        Enumerator(Json.toJson(artistId))
+      }
+
+    Enumerator.interleave(artistDatabaseIdEnumerator, soundCloudTracksEnumerator, youtubeTracksEnumerator)
   }
 
   def deleteArtist(artistId: Long) = Action {

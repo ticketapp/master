@@ -41,7 +41,6 @@ object Artist {
     }
   }
 
-
   def formApply(facebookId: Option[String], name: String, description: Option[String], facebookUrl: Option[String],
                 websites: Seq[String], images: Seq[Image], genres: Seq[Genre], tracks: Seq[Track]): Artist =
     new Artist(-1L, facebookId, name, description, facebookUrl, websites.toSet, images.toSet, genres.toSet, tracks.toSet)

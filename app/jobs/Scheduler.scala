@@ -20,6 +20,96 @@ object Scheduler {
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
   val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
+  def start() = {
+    Place.findAllIdsAndFacebookIds.map { findAllIdsAndFacebookId: (Long, String) =>
+      saveEventsOfPlace(findAllIdsAndFacebookId._1, findAllIdsAndFacebookId._2)
+    }
+  }
+
+  def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
+    WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
+      .withQueryString(
+        "access_token" -> token
+      )
+      .get
+      .map { returnListOfIdsFromEvents(_)
+      .map(eventId =>
+        WS.url("https://graph.facebook.com/v2.2/" + eventId +
+          "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
+          .get onComplete {
+          case Success(eventDetailed) =>
+            val description = eventDetailed.json.asOpt[String]((__ \ "description").read[String])
+            val imgPath = eventDetailed.json.as[String]((__ \ "cover" \ "source").read[String])
+            saveEvent(formatDescription(description), eventDetailed, placeId, imgPath)
+          case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
+        })
+    }
+  }
+
+
+  def returnListOfIdsFromEvents(resp: Response): Seq[String] = {
+    val readSoundFacebookIds: Reads[Seq[String]] = Reads.seq((__ \ "id").read[String])
+    (resp.json \ "data").as[Seq[String]](readSoundFacebookIds)
+  }
+
+  def saveEvent(eventDescription: Option[String], eventResp: Response, placeId: Long, imgPath: String) = {
+    val eventJson = eventResp.json
+
+
+    //println(eventJson)
+    val street = (eventJson \ "venue" \ "street").as[Option[String]]
+    val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
+    val city = (eventJson \ "venue" \ "city").as[Option[String]]
+
+    val geographicPoint = None
+
+    val address: Address = new Address(-1l, geographicPoint, city, zip, street)
+    // + tester si
+    //l'adresse est vide
+
+    val name = eventJson.as[String]((__ \ "name").read[String])
+
+
+    val listArtistsFromTitle: List[String] = splitArtistNamesInTitle(name)
+    //println(listArtistsFromTitle)
+
+
+    val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
+    //println(facebookId) 783881178345234
+
+    def formateDate(date: JsValue): Option[Date] = date.asOpt[String] match {
+      case Some(dateFound: String) => val date = dateFound.replace("T", " ")
+        date.length match {
+          case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
+          case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
+          case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
+        }
+      case _ => None
+    }
+
+    val startTime = formateDate(eventJson \ "start_time")
+    val endTime = formateDate(eventJson \ "end_time")
+
+    val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
+    getOrganizerInfos(readOwnerId).map { organizer =>
+      var event: Event = new Event(-1L, facebookId, true, true, new Date, name, geographicPoint, eventDescription,
+        startTime.getOrElse(new Date()), endTime, 16, List(), organizer, List(), List(), List(address))
+
+      imgPath match {
+        case "null" =>
+        case _ => event = event.copy(images = List(new Image(-1L, imgPath)))
+      }
+
+      Event.save(event) match {
+        case None => Event.update(event) //delete old imgs and insert news
+        case Some(eventId) =>
+          //println(eventId + event.images.toString())
+          Address.saveAddressAndEventRelation(address, eventId)
+          Place.saveEventPlaceRelation(eventId, placeId)
+      }
+    }
+  }
+
   def formatDescription(description: Option[String]): Option[String] = {
     description match {
       case None => None
@@ -85,95 +175,5 @@ object Scheduler {
       ""
     }
 
-  }
-
-  def saveEvent(eventDescription: Option[String], eventResp: Response, placeId: Long, imgPath: String) = {
-    val eventJson = eventResp.json
-
-
-    //println(eventJson)
-    val street = (eventJson \ "venue" \ "street").as[Option[String]]
-    val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
-    val city = (eventJson \ "venue" \ "city").as[Option[String]]
-
-    val geographicPoint = None
-
-    val address: Address = new Address(-1l, geographicPoint, city, zip, street)
-    // + tester si
-    //l'adresse est vide
-
-    val name = eventJson.as[String]((__ \ "name").read[String])
-
-
-    val listArtistsFromTitle: List[String] = splitArtistNamesInTitle(name)
-    //println(listArtistsFromTitle)
-
-
-    val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
-    //println(facebookId) 783881178345234
-
-    def formateDate(date: JsValue): Option[Date] = date.asOpt[String] match {
-      case Some(dateFound: String) => val date = dateFound.replace("T", " ")
-        date.length match {
-          case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
-          case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
-          case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
-        }
-      case _ => None
-    }
-
-    val startTime = formateDate(eventJson \ "start_time")
-    val endTime = formateDate(eventJson \ "end_time")
-
-    val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
-    getOrganizerInfos(readOwnerId).map { organizer =>
-      var event: Event = new Event(-1L, facebookId, true, true, new Date, name, geographicPoint, eventDescription,
-        startTime.getOrElse(new Date()), endTime, 16, List(), organizer, List(), List(), List(address))
-
-      imgPath match {
-        case "null" =>
-        case _ => event = event.copy(images = List(new Image(-1L, imgPath)))
-      }
-
-      Event.save(event) match {
-        case None => Event.update(event) //delete old imgs and insert news
-        case Some(eventId) =>
-          //println(eventId + event.images.toString())
-          Address.saveAddressAndEventRelation(address, eventId)
-          Place.saveEventPlaceRelation(eventId, placeId)
-      }
-    }
-  }
-
-  def returnListOfIdsFromEvents(resp: Response): Seq[String] = {
-    val readSoundFacebookIds: Reads[Seq[String]] = Reads.seq((__ \ "id").read[String])
-    (resp.json \ "data").as[Seq[String]](readSoundFacebookIds)
-  }
-
-  def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
-    WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/?access_token=" +
-      token).get onComplete {
-      case Success(events) => returnListOfIdsFromEvents(events).map(eventId =>
-        WS.url("https://graph.facebook.com/v2.2/" + eventId +
-          "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
-          .get onComplete {
-          case Success(eventDetailed) =>
-            val description = eventDetailed.json.asOpt[String]((__ \ "description").read[String])
-            val imgPath = eventDetailed.json.as[String]((__ \ "cover" \ "source").read[String])
-            saveEvent(formatDescription(description), eventDetailed, placeId, imgPath)
-          case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
-        })
-      case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
-    }
-  }
-
-  def start() = {
-    Place.findAllIdsAndFacebookIds match {
-      case Failure(f) => throw new WebServiceException("Error in scheduler : " + f.getMessage)
-      case Success(listPlacesIdAndFbIdFromDatabase) =>
-        listPlacesIdAndFbIdFromDatabase.foreach(placeIdAndFbId =>
-          saveEventsOfPlace(placeIdAndFbId._1, placeIdAndFbId._2)
-        )
-    }
   }
 }
