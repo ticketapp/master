@@ -31,25 +31,29 @@ object Scheduler {
       .withQueryString(
         "access_token" -> token
       )
-      .get
-      .map { returnListOfIdsFromEvents(_)
-      .map(eventId =>
-        WS.url("https://graph.facebook.com/v2.2/" + eventId +
-          "?fields=cover,description,name,start_time,end_time,owner,venue" + "&access_token=" + token)
-          .get onComplete {
-          case Success(eventDetailed) =>
+      .get()
+      .map { readIdsFromEvents(_)
+      .map { eventId =>
+        WS.url("https://graph.facebook.com/v2.2/" + eventId)
+          .withQueryString(
+            "fields" -> "cover,description,name,start_time,end_time,owner,venue",
+            "access_token" -> token
+          )
+          .get()
+          .map { eventDetailed =>
             val description = eventDetailed.json.asOpt[String]((__ \ "description").read[String])
             val imgPath = eventDetailed.json.as[String]((__ \ "cover" \ "source").read[String])
             saveEvent(formatDescription(description), eventDetailed, placeId, imgPath)
-          case Failure(f) => throw new WebServiceException("An error has occurred in saveEventsOfPlace: " + f.getMessage)
-        })
+          }
+      }
     }
   }
 
 
-  def returnListOfIdsFromEvents(resp: Response): Seq[String] = {
-    val readSoundFacebookIds: Reads[Seq[String]] = Reads.seq((__ \ "id").read[String])
-    (resp.json \ "data").as[Seq[String]](readSoundFacebookIds)
+  def readIdsFromEvents(resp: Response): Seq[String] = {
+    val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
+    (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds)
+      .flatten
   }
 
   def saveEvent(eventDescription: Option[String], eventResp: Response, placeId: Long, imgPath: String) = {

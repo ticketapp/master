@@ -30,9 +30,9 @@
     </ul>
     <div ng-if="artiste.description.length > 0" class="column large-4 float-left eventInfo" >
         <h3>{{artiste.name}}</h3>
-        <div data-ng-bind-html="artiste.description" style="height : {{lessDesc}}; overflow: hidden"></div>
-        <i ng-if="heightDesc == 147" class="fi-plus" ng-click="heightDesc = 'auto'"></i>
-        <i ng-if="heightDesc == 'auto'" class="fi-minus" ng-click="heightDesc = 147"></i>
+        <div data-ng-bind-html="artiste.description" style="height : {{heightDesc}}; overflow: hidden"></div>
+        <i ng-if="heightDesc == '147px'" class="fi-plus pointer" ng-click="$parent.heightDesc = 'auto'"></i>
+        <i ng-if="heightDesc == 'auto'" class="fi-minus pointer" ng-click="$parent.heightDesc = '147px'"></i>
     </div>
     <div class="column large-4 float-left eventInfo tracksContener" >
         <div class="column large-12">
@@ -58,7 +58,7 @@
         </div>
         <div class="column large-12">
             <button ng-if="trackLimit < artiste.tracks.length" ng-click="$parent.trackLimit = $parent.trackLimit + 10">More tracks</button>
-            <button ng-if="trackLimit > 10 && trackTitle.length < 1" ng-click="$parent.trackLimit = 10">Less tracks</button>
+            <button ng-if="trackLimit > 10 && trackTitle.length <= 1" ng-click="$parent.trackLimit = 10">Less tracks</button>
         </div>
     </div>
     <ul id="events_contener" ng-if="$root.window == 'small' || $root.window == 'medium'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 small-block-grid-1 medium-block-grid-2 large-block-grid-4">

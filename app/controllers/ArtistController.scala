@@ -9,8 +9,6 @@ import play.api.libs.iteratee.Enumerator
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
-import scala.concurrent.Future
-import services.Utilities.normalizeString
 import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
 
@@ -66,7 +64,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {
-          println("ok")
           Ok.chunked(getArtistIdAndTracks(patternAndArtist))
         }
       )
@@ -78,17 +75,14 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def getArtistIdAndTracks(patternAndArtist: PatternAndArtist) = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        println(Json.toJson(soundCloudTracks))
         Enumerator(Json.toJson(soundCloudTracks))
       }
     )
     val youtubeTracksEnumerator = Enumerator.flatten(
       getYoutubeTracksForArtist(patternAndArtist.artist.name, patternAndArtist.artist.facebookId.get,
-        patternAndArtist.searchPattern).map {
-        youtubeTracks =>
-          println(Json.toJson(youtubeTracks))
+        patternAndArtist.searchPattern).map { youtubeTracks =>
           Enumerator(Json.toJson(youtubeTracks))
-      }
+        }
     )
     val artistDatabaseIdEnumerator = {
       val artistId = Artist.save(patternAndArtist.artist)

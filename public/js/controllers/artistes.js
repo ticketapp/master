@@ -1,7 +1,8 @@
 app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket){
     $scope.bigTracks = true;
     $scope.trackLimit = 10;
-    $scope.heightDesc = 147;
+    $scope.heightDesc = '147px';
+    $scope.trackTitle = '';
     function refactorWebsites () {
         for (var i = 0; i < $scope.artiste.websites.length; i++) {
             $scope.artiste.websites[i] = {url: $scope.artiste.websites[i]};
