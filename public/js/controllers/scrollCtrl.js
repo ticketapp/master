@@ -1,5 +1,5 @@
-app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics',
-    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics) {
+app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket',
+    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position)
                 {
@@ -9,6 +9,39 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             );
         } /*else {
         }*/
+        $rootScope.artisteToCreate = false;
+        $rootScope.createArtist = function (artist) {
+            $rootScope.artisteToCreate = true;
+            $rootScope.$apply;
+            $http.post('artists/createArtist', {
+                artistName : artist.name,
+                facebookId: artist.facebookId,
+                images : artist.images,
+                websites : artist.websites,
+                description : artist.description,
+                genre : artist.genre
+            }).
+                success(function(data, status, headers, config) {
+                    window.location.href =('#/artiste/' + data);
+                }).
+                error(function(data, status, headers, config) {
+                    console.log(data)
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                });
+        };
+        $rootScope.resizeImgHeight = function () {
+            var waitForContentMin = setTimeout(function () {
+                var content = document.getElementsByClassName('img_min_evnt');
+                if (content.length > 0) {
+                    clearInterval(waitForContentMin);
+                    var newHeight = content[0].clientWidth * 0.376 + 'px';
+                    for (var i = 0; i < content.length; i++) {
+                        content[i].style.height = newHeight;
+                    }
+                }
+            }, 100)
+        }
         $rootScope.window = 'large';
         function marginContent () {
             if ($rootScope.home == false) {

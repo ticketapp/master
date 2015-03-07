@@ -1,20 +1,8 @@
 app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http, $rootScope){
-    function imgHeight () {
-        var waitForContentMin = setTimeout(function () {
-            var content = document.getElementsByClassName('img_min_evnt');
-            if (content.length > 0) {
-                clearInterval(waitForContentMin);
-                var newHeight = content[0].clientWidth * 0.376 + 'px';
-                for (var i = 0; i < content.length; i++) {
-                    content[i].style.height = newHeight;
-                }
-            }
-        }, 100)
-    }
     $http.get('/organizers/' + $routeParams.id +'/events')
         .success(function(data, status){
             $scope.orgaEvents = data;
-            imgHeight();
+            $rootScope.resizeImgHeight();
             console.log($scope.orgaEvents);
             if ($scope.orgaEvents.length > 0 && $rootScope.window != 'small' && $rootScope.window != 'medium') {
                 var waitForBinding = setInterval(function () {
@@ -27,7 +15,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                             document.getElementsByClassName('descriptionContent')[0].classList.add('paddingLeft0');
                             document.getElementsByClassName('data-ng-event')[0].classList.add('width100p');
                             document.getElementsByClassName('min_contener')[0].classList.add('padding0');
-                            imgHeight();
+                            $rootScope.resizeImgHeight();
                             var descPlace = document.getElementsByClassName('descriptionContent')[0].getBoundingClientRect();
                             for (var i = 0; i < eventInfoConteners.length; i++) {
                                 eventInfoConteners[i].classList.remove('large-4');
