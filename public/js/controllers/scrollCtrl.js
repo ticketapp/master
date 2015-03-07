@@ -1,5 +1,5 @@
-app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket',
-    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket) {
+app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket', 'oboe',
+    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position)
                 {
@@ -9,25 +9,44 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             );
         } /*else {
         }*/
-        $rootScope.artisteToCreate = false;
+        $rootScope.passArtisteToCreateToFalse = function () {
+            $rootScope.artisteToCreate = false;
+            console.log($rootScope.artisteToCreate)
+        };
+        $rootScope.passArtisteToCreateToFalse();
         $rootScope.createArtist = function (artist) {
             $rootScope.artisteToCreate = true;
+            $rootScope.artiste = artist;
             $rootScope.$apply;
-            $http.post('artists/createArtist', {
-                artistName : artist.name,
-                facebookId: artist.facebookId,
-                images : artist.images,
-                websites : artist.websites,
-                description : artist.description,
-                genre : artist.genre
-            }).
-                success(function(data, status, headers, config) {
-                    window.location.href =('#/artiste/' + data);
-                }).
-                error(function(data, status, headers, config) {
-                    console.log(data)
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
+            var searchPattern  = document.getElementById('searchTopBar').value.trim();
+            console.log(searchPattern);
+            oboe.post('artists/createArtist', {
+                searchPattern: searchPattern,
+                artist: {
+                    facebookUrl: artist.facebookUrl,
+                    artistName: artist.name,
+                    facebookId: artist.facebookId,
+                    images: artist.images,
+                    websites: artist.websites,
+                    description: artist.description,
+                    genre: artist.genre
+                }
+            }).start(function (data, etc) {
+                    console.log(etc, data);
+                    window.location.href =('#/artiste/' + artist.facebookUrl);
+                })
+                /*.node('champ.*', function (value) {
+                 $scope.items.push(value);
+                 })*/
+                .done(function (value) {
+                    console.log(value)
+                    $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
+                    console.log($rootScope.artiste.tracks)
+                    $rootScope.$apply();
+
+                })
+                .fail(function (error) {
+                    console.log("Error: ", error);
                 });
         };
         $rootScope.resizeImgHeight = function () {

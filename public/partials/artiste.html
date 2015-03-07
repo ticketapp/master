@@ -20,6 +20,9 @@
                    'fi-mixcloud' : website.name == 'mixcloud'}"
                    class="float-right" style="margin-left: 5px;"></i>
             </a>
+            <a href="http://www.facebook.com/{{artiste.facebookUrl}}" target="_blank">
+                <i class="float-right fi-social-facebook" style="margin-left: 5px;"></i>
+            </a>
         </h2>
     </div>
     <ul id="events_contener" ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 large-block-grid-2">
@@ -27,7 +30,9 @@
     </ul>
     <div ng-if="artiste.description.length > 0" class="column large-4 float-left eventInfo" >
         <h3>{{artiste.name}}</h3>
-        <div data-ng-bind-html="artiste.description"></div>
+        <div data-ng-bind-html="artiste.description" style="height : {{lessDesc}}; overflow: hidden"></div>
+        <i ng-if="heightDesc == 147" class="fi-plus" ng-click="heightDesc = 'auto'"></i>
+        <i ng-if="heightDesc == 'auto'" class="fi-minus" ng-click="heightDesc = 147"></i>
     </div>
     <div class="column large-4 float-left eventInfo tracksContener" >
         <div class="column large-12">

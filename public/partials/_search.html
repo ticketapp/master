@@ -33,13 +33,13 @@
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <a href="#/artiste/{{artist.artistId}}">
+                        <a href="#/artiste/{{artist.facebookUrl}}">
                             <img src="{{artist.images[0].path}}" alt="une belle image" class="min"/>
                         </a>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a href="#/artiste/{{artist.artistId}}"><h4>{{ artist.name }}</h4></a>
+                    <a href="#/artiste/{{artist.facebookUrl}}"><h4>{{ artist.name }}</h4></a>
                 </div>
             </div>
         </li>
@@ -50,7 +50,7 @@
                     <div class="toGrow">
                         <img ng-click="createArtist(artistFb)"
                              src="{{ artistFb.images[0].path }}"
-                             alt="une belle image" class="min"/>
+                             alt="une belle image" class="min pointer"/>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >

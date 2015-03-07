@@ -188,27 +188,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 })*/
                 .done(function (value) {
                     function updateArtistFb (artistInfo) {
-                        //if (artistInfo.name != undefined) {
-                            if ($scope.artistsFb.indexOf(artistInfo) < 0) {
-                                console.log(artistInfo);
-                                artistInfo.tracks = [];
-                                $scope.artistsFb.push(artistInfo);
-                                $scope.$apply();
-                                $rootScope.resizeImgHeight();
-                            }
-                        /*} else {
-                            var artFbIdSearch = $scope.artistsFb.length;
-                            var tracksIdFb = Object.keys(artistInfo)[0];
-                            console.log(artistInfo[tracksIdFb]);
-                            for (var art = 0; art < artFbIdSearch; art++) {
-                                if (tracksIdFb == $scope.artistsFb[art].id) {
-                                    if (tracksIdFb == $scope.artistsFb[art].id) {
-                                        $scope.artistsFb[art].tracks = $scope.artistsFb[art].tracks.concat(artistInfo[tracksIdFb]);
-                                        $scope.$apply();
-                                    }
-                                }
-                            }
-                        }*/
+                        if ($scope.artistsFb.indexOf(artistInfo) < 0) {
+                            console.log(artistInfo);
+                            artistInfo.tracks = [];
+                            $scope.artistsFb.push(artistInfo);
+                            $scope.$apply();
+                            $rootScope.resizeImgHeight();
+                        }
                     }
                     value.forEach(updateArtistFb);
                 })
@@ -218,7 +204,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
     }
     search();
-
     var typingTimer;
     var doneTypingInterval = 600;
     $scope.research = function(newName) {

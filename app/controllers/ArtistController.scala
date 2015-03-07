@@ -96,7 +96,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         Enumerator(Json.toJson(artistId))
       }
 
-    Enumerator.interleave(artistDatabaseIdEnumerator, soundCloudTracksEnumerator, youtubeTracksEnumerator)
+    Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
   }
 
   def deleteArtist(artistId: Long) = Action {

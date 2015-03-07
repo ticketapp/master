@@ -41,7 +41,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         for (var tr = 0; tr < tracksLenght; tr++) {
             pushTrack(tracks[tr], artist)
         }
-        Angularytics.trackEvent("listen music", artist);
+        //Angularytics.trackEvent("listen music", artist);
         $scope.play(last);
         if ($rootScope.playlist.tracks.length == 0) {
             played = [];
