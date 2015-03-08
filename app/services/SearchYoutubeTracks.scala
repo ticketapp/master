@@ -8,6 +8,7 @@ import play.api.libs.functional.syntax._
 import services.Utilities.{ normalizeUrl, normalizeString }
 
 import scala.concurrent.Future
+import java.util.regex.Pattern
 
 object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
@@ -74,7 +75,17 @@ object SearchYoutubeTracks {
     val eventuallyTracks = Future.sequence(
       tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artistName, _) }
     )
-    eventuallyTracks.map { _.flatten.filter(_.title.toLowerCase.indexOf(artistName.toLowerCase) > -1) }
+    eventuallyTracks.map { tracks =>
+      println(artistName)
+      val ArtistNameRegex = (artistName.toLowerCase).r
+
+      tracks.flatten.filter(
+        _.title.toLowerCase contains artistName/*match {
+          case ArtistNameRegex(title) => true
+          case _ => false
+        }*/
+      )
+    }
   }
 
   def getYoutubeTracksByTitleAndArtistName(artistName: String, trackTitle: String): Future[Set[Track]] = {

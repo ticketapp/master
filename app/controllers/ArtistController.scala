@@ -22,6 +22,13 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Artist.find(artistId)))
   }
 
+  def artistByFacebookUrl(facebookUrl: String) = Action {
+    Artist.findByFacebookUrl(facebookUrl) match {
+      case Some(artist) => Ok(Json.toJson(artist))
+      case None =>  Ok
+    }
+  }
+
   def findArtistsContaining(pattern: String) = Action {
     Ok(Json.toJson(Artist.findAllContaining(pattern)))
   }
@@ -84,12 +91,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           Enumerator(Json.toJson(youtubeTracks))
         }
     )
-    val artistDatabaseIdEnumerator = {
-      val artistId = Artist.save(patternAndArtist.artist)
-        println(artistId)
-        Enumerator(Json.toJson(artistId))
-      }
-
+    //faire de l'async pour sauver en base de données : ask SO if async-postgresql needed
+    Artist.save(patternAndArtist.artist)
     Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
   }
 

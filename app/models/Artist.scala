@@ -100,10 +100,27 @@ object Artist {
     }
   }
 
-  def findAllContaining(searchPattern: String): Set[Artist] = {
+  def findByFacebookUrl(facebookUrl: String): Option[Artist] = {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT * FROM artists WHERE facebookUrl = {facebookUrl}")
+        .on('facebookUrl -> facebookUrl)
+        .as(ArtistParser.singleOpt)
+        .map( artist =>
+          artist.copy(
+            images = Image.findAllByArtist(artist.artistId),
+            genres = Genre.findAllByArtist(artist.artistId),
+            tracks = Track.findAllByArtist(artist.artistId)
+          )
+        )
+    }
+  }
+
+  def findAllContaining(searchPattern: String): Seq[Artist] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM artists WHERE LOWER(name) LIKE '%'||{searchPatternLowCase}||'%' LIMIT 10")
+        SQL(
+          """SELECT * FROM artists WHERE LOWER(name)
+            |LIKE '%'||{searchPatternLowCase}||'%' LIMIT 10""".stripMargin)
           .on('searchPatternLowCase -> searchPattern.toLowerCase)
           .as(ArtistParser.*)
           .map(artist =>
@@ -113,7 +130,6 @@ object Artist {
               tracks = Track.findAllByArtist(artist.artistId)
             )
           )
-          .toSet
       }
     } catch {
       case e: Exception =>
@@ -127,11 +143,12 @@ object Artist {
       case false => try {
         DB.withConnection { implicit connection =>
           SQL(
-            """INSERT INTO artists(facebookId, name, description, websites)
-              VALUES ({facebookId}, {name}, {description}, {websites})""")
+            """INSERT INTO artists(facebookId, name, description, facebookUrl, websites)
+              VALUES ({facebookId}, {name}, {description}, {facebookUrl}, {websites})""")
             .on(
               'facebookId -> artist.facebookId,
               'name -> artist.name,
+              'facebookUrl -> artist.facebookUrl,
               'description -> artist.description,
               'websites -> artist.websites.mkString(","))
             .executeInsert()

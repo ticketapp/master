@@ -32,7 +32,7 @@ object Scheduler {
         "access_token" -> token
       )
       .get()
-      .map { readIdsFromEvents(_)
+      .map { readEventsIdsFromResponse(_)
       .map { eventId =>
         WS.url("https://graph.facebook.com/v2.2/" + eventId)
           .withQueryString(
@@ -49,8 +49,7 @@ object Scheduler {
     }
   }
 
-
-  def readIdsFromEvents(resp: Response): Seq[String] = {
+  def readEventsIdsFromResponse(resp: Response): Seq[String] = {
     val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
     (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds)
       .flatten
@@ -58,43 +57,24 @@ object Scheduler {
 
   def saveEvent(eventDescription: Option[String], eventResp: Response, placeId: Long, imgPath: String) = {
     val eventJson = eventResp.json
-
-
     //println(eventJson)
-    val street = (eventJson \ "venue" \ "street").as[Option[String]]
-    val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
-    val city = (eventJson \ "venue" \ "city").as[Option[String]]
 
+    val address = readAddressFromEvent(eventJson)
     val geographicPoint = None
 
-    val address: Address = new Address(-1l, geographicPoint, city, zip, street)
-    // + tester si
-    //l'adresse est vide
-
     val name = eventJson.as[String]((__ \ "name").read[String])
+    /*val artistsFromTitle: List[String] = splitArtistNamesInTitle(name)
+    println(artistsFromTitle)
+    artistsFromTitle.map { artistName =>
+      getFacebookArtist(artistName)
+    }*/
 
 
-    val listArtistsFromTitle: List[String] = splitArtistNamesInTitle(name)
-    //println(listArtistsFromTitle)
-
-
-    val facebookId = Some(eventJson.as[String]((__ \ "id").read[String]))
-    //println(facebookId) 783881178345234
-
-    def formateDate(date: JsValue): Option[Date] = date.asOpt[String] match {
-      case Some(dateFound: String) => val date = dateFound.replace("T", " ")
-        date.length match {
-          case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
-          case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
-          case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
-        }
-      case _ => None
-    }
-
-    val startTime = formateDate(eventJson \ "start_time")
-    val endTime = formateDate(eventJson \ "end_time")
-
+    val facebookId = eventJson.asOpt[String]((__ \ "id").read[String]) //println(facebookId) 783881178345234
+    val startTime = formatDate(eventJson \ "start_time")
+    val endTime = formatDate(eventJson \ "end_time")
     val readOwnerId = eventJson.as[String]((__ \ "owner" \ "id").read[String])
+
     getOrganizerInfos(readOwnerId).map { organizer =>
       var event: Event = new Event(-1L, facebookId, true, true, new Date, name, geographicPoint, eventDescription,
         startTime.getOrElse(new Date()), endTime, 16, List(), organizer, List(), List(), List(address))
@@ -114,14 +94,43 @@ object Scheduler {
     }
   }
 
+  /*def getFacebookArtist(artistName: String, webSites): Option[Artist] = {
+
+  }*/
+
+  def readAddressFromEvent(eventJson: JsValue): Address = {
+    //+ tester si
+    //l'adresse est vide
+    val street = (eventJson \ "venue" \ "street").as[Option[String]]
+    val zip = (eventJson \ "venue" \ "zip").as[Option[String]]
+    val city = (eventJson \ "venue" \ "city").as[Option[String]]
+    val geographicPoint = None
+
+    new Address(-1l, geographicPoint, city, zip, street)
+  }
+
+  def formatDate(date: JsValue): Option[Date] = date.asOpt[String] match {
+    case Some(dateFound: String) => val date = dateFound.replace("T", " ")
+      date.length match {
+        case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
+        case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
+        case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
+      }
+    case _ => None
+  }
+
   def formatDescription(description: Option[String]): Option[String] = {
+    //déjà match tous
+    //ensuite formate description avec websites en plus comme arg de formatEventDescription
+    //et une pour enregistrer les websites
     description match {
       case None => None
       case Some(desc) => Some("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m => "<a href='http://" + m + "'>" + m + "</a>")
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
-          .replaceAll( """\t""", "    ").replaceAll( """</a>/""", "</a> ") + "</div>")
+          .replaceAll( """\t""", "    ")
+          .replaceAll( """</a>/""", "</a> ") + "</div>")
     }
   }
 
