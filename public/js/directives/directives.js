@@ -10,6 +10,12 @@ app.directive('ngEvents', function(){
       templateUrl:'assets/partials/events.html'
     }
 });
+app.directive('ngSearchBar', function(){
+    return{
+      restrict : 'E',
+      templateUrl:'assets/partials/_searchBar.html'
+    }
+});
 app.directive('ngSearch', function(){
     return{
         restrict : 'C',

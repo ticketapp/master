@@ -39,6 +39,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         if (data != $scope.artists) {
                             $scope.artists = data;
                             $rootScope.resizeImgHeight()
+                            console.log(data)
                         }
                     }).
                     error(function (data, status, headers, config) {

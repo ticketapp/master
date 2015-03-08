@@ -30,8 +30,11 @@
     </ul>
     <div ng-if="artiste.description.length > 0" class="column large-4 float-left eventInfo" >
         <h3>{{artiste.name}}</h3>
-        <div data-ng-bind-html="artiste.description" style="height : {{heightDesc}}; overflow: hidden"></div>
-        <i ng-if="heightDesc == '147px'" class="fi-plus pointer" ng-click="$parent.heightDesc = 'auto'"></i>
+        <div data-ng-bind-html="artiste.description"
+             style="max-height : {{heightDesc}}; overflow: hidden"
+             id="descContent">
+        </div>
+        <i ng-if="heightDesc == '147px' && allDesc == false" class="fi-plus pointer" ng-click="$parent.heightDesc = 'auto'"></i>
         <i ng-if="heightDesc == 'auto'" class="fi-minus pointer" ng-click="$parent.heightDesc = '147px'"></i>
     </div>
     <div class="column large-4 float-left eventInfo tracksContener" >

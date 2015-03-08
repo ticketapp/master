@@ -1,0 +1,47 @@
+<input ng-if="!filter" id="searchBar" placeholder="Search" ng-model="$root.research"
+       ng-model-options="{ getterSetter: true }"
+       class="column large-10">
+<input ng-if="filter" id="searchBar" placeholder="Filter by {{$root.filterType}}"
+       ng-change="$root.resizeImgHeight()"
+       ng-model="$root.filterQuery"
+       class="column large-10">
+<ul class="column large-2 padding0">
+    <a ng-click="filter = false; $root.filterQuery = ''"><i class="fi-x"></i>Remove filter</a>
+    <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
+        <a>Filters <i class="fi-arrow-down"></i></a>
+    </li>
+    <ul ng-if="selectFilter" class="absolute white zIndex5 column large-12">
+        <li style="display:block;" class="column large-12 pointer"
+            ng-click="$parent.filter = true; $root.filterType = 'genre'; $parent.selectFilter = false">
+            <a >
+                Genre
+            </a>
+        </li>
+        <li ng-click="$parent.filter = true; $root.filterType = 'ville'; $parent.selectFilter = false"
+            style="display:block;" class="column large-12 pointer" ng-show="$root.activEvent">
+            <a>
+                Ville
+            </a>
+        </li>
+    </ul>
+</ul>
+<label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
+       ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)"
+       ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">
+    Events
+</label>
+<label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox"
+       ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)"
+       ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">
+    Artists
+</label>
+<label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox"
+       ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)"
+       ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">
+    Places
+</label>
+<label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox"
+       ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)"
+       ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">
+    Users
+</label>

@@ -18,7 +18,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.artisteToCreate = true;
             $rootScope.artiste = artist;
             $rootScope.$apply;
-            var searchPattern  = document.getElementById('searchTopBar').value.trim();
+            var searchPattern  = document.getElementById('searchBar').value.trim();
             console.log(searchPattern);
             oboe.post('artists/createArtist', {
                 searchPattern: searchPattern,
@@ -49,14 +49,28 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     console.log("Error: ", error);
                 });
         };
+        function resizeArtistsText (ImgHeight) {
+            var artists = document.getElementsByClassName('textArtistMin');
+            for (var i = 0; i < artists.length; i++) {
+                var newTextHeight = 110.5 - (ImgHeight/2) - 10 + 'px';
+                console.log(newTextHeight)
+                artists[i].style.height = newTextHeight;
+            }
+        }
         $rootScope.resizeImgHeight = function () {
             var waitForContentMin = setTimeout(function () {
                 var content = document.getElementsByClassName('img_min_evnt');
                 if (content.length > 0) {
                     clearInterval(waitForContentMin);
-                    var newHeight = content[0].clientWidth * 0.376 + 'px';
+                    var newImgHeight = content[0].clientWidth * 0.376;
                     for (var i = 0; i < content.length; i++) {
-                        content[i].style.height = newHeight;
+                        if (content[i].clientWidth > 0) {
+                            newImgHeight = content[i].clientWidth * 0.376;
+                        }
+                        content[i].style.height = newImgHeight + 'px';
+                        if (i == content.length - 1) {
+                            resizeArtistsText(newImgHeight)
+                        }
                     }
                 }
             }, 100)

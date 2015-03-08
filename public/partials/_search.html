@@ -1,26 +1,5 @@
 <div id="searchBlock" class="column large-6 large-offset-3 absolute" ng-if="!$root.pathSearch">
-    <input id="searchBar" placeholder="Search" ng-model="$root.research" ng-click="goSearch()"
-           ng-model-options="{ getterSetter: true }">
-    <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
-           ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)"
-           ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">
-        Events
-    </label>
-    <label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox"
-           ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)"
-           ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">
-        Artists
-    </label>
-    <label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox"
-           ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)"
-           ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">
-        Places
-    </label>
-    <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox"
-           ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)"
-           ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">
-        Users
-    </label>
+    <ng-search-bar></ng-search-bar>
 </div>
 <div>
     <ul id="events_contener" ng-class="{padding50: $root.pathSearch}"
@@ -28,8 +7,11 @@
         <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0"
             data-ng-repeat="event in events  | limitTo : limit">
         </li>
-        <li ng-if="$root.activArtist && artists.length > 0" class="min_contener margin0"
-            data-ng-repeat="artist in artists | limitTo : limit" >
+        <div ng-if="$root.activArtist && artists.length > 0"
+             class="column large-3 medium-6 float-left margin0"
+            data-ng-repeat="artist in artists | limitTo : limit"
+            ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
+            style="padding-bottom: 20px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -38,33 +20,49 @@
                         </a>
                     </div>
                 </div>
-                <div class=" text_evnt_min" >
-                    <a href="#/artiste/{{artist.facebookUrl}}"><h4>{{ artist.name }}</h4></a>
+                <div class=" textArtistMin" style="height: 30px">
+                    <a href="#/artiste/{{artist.facebookUrl}}">
+                        <h4 style="margin-bottom: 0;">
+                        {{ artist.name }}
+                        </h4>
+                    </a>
+                    <a ng-if="filterType == 'genre'"
+                       ng-repeat="genre in filteredEntries = (artist.genres | filter: filterQuery)"
+                       ng-click="$root.filterQuery = genre.name"
+                       class="ng-hide"></a>
                 </div>
             </div>
-        </li>
-        <li class="min_contener margin0" ng-if="$root.activArtist && artistsFb.length > 0"
-            data-ng-repeat="artistFb in artistsFb | limitTo : limit" >
+        </div>
+        <div class="column large-3 medium-6 float-left margin0"
+             ng-if="$root.activArtist && artistsFb.length > 0"
+            data-ng-repeat="artist in artistsFb | limitTo : limit"
+            ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
+            style="padding-bottom: 20px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <img ng-click="createArtist(artistFb)"
-                             src="{{ artistFb.images[0].path }}"
+                        <img ng-click="createArtist(artist)"
+                             src="{{ artist.images[0].path }}"
                              alt="une belle image" class="min pointer"/>
                     </div>
                 </div>
-                <div class=" text_evnt_min" >
-                    <a ng-click="createArtist(artistFb)"><h4>{{ artistFb.name }}</h4></a>
-                    <i ng-show="artistFb.tracks.length > 0" class="fi-play-circle"
+                <div class=" textArtistMin" style="height: 30px">
+                    <a ng-click="createArtist(artist)">
+                        <h4 style="margin-bottom: 0;">
+                            {{ artist.name }}
+                        </h4>
+                    </a>
+                    <i ng-show="artist.tracks.length > 0" class="fi-play-circle"
                        style="font-size: 26px;"
-                       ng-click="$root.addAndPlay(artistFb.tracks, artistFb.name)">
+                       ng-click="$root.addAndPlay(artist.tracks, artist.name)">
                    </i>
-                    <i ng-show="artistFb.tracks.length > 0" class="fi-plus" style="font-size: 26px;"
-                       ng-click="$root.addToPlaylist(artistFb.tracks, artistFb.name)">
-                   </i>
+                    <a ng-if="filterType == 'genre'"
+                       ng-repeat="genre in filteredEntries = (artist.genres | filter: filterQuery)"
+                       ng-click="$root.filterQuery = genre.name"
+                            class="ng-hide"></a>
                 </div>
             </div>
-        </li>
+        </div>
         <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0"
             data-ng-repeat="place in places | limitTo : limit - events.length - artists.length - artistsFb.length" >
             <div class="block_event_min">

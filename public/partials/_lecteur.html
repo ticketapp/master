@@ -3,17 +3,17 @@
     <div id="youtubePlayer">
     </div>
 </div>
+<div ng-show="savePlaylist" class="absolute zIndex1" style="background: #ffffff">
+    <input type="text" ng-model="$root.playlist.name" placeholder="PlaylistName">
+    <button>Save</button>
+    <button ng-click="savePlaylist = !savePlaylist">cancel</button>
+</div>
 <div class="zIndex1 column large-12">
     <!--<a class="close float-right">X</a>-->
     <i ng-click="$parent.showLecteur = true" ng-if="!showLecteur" style="margin: 0 4px;" class="fi-plus float-left"></i>
     <i ng-click="$parent.showLecteur = false" ng-if="showLecteur" style="margin: 0 4px;" class="fi-minus float-left"></i>
     <i ng-click="remPlaylist()" class="fi-trash float-left" style="margin: 0 4px;"></i>
     <i ng-click="savePlaylist = !savePlaylist" class="fi-save float-left" style="margin: 0 4px;"></i>
-    <div ng-show="savePlaylist" class="absolute zIndex1" style="background: #ffffff">
-        <input type="text" ng-model="$root.playlist.name" placeholder="PlaylistName">
-        <button>Save</button>
-        <button ng-click="savePlaylist = !savePlaylist">cancel</button>
-    </div>
     <i ng-if="playlist.tracks[trackActive].platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
     <i class="fi-volume float-left" ng-click="showVol = !showVol" style="margin: 0 4px;"></i>
     <md-slider ng-show="showVol" flex ng-change="volume()"
