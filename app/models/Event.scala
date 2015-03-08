@@ -75,19 +75,19 @@ object Event {
     }
   }
 
-  def findAll = {
+  def find20Since(start: Int): Seq[Event] = {
     /*
     change limit by variable?
      */
     DB.withConnection { implicit connection =>
-      SQL(
-        """ SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
-            events.name, events.geographicPoint, events.description, events.startTime,
+      SQL(s""" SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
+         events.name, events.geographicPoint, events.description, events.startTime,
             events.endTime, events.ageRestriction
         FROM events
         ORDER BY events.creationDateTime DESC
-        LIMIT 20"""
-      ).as(EventParser.*)
+        LIMIT 20
+        OFFSET $start""")
+        .as(EventParser.*)
         .map(e => e.copy(
           images = Image.findAllByEvent(e),
           organizers = Organizer.findAllByEvent(e),

@@ -8,8 +8,8 @@ import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
 
 object EventController extends Controller with securesocial.core.SecureSocial {
-  def events = Action {
-    Ok(Json.toJson(Event.findAll))
+  def events(offset: Int) = Action {
+    Ok(Json.toJson(Event.find20Since(offset)))
   }
 
   def eventsByPlace(placeId: Long) = Action {
