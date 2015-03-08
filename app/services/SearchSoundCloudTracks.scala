@@ -59,8 +59,8 @@ object SearchSoundCloudTracks {
           .withQueryString("client_id" -> soundCloudClientId)
           .get()
           .map { soundCloudResponse =>
-          (id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
-        }
+            (id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
+          }
       }
     )
   }
