@@ -78,13 +78,14 @@ object SearchYoutubeTracks {
     eventuallyTracks.map { tracks =>
       println(artistName)
       val ArtistNameRegex = (artistName.toLowerCase).r
+      println(tracks)
+      println( tracks.flatten.filter(_.title.toLowerCase contains artistName.toLowerCase))
 
-      tracks.flatten.filter(
-        _.title.toLowerCase contains artistName/*match {
+      tracks.flatten.filter(_.title.toLowerCase contains artistName.toLowerCase)
+        /*match {
           case ArtistNameRegex(title) => true
           case _ => false
         }*/
-      )
     }
   }
 

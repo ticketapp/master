@@ -72,7 +72,8 @@ object Artist {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM eventsArtists eA
-             INNER JOIN artists a ON a.artistId = eA.artistId where eA.eventId = {eventId}""")
+             INNER JOIN artists a ON a.artistId = eA.artistId
+             WHERE eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(ArtistParser.*)
         .map(artist =>

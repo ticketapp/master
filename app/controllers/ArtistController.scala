@@ -71,7 +71,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {
-          Ok.chunked(getArtistIdAndTracks(patternAndArtist))
+          Artist.save(patternAndArtist.artist)
+          Ok.chunked(getArtistTracks(patternAndArtist))
         }
       )
     } catch {
@@ -79,7 +80,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def getArtistIdAndTracks(patternAndArtist: PatternAndArtist) = {
+  def getArtistTracks(patternAndArtist: PatternAndArtist) = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
         Enumerator(Json.toJson(soundCloudTracks))
@@ -91,8 +92,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           Enumerator(Json.toJson(youtubeTracks))
         }
     )
-    //faire de l'async pour sauver en base de données : ask SO if async-postgresql needed
-    Artist.save(patternAndArtist.artist)
     Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
   }
 
