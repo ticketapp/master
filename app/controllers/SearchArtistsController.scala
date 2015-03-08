@@ -59,8 +59,10 @@ object SearchArtistsController extends Controller {
             normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
           )
           val websitesSeq = facebookUrl match {
-            case Some(facebookUrlFound) => websitesStringToWebsitesSet(websites).filterNot(_ == facebookUrlFound)
-            case None => websitesStringToWebsitesSet(websites)
+            case Some(facebookUrlFound) =>
+              websitesStringToWebsitesSet(websites).filterNot(_ contains facebookUrlFound)
+            case None =>
+              websitesStringToWebsitesSet(websites)
           }
           val images = Set(new Image(-1, cover))
           val description = formatDescription(maybeDescription)
