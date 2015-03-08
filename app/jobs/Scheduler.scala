@@ -7,8 +7,8 @@ import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 import play.api.libs.functional.syntax._
+import scala.util.{Success, Failure}
 
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -24,20 +24,19 @@ object Scheduler {
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
       .withQueryString(
-        "access_token" -> token
-      )
+        "access_token" -> token)
       .get()
       .map { readEventsIdsFromResponse(_)
       .map { eventId =>
         WS.url("https://graph.facebook.com/v2.2/" + eventId)
           .withQueryString(
             "fields" -> "cover,description,name,start_time,end_time,owner,venue",
-            "access_token" -> token
-          )
+            "access_token" -> token)
           .get()
           .map { eventDetailed =>
               readFacebookEvent(eventDetailed) match {
-                case Some(facebookEvent: Event) => saveEvent(facebookEvent, placeId)
+                case Some(facebookEvent: Future[Event]) =>
+                  facebookEvent map { saveEvent(_, placeId) }
                 case None => println("error")
               }
           }
@@ -45,7 +44,7 @@ object Scheduler {
     }
   }
 
-  def readFacebookEvent(eventFacebookResponse: Response): Option[Event] = {
+  def readFacebookEvent(eventFacebookResponse: Response): Option[Future[Event]] = {
     val eventRead =
       ((__ \ "description").readNullable[String] and
       (__ \ "cover" \ "source").read[String] and
@@ -61,31 +60,27 @@ object Scheduler {
       )((description: Option[String], source: String, name: String, facebookId: Option[String],
          startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
          city: Option[String], address: Option[String], maybeOwnerId: Option[String]) => {
-        val imgs = source match {
-          case "null" => List.empty
-          case path => List(new Image(-1L, path))
-        }
-        //+ tester si l'adresse est vide
-        val address = new Address(-1l, None, city, zip, street)
-        getGeographicPoint(address).map { geographicPoint =>
-          address.copy(geographicPoint = geographicPoint)
-        }
-        //getOrganizerInfos(maybeOwnerId)
 
-        new Event(-1L, facebookId, true, true, new Date(), name, None, formatDescription(description),
-        formatDate(startTime).getOrElse(new Date()), formatDate(endTime),
-        16, imgs, List(), List(), List(), List(address), List())
+        val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
+        val eventuallyAddress = getGeographicPoint(new Address(-1l, None, city, zip, street))
+
+        for {
+          organizer <- eventuallyOrganizer
+          address <- eventuallyAddress
+        } yield {
+          new Event(-1L, facebookId, true, true, new Date(), name, None,
+            formatDescription(description), formatDate(startTime).getOrElse(new Date()),
+            formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten, List(), List(),
+            List(address), List())
+        }
       })
-    eventFacebookResponse.json.asOpt[Event](eventRead)
+    eventFacebookResponse.json.asOpt[Future[Event]](eventRead)
   }
-
 
   def readEventsIdsFromResponse(resp: Response): Seq[String] = {
     val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
-    (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds)
-      .flatten
+    (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
   }
-
 
   def saveEvent(facebookEvent: Event, placeId: Long) = {
     Event.save(facebookEvent) match {
@@ -110,7 +105,7 @@ object Scheduler {
 
   def formatDescription(description: Option[String]): Option[String] = {
     //déjà match tous les websites
-    //ensuite formate description avec websites en plus comme arg de formatEventDescription
+    //ensuite formate description avec websites en plus comme arg de formatDescription
     //et une pour enregistrer les websites
     description match {
       case None => None
@@ -185,13 +180,22 @@ object Scheduler {
     }
   }
 
-  def getGeographicPoint(address: Address): Future[Option[String]] = {
-    WS.url("https://maps.googleapis.com/maps/api/geocode/json")
-      .withQueryString( //replaceAll(" ", "+")) ??
-        "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
-        "key" -> youtubeKey)
-      .get()
-      .map { readGoogleGeographicPoint }
+  def getGeographicPoint(address: Address): Future[Address] = {
+    if (Vector(address.street, address.zip, address.city).flatten.length > 1) {
+      WS.url("https://maps.googleapis.com/maps/api/geocode/json")
+        .withQueryString( //replaceAll(" ", "+")) ??
+          "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
+          "key" -> youtubeKey)
+        .get()
+        .map { response =>
+        readGoogleGeographicPoint(response)  match {
+          case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
+          case None => address
+        }
+      }
+
+    } else
+      Future { address }
   }
 
 
