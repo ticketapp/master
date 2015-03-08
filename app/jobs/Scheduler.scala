@@ -163,6 +163,7 @@ object Scheduler {
     WS.url("https://graph.facebook.com/v2.2/" + organizerId +
       "?fields=name,description,cover%7Bsource%7D,location,phone,public_transit,website&access_token=" + token).get()
       .map { organizer =>
+      println(organizer.json)
       organizer.json.asOpt[Organizer](readOrganizer).toList
     }
   }
@@ -176,11 +177,11 @@ object Scheduler {
             }
           case _ => None
         }*/
-    WS.url("https://maps.googleapis.com/maps/api/geocode/json?address=" +
-      normalizeString(street.getOrElse("").replaceAll(" ", "+")) +
-      normalizeString(zip.getOrElse("").replaceAll(" ", "+")) +
-      normalizeString(city.getOrElse("").replaceAll(" ", "+")) +
-      "&key=" + youtubeKey).get().map { geographicPoint =>
+    WS.url("https://maps.googleapis.com/maps/api/geocode/json")
+    .withQueryString( //replaceAll(" ", "+")) ??
+        "address" -> (street.getOrElse("") + zip.getOrElse("") + city.getOrElse("")),
+        "key" -> youtubeKey)
+      .get().map { geographicPoint =>
 
       //verify JsUndefined :
       /*(geographicPoint.json \ "results")(0) \ "geometry" \ "location" \ "lat" +

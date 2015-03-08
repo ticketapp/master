@@ -101,24 +101,23 @@ object Event {
 
   def findAllByPlace(placeId: Long) = {
     DB.withConnection { implicit connection =>
-      SQL(
-        """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
-            s.name, s.geographicPoint, s.description, s.startTime,
-            s.endTime, s.ageRestriction
-        FROM eventsPlaces eP
-        INNER JOIN events s ON s.eventId = eP.eventId
-        WHERE eP.placeId = {placeId}
-        ORDER BY s.creationDateTime DESC
-        LIMIT 20"""
-      ).on('placeId -> placeId)
+      SQL("""SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
+              s.name, s.geographicPoint, s.description, s.startTime,
+              s.endTime, s.ageRestriction
+              FROM eventsPlaces eP
+              INNER JOIN events s ON s.eventId = eP.eventId
+              WHERE eP.placeId = {placeId}
+              ORDER BY s.creationDateTime DESC
+              LIMIT 20""")
+        .on('placeId -> placeId)
         .as(EventParser.*)
-        .map(e => e.copy(
-          images = Image.findAllByEvent(e),
-          organizers = Organizer.findAllByEvent(e),
-          artists = Artist.findAllByEvent(e),
-          tariffs = Tariff.findAllByEvent(e),
-          places = Place.findAllByEvent(e),
-          addresses = Address.findAllByEvent(e))
+        .map(event => event.copy(
+          images = Image.findAllByEvent(event),
+          organizers = Organizer.findAllByEvent(event),
+          artists = Artist.findAllByEvent(event),
+          tariffs = Tariff.findAllByEvent(event),
+          places = Place.findAllByEvent(event),
+          addresses = Address.findAllByEvent(event))
         )
     }
   }
@@ -136,12 +135,12 @@ object Event {
         LIMIT 20"""
       ).on('genreId -> genreId)
         .as(EventParser.*)
-        .map(e => e.copy(
-          images = Image.findAllByEvent(e),
-          organizers = Organizer.findAllByEvent(e),
-          artists = Artist.findAllByEvent(e),
-          tariffs = Tariff.findAllByEvent(e),
-          addresses = Address.findAllByEvent(e))
+        .map(event => event.copy(
+          images = Image.findAllByEvent(event),
+          organizers = Organizer.findAllByEvent(event),
+          artists = Artist.findAllByEvent(event),
+          tariffs = Tariff.findAllByEvent(event),
+          addresses = Address.findAllByEvent(event))
         )
     }
   }
@@ -159,13 +158,13 @@ object Event {
         LIMIT 20""")
         .on('organizerId -> organizerId)
         .as(EventParser.*)
-        .map(e => e.copy(
-          images = Image.findAllByEvent(e),
-          organizers = Organizer.findAllByEvent(e),
-          artists = Artist.findAllByEvent(e),
-          tariffs = Tariff.findAllByEvent(e),
-          places = Place.findAllByEvent(e),
-          addresses = Address.findAllByEvent(e))
+        .map(event => event.copy(
+          images = Image.findAllByEvent(event),
+          organizers = Organizer.findAllByEvent(event),
+          artists = Artist.findAllByEvent(event),
+          tariffs = Tariff.findAllByEvent(event),
+          places = Place.findAllByEvent(event),
+          addresses = Address.findAllByEvent(event))
         )
     }
   }
@@ -183,13 +182,13 @@ object Event {
           LIMIT 20""")
             .on('patternLowCase -> pattern.toLowerCase)
             .as(EventParser.*)
-            .map(e => e.copy(
-              images = Image.findAllByEvent(e),
-              organizers = Organizer.findAllByEvent(e),
-              artists = Artist.findAllByEvent(e),
-              tariffs = Tariff.findAllByEvent(e),
-              places = Place.findAllByEvent(e),
-              addresses = Address.findAllByEvent(e))
+            .map(event => event.copy(
+              images = Image.findAllByEvent(event),
+              organizers = Organizer.findAllByEvent(event),
+              artists = Artist.findAllByEvent(event),
+              tariffs = Tariff.findAllByEvent(event),
+              places = Place.findAllByEvent(event),
+              addresses = Address.findAllByEvent(event))
             )
         }
       } catch {
@@ -210,13 +209,13 @@ object Event {
           WHERE a.isEvent = TRUE AND LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 50""")
           .on('patternLowCase -> cityPattern.toLowerCase)
           .as(EventParser.*)
-          .map(e => e.copy(
-            images = Image.findAllByEvent(e),
-            organizers = Organizer.findAllByEvent(e),
-            artists = Artist.findAllByEvent(e),
-            tariffs = Tariff.findAllByEvent(e),
-            places = Place.findAllByEvent(e),
-            addresses = Address.findAllByEvent(e))
+          .map(event => event.copy(
+            images = Image.findAllByEvent(event),
+            organizers = Organizer.findAllByEvent(event),
+            artists = Artist.findAllByEvent(event),
+            tariffs = Tariff.findAllByEvent(event),
+            places = Place.findAllByEvent(event),
+            addresses = Address.findAllByEvent(event))
           )
       }
     } catch {
@@ -285,17 +284,17 @@ object Event {
       DB.withConnection { implicit connection =>
         SQL( """UPDATE events
           SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
-          WHERE facebookId={facebookId}"""
-        ).on(
-          'facebookId -> event.facebookId,
-          'name -> event.name,
-          'description -> event.description,
-          'startTime -> event.startTime,
-          'endTime -> event.endTime
-          ).executeUpdate() match {
-          case 1 =>
-          case _ =>
-        }
+          WHERE facebookId={facebookId}""")
+          .on(
+            'facebookId -> event.facebookId,
+            'name -> event.name,
+            'description -> event.description,
+            'startTime -> event.startTime,
+            'endTime -> event.endTime)
+          .executeUpdate() match {
+            case 1 =>
+            case _ =>
+          }
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot update event: " + e.getMessage)
