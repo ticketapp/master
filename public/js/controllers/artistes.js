@@ -3,7 +3,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $scope.trackLimit = 10;
     $rootScope.heightDesc = '147px';
     $scope.trackTitle = '';
-    $scope.allDesc = false;
+    $scope.allDesc = true;
     function resizePageElem () {
         var waitForBinding = setInterval(function () {
             if (document.getElementById('events_contener').innerHTML.length > 0) {
@@ -40,7 +40,9 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                 if (document.getElementById('descContent') != null &&
                     document.getElementById('descContent').clientHeight < 147) {
                     $scope.allDesc = true;
-                    console.log('yo')
+                    $scope.$apply;
+                } else {
+                    $scope.allDesc = false;
                     $scope.$apply;
                 }
                 //}

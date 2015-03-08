@@ -4,24 +4,57 @@
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
         <h2 id="eventTitle">{{organizer.name}}</h2>
-    </div>
+    </div><!--
     <ul id="events_contener" ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 large-block-grid-2">
         <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents"></li>
-    </ul>
-    <div class="column large-4 float-left eventInfo" >
+    </ul>-->
+    <div class="column float-right eventInfo" style="padding-bottom: 0" ng-class="{'large-8': orgaEvents.length == 1, 'large-4':orgaEvents.length > 1}">
         <h3>{{organizer.name}}</h3>
         <div data-ng-bind-html="organizer.description"></div>
+        <div ng-if="!largeMap" style="padding-bottom: 10px">
+            <h2>Lieu</h2>
+            <div style=" height: {{heightMap}};">
+                <div class="column large-4 absolute" style="background: #ffffff;
+                box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
+                margin-left: 5px;
+                margin-top: 5px;
+                z-index: 1;">
+                    <h4>{{event.place}}</h4>
+                    <div style="font-size: 12px;">
+                        {{event.addresses[0].street}}<br/>
+                        {{event.addresses[0].zip}}
+                        {{event.addresses[0].city}}
+                    </div>
+                </div>
+                <map ng-if="map"
+                 zoom="15"
+                 center="[{{event.addresses[0].geographicPoint}}]"
+                 scrollwheel="false"
+                 navigationControl="false"
+                 mapTypeControl="false"
+                 scaleControl="false"
+                 style="height: 100%;"
+                 class="width100p">
+                    <marker visible="true" position="{{event.addresses[0].geographicPoint}}" icon="../assets/img/marker.png">
+                    </marker>
+                </map>
+            </div>
+        </div>
     </div>
-    <div class="column large-4 float-left eventInfo">
+    <div class="column large-4 float-left margin0 data-ng-event"
+         data-ng-repeat="event in orgaEvents">
+    </div>
+    <div class="column float-right eventInfo column large-12"
+         ng-if="largeMap">
         <h2>Lieu</h2>
-        <!--<div class="column large-4 absolute" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-left: 5px; margin-top: 5px; z-index: 1;">
+        <div class="column large-4 absolute" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-left: 5px; margin-top: 5px; z-index: 1;">
             <h4>{{event.place}}</h4>
             <div style="font-size: 12px;">
                 {{event.addresses[0].street}}<br/>
                 {{event.addresses[0].zip}}
                 {{event.addresses[0].city}}
             </div>
-        </div>-->
+        </div>
         <map ng-if="map"
              zoom="15"
              center="[{{event.addresses[0].geographicPoint}}]"
@@ -35,9 +68,6 @@
             </marker>
         </map>
     </div>
-    <ul id="events_contener" ng-if="$root.window == 'small' || $root.window == 'medium'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 small-block-grid-1 medium-block-grid-2 large-block-grid-4">
-        <li class="min_contener data-ng-event margin0" data-ng-repeat="event in orgaEvents"></li>
-    </ul>
 </div>
 
 

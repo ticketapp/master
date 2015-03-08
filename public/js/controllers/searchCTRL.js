@@ -5,15 +5,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     $scope.users = [];
     $scope.places = [];
     $scope.events = [];
+    var offset = 0;
     var _selArtist = $rootScope.activArtist;
     var _selEvent = $rootScope.activEvent;
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
     var _research = '';
-    $scope.moreLimit = function () {
-        $scope.limit = $scope.limit + 12;
-        $rootScope.resizeImgHeight()
-    };
+
     function search () {
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
@@ -21,10 +19,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         $rootScope.activUsr = _selUsr;
         if (_research.length == 0) {
             if (_selEvent == true) {
-                $http.get('/events').
+                $http.get('/events/offset/' + offset).
                     success(function (data, status, headers, config) {
                         if (data != $scope.events) {
-                            $scope.events = data;
+                            $scope.events = $scope.events.concat(data);;
+                            console.log($scope.events)
                         }
                         $rootScope.resizeImgHeight()
                     }).
@@ -37,9 +36,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 $http.get('/artists').
                     success(function (data, status, headers, config) {
                         if (data != $scope.artists) {
-                            $scope.artists = data;
                             $rootScope.resizeImgHeight()
-                            console.log(data)
                         }
                     }).
                     error(function (data, status, headers, config) {
@@ -205,6 +202,12 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
     }
     search();
+    $scope.moreLimit = function () {
+        $scope.limit = $scope.limit + 12;
+        offset = offset + 20;
+        $rootScope.resizeImgHeight();
+        search();
+    };
     var typingTimer;
     var doneTypingInterval = 600;
     $scope.research = function(newName) {
