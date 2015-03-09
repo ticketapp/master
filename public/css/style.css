@@ -160,7 +160,7 @@
         .wrapper-outer {width: 100%; color:black; padding-bottom: 200px;}
         .footer{background-color:black; clear: both; position: relative; z-index: 10; height: 200px; margin-top: -200px;}
         .footer_inner{width:95%; margin:auto;}
-
+        .scaleMap {-webkit-transform: scale(0.96);}
         /*filters top*/
 
         #searchBlock, #searchTopBlock {
