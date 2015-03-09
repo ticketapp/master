@@ -69,19 +69,25 @@ object Scheduler {
 
         val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
         val eventuallyAddress = getGeographicPoint(new Address(-1l, None, city, zip, street))
-        getWebsitesInDescription(description).map { website =>
-          if (website contains "facebook")
-            getFacebookArtistByUrl(website).map { a => a }//println }
-        }
+        val websitesInDescription: Set[String] = getWebsitesInDescription(description)
+        val eventuallyArtists = Future.sequence(
+          websitesInDescription.map { website =>
+            if (website contains "facebook")
+              getFacebookArtistByUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
+            else
+              Future { None }
+          }
+        )
 
         for {
           organizer <- eventuallyOrganizer
           address <- eventuallyAddress
+          artists <- eventuallyArtists
         } yield {
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
-            formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten, List(), List(),
-            List(address), List())
+            formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,
+            artists.flatten.toList, List(), List(address), List())
         }
       })
     eventFacebookResponse.json.asOpt[Future[Event]](eventRead)

@@ -89,15 +89,31 @@ object SearchArtistsController extends Controller {
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
         "access_token" -> token)
       .get()
-      .map { a => None }//Reads.asOpt[Artist]  (readArtist) }
-
-    /*readFacebookArtist(_) match {
-      case seqOfMaybeOneArtist: Seq[Artist] if seqOfMaybeOneArtist.length > 0 =>
-        Option(seqOfMaybeOneArtist(0))
-      case x =>
-        println(x)
-        None
-    }*/
+      .map { readFacebookArtist }
+  }
+  
+  def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
+    facebookResponse.json
+      .asOpt[(String, String, String, Option[String], Option[String],
+        String, Option[String], Option[String])](readArtist)
+      match {
+        case Some((name, facebookId, "Musician/band", Some(cover: String), websites,
+        link, maybeDescription, maybeGenre)) =>
+          val facebookUrl = Option(
+            normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
+          )
+          val websitesSeq = facebookUrl match {
+            case Some(facebookUrlFound) =>
+              websitesStringToWebsitesSet(websites).filterNot(_ contains facebookUrlFound)
+            case None =>
+              websitesStringToWebsitesSet(websites)
+          }
+          val images = Set(new Image(-1, cover))
+          val description = formatDescription(maybeDescription)
+          val genres = genresStringToGenresSet(maybeGenre)
+          Option(Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSeq, images, genres, Set.empty))
+        case _ => None
+      }
   }
 
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
