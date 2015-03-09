@@ -9,7 +9,7 @@
         </li>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-3 medium-6 float-left margin0"
-            data-ng-repeat="artist in artists | limitTo : limit"
+            data-ng-repeat="artist in artists | limitTo : limit | filter: filterSearch"
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
             style="padding-bottom: 20px;">
             <div class="block_event_min">
@@ -62,6 +62,9 @@
                             class="ng-hide"></a>
                 </div>
             </div>
+        </div>
+        <div layout="row" layout-sm="column" layout-align="space-around" class="float-left" ng-if="loadingFbArt">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
         <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0"
             data-ng-repeat="place in places | limitTo : limit - events.length - artists.length - artistsFb.length" >

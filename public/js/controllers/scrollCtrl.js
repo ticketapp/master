@@ -11,10 +11,10 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }*/
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
-            console.log($rootScope.artisteToCreate)
         };
         $rootScope.passArtisteToCreateToFalse();
         $rootScope.createArtist = function (artist) {
+            $rootScope.loadingTracks = true;
             $rootScope.artisteToCreate = true;
             $rootScope.artiste = artist;
             $rootScope.$apply;
@@ -39,10 +39,13 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                  $scope.items.push(value);
                  })*/
                 .done(function (value) {
-                    console.log(value)
                     $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
-                    console.log($rootScope.artiste.tracks)
+                    $rootScope.loadingTracks = false;
                     $rootScope.$apply();
+                    function saveTrack (track) {
+                        //$http.post('/tracks')
+                    }
+                    value.forEach(saveTrack)
 
                 })
                 .fail(function (error) {

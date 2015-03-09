@@ -46,6 +46,9 @@
                 <a class="button" ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)"><i class="fi-plus"></i> Add all</a>
             </div>
         </div>
+        <div layout="row" layout-sm="column" layout-align="space-around" class="column" ng-if="$root.loadingTracks">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+        </div>
         <div ng-repeat="track in artiste.tracks | limitTo: trackLimit | filter : trackTitle" class="column" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
             <div ng-if="track.thumbnail != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
             </div>

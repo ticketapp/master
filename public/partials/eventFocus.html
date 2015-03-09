@@ -46,7 +46,7 @@
             </a>
             <button style='margin-top:5px; float:right'>Suivre</button>
             <i class="fi-plus column large-12 pointer"
-               ng-if="!readDesc"
+               ng-if="!readDesc && organizer.description != undefined"
                ng-click="$parent.readDesc = !$parent.readDesc">
            </i>
             <i class="fi-minus column large-12 pointer"

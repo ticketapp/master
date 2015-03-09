@@ -21,11 +21,22 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             if (_selEvent == true) {
                 $http.get('/events/offset/' + offset).
                     success(function (data, status, headers, config) {
-                        if (data != $scope.events) {
-                            $scope.events = $scope.events.concat(data);;
-                            console.log($scope.events)
+                        var scopeIdList = [];
+                        function getEventId(el, index, array) {
+                            scopeIdList.push(el.eventId);
                         }
-                        $rootScope.resizeImgHeight()
+                        $scope.events.forEach(getEventId);
+                        if ($scope.events.length == 0) {
+                            $scope.events = data;
+                        } else {
+                            function uploadEvents(el, index, array) {
+                                if (scopeIdList.indexOf(el.eventId) == -1) {
+                                    $scope.events.push(el);
+                                }
+                            }
+                            data.forEach(uploadEvents)
+                        }
+                        $rootScope.resizeImgHeight();
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -201,21 +212,26 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     function searchArtistFb () {
         $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
-        if ($scope.artists.length + $scope.artistsFb.length < $scope.limit && _selArtist == true) {
-            var artistFbIdList = [];
-            function getArtistFbIdInArtists (el) {
-                artistFbIdList.push(el.facebookId);
-            }
-            $scope.artists.forEach(getArtistFbIdInArtists);
-            oboe.get('/artists/facebookContaining/'+_research)
-                .start(function (data, etc) {
+        var artistFbIdList = [];
+        console.log(_research.length)
+        if ($scope.artistsFb.length < $scope.limit && _selArtist == true && _research.length > 1) {
+            $scope.loadingFbArt = true;
+            console.log('yo')
+            $http.get('/artists/facebookContaining/'+_research)
+                /*.start(function (data, etc) {
                     console.log("Dude! We're goin'!", data, etc);
                 })
                 /*.node('champ.*', function (value) {
                     $scope.items.push(value);
                 })*/
-                .done(function (value) {
+                .success(function (value) {
+                    $scope.loadingFbArt = false;
+                    console.log(value)
                     function updateArtistFb (artistInfo) {
+                        function getArtistFbIdInArtists (el) {
+                            artistFbIdList.push(el.facebookId);
+                        }
+                        $scope.artists.forEach(getArtistFbIdInArtists);
                         if ($scope.artistsFb.indexOf(artistInfo) < 0 && artistFbIdList.indexOf(artistInfo.facebookId) < 0) {
                             console.log(artistInfo);
                             artistInfo.tracks = [];
@@ -229,7 +245,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     }
                     value.forEach(updateArtistFb);
                 })
-                .fail(function (error) {
+                .error(function (error) {
+                    $scope.loadingFbArt = false;
                     console.log("Error: ", error);
                 });
         }
