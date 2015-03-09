@@ -1,9 +1,7 @@
 # Home page
 GET     /                               controllers.Application.index
 
-
 GET     /test                           controllers.Test.test1
-
 
 ################################## Admin ################################################
 GET     /admin                          controllers.Admin.indexAdmin

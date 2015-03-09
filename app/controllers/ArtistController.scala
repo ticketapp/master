@@ -87,8 +87,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       }
     )
     val youtubeTracksEnumerator = Enumerator.flatten(
-      getYoutubeTracksForArtist(patternAndArtist.artist.name, patternAndArtist.artist.facebookId.get,
-        patternAndArtist.searchPattern).map { youtubeTracks =>
+      getYoutubeTracksForArtist(
+        patternAndArtist.artist.name, patternAndArtist.artist.facebookId.get, patternAndArtist.searchPattern)
+        .map { youtubeTracks =>
           Enumerator(Json.toJson(youtubeTracks))
         }
     )

@@ -35,13 +35,13 @@ object Image {
 
   def findAll(): Seq[Image] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from images").as(ImageParser.*)
+      SQL("SELECT * FROM images").as(ImageParser.*)
     }
   }
 
   def findAllByEvent(event: Event): List[Image] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from images where eventId = {eventId}")
+      SQL("SELECT * FROM images WHERE eventId = {eventId}")
         .on('eventId -> event.eventId)
         .as(ImageParser.*)
     }
@@ -87,7 +87,7 @@ object Image {
   }
 
   def save(image: Image): Option[Long] = {
-    println(image)
+    //println(image)
     Utilities.testIfExist("images", "path", image.path) match {
       case true =>
         println("Image path already in database")
