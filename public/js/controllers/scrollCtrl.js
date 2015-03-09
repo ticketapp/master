@@ -3,7 +3,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position)
                 {
-                    //alert("Latitude : " + position.coords.latitude + ", longitude : " + position.coords.longitude);
+                    $rootScope.geoLoc = "(" + position.coords.latitude + "," + position.coords.longitude + ")";
                 }, function erreurPosition(error) {
                 }
             );

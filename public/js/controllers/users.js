@@ -38,11 +38,12 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                                 console.log(eventsContener[0].clientHeight/3);
                                 if (newHeight < -(eventsContener[0].clientHeight/3)) {
                                     $scope.medMap = true;
+                                    $scope.descHeight = eventsContener[0].clientHeight + 290;
                                 } else if (newHeight < (eventsContener[0].clientHeight)/3) {
-                                    console.log(eventsContener.length)
                                     if (eventsContener.length == 1 || eventsContener.length %2 == 0) {
                                         $scope.fullMap = true;
                                     }
+                                    $scope.heightMap = eventsContener[0].clientHeight - 30 +'px';
                                 } else {
                                     descPos = eventInfoConteners[1].getBoundingClientRect();
                                     lastEventPos = eventsContener[eventsContener.length -1].getBoundingClientRect();
