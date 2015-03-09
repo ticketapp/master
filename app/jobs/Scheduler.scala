@@ -9,6 +9,8 @@ import models._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import scala.util.{Success, Failure}
+import services.Utilities.normalizeUrl
+import controllers.SearchArtistsController.getFacebookArtistByUrl
 
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -16,32 +18,36 @@ object Scheduler {
   val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
   def start() = {
-    Place.findAllIdsAndFacebookIds.map { findAllIdsAndFacebookId: (Long, String) =>
-      saveEventsOfPlace(findAllIdsAndFacebookId._1, findAllIdsAndFacebookId._2)
+    Place.findAllIdsAndFacebookIds.map { placeIdAndFacebookId: (Long, String) =>
+      saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2)
     }
   }
 
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
-    WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
-      .withQueryString(
-        "access_token" -> token)
-      .get()
-      .map { readEventsIdsFromResponse(_)
-      .map { eventId =>
+    getEventsIdsByPlace(placeFacebookId).map {
+      _.map { eventId =>
         WS.url("https://graph.facebook.com/v2.2/" + eventId)
           .withQueryString(
             "fields" -> "cover,description,name,start_time,end_time,owner,venue",
             "access_token" -> token)
           .get()
           .map { eventDetailed =>
-              readFacebookEvent(eventDetailed) match {
-                case Some(facebookEvent: Future[Event]) =>
-                  facebookEvent map { saveEvent(_, placeId) }
-                case None => println("error")
-              }
+          readFacebookEvent(eventDetailed) match {
+            case Some(eventuallyFacebookEvent) =>
+              eventuallyFacebookEvent map { saveEvent(_, placeId) }
+            case None => println("Cannot create event: empty event created in readFacebookEvent")
           }
+        }
       }
     }
+  }
+
+  def getEventsIdsByPlace(placeFacebookId: String): Future[Seq[String]] = {
+    WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
+      .withQueryString(
+        "access_token" -> token)
+      .get()
+      .map { readEventsIdsFromResponse }
   }
 
   def readFacebookEvent(eventFacebookResponse: Response): Option[Future[Event]] = {
@@ -56,13 +62,17 @@ object Scheduler {
       (__ \ "zip").readNullable[String] and
       (__ \ "city").readNullable[String] and
       (__ \ "address").readNullable[String] and
-      (__ \ "owner" \ "id").readNullable[String] 
+      (__ \ "owner" \ "id").readNullable[String]
       )((description: Option[String], source: String, name: String, facebookId: Option[String],
          startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
          city: Option[String], address: Option[String], maybeOwnerId: Option[String]) => {
 
         val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
         val eventuallyAddress = getGeographicPoint(new Address(-1l, None, city, zip, street))
+        getWebsitesInDescription(description).map { website =>
+          if (website contains "facebook")
+            getFacebookArtistByUrl(website).map { a => a }//println }
+        }
 
         for {
           organizer <- eventuallyOrganizer
@@ -92,7 +102,7 @@ object Scheduler {
         }
     }
   }
-  /*def getFacebookArtist(artistName: String, webSites): Option[Artist] = {}*/
+
   def formatDate(date: Option[String]): Option[Date] = date match {
     case Some(dateFound: String) => val date = dateFound.replace("T", " ")
       date.length match {
@@ -104,9 +114,7 @@ object Scheduler {
   }
 
   def formatDescription(description: Option[String]): Option[String] = {
-    //déjà match tous les websites
-    //ensuite formate description avec websites en plus comme arg de formatDescription
-    //et une pour enregistrer les websites
+    //see if not faster to useGetWebsitesInDescription and after replace all matched?
     description match {
       case None => None
       case Some(desc) => Some("<div class='column large-12'>" +
@@ -114,8 +122,14 @@ object Scheduler {
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
           .replaceAll( """\t""", "    ")
-          .replaceAll( """</a>/""", "</a> ") + "</div>")
+          .replaceAll( """</a>/""", "</a> ") +
+        "</div>")
     }
+  }
+
+  def getWebsitesInDescription(maybeDescription: Option[String]): Set[String] = maybeDescription match {
+    case None => Set.empty
+    case Some(description) => linkPattern.findAllIn(description).toSet.map { normalizeUrl }
   }
 
   def createNewImageIfSourceExists(source: Option[String]): List[Image] = {
@@ -125,9 +139,8 @@ object Scheduler {
     }
   }
 
-  def splitArtistNamesInTitle(title: String): List[String] = {
+  def splitArtistNamesInTitle(title: String): List[String] =
     "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
-  }
 
   def readOrganizer(organizer: Response, organizerId: String): Option[Organizer] = {
     val readOrganizer = (

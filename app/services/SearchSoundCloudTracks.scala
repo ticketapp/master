@@ -51,7 +51,6 @@ object SearchSoundCloudTracks {
       Future { Seq.empty }
   }
 
-  //Should be improved
   def getTupleIdAndSoundCloudWebsitesForIds(ids: Seq[Long]): Future[Seq[(Long, Seq[String])]] = {
     Future.sequence(
       ids.map { id =>
@@ -75,7 +74,7 @@ object SearchSoundCloudTracks {
   def getSoundCloudIdsForName(namePattern: String): Future[Seq[Long]] = {
     WS.url("http://api.soundcloud.com/users")
       .withQueryString(
-        "q" -> normalizeString(namePattern),
+        "q" -> namePattern,
         "client_id" -> soundCloudClientId)
       .get()
       .map { readSoundCloudIds }

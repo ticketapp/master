@@ -32,25 +32,25 @@ object SearchArtistsController extends Controller {
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
         "access_token" -> token)
       .get()
-      .map { readFacebookArtist(_).take(20) }
+      .map { readFacebookArtists(_).take(20) }
   }
+  
+  val readArtist = (
+    (__ \ "name").read[String] and
+      (__ \ "category").read[String] and
+      (__ \ "id").read[String] and
+      (__ \ "cover").readNullable[String](
+        (__ \ "source").read[String]
+      ) and
+      (__ \ "website").readNullable[String] and
+      (__ \ "link").read[String] and
+      (__ \ "description").readNullable[String] and
+      (__ \ "genre").readNullable[String]
+    ).apply((name: String, category: String, id: String, maybeCover: Option[String], website: Option[String],
+             link: String, maybeDescription: Option[String], maybeGenre: Option[String]) =>
+    (name, id, category, maybeCover, website, link, maybeDescription, maybeGenre))
 
-  def readFacebookArtist(facebookResponse: Response): Seq[Artist] = {
-    val readArtist = (
-      (__ \ "name").read[String] and
-        (__ \ "category").read[String] and
-        (__ \ "id").read[String] and
-        (__ \ "cover").readNullable[String](
-          (__ \ "source").read[String]
-        ) and
-        (__ \ "website").readNullable[String] and
-        (__ \ "link").read[String] and
-        (__ \ "description").readNullable[String] and
-        (__ \ "genre").readNullable[String]
-      ).apply((name: String, category: String, id: String, maybeCover: Option[String], website: Option[String],
-               link: String, maybeDescription: Option[String], maybeGenre: Option[String]) =>
-      (name, id, category, maybeCover, website, link, maybeDescription, maybeGenre))
-
+  def readFacebookArtists(facebookResponse: Response): Seq[Artist] = {
     val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
         case (name, facebookId, "Musician/band", Some(cover: String),
@@ -74,6 +74,30 @@ object SearchArtistsController extends Controller {
     (facebookResponse.json \ "data")
       .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
       .getOrElse(Seq.empty)
+  }
+
+  def getFacebookArtistByUrl(url: String): Future[Option[Artist]] = {
+    val smallerUrl = url.replace("facebook.com/", "")
+    val normalizedUrl =
+      if (smallerUrl contains "/")
+        smallerUrl.substring(smallerUrl.indexOf("/") + 1)
+      else
+        smallerUrl
+    //println("normalizedUrl = " + normalizedUrl)
+    WS.url("https://graph.facebook.com/v2.2/" + normalizedUrl)
+      .withQueryString(
+        "fields" -> "name,cover{source},id,category,link,website,description,genre",
+        "access_token" -> token)
+      .get()
+      .map { a => None }//Reads.asOpt[Artist]  (readArtist) }
+
+    /*readFacebookArtist(_) match {
+      case seqOfMaybeOneArtist: Seq[Artist] if seqOfMaybeOneArtist.length > 0 =>
+        Option(seqOfMaybeOneArtist(0))
+      case x =>
+        println(x)
+        None
+    }*/
   }
 
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {

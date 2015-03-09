@@ -24,7 +24,7 @@ object SearchYoutubeTracks {
   }
   
   def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Future[Set[Track]] = {
-    val facebookId = artist.facebookId.get //sure while called by getYoutubeTracksForArtist
+    val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksForArtist
     getMaybeEchonestArtistUrls(facebookId) flatMap {
       case Some(idUrls: (String, Set[String])) =>
         val echonestId = idUrls._1
@@ -38,7 +38,7 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksIfNotFoundDirectlyByEchonest(artist: Artist, pattern: String): Future[Set[Track]] = {
-    val facebookId = artist.facebookId.get //sure while called by getYoutubeTracksIfEchonestIdNotFoundByFacebookId
+    val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksIfEchonestIdNotFoundByFacebookId
     getEchonestIdCorrespondingToFacebookId(
       getSeqTupleEchonestIdFacebookId(artist.name), facebookId
     ) flatMap {
@@ -78,7 +78,6 @@ object SearchYoutubeTracks {
     eventuallyTracks.map { tracks =>
       println(artistName)
       val ArtistNameRegex = (artistName.toLowerCase).r
-      println(tracks)
       println( tracks.flatten.filter(_.title.toLowerCase contains artistName.toLowerCase))
 
       tracks.flatten.filter(_.title.toLowerCase contains artistName.toLowerCase)
