@@ -41,7 +41,9 @@ object SearchSoundCloudTracks {
     for (websitesAndId <- websitesAndIds) {
       for (website <- websitesAndId._2) {
         val site = normalizeUrl(website)
-        if (artist.websites.toSeq.indexOf(site) > -1)
+        if (artist.websites.toSeq.indexOf(site) > -1 ||
+          ("facebook.com/" + artist.facebookUrl.getOrElse("")) == site ||
+          (artist.facebookId.nonEmpty && (site contains artist.facebookId.get)))
           matchedId = websitesAndId._1
       }
     }
@@ -58,8 +60,8 @@ object SearchSoundCloudTracks {
           .withQueryString("client_id" -> soundCloudClientId)
           .get()
           .map { soundCloudResponse =>
-            (id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
-          }
+          (id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
+        }
       }
     )
   }
