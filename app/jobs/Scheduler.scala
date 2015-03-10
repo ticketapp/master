@@ -50,19 +50,30 @@ object Scheduler {
       .map { readEventsIdsFromResponse }
   }
 
+  def saveEvent(facebookEvent: Event, placeId: Long) = {
+    Event.save(facebookEvent) match {
+      case None => Event.update(facebookEvent) //delete old imgs and insert news
+      case Some(eventId) =>
+        Place.saveEventPlaceRelation(eventId, placeId)
+        facebookEvent.addresses.map { address =>
+          Address.saveAddressAndEventRelation(address, eventId)
+        }
+    }
+  }
+
   def readFacebookEvent(eventFacebookResponse: Response): Option[Future[Event]] = {
-    val eventRead =
-      ((__ \ "description").readNullable[String] and
-      (__ \ "cover" \ "source").read[String] and
-      (__ \ "name").read[String] and
-      (__ \ "id").readNullable[String] and
-      (__ \ "start_time").readNullable[String] and
-      (__ \ "endTime").readNullable[String] and
-      (__ \ "street").readNullable[String] and
-      (__ \ "zip").readNullable[String] and
-      (__ \ "city").readNullable[String] and
-      (__ \ "address").readNullable[String] and
-      (__ \ "owner" \ "id").readNullable[String]
+    val eventRead = (
+      (__ \ "description").readNullable[String] and
+        (__ \ "cover" \ "source").read[String] and
+        (__ \ "name").read[String] and
+        (__ \ "id").readNullable[String] and
+        (__ \ "start_time").readNullable[String] and
+        (__ \ "endTime").readNullable[String] and
+        (__ \ "street").readNullable[String] and
+        (__ \ "zip").readNullable[String] and
+        (__ \ "city").readNullable[String] and
+        (__ \ "address").readNullable[String] and
+        (__ \ "owner" \ "id").readNullable[String]
       )((description: Option[String], source: String, name: String, facebookId: Option[String],
          startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
          city: Option[String], address: Option[String], maybeOwnerId: Option[String]) => {
@@ -84,6 +95,7 @@ object Scheduler {
           address <- eventuallyAddress
           artists <- eventuallyArtists
         } yield {
+          println(artists.flatten.toList)
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
             formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,
@@ -96,17 +108,6 @@ object Scheduler {
   def readEventsIdsFromResponse(resp: Response): Seq[String] = {
     val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
     (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
-  }
-
-  def saveEvent(facebookEvent: Event, placeId: Long) = {
-    Event.save(facebookEvent) match {
-      case None => Event.update(facebookEvent) //delete old imgs and insert news
-      case Some(eventId) =>
-        Place.saveEventPlaceRelation(eventId, placeId)
-        facebookEvent.addresses.map { address =>
-          Address.saveAddressAndEventRelation(address, eventId)
-        }
-    }
   }
 
   def formatDate(date: Option[String]): Option[Date] = date match {

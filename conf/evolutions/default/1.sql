@@ -29,19 +29,20 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 30 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 25 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
-  creationDateTime          TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
   description               TEXT,
   facebookUrl               VARCHAR(255),
   websites                  TEXT,
   UNIQUE(name),
-  UNIQUE(facebookId)
+  UNIQUE(facebookId),
+  UNIQUE(facebookUrl)
 );
 
 CREATE TABLE organizers (

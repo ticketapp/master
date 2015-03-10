@@ -46,9 +46,9 @@ object SearchArtistsController extends Controller {
       (__ \ "link").read[String] and
       (__ \ "description").readNullable[String] and
       (__ \ "genre").readNullable[String]
-    ).apply((name: String, category: String, id: String, maybeCover: Option[String], website: Option[String],
+    ).apply((name: String, category: String, id: String, maybeCover: Option[String], websites: Option[String],
              link: String, maybeDescription: Option[String], maybeGenre: Option[String]) =>
-    (name, id, category, maybeCover, website, link, maybeDescription, maybeGenre))
+    (name, id, category, maybeCover, websites, link, maybeDescription, maybeGenre))
 
   def readFacebookArtists(facebookResponse: Response): Seq[Artist] = {
     val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
@@ -80,10 +80,9 @@ object SearchArtistsController extends Controller {
     val smallerUrl = url.replace("facebook.com/", "")
     val normalizedUrl =
       if (smallerUrl contains "/")
-        smallerUrl.substring(smallerUrl.indexOf("/") + 1)
+        smallerUrl.substring(smallerUrl.indexOf("/", 2) + 1)
       else
         smallerUrl
-    //println("normalizedUrl = " + normalizedUrl)
     WS.url("https://graph.facebook.com/v2.2/" + normalizedUrl)
       .withQueryString(
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
@@ -93,24 +92,27 @@ object SearchArtistsController extends Controller {
   }
   
   def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
+    //println(facebookResponse.json)
     facebookResponse.json
       .asOpt[(String, String, String, Option[String], Option[String],
         String, Option[String], Option[String])](readArtist)
       match {
-        case Some((name, facebookId, "Musician/band", Some(cover: String), websites,
+        case Some((name, facebookId, "Musician/band", Some(cover: String), maybeWebsites,
         link, maybeDescription, maybeGenre)) =>
+          //println(name, facebookId, maybeWebsites, link, maybeDescription, maybeGenre)
           val facebookUrl = Option(
             normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
           )
           val websitesSeq = facebookUrl match {
             case Some(facebookUrlFound) =>
-              websitesStringToWebsitesSet(websites).filterNot(_ contains facebookUrlFound)
+              websitesStringToWebsitesSet(maybeWebsites).filterNot(_ contains facebookUrlFound)
             case None =>
-              websitesStringToWebsitesSet(websites)
+              websitesStringToWebsitesSet(maybeWebsites)
           }
           val images = Set(new Image(-1, cover))
           val description = formatDescription(maybeDescription)
           val genres = genresStringToGenresSet(maybeGenre)
+          //println(Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSeq, images, genres, Set.empty))
           Option(Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSeq, images, genres, Set.empty))
         case _ => None
       }

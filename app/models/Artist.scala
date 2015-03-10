@@ -156,16 +156,18 @@ object Artist {
             match {
               case None => None
               case Some(artistId: Long) =>
-                artist.images.foreach(image =>
+                /*
+                artist.images.foreach( image =>
                   Image.save(image.copy(artistId = Some(artistId)))
                 )
-                artist.genres.foreach(genre =>
+                artist.genres.foreach( genre =>
                   Genre.saveGenreAndArtistRelation(genre, artistId)
                 )
-                artist.tracks.foreach(track =>
-                  Track.saveTrackAndArtistRelation(track, artistId)
-                )
-                Some(artistId)
+
+                artist.tracks.foreach( track =>
+                  Track.saveTrackAndArtistRelation(track, Left(artistId))
+                )*/
+                Option(artistId)
           }
         }
       } catch {
@@ -184,13 +186,20 @@ object Artist {
 
   def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = {
     save(artist) match {
-      case Some(-1) => saveEventArtistRelation(eventId, returnArtistId(artist.name))
-      case Some(i) => saveEventArtistRelation(eventId, i)
-      case None => None
+      case Some(-1) =>
+        println(artist.name +  "???")
+        saveEventArtistRelation(eventId, returnArtistId(artist.name))
+      case Some(artistId) =>
+        println(artist.name + "!!!")
+        saveEventArtistRelation(eventId, artistId)
+      case None =>
+        println(artist.name + "???!!!???!!!")
+        None
     }
   }
 
   def saveEventArtistRelation(eventId: Long, artistId: Long): Option[Long] = {
+    println(eventId, artistId)
     try {
       DB.withConnection { implicit connection =>
         SQL( """INSERT INTO eventsArtists (eventId, artistId)

@@ -6,6 +6,7 @@ import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
 import java.util.Date
+import play.libs.Scala
 import services.Utilities.{testIfExist, geographicPointToString}
 
 case class Event(eventId: Long,
@@ -254,19 +255,20 @@ object Event {
                     ).executeInsert() match {
                     case None => None
                     case Some(eventId: Long) =>
-                      event.organizers.foreach(organizer =>
-                        Organizer.saveWithEventRelation(organizer, eventId)
-                      )
-                      event.tariffs.foreach(tariff =>
+                      event.organizers.foreach { organizer =>
+                        Organizer.saveWithEventRelation (organizer, eventId)
+                      }
+                      event.tariffs.foreach { tariff =>
                         Tariff.save(tariff.copy(eventId = eventId))
-                      )
-                      event.images.foreach(image =>
+                      }
+                      event.images.foreach { image =>
                         Image.save(image.copy(eventId = Some(eventId)))
-                      )
-                      event.artists.foreach(artist =>
+                      }
+                      event.artists.foreach { artist =>
+                        println(artist)
                         Artist.saveWithEventRelation(artist, eventId)
-                      )
-                      Some(eventId)
+                      }
+                      Option(eventId)
                   }
               }
             } catch {

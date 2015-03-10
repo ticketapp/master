@@ -26,8 +26,7 @@ object Track {
       }
     }
   }
-
-  def formUnapply(track: Track) = Some(track.title, track.url, track.platform, Some(track.thumbnailUrl), None)
+  def formUnapply(track: Track) = Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None))
 
 
   private val TrackParser: RowParser[Track] = {
@@ -89,20 +88,31 @@ object Track {
     }
   }
 
-  def saveTrackAndPlaylistRelation(track: Track, id: Long): Option[Long] = {
+  def saveTrackAndArtistRelation(track: Track, artistIdOrArtistFacebookUrl: Either[Long, String]): Option[Long] = {
+    save(track) match {
+      case Some(trackId: Long) => saveArtistTrackRelation(artistIdOrArtistFacebookUrl, trackId)
+      case _ => None
+    }
+  }
+
+  def saveTrackAndPlaylistRelation(track: Track, playlistId: Long): Option[Long] = {
+    save(track) match {
+      case Some(trackId: Long) => savePlaylistTrackRelation(playlistId, trackId)
+      case _ => None
+    }
+  }
+
+  def save(track: Track): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( s"""INSERT into tracks(title, url, platform, thumbnail)
-        values ({title}, {url}, {platform}, {thumbnailUrl})"""
-        ).on(
+        SQL( """INSERT into tracks(title, url, platform, thumbnail)
+        VALUES ({title}, {url}, {platform}, {thumbnailUrl})""")
+          .on(
             'title -> track.title,
             'url -> track.url,
             'platform -> track.platform,
-            'thumbnailUrl -> track.thumbnailUrl
-          ).executeInsert() match {
-          case Some(x: Long) => savePlaylistTrackRelation(id, x)
-          case _ => None
-        }
+            'thumbnailUrl -> track.thumbnailUrl)
+          .executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create track: " + e.getMessage)
@@ -115,42 +125,35 @@ object Track {
         SQL( """INSERT INTO playlistsTracks (playlistId, trackId)
             VALUES ({playlistId}, {trackId})""").on(
             'playlistId -> playlistId,
-            'trackId -> trackId
-          ).executeInsert()
+            'trackId -> trackId)
+          .executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
     }
   }
 
-  def saveTrackAndArtistRelation(track: Track, id: Long): Option[Long] = {
+  def saveArtistTrackRelation(artistIdOrArtistFacebookUrl: Either[Long, String], trackId: Long): Option[Long] = {
     try {
-      DB.withConnection { implicit connection =>
-       SQL( s"""INSERT into tracks(title, url, platform, thumbnailUrl)
-               values ({title}, {url}, {platform}, {thumbnailUrl})"""
-       ).on(
-         'title -> track.title,
-         'url -> track.url,
-         'platform -> track.platform,
-         'thumbnailUrl -> track.thumbnailUrl
-       ).executeInsert() match {
-          case Some(x: Long) => saveArtistTrackRelation(id, x)
-          case _ => None
-        }
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot create track: " + e.getMessage)
-    }
-  }
-
-  def saveArtistTrackRelation(artistId: Long, trackId: Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO artistsTracks (artistId, trackId)
-            VALUES ({artistId}, {trackId})""").on(
-            'artistId -> artistId,
-            'trackId -> trackId
-          ).executeInsert()
+      artistIdOrArtistFacebookUrl match {
+        case Left(artistId) =>
+          DB.withConnection { implicit connection =>
+            SQL("""INSERT INTO artistsTracks (artistId, trackId)
+                VALUES ({artistId}, {trackId})""")
+              .on(
+                'artistId -> artistId,
+                'trackId -> trackId)
+              .executeInsert()
+          }
+        case Right(facebookUrl) =>
+          DB.withConnection { implicit connection =>
+            SQL("""INSERT INTO artistsTracks (facebookUrl, trackId)
+                VALUES ({facebookUrl}, {trackId})""")
+              .on(
+                'facebookUrl -> facebookUrl,
+                'trackId -> trackId)
+              .executeInsert()
+          }
       }
     } catch {
       case e: Exception => throw new DAOException("saveArtistTrackRelation: " + e.getMessage)
