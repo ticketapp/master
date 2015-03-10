@@ -80,23 +80,25 @@ object Event {
     /*
     change limit by variable?
      */
-    DB.withConnection { implicit connection =>
-      SQL(s""" SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
+    try {
+      DB.withConnection { implicit connection =>
+        SQL( s""" SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
          events.name, events.geographicPoint, events.description, events.startTime,
             events.endTime, events.ageRestriction
         FROM events
         ORDER BY events.creationDateTime DESC
         LIMIT 20
         OFFSET $start""")
-        .as(EventParser.*)
-        .map(e => e.copy(
+          .as(EventParser.*)
+          .map(e => e.copy(
           images = Image.findAllByEvent(e),
           organizers = Organizer.findAllByEvent(e),
           artists = Artist.findAllByEvent(e),
           tariffs = Tariff.findAllByEvent(e),
           places = Place.findAllByEvent(e),
           addresses = Address.findAllByEvent(e))
-        )
+          )
+      }
     }
   }
 
@@ -124,32 +126,35 @@ object Event {
   }
 
   def findAllByGenre(genreId: Long) = {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """ SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
-            e.name, e.geographicPoint, e.description, e.startTime,
-            e.endTime, e.ageRestriction
-        FROM eventsGenres eG
-        INNER JOIN events e ON e.eventId = eG.eventId
-        WHERE eG.genreId = {genreId}
-        ORDER BY e.creationDateTime DESC
-        LIMIT 20"""
-      ).on('genreId -> genreId)
-        .as(EventParser.*)
-        .map(event => event.copy(
-          images = Image.findAllByEvent(event),
-          organizers = Organizer.findAllByEvent(event),
-          artists = Artist.findAllByEvent(event),
-          tariffs = Tariff.findAllByEvent(event),
-          addresses = Address.findAllByEvent(event))
-        )
+    try {
+      DB.withConnection { implicit connection =>
+        SQL(
+          """ SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
+              e.name, e.geographicPoint, e.description, e.startTime,
+              e.endTime, e.ageRestriction
+          FROM eventsGenres eG
+          INNER JOIN events e ON e.eventId = eG.eventId
+          WHERE eG.genreId = {genreId}
+          ORDER BY e.creationDateTime DESC
+          LIMIT 20""")
+          .on('genreId -> genreId)
+          .as(EventParser.*)
+          .map { event => event.copy(
+            images = Image.findAllByEvent(event),
+            organizers = Organizer.findAllByEvent(event),
+            artists = Artist.findAllByEvent(event),
+            tariffs = Tariff.findAllByEvent(event),
+            addresses = Address.findAllByEvent(event))
+          }
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Cannot get events by genre: " + e.getMessage)
     }
   }
 
   def findAllByOrganizer(organizerId: Long) = {
     DB.withConnection { implicit connection =>
-      SQL(
-        """ SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
+      SQL(""" SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
             s.name, s.geographicPoint, s.description, s.startTime,
             s.endTime, s.ageRestriction
         FROM eventsOrganizers eO
@@ -176,7 +181,7 @@ object Event {
       case patternRegex(_) =>
       try {
         DB.withConnection { implicit connection =>
-          SQL( s"""SELECT *
+          SQL(s"""SELECT *
           FROM events WHERE LOWER(name)
           LIKE '%'||{patternLowCase}||'%'
           ORDER BY geographicPoint <-> point '$center'
@@ -235,41 +240,41 @@ object Event {
         geographicPoint match {
           case pattern(_) =>
             try {
-              DB.withConnection {
-                implicit connection =>
-                  SQL( s"""INSERT INTO
-                events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description, startTime,
-                endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive}, {creationDateTime}, {name},
-                point '$geographicPoint', {description}, {startTime}, {endTime}, {ageRestriction}) """)
-                    .on(
-                      'facebookId -> event.facebookId,
-                      'isPublic -> event.isPublic,
-                      'isActive -> event.isActive,
-                      'creationDateTime -> event.creationDateTime,
-                      'name -> event.name,
-                      'geographicPoint -> event.geographicPoint,
-                      'description -> event.description,
-                      'startTime -> event.startTime,
-                      'endTime -> event.endTime,
-                      'ageRestriction -> event.ageRestriction
-                    ).executeInsert() match {
-                    case None => None
-                    case Some(eventId: Long) =>
-                      event.organizers.foreach { organizer =>
-                        Organizer.saveWithEventRelation (organizer, eventId)
-                      }
-                      event.tariffs.foreach { tariff =>
-                        Tariff.save(tariff.copy(eventId = eventId))
-                      }
-                      event.images.foreach { image =>
-                        Image.save(image.copy(eventId = Some(eventId)))
-                      }
-                      event.artists.foreach { artist =>
-                        println(artist)
-                        Artist.saveWithEventRelation(artist, eventId)
-                      }
-                      Option(eventId)
-                  }
+              DB.withConnection { implicit connection =>
+                SQL(s"""INSERT INTO
+                    events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
+                    startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive},
+                    {creationDateTime}, {name}, point '$geographicPoint', {description}, {startTime}, {endTime},
+                    {ageRestriction}) """)
+                  .on(
+                    'facebookId -> event.facebookId,
+                    'isPublic -> event.isPublic,
+                    'isActive -> event.isActive,
+                    'creationDateTime -> event.creationDateTime,
+                    'name -> event.name,
+                    'geographicPoint -> event.geographicPoint,
+                    'description -> event.description,
+                    'startTime -> event.startTime,
+                    'endTime -> event.endTime,
+                    'ageRestriction -> event.ageRestriction
+                  ).executeInsert() match {
+                  case None => None
+                  case Some(eventId: Long) =>
+                    event.organizers.foreach { organizer =>
+                      Organizer.saveWithEventRelation (organizer, eventId)
+                    }
+                    event.tariffs.foreach { tariff =>
+                      Tariff.save(tariff.copy(eventId = eventId))
+                    }
+                    event.images.foreach { image =>
+                      Image.save(image.copy(eventId = Some(eventId)))
+                    }
+                    event.artists.foreach { artist =>
+                      println(artist)
+                      Artist.saveWithEventRelation(artist, eventId)
+                    }
+                    Option(eventId)
+                }
               }
             } catch {
               case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)

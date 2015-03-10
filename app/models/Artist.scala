@@ -143,8 +143,7 @@ object Artist {
       case true => Some(-1)
       case false => try {
         DB.withConnection { implicit connection =>
-          SQL(
-            """INSERT INTO artists(facebookId, name, description, facebookUrl, websites)
+          SQL("""INSERT INTO artists(facebookId, name, description, facebookUrl, websites)
               VALUES ({facebookId}, {name}, {description}, {facebookUrl}, {websites})""")
             .on(
               'facebookId -> artist.facebookId,
@@ -153,21 +152,13 @@ object Artist {
               'description -> artist.description,
               'websites -> artist.websites.mkString(","))
             .executeInsert()
-            match {
-              case None => None
-              case Some(artistId: Long) =>
-                /*
-                artist.images.foreach( image =>
-                  Image.save(image.copy(artistId = Some(artistId)))
-                )
-                artist.genres.foreach( genre =>
-                  Genre.saveGenreAndArtistRelation(genre, artistId)
-                )
-
-                artist.tracks.foreach( track =>
-                  Track.saveTrackAndArtistRelation(track, Left(artistId))
-                )*/
-                Option(artistId)
+          match {
+            case None => None
+            case Some(artistId: Long) =>
+              artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId))) }
+              artist.genres.foreach { genre => Genre.saveGenreAndArtistRelation(genre, artistId) }
+              artist.tracks.foreach { track => Track.saveTrackAndArtistRelation(track, Left(artistId) ) }
+              Option(artistId)
           }
         }
       } catch {
@@ -176,25 +167,19 @@ object Artist {
     }
   }
 
-  def returnArtistId(name: String): Long = {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT artistId from artists WHERE name = {name}")
-        .on('name -> name)
-        .as(scalar[Long].single)
+  def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = {
+    save(artist) match {
+      case Some(-1) => saveEventArtistRelation(eventId, returnArtistId(artist.name))
+      case Some(artistId) => saveEventArtistRelation(eventId, artistId)
+      case None => None
     }
   }
 
-  def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = {
-    save(artist) match {
-      case Some(-1) =>
-        println(artist.name +  "???")
-        saveEventArtistRelation(eventId, returnArtistId(artist.name))
-      case Some(artistId) =>
-        println(artist.name + "!!!")
-        saveEventArtistRelation(eventId, artistId)
-      case None =>
-        println(artist.name + "???!!!???!!!")
-        None
+  def returnArtistId(name: String): Long = {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT artistId FROM artists WHERE name = {name}")
+        .on('name -> name)
+        .as(scalar[Long].single)
     }
   }
 
@@ -202,11 +187,12 @@ object Artist {
     println(eventId, artistId)
     try {
       DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO eventsArtists (eventId, artistId)
-          VALUES ({eventId}, {artistId})""").on(
+        SQL("""INSERT INTO eventsArtists (eventId, artistId)
+          VALUES ({eventId}, {artistId})""")
+          .on(
             'eventId -> eventId,
-            'artistId -> artistId
-          ).executeInsert()
+            'artistId -> artistId)
+          .executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)

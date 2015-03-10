@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 25 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 17 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -405,9 +405,9 @@ CREATE TABLE usersArtists (
   PRIMARY KEY (userId, artistId)
 );
 
-CREATE TABLE genresArtists (
-  genreId INT REFERENCES genres (genreId),
+CREATE TABLE artistsGenres (
   artistId INT REFERENCES artists (artistId),
+  genreId INT REFERENCES genres (genreId),
   PRIMARY KEY (genreId, artistId)
 );
 
@@ -446,7 +446,7 @@ DROP TABLE IF EXISTS eventsAddresses;
 DROP TABLE IF EXISTS usersOrganizers;
 DROP TABLE IF EXISTS eventsArtists;
 DROP TABLE IF EXISTS usersArtists;
-DROP TABLE IF EXISTS genresArtists;
+DROP TABLE IF EXISTS artistsGenres;
 DROP TABLE IF EXISTS eventsFollowed;
 DROP TABLE IF EXISTS artistsFollowed;
 DROP TABLE IF EXISTS placesFollowed;
