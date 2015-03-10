@@ -40,11 +40,14 @@
     <div class="column large-4 float-left eventInfo tracksContener" >
         <div class="column large-12">
             <h3 class="column large-6">Tracks</h3>
-            <input class="column large-6 marginTop20" ng-change="trackLimit = artiste.tracks.length;" ng-model="trackTitle" placeholder="filter tracks"/>
+            <input class="column large-6 marginTop20" ng-click="trackLimit = artiste.tracks.length;" ng-model="trackTitle" placeholder="filter tracks"/>
             <div class="float-left column large-12">
                 <a class="button" ng-click="$root.addAndPlay(artiste.tracks, artiste.name)"><i class="fi-play"></i> Play all</a>
                 <a class="button" ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)"><i class="fi-plus"></i> Add all</a>
             </div>
+        </div>
+        <div layout="row" layout-sm="column" layout-align="space-around" class="column" ng-if="$root.loadingTracks">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
         <div ng-repeat="track in artiste.tracks | limitTo: trackLimit | filter : trackTitle" class="column" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
             <div ng-if="track.thumbnail != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">

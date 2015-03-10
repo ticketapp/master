@@ -3,7 +3,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position)
                 {
-                    //alert("Latitude : " + position.coords.latitude + ", longitude : " + position.coords.longitude);
+                    $rootScope.geoLoc = "(" + position.coords.latitude + "," + position.coords.longitude + ")";
                 }, function erreurPosition(error) {
                 }
             );
@@ -11,15 +11,14 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }*/
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
-            console.log($rootScope.artisteToCreate)
         };
         $rootScope.passArtisteToCreateToFalse();
         $rootScope.createArtist = function (artist) {
+            $rootScope.loadingTracks = true;
             $rootScope.artisteToCreate = true;
             $rootScope.artiste = artist;
             $rootScope.$apply;
-            var searchPattern  = document.getElementById('searchBar').value.trim();
-            console.log(searchPattern);
+            var searchPattern  = document.getElementById('searchBar').value.trim()
             oboe.post('artists/createArtist', {
                 searchPattern: searchPattern,
                 artist: {
@@ -39,10 +38,16 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                  $scope.items.push(value);
                  })*/
                 .done(function (value) {
-                    console.log(value)
                     $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
-                    console.log($rootScope.artiste.tracks)
+                    if (value.constructor === Array) {
+                        console.log(value)
+                        $rootScope.loadingTracks = false
+                    }
                     $rootScope.$apply();
+                    function saveTrack (track) {
+                        //$http.post('/tracks')
+                    }
+                    value.forEach(saveTrack)
 
                 })
                 .fail(function (error) {
@@ -53,7 +58,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             var artists = document.getElementsByClassName('textArtistMin');
             for (var i = 0; i < artists.length; i++) {
                 var newTextHeight = 110.5 - (ImgHeight/2) - 10 + 'px';
-                console.log(newTextHeight)
                 artists[i].style.height = newTextHeight;
             }
         }
@@ -74,7 +78,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     }
                 }
             }, 100)
-        }
+        };
         $rootScope.window = 'large';
         function marginContent () {
             if ($rootScope.home == false) {

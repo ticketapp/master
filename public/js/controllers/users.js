@@ -1,8 +1,14 @@
-app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http, $rootScope){
+app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http, $rootScope, $location){
     $scope.map = false;
     $scope.heightMap = 300;
+    if ($location.path().indexOf('lieu') > -1) {
+        $scope.getUrl = 'places'
+    } else {
+        $scope.getUrl = 'organizers'
+    }
+
     console.log($routeParams);
-    $http.get('/organizers/' + $routeParams.id +'/events')
+    $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
         .success(function(data, status){
             $scope.orgaEvents = data;
             $scope.$apply();
@@ -36,13 +42,17 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                                 }
                                 console.log(newHeight)
                                 console.log(eventsContener[0].clientHeight/3);
-                                if (newHeight < -(eventsContener[0].clientHeight/3)) {
+                                if (newHeight < -(eventsContener[0].clientHeight/3) && $scope.orgaEvents.length > 1) {
                                     $scope.medMap = true;
+                                    $scope.descHeight = eventsContener[0].clientHeight + 290;
                                 } else if (newHeight < (eventsContener[0].clientHeight)/3) {
-                                    console.log(eventsContener.length)
                                     if (eventsContener.length == 1 || eventsContener.length %2 == 0) {
                                         $scope.fullMap = true;
+                                        if (newHeight < -(eventsContener[0].clientHeight/3)) {
+                                            $scope.descHeight = eventsContener[0].clientHeight - 25;
+                                        }
                                     }
+                                    $scope.heightMap = eventsContener[0].clientHeight - 30 +'px';
                                 } else {
                                     descPos = eventInfoConteners[1].getBoundingClientRect();
                                     lastEventPos = eventsContener[eventsContener.length -1].getBoundingClientRect();
@@ -111,7 +121,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                 })
             }
         });
-    $http.get('/organizers/' + $routeParams.id)
+    $http.get('/' + $scope.getUrl + '/' + $routeParams.id)
         .success(function(data, status){
             $scope.organizer = data;
         }).error(function(data, status){
