@@ -253,7 +253,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     search();
     $scope.moreLimit = function () {
-        $scope.limit = $scope.limit + 12;
         offset = offset + 20;
         $rootScope.resizeImgHeight();
         search();
@@ -262,7 +261,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var doneTypingInterval = 600;
     $scope.research = function(newName) {
         if (angular.isDefined(newName)) {
-            _research = newName;
+            _research = newName
+            $scope.limit = 12;
+            offset = 0;
             if (_selArtist == true && _research.length > 2) {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(searchArtistFb, doneTypingInterval);

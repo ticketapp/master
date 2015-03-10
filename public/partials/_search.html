@@ -67,7 +67,7 @@
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
         <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0"
-            data-ng-repeat="place in places | limitTo : limit - events.length - artists.length - artistsFb.length" >
+            data-ng-repeat="place in places | limitTo : limit" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -83,7 +83,7 @@
         </li>
         <li class="min_contener margin0" ng-if="$root.activUsr && users.length > 0"
             data-ng-repeat="user in users |
-            limitTo : limit - events.length - artists.length - artistsFb.length - places.length">
+            limitTo : limit">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -98,9 +98,13 @@
             </div>
         </li>
     </ul>
-    <div ng-if="events.length + artists.length + artistsFb.length + places.length + users.length > limit"
+    <div ng-if="events.length > limit || artists.length > limit || artistsFb.length || places.length > limit || users.length > limit"
          layout="row" layout-align="center center">
-        <button ng-click="moreLimit()" class="column large-5">More</button>
+        <button ng-click="moreLimit(); $parent.limit = $parent.limit + 12" class="column large-5">More</button>
+    </div>
+    <div ng-if="limit > 12"
+         layout="row" layout-align="center center">
+        <button ng-click="$parent.limit = 12" class="column large-5">Less</button>
     </div>
 </div>
 

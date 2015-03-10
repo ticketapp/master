@@ -40,7 +40,7 @@
     <div class="column large-4 float-left eventInfo tracksContener" >
         <div class="column large-12">
             <h3 class="column large-6">Tracks</h3>
-            <input class="column large-6 marginTop20" ng-change="trackLimit = artiste.tracks.length;" ng-model="trackTitle" placeholder="filter tracks"/>
+            <input class="column large-6 marginTop20" ng-click="trackLimit = artiste.tracks.length;" ng-model="trackTitle" placeholder="filter tracks"/>
             <div class="float-left column large-12">
                 <a class="button" ng-click="$root.addAndPlay(artiste.tracks, artiste.name)"><i class="fi-play"></i> Play all</a>
                 <a class="button" ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)"><i class="fi-plus"></i> Add all</a>

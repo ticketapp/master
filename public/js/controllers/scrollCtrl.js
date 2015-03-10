@@ -18,8 +18,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.artisteToCreate = true;
             $rootScope.artiste = artist;
             $rootScope.$apply;
-            var searchPattern  = document.getElementById('searchBar').value.trim();
-            console.log(searchPattern);
+            var searchPattern  = document.getElementById('searchBar').value.trim()
             oboe.post('artists/createArtist', {
                 searchPattern: searchPattern,
                 artist: {
@@ -40,7 +39,10 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                  })*/
                 .done(function (value) {
                     $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
-                    $rootScope.loadingTracks = false;
+                    if (value.constructor === Array) {
+                        console.log(value)
+                        $rootScope.loadingTracks = false
+                    }
                     $rootScope.$apply();
                     function saveTrack (track) {
                         //$http.post('/tracks')
@@ -56,7 +58,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             var artists = document.getElementsByClassName('textArtistMin');
             for (var i = 0; i < artists.length; i++) {
                 var newTextHeight = 110.5 - (ImgHeight/2) - 10 + 'px';
-                console.log(newTextHeight)
                 artists[i].style.height = newTextHeight;
             }
         }
@@ -77,7 +78,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     }
                 }
             }, 100)
-        }
+        };
         $rootScope.window = 'large';
         function marginContent () {
             if ($rootScope.home == false) {
