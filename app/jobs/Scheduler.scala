@@ -95,11 +95,12 @@ object Scheduler {
           address <- eventuallyAddress
           artists <- eventuallyArtists
         } yield {
-          println(artists.flatten.toList)
+          val nonEmptyArtists = artists.flatten.toList
+          val eventGenres = nonEmptyArtists.map { _.genres }.flatten.toSet
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
             formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,
-            artists.flatten.toList, List(), List(address), List())
+            nonEmptyArtists, List(), List(address), List(), eventGenres)
         }
       })
     eventFacebookResponse.json.asOpt[Future[Event]](eventRead)

@@ -25,7 +25,8 @@ case class Event(eventId: Long,
                  artists: List[Artist],
                  tariffs: List[Tariff],
                  addresses: List[Address],
-                 places: List[Place] = List())
+                 places: List[Place] = List.empty,
+                 genres: Set[Genre] = Set.empty)
 
 object Event {
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,

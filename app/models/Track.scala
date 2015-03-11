@@ -34,11 +34,11 @@ object Track {
 
   def formUnapply(track: Track) = Some((track.title, track.url, track.platform, track.thumbnailUrl))
 
-  case class ArtistIdAnTrack (artistId: Long, track: Track)
-  def formWithArtistIdApply(artistId: Long, track: Track) =
-    new ArtistIdAnTrack(artistId, track)
+  case class ArtistIdAnTrack (artistFacebookUrl: String, track: Track)
+  def formWithArtistIdApply(artistFacebookUrl: String, track: Track) =
+    new ArtistIdAnTrack(artistFacebookUrl, track)
   def formWithArtistIdUnapply(artistIdAnTrack: ArtistIdAnTrack) =
-    Option((artistIdAnTrack.artistId, artistIdAnTrack.track))
+    Option((artistIdAnTrack.artistFacebookUrl, artistIdAnTrack.track))
 
   private val TrackParser: RowParser[Track] = {
     get[Long]("trackId") ~
