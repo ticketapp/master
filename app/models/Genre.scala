@@ -69,20 +69,45 @@ object Genre {
       case e: Exception => throw new DAOException("Problem with the method Genre.findAllContaining: " + e.getMessage)
     }
   }
-
-  def saveGenreAndArtistRelation(genre: Genre, artistId: Long): Option[Long] = {
-   try {
+  
+  def save(genre: Genre): Option[Long] = {
+    try {
       DB.withConnection { implicit connection =>
         SQL("""INSERT INTO genres(name) VALUES ({name})""")
           .on('name -> genre.name)
           .executeInsert()
-        match {
-          case Some(genreId: Long) => saveArtistGenreRelation(artistId, genreId)
-          case _ => None
-        }
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot create genre: " + e.getMessage)
+    }
+  }
+  
+  def saveWithEventRelation(genre: Genre, eventId: Long): Option[Long] = {
+    save(genre) match {
+      case Some(genreId: Long) => saveEventGenreRelation(eventId, genreId)
+      case _ => None
+    }
+  }
+
+  def saveEventGenreRelation(eventId: Long, genreId: Long): Option[Long] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL("""INSERT INTO eventsGenres (eventId, genreId)
+            VALUES ({eventId}, {genreId})""")
+          .on(
+            'eventId -> eventId,
+            'genreId -> genreId)
+          .executeInsert()
+      }
+    } catch {
+      case e: Exception => throw new DAOException("saveEventGenreRelation: " + e.getMessage)
+    }
+  }
+
+  def saveWithArtistRelation(genre: Genre, artistId: Long): Option[Long] = {
+    save(genre) match {
+      case Some(genreId: Long) => saveArtistGenreRelation(artistId, genreId)
+      case _ => None
     }
   }
 

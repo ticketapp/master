@@ -156,7 +156,7 @@ object Artist {
             case None => None
             case Some(artistId: Long) =>
               artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId))) }
-              artist.genres.foreach { genre => Genre.saveGenreAndArtistRelation(genre, artistId) }
+              artist.genres.foreach { genre => Genre.saveWithArtistRelation(genre, artistId) }
               artist.tracks.foreach { track => Track.saveTrackAndArtistRelation(track, Left(artistId) ) }
               Option(artistId)
           }
