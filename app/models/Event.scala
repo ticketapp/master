@@ -29,6 +29,7 @@ case class Event(eventId: Long,
                  genres: Set[Genre] = Set.empty)
 
 object Event {
+  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
                 endTime: Option[Date], ageRestriction: Int, images: List[Image], tariffs: List[Tariff],
                 addresses: List[Address]): Event = {
@@ -77,17 +78,14 @@ object Event {
     }
   }
 
-  def find20Since(start: Int): Seq[Event] = {
-    /*
-    change limit by variable?
-     */
+  def find20Since(start: Int, center: String): Seq[Event] = {
     try {
       DB.withConnection { implicit connection =>
         SQL( s""" SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
          events.name, events.geographicPoint, events.description, events.startTime,
             events.endTime, events.ageRestriction
         FROM events
-        ORDER BY events.creationDateTime DESC
+        ORDER BY geographicPoint <-> point '$center'
         LIMIT 20
         OFFSET $start""")
           .as(EventParser.*)
@@ -176,10 +174,8 @@ object Event {
     }
   }
 
-  def findAllContaining(pattern: String, center: String): Seq[Event] = {
-    val patternRegex = """(\(-?\d+\.\d*,-?\d+\.\d*\))""".r
-    center match {
-      case patternRegex(_) =>
+  def findAllContaining(pattern: String, center: String): Seq[Event] = center match {
+      case geographicPointPattern(_) =>
       try {
         DB.withConnection { implicit connection =>
           SQL(s"""SELECT *
@@ -202,9 +198,7 @@ object Event {
         case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
       }
     case _ => Seq.empty
-    }
   }
-
 
   def findAllByCityPattern(cityPattern: String): Seq[Event] = {
     try {
@@ -235,11 +229,10 @@ object Event {
       case true => None
       case false =>
         //+ négatif
-        val pattern = """(\(\d+\.?\d*,\d+\.?\d*\))""".r
         val geographicPoint = event.geographicPoint.getOrElse("(0,0)")
         println(geographicPoint)
         geographicPoint match {
-          case pattern(_) =>
+          case geographicPointPattern(_) =>
             try {
               DB.withConnection { implicit connection =>
                 SQL(s"""INSERT INTO
@@ -339,9 +332,8 @@ object Event {
   }
 
   def findAllInCircle(center: String): List[Event] = {
-    val pattern = """(\(\d+\.\d*,\d+\.\d*\))""".r
     center match {
-      case pattern(_) =>
+      case geographicPointPattern(_) =>
         try {
           DB.withConnection { implicit connection =>
             SQL(s"""SELECT *

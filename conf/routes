@@ -8,7 +8,7 @@ GET     /admin                          controllers.Admin.indexAdmin
 #POST    /admin/createTariff            controllers.Admin.createTariff
 
 ################################## Events ###############################################
-GET     /events/offset/:offset          controllers.EventController.events(offset: Int)
+GET     /events/offset/:offset/:geographicPoint   controllers.EventController.events(offset: Int, geographicPoint: String)
 GET     /events/:id                     controllers.EventController.event(id: Long)
 POST    /events/create                  controllers.EventController.createEvent
 POST    /events/:eventId/follow         controllers.EventController.followEvent(eventId: Long)

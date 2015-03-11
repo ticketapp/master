@@ -7,9 +7,16 @@ import play.api.libs.json.Json
 import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
 
+import scala.util.matching.Regex
+
 object EventController extends Controller with securesocial.core.SecureSocial {
-  def events(offset: Int) = Action {
-    Ok(Json.toJson(Event.find20Since(offset)))
+  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
+
+  def events(offset: Int, geographicPoint: String) = Action {
+    geographicPoint match {
+      case geographicPointPattern(_) => Ok(Json.toJson(Event.find20Since(offset, geographicPoint)))
+      case _ => Ok(Json.toJson("Invalid geographicPoint"))
+    }
   }
 
   def eventsByPlace(placeId: Long) = Action {

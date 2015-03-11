@@ -8,7 +8,6 @@ import play.api.libs.concurrent.Execution.Implicits._
 import models._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
-import scala.util.{Success, Failure}
 import services.Utilities.normalizeUrl
 import controllers.SearchArtistsController.getFacebookArtistByUrl
 
@@ -63,20 +62,19 @@ object Scheduler {
 
   def readFacebookEvent(eventFacebookResponse: Response): Option[Future[Event]] = {
     val eventRead = (
-      (__ \ "description").readNullable[String] and
+        (__ \ "description").readNullable[String] and
         (__ \ "cover" \ "source").read[String] and
         (__ \ "name").read[String] and
         (__ \ "id").readNullable[String] and
         (__ \ "start_time").readNullable[String] and
         (__ \ "endTime").readNullable[String] and
-        (__ \ "street").readNullable[String] and
-        (__ \ "zip").readNullable[String] and
-        (__ \ "city").readNullable[String] and
-        (__ \ "address").readNullable[String] and
+        (__ \ "venue" \ "street").readNullable[String] and
+        (__ \ "venue" \ "zip").readNullable[String] and
+        (__ \ "venue" \ "city").readNullable[String] and
         (__ \ "owner" \ "id").readNullable[String]
       )((description: Option[String], source: String, name: String, facebookId: Option[String],
          startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
-         city: Option[String], address: Option[String], maybeOwnerId: Option[String]) => {
+         city: Option[String], maybeOwnerId: Option[String]) => {
 
         val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
         val eventuallyAddress = getGeographicPoint(new Address(-1l, None, city, zip, street))
@@ -126,7 +124,11 @@ object Scheduler {
     description match {
       case None => None
       case Some(desc) => Some("<div class='column large-12'>" +
-        linkPattern.replaceAllIn(desc, m => "<a href='http://" + m + "'>" + m + "</a>")
+        linkPattern.replaceAllIn(desc, m =>
+          if (m.toString contains "@")
+            "<a href='http://" + m + "'>ablezblazbelabezlabzlejbalejbazlejbajlez" + m + "</a>"
+          else
+            "<a href='http://" + m + "'>" + m + "</a>")
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
           .replaceAll( """\t""", "    ")
@@ -140,11 +142,9 @@ object Scheduler {
     case Some(description) => linkPattern.findAllIn(description).toSet.map { normalizeUrl }
   }
 
-  def createNewImageIfSourceExists(source: Option[String]): List[Image] = {
-    source match {
-      case Some(path) => List(new Image(-1, path))
-      case None => List()
-    }
+  def createNewImageIfSourceExists(source: Option[String]): List[Image] = source match {
+    case Some(path) => List(new Image(-1, path))
+    case None => List()
   }
 
   def splitArtistNamesInTitle(title: String): List[String] =
@@ -190,8 +190,8 @@ object Scheduler {
 
   def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {
     val googleGeoCodeJson = googleGeoCodeResponse.json
-    val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[String]
-    val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[String]
+    val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
+    val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
     latitude match {
       case None => None
       case Some(lat) => longitude match {
@@ -214,7 +214,6 @@ object Scheduler {
           case None => address
         }
       }
-
     } else
       Future { address }
   }

@@ -67,7 +67,7 @@ object Organizer {
 
   def find(organizerId: Long): Option[Organizer] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from organizers WHERE organizerId = {organizerId}")
+      SQL("SELECT * FROM organizers WHERE organizerId = {organizerId}")
         .on('organizerId -> organizerId)
         .as(OrganizerParser.singleOpt)
         .map(o => o.copy(

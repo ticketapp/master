@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 15 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 13 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -40,7 +40,6 @@ CREATE TABLE artists (
   description               TEXT,
   facebookUrl               VARCHAR(255),
   websites                  TEXT,
-  UNIQUE(name),
   UNIQUE(facebookId),
   UNIQUE(facebookUrl)
 );

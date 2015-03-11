@@ -95,20 +95,7 @@ object Place {
         .as(PlaceParser.*)
     }
   }
-/*
- private val ArtistParser: RowParser[Artist] = {
-    get[Long]("artistId") ~
-      get[Option[String]]("facebookId") ~
-      get[String]("name") ~
-      get[Option[String]]("description") ~
-      get[Option[String]]("facebookUrl") ~
-      get[Option[String]]("websites") map {
-      case artistId ~ facebookId ~ name ~ description ~ facebookUrl ~ websites =>
-        Artist(artistId, facebookId, name, description, facebookUrl,
-          websites.getOrElse("").split(",").toSet, Set(), Set(), Set())
-    }
-  }
- */
+
   def findAllIdsAndFacebookIds: Seq[(Long, String)] = {
     try {
       val placeIdFacebookIdParser = {

@@ -6,7 +6,6 @@ import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
 
-
 object TrackController extends Controller {
   val trackBindingForm = Form(
     mapping(
