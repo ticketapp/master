@@ -57,7 +57,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
             "platform" -> nonEmptyText,
             "thumbnail" -> optional(nonEmptyText),
             "avatarUrl" -> optional(nonEmptyText)
-          )(Track.formApply)(Track.formUnapply)
+          )(Track.formApplyForTrackCreatedWithArtist)(Track.formUnapplyForTrackCreatedWithArtist)
         )
       )(Artist.formApply)(Artist.formUnapply)
     )(Artist.formWithPatternApply)(Artist.formWithPatternUnapply)

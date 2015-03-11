@@ -48,7 +48,7 @@ GET     /organizers/:organizerId/events controllers.EventController.eventsByOrga
 ################################# Playlists ############################################
 
 ################################# Tracks ############################################
-
+POST    /tracks/create                  controllers.TrackController.createTrack
 
 ################################## Infos ################################################
 GET     /infos                          controllers.Application.infos

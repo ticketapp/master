@@ -4,7 +4,6 @@ import anorm.SqlParser._
 import anorm._
 import controllers._
 import play.api.db.DB
-import play.api.libs.json.Json
 import play.api.Play.current
 
 case class Genre (genreId: Long, name: String)

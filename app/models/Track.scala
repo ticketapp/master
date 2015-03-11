@@ -16,7 +16,7 @@ case class Track (trackId: Long,
 object Track {
   implicit val trackWrites = Json.writes[Track]
 
-  def formApply(title: String, url: String, platform: String, thumbnailUrl: Option[String],
+  def formApplyForTrackCreatedWithArtist(title: String, url: String, platform: String, thumbnailUrl: Option[String],
   userThumbnailUrl: Option[String]): Track = {
     thumbnailUrl match {
       case Some(thumbnail: String) => new Track(-1L, title, url, platform, thumbnail)
@@ -26,8 +26,19 @@ object Track {
       }
     }
   }
-  def formUnapply(track: Track) = Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None))
+  def formUnapplyForTrackCreatedWithArtist(track: Track) =
+    Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None))
 
+  def formApply(title: String, url: String, platform: String, thumbnailUrl: String): Track =
+   new Track(-1L, title, url, platform, thumbnailUrl)
+
+  def formUnapply(track: Track) = Some((track.title, track.url, track.platform, track.thumbnailUrl))
+
+  case class ArtistIdAnTrack (artistId: Long, track: Track)
+  def formWithArtistIdApply(artistId: Long, track: Track) =
+    new ArtistIdAnTrack(artistId, track)
+  def formWithArtistIdUnapply(artistIdAnTrack: ArtistIdAnTrack) =
+    Option((artistIdAnTrack.artistId, artistIdAnTrack.track))
 
   private val TrackParser: RowParser[Track] = {
     get[Long]("trackId") ~
