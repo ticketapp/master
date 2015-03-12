@@ -9,14 +9,14 @@ import models._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import services.Utilities.normalizeUrl
-import controllers.SearchArtistsController.getFacebookArtistByUrl
+import controllers.SearchArtistsController.getFacebookArtistsByWebsites
 
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
   val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
-  def start() = {
+  def start = {
     Place.findAllIdsAndFacebookIds.map { placeIdAndFacebookId: (Long, String) =>
       saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2)
     }
@@ -78,20 +78,12 @@ object Scheduler {
 
         val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
         val eventuallyAddress = getGeographicPoint(new Address(-1l, None, city, zip, street))
-        val websitesInDescription: Set[String] = getWebsitesInDescription(description)
-        val eventuallyArtists = Future.sequence(
-          websitesInDescription.map { website =>
-            if (website contains "facebook")
-              getFacebookArtistByUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
-            else
-              Future { None }
-          }
-        )
+        val eventuallyMaybeArtists = getFacebookArtistsByWebsites(getWebsitesInDescription(description))
 
         for {
           organizer <- eventuallyOrganizer
           address <- eventuallyAddress
-          artists <- eventuallyArtists
+          artists <- eventuallyMaybeArtists
         } yield {
           val nonEmptyArtists = artists.flatten.toList
           val eventGenres = nonEmptyArtists.map { _.genres }.flatten.toSet
