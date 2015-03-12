@@ -15,6 +15,10 @@ object Application extends Controller with securesocial.core.SecureSocial {
     Ok(views.html.index(userConnected))
   }
 
+  def getGeographicPoint = {
+
+  }
+
   /*#################### CAROUSEL ########################*/
   def infos = Action {
     Ok(Json.toJson(Info.findAll()))

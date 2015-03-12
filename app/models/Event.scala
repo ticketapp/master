@@ -67,13 +67,13 @@ object Event {
       SQL("SELECT * from events WHERE eventId = {eventId}")
         .on('eventId -> eventId)
         .as(EventParser.singleOpt)
-        .map(e => e.copy(
-          images = Image.findAllByEvent(e),
-          organizers = Organizer.findAllByEvent(e),
-          artists = Artist.findAllByEvent(e),
-          tariffs = Tariff.findAllByEvent(e),
-          places = Place.findAllByEvent(e.eventId),
-          addresses = Address.findAllByEvent(e))
+        .map(event => event.copy(
+          images = Image.findAllByEvent(event),
+          organizers = Organizer.findAllByEvent(event),
+          artists = Artist.findAllByEvent(event),
+          tariffs = Tariff.findAllByEvent(event),
+          places = Place.findAllByEvent(event.eventId),
+          addresses = Address.findAllByEvent(event))
         )
     }
   }
