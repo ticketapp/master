@@ -56,12 +56,12 @@ object Track {
     }
   }
 
-  def findAllByArtist(facebookUrl: String): Seq[Track] = try {
+  def findAllByArtist(artistFacebookUrl: String): Seq[Track] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM tracks
-             WHERE facebookUrl = {facebookUrl}""")
-        .on('facebookUrl -> facebookUrl)
+             WHERE artistFacebookUrl = {artistFacebookUrl}""")
+        .on('artistFacebookUrl -> artistFacebookUrl)
         .as(TrackParser.*)
     }
   } catch {

@@ -118,7 +118,7 @@ object Scheduler {
       case Some(desc) => Some("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m =>
           if (m.toString contains "@")
-            "<a href='http://" + m + "'>ablezblazbelabezlabzlejbalejbazlejbajlez" + m + "</a>"
+            "<a href='http://" + m + "'>ablezblazbelabezlabzlejbalbazlejbajlez" + m + "</a>"
           else
             "<a href='http://" + m + "'>" + m + "</a>")
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
