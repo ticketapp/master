@@ -1,9 +1,11 @@
 package controllers
 
+import play.api.libs.ws.WS
 import play.api.mvc._
 import play.api.libs.json.Json
 import models.{Info, Ticket}
 import json.JsonHelper._
+import play.api.libs.concurrent.Execution.Implicits._
 
 object Application extends Controller with securesocial.core.SecureSocial {
   def index = UserAwareAction { implicit request =>
@@ -13,6 +15,14 @@ object Application extends Controller with securesocial.core.SecureSocial {
     }
     //println("Yo %s la sacoche".format(userName))
     Ok(views.html.index(userConnected))
+  }
+
+  def getUserGeographicPoint = Action.async { request =>
+      WS.url("http://ip-api.com/json/" + request.remoteAddress)
+        .get()
+        .map { response =>
+          Ok(Json.toJson(response.json))
+        }
   }
 
   /*#################### CAROUSEL ########################*/

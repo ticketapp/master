@@ -93,7 +93,7 @@ object SearchYoutubeTracks {
     WS.url("https://www.googleapis.com/youtube/v3/search")
       .withQueryString(
         "part" -> "snippet",
-        "q" -> (normalizeString(trackTitle) + normalizeString(artistName)),
+        "q" -> (trackTitle + artistName),
         "type" -> "video",
         "videoCategoryId" -> "10",
         "key" -> youtubeKey)
@@ -202,7 +202,7 @@ object SearchYoutubeTracks {
   def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/search")
       .withQueryString(
-        "name" -> normalizeString(artistName),
+        "name" -> artistName,
         "format" -> "json",
         "bucket" -> "urls",
         "bucket" -> "images",

@@ -91,7 +91,7 @@ object SearchSoundCloudTracks {
   }
 
   def getSoundCloudTracksWithLink(scLink: String, artistName: String): Future[Seq[Track]] = {
-    WS.url("http://api.soundcloud.com/users/" + normalizeString(scLink) + "/tracks")
+    WS.url("http://api.soundcloud.com/users/" + scLink + "/tracks")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { readSoundCloudTracks(_, artistName) }
@@ -122,6 +122,7 @@ object SearchSoundCloudTracks {
   }
 
   def normalizeTrackTitle(title: String, artistName: String): String = {
+    //+ artistName_ (ou : / etc)
     val a = ("""(?i)""" + Pattern.quote(artistName) + """\s*-?\s*""").r.replaceFirstIn(
       """(?i)(\.wm[a|v]|\.ogc|\.amr|\.wav|\.flv|\.mov|\.ram|\.mp[3-5]|\.pcm|\.alac|\.eac-3|\.flac|\.vmd)\s*$""".r.
         replaceFirstIn(title, ""),

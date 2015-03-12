@@ -64,6 +64,19 @@ object SearchArtistsController extends Controller {
       .getOrElse(Seq.empty)
   }
 
+  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
+    Future.sequence(
+      websites.map {
+        case website if website contains "facebook" =>
+          getFacebookArtistByUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
+        case website if website contains "soundcloud" =>
+          getFacebookArtistByUrl(website).map { maybeFacebookArtist => maybeFacebookArtist } //bySoundcloudUrl
+        case _ =>
+          Future { None }
+      }
+    )
+  }
+
   def getFacebookArtistByUrl(url: String): Future[Option[Artist]] = {
     val smallerUrl = url.replace("facebook.com/", "")
     val normalizedUrl =
