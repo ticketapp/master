@@ -103,21 +103,19 @@ object Artist {
   }
    */
 
-  def find(artistId: Long): Option[Artist] = {
-    //try {
+  def find(artistId: Long): Option[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM artists WHERE artistId = {artistId}")
         .on('artistId -> artistId)
         .as(ArtistParser.singleOpt)
         .map(artist => artist.copy(
           images = Image.findAllByArtist(artistId),
-          genres = Genre.findAllByArtist(artistId),
-          tracks = Track.findAllByArtist(artist.facebookUrl)))
+          genres = Genre.findAllByArtist(artistId)/*,
+          tracks = Track.findAllByArtist(artist.facebookUrl)*/))
     }
-  }
-/*} catch {
+  } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
-  }*/
+  }
 
   def findByFacebookUrl(facebookUrl: String): Option[Artist] = try {
     DB.withConnection { implicit connection =>
@@ -127,8 +125,8 @@ object Artist {
         .map( artist =>
           artist.copy(
             images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.artistId),
-            tracks = Track.findAllByArtist(artist.facebookUrl)))
+            genres = Genre.findAllByArtist(artist.artistId)/*,
+            tracks = Track.findAllByArtist(artist.facebookUrl)*/))
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
