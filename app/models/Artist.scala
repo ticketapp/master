@@ -107,8 +107,8 @@ object Artist {
         .map( artist =>
           artist.copy(
             images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.artistId)/*,
-            tracks = Track.findAllByArtist(artist.facebookUrl)*/))
+            genres = Genre.findAllByArtist(artist.artistId),
+            tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
