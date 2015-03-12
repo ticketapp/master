@@ -13,69 +13,67 @@ case class Track (trackId: Long,
                   title: String, 
                   url: String, 
                   platform: String, 
-                  thumbnailUrl: String)
+                  thumbnailUrl: String,
+                  artistFacebookUrl: String)
 
 object Track {
   implicit val trackWrites = Json.writes[Track]
 
   def formApplyForTrackCreatedWithArtist(title: String, url: String, platform: String, thumbnailUrl: Option[String],
-  userThumbnailUrl: Option[String]): Track = {
+  userThumbnailUrl: Option[String], artistFacebookUrl: String): Track = {
     thumbnailUrl match {
-      case Some(thumbnail: String) => new Track(-1L, title, url, platform, thumbnail)
+      case Some(thumbnail: String) => new Track(-1L, title, url, platform, thumbnail, artistFacebookUrl)
       case None => userThumbnailUrl match {
-        case Some(userThumbnail: String) => new Track(-1L, title, url, platform, userThumbnail)
+        case Some(userThumbnail: String) => new Track(-1L, title, url, platform, userThumbnail, artistFacebookUrl)
         case None => throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
       }
     }
   }
   def formUnapplyForTrackCreatedWithArtist(track: Track) =
-    Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None))
+    Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None, track.artistFacebookUrl))
 
-  def formApply(title: String, url: String, platform: String, thumbnailUrl: String): Track =
-   new Track(-1L, title, url, platform, thumbnailUrl)
-
-  def formUnapply(track: Track) = Some((track.title, track.url, track.platform, track.thumbnailUrl))
-
-  case class ArtistIdAnTrack (artistFacebookUrl: String, track: Track)
-  def formWithArtistIdApply(artistFacebookUrl: String, track: Track) =
-    new ArtistIdAnTrack(artistFacebookUrl, track)
-  def formWithArtistIdUnapply(artistIdAnTrack: ArtistIdAnTrack) =
-    Option((artistIdAnTrack.artistFacebookUrl, artistIdAnTrack.track))
+  def formApply(title: String, url: String, platform: String, thumbnailUrl: String, artistFacebookUrl: String): Track =
+   new Track(-1L, title, url, platform, thumbnailUrl, artistFacebookUrl)
+  def formUnapply(track: Track) =
+    Some((track.title, track.url, track.platform, track.thumbnailUrl, track.artistFacebookUrl))
 
   private val TrackParser: RowParser[Track] = {
     get[Long]("trackId") ~
       get[String]("title") ~
       get[String]("url") ~
       get[String]("platform") ~
-      get[String]("thumbnailUrl") map {
-      case trackId ~ title ~ url ~ platform ~ thumbnailUrl=>
-        Track(trackId, title, url, platform, thumbnailUrl)
+      get[String]("thumbnailUrl") ~
+      get[String]("artistFacebookUrl") map {
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl =>
+        Track(trackId, title, url, platform, thumbnailUrl, artistFacebookUrl)
     }
   }
 
-  def findAll(): Seq[Track] = {
+  def findAll: Seq[Track] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from tracks")
+      SQL("SELECT * FROM tracks")
         .as(TrackParser.*)
     }
   }
 
-  def findAllByArtist(artistId: Long): Set[Track] = {
+  def findAllByArtist(artistId: Long): Seq[Track] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
-             FROM artistsTracks aT
-             INNER JOIN tracks t ON t.trackId = aT.trackId where aT.artistId = {artistId}""")
+             FROM tracks
+             WHERE artistId = {artistId}""")
         .on('artistId -> artistId)
         .as(TrackParser.*)
-        .toSet
     }
+  } catch {
+    case e: Exception => throw new DAOException("Problem with method Track.findAllByArtist: " + e.getMessage)
   }
 
   def findTracksByPlaylistId(playlistId: Long): Seq[Track] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM playlistsTracks pT
-             INNER JOIN tracks t ON t.trackId = pT.trackId where pT.eventId = {eventId}""")
+             INNER JOIN tracks t ON t.trackId = pT.trackId
+             WHERE pT.eventId = {eventId}""")
         .on('playlistId -> playlistId)
         .as(TrackParser.*)
     }
@@ -101,13 +99,6 @@ object Track {
     }
   }
 
-  def saveTrackAndArtistRelation(track: Track, artistIdOrArtistFacebookUrl: Either[Long, String]): Option[Long] = {
-    save(track) match {
-      case Some(trackId: Long) => saveArtistTrackRelation(artistIdOrArtistFacebookUrl, trackId)
-      case _ => None
-    }
-  }
-
   def saveTrackAndPlaylistRelation(track: Track, playlistId: Long): Option[Long] = {
     save(track) match {
       case Some(trackId: Long) => savePlaylistTrackRelation(playlistId, trackId)
@@ -118,13 +109,14 @@ object Track {
   def save(track: Track): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( """INSERT into tracks(title, url, platform, thumbnailUrl)
-        VALUES ({title}, {url}, {platform}, {thumbnailUrl})""")
+        SQL( """INSERT into tracks(title, url, platform, thumbnailUrl, artistFacebookUrl)
+        VALUES ({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl})""")
           .on(
             'title -> track.title,
             'url -> track.url,
             'platform -> track.platform,
-            'thumbnailUrl -> track.thumbnailUrl)
+            'thumbnailUrl -> track.thumbnailUrl,
+            'artistFacebookUrl -> track.artistFacebookUrl)
           .executeInsert()
       }
     } catch {
@@ -144,39 +136,6 @@ object Track {
     } catch {
       case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
     }
-  }
-
-  def saveArtistTrackRelation(artistIdOrArtistFacebookUrl: Either[Long, String], trackId: Long): Option[Long] = {
-    try {
-      artistIdOrArtistFacebookUrl match {
-        case Left(artistId) =>
-          DB.withConnection { implicit connection =>
-            saveArtistTrackRelationInDatabase(artistId, trackId)
-          }
-        case Right(facebookUrl) =>
-          DB.withConnection { implicit connection =>
-            SQL("""SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl}""")
-              .on('facebookUrl -> facebookUrl)
-              .as(scalar[Option[Long]].single)
-              match {
-                case None => None
-                case Some(artistId) => saveArtistTrackRelationInDatabase(artistId, trackId)
-              }
-          }
-      }
-    } catch {
-      case e: Exception => throw new DAOException("saveArtistTrackRelation: " + e.getMessage)
-    }
-  }
-
-  def saveArtistTrackRelationInDatabase(artistId: Long, trackId: Long)(implicit connection: Connection)
-  : Option[Long] = {
-    SQL("""INSERT INTO artistsTracks (artistId, trackId)
-                  VALUES ({artistId}, {trackId})""")
-      .on(
-        'artistId -> artistId,
-        'trackId -> trackId)
-      .executeInsert()
   }
 
   def deleteTrack(trackId: Long): Long = {

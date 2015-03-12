@@ -17,7 +17,6 @@ GET           /events/containing/:pattern/:center            controllers.EventCo
 GET           /events/circle/:center                         controllers.EventController.findEventsInCircle(center: String)
 GET           /events/city/:pattern                          controllers.EventController.findEventsByCity(pattern: String)
 
-
 ################################## Artists ##############################################
 GET           /artists                                       controllers.ArtistController.artists
 GET           /artists/:facebookUrl                          controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)

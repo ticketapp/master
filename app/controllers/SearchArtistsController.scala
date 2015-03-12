@@ -141,19 +141,12 @@ object SearchArtistsController extends Controller {
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                  maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
     //println(name, facebookId, maybeWebsites, link, maybeDescription, maybeGenre)
-    val facebookUrl = Option(
-      normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
-    )
-    val websitesSeq = facebookUrl match {
-      case Some(facebookUrlFound) =>
-        websitesStringToWebsitesSet(maybeWebsites).filterNot(_ contains facebookUrlFound)
-      case None =>
-        websitesStringToWebsitesSet(maybeWebsites)
-    }
+    val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
+    val websitesSeq = websitesStringToWebsitesSet(maybeWebsites).filterNot(_ contains facebookUrl)
     val images = Set(new Image(-1, cover))
     val description = formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
-    Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSeq, images, genres, Set.empty)
+    Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSeq, images, genres, Seq.empty)
   }
 
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {

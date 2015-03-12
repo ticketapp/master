@@ -29,7 +29,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
 
   def event(id: Long) = Action {
     Event.find(id) match {
-      case Some(x) => Ok(Json.toJson(x))
+      case Some(event) => Ok(Json.toJson(event))
       case None => NotFound
     }
   }

@@ -151,12 +151,11 @@ object Scheduler {
         (__ \ "cover" \ "source").readNullable[String] and
         (__ \ "phone").readNullable[String] and
         (__ \ "public_transit").readNullable[String] and
-        (__ \ "website").readNullable[String]
-      ).apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
-               public_transit: Option[String], website: Option[String]) =>
-      Organizer(-1L, Some(organizerId), name, formatDescription(description),
-        phone, public_transit, website, verified = false,
-        createNewImageIfSourceExists(source)))
+        (__ \ "website").readNullable[String])
+      .apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
+              public_transit: Option[String], website: Option[String]) =>
+      Organizer(-1L, Some(organizerId), name, formatDescription(description), phone, public_transit,
+        website, verified = false, createNewImageIfSourceExists(source)))
     organizer.json.asOpt[Organizer](readOrganizer)
   }
 
