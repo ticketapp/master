@@ -49,12 +49,10 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     function saveTrack (track) {
                         $http.post('/tracks/create', {
                             artistFacebookUrl: artist.facebookUrl,
-                            track: {
-                                title: track.title,
-                                url: track.url,
-                                platform: track.platform,
-                                thumbnailUrl: track.thumbnailUrl
-                            }
+                            title: track.title,
+                            url: track.url,
+                            platform: track.platform,
+                            thumbnailUrl: track.thumbnailUrl
                         }).error(function(data){
                             console.log(data)
                         })

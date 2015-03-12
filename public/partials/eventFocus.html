@@ -68,9 +68,11 @@
                 {{event.addresses[0].zip}}
                 {{event.addresses[0].city}}
             </div>
+            <a class="button" ng-click="moreZoom()">+</a>
+            <a class="button" ng-click="lessZoom()">-</a>
         </div>
         <map ng-if="map && adresses"
-             zoom="15"
+             zoom="{{zoom}}"
              center="[{{event.addresses[0].geographicPoint}}]"
              scrollwheel="false"
              navigationControl="false"

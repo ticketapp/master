@@ -43,7 +43,7 @@
             <input class="column large-6 marginTop20" ng-if="artiste.tracks.length > 0" ng-click="$parent.trackLimit = artiste.tracks.length" ng-model="$parent.trackTitle" placeholder="filter tracks"/>
             <div class="float-left column large-12">
                 <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$root.addAndPlay(artiste.tracks, artiste.name)"><i class="fi-play"></i> Play all</a>
-                <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)"><i class="fi-plus"></i> Add all</a>
+                <a class="button" ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0" ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)"><i class="fi-plus"></i> Add all</a>
                 <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$parent.suggest = !$parent.suggest">Suggérer une track</a>
                 <div ng-if="suggest">
                     <input ng-model="trackTitleSuggest" placeholder="track title">
@@ -65,20 +65,24 @@
             <a class="button" ng-click="suggestQuery(trackTitle, artiste.name)">Suggérer la track {{trackTitle}}</a>
         </div>
         <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit | filter : trackTitle)" class="column" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
-            <div ng-if="track.thumbnail != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
-                <i class="fi-play playInImg" ng-click="$root.addToPlaylist([track], artiste.name)"></i>
-            </div>
-            <div ng-if="track.avatarUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.avatarUrl}}');">
-                <i class="fi-play playInImg" ng-click="$root.addToPlaylist([track], artiste.name)"></i>
-            </div>
             <div ng-if="track.thumbnailUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
                 <i class="fi-play playInImg" ng-click="$root.addToPlaylist([track], artiste.name)"></i>
             </div>
             <div class="column large-8">{{track.title}}</div>
-            <div class="column large-4">
+            <div>
                 <i class="fi-plus float-right" style="font-size: 26px;" ng-click="$root.addToPlaylist([track], artiste.name)"></i>
                 <i class="fi-play-circle float-right" style="font-size: 26px;" ng-click="$root.addAndPlay([track], artiste.name)"></i>
             </div>
+            <a class="column large-8" style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
+                <i style="display: block" class="fi-soundcloud"></i>
+            </a>
+            <a href="https://youtube.com/watch?v={{track.url}}"
+               class="column large-8"
+               style="font-size: 27px;"
+               ng-if="track.platform == 'Youtube'"
+               target="_blank">
+                <i style="display: block" class="fi-social-youtube"></i>
+            </a>
         </div>
         <div class="column large-12">
             <button ng-if="trackLimit < artiste.tracks.length" ng-click="$parent.trackLimit = $parent.trackLimit + 10">More tracks</button>

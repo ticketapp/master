@@ -53,17 +53,17 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                                                 $scope.descHeight = eventsContener[0].clientHeight - 25;
                                             }
                                         }
-                                        $scope.heightMap = eventsContener[0].clientHeight - 30 + 'px';
+                                        $scope.heightMap = eventsContener[0].clientHeight + 'px';
                                     } else {
                                         descPos = eventInfoConteners[1].getBoundingClientRect();
                                         lastEventPos = eventsContener[eventsContener.length - 1].getBoundingClientRect();
-                                        newHeight = (lastEventPos.bottom - descPos.bottom) - 10;
+                                        newHeight = (lastEventPos.bottom - descPos.bottom);
                                         $scope.heightMap = newHeight + 'px';
                                     }
                                 } else {
                                     descPos = eventInfoConteners[1].getBoundingClientRect();
                                     lastEventPos = eventsContener[eventsContener.length - 1].getBoundingClientRect();
-                                    newHeight = (lastEventPos.bottom - descPos.bottom) - 10;
+                                    newHeight = (lastEventPos.bottom - descPos.bottom);
                                     $scope.heightMap = newHeight + 'px';
                                 }
                             } else {
