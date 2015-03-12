@@ -116,7 +116,7 @@ object Track {
   def save(track: Track): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( """INSERT into tracks(title, url, platform, thumbnail)
+        SQL( """INSERT into tracks(title, url, platform, thumbnailUrl)
         VALUES ({title}, {url}, {platform}, {thumbnailUrl})""")
           .on(
             'title -> track.title,
