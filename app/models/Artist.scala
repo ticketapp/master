@@ -54,13 +54,13 @@ object Artist {
     Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
 
 
-  def findAll: List[Artist] = try {
+  def findAll: Seq[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM artists")
         .as(ArtistParser.*)
         .map(artist => artist.copy(
           images = Image.findAllByArtist(artist.artistId),
-          tracks = Track.findAllByArtist(artist.facebookUrl),
+          //tracks = Track.findAllByArtist(artist.facebookUrl),
           genres = Genre.findAllByArtist(artist.artistId)))
     }
   } catch {

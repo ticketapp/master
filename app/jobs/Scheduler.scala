@@ -32,8 +32,7 @@ object Scheduler {
           .get()
           .map { eventDetailed =>
           readFacebookEvent(eventDetailed) match {
-            case Some(eventuallyFacebookEvent) =>
-              eventuallyFacebookEvent map { saveEvent(_, placeId) }
+            case Some(eventuallyFacebookEvent) => eventuallyFacebookEvent map { saveEvent(_, placeId) }
             case None => println("Cannot create event: empty event created in readFacebookEvent")
           }
         }
