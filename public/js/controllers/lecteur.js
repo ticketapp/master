@@ -8,17 +8,36 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     $scope.onPlay = false;
     $scope.levelVol = 100;
     $scope.shuffle = false;
+    $scope.sortableOptions = {
+        containment: '#sortable-container',
+        //restrict move across columns. move only within column.
+        accept: function (sourceItemHandleScope, destSortableScope) {
+            return sourceItemHandleScope.itemScope.sortableScope.$id === destSortableScope.$id;
+        }
+    };
     var played = [];
     var i = 0;
     function pushTrack (track, art) {
-        track.artist = art;
-        track.title = track.title.replace(art + " - ", "");
-        track.title = track.title.replace(art + "-", "");
-        track.title = track.title.replace(art.toLowerCase() + " - ", "");
-        track.title = track.title.replace(art.toLowerCase() + "-", "");
-        track.title = track.title.replace(art.toUpperCase() + " - ", "");
-        track.title = track.title.replace(art.toUpperCase() + "-", "");
-        $rootScope.playlist.tracks.push(track);
+        $scope.newTrack = {};
+        $scope.newTrack.platform = track.platform;
+        if (track.thumbnailUrl != undefined) {
+            $scope.newTrack.thumbnailUrl = track.thumbnailUrl;
+        } else if (track.avatarUrl != undefined) {
+            $scope.newTrack.avatarUrl = track.avatarUrl;
+        } else if (track.thumbnail != undefined) {
+            $scope.newTrack.thumbnail = track.thumbnail;
+        }
+        $scope.newTrack.url = track.url;
+        $scope.newTrack.artist = art;
+        $scope.newTrack.title = track.title.replace(art + " - ", "");
+        $scope.newTrack.title = $scope.newTrack.title.replace(art + "-", "");
+        $scope.newTrack.title = $scope.newTrack.title.replace(art.toLowerCase() + " - ", "");
+        $scope.newTrack.title = $scope.newTrack.title.replace(art.toLowerCase() + "-", "");
+        $scope.newTrack.title = $scope.newTrack.title.replace(art.toUpperCase() + " - ", "");
+        $scope.newTrack.title = $scope.newTrack.title.replace(art.toUpperCase() + "-", "");
+        $rootScope.playlist.tracks.push($scope.newTrack);
+        console.log($scope.newTrack)
+        console.log($rootScope.playlist.tracks)
     }
     $rootScope.addToPlaylist = function (tracks, artist) {
         if ($rootScope.playlist.tracks.length == 0) {
@@ -128,7 +147,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         };
         document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
-        $scope.trackActive = i;
+        $scope.trackActive = $rootScope.playlist.tracks[i];
         if ($rootScope.playlist.tracks[i].platform == 'Soundcloud') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';

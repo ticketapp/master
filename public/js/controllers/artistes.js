@@ -1,9 +1,12 @@
 app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket){
     $scope.bigTracks = true;
     $scope.trackLimit = 10;
-    $rootScope.heightDesc = '147px';
+    $scope.heightDesc = '147px';
     $scope.trackTitle = '';
-    $scope.allDesc = true;
+    $scope.allDesc = false;
+    $scope.suggestQuery = function (trackName, artistName) {
+        console.log(trackName, artistName)
+    };
     function resizePageElem () {
         var waitForBinding = setInterval(function () {
             if (document.getElementById('events_contener').innerHTML.length > 0) {
@@ -78,12 +81,14 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
         }
     }
     if ($rootScope.artisteToCreate == false) {
+        $rootScope.loadingTracks = true;
         $http.get('/artists/' + $routeParams.facebookUrl)
             .success(function (data, status) {
                 $scope.artiste = data;
                 refactorWebsites();
                 watchWindowSize();
                 console.log(data)
+                $rootScope.loadingTracks = false
             }).error(function (data, status) {
             });
     } else {

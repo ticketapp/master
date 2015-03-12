@@ -17,6 +17,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.loadingTracks = true;
             $rootScope.artisteToCreate = true;
             $rootScope.artiste = artist;
+            window.location.href =('#/artiste/' + artist.facebookUrl);
             $rootScope.$apply;
             var searchPattern  = document.getElementById('searchBar').value.trim()
             oboe.post('artists/createArtist', {
@@ -32,7 +33,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 }
             }).start(function (data, etc) {
                     console.log(etc, data);
-                    window.location.href =('#/artiste/' + artist.facebookUrl);
                 })
                 /*.node('champ.*', function (value) {
                  $scope.items.push(value);
@@ -40,19 +40,26 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 .done(function (value) {
                     $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
                     if (value.constructor === Array) {
-                        console.log(value)
-                        $rootScope.loadingTracks = false
+                        console.log(value);
+                        if (value.length != 0) {
+                            $rootScope.loadingTracks = false
+                        }
                     }
                     $rootScope.$apply();
-                    function saveTrack (track) {
-                        //$http.post('/tracks')
-                    }
+                    /*function saveTrack (track) {
+                        $http.post('/tracks/create', {
+
+                        })
+                    }*/
                     value.forEach(saveTrack)
 
                 })
                 .fail(function (error) {
                     console.log("Error: ", error);
                 });
+        };
+        $rootScope.resizePageElementsWithEvents = function() {
+
         };
         function resizeArtistsText (ImgHeight) {
             var artists = document.getElementsByClassName('textArtistMin');
@@ -107,6 +114,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }
         function respClass () {
             marginContent();
+            $rootScope.resizeImgHeight();
             if (window.innerWidth > 0 && window.innerWidth <= 640) {
                 $scope.$apply(function () {
                     $rootScope.window = 'small';
@@ -146,10 +154,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }
         $scope.gotoTop = '';
         function location() {
-            marginContent();
-            $timeout(function() {
-                window.scrollTo(0, 0);
-            }, 200);
             if ($location.path() == '/') {
                 $rootScope.home = true;
                 $rootScope.pathArt = false;
@@ -205,10 +209,10 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             } else {
                 window.removeEventListener('scroll', fixControl)
             }
+            marginContent();
         }
         $scope.$on('$locationChangeSuccess', function() {
             location();
-            marginContent();
         });
         $rootScope.activArtist = false;
         $rootScope.activEvent = true;

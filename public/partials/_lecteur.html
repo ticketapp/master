@@ -14,7 +14,7 @@
     <i ng-click="$parent.showLecteur = false" ng-if="showLecteur" style="margin: 0 4px;" class="fi-minus float-left"></i>
     <i ng-click="remPlaylist()" class="fi-trash float-left" style="margin: 0 4px;"></i>
     <i ng-click="savePlaylist = !savePlaylist" class="fi-save float-left" style="margin: 0 4px;"></i>
-    <i ng-if="playlist.tracks[trackActive].platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
+    <i ng-if="trackActive.platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
     <i class="fi-volume float-left" ng-click="showVol = !showVol" style="margin: 0 4px;"></i>
     <md-slider ng-show="showVol" flex ng-change="volume()"
                ng-model="levelVol" min="0" max="100"
@@ -41,22 +41,30 @@
 </div>
 <div ng-show="showLecteur" class="width100p float-left">
     <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>
-    <div class="playlistScroller" style="position: relative; overflow-x: auto;">
-        <div class="playlistContener">
-            <div ng-class="{onplay : $index == trackActive}" class="float-left trackContener" ng-repeat="track in playlist.tracks track by $index">
+    <div class="width100p playlistScroller" style="overflow-x: auto;">
+        <div ng-if="playlist.tracks.length > 0" style="position: relative; overflow-x: auto; display: inline-flex;"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
+            <div ng-class="{onplay : track == trackActive}" class="float-left trackContener"
+                 as-sortable-item ng-repeat="track in playlist.tracks">
                 <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
-                <div ng-click="play($index)">
-                    <div ng-if="track.thumbnail != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
-                    </div>
-                    <div ng-if="track.avatarUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.avatarUrl}}');">
-                    </div>
-                    <div ng-if="track.thumbnailUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
-                    </div>
-                    <div class="trackInfos">
-                        {{track.artist}}<br/>
-                        {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
-                        {{track.platform}}<br/>
-                    </div>
+                <div ng-if="track.thumbnail != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnail}}');">
+                    <i class="fi-play playInImg" ng-if="$parent.track != $parent.trackActive" ng-click="$root.play($index)"></i>
+                    <i class="fi-pause pauseInImg" ng-if="$parent.track == $parent.trackActive && onPlay" ng-click="playPause()"></i>
+                    <i class="fi-play pauseInImg" ng-if="$parent.track == $parent.trackActive && !onPlay" ng-click="playPause()"></i>
+                </div>
+                <div ng-if="track.avatarUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.avatarUrl}}');">
+                    <i class="fi-play playInImg" ng-if="$parent.track != $parent.trackActive" ng-click="$root.play($index)"></i>
+                    <i class="fi-pause pauseInImg" ng-if="$parent.track == $parent.trackActive && onPlay" ng-click="playPause()"></i>
+                    <i class="fi-play pauseInImg" ng-if="$parent.track == $parent.trackActive && !onPlay" ng-click="playPause()"></i>
+                </div>
+                <div ng-if="track.thumbnailUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
+                    <i class="fi-play playInImg" ng-if="$parent.track != $parent.trackActive" ng-click="$root.play($index)"></i>
+                    <i class="fi-pause pauseInImg" ng-if="$parent.track == $parent.trackActive && onPlay" ng-click="playPause()"></i>
+                    <i class="fi-play pauseInImg" ng-if="$parent.track == $parent.trackActive && !onPlay" ng-click="playPause()"></i>
+                </div>
+                <div as-sortable-item-handle class="trackInfos">
+                    {{track.artist}}<br/>
+                    {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
+                    {{track.platform}}<br/>
                 </div>
             </div>
         </div>

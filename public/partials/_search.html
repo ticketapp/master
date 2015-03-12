@@ -5,11 +5,12 @@
     <ul id="events_contener" ng-class="{padding50: $root.pathSearch}"
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
         <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0"
-            data-ng-repeat="event in events  | limitTo : limit |orderBy: order | filter: filterSearch">
+            data-ng-repeat="event in events |orderBy: order | filter: filterSearch"
+            ng-show= " filterQuery.length <= 1 || filterQuery == undefined">
         </li>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-3 medium-6 float-left margin0"
-            data-ng-repeat="artist in artists | limitTo : limit | filter: filterSearch"
+            data-ng-repeat="artist in artists | filter: filterSearch"
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
             style="padding-bottom: 20px;">
             <div class="block_event_min">
@@ -35,7 +36,7 @@
         </div>
         <div class="column large-3 medium-6 float-left margin0"
              ng-if="$root.activArtist && artistsFb.length > 0"
-            data-ng-repeat="artist in artistsFb | limitTo : limit "
+            data-ng-repeat="artist in artistsFb "
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
             style="padding-bottom: 20px;">
             <div class="block_event_min">
@@ -67,7 +68,7 @@
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
         <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0"
-            data-ng-repeat="place in places | limitTo : limit" >
+            data-ng-repeat="place in places" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -82,8 +83,7 @@
             </div>
         </li>
         <li class="min_contener margin0" ng-if="$root.activUsr && users.length > 0"
-            data-ng-repeat="user in users |
-            limitTo : limit">
+            data-ng-repeat="user in users">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -98,13 +98,9 @@
             </div>
         </li>
     </ul>
-    <div ng-if="events.length > limit || artists.length > limit || artistsFb.length || places.length > limit || users.length > limit"
+    <div ng-if="events.length >= limit || artists.length >= limit || artistsFb.length >= limit || places.length >= limit || users.length >= limit"
          layout="row" layout-align="center center">
-        <button ng-click="moreLimit(); $parent.limit = $parent.limit + 12" class="column large-5">More</button>
-    </div>
-    <div ng-if="limit > 12"
-         layout="row" layout-align="center center">
-        <button ng-click="$parent.limit = 12" class="column large-5">Less</button>
+        <button ng-click="moreLimit(); $parent.limit = $parent.limit + 20" class="column large-5">More</button>
     </div>
 </div>
 

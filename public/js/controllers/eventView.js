@@ -8,7 +8,7 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
             data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(",", ", ");*/
             $scope.event = data;
             console.log($scope.event);
-            if (data.description.length > 0 && $rootScope.window != 'small' && $rootScope.window != 'medium') {
+            if ( $rootScope.window != 'small' || $rootScope.window != 'medium') {
                 var waitForBinding = setInterval(function () {
                     if (document.getElementById('eventDescBind').innerHTML.length > 0) {
                         clearInterval(waitForBinding);
@@ -19,29 +19,21 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                                 eventInfoConteners[i].classList.add('large-12');
                             }
                         }
-                        $scope.map = true;
-                        $scope.$apply();
-                    }
-                }, 100);
-            } else if ( $rootScope.window != 'small' || $rootScope.window != 'medium') {
-                $rootScope.$watch('window', function(newval) {
-                    if (newval == 'large' || newval == 'xlarge' || newval == 'xxlarge') {
-                        var waitForBinding = setInterval(function () {
-                            if (document.getElementById('eventDescBind').innerHTML.length > 0) {
-                                clearInterval(waitForBinding);
-                                var eventInfoConteners = document.getElementsByClassName('eventInfo');
-                                for (var i = 0; i < eventInfoConteners.length; i++) {
-                                    if (eventInfoConteners[i].offsetLeft < 30) {
-                                        eventInfoConteners[i].classList.remove('large-4');
-                                        eventInfoConteners[i].classList.add('large-12');
-                                    }
-                                }
+                    } else {
+                        clearInterval(waitForBinding);
+                        var eventInfoConteners = document.getElementsByClassName('eventInfo');
+                        for (var i = 0; i < eventInfoConteners.length; i++) {
+                            if (eventInfoConteners[i].offsetLeft < 30) {
+                                eventInfoConteners[i].classList.remove('large-4');
+                                eventInfoConteners[i].classList.add('large-12');
                             }
-                            $scope.map = true;
-                            $scope.$apply();
-                        }, 100);
+                        }
                     }
-                })
+                    $scope.map = true;
+                    $scope.$apply();
+                }, 100);
+            } else {
+                $scope.map = true;
             }
         }).error(function(data, status){
             console.log(data);

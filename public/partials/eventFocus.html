@@ -31,19 +31,23 @@
     </div>
     <div class="column large-4 float-left eventInfo" >
         <h2>Programmation</h2>
-        <li ng-repeat="artist in event.artists">
-            <a href="#/artiste/{{artist.id}}">{{artist.name}}</a>
+        <li ng-repeat="artist in event.artists" style="display: block;">
+            <a href="#/artiste/{{artist.facebookUrl}}">{{artist.name}}</a>
+            <i ng-if="artist.tracks.length > 0"
+               ng-click="$root.addAndPlay(artiste.tracks, artiste.name)"
+               class="fi-play-circle float-right"><a>PlayAll</a></i>
+            <i ng-if="artist.tracks.length > 0"
+               ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)"
+               class="fi-plus float-right"><a>addAll</a></i>
         </li>
     </div>
     <div class="column large-4 float-left eventInfo" >
         <h2>Organisateur</h2>
         <div data-ng-repeat="organizer in event.organizers">
-            <a href="#/user/{{organizer.organizerId}}">
+            <a href="#/user/{{organizer.organizerId}}" class="column large-12 padding0">
                 <img src="{{organizer.images[0].path}}" class="relative width100p"/>
             </a>
-            <a href="#/user/{{organizer.organizerId}}">
-                <h3 class="column large-8">{{ organizer.name }}</h3>
-            </a>
+            <h3 class="column large-8"><a href="#/user/{{organizer.organizerId}}">{{ organizer.name }}</a></h3>
             <button style='margin-top:5px; float:right'>Suivre</button>
             <i class="fi-plus column large-12 pointer"
                ng-if="!readDesc && organizer.description != undefined"
