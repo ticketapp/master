@@ -35,19 +35,17 @@ object Genre {
     }
   }
 
-  def findAllByArtist(artistId: Long): Set[Genre] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("""SELECT *
-               FROM artistsGenres gA
-               INNER JOIN genres g ON g.genreId = gA.genreId where gA.artistId = {artistId}""")
-          .on('artistId -> artistId)
-          .as(GenreParser.*)
-          .toSet
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot get all genres by artist: " + e.getMessage)
+  def findAllByArtist(artistId: Long): Set[Genre] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT *
+             FROM artistsGenres gA
+             INNER JOIN genres g ON g.genreId = gA.genreId where gA.artistId = {artistId}""")
+        .on('artistId -> artistId)
+        .as(GenreParser.*)
+        .toSet
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot get all genres by artist: " + e.getMessage)
   }
 
   def find(genreId: Long): Option[Genre] = {

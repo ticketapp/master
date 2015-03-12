@@ -11,17 +11,18 @@ import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
-
 import scala.concurrent.Future
-
 
 object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action {
-    Ok(Json.toJson(Artist.findAll()))
+    Ok(Json.toJson(Artist.findAll))
   }
 
   def artist(artistId: Long) = Action {
-    Ok(Json.toJson(Artist.find(artistId)))
+    Artist.find(artistId) match {
+      case Some(x) => Ok(Json.toJson(x))
+      case None => NotFound
+    }
   }
 
   def artistByFacebookUrl(facebookUrl: String) = Action {
@@ -42,7 +43,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         "facebookId" -> optional(nonEmptyText(2)),
         "artistName" -> nonEmptyText(2),
         "description"  -> optional(nonEmptyText),
-        "facebookUrl"  -> optional(nonEmptyText),
+        "facebookUrl"  -> nonEmptyText,
         "websites" -> seq(nonEmptyText(4)),
         "images" -> seq(
           mapping(
@@ -58,7 +59,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
             "url" -> nonEmptyText,
             "platform" -> nonEmptyText,
             "thumbnail" -> optional(nonEmptyText),
-            "avatarUrl" -> optional(nonEmptyText)
+            "avatarUrl" -> optional(nonEmptyText),
+            "artistFacebookUrl" -> nonEmptyText(2)
           )(Track.formApplyForTrackCreatedWithArtist)(Track.formUnapplyForTrackCreatedWithArtist)
         )
       )(Artist.formApply)(Artist.formUnapply)
@@ -90,7 +92,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     )
     val youtubeTracksEnumerator = Enumerator.flatten(
       getYoutubeTracksForArtist(
-        patternAndArtist.artist.name, patternAndArtist.artist.facebookId.get, patternAndArtist.searchPattern)
+        patternAndArtist.artist, patternAndArtist.searchPattern)
         .map { youtubeTracks =>
           Enumerator(Json.toJson(youtubeTracks))
         }

@@ -68,7 +68,8 @@ CREATE TABLE tracks (
   title                   VARCHAR(255) NOT NULL,
   url                     TEXT NOT NULL,
   platform                VARCHAR(255) NOT NULL,
-  thumbnailUrl            TEXT NOT NULL
+  thumbnailUrl            TEXT NOT NULL,
+  artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL
 );
 
 CREATE TABLE users (
@@ -369,14 +370,14 @@ CREATE TABLE usersFollowed (
 );
 
 CREATE TABLE eventsPlaces (
-  eventId INT REFERENCES events (eventId),
-  placeId INT REFERENCES places (placeId),
+  eventId                 INT REFERENCES events (eventId),
+  placeId                 INT REFERENCES places (placeId),
   PRIMARY KEY (eventId, placeId)
 );
 
 CREATE TABLE eventsGenres (
-  eventId INT REFERENCES events (eventId),
-  genreId INT REFERENCES genres (genreId),
+  eventId                 INT REFERENCES events (eventId),
+  genreId                 INT REFERENCES genres (genreId),
   PRIMARY KEY (eventId, genreId)
 );
 
@@ -434,15 +435,7 @@ CREATE TABLE usersPlaylists (
   PRIMARY KEY (userId, playlistId)
 );
 
-CREATE TABLE artistsTracks (
-  artistId                BIGINT REFERENCES artists (artistId),
-  trackId                 BIGINT REFERENCES tracks (trackId),
-  PRIMARY KEY (artistId, trackId)
-);
-
-
 # --- !Downs
-DROP TABLE IF EXISTS artistsTracks;
 DROP TABLE IF EXISTS usersPlaylists;
 DROP TABLE IF EXISTS playlistTracks;
 DROP TABLE IF EXISTS playlists;

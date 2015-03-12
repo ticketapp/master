@@ -25,7 +25,7 @@ object SearchSoundCloudTracks {
     }
     soundCloudLink match {
       case "" => getSoundCloudTracksNotDefinedInFb(artist)
-      case scLink => getSoundCloudTracksWithLink(scLink, artist.name)
+      case scLink => getSoundCloudTracksWithLink(scLink, artist)
     }
   }
 
@@ -43,14 +43,13 @@ object SearchSoundCloudTracks {
     for (websitesAndId <- websitesAndIds) {
       for (website <- websitesAndId._2) {
         val site = normalizeUrl(website)
-        if (artist.websites.toSeq.indexOf(site) > -1 ||
-          ("facebook.com/" + artist.facebookUrl.getOrElse("")) == site ||
+        if (artist.websites.toSeq.indexOf(site) > -1 || ("facebook.com/" + artist.facebookUrl) == site ||
           (artist.facebookId.nonEmpty && (site contains artist.facebookId.get)))
           matchedId = websitesAndId._1
       }
     }
     if (matchedId != 0)
-      getSoundCloudTracksWithLink(matchedId.toString, artist.name)
+      getSoundCloudTracksWithLink(matchedId.toString, artist)
     else
       Future { Seq.empty }
   }
@@ -90,14 +89,14 @@ object SearchSoundCloudTracks {
       .getOrElse(Seq.empty)
   }
 
-  def getSoundCloudTracksWithLink(scLink: String, artistName: String): Future[Seq[Track]] = {
+  def getSoundCloudTracksWithLink(scLink: String, artist: Artist): Future[Seq[Track]] = {
     WS.url("http://api.soundcloud.com/users/" + scLink + "/tracks")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
-      .map { readSoundCloudTracks(_, artistName) }
+      .map { readSoundCloudTracks(_, artist) }
   }
 
-  def readSoundCloudTracks(soundCloudResponse: Response, artistName: String): Seq[Track] = {
+  def readSoundCloudTracks(soundCloudResponse: Response, artist: Artist): Seq[Track] = {
     val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
@@ -111,9 +110,9 @@ object SearchSoundCloudTracks {
     val collectOnlyTracksWithUrlTitleAndThumbnail = readTracks.map { tracks =>
       tracks.collect {
         case (Some(url: String), Some(title: String), Some(thumbnailUrl: String), avatarUrl) =>
-          Track(-1L, normalizeTrackTitle(title, artistName), url, "Soundcloud", thumbnailUrl)
+          Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl)
         case (Some(url: String), Some(title: String), None, Some(avatarUrl: String)) =>
-          Track(-1L, normalizeTrackTitle(title, artistName), url, "Soundcloud", avatarUrl)
+          Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl)
       }
     }
     soundCloudResponse.json
