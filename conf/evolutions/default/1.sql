@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 3 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 2 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -406,14 +406,14 @@ CREATE TABLE eventsArtists (
 );
 
 CREATE TABLE usersArtists (
-  userId INT REFERENCES users (userId),
-  artistId INT REFERENCES artists (artistId),
+  userId                  INT REFERENCES users (userId),
+  artistId                INT REFERENCES artists (artistId),
   PRIMARY KEY (userId, artistId)
 );
 
 CREATE TABLE artistsGenres (
-  artistId INT REFERENCES artists (artistId),
-  genreId INT REFERENCES genres (genreId),
+  artistId                INT REFERENCES artists (artistId),
+  genreId                 INT REFERENCES genres (genreId),
   PRIMARY KEY (genreId, artistId)
 );
 
@@ -483,10 +483,10 @@ DROP TABLE IF EXISTS images;
 DROP TABLE IF EXISTS infos;
 DROP TABLE IF EXISTS places;
 DROP TABLE IF EXISTS amountDue;
+DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS tracks;
-DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS organizers;
 DROP TABLE IF EXISTS users_login, users_token;
 DROP TABLE IF EXISTS artists;
