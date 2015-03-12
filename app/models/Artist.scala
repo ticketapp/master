@@ -58,17 +58,14 @@ object Artist {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM artists")
         .as(ArtistParser.*)
-        .map(artist =>
-      {println("tracks: " + Track.findAllByArtist(artist.artistId))
-        artist.copy(
+        .map(artist => artist.copy(
           images = Image.findAllByArtist(artist.artistId),
-          tracks = Track.findAllByArtist(artist.artistId),
-          genres = Genre.findAllByArtist(artist.artistId)) } )
+          tracks = Track.findAllByArtist(artist.facebookUrl),
+          genres = Genre.findAllByArtist(artist.artistId)))
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
   }
-
 
   def findAllByEvent(event: Event): List[Artist] = try {
     DB.withConnection { implicit connection =>
@@ -82,7 +79,7 @@ object Artist {
           artist.copy(
             images = Image.findAllByArtist(artist.artistId),
             genres = Genre.findAllByArtist(artist.artistId),
-            tracks = Track.findAllByArtist(artist.artistId)))
+            tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -115,7 +112,7 @@ object Artist {
         .map(artist => artist.copy(
           images = Image.findAllByArtist(artistId),
           genres = Genre.findAllByArtist(artistId),
-          tracks = Track.findAllByArtist(artistId)))
+          tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   }
 /*} catch {
@@ -131,7 +128,7 @@ object Artist {
           artist.copy(
             images = Image.findAllByArtist(artist.artistId),
             genres = Genre.findAllByArtist(artist.artistId),
-            tracks = Track.findAllByArtist(artist.artistId)))
+            tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -148,9 +145,7 @@ object Artist {
           artist.copy(
             images = Image.findAllByArtist(artist.artistId),
             genres = Genre.findAllByArtist(artist.artistId),
-            tracks = Track.findAllByArtist(artist.artistId)
-          )
-        )
+            tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAllContaining: " + e.getMessage)
