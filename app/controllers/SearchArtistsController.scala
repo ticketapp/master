@@ -85,6 +85,7 @@ object SearchArtistsController extends Controller {
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { response =>
+        println(readMaybeFacebookUrl(response))
         println(response.json)
     }
   }
@@ -100,7 +101,6 @@ object SearchArtistsController extends Controller {
         case (url: String, "facebook") => url
       }
     }
-
     soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
       case Some(facebookUrls: Seq[String]) if facebookUrls.length > 0 => Option(facebookUrls(0))
       case _ => None
