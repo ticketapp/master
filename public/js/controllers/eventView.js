@@ -1,11 +1,16 @@
 app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope',
     function ($scope, $routeParams, $http, $rootScope ){
     $scope.map = false;
+    $scope.adresses = false;
     $http.get('/events/' + $routeParams.id)
         .success(function(data, status){
-            /*data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace("(", "");
-            data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(")", "");
-            data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(",", ", ");*/
+            if (data.addresses.length > 0) {
+                data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace("(", "");
+                data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(")", "");
+                data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(",", ", ");
+                $scope.adresses = true;
+                console.log($scope.adresses);
+            }
             $scope.event = data;
             console.log($scope.event);
             if ( $rootScope.window != 'small' || $rootScope.window != 'medium') {

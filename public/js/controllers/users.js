@@ -7,7 +7,6 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         $scope.getUrl = 'organizers'
     }
 
-    console.log($routeParams);
     $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
         .success(function(data, status){
             $scope.orgaEvents = data;
@@ -102,6 +101,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
     $http.get('/' + $scope.getUrl + '/' + $routeParams.id)
         .success(function(data, status){
             $scope.organizer = data;
+            console.log(data);
         }).error(function(data, status){
         });
 });

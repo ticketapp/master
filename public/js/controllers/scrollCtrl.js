@@ -46,11 +46,19 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                         }
                     }
                     $rootScope.$apply();
-                    /*function saveTrack (track) {
+                    function saveTrack (track) {
                         $http.post('/tracks/create', {
-
+                            artistFacebookUrl: artist.facebookUrl,
+                            track: {
+                                title: track.title,
+                                url: track.url,
+                                platform: track.platform,
+                                thumbnailUrl: track.thumbnailUrl
+                            }
+                        }).error(function(data){
+                            console.log(data)
                         })
-                    }*/
+                    }
                     value.forEach(saveTrack)
 
                 })

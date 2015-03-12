@@ -19,7 +19,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         $scope.filterSearch = _research;
         if (_research.length == 0) {
             if (_selEvent == true) {
-                $http.get('/events/offset/' + offset).
+                $http.get('/events/offset/'+ offset+ '/' + $rootScope.geoLoc).
                     success(function (data, status, headers, config) {
                         var scopeIdList = [];
                         function getEventId(el, index, array) {
