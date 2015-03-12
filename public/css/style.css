@@ -337,6 +337,25 @@ top: 0;
 .rightmv.ng-enter{position:absolute; top: 0; -webkit-animation-name: slideInRight; -moz-animation-name : slideInRight; -ms-animation-name : slideInRight; -o-animation-name : slideInRight;}
 .rightmv.ng-leave{-webkit-animation-name: slideOutLeft; -moz-animation-name: slideOutLeft; -ms-animation-name: slideOutLeft; -o-animation-name: slideOutLeft;}
 */
+        .as-sortable-item,
+        .as-sortable-placeholder {
+            display: inline-block;
+            width: 124px;
+            height: 110px;
+            float: left;
+        }
+
+        .sortable-row:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        #sortable-container {
+            display: inline-block;
+        }
         /*carousel animations*/
         .switch-container {
             position: relative;
@@ -414,6 +433,23 @@ top: 0;
             font-size: 26px;
             margin-top: -8px;
         }
+        .playInImg {
+            display : none;
+            font-size: 57px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+        }
+        .pauseInImg {
+            display: block;
+            font-size: 57px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+        }
+        .img-circularPlayer:hover > .playInImg {
+            display: block;
+        }
         .img-circularPlayer{
             width: 80px;
             height: 80px;
@@ -432,6 +468,10 @@ top: 0;
         }
         .trackInfos {
             padding-top: 10px;
+            font-size: 11px;
+        }
+        .trackInfos:hover {
+            cursor: move;
         }
         .trackContener {
             width: 205px;

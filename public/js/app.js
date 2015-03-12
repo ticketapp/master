@@ -1,4 +1,17 @@
-var app = angular.module('MonApp',['ngAnimate', 'ngAria', 'ngMessages', 'ngMaterial', 'ngRoute', 'ngSanitize', 'mm.foundation', 'colorpicker.module', 'ngMap', 'uiSlider', 'ng-oboe', 'angularytics', 'ngWebsocket']);
+var app = angular.module('MonApp',['ngAnimate',
+    'ngAria',
+    'ngMessages',
+    'ngMaterial',
+    'ngRoute',
+    'ngSanitize',
+    'mm.foundation',
+    'colorpicker.module',
+    'ngMap',
+    'uiSlider',
+    'ng-oboe',
+    'angularytics',
+    'ngWebsocket',
+    'ui.sortable']);
 
 app.config(function($routeProvider, $locationProvider, AngularyticsProvider){
     AngularyticsProvider.setEventHandlers(['Console', 'GoogleUniversal']);

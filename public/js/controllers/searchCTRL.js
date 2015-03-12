@@ -1,5 +1,5 @@
 app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', function($rootScope, $http, $scope, $filter, oboe){
-    $scope.limit = 12;
+    $scope.limit = 20;
     $scope.artists = [];
     $scope.artistsFb = [];
     $scope.users = [];
@@ -36,6 +36,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             }
                             data.forEach(uploadEvents)
                         }
+                        console.log($scope.events)
                         $rootScope.resizeImgHeight();
                     }).
                     error(function (data, status, headers, config) {
@@ -212,7 +213,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     function searchArtistFb () {
         $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
-        var artistFbIdList = [];
         console.log(_research.length)
         if ($scope.artistsFb.length < $scope.limit && _selArtist == true && _research.length > 1) {
             $scope.loadingFbArt = true;
@@ -227,16 +227,18 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 .success(function (value) {
                     $scope.loadingFbArt = false;
                     console.log(value)
+                    var artistFbIdList = [];
                     function updateArtistFb (artistInfo) {
                         function getArtistFbIdInArtists (el) {
                             artistFbIdList.push(el.facebookId);
                         }
                         $scope.artists.forEach(getArtistFbIdInArtists);
-                        if ($scope.artistsFb.indexOf(artistInfo) < 0 && artistFbIdList.indexOf(artistInfo.facebookId) < 0) {
+                        $scope.artistsFb.forEach(getArtistFbIdInArtists);
+                        if (artistFbIdList.indexOf(artistInfo.facebookId) < 0) {
                             console.log(artistInfo);
                             artistInfo.tracks = [];
+                            artistFbIdList.push(artistInfo.facebookId);
                             $scope.artistsFb.push(artistInfo);
-                            $scope.$apply();
                             $rootScope.resizeImgHeight();
                             console.log($scope.artistsFb)
                         } else {
@@ -262,7 +264,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     $scope.research = function(newName) {
         if (angular.isDefined(newName)) {
             _research = newName
-            $scope.limit = 12;
+            $scope.limit = 20;
             offset = 0;
             if (_selArtist == true && _research.length > 2) {
                 clearTimeout(typingTimer);
@@ -277,6 +279,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             _selArtist = newName;
             search();
             searchArtistFb();
+            $scope.limit = 20;
+            offset = 0;
         }
         return _selArtist;
     };
@@ -284,6 +288,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _selEvent = newName;
             search();
+            $scope.limit = 20;
+            offset = 0;
         }
         return _selEvent;
     };
@@ -291,6 +297,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _selPlace = newName;
             search();
+            $scope.limit = 20;
+            offset = 0;
         }
         return _selPlace;
     };
@@ -298,6 +306,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _selUsr = newName;
             search();
+            $scope.limit = 20;
+            offset = 0;
         }
         return _selUsr;
     };
