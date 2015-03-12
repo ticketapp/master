@@ -66,19 +66,17 @@ object SearchYoutubeTracks {
   
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Future[Set[Track]] = {
     getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
-      getYoutubeTracksByTitlesAndArtistName(echonestSongsTitle, artist)
+      getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
     }
   }
 
-  def getYoutubeTracksByTitlesAndArtistName(tracksTitle: Set[String], artist: Artist): Future[Set[Track]] = {
+  def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Future[Set[Track]] = {
+    println(tracksTitle)
     val eventuallyTracks = Future.sequence(
       tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) }
     )
     eventuallyTracks.map { tracks =>
-      println(artist.name)
-      val ArtistNameRegex = (artist.name.toLowerCase).r
-      println( tracks.flatten.filter(_.title.toLowerCase contains artist.name.toLowerCase))
-
+      //val ArtistNameRegex = artist.name.toLowerCase.r
       tracks.flatten.filter(_.title.toLowerCase contains artist.name.toLowerCase)
         /*match {
           case ArtistNameRegex(title) => true
@@ -88,6 +86,7 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksByTitleAndArtistName(artist: Artist, trackTitle: String): Future[Set[Track]] = {
+    println(trackTitle)
     WS.url("https://www.googleapis.com/youtube/v3/search")
       .withQueryString(
         "part" -> "snippet",
@@ -106,7 +105,6 @@ object SearchYoutubeTracks {
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
       )((title: Option[String], url: Option[String], thumbnailUrl: Option[String]) =>
       (title, url, thumbnailUrl))
-
     val collectOnlyTracksWithUrlTitleAndThumbnailUrl = Reads.set(youtubeTrackReads).map { tracks =>
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String)) =>
@@ -125,7 +123,7 @@ object SearchYoutubeTracks {
         "id" -> s"facebook:artist:$facebookArtistId",
         "format" -> "json")
       .get()
-      .map { readMaybeEchonestArtistIdAndUrls }
+      .map { response => readMaybeEchonestArtistIdAndUrls(response) }
   }
 
   def readMaybeEchonestArtistIdAndUrls(echonestResponse: Response): Option[(String, Set[String])] = {
@@ -207,7 +205,7 @@ object SearchYoutubeTracks {
         "bucket" -> "id:facebook",
         "api_key" -> echonestApiKey)
       .get()
-      .map { readEchonestTupleIdFacebookId }
+      .map { response => println(response.json);readEchonestTupleIdFacebookId(response) }
   }
 
   def readEchonestTupleIdFacebookId(echonestResponse: Response): Seq[(String, String)] = {
@@ -220,14 +218,12 @@ object SearchYoutubeTracks {
         )
         tupled
       )
-
     val collectOnlyValidTuples = Reads.seq(TupleEnIdFbIdReads).map { tuples =>
       tuples.collect {
         case (echonestId: String, Some(facebookId: Seq[String])) if facebookId.nonEmpty =>
           (echonestId, facebookId(0))
       }
     }
-
     (echonestResponse.json \ "response" \ "artists")
       .asOpt[Seq[(String, String)] ](collectOnlyValidTuples)
       .getOrElse(Seq.empty)

@@ -82,13 +82,13 @@ object SearchArtistsController extends Controller {
 
   def getFacebookArtistBySoundCloudUrl(soundCloudUrl: String)={//: Future[Option[Artist]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
-    println(soundCloudName)
+    //println(soundCloudName)
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { response =>
         println(readMaybeFacebookUrl(response))
-        println(response.json)
+        //println(response.json)
     }
   }
 
