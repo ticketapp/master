@@ -9,6 +9,7 @@ import services.Utilities.{ normalizeUrl, normalizeString }
 
 import scala.concurrent.Future
 import java.util.regex.Pattern
+import services.SearchSoundCloudTracks.normalizeTrackTitle
 
 object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
@@ -97,10 +98,10 @@ object SearchYoutubeTracks {
         "videoCategoryId" -> "10",
         "key" -> youtubeKey)
       .get()
-      .map { readYoutubeTracks }
+      .map { readYoutubeTracks(_, artistName) }
   }
 
-  def readYoutubeTracks(youtubeResponse: Response): Set[Track] = {
+  def readYoutubeTracks(youtubeResponse: Response, artistName: String): Set[Track] = {
     val youtubeTrackReads = (
       (__ \ "snippet" \ "title").read[Option[String]] and
         (__ \ "id" \ "videoId").read[Option[String]] and
@@ -111,7 +112,7 @@ object SearchYoutubeTracks {
     val collectOnlyTracksWithUrlTitleAndThumbnailUrl = Reads.set(youtubeTrackReads).map { tracks =>
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String)) =>
-          Track(-1L, title, url, "Youtube", thumbnailUrl)
+          Track(-1L, normalizeTrackTitle(title, artistName), url, "Youtube", thumbnailUrl)
       }
     }
 
@@ -197,8 +198,6 @@ object SearchYoutubeTracks {
       .getOrElse(Set.empty)
       .flatten
   }
-
-
 
   def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/search")

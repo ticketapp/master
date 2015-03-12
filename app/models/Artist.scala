@@ -139,6 +139,7 @@ object Artist {
   }
 
   def save(artist: Artist): Option[Long] = {
+    println("begin")
     Utilities.testIfExist("artists", "name", artist.name) match {
       case true => Some(-1)
       case false => try {

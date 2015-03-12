@@ -7,10 +7,12 @@ import play.api.Play.current
 import controllers.DAOException
 import services.Utilities
 import scala.util.Try
+import scala.util.matching.Regex
 
 case class Place (placeId: Long,
                   name: String,
                   facebookId: Option[String] = None,
+                  geographicPoint: Option[String],
                   description: Option[String] = None,
                   webSite: Option[String] = None,
                   capacity: Option[Int] = None,
@@ -19,25 +21,27 @@ case class Place (placeId: Long,
                   address : Option[Address] = None)
 
 object Place {
-  def formApply(name: String, facebookId: Option[String], description: Option[String],
+  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
+  def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String]): Place =
-    new Place(-1L, name, facebookId, description, webSite, capacity, openingHours)
+    new Place(-1L, name, facebookId, geographicPoint, description, webSite, capacity, openingHours)
 
-  def formUnapply(place: Place): Option[(String, Option[String], Option[String], Option[String],
-    Option[Int], Option[String])] = Some((place.name, place.facebookId, place.description,
+  def formUnapply(place: Place): Option[(String, Option[String], Option[String], Option[String], Option[String],
+    Option[Int], Option[String])] = Some((place.name, place.facebookId, place.geographicPoint, place.description,
     place.webSite, place.capacity, place.openingHours))
 
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
       get[String]("name") ~
       get[Option[String]]("facebookId") ~
+      get[Option[String]]("geographicPoint") ~
       get[Option[String]]("description") ~
       get[Option[String]]("webSite") ~
       get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") ~
       get[Option[Long]]("addressId") map {
-        case placeId ~ name ~ facebookId ~ description ~ webSite ~ capacity ~ openingHours ~ addressId =>
-          Place(placeId, name, facebookId, description, webSite, capacity, openingHours, List(),
+        case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSite ~ capacity ~ openingHours ~ addressId =>
+          Place(placeId, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, List(),
             Address.find(addressId.getOrElse(-1)))
     }
   }
@@ -46,22 +50,28 @@ object Place {
     Utilities.testIfExist("places", "facebookId", place.facebookId) match {
       case true => None
       case false => try {
+        val geographicPoint = place.geographicPoint match {
+          case geographicPointPattern(geoPoint) => geoPoint
+          case _ => println("geographicPoint not conform"); None
+        }
         val addressId = place.address.getOrElse(None) match {
           case None => None
           case Some(address: Address) => address.addressId
         }
         DB.withConnection { implicit connection =>
-          SQL("""INSERT into places(name, addressId, facebookId, description, webSite, capacity, openingHours)
-            values ({name}, {addressId}, {facebookId}, {description}, {webSite}, {capacity}, {openingHours})"""
-          ).on(
+          SQL(s"""INSERT into places(name, addressId, facebookId, geographicPoint, description, webSite, capacity,
+            openingHours)
+            VALUES ({name}, {addressId}, {facebookId}, point '$geographicPoint', {description}, {webSite}, {capacity},
+            {openingHours})""")
+            .on(
               'name -> place.name,
               'addressId -> addressId,
               'facebookId -> place.facebookId,
               'description -> place.description,
               'webSite -> place.webSite,
               'capacity -> place.capacity,
-              'openingHours -> place.openingHours
-            ).executeInsert() match {
+              'openingHours -> place.openingHours)
+            .executeInsert() match {
             case None => None
             case Some(placeId: Long) =>
               place.images.foreach(image =>
@@ -76,6 +86,20 @@ object Place {
     }
   }
 
+  def find20Since(start: Int, center: String): Seq[Place] = {
+    try {
+      DB.withConnection { implicit connection =>
+        SQL(s""" SELECT *
+          FROM places
+          ORDER BY geographicPoint <-> point '$center'
+          LIMIT 20
+          OFFSET $start""")
+          .as(PlaceParser.*)
+          .map(place => place.copy(images = Image.findAllByPlace(place.placeId)))
+      }
+    }
+  }
+
   def findAll: Seq[Place] = {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM places").as(PlaceParser.*).map( p =>
@@ -86,12 +110,12 @@ object Place {
     }
   }
 
-  def findAllByEvent(event: Event): List[Place] = {
+  def findAllByEvent(eventId: Long): List[Place] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM eventsPlaces eA
              INNER JOIN places a ON a.placeId = eA.placeId where eA.eventId = {eventId}""")
-        .on('eventId -> event.eventId)
+        .on('eventId -> eventId)
         .as(PlaceParser.*)
     }
   }
@@ -126,10 +150,9 @@ object Place {
     }
   }
 
-
   def find(placeId: Long): Option[Place] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from places WHERE placeId = {placeId}")
+      SQL("SELECT * FROM places WHERE placeId = {placeId}")
         .on('placeId -> placeId)
         .as(PlaceParser.singleOpt)
     }.map(p => p.copy(

@@ -30,7 +30,7 @@ GET     /artists/facebookContaining/:pattern    controllers.SearchArtistsControl
 GET     /artists/:facebookArtistId/tracks       controllers.SearchTracksController.getTracksForArtist(facebookArtistId: String)
 
 ################################## Places ###############################################
-GET     /places                         controllers.PlaceController.places
+GET     /places/offset/:offset/:geographicPoint     controllers.PlaceController.places(offset: Int, geographicPoint: String)
 GET     /places/:id                     controllers.PlaceController.place(id: Long)
 POST    /places/:placeId/follow         controllers.PlaceController.followPlace(placeId: Long)
 GET     /places/containing/:pattern     controllers.PlaceController.findPlacesContaining(pattern: String)

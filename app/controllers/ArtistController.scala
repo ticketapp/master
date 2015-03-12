@@ -12,6 +12,8 @@ import play.api.libs.concurrent.Execution.Implicits._
 import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
 
+import scala.concurrent.Future
+
 
 object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action {
@@ -71,7 +73,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {
-          Artist.save(patternAndArtist.artist)
+          Future { Artist.save(patternAndArtist.artist) }
           Ok.chunked(getArtistTracks(patternAndArtist))
         }
       )

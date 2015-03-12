@@ -10,9 +10,16 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import json.JsonHelper.placeWrites
 
+import scala.util.matching.Regex
+
 object PlaceController extends Controller {
-  def places = Action {
-    Ok(Json.toJson(Place.findAll))
+  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
+
+  def places(offset: Int, geographicPoint: String) = Action {
+    geographicPoint match {
+      case geographicPointPattern(_) => Ok(Json.toJson(Place.find20Since(offset, geographicPoint)))
+      case _ => Ok(Json.toJson("Invalid geographicPoint"))
+    }
   }
 
   def place(id: Long) = Action {
@@ -39,6 +46,7 @@ object PlaceController extends Controller {
   val placeBindingForm = Form(mapping(
     "name" -> nonEmptyText(2),
     "facebookId" -> optional(nonEmptyText()),
+    "geographicPoint" -> optional(nonEmptyText(5)),
     "description" -> optional(nonEmptyText(2)),
     "webSite" -> optional(nonEmptyText(4)),
     "capacity" -> optional(number),
