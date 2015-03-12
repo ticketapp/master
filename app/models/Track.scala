@@ -158,6 +158,7 @@ object Track {
           }
         case Right(facebookUrl) =>
           DB.withConnection { implicit connection =>
+
             SQL("""INSERT INTO artistsTracks (facebookUrl, trackId)
                 VALUES ({facebookUrl}, {trackId})""")
               .on(

@@ -374,6 +374,12 @@ CREATE TABLE eventsPlaces (
   PRIMARY KEY (eventId, placeId)
 );
 
+CREATE TABLE eventsGenres (
+  eventId INT REFERENCES events (eventId),
+  genreId INT REFERENCES genres (genreId),
+  PRIMARY KEY (eventId, genreId)
+);
+
 CREATE TABLE eventsOrganizers (
   eventId INT REFERENCES events (eventId),
   organizerId INT REFERENCES organizers(organizerId),
@@ -430,8 +436,9 @@ CREATE TABLE usersPlaylists (
 
 CREATE TABLE artistsTracks (
   artistId                BIGINT REFERENCES artists (artistId),
+  facebookUrl             VARCHAR(255) REFERENCES artists (facebookUrl),
   trackId                 BIGINT REFERENCES tracks (trackId),
-  PRIMARY KEY (artistId, trackId)
+  PRIMARY KEY (artistId, facebookUrl, trackId)
 );
 
 

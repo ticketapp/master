@@ -50,9 +50,9 @@ object Place {
     Utilities.testIfExist("places", "facebookId", place.facebookId) match {
       case true => None
       case false => try {
-        val geographicPoint = place.geographicPoint match {
-          case geographicPointPattern(geoPoint) => geoPoint
-          case _ => println("geographicPoint not conform"); None
+        val geographicPoint = place.geographicPoint.getOrElse("") match {
+          case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
+          case _ => "{geographicPoint}"
         }
         val addressId = place.address.getOrElse(None) match {
           case None => None
@@ -61,12 +61,13 @@ object Place {
         DB.withConnection { implicit connection =>
           SQL(s"""INSERT into places(name, addressId, facebookId, geographicPoint, description, webSite, capacity,
             openingHours)
-            VALUES ({name}, {addressId}, {facebookId}, point '$geographicPoint', {description}, {webSite}, {capacity},
+            VALUES ({name}, {addressId}, {facebookId}, $geographicPoint, {description}, {webSite}, {capacity},
             {openingHours})""")
             .on(
               'name -> place.name,
               'addressId -> addressId,
               'facebookId -> place.facebookId,
+              'geographicPoint -> place.geographicPoint,
               'description -> place.description,
               'webSite -> place.webSite,
               'capacity -> place.capacity,

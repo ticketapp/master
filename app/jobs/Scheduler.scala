@@ -86,7 +86,7 @@ object Scheduler {
           artists <- eventuallyMaybeArtists
         } yield {
           val nonEmptyArtists = artists.flatten.toList
-          val eventGenres = nonEmptyArtists.map { _.genres }.flatten.toSet
+          val eventGenres = nonEmptyArtists.map { _.genres }.flatten
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
             formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,

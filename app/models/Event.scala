@@ -26,7 +26,7 @@ case class Event(eventId: Long,
                  tariffs: List[Tariff],
                  addresses: List[Address],
                  places: List[Place] = List.empty,
-                 genres: Set[Genre] = Set.empty)
+                 genres: Seq[Genre] = Seq.empty)
 
 object Event {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
@@ -73,6 +73,7 @@ object Event {
           artists = Artist.findAllByEvent(event),
           tariffs = Tariff.findAllByEvent(event),
           places = Place.findAllByEvent(event.eventId),
+          genres = Genre.findAllByEvent(event.eventId),
           addresses = Address.findAllByEvent(event))
         )
     }
@@ -90,12 +91,13 @@ object Event {
         OFFSET $start""")
           .as(EventParser.*)
           .map(event => event.copy(
-          images = Image.findAllByEvent(event),
-          organizers = Organizer.findAllByEvent(event),
-          artists = Artist.findAllByEvent(event),
-          tariffs = Tariff.findAllByEvent(event),
-          places = Place.findAllByEvent(event.eventId),
-          addresses = Address.findAllByEvent(event))
+            images = Image.findAllByEvent(event),
+            organizers = Organizer.findAllByEvent(event),
+            artists = Artist.findAllByEvent(event),
+            tariffs = Tariff.findAllByEvent(event),
+            places = Place.findAllByEvent(event.eventId),
+            genres = Genre.findAllByEvent(event.eventId),
+            addresses = Address.findAllByEvent(event))
           )
       }
     }
@@ -119,6 +121,7 @@ object Event {
           artists = Artist.findAllByEvent(event),
           tariffs = Tariff.findAllByEvent(event),
           places = Place.findAllByEvent(event.eventId),
+          genres = Genre.findAllByEvent(event.eventId),
           addresses = Address.findAllByEvent(event))
         )
     }
@@ -144,6 +147,7 @@ object Event {
             artists = Artist.findAllByEvent(event),
             tariffs = Tariff.findAllByEvent(event),
             places = Place.findAllByEvent(event.eventId),
+            genres = Genre.findAllByEvent(event.eventId),
             addresses = Address.findAllByEvent(event))
           }
       }
@@ -170,6 +174,7 @@ object Event {
           artists = Artist.findAllByEvent(event),
           tariffs = Tariff.findAllByEvent(event),
           places = Place.findAllByEvent(event.eventId),
+          genres = Genre.findAllByEvent(event.eventId),
           addresses = Address.findAllByEvent(event))
         )
     }
@@ -192,6 +197,7 @@ object Event {
               artists = Artist.findAllByEvent(event),
               tariffs = Tariff.findAllByEvent(event),
               places = Place.findAllByEvent(event.eventId),
+              genres = Genre.findAllByEvent(event.eventId),
               addresses = Address.findAllByEvent(event))
             )
         }
@@ -217,6 +223,7 @@ object Event {
             artists = Artist.findAllByEvent(event),
             tariffs = Tariff.findAllByEvent(event),
             places = Place.findAllByEvent(event.eventId),
+            genres = Genre.findAllByEvent(event.eventId),
             addresses = Address.findAllByEvent(event))
           )
       }

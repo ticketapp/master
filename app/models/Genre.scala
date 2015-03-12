@@ -25,12 +25,12 @@ object Genre {
     }
   }
 
-  def findAllByEvent(event: Event): Seq[Genre] = {
+  def findAllByEvent(eventId: Long): Seq[Genre] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM eventsGenres eA
              INNER JOIN genres a ON a.genreId = eA.genreId where eA.eventId = {eventId}""")
-        .on('eventId -> event.eventId)
+        .on('eventId -> eventId)
         .as(GenreParser.*)
     }
   }
