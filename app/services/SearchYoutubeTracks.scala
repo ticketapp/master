@@ -5,8 +5,7 @@ import play.api.libs.ws.{WS, Response}
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
-import services.Utilities.{ normalizeUrl, normalizeString }
-
+import services.Utilities.normalizeUrl
 import scala.concurrent.Future
 import java.util.regex.Pattern
 import services.SearchSoundCloudTracks.normalizeTrackTitle
@@ -15,12 +14,12 @@ object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
-  def getYoutubeTracksForArtist(artistName: String, artistFacebookId: String, pattern: String):
-  Future[Set[Track]] = {
-    val artist = new Artist(-1L, Option(artistFacebookId), artistName)
-    getMaybeEchonestIdByFacebookId(artistFacebookId, artist.name) flatMap {
-      case Some(echonestId) => getYoutubeTracksByEchonestId(artist.name, echonestId)
-      case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
+  def getYoutubeTracksForArtist(artistName: String, artistFacebookId: String, pattern: String): Future[Set[Track]] = {
+    getMaybeEchonestIdByFacebookId(artistFacebookId, artistName) flatMap {
+      case Some(echonestId) =>
+        getYoutubeTracksByEchonestId(artistName, echonestId)
+      case None =>
+        getYoutubeTracksIfEchonestIdNotFoundByFacebookId(new Artist(-1L, Option(artistFacebookId), artistName), pattern)
     }
   }
   
@@ -66,10 +65,9 @@ object SearchYoutubeTracks {
   }
   
   def getYoutubeTracksByEchonestId(artistName: String, echonestId: String): Future[Set[Track]] = {
-    getEchonestSongs(0, echonestId)//.map(_.map(_ \ "title").map(_.as[String]))
-      .flatMap { echonestSongsTitle: Set[String] =>
-        getYoutubeTracksByTitlesAndArtistName(echonestSongsTitle, artistName)
-      }
+    getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
+      getYoutubeTracksByTitlesAndArtistName(echonestSongsTitle, artistName)
+    }
   }
 
   def getYoutubeTracksByTitlesAndArtistName(tracksTitle: Set[String], artistName: String): Future[Set[Track]] = {

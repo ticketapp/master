@@ -229,16 +229,16 @@ object Event {
     testIfExist("events", "facebookId", event.facebookId) match {
       case true => None
       case false =>
-        val geographicPoint = event.geographicPoint match {
-          case geographicPointPattern(geoPoint) => geoPoint
-          case _ => println("geographicPoint not conform"); None
+        val geographicPoint = event.geographicPoint.getOrElse("") match {
+          case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
+          case _ => "{geographicPoint}"
         }
         try {
           DB.withConnection { implicit connection =>
             SQL(s"""INSERT INTO
                 events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
                 startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive},
-                {creationDateTime}, {name}, point '$geographicPoint', {description}, {startTime}, {endTime},
+                {creationDateTime}, {name}, $geographicPoint, {description}, {startTime}, {endTime},
                 {ageRestriction}) """)
               .on(
                 'facebookId -> event.facebookId,
