@@ -13,8 +13,10 @@ import services.Utilities.normalizeUrl
 import models.Artist
 import models.Image
 import models.Genre
+import play.api.libs.json.Reads._
 
 object SearchArtistsController extends Controller {
+  val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val token = play.Play.application.configuration.getString("facebook.token")
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
@@ -68,16 +70,44 @@ object SearchArtistsController extends Controller {
     Future.sequence(
       websites.map {
         case website if website contains "facebook" =>
-          getFacebookArtistByUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
+          getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
         case website if website contains "soundcloud" =>
-          getFacebookArtistByUrl(website).map { maybeFacebookArtist => maybeFacebookArtist } //bySoundcloudUrl
+          getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist } //bySoundcloudUrl
         case _ =>
           Future { None }
       }
     )
   }
 
-  def getFacebookArtistByUrl(url: String): Future[Option[Artist]] = {
+  def getFacebookArtistBySoundCloudUrl(soundCloudUrl: String)={//: Future[Option[Artist]] = {
+    val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/"))
+    WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
+      .withQueryString("client_id" -> soundCloudClientId)
+      .get()
+      .map { response =>
+        println(response.json)
+    }
+  }
+
+  def readMaybeFacebookUrl(soundCloudWebProfilesResponse: Response): Option[String] = {
+    val facebookUrlReads = (
+      (__ \ "url").read[String] and
+        (__ \ "service").read[String]
+      )((url: String, service: String) => (url, service))
+
+    val collectOnlyFacebookUrls = Reads.seq(facebookUrlReads).map { urlService =>
+      urlService.collect {
+        case (url: String, "facebook") => url
+      }
+    }
+
+    soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
+      case Some(facebookUrls: Seq[String]) if facebookUrls.length > 0 => Option(facebookUrls(0))
+      case _ => None
+    }
+  }
+
+  def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
     val smallerUrl = url.replace("facebook.com/", "")
     val normalizedUrl =
       if (smallerUrl contains "/")

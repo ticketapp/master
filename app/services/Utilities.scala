@@ -41,10 +41,9 @@ object Utilities {
     }
     try {
       DB.withConnection { implicit connection =>
-        SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName={value} LIMIT 1)"""
-        ).on(
-            "value" -> value
-          ).as(scalar[Boolean].single)//.singleOpt _)
+        SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName={value} LIMIT 1)""")
+          .on("value" -> value)
+          .as(scalar[Boolean].single)//.singleOpt _)
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot select in database with method Utilities.testIfExistById: " +

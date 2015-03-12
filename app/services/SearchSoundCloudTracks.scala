@@ -7,7 +7,7 @@ import play.api.libs.ws.{WS, Response}
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
-import services.Utilities.{ normalizeUrl, normalizeString }
+import services.Utilities.normalizeUrl
 import scala.util.matching._
 import java.util.regex.Pattern
 

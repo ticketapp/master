@@ -317,16 +317,16 @@ object Event {
   def followEvent(userId: String, eventId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("""select id from users_login where userId = {userId}"""
-        ).on(
-          'userId -> userId
-        ).as(scalar[Option[Long]].single) match {
-          case None => throw new DAOException("Cannot follow event: didn't find id with this userId")
-          case Some(id) => SQL("""INSERT INTO eventsFollowed(userId, eventId)
-          VALUES ({userId}, {eventId})""").on(
-              'userId -> id,
-              'eventId -> eventId
-            ).executeInsert()
+        SQL("""SELECT id FROM users_login WHERE userId = {userId}""")
+          .on('userId -> userId)
+          .as(scalar[Option[Long]].single) match {
+            case None => throw new DAOException("Cannot follow event: didn't find id with this userId")
+            case Some(id) => SQL("""INSERT INTO eventsFollowed(userId, eventId)
+            VALUES ({userId}, {eventId})""")
+              .on(
+                'userId -> id,
+                'eventId -> eventId)
+              .executeInsert()
         }
       }
     } catch {

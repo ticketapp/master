@@ -28,8 +28,8 @@ CREATE TABLE infos (
   content                   TEXT
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
-INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs!!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 4 avant la béta :) :)');
+INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'J - 3 avant la béta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -436,9 +436,8 @@ CREATE TABLE usersPlaylists (
 
 CREATE TABLE artistsTracks (
   artistId                BIGINT REFERENCES artists (artistId),
-  facebookUrl             VARCHAR(255) REFERENCES artists (facebookUrl),
   trackId                 BIGINT REFERENCES tracks (trackId),
-  PRIMARY KEY (artistId, facebookUrl, trackId)
+  PRIMARY KEY (artistId, trackId)
 );
 
 
@@ -447,6 +446,7 @@ DROP TABLE IF EXISTS artistsTracks;
 DROP TABLE IF EXISTS usersPlaylists;
 DROP TABLE IF EXISTS playlistTracks;
 DROP TABLE IF EXISTS playlists;
+DROP TABLE IF EXISTS eventsGenres;
 DROP TABLE IF EXISTS eventsPlaces;
 DROP TABLE IF EXISTS eventsOrganizers;
 DROP TABLE IF EXISTS eventsAddresses;

@@ -1,5 +1,7 @@
 package models
 
+import java.sql.Connection
+
 import anorm.SqlParser._
 import anorm._
 import controllers._
@@ -149,27 +151,32 @@ object Track {
       artistIdOrArtistFacebookUrl match {
         case Left(artistId) =>
           DB.withConnection { implicit connection =>
-            SQL("""INSERT INTO artistsTracks (artistId, trackId)
-                VALUES ({artistId}, {trackId})""")
-              .on(
-                'artistId -> artistId,
-                'trackId -> trackId)
-              .executeInsert()
+            saveArtistTrackRelationInDatabase(artistId, trackId)
           }
         case Right(facebookUrl) =>
           DB.withConnection { implicit connection =>
-
-            SQL("""INSERT INTO artistsTracks (facebookUrl, trackId)
-                VALUES ({facebookUrl}, {trackId})""")
-              .on(
-                'facebookUrl -> facebookUrl,
-                'trackId -> trackId)
-              .executeInsert()
+            SQL("""SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl}""")
+              .on('facebookUrl -> facebookUrl)
+              .as(scalar[Option[Long]].single)
+              match {
+                case None => None
+                case Some(artistId) => saveArtistTrackRelationInDatabase(artistId, trackId)
+              }
           }
       }
     } catch {
       case e: Exception => throw new DAOException("saveArtistTrackRelation: " + e.getMessage)
     }
+  }
+
+  def saveArtistTrackRelationInDatabase(artistId: Long, trackId: Long)(implicit connection: Connection)
+  : Option[Long] = {
+    SQL("""INSERT INTO artistsTracks (artistId, trackId)
+                  VALUES ({artistId}, {trackId})""")
+      .on(
+        'artistId -> artistId,
+        'trackId -> trackId)
+      .executeInsert()
   }
 
   def deleteTrack(trackId: Long): Long = {
@@ -185,10 +192,11 @@ object Track {
   def followTrack(userId : Long, trackId : Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL("insert into trackFollowed(userId, trackId) values ({userId}, {trackId})").on(
-          'userId -> userId,
-          'trackId -> trackId
-        ).executeInsert()
+        SQL("INSERT INTO trackFollowed(userId, trackId) VALUES ({userId}, {trackId})")
+          .on(
+            'userId -> userId,
+            'trackId -> trackId)
+          .executeInsert()
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)

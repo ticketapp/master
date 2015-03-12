@@ -131,7 +131,9 @@ object Scheduler {
 
   def getWebsitesInDescription(maybeDescription: Option[String]): Set[String] = maybeDescription match {
     case None => Set.empty
-    case Some(description) => linkPattern.findAllIn(description).toSet.map { normalizeUrl }
+    case Some(description) =>
+      println(linkPattern.findAllIn(description).toSet.map { normalizeUrl })
+      linkPattern.findAllIn(description).toSet.map { normalizeUrl }
   }
 
   def createNewImageIfSourceExists(source: Option[String]): List[Image] = source match {
