@@ -101,7 +101,7 @@ object SearchSoundCloudTracks {
     val soundCloudTrackReads = (
       (__ \ "stream_url").read[String] and
         (__ \ "title").read[String] and
-        (__ \ "permalink_url").read[Option[String]] and
+        (__ \ "permalink_url").readNullable[String] and
         (__ \ "user" \ "avatar_url").readNullable[String] and
         (__ \ "artwork_url").readNullable[String]
       )((url: String, title: String, redirectUrl: Option[String], avatarUrl: Option[String],
@@ -109,10 +109,10 @@ object SearchSoundCloudTracks {
     val readTracks = Reads.seq(soundCloudTrackReads)
     val collectOnlyTracksWithUrlTitleAndThumbnail = readTracks.map { tracks =>
       tracks.collect {
-        case (url, title, redirectUrl, Some(thumbnailUrl: String), avatarUrl) =>
+        case (url, title, redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl) =>
           Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
             redirectUrl)
-        case (url, title, redirectUrl, None, Some(avatarUrl: String)) =>
+        case (url, title, redirectUrl: Option[String], None, Some(avatarUrl: String)) =>
           Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
             redirectUrl)
       }

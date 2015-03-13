@@ -131,7 +131,7 @@ object Scheduler {
   def getWebsitesInDescription(maybeDescription: Option[String]): Set[String] = maybeDescription match {
     case None => Set.empty
     case Some(description) =>
-      println(linkPattern.findAllIn(description).toSet.map { normalizeUrl })
+      //println(linkPattern.findAllIn(description).toSet.map { normalizeUrl })
       linkPattern.findAllIn(description).toSet.map { normalizeUrl }
   }
 
@@ -153,8 +153,8 @@ object Scheduler {
         (__ \ "website").readNullable[String])
       .apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
               public_transit: Option[String], website: Option[String]) =>
-      Organizer(-1L, Some(organizerId), name, formatDescription(description), phone, public_transit,
-        website, verified = false, createNewImageIfSourceExists(source)))
+      Organizer(-1L, Some(organizerId), name, formatDescription(description), None, phone, public_transit,
+        website, verified = false, createNewImageIfSourceExists(source), None))
     organizer.json.asOpt[Organizer](readOrganizer)
   }
 
