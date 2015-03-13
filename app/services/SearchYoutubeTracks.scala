@@ -28,7 +28,6 @@ object SearchYoutubeTracks {
       case Some(idUrls: (String, Set[String])) =>
         val echonestId = idUrls._1
         val echonestWebsites = idUrls._2
-        println(echonestWebsites + " -----> " + artist.websites.toString + "    " + artist.facebookUrl)
         if ((echonestWebsites intersect artist.websites).nonEmpty)
           getYoutubeTracksByEchonestId(artist, echonestId)
         else
