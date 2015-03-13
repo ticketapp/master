@@ -70,7 +70,9 @@ CREATE TABLE tracks (
   url                     TEXT NOT NULL,
   platform                VARCHAR(255) NOT NULL,
   thumbnailUrl            TEXT NOT NULL,
-  artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL
+  artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
+  redirectUrl             VARCHAR(255),
+  UNIQUE(url)
 );
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
