@@ -133,7 +133,6 @@ object Artist {
 
 
   def save(artist: Artist): Option[Long] = {
-    println("begin")
     Utilities.testIfExist("artists", "name", artist.name) match {
       case true => Some(-1)
       case false => try {
@@ -178,41 +177,39 @@ object Artist {
     }
   }
 
-  def saveEventArtistRelation(eventId: Long, artistId: Long): Option[Long] = {
-    println(eventId, artistId)
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("""INSERT INTO eventsArtists (eventId, artistId)
-          VALUES ({eventId}, {artistId})""")
-          .on(
-            'eventId -> eventId,
-            'artistId -> artistId)
-          .executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)
+  def saveEventArtistRelation(eventId: Long, artistId: Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""INSERT INTO eventsArtists (eventId, artistId)
+        VALUES ({eventId}, {artistId})""")
+        .on(
+          'eventId -> eventId,
+          'artistId -> artistId)
+        .executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)
   }
 
 
-  def deleteArtist(artistId: Long): Long = {
+
+  def deleteArtist(artistId: Long): Long = try {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM artists WHERE artistId={artistId}").on(
         'artistId -> artistId
       ).executeUpdate()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot save in deleteArtist : " + e.getMessage)
   }
 
-  def followArtist(userId : Long, artistId : Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("insert into artistsFollowed(userId, artistId) values ({userId}, {artistId})").on(
-          'userId -> userId,
-          'artistId -> artistId
-        ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot follow artist: " + e.getMessage)
+  def followArtist(userId : Long, artistId : Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("insert into artistsFollowed(userId, artistId) values ({userId}, {artistId})").on(
+        'userId -> userId,
+        'artistId -> artistId
+      ).executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot follow artist: " + e.getMessage)
   }
 }
