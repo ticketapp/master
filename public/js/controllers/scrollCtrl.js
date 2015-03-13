@@ -1,14 +1,17 @@
 app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket', 'oboe',
     function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe) {
+        $rootScope.geoLoc = '';
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position)
-                {
+            navigator.geolocation.getCurrentPosition(function (position) {
                     $rootScope.geoLoc = "(" + position.coords.latitude + "," + position.coords.longitude + ")";
+                    $rootScope.$apply();
+                    console.log($rootScope.geoLoc)
                 }, function erreurPosition(error) {
                 }
             );
-        } /*else {
-        }*/
+        }
+        /*else {
+         }*/ console.log($rootScope.geoLoc)
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
         };
@@ -202,6 +205,14 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 $rootScope.home = false;
                 $rootScope.pathPlace = true;
                 $rootScope.pathSearch = false;
+            }else if ($location.path().indexOf('/iframeEvents') > -1){
+                $rootScope.pathUsr = false;
+                $rootScope.pathArt = false;
+                $rootScope.pathEvent = false;
+                $rootScope.home = false;
+                $rootScope.pathPlace = false;
+                $rootScope.pathSearch = false;
+                $rootScope.pathiframe = true;
             } else {
                 $rootScope.pathUsr = false;
                 $rootScope.pathArt = false;

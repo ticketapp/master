@@ -1,18 +1,18 @@
 <div class="fixed right zIndex1 generalControlsContener" id="generalControlsContener">
     <ul class="float-right">
-        <li ng-if="!$root.home" class="generalControls float-right" >
+        <li ng-if="!$root.home && !$root.pathiframe" class="generalControls float-right" >
             <a href="#/" class="button"><i class="fi-home"></i></a>
         </li><!--
         <li ng-if="!$root.home" class="generalControls float-right">
             <button ng-click="back()" class="alert"><i class="fi-x"></i></button>
         </li>-->
-        <li class="generalControls float-right" data-ng-controller="toolsCtrl" ng-click="open()">
+        <li ng-if="!$root.pathiframe" class="generalControls float-right" data-ng-controller="toolsCtrl" ng-click="open()">
             <button><i class="fi-thumbnails"></i></button>
         </li>
-        <li ng-if="!$root.home && !$root.pathSearch" class="generalControls float-right">
+        <li ng-if="!$root.home && !$root.pathSearch && !$root.pathiframe" class="generalControls float-right">
             <a href="#/search" class="button"><i class="fi-magnifying-glass"></i></a>
         </li>
-        <li class="generalControls float-right">
+        <li class="generalControls float-right" ng-if="!$root.pathiframe">
             <button ng-click="createPlaces()"><i class="fi-plus"></i></button>
         </li>
     </ul>

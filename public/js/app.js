@@ -24,6 +24,7 @@ app.config(function($routeProvider, $locationProvider, AngularyticsProvider){
     .when('/lieu/:id',{templateUrl:'assets/partials/user.html', controller : 'UsersCtrl'})
     .when('/createEvent',{templateUrl:'assets/partials/createEvent.html', controller : 'CreateEventCtrl'})
     .when('/search',{templateUrl:'assets/partials/search.html'})
+    .when('/iframeEvents',{templateUrl:'assets/partials/iframe_calender.html', controller: 'iframeCtrl'})
         .otherwise('/');
 }).run(function(Angularytics) {
     Angularytics.init();

@@ -1,0 +1,74 @@
+<div>
+    <input ng-if="$parent.filter && $root.order != 'startTime'" id="searchBar" placeholder="Filter by {{$root.filterType}}"
+           ng-change="$root.resizeImgHeight()"
+           ng-model="$root.filterQuery"
+           class="column large-10">
+    <ul class="column padding0" ng-class="{'large-2': filter && $root.order != 'startTime', 'large-12': !filter || $root.order == 'startTime'}">
+        <a target="_blank" ng-if="$parent.filter == true" ng-click="$parent.$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
+        <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
+            <a>Filters <i class="fi-arrow-down"></i></a>
+        </li>
+        <ul ng-if="selectFilter" class="absolute white zIndex5 column large-12">
+            <li style="display:block;" class="column large-12 pointer"
+                ng-click="$parent.$parent.filter = true; $root.filterType = 'genre'; $parent.selectFilter = false">
+                <a target="_blank" >
+                    Genre
+                </a>
+            </li>
+            <li ng-click="$parent.$parent.filter = true; $root.filterType = 'ville'; $parent.selectFilter = false"
+                style="display:block;" class="column large-12 pointer" ng-show="$root.activEvent">
+                <a>
+                    Ville
+                </a>
+            </li>
+            <li ng-click="$root.order = 'startTime'; $parent.$parent.filter = true; $parent.selectFilter = false"
+                style="display:block;" class="column large-12 pointer"
+                ng-show="$root.activEvent"
+                ng-class="{'primCol': $root.order == 'startTime'}"
+                    >
+                <a>
+                    Date
+                </a>
+            </li>
+        </ul>
+    </ul>
+</div>
+<div style="padding-top: 70px;">
+    <div class="column large-3 float-left margin0"
+         data-ng-repeat="event in events | orderBy: $root.order">
+        <div class="block_event_min">
+            <div class="img_min_evnt" style="height: 100px">
+                <div class="toGrow">
+                    <a target="_blank" href="#/event/{{event.eventId}}">
+                        <img src="{{ event.images[0].path }}" class="width100p" alt="yo"/>
+                    </a>
+                </div>
+            </div>
+            <div class=" text_evnt_min" >
+                <a target="_blank" href="#/event/{{event.eventId}}"><h4 style="height: 2.8em;
+    overflow: hidden;">{{ event.name }}</h4></a>
+                Par
+                <a target="_blank" href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
+                   >{{organizer.name}} </a>
+                <br/>
+                <div class="infos_event">
+                    <i class="icon-calendar"></i>{{ event.startTime | date:'dd/MM' }}
+                    <i class="icon-time"></i> {{ event.startTime | date:'HH:mm' }}<b ng-show="event.endTime"> - </b>
+                    <i class="icon-calendar"></i>{{ event.endTime | date:'dd/MM' }}
+                    <i class="icon-time"></i> {{ event.endTime | date:'HH:mm' }} <br/>
+                    <i class="icon-map-marker"></i>
+                    <a target="_blank" href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a>
+                </div>
+                <br/>
+                <div class="description_event_min">
+                    <a target="_blank" href="#/artiste/{{artist.facebookUrl}}" data-ng-repeat="artist in event.artists">
+                        {{ artist.name }}
+                    </a>
+                    <!--<a target="_blank" ng-repeat="genre in filteredEventGenre = (event.genres | filter: name: filterQuery)"
+                            >{{genre.name}}</a>-->
+                </div>
+                <br/>
+            </div>
+        </div>
+    </div>
+</div>

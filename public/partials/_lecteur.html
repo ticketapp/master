@@ -47,8 +47,8 @@
                  as-sortable-item ng-repeat="track in playlist.tracks">
                 <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
                 <div class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
-                    <i class="fi-play playInImg" ng-if="$parent.track != $parent.trackActive" ng-click="$root.play($index)"></i>
-                    <i class="fi-pause pauseInImg" ng-if="$parent.track == $parent.trackActive"
+                    <i class="fi-play playInImg" ng-if="track != trackActive" ng-click="$root.play($index)"></i>
+                    <i class="fi-pause pauseInImg" ng-if="track == trackActive"
                        ng-class="{'fi-pause': onPlay, 'fi-play': !onPlay}" ng-click="playPause()"></i>
                 </div>
                 <div as-sortable-item-handle class="trackInfos">

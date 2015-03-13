@@ -42,7 +42,8 @@
         <i class="fi-plus" ng-if="descHeight > 0" ng-click="$parent.descHeight = 'auto'"></i>
     </div>
     <div class="column large-4 float-left margin0 data-ng-event"
-         data-ng-repeat="event in orgaEvents">
+         data-ng-repeat="event in orgaEvents"
+         ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
     </div>
     <div class="column float-right eventInfo column padding0"
          ng-if="largeMap == true"

@@ -17,5 +17,5 @@
     </div>
     <div ng-show="$root.playlist.tracks.length > 0" class="ng-lecture"></div>
 </div>
-<div class="footer row-fluid"></div>
+<div  ng-if="!$root.pathiframe" class="footer row-fluid"></div>
 }
