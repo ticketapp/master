@@ -14,7 +14,8 @@ case class Track (trackId: Long,
                   url: String, 
                   platform: String, 
                   thumbnailUrl: String,
-                  artistFacebookUrl: String)
+                  artistFacebookUrl: String,
+                  redirectUrl: Option[String] = None)
 
 object Track {
   implicit val trackWrites = Json.writes[Track]

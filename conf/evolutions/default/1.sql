@@ -8,7 +8,7 @@ CREATE TABLE addresses (
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
 INSERT INTO addresses (geographicPoint) VALUES ('(44.1764121, 4.97134)');
-INSERT INTO addresses (geographicPoint) VALUES ('(45.461787, 4.187134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(45.471787, 4.187134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.847234)');
 INSERT INTO addresses (geographicPoint) VALUES ('(41.4641787, 5.9147134)');
 
@@ -49,6 +49,7 @@ CREATE TABLE organizers (
   facebookId              VARCHAR(63),
   name                    VARCHAR(255) NOT NULL,
   description             TEXT,
+  addressId               BIGINT references addresses(addressId),
   phone                   VARCHAR(15),
   publicTransit           TEXT,
   website                 VARCHAR(255),
@@ -142,6 +143,7 @@ CREATE TABLE places (
   UNIQUE(facebookId)
 );
 INSERT into places(name, facebookId) values ('Le transbordeur', '117030545096697');
+CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,

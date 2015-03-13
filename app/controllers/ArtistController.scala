@@ -87,14 +87,14 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def getArtistTracks(patternAndArtist: PatternAndArtist) = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        Enumerator(Json.toJson(soundCloudTracks + "end"))
+        Enumerator(Json.toJson(soundCloudTracks))
       }
     )
     val youtubeTracksEnumerator = Enumerator.flatten(
       getYoutubeTracksForArtist(
         patternAndArtist.artist, patternAndArtist.searchPattern)
         .map { youtubeTracks =>
-          Enumerator(Json.toJson(youtubeTracks + "end"))
+          Enumerator(Json.toJson(youtubeTracks + Track(-2L, "", "", "", "", "")))
         }
     )
     Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
