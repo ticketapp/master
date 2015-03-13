@@ -31,7 +31,7 @@ object SearchSoundCloudTracks {
 
   def getSoundCloudTracksNotDefinedInFb(artist: Artist): Future[Seq[Track]] = {
     getSoundCloudIdsForName(artist.name).flatMap { ids =>
-      getTupleIdAndSoundCloudWebsitesForIds(ids).flatMap{ websitesAndIds =>
+      getTupleIdAndSoundCloudWebsitesForIds(ids).flatMap { websitesAndIds =>
         compareArtistWebsitesWSCWebsitesAndAddTracks(artist, websitesAndIds)
       }
     }
@@ -97,22 +97,24 @@ object SearchSoundCloudTracks {
   }
 
   def readSoundCloudTracks(soundCloudResponse: Response, artist: Artist): Seq[Track] = {
+    println(soundCloudResponse.json)
     val soundCloudTrackReads = (
-      (__ \ "stream_url").readNullable[String] and
-        (__ \ "title").readNullable[String] and
+      (__ \ "stream_url").read[String] and
+        (__ \ "title").read[String] and
+        (__ \ "permalink_url").read[Option[String]] and
         (__ \ "user" \ "avatar_url").readNullable[String] and
         (__ \ "artwork_url").readNullable[String]
-      )((url: Option[String], title: Option[String], avatarUrl: Option[String], thumbnail: Option[String]) =>
-      (url, title, thumbnail, avatarUrl))
-
+      )((url: String, title: String, redirectUrl: Option[String], avatarUrl: Option[String],
+         thumbnail: Option[String]) => (url, title, redirectUrl, thumbnail, avatarUrl))
     val readTracks = Reads.seq(soundCloudTrackReads)
-
     val collectOnlyTracksWithUrlTitleAndThumbnail = readTracks.map { tracks =>
       tracks.collect {
-        case (Some(url: String), Some(title: String), Some(thumbnailUrl: String), avatarUrl) =>
-          Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl)
-        case (Some(url: String), Some(title: String), None, Some(avatarUrl: String)) =>
-          Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl)
+        case (url, title, redirectUrl, Some(thumbnailUrl: String), avatarUrl) =>
+          Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
+            redirectUrl)
+        case (url, title, redirectUrl, None, Some(avatarUrl: String)) =>
+          Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
+            redirectUrl)
       }
     }
     soundCloudResponse.json
