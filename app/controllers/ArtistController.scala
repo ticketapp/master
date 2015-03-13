@@ -2,7 +2,7 @@ package controllers
 
 import json.JsonHelper._
 import models.Artist.PatternAndArtist
-import models.{Genre, Image, Artist, Track}
+import models._
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.iteratee.Enumerator
@@ -12,6 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
 import scala.concurrent.Future
+
 
 object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action {
@@ -34,6 +35,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
   def findArtistsContaining(pattern: String) = Action {
     Ok(Json.toJson(Artist.findAllContaining(pattern)))
+  }
+
+  def eventsByArtist(artistId: Long) = Action {
+    Ok(Json.toJson(Event.findAllByArtist(artistId)))
   }
 
   val artistBindingForm = Form(

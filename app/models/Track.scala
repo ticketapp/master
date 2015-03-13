@@ -82,7 +82,7 @@ object Track {
 
   def find(trackId: Long): Option[Track] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from tracks WHERE trackId = {trackId}")
+      SQL("SELECT * FROM tracks WHERE trackId = {trackId}")
         .on('trackId -> trackId)
         .as(TrackParser.singleOpt)
     }
@@ -110,14 +110,15 @@ object Track {
   def save(track: Track): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( """INSERT into tracks(title, url, platform, thumbnailUrl, artistFacebookUrl)
-        VALUES ({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl})""")
+        SQL( """INSERT INTO tracks(title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
+        VALUES ({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
           .on(
             'title -> track.title,
             'url -> track.url,
             'platform -> track.platform,
             'thumbnailUrl -> track.thumbnailUrl,
-            'artistFacebookUrl -> track.artistFacebookUrl)
+            'artistFacebookUrl -> track.artistFacebookUrl,
+            'redirectUrl -> track.redirectUrl)
           .executeInsert()
       }
     } catch {

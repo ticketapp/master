@@ -153,8 +153,7 @@ object Event {
   } catch {
     case e: Exception => throw new DAOException("Cannot get events by genre: " + e.getMessage)
   }
-
-
+  
   def findAllByOrganizer(organizerId: Long) = try {
     DB.withConnection { implicit connection =>
       SQL(""" SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
@@ -166,6 +165,32 @@ object Event {
         ORDER BY s.creationDateTime DESC
         LIMIT 20""")
         .on('organizerId -> organizerId)
+        .as(EventParser.*)
+        .map(event => event.copy(
+          images = Image.findAllByEvent(event),
+          organizers = Organizer.findAllByEvent(event),
+          artists = Artist.findAllByEvent(event),
+          tariffs = Tariff.findAllByEvent(event),
+          places = Place.findAllByEvent(event.eventId),
+          genres = Genre.findAllByEvent(event.eventId),
+          addresses = Address.findAllByEvent(event))
+        )
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot get events by oragnizer: " + e.getMessage)
+  }  
+  
+  def findAllByArtist(artistId: Long) = try {
+    DB.withConnection { implicit connection =>
+      SQL(""" SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
+            e.name, e.geographicPoint, e.description, e.startTime,
+            e.endTime, e.ageRestriction
+        FROM eventsArtists eA
+        INNER JOIN events e ON e.eventId = eA.eventId
+        WHERE eA.artistId = {artistId}
+        ORDER BY e.creationDateTime DESC
+        LIMIT 20""")
+        .on('artistId -> artistId)
         .as(EventParser.*)
         .map(event => event.copy(
           images = Image.findAllByEvent(event),
