@@ -75,7 +75,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {
-          Future { Artist.save(patternAndArtist.artist) }
+          Artist.save(patternAndArtist.artist)
           Ok.chunked(getArtistTracks(patternAndArtist))
         }
       )

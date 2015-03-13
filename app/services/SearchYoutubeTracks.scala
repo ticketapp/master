@@ -15,25 +15,25 @@ object SearchYoutubeTracks {
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Future[Set[Track]] = {
+    println(artist.facebookId)
     getMaybeEchonestIdByFacebookId(artist) flatMap {
-      case Some(echonestId) =>
-        getYoutubeTracksByEchonestId(artist, echonestId)
-      case None =>
-        getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
+      case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
+      case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
     }
   }
-  
+
   def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Future[Set[Track]] = {
     val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksForArtist
-    getMaybeEchonestArtistUrls(facebookId) flatMap {
+    getMaybeEchonestArtistUrlsByFacebookId(facebookId) flatMap {
       case Some(idUrls: (String, Set[String])) =>
         val echonestId = idUrls._1
         val echonestWebsites = idUrls._2
+        println(echonestWebsites + " -----> " + artist.websites.toString + "    " + artist.facebookUrl)
         if ((echonestWebsites intersect artist.websites).nonEmpty)
           getYoutubeTracksByEchonestId(artist, echonestId)
         else
-          getYoutubeTracksIfNotFoundDirectlyByEchonest(artist, pattern)
-      case None => Future { Set.empty }
+          Future { Set.empty }
+      case None => getYoutubeTracksIfNotFoundDirectlyByEchonest(artist, pattern)
     }
   }
 
@@ -63,7 +63,7 @@ object SearchYoutubeTracks {
       toBeReturned
     }
   }
-  
+
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Future[Set[Track]] = {
     getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
       getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
@@ -115,15 +115,15 @@ object SearchYoutubeTracks {
     (youtubeResponse.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlTitleAndThumbnailUrl)
       .getOrElse(Set.empty)
   }
-  
-  def getMaybeEchonestArtistUrls(facebookArtistId: String): Future[Option[(String, Set[String])]] = {
+
+  def getMaybeEchonestArtistUrlsByFacebookId(facebookArtistId: String): Future[Option[(String, Set[String])]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/urls")
       .withQueryString(
         "api_key" -> echonestApiKey,
         "id" -> s"facebook:artist:$facebookArtistId",
         "format" -> "json")
       .get()
-      .map { response => readMaybeEchonestArtistIdAndUrls(response) }
+      .map { readMaybeEchonestArtistIdAndUrls }
   }
 
   def readMaybeEchonestArtistIdAndUrls(echonestResponse: Response): Option[(String, Set[String])] = {
@@ -143,7 +143,7 @@ object SearchYoutubeTracks {
     urlsJsObject.values.map { url =>
       normalizeUrl(url.as[String])
     }.toSet
-  
+
   def getMaybeEchonestIdByFacebookId(artist: Artist): Future[Option[String]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/profile")
       .withQueryString(
