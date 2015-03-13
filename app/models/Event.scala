@@ -324,7 +324,6 @@ object Event {
     case e: Exception => throw new DAOException("Cannot follow event: " + e.getMessage)
   }
 
-
   def findAllInCircle(center: String): List[Event] = center match {
     case geographicPointPattern(_) =>
       try {
@@ -334,8 +333,8 @@ object Event {
           JOIN eventsAddresses eA on e.eventId = eA.eventId
           JOIN addresses a ON a.addressId = eA.eventId
           WHERE a.isEvent = TRUE
-          ORDER BY a.geographicPoint <-> point '$center' LIMIT 50"""
-          ).as(EventParser.*)
+          ORDER BY a.geographicPoint <-> point '$center' LIMIT 50""")
+            .as(EventParser.*)
             .map(e => e.copy(
               images = Image.findAllByEvent(e),
               organizers = Organizer.findAllByEvent(e),

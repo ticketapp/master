@@ -12,7 +12,7 @@ import json.JsonHelper.organizerWrites
 
 object OrganizerController extends Controller {
   def organizers = Action {
-    Ok(Json.toJson(Organizer.findAll()))
+    Ok(Json.toJson(Organizer.findAll))
   }
 
   def organizer(id: Long) = Action {
@@ -23,12 +23,14 @@ object OrganizerController extends Controller {
     Ok(Json.toJson(Organizer.findAllContaining(pattern)))
   }
 
-  def deleteOrganizer(organizerId: Long): Int = {
+  def deleteOrganizer(organizerId: Long): Int = try {
     DB.withConnection { implicit connection =>
-      SQL("DELETE FROM organizers WHERE organizerId={organizerId}").on(
-        'organizerId -> organizerId
-      ).executeUpdate()
+      SQL("DELETE FROM organizers WHERE organizerId = {organizerId}")
+        .on('organizerId -> organizerId)
+        .executeUpdate()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot delete Organizer: " + e.getMessage)
   }
 
   def followOrganizer(organizerId : Long) = Action {
@@ -54,6 +56,5 @@ object OrganizerController extends Controller {
       }
     )
   }
-
 }
 

@@ -26,21 +26,21 @@ object Address {
     }
   }
 
-  def formApply(city: Option[String], zip: Option[String], street: Option[String]) = {
+  def formApply(city: Option[String], zip: Option[String], street: Option[String]) =
     new Address(-1L, None, city, zip, street)
-  }
   def formUnapply(address: Address): Option[(Option[String], Option[String], Option[String])] =
     Some((address.city, address.zip, address.street))
-  //def formUnapply(artist: Artist): Option[(Option[String], String)] = Some((artist.facebookId, artist.name))
 
-  def findAll(): List[Address] = {
+
+  def findAll: List[Address] = try {
     DB.withConnection { implicit connection =>
-      SQL("select * from addresses").as(AddressParser.*)
+      SQL("SELECT * FROM addresses").as(AddressParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Problem with the method Address.findAll: " + e.getMessage)
   }
 
-
-  def findAllByEvent(event: Event): List[Address] = {
+  def findAllByEvent(event: Event): List[Address] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM eventsAddresses eA
@@ -48,37 +48,47 @@ object Address {
         .on('eventId -> event.eventId)
         .as(AddressParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Problem with the method Address.findAllByEvent: " + e.getMessage)
   }
 
-  def find(addressId: Long): Option[Address] = {
-    try {
+  def find(addressId: Option[Long]): Option[Address] = addressId match {
+    case None => None
+    case Some(id) => try {
       DB.withConnection { implicit connection =>
-        SQL("SELECT * from addresses WHERE addressId = {addressId}")
-          .on('addressId -> addressId)
+        SQL("SELECT * FROM addresses WHERE addressId = {id}")
+          .on('id -> id)
           .as(AddressParser.singleOpt)
       }
     } catch {
       case e: Exception => throw new DAOException("Problem with the method Address.find: " + e.getMessage)
     }
   }
-
-
-  def findAllContaining(pattern: String): Seq[Address] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM addresses WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
-          .on('patternLowCase -> pattern.toLowerCase)
-          .as(AddressParser.*)
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
+  /*
+  def findByOrganizer(organizerId: Long): Option[Address] = try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT * FROM addresses WHERE addressId = {addressId}")
+        .on('organizerId -> organizerId)
+        .as(AddressParser.singleOpt)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Problem with the method Address.find: " + e.getMessage)
   }
+*/
+  def findAllContaining(pattern: String): Seq[Address] = try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT * FROM addresses WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
+        .on('patternLowCase -> pattern.toLowerCase)
+        .as(AddressParser.*)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
+  }
+
 
   def saveAddressAndEventRelation(address: Address, id: Long): Option[Long] = {
     //, relationClass: String
     //sécurité geographicPoint
-
     address.geographicPoint match {
       case None =>
         try {
@@ -118,40 +128,37 @@ object Address {
     }
   }
 
-   def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = {
-      try {
-        DB.withConnection { implicit connection =>
-          SQL( """INSERT INTO eventsAddresses (eventId, addressId)
-            VALUES ({eventId}, {addressId})""").on(
-              'eventId -> eventId,
-              'addressId -> addressId
-            ).executeInsert()
-        }
-      } catch {
-        case e: Exception => throw new DAOException("saveEventAddressRelation: " + e.getMessage)
-      }
-    }
-
-  def deleteAddress(addressId: Long): Long = {
-    try {
+   def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = try {
       DB.withConnection { implicit connection =>
-        SQL("""DELETE FROM addresses WHERE addressId={addressId}""").on('addressId -> addressId).executeUpdate()
+        SQL( """INSERT INTO eventsAddresses (eventId, addressId)
+          VALUES ({eventId}, {addressId})""")
+          .on(
+            'eventId -> eventId,
+            'addressId -> addressId)
+          .executeInsert()
       }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
+   } catch {
+     case e: Exception => throw new DAOException("saveEventAddressRelation: " + e.getMessage)
+   }
+
+  def deleteAddress(addressId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL("""DELETE FROM addresses WHERE addressId={addressId}""")
+        .on('addressId -> addressId)
+        .executeUpdate()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
   }
 
-  def followAddress(userId : Long, addressId : Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("insert into addressFollowed(userId, addressId) values ({userId}, {addressId})").on(
-          'userId -> userId,
-          'addressId -> addressId
-        ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot follow address: " + e.getMessage)
+  def followAddress(userId : Long, addressId : Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("insert into addressFollowed(userId, addressId) values ({userId}, {addressId})").on(
+        'userId -> userId,
+        'addressId -> addressId)
+        .executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot follow address: " + e.getMessage)
   }
 }

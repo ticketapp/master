@@ -87,7 +87,8 @@ object SearchArtistsController extends Controller {
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { response =>
-        println(readMaybeFacebookUrl(response))
+        readMaybeFacebookUrl(response)
+        //println(readMaybeFacebookUrl(response))
         //println(response.json)
     }
   }
