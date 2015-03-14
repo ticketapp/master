@@ -37,8 +37,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Artist.findAllContaining(pattern)))
   }
 
-  def eventsByArtist(artistId: Long) = Action {
-    Ok(Json.toJson(Event.findAllByArtist(artistId)))
+  def eventsByArtist(facebookUrl: String) = Action {
+    Ok(Json.toJson(Event.findAllByArtist(facebookUrl)))
   }
 
   val artistBindingForm = Form(

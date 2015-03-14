@@ -177,11 +177,12 @@ object Event {
         )
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot get events by oragnizer: " + e.getMessage)
+    case e: Exception => throw new DAOException("Cannot get events by organizer: " + e.getMessage)
   }  
   
-  def findAllByArtist(artistId: Long) = try {
+  def findAllByArtist(facebookUrl: String) = try {
     DB.withConnection { implicit connection =>
+      val artistId = Artist.returnArtistIdByFacebookUrl(facebookUrl)
       SQL(""" SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
             e.name, e.geographicPoint, e.description, e.startTime,
             e.endTime, e.ageRestriction
@@ -360,18 +361,18 @@ object Event {
           WHERE a.isEvent = TRUE
           ORDER BY a.geographicPoint <-> point '$center' LIMIT 50""")
             .as(EventParser.*)
-            .map(e => e.copy(
-              images = Image.findAllByEvent(e),
-              organizers = Organizer.findAllByEvent(e),
-              artists = Artist.findAllByEvent(e),
-              tariffs = Tariff.findAllByEvent(e),
-              addresses = Address.findAllByEvent(e))
+            .map(event => event.copy(
+              images = Image.findAllByEvent(event),
+              organizers = Organizer.findAllByEvent(event),
+              artists = Artist.findAllByEvent(event),
+              tariffs = Tariff.findAllByEvent(event),
+              addresses = Address.findAllByEvent(event))
             )
         }
       } catch {
         case e: Exception => throw new DAOException("Problem with the method Event.findAllInCircle: " + e.getMessage)
       }
-    case _ => List()
+    case _ => List.empty
   }
 }
 

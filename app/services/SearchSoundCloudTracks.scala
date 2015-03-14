@@ -93,11 +93,11 @@ object SearchSoundCloudTracks {
     WS.url("http://api.soundcloud.com/users/" + scLink + "/tracks")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
-      .map { readSoundCloudTracks(_, artist) }
+      .map { response => readSoundCloudTracks(response.json, artist) }
   }
 
-  def readSoundCloudTracks(soundCloudResponse: Response, artist: Artist): Seq[Track] = {
-    println(soundCloudResponse.json)
+  def readSoundCloudTracks(soundCloudResponse: JsValue, artist: Artist): Seq[Track] = {
+    println(soundCloudResponse)
     val soundCloudTrackReads = (
       (__ \ "stream_url").read[String] and
         (__ \ "title").read[String] and
@@ -117,7 +117,7 @@ object SearchSoundCloudTracks {
             redirectUrl)
       }
     }
-    soundCloudResponse.json
+    soundCloudResponse
       .asOpt[Seq[Track]](collectOnlyTracksWithUrlTitleAndThumbnail)
       .getOrElse(Seq.empty)
   }
@@ -130,5 +130,6 @@ object SearchSoundCloudTracks {
       "")
     println("a: " + a)
     title
+    a
   }
 }

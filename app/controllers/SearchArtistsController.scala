@@ -176,6 +176,10 @@ object SearchArtistsController extends Controller {
   def websitesStringToWebsitesSet(websites: Option[String]): Set[String] = websites match {
     case None => Set.empty
     case Some(websites: String) =>
+      println("""((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
+        .map { _.trim.stripSuffix("/") }
+        .filter(_.nonEmpty)
+        .toSet)
       """((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
         .map { _.trim.stripSuffix("/") }
         .filter(_.nonEmpty)

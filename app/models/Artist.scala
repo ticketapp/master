@@ -1,5 +1,7 @@
 package models
 
+import java.sql.Connection
+
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
@@ -75,8 +77,7 @@ object Artist {
              WHERE eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(ArtistParser.*)
-        .map(artist =>
-          artist.copy(
+        .map(artist => artist.copy(
             images = Image.findAllByArtist(artist.artistId),
             genres = Genre.findAllByArtist(artist.artistId),
             tracks = Track.findAllByArtist(artist.facebookUrl)))
@@ -133,6 +134,8 @@ object Artist {
 
 
   def save(artist: Artist): Option[Long] = {
+    println(artist.websites)
+    println(artist.websites.mkString(","))
     Utilities.testIfExist("artists", "name", artist.name) match {
       case true => Some(-1)
       case false => try {
@@ -169,13 +172,24 @@ object Artist {
     }
   }
 
-  def returnArtistId(name: String): Long = {
+  def returnArtistId(name: String): Long = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT artistId FROM artists WHERE name = {name}")
         .on('name -> name)
         .as(scalar[Long].single)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot returnArtistId: " + e.getMessage)
   }
+
+  def returnArtistIdByFacebookUrl(facebookUrl: String)(implicit connection: Connection): Option[Long] = try {
+    SQL("SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl}")
+      .on('facebookUrl -> facebookUrl)
+      .as(scalar[Option[Long]].single)
+  } catch {
+    case e: Exception => throw new DAOException("Cannot returnArtistIdByFacebookUrl: " + e.getMessage)
+  }
+
 
   def saveEventArtistRelation(eventId: Long, artistId: Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
@@ -189,8 +203,6 @@ object Artist {
   } catch {
     case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)
   }
-
-
 
   def deleteArtist(artistId: Long): Long = try {
     DB.withConnection { implicit connection =>
