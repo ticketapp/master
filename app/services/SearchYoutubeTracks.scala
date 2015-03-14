@@ -69,23 +69,11 @@ object SearchYoutubeTracks {
     }
   }
 
-  def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Future[Set[Track]] = {
-    println(tracksTitle)
-    val eventuallyTracks = Future.sequence(
-      tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) }
-    )
-    eventuallyTracks.map { tracks =>
-      //val ArtistNameRegex = artist.name.toLowerCase.r
-      tracks.flatten.filter(_.title.toLowerCase contains artist.name.toLowerCase)
-        /*match {
-          case ArtistNameRegex(title) => true
-          case _ => false
-        }*/
-    }
-  }
+  def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Future[Set[Track]] =
+    Future.sequence(tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) })
+      .map { _.flatten }
 
-  def getYoutubeTracksByTitleAndArtistName(artist: Artist, trackTitle: String): Future[Set[Track]] = {
-    println(trackTitle)
+  def getYoutubeTracksByTitleAndArtistName(artist: Artist, trackTitle: String): Future[Seq[Track]] = {
     WS.url("https://www.googleapis.com/youtube/v3/search")
       .withQueryString(
         "part" -> "snippet",
@@ -97,22 +85,30 @@ object SearchYoutubeTracks {
       .map { readYoutubeTracks(_, artist) }
   }
 
-  def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Set[Track] = {
+  def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
     val youtubeTrackReads = (
-      (__ \ "snippet" \ "title").read[Option[String]] and
-        (__ \ "id" \ "videoId").read[Option[String]] and
-        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
-      )((title: Option[String], url: Option[String], thumbnailUrl: Option[String]) =>
-      (title, url, thumbnailUrl))
-    val collectOnlyTracksWithUrlTitleAndThumbnailUrl = Reads.set(youtubeTrackReads).map { tracks =>
+      (__ \ "snippet" \ "title").read[String] and
+        (__ \ "id" \ "videoId").read[String] and
+        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").read[String]
+      )((title: String, url: String, thumbnailUrl: String) => (title, url, thumbnailUrl))
+    val collectOnlyTracksWithUrlTitleAndThumbnailUrl = Reads.seq(youtubeTrackReads).map { tracks =>
       tracks.collect {
-        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String)) =>
+        case (title, url, thumbnailUrl) if filterTracksWithoutArtistName(title, artist.name) =>
           Track(-1L, normalizeTrackTitle(title, artist.name), url, "Youtube", thumbnailUrl, artist.facebookUrl)
       }
     }
+    (youtubeResponse.json \ "items")
+      .asOpt[Seq[Track]](collectOnlyTracksWithUrlTitleAndThumbnailUrl)
+      .getOrElse(Seq.empty)
+  }
 
-    (youtubeResponse.json \ "items").asOpt[Set[Track]](collectOnlyTracksWithUrlTitleAndThumbnailUrl)
-      .getOrElse(Set.empty)
+  def filterTracksWithoutArtistName(trackTitle: String, artistName: String): Boolean = {
+  //val ArtistNameRegex = artist.name.toLowerCase.r
+    trackTitle.toLowerCase contains artistName.toLowerCase
+    /*match {
+      case ArtistNameRegex(title) => true
+      case _ => false
+    }*/
   }
 
   def getMaybeEchonestArtistUrlsByFacebookId(facebookArtistId: String): Future[Option[(String, Set[String])]] = {

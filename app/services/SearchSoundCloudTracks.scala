@@ -96,8 +96,7 @@ object SearchSoundCloudTracks {
       .map { response => readSoundCloudTracks(response.json, artist) }
   }
 
-  def readSoundCloudTracks(soundCloudResponse: JsValue, artist: Artist): Seq[Track] = {
-    println(soundCloudResponse)
+  def readSoundCloudTracks(soundCloudJsonResponse: JsValue, artist: Artist): Seq[Track] = {
     val soundCloudTrackReads = (
       (__ \ "stream_url").read[String] and
         (__ \ "title").read[String] and
@@ -117,19 +116,18 @@ object SearchSoundCloudTracks {
             redirectUrl)
       }
     }
-    soundCloudResponse
+    soundCloudJsonResponse
       .asOpt[Seq[Track]](collectOnlyTracksWithUrlTitleAndThumbnail)
       .getOrElse(Seq.empty)
   }
 
+  //def aa(a: Reads[scala.Seq[Nothing]])
+
   def normalizeTrackTitle(title: String, artistName: String): String = {
     //+ artistName_ (ou : / etc)
-    val a = ("""(?i)""" + Pattern.quote(artistName) + """\s*-?\s*""").r.replaceFirstIn(
+    ("""(?i)""" + Pattern.quote(artistName) + """\s*-?\s*""").r.replaceFirstIn(
       """(?i)(\.wm[a|v]|\.ogc|\.amr|\.wav|\.flv|\.mov|\.ram|\.mp[3-5]|\.pcm|\.alac|\.eac-3|\.flac|\.vmd)\s*$""".r.
         replaceFirstIn(title, ""),
       "")
-    println("a: " + a)
-    title
-    a
   }
 }
