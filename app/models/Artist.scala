@@ -132,7 +132,6 @@ object Artist {
     case e: Exception => throw new DAOException("Problem with method Artist.findAllContaining: " + e.getMessage)
   }
 
-
   def save(artist: Artist): Option[Long] = {
     println(artist.websites)
     println(artist.websites.mkString(","))

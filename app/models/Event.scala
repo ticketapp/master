@@ -183,14 +183,14 @@ object Event {
   def findAllByArtist(facebookUrl: String) = try {
     DB.withConnection { implicit connection =>
       val artistId = Artist.returnArtistIdByFacebookUrl(facebookUrl)
-      SQL(""" SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
+      SQL("""SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
             e.name, e.geographicPoint, e.description, e.startTime,
             e.endTime, e.ageRestriction
-        FROM eventsArtists eA
-        INNER JOIN events e ON e.eventId = eA.eventId
-        WHERE eA.artistId = {artistId}
-        ORDER BY e.creationDateTime DESC
-        LIMIT 20""")
+          FROM eventsArtists eA
+          INNER JOIN events e ON e.eventId = eA.eventId
+          WHERE eA.artistId = {artistId}
+          ORDER BY e.creationDateTime DESC
+          LIMIT 20""")
         .on('artistId -> artistId)
         .as(EventParser.*)
         .map(event => event.copy(

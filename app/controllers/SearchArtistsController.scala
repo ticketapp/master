@@ -145,7 +145,7 @@ object SearchArtistsController extends Controller {
                  maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
     //println(name, facebookId, maybeWebsites, link, maybeDescription, maybeGenre)
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
-    val websitesSeq = websitesStringToWebsitesSet(maybeWebsites).filterNot(_ contains facebookUrl)
+    val websitesSeq = websitesStringToWebsitesSet(maybeWebsites)
     val images = Set(new Image(-1, cover))
     val description = formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
@@ -176,13 +176,10 @@ object SearchArtistsController extends Controller {
   def websitesStringToWebsitesSet(websites: Option[String]): Set[String] = websites match {
     case None => Set.empty
     case Some(websites: String) =>
-      println("""((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
-        .map { _.trim.stripSuffix("/") }
-        .filter(_.nonEmpty)
-        .toSet)
       """((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
         .map { _.trim.stripSuffix("/") }
         .filter(_.nonEmpty)
+        .filterNot(_.contains("facebook.com"))
         .toSet
   }
 }
