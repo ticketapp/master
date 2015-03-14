@@ -204,7 +204,7 @@ object SearchYoutubeTracks {
         "bucket" -> "id:facebook",
         "api_key" -> echonestApiKey)
       .get()
-      .map { response => println(response.json);readEchonestTupleIdFacebookId(response) }
+      .map { readEchonestTupleIdFacebookId }
   }
 
   def readEchonestTupleIdFacebookId(echonestResponse: Response): Seq[(String, String)] = {

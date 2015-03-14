@@ -24,7 +24,7 @@ GET           /artists/byId/:id                              controllers.ArtistC
 POST          /artists/createArtist                          controllers.ArtistController.createArtist
 POST          /artists/:artistId/follow                      controllers.ArtistController.followArtist(artistId: Long)
 DELETE        /artists/:artistId                             controllers.ArtistController.deleteArtist(artistId: Long)
-GET           /artists/:artistId/events                      controllers.ArtistController.eventsByArtist(artistId: Long)
+GET           /artists/:facebookUrl/events                   controllers.ArtistController.eventsByArtist(facebookUrl: String)
 GET           /artists/containing/:pattern                   controllers.ArtistController.findArtistsContaining(pattern: String)
 GET           /artists/facebookContaining/:pattern           controllers.SearchArtistsController.getFacebookArtistsContaining(pattern: String)
 GET           /artists/:facebookArtistId/tracks              controllers.SearchTracksController.getTracksForArtist(facebookArtistId: String)
