@@ -82,7 +82,6 @@ object Scheduler {
         val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getWebsitesInDescription(description))
         val eventuallyMaybeArtistsFromTitle =
           getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getWebsitesInDescription(description))
-        println(splitArtistNamesInTitle(name) + getWebsitesInDescription(description).toString)
 
         for {
           organizer <- eventuallyOrganizer
@@ -90,7 +89,6 @@ object Scheduler {
           artistsFromDescription <- eventuallyMaybeArtistsFromDescription
           artistsFromTitle <- eventuallyMaybeArtistsFromTitle
         } yield {
-          println("artistsFromTitle = " + artistsFromTitle)
           val nonEmptyArtists = artistsFromDescription.flatten.toList ++ artistsFromTitle
           Future { nonEmptyArtists.map { getSoundCloudTracksForArtist }.map { _.map { _.map { Track.save } } } }
           Future { nonEmptyArtists.map { artist =>

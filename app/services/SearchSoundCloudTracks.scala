@@ -1,7 +1,7 @@
 package services
 
 import controllers.DAOException
-import models.{Artist, Track}
+import models.{Genre, Artist, Track}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, Response}
 import play.api.libs.concurrent.Execution.Implicits._
@@ -10,6 +10,7 @@ import play.api.libs.functional.syntax._
 import services.Utilities.normalizeUrl
 import scala.util.matching._
 import java.util.regex.Pattern
+import models.Genre.saveWithArtistRelation
 
 object SearchSoundCloudTracks {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
@@ -101,31 +102,43 @@ object SearchSoundCloudTracks {
         (__ \ "title").readNullable[String] and
         (__ \ "permalink_url").readNullable[String] and
         (__ \ "user" \ "avatar_url").readNullable[String] and
-        (__ \ "artwork_url").readNullable[String]
+        (__ \ "artwork_url").readNullable[String] and
+        (__ \ "genre").readNullable[String]
       )((url: Option[String], title: Option[String], redirectUrl: Option[String], avatarUrl: Option[String],
-         thumbnail: Option[String]) => (url, title, redirectUrl, thumbnail, avatarUrl))
+         thumbnail: Option[String], genre: Option[String]) => (url, title, redirectUrl, thumbnail, avatarUrl, genre))
     val onlyTracksWithUrlTitleAndThumbnail =
-      Reads.seq(soundCloudTrackReads).map { collectOnlyTracksWithUrlTitleAndThumbnail(_, artist) }
+      Reads.seq(soundCloudTrackReads).map { collectOnlyValidTracksAndSaveArtistGenres(_, artist) }
 
     soundCloudJsonResponse
       .asOpt[Seq[Track]](onlyTracksWithUrlTitleAndThumbnail)
       .getOrElse(Seq.empty)
   }
 
-  def collectOnlyTracksWithUrlTitleAndThumbnail(tracks: Seq[(Option[String], Option[String], Option[String],
-    Option[String], Option[String])], artist: Artist): Seq[Track] = {
+  def collectOnlyValidTracksAndSaveArtistGenres(tracks: Seq[(Option[String], Option[String],
+    Option[String], Option[String], Option[String], Option[String])], artist: Artist): Seq[Track] = {
     tracks.collect {
-      case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl) =>
+      case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl, genre) =>
+        saveGenreForArtist(genre, artist.artistId)
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
           redirectUrl)
-      case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String)) =>
+      case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String), genre) =>
+        saveGenreForArtist(genre, artist.artistId)
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
           redirectUrl)
     }
   }
-  //+ artistName_ (ou : / etc)
+
+  def saveGenreForArtist(genreName: Option[String], artistId: Long): Unit = {
+    Future {
+      genreName match {
+        case Some(genreFound) if genreFound.nonEmpty =>
+          saveWithArtistRelation(new Genre(-1, genreFound), artistId)
+      }
+    }
+  }
+
   def normalizeTrackTitle(title: String, artistName: String): String =
-    ("""(?i)""" + Pattern.quote(artistName) + """\s*-?\s*""").r.replaceFirstIn(
+    ("""(?i)""" + Pattern.quote(artistName) + """\s*[:/-]?\s*""").r.replaceFirstIn(
       """(?i)(\.wm[a|v]|\.ogc|\.amr|\.wav|\.flv|\.mov|\.ram|\.mp[3-5]|\.pcm|\.alac|\.eac-3|\.flac|\.vmd)\s*$""".r
         .replaceFirstIn(title, ""),
       "")
