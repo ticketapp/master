@@ -89,10 +89,7 @@ object SearchArtistsController extends Controller {
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
-      .map { response =>
-        println(readMaybeFacebookUrl(response))
-        readMaybeFacebookUrl(response)
-    }
+      .map { readMaybeFacebookUrl }
   }
 
   def readMaybeFacebookUrl(soundCloudWebProfilesResponse: Response): Option[String] = {
@@ -113,25 +110,30 @@ object SearchArtistsController extends Controller {
   }
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
-    //facebook.com/profile.php?id=1171751839
-    //facebook.com/pages/cookie-monsta-official/175957405757449?fref=ts
-    //tinyUrl??
-    val smallerUrl = url.replace("facebook.com/", "")
-    val normalizedUrl =
-      if (smallerUrl contains "/")
-        smallerUrl.substring(smallerUrl.indexOf("/", 2) + 1)
-      else
-        smallerUrl
-    WS.url("https://graph.facebook.com/v2.2/" + normalizedUrl)
+    //tinyUrl api??
+    WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
       .withQueryString(
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
         "access_token" -> token)
       .get()
       .map { readFacebookArtist }
   }
+
+  def normalizeFacebookUrl(facebookUrl: String): String = {
+    val firstNormalization = facebookUrl.drop(facebookUrl.lastIndexOf("/") + 1) match {
+      case urlWithProfile: String if urlWithProfile contains "profile.php?id=" =>
+        urlWithProfile.substring(urlWithProfile.lastIndexOf("=") + 1)
+      case alreadyNormalizedUrl: String =>
+        alreadyNormalizedUrl
+    }
+    firstNormalization match {
+      case urlWithArguments if urlWithArguments contains "?" =>
+        urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?"))
+      case urlWithoutArguments => urlWithoutArguments
+    }
+  }
   
   def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
-    //println(facebookResponse.json)
     facebookResponse.json
       .asOpt[(String, String, String, Option[String], Option[String],
         String, Option[String], Option[String])](readArtist)
@@ -148,7 +150,6 @@ object SearchArtistsController extends Controller {
 
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                  maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
-    //println(name, facebookId, maybeWebsites, link, maybeDescription, maybeGenre)
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val websitesSeq = websitesStringToWebsitesSet(maybeWebsites)
     val images = Set(new Image(-1, cover))

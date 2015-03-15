@@ -19,7 +19,6 @@ object SearchSoundCloudTracks {
       case None =>
         getSoundCloudTracksNotDefinedInFb(artist)
       case Some(soundCloudLink) =>
-        println(soundCloudLink)
         getSoundCloudTracksWithLink(soundCloudLink.substring("soundcloud.com".length + 1), artist)
     }
 
@@ -89,11 +88,13 @@ object SearchSoundCloudTracks {
       .getOrElse(Seq.empty)
   }
 
-  def getSoundCloudTracksWithLink(scLink: String, artist: Artist): Future[Seq[Track]] = {
-    WS.url("http://api.soundcloud.com/users/" + scLink + "/tracks")
+  def getSoundCloudTracksWithLink(soundCloudLink: String, artist: Artist): Future[Seq[Track]] = {
+    WS.url("http://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
-      .map { response => readSoundCloudTracks(response.json, artist) }
+      .map { response => 
+      println(response.json)
+      readSoundCloudTracks(response.json, artist) }
   }
 
   def readSoundCloudTracks(soundCloudJsonResponse: JsValue, artist: Artist): Seq[Track] = {
@@ -114,8 +115,9 @@ object SearchSoundCloudTracks {
   }
 
   def collectOnlyTracksWithUrlTitleAndThumbnail(tracks: Seq[(String, String, Option[String], Option[String],
-    Option[String])], artist: Artist) = {
-    tracks.collect {
+    Option[String])], artist: Artist): Seq[Track] = {
+    println(tracks)
+    val a = tracks.collect {
       case (url, title, redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl) =>
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
           redirectUrl)
@@ -123,6 +125,8 @@ object SearchSoundCloudTracks {
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
           redirectUrl)
     }
+    println(a)
+    a
   }
   //+ artistName_ (ou : / etc)
   def normalizeTrackTitle(title: String, artistName: String): String =
