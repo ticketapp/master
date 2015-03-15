@@ -10,7 +10,7 @@ import play.api.libs.functional.syntax._
 import services.Utilities.normalizeUrl
 import scala.util.matching._
 import java.util.regex.Pattern
-import models.Genre.saveWithArtistRelation
+import models.Genre.saveGenreForArtistInFuture
 
 object SearchSoundCloudTracks {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
@@ -118,24 +118,17 @@ object SearchSoundCloudTracks {
     Option[String], Option[String], Option[String], Option[String])], artist: Artist): Seq[Track] = {
     tracks.collect {
       case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl, genre) =>
-        saveGenreForArtist(genre, artist.facebookUrl)
+        saveGenreForArtistInFuture(genre, artist.facebookUrl)
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
           redirectUrl)
       case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String), genre) =>
-        saveGenreForArtist(genre, artist.facebookUrl)
+        saveGenreForArtistInFuture(genre, artist.facebookUrl)
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
           redirectUrl)
     }
   }
 
-  def saveGenreForArtist(genreName: Option[String], artistFacebookUrl: String): Unit = {
-    Future {
-      genreName match {
-        case Some(genreFound) if genreFound.nonEmpty =>
-          saveWithArtistRelation(new Genre(-1, genreFound), artistFacebookUrl)
-      }
-    }
-  }
+
 
   def normalizeTrackTitle(title: String, artistName: String): String =
     ("""(?i)""" + Pattern.quote(artistName) + """\s*[:/-]?\s*""").r.replaceFirstIn(

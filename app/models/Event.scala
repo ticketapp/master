@@ -303,7 +303,6 @@ object Event {
                 Artist.saveWithEventRelation(artist, eventId)
               }
               event.genres.foreach { genre =>
-                println(genre)
                 Genre.saveWithEventRelation(genre, eventId)
               }
               Option(eventId)

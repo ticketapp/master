@@ -9,6 +9,7 @@ import services.Utilities.normalizeUrl
 import scala.concurrent.Future
 import java.util.regex.Pattern
 import services.SearchSoundCloudTracks.normalizeTrackTitle
+import models.Genre.saveGenreForArtistInFuture
 
 object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
@@ -85,17 +86,15 @@ object SearchYoutubeTracks {
   }
 
   def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
-    println("youtubeResponse = " + youtubeResponse.json)
     val youtubeTrackReads = (
       (__ \ "snippet" \ "title").readNullable[String] and
         (__ \ "id" \ "videoId").readNullable[String] and
-        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String] and
-        (__ \ "genre").readNullable[String]
-      )((title: Option[String], url: Option[String], thumbnailUrl: Option[String], genre: Option[String]) =>
-      (title, url, thumbnailUrl, genre))
+        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
+      )((title: Option[String], url: Option[String], thumbnailUrl: Option[String]) =>
+      (title, url, thumbnailUrl))
     val collectOnlyValidTracks = Reads.seq(youtubeTrackReads).map { tracks =>
       tracks.collect {
-        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String), genre)
+        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
           if isArtistNameInTrackTitle(title, artist.name) =>
           Track(-1L, normalizeTrackTitle(title, artist.name), url, "Youtube", thumbnailUrl, artist.facebookUrl)
       }
@@ -186,6 +185,7 @@ object SearchYoutubeTracks {
   }
 
   def readEchonestSongs(result: JsValue): Set[String] = {
+    println(result)
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     (result \ "response" \ "songs")
       .asOpt[Set[Option[String]]](Reads.set(titleReads))
