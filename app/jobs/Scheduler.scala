@@ -1,6 +1,7 @@
 package jobs
 
 import java.util.Date
+import models.Genre._
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.libs.json._

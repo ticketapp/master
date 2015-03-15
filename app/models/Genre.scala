@@ -76,15 +76,28 @@ object Genre {
   
   def save(genre: Genre): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      /*testIfExist("events", "facebookId", event.facebookId) match {
-      case true => None
-      case false =>*/
-      SQL("""INSERT INTO genres(name) VALUES ({name})""")
-        .on('name -> genre.name)
-        .executeInsert()
+      testIfExist("genres", "name", genre.name) match {
+        case true => findGenreId(genre.name)
+        case false =>
+          SQL( """INSERT INTO genres(name) VALUES ({name})""")
+            .on('name -> genre.name)
+            .executeInsert()
+      }
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot create genre: " + e.getMessage)
+  }
+
+  def findGenreId(genreName: String): Option[Long] = try {
+    val a = DB.withConnection { implicit connection =>
+        SQL( """SELECT genreId FROM genres WHERE name = {name}""")
+          .on('name -> genreName)
+          .as(scalar[Option[Long]].single)
+    }
+    println(a)
+    a
+  } catch {
+    case e: Exception => throw new DAOException("Event.findGenreId: " + e.getMessage)
   }
 
   
@@ -109,24 +122,24 @@ object Genre {
   }
 
 
-  def saveWithArtistRelation(genre: Genre, artistId: Long): Option[Long] = {
+  def saveWithArtistRelation(genre: Genre, artistFacebookUrl: String): Option[Long] = {
     save(genre) match {
-      case Some(genreId: Long) => saveArtistGenreRelation(artistId, genreId)
+      case Some(genreId: Long) => saveArtistGenreRelation(artistFacebookUrl, genreId)
       case _ => None
     }
   }
 
-  def saveArtistGenreRelation(artistId: Long, genreId: Long): Option[Long] = try {
+  def saveArtistGenreRelation(artistFacebookUrl: String, genreId: Long) = try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO artistsGenres (artistId, genreId)
-          VALUES ({artistId}, {genreId})""")
+      SQL("""INSERT INTO artistsGenres (artistFacebookUrl, genreId)
+          VALUES ({artistFacebookUrl}, {genreId})""")
         .on(
-          'artistId -> artistId,
+          'artistFacebookUrl -> artistFacebookUrl,
           'genreId -> genreId)
         .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("saveArtistGenreRelation: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.saveArtistGenreRelation: " + e.getMessage)
   }
 
 

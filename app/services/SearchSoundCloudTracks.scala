@@ -118,21 +118,21 @@ object SearchSoundCloudTracks {
     Option[String], Option[String], Option[String], Option[String])], artist: Artist): Seq[Track] = {
     tracks.collect {
       case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl, genre) =>
-        saveGenreForArtist(genre, artist.artistId)
+        saveGenreForArtist(genre, artist.facebookUrl)
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
           redirectUrl)
       case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String), genre) =>
-        saveGenreForArtist(genre, artist.artistId)
+        saveGenreForArtist(genre, artist.facebookUrl)
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
           redirectUrl)
     }
   }
 
-  def saveGenreForArtist(genreName: Option[String], artistId: Long): Unit = {
+  def saveGenreForArtist(genreName: Option[String], artistFacebookUrl: String): Unit = {
     Future {
       genreName match {
         case Some(genreFound) if genreFound.nonEmpty =>
-          saveWithArtistRelation(new Genre(-1, genreFound), artistId)
+          saveWithArtistRelation(new Genre(-1, genreFound), artistFacebookUrl)
       }
     }
   }

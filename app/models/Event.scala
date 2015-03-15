@@ -134,8 +134,7 @@ object Event {
 
   def findAllByGenre(genreId: Long) = try {
     DB.withConnection { implicit connection =>
-      SQL(
-        """ SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
+      SQL(""" SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
             e.name, e.geographicPoint, e.description, e.startTime,
             e.endTime, e.ageRestriction
         FROM eventsGenres eG
@@ -209,7 +208,7 @@ object Event {
         )
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot get events by oragnizer: " + e.getMessage)
+    case e: Exception => throw new DAOException("Cannot get events by organizer: " + e.getMessage)
   }
 
   def findAllContaining(pattern: String, center: String): Seq[Event] = center match {

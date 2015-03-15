@@ -418,9 +418,9 @@ CREATE TABLE usersArtists (
 );
 
 CREATE TABLE artistsGenres (
-  artistId                INT REFERENCES artists (artistId),
+  artistFacebookUrl       VARCHAR(255) REFERENCES artists (facebookUrl),
   genreId                 INT REFERENCES genres (genreId),
-  PRIMARY KEY (genreId, artistId)
+  PRIMARY KEY (artistFacebookUrl, genreId)
 );
 
 CREATE TABLE playlists (

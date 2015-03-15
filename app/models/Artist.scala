@@ -151,7 +151,7 @@ object Artist {
             case Some(artistId: Long) =>
               artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId)))}
               artist.genres.foreach {
-                Genre.saveWithArtistRelation(_, artistId)
+                Genre.saveWithArtistRelation(_, artist.facebookUrl)
               }
               artist.tracks.foreach {
                 Track.save
