@@ -103,6 +103,7 @@ object SearchYoutubeTracks {
   }
 
   def filterTracksWithoutArtistName(trackTitle: String, artistName: String): Boolean = {
+    println(trackTitle)
   //val ArtistNameRegex = artist.name.toLowerCase.r
     trackTitle.toLowerCase contains artistName.toLowerCase
     /*match {

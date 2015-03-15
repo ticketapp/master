@@ -72,24 +72,26 @@ object SearchArtistsController extends Controller {
         case website if website contains "facebook" =>
           getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
         case website if website contains "soundcloud" =>
-          getFacebookArtistBySoundCloudUrl(website)
-          Future { None}
+          getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
+            case None =>
+              Future { None }
+            case Some(facebookUrl) =>
+              getFacebookArtistByFacebookUrl(facebookUrl).map { maybeFacebookArtist => maybeFacebookArtist }
+          }
         case _ =>
           Future { None }
       }
     )
   }
 
-  def getFacebookArtistBySoundCloudUrl(soundCloudUrl: String)={//: Future[Option[Artist]] = {
+  def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
-    //println(soundCloudName)
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { response =>
+        println(readMaybeFacebookUrl(response))
         readMaybeFacebookUrl(response)
-        //println(readMaybeFacebookUrl(response))
-        //println(response.json)
     }
   }
 
@@ -101,7 +103,7 @@ object SearchArtistsController extends Controller {
 
     val collectOnlyFacebookUrls = Reads.seq(facebookUrlReads).map { urlService =>
       urlService.collect {
-        case (url: String, "facebook") => url
+        case (url: String, "facebook") => normalizeUrl(url)
       }
     }
     soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
@@ -111,6 +113,9 @@ object SearchArtistsController extends Controller {
   }
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
+    //facebook.com/profile.php?id=1171751839
+    //facebook.com/pages/cookie-monsta-official/175957405757449?fref=ts
+    //tinyUrl??
     val smallerUrl = url.replace("facebook.com/", "")
     val normalizedUrl =
       if (smallerUrl contains "/")

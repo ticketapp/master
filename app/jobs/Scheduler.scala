@@ -30,8 +30,8 @@ object Scheduler {
             "fields" -> "cover,description,name,start_time,end_time,owner,venue",
             "access_token" -> token)
           .get()
-          .map { eventDetailed =>
-          readFacebookEvent(eventDetailed) match {
+          .map {
+          readFacebookEvent(_) match {
             case Some(eventuallyFacebookEvent) => eventuallyFacebookEvent map { saveEvent(_, placeId) }
             case None => println("Cannot create event: empty event created in readFacebookEvent")
           }
@@ -91,7 +91,7 @@ object Scheduler {
             formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,
             nonEmptyArtists, List(), List(address), List(), eventGenres)
         }
-      })
+    })
     eventFacebookResponse.json.asOpt[Future[Event]](eventRead)
   }
 
@@ -111,13 +111,13 @@ object Scheduler {
   }
 
   def formatDescription(description: Option[String]): Option[String] = {
-    //see if not faster to useGetWebsitesInDescription and after replace all matched?
+    //see if not faster to useGetWebsitesInDescription and after replace all matched ?
     description match {
       case None => None
       case Some(desc) => Some("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m =>
           if (m.toString contains "@")
-            "<a href='http://" + m + "'>ablezblazbelabezlabzlejbalbazlejbajlez" + m + "</a>"
+            "<i>" + m + "</i>"
           else
             "<a href='http://" + m + "'>" + m + "</a>")
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
