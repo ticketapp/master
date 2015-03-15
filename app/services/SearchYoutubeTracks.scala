@@ -87,18 +87,21 @@ object SearchYoutubeTracks {
   def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
     println("youtubeResponse = " + youtubeResponse.json)
     val youtubeTrackReads = (
-      (__ \ "snippet" \ "title").read[String] and
-        (__ \ "id" \ "videoId").read[String] and
-        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").read[String]
-      )((title: String, url: String, thumbnailUrl: String) => (title, url, thumbnailUrl))
-    val collectOnlyTracksWithUrlTitleAndThumbnailUrl = Reads.seq(youtubeTrackReads).map { tracks =>
+      (__ \ "snippet" \ "title").readNullable[String] and
+        (__ \ "id" \ "videoId").readNullable[String] and
+        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String] and
+        (__ \ "genre").readNullable[String]
+      )((title: Option[String], url: Option[String], thumbnailUrl: Option[String], genre: Option[String]) =>
+      (title, url, thumbnailUrl, genre))
+    val collectOnlyValidTracks = Reads.seq(youtubeTrackReads).map { tracks =>
       tracks.collect {
-        case (title, url, thumbnailUrl) if isArtistNameInTrackTitle(title, artist.name) =>
+        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String), genre)
+          if isArtistNameInTrackTitle(title, artist.name) =>
           Track(-1L, normalizeTrackTitle(title, artist.name), url, "Youtube", thumbnailUrl, artist.facebookUrl)
       }
     }
     (youtubeResponse.json \ "items")
-      .asOpt[Seq[Track]](collectOnlyTracksWithUrlTitleAndThumbnailUrl)
+      .asOpt[Seq[Track]](collectOnlyValidTracks)
       .getOrElse(Seq.empty)
   }
 

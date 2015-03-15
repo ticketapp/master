@@ -63,7 +63,7 @@ object Artist {
         .map(artist => artist.copy(
           images = Image.findAllByArtist(artist.artistId),
           tracks = Track.findAllByArtist(artist.facebookUrl),
-          genres = Genre.findAllByArtist(artist.artistId)))
+          genres = Genre.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -79,7 +79,7 @@ object Artist {
         .as(ArtistParser.*)
         .map(artist => artist.copy(
             images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.artistId),
+            genres = Genre.findAllByArtist(artist.facebookUrl),
             tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
@@ -93,7 +93,7 @@ object Artist {
         .as(ArtistParser.singleOpt)
         .map(artist => artist.copy(
           images = Image.findAllByArtist(artistId),
-          genres = Genre.findAllByArtist(artistId),
+          genres = Genre.findAllByArtist(artist.facebookUrl),
           tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
@@ -108,7 +108,7 @@ object Artist {
         .map( artist =>
           artist.copy(
             images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.artistId),
+            genres = Genre.findAllByArtist(artist.facebookUrl),
             tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
@@ -125,7 +125,7 @@ object Artist {
         .map(artist =>
           artist.copy(
             images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.artistId),
+            genres = Genre.findAllByArtist(artist.facebookUrl),
             tracks = Track.findAllByArtist(artist.facebookUrl)))
     }
   } catch {
