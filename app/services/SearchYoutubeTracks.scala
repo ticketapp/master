@@ -85,6 +85,7 @@ object SearchYoutubeTracks {
   }
 
   def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
+    println("youtubeResponse = " + youtubeResponse.json)
     val youtubeTrackReads = (
       (__ \ "snippet" \ "title").read[String] and
         (__ \ "id" \ "videoId").read[String] and
@@ -92,7 +93,7 @@ object SearchYoutubeTracks {
       )((title: String, url: String, thumbnailUrl: String) => (title, url, thumbnailUrl))
     val collectOnlyTracksWithUrlTitleAndThumbnailUrl = Reads.seq(youtubeTrackReads).map { tracks =>
       tracks.collect {
-        case (title, url, thumbnailUrl) if filterTracksWithoutArtistName(title, artist.name) =>
+        case (title, url, thumbnailUrl) if isArtistNameInTrackTitle(title, artist.name) =>
           Track(-1L, normalizeTrackTitle(title, artist.name), url, "Youtube", thumbnailUrl, artist.facebookUrl)
       }
     }
@@ -101,8 +102,7 @@ object SearchYoutubeTracks {
       .getOrElse(Seq.empty)
   }
 
-  def filterTracksWithoutArtistName(trackTitle: String, artistName: String): Boolean = {
-    println(trackTitle)
+  def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean = {
   //val ArtistNameRegex = artist.name.toLowerCase.r
     trackTitle.toLowerCase contains artistName.toLowerCase
     /*match {

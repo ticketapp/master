@@ -132,13 +132,13 @@ object Artist {
     case e: Exception => throw new DAOException("Problem with method Artist.findAllContaining: " + e.getMessage)
   }
 
-  def save(artist: Artist): Option[Long] = {
-    Utilities.testIfExist("artists", "name", artist.name) match {
-      case true => Some(-1)
-      case false => try {
-        DB.withConnection { implicit connection =>
-          SQL("""INSERT INTO artists(facebookId, name, description, facebookUrl, websites)
-              VALUES ({facebookId}, {name}, {description}, {facebookUrl}, {websites})""")
+  def save(artist: Artist): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      Utilities.testIfExist("artists", "name", artist.name) match {
+        case true => Some(-1)
+        case false =>
+          SQL( """INSERT INTO artists(facebookId, name, description, facebookUrl, websites)
+            VALUES ({facebookId}, {name}, {description}, {facebookUrl}, {websites})""")
             .on(
               'facebookId -> artist.facebookId,
               'name -> artist.name,
@@ -149,17 +149,21 @@ object Artist {
           match {
             case None => None
             case Some(artistId: Long) =>
-              artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId))) }
-              artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId) }
-              artist.tracks.foreach { Track.save }
+              artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId)))}
+              artist.genres.foreach {
+                Genre.saveWithArtistRelation(_, artistId)
+              }
+              artist.tracks.foreach {
+                Track.save
+              }
               Option(artistId)
           }
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
       }
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
   }
+
 
   def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = {
     save(artist) match {

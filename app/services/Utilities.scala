@@ -1,5 +1,6 @@
 package services
 
+import java.sql.Connection
 import java.text.Normalizer
 
 import anorm.SqlParser._
@@ -32,7 +33,7 @@ object Utilities {
   def normalizeUrl(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
 
-  def testIfExist(table: String, fieldName: String, valueAnyType: Any): Boolean = {
+  def testIfExist(table: String, fieldName: String, valueAnyType: Any)(implicit connection: Connection): Boolean = {
     val value = valueAnyType match {
       case Some(v: Int) => v
       case Some(v: String) => v

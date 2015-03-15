@@ -58,13 +58,13 @@ object Event {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ creationDateTime ~ name ~ geographicPoint ~ description ~
         startTime ~ endTime ~ ageRestriction =>
         Event.apply(eventId, facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
-          startTime, endTime, ageRestriction, List(), List(), List(), List(), List())
+          startTime, endTime, ageRestriction, List.empty, List.empty, List.empty, List.empty, List.empty)
     }
   }
 
-  def find(eventId: Long): Option[Event] = {
+  def find(eventId: Long): Option[Event] = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from events WHERE eventId = {eventId}")
+      SQL("SELECT * FROM events WHERE eventId = {eventId}")
         .on('eventId -> eventId)
         .as(EventParser.singleOpt)
         .map(event => event.copy(
@@ -77,33 +77,36 @@ object Event {
           addresses = Address.findAllByEvent(event))
         )
     }
+  } catch {
+    case e: Exception => throw new DAOException("Event.eventId: " + e.getMessage)
   }
 
-  def find20Since(start: Int, center: String): Seq[Event] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( s""" SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
-         events.name, events.geographicPoint, events.description, events.startTime,
-            events.endTime, events.ageRestriction
-        FROM events
-        ORDER BY geographicPoint <-> point '$center'
-        LIMIT 20
-        OFFSET $start""")
-          .as(EventParser.*)
-          .map(event => event.copy(
-            images = Image.findAllByEvent(event),
-            organizers = Organizer.findAllByEvent(event),
-            artists = Artist.findAllByEvent(event),
-            tariffs = Tariff.findAllByEvent(event),
-            places = Place.findAllByEvent(event.eventId),
-            genres = Genre.findAllByEvent(event.eventId),
-            addresses = Address.findAllByEvent(event))
-          )
-      }
+  def find20Since(start: Int, center: String): Seq[Event] = try {
+    DB.withConnection { implicit connection =>
+      SQL( s""" SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
+       events.name, events.geographicPoint, events.description, events.startTime,
+          events.endTime, events.ageRestriction
+      FROM events
+      ORDER BY geographicPoint <-> point '$center'
+      LIMIT 20
+      OFFSET $start""")
+        .as(EventParser.*)
+        .map(event => event.copy(
+          images = Image.findAllByEvent(event),
+          organizers = Organizer.findAllByEvent(event),
+          artists = Artist.findAllByEvent(event),
+          tariffs = Tariff.findAllByEvent(event),
+          places = Place.findAllByEvent(event.eventId),
+          genres = Genre.findAllByEvent(event.eventId),
+          addresses = Address.findAllByEvent(event))
+        )
     }
+  } catch {
+    case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
   }
+  
 
-  def findAllByPlace(placeId: Long) = {
+  def findAllByPlace(placeId: Long) = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
               s.name, s.geographicPoint, s.description, s.startTime,
@@ -125,6 +128,8 @@ object Event {
           addresses = Address.findAllByEvent(event))
         )
     }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
 
   def findAllByGenre(genreId: Long) = try {
@@ -258,59 +263,58 @@ object Event {
   }
 
 
-  def save(event: Event): Option[Long] = {
-    testIfExist("events", "facebookId", event.facebookId) match {
-      case true => None
-      case false =>
-        val geographicPoint = event.geographicPoint.getOrElse("") match {
-          case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
-          case _ => "{geographicPoint}"
-        }
-        try {
-          DB.withConnection { implicit connection =>
-            SQL(s"""INSERT INTO
-                events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
-                startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive},
-                {creationDateTime}, {name}, $geographicPoint, {description}, {startTime}, {endTime},
-                {ageRestriction}) """)
-              .on(
-                'facebookId -> event.facebookId,
-                'isPublic -> event.isPublic,
-                'isActive -> event.isActive,
-                'creationDateTime -> event.creationDateTime,
-                'name -> event.name,
-                'geographicPoint -> event.geographicPoint,
-                'description -> event.description,
-                'startTime -> event.startTime,
-                'endTime -> event.endTime,
-                'ageRestriction -> event.ageRestriction)
-              .executeInsert() match {
-                case None => None
-                case Some(eventId: Long) =>
-                  event.organizers.foreach { organizer =>
-                    Organizer.saveWithEventRelation (organizer, eventId)
-                  }
-                  event.tariffs.foreach { tariff =>
-                    Tariff.save(tariff.copy(eventId = eventId))
-                  }
-                  event.images.foreach { image =>
-                    Image.save(image.copy(eventId = Some(eventId)))
-                  }
-                  event.artists.foreach { artist =>
-                    Artist.saveWithEventRelation(artist, eventId)
-                  }
-                  event.genres.foreach { genre =>
-                    println(genre)
-                    Genre.saveWithEventRelation(genre, eventId)
-                  }
-                  Option(eventId)
-              }
+  def save(event: Event): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      testIfExist("events", "facebookId", event.facebookId) match {
+        case true => None
+        case false =>
+          val geographicPoint = event.geographicPoint.getOrElse("") match {
+            case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
+            case _ => "{geographicPoint}"
           }
-        } catch {
-          case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
-        }
+          SQL( s"""INSERT INTO
+            events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
+            startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive},
+            {creationDateTime}, {name}, $geographicPoint, {description}, {startTime}, {endTime},
+            {ageRestriction}) """)
+            .on(
+              'facebookId -> event.facebookId,
+              'isPublic -> event.isPublic,
+              'isActive -> event.isActive,
+              'creationDateTime -> event.creationDateTime,
+              'name -> event.name,
+              'geographicPoint -> event.geographicPoint,
+              'description -> event.description,
+              'startTime -> event.startTime,
+              'endTime -> event.endTime,
+              'ageRestriction -> event.ageRestriction)
+            .executeInsert() match {
+            case None => None
+            case Some(eventId: Long) =>
+              event.organizers.foreach { organizer =>
+                Organizer.saveWithEventRelation(organizer, eventId)
+              }
+              event.tariffs.foreach { tariff =>
+                Tariff.save(tariff.copy(eventId = eventId))
+              }
+              event.images.foreach { image =>
+                Image.save(image.copy(eventId = Some(eventId)))
+              }
+              event.artists.foreach { artist =>
+                Artist.saveWithEventRelation(artist, eventId)
+              }
+              event.genres.foreach { genre =>
+                println(genre)
+                Genre.saveWithEventRelation(genre, eventId)
+              }
+              Option(eventId)
+          }
+      }
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
   }
+
 
   def update(event: Event): Unit = try {
     DB.withConnection { implicit connection =>
