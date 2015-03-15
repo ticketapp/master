@@ -11,7 +11,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             );
         }
         /*else {
-         }*/ console.log($rootScope.geoLoc)
+         }*/
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
         };
@@ -20,6 +20,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.loadingTracks = true;
             $rootScope.artisteToCreate = true;
             $rootScope.artiste = artist;
+            $rootScope.artiste.events = [];
             window.location.href =('#/artiste/' + artist.facebookUrl);
             $rootScope.$apply;
             var searchPattern  = document.getElementById('searchBar').value.trim()
@@ -44,21 +45,28 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
                     if (value.constructor === Array) {
                         console.log(value);
-                        if (value.length != 0) {
-                            $rootScope.loadingTracks = false
-                        }
                     }
                     $rootScope.$apply();
                     function saveTrack (track) {
-                        $http.post('/tracks/create', {
-                            artistFacebookUrl: artist.facebookUrl,
-                            title: track.title,
-                            url: track.url,
-                            platform: track.platform,
-                            thumbnailUrl: track.thumbnailUrl
-                        }).error(function(data){
-                            console.log(data)
-                        })
+                        if (track.trackId == -2) {
+                            $rootScope.loadingTracks = false;
+                            console.log('yo')
+                        } else {
+                            if (track.redirectUrl == undefined) {
+                                track.redirectUrl = track.url;
+                            }
+                            console.log('yoyo')
+                            $http.post('/tracks/create', {
+                                artistFacebookUrl: artist.facebookUrl,
+                                redirectUrl : track.redirectUrl,
+                                title: track.title,
+                                url: track.url,
+                                platform: track.platform,
+                                thumbnailUrl: track.thumbnailUrl
+                            }).error(function (data) {
+                                console.log(data)
+                            })
+                        }
                     }
                     value.forEach(saveTrack)
 

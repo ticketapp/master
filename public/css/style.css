@@ -268,6 +268,9 @@
             -ms-animation-name: bounceOutRight;
             -o-animation-name: bounceOutRight;
         }
+        .arTrack {
+            box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
+        }
         /*wysiwyg*/
         .parallax-background {
             background-color: #0078A0;

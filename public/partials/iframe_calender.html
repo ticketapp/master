@@ -1,10 +1,10 @@
-<div>
+<div class="fixed">
     <input ng-if="$parent.filter && $root.order != 'startTime'" id="searchBar" placeholder="Filter by {{$root.filterType}}"
            ng-change="$root.resizeImgHeight()"
            ng-model="$root.filterQuery"
-           class="column large-10">
-    <ul class="column padding0" ng-class="{'large-2': filter && $root.order != 'startTime', 'large-12': !filter || $root.order == 'startTime'}">
-        <a target="_blank" ng-if="$parent.filter == true" ng-click="$parent.$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
+           class="column small-10 zIndex5">
+    <ul class="column padding0 zIndex5 white" ng-class="{'small-2': filter && $root.order != 'startTime', 'small-12': !filter || $root.order == 'startTime'}">
+        <a ng-if="$parent.filter == true" ng-click="$parent.$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
         <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
             <a>Filters <i class="fi-arrow-down"></i></a>
         </li>
@@ -47,27 +47,31 @@
             <div class=" text_evnt_min" >
                 <a target="_blank" href="#/event/{{event.eventId}}"><h4 style="height: 2.8em;
     overflow: hidden;">{{ event.name }}</h4></a>
-                Par
-                <a target="_blank" href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
-                   >{{organizer.name}} </a>
-                <br/>
-                <div class="infos_event">
-                    <i class="icon-calendar"></i>{{ event.startTime | date:'dd/MM' }}
-                    <i class="icon-time"></i> {{ event.startTime | date:'HH:mm' }}<b ng-show="event.endTime"> - </b>
-                    <i class="icon-calendar"></i>{{ event.endTime | date:'dd/MM' }}
-                    <i class="icon-time"></i> {{ event.endTime | date:'HH:mm' }} <br/>
-                    <i class="icon-map-marker"></i>
-                    <a target="_blank" href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a>
+                <i ng-if="!showDetails" class="fi-plus" ng-click="$parent.showDetails = !$parent.showDetails"></i>
+                <i ng-if="showDetails" class="fi-minus" ng-click="$parent.showDetails = !$parent.showDetails"></i>
+                <div ng-if="showDetails">
+                    Par
+                    <a target="_blank" href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
+                       >{{organizer.name}} </a>
+                    <br/>
+                    <div class="infos_event">
+                        <i class="icon-calendar"></i>{{ event.startTime | date:'dd/MM' }}
+                        <i class="icon-time"></i> {{ event.startTime | date:'HH:mm' }}<b ng-show="event.endTime"> - </b>
+                        <i class="icon-calendar"></i>{{ event.endTime | date:'dd/MM' }}
+                        <i class="icon-time"></i> {{ event.endTime | date:'HH:mm' }} <br/>
+                        <i class="icon-map-marker"></i>
+                        <a target="_blank" href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a>
+                    </div>
+                    <br/>
+                    <div class="description_event_min">
+                        <a target="_blank" href="#/artiste/{{artist.facebookUrl}}" data-ng-repeat="artist in event.artists">
+                            {{ artist.name }}
+                        </a>
+                        <!--<a target="_blank" ng-repeat="genre in filteredEventGenre = (event.genres | filter: name: filterQuery)"
+                                >{{genre.name}}</a>-->
+                    </div>
+                    <br/>
                 </div>
-                <br/>
-                <div class="description_event_min">
-                    <a target="_blank" href="#/artiste/{{artist.facebookUrl}}" data-ng-repeat="artist in event.artists">
-                        {{ artist.name }}
-                    </a>
-                    <!--<a target="_blank" ng-repeat="genre in filteredEventGenre = (event.genres | filter: name: filterQuery)"
-                            >{{genre.name}}</a>-->
-                </div>
-                <br/>
             </div>
         </div>
     </div>

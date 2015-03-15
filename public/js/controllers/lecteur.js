@@ -1,6 +1,7 @@
 app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', function ($scope, $rootScope, $timeout, $http, Angularytics){
     $rootScope.playlist = [];
     $rootScope.playlist.name = "";
+    $rootScope.playlist.genres = [];
     $rootScope.playlist.by = "";
     $rootScope.playlist.tracks = [];
     $scope.showLecteur = true;
@@ -15,6 +16,28 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             return sourceItemHandleScope.itemScope.sortableScope.$id === destSortableScope.$id;
         }
     };
+    var playlistEvents = [];
+    function eventsPlaylist () {
+        $http.get('/events/offset/0/' + $rootScope.geoLoc).
+            success(function(data){
+                function getEventsArtsts (event) {
+                   var evArtLenght = event.artists.length
+                    for (var a = 0; a < evArtLenght; a++) {
+                        for(var g = 0; g < event.artists[a].genres.length; g++) {
+                            console.log($rootScope.playlist.genres)
+                            console.log(event.artists[a].genres)
+                            if ($rootScope.playlist.genres.indexOf(event.artists[a].genres[g].name) > -1) {
+                                console.log(event.artists[a])
+                                for (var t = 0; t < 5; t++) {
+                                    playlistEvents.push(event.artists[a].tracks[t]);
+                                }
+                            }
+                        }
+                    }
+                }
+                data.forEach(getEventsArtsts)
+            })
+    }
     var played = [];
     var i = 0;
     function pushTrack (track, art) {
@@ -36,35 +59,43 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.newTrack.title = $scope.newTrack.title.replace(art.toUpperCase() + " - ", "");
         $scope.newTrack.title = $scope.newTrack.title.replace(art.toUpperCase() + "-", "");
         $rootScope.playlist.tracks.push($scope.newTrack);
-        console.log($scope.newTrack)
-        console.log($rootScope.playlist.tracks)
     }
     $rootScope.addToPlaylist = function (tracks, artist) {
         if ($rootScope.playlist.tracks.length == 0) {
             var tracksLenght = tracks.length;
             for (var tr = 0; tr < tracksLenght; tr++) {
-                pushTrack(tracks[tr], artist)
+                pushTrack(tracks[tr], artist.name)
             }
             $scope.play(i);
             played = [];
         } else {
             var tracksLenght = tracks.length;
             for (var tr = 0; tr < tracksLenght; tr++) {
-                pushTrack(tracks[tr], artist)
+                pushTrack(tracks[tr], artist.name)
             }
         }
+        function addGenres (genre) {
+            $rootScope.playlist.genres = $rootScope.playlist.genres.concat(genre.name);
+        }
+        artist.genres.forEach(addGenres);
+        eventsPlaylist();
     };
     $rootScope.addAndPlay = function (tracks, artist) {
         var last = $rootScope.playlist.tracks.length;
         var tracksLenght = tracks.length;
         for (var tr = 0; tr < tracksLenght; tr++) {
-            pushTrack(tracks[tr], artist)
+            pushTrack(tracks[tr], artist.name)
         }
         //Angularytics.trackEvent("listen music", artist);
         $scope.play(last);
         if ($rootScope.playlist.tracks.length == 0) {
             played = [];
         }
+        function addGenres (genre) {
+            $rootScope.playlist.genres = $rootScope.playlist.genres.concat(genre.name);
+        }
+        artist.genres.forEach(addGenres);
+        eventsPlaylist();
     };
     function alreadyPlayed (element, index, array) {
         return played.indexOf(element.title) > -1;
@@ -76,6 +107,9 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         } else if (played.indexOf($rootScope.playlist.tracks[i].title) > -1) {
             if ($rootScope.playlist.tracks.every(alreadyPlayed) == true) {
                 console.log('all tracks already played')
+                var lastT = $rootScope.playlist.tracks.length;
+                $rootScope.playlist.tracks = $rootScope.playlist.tracks.concat(playlistEvents)
+                $scope.play(lastT)
             } else {
                 i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                 shuffle()
