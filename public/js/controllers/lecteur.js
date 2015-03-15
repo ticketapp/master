@@ -17,19 +17,28 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         }
     };
     var playlistEvents = [];
+    var played = [];
+    var artNames = [];
+    var i = 0;
     function eventsPlaylist () {
         $http.get('/events/offset/0/' + $rootScope.geoLoc).
             success(function(data){
                 function getEventsArtsts (event) {
                    var evArtLenght = event.artists.length
                     for (var a = 0; a < evArtLenght; a++) {
+                        console.log(artNames)
                         for(var g = 0; g < event.artists[a].genres.length; g++) {
+                            console.log(event.artists[a].genres[g].name)
+                            console.log(event.artists[a])
                             console.log($rootScope.playlist.genres)
-                            console.log(event.artists[a].genres)
-                            if ($rootScope.playlist.genres.indexOf(event.artists[a].genres[g].name) > -1) {
-                                console.log(event.artists[a])
-                                for (var t = 0; t < 5; t++) {
-                                    playlistEvents.push(event.artists[a].tracks[t]);
+                            if ($rootScope.playlist.genres.toString().indexOf(event.artists[a].genres[g].name) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
+                                artNames.push(event.artists[a].name);
+                                for (var t = 0; t < 4; t++) {
+                                    if (played.indexOf(event.artists[a].tracks[t].title) == -1) {
+                                        event.artists[a].tracks[t].art = event.artists[a];
+                                        event.artists[a].tracks[t].nextShow = event;
+                                        playlistEvents.push(event.artists[a].tracks[t]);
+                                    }
                                 }
                             }
                         }
@@ -38,23 +47,19 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 data.forEach(getEventsArtsts)
             })
     }
-    var played = [];
-    var i = 0;
     function pushTrack (track, art) {
         $scope.newTrack = {};
         if (track.platform == 'Soundcloud') {
             $scope.newTrack.redirectUrl = track.redirectUrl;
         }
+        if (track.nextShow != undefined) {
+            $scope.newTrack.nextShow = track.nextShow;
+        }
         $scope.newTrack.platform = track.platform;
         $scope.newTrack.thumbnailUrl = track.thumbnailUrl;
         $scope.newTrack.url = track.url;
         $scope.newTrack.artist = art;
-        $scope.newTrack.title = track.title.replace(art.name + " - ", "");
-        $scope.newTrack.title = $scope.newTrack.title.replace(art.name + "-", "");
-        $scope.newTrack.title = $scope.newTrack.title.replace(art.name.toLowerCase() + " - ", "");
-        $scope.newTrack.title = $scope.newTrack.title.replace(art.name.toLowerCase() + "-", "");
-        $scope.newTrack.title = $scope.newTrack.title.replace(art.name.toUpperCase() + " - ", "");
-        $scope.newTrack.title = $scope.newTrack.title.replace(art.name.toUpperCase() + "-", "");
+        $scope.newTrack.title = track.title;
         $rootScope.playlist.tracks.push($scope.newTrack);
     }
     $rootScope.addToPlaylist = function (tracks, artist) {
@@ -105,8 +110,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             if ($rootScope.playlist.tracks.every(alreadyPlayed) == true) {
                 console.log('all tracks already played')
                 var lastT = $rootScope.playlist.tracks.length;
-                $rootScope.playlist.tracks = $rootScope.playlist.tracks.concat(playlistEvents)
-                $scope.play(lastT)
+                for (var t = 0; t < playlistEvents.length; t++) {
+                    pushTrack(playlistEvents[t], playlistEvents[t].art)
+                }
+                $scope.play(lastT);
+                playlistEvents = [];
             } else {
                 i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                 shuffle()
@@ -131,6 +139,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         }
     }
     $scope.play = function (i) {
+        $timeout(function() {
+            $scope.$apply(function () {
+                $scope.showInfo = true;
+                $timeout(function () {
+                    $scope.showInfo = false;
+                }, 5000)
+            })
+        }, 0)
         $scope.prevTrack = function () {
             i--;
             $scope.play(i);
@@ -145,6 +161,15 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     $scope.play(i);
                 } else {
                     console.log('playlist end')
+                    var lastT = $rootScope.playlist.tracks.length;
+                    for (var t = 0; t < playlistEvents.length; t++) {
+                        pushTrack(playlistEvents[t], playlistEvents[t].art)
+                    }
+                    $rootScope.playlist.name = 'La selection';
+                    $rootScope.playlist.by = 'Claude';
+                    console.log($rootScope.playlist)
+                    $scope.play(lastT)
+                    playlistEvents = [];
                 }
             }
         };
@@ -191,13 +216,19 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             } else {
                 $scope.nextTrack();
             }
-            $scope.onPlay = true;
-            $scope.$apply();
+            $timeout(function () {
+                $scope.$apply(function () {
+                    $scope.onPlay = true;
+                });
+            },0);
             $scope.playPause = function () {
                 if ($scope.onPlay == false) {
                     document.getElementById('musicPlayer').play();
-                    $scope.onPlay = true;
-                    $scope.$apply();
+                    $timeout(function(){
+                        $scope.$apply(function () {
+                            $scope.onPlay = true;
+                        });
+                    })
                 } else {
                     document.getElementById('musicPlayer').pause();
                     $scope.onPlay = false;
