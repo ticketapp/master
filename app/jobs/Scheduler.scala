@@ -9,7 +9,7 @@ import models._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import services.Utilities.normalizeUrl
-import controllers.SearchArtistsController.getFacebookArtistsByWebsites
+import controllers.SearchArtistsController.{ getEventuallyArtistsInEventTitle, getFacebookArtistsByWebsites }
 
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
@@ -77,14 +77,19 @@ object Scheduler {
 
         val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
         val eventuallyAddress = getGeographicPoint(new Address(-1l, None, city, zip, street))
-        val eventuallyMaybeArtists = getFacebookArtistsByWebsites(getWebsitesInDescription(description))
+        val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getWebsitesInDescription(description))
+        val eventuallyMaybeArtistsFromTitle =
+          getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getWebsitesInDescription(description))
+        println(splitArtistNamesInTitle(name) + getWebsitesInDescription(description).toString)
 
         for {
           organizer <- eventuallyOrganizer
           address <- eventuallyAddress
-          artists <- eventuallyMaybeArtists
+          artistsFromDescription <- eventuallyMaybeArtistsFromDescription
+          artistsFromTitle <- eventuallyMaybeArtistsFromTitle
         } yield {
-          val nonEmptyArtists = artists.flatten.toList
+          println("artistsFromTitle = " + artistsFromTitle)
+          val nonEmptyArtists = artistsFromDescription.flatten.toList ++ artistsFromTitle
           val eventGenres = nonEmptyArtists.map { _.genres }.flatten
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
@@ -135,7 +140,7 @@ object Scheduler {
 
   def createNewImageIfSourceExists(source: Option[String]): List[Image] = source match {
     case Some(path) => List(new Image(-1, path))
-    case None => List()
+    case None => List.empty
   }
 
   def splitArtistNamesInTitle(title: String): List[String] =
@@ -208,13 +213,12 @@ object Scheduler {
       Future { address }
   }
 
-
   def getArtistsFromTitle(title: String): Set[String] = {
     /*val artistsFromTitle: List[String] = splitArtistNamesInTitle(name)
     println(artistsFromTitle)
     artistsFromTitle.map { artistName =>
      getFacebookArtist(artistName)
     }*/
-    Set()
+    Set.empty
   }
 }

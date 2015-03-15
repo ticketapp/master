@@ -18,7 +18,7 @@ import controllers.SearchArtistsController._
 
 object SearchTracksController extends Controller {
   def getTracksForArtist(pattern: String) = Action.async {
-    get20FacebookArtists(pattern).map { facebookArtists =>
+    getEventuallyFacebookArtists(pattern).map { facebookArtists =>
       val soundCloudTracksEnumerator = Enumerator.flatten(
         getSoundCloudTracksForArtist(facebookArtists(0)).map { soundCloudTracks =>
           Enumerator(Json.toJson(soundCloudTracks))

@@ -20,12 +20,12 @@ object SearchArtistsController extends Controller {
   val token = play.Play.application.configuration.getString("facebook.token")
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
-    get20FacebookArtists(pattern).map { artists =>
+    getEventuallyFacebookArtists(pattern).map { artists =>
       Ok(Json.toJson(artists))
     }
   }
 
-  def get20FacebookArtists(pattern: String): Future[Seq[Artist]] = {
+  def getEventuallyFacebookArtists(pattern: String): Future[Seq[Artist]] = {
     WS.url("https://graph.facebook.com/v2.2/search")
       .withQueryString(
         "q" -> pattern,
@@ -34,7 +34,15 @@ object SearchArtistsController extends Controller {
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
         "access_token" -> token)
       .get()
-      .map { readFacebookArtists(_).take(20) }
+      .map { readFacebookArtists } //(_).take(20)
+  }
+  
+  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] = {
+    Future.sequence(
+      artistsNameInTitle.map {
+        getEventuallyFacebookArtists(_).map { artists => artists }
+      }
+    ).map { _.flatten collect { case artist: Artist if (artist.websites intersect webSites).nonEmpty => artist } }
   }
   
   val readArtist = (
