@@ -107,60 +107,55 @@ object Track {
     }
   }
 
-  def save(track: Track): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO tracks(title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
-        VALUES ({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
-          .on(
-            'title -> track.title,
-            'url -> track.url,
-            'platform -> track.platform,
-            'thumbnailUrl -> track.thumbnailUrl,
-            'artistFacebookUrl -> track.artistFacebookUrl,
-            'redirectUrl -> track.redirectUrl)
-          .executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot create track: " + e.getMessage)
+  def save(track: Track): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL( """INSERT INTO tracks(title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
+      VALUES ({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
+        .on(
+          'title -> track.title,
+          'url -> track.url,
+          'platform -> track.platform,
+          'thumbnailUrl -> track.thumbnailUrl,
+          'artistFacebookUrl -> track.artistFacebookUrl,
+          'redirectUrl -> track.redirectUrl)
+        .executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot create track: " + e.getMessage)
   }
 
-  def savePlaylistTrackRelation(playlistId: Long, trackId: Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO playlistsTracks (playlistId, trackId)
-            VALUES ({playlistId}, {trackId})""").on(
-            'playlistId -> playlistId,
-            'trackId -> trackId)
-          .executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
+
+  def savePlaylistTrackRelation(playlistId: Long, trackId: Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL( """INSERT INTO playlistsTracks (playlistId, trackId)
+          VALUES ({playlistId}, {trackId})""").on(
+          'playlistId -> playlistId,
+          'trackId -> trackId)
+        .executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
   }
 
-  def deleteTrack(trackId: Long): Long = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("""DELETE FROM tracks WHERE trackId={trackId}""").on('trackId -> trackId).executeUpdate()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot delete track: " + e.getMessage)
+
+  def deleteTrack(trackId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL("""DELETE FROM tracks WHERE trackId={trackId}""").on('trackId -> trackId).executeUpdate()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot delete track: " + e.getMessage)
   }
 
-  def followTrack(userId : Long, trackId : Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("INSERT INTO trackFollowed(userId, trackId) VALUES ({userId}, {trackId})")
-          .on(
-            'userId -> userId,
-            'trackId -> trackId)
-          .executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)
+
+  def followTrack(userId : Long, trackId : Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("INSERT INTO trackFollowed(userId, trackId) VALUES ({userId}, {trackId})")
+        .on(
+          'userId -> userId,
+          'trackId -> trackId)
+        .executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)
   }
 }
