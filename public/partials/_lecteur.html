@@ -3,6 +3,17 @@
     <div id="youtubePlayer">
     </div>
 </div>
+<div ng-show="showInfo" class="EventinfoTrack">
+    <a href="#/artiste/{{trackActive.artist.facebookUrl}}"><h3>{{trackActive.artist.name}}</h3></a>
+    Prochain concert prez de chez vous : <br/>
+    <a href="#/event/{{trackActive.nextShow.id}}">
+        {{trackActive.nextShow.name}}
+    </a><br/>
+    Le {{trackActive.nextShow.startTime | date:'dd/MM' }} @
+    <a href="#/lieu/{{trackActive.nextShow.places[0].placeId }}">
+    {{trackActive.nextShow.places[0].name}}
+    </a>
+</div>
 <div ng-show="savePlaylist" class="absolute zIndex1" style="background: #ffffff">
     <input type="text" ng-model="$root.playlist.name" placeholder="PlaylistName">
     <button>Save</button>
@@ -32,15 +43,14 @@
         </div>
         <div id="progressBar" class="progress small-9 primary float-left round">
             <b style="color: #008CBA;font-size: 13px;
-margin-left: 5px;" class="absolute">{{playlist.name}} // {{playlist.by}} // {{trackActive.title}} // {{trackActive.artist.name}}</b>
+margin-left: 5px;" class="absolute">{{playlist.name}} by {{playlist.by}} // {{trackActive.title}} // {{trackActive.artist.name}}</b>
             <span id="progress" class="meter column padding0" style="width: 0%; overflow: hidden">
                 <b style="color: #ffffff;white-space: nowrap;overflow: hidden;font-size: 13px;
 margin-left: 5px;"
                    class="absolute">
-                    {{playlist.name}} //
-                    {{playlist.by}} //
-                    {{trackActive.title}} //
-                    {{trackActive.artist.name}} //
+                    {{playlist.name}} by {{playlist.by}}
+                    // {{trackActive.title}}
+                    // {{trackActive.artist.name}}
                     <a target="_blank" href="{{track.redirectUrl}}" style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
                         <i style="display: block" class="fi-soundcloud"></i>
                     </a>
@@ -83,7 +93,10 @@ margin-left: 5px;"
                 <div as-sortable-item-handle class="trackInfos">
                     <a href="#/artiste/{{track.artist.facebookUrl}}">{{track.artist.name}}</a><br/>
                     {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
-                    <a target="_blank" href="{{track.redirectUrl}}" style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
+                    <a target="_blank" href="{{track.redirectUrl}}"
+                       class="column small-2 padding0"
+                       style="font-size: 27px;"
+                       ng-if="track.platform == 'Soundcloud'">
                         <i style="display: block" class="fi-soundcloud"></i>
                     </a>
                     <a href="https://youtube.com/watch?v={{track.url}}"

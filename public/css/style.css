@@ -271,6 +271,9 @@
         .arTrack {
             box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
         }
+        .EventinfoTrack:hover {
+            display: block!important;
+        }
         /*wysiwyg*/
         .parallax-background {
             background-color: #0078A0;
