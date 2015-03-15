@@ -92,41 +92,36 @@ object SearchSoundCloudTracks {
     WS.url("http://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
-      .map { response => 
-      println(response.json)
-      readSoundCloudTracks(response.json, artist) }
+      .map { response => readSoundCloudTracks(response.json, artist) }
   }
 
   def readSoundCloudTracks(soundCloudJsonResponse: JsValue, artist: Artist): Seq[Track] = {
     val soundCloudTrackReads = (
-      (__ \ "stream_url").read[String] and
-        (__ \ "title").read[String] and
+      (__ \ "stream_url").readNullable[String] and
+        (__ \ "title").readNullable[String] and
         (__ \ "permalink_url").readNullable[String] and
         (__ \ "user" \ "avatar_url").readNullable[String] and
         (__ \ "artwork_url").readNullable[String]
-      )((url: String, title: String, redirectUrl: Option[String], avatarUrl: Option[String],
+      )((url: Option[String], title: Option[String], redirectUrl: Option[String], avatarUrl: Option[String],
          thumbnail: Option[String]) => (url, title, redirectUrl, thumbnail, avatarUrl))
-    val onlyTracksWithUrlTitleAndThumbnail = Reads.seq(soundCloudTrackReads).map {
-      collectOnlyTracksWithUrlTitleAndThumbnail(_, artist)
-    }
+    val onlyTracksWithUrlTitleAndThumbnail =
+      Reads.seq(soundCloudTrackReads).map { collectOnlyTracksWithUrlTitleAndThumbnail(_, artist) }
+
     soundCloudJsonResponse
       .asOpt[Seq[Track]](onlyTracksWithUrlTitleAndThumbnail)
       .getOrElse(Seq.empty)
   }
 
-  def collectOnlyTracksWithUrlTitleAndThumbnail(tracks: Seq[(String, String, Option[String], Option[String],
-    Option[String])], artist: Artist): Seq[Track] = {
-    println(tracks)
-    val a = tracks.collect {
-      case (url, title, redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl) =>
+  def collectOnlyTracksWithUrlTitleAndThumbnail(tracks: Seq[(Option[String], Option[String], Option[String],
+    Option[String], Option[String])], artist: Artist): Seq[Track] = {
+    tracks.collect {
+      case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl) =>
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
           redirectUrl)
-      case (url, title, redirectUrl: Option[String], None, Some(avatarUrl: String)) =>
+      case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String)) =>
         Track(-1L, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
           redirectUrl)
     }
-    println(a)
-    a
   }
   //+ artistName_ (ou : / etc)
   def normalizeTrackTitle(title: String, artistName: String): String =
