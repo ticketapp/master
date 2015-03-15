@@ -22,8 +22,9 @@ object Utilities {
         " to Float for column " + qualified) )
     }
   }
+
   def normalizeString(string: String): String = {
-    Normalizer.normalize(string.replaceAll(" ", "+"), Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
+    Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
   }
 
   def stripChars(s:String, ch:String)= s filterNot (ch contains _)

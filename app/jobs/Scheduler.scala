@@ -7,9 +7,10 @@ import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
 import services.SearchSoundCloudTracks._
+import services.SearchYoutubeTracks._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
-import services.Utilities.normalizeUrl
+import services.Utilities.{ normalizeUrl, normalizeString }
 import controllers.SearchArtistsController.{ getEventuallyArtistsInEventTitle, getFacebookArtistsByWebsites }
 
 object Scheduler {
@@ -92,6 +93,9 @@ object Scheduler {
           println("artistsFromTitle = " + artistsFromTitle)
           val nonEmptyArtists = artistsFromDescription.flatten.toList ++ artistsFromTitle
           Future { nonEmptyArtists.map { getSoundCloudTracksForArtist }.map { _.map { _.map { Track.save } } } }
+          Future { nonEmptyArtists.map { artist =>
+            getYoutubeTracksForArtist(artist, normalizeArtistName(artist.name)) }.map { _.map { _.map { Track.save } } }
+          }
           val eventGenres = nonEmptyArtists.map(_.genres).flatten
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
@@ -213,6 +217,10 @@ object Scheduler {
       }
     } else
       Future { address }
+  }
+
+  def normalizeArtistName(artistName: String): String = {
+    normalizeString(artistName)
   }
 
   def getArtistsFromTitle(title: String): Set[String] = {

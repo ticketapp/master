@@ -11,7 +11,7 @@ import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
-import services.Utilities.{ normalizeUrl, normalizeString }
+import services.Utilities.{ normalizeUrl }
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import controllers.SearchArtistsController._

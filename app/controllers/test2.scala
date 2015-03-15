@@ -17,7 +17,6 @@ import play.api.mvc.Results._
 import scala.util.{Failure, Success, Try}
 import play.api.libs.functional.syntax._
 import json.JsonHelper._
-import services.Utilities.normalizeString
 
 /*
  follower counts SC
