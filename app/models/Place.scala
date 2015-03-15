@@ -46,20 +46,20 @@ object Place {
     }
   }
 
-  def save(place: Place): Option[Long] = {
-    Utilities.testIfExist("places", "facebookId", place.facebookId) match {
-      case true => None
-      case false => try {
-        val geographicPoint = place.geographicPoint.getOrElse("") match {
-          case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
-          case _ => "{geographicPoint}"
-        }
-        val addressId = place.address.getOrElse(None) match {
-          case None => None
-          case Some(address: Address) => address.addressId
-        }
-        DB.withConnection { implicit connection =>
-          SQL(s"""INSERT into places(name, addressId, facebookId, geographicPoint, description, webSite, capacity,
+  def save(place: Place): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      Utilities.testIfExist("places", "facebookId", place.facebookId) match {
+        case true => None
+        case false =>
+          val geographicPoint = place.geographicPoint.getOrElse("") match {
+            case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
+            case _ => "{geographicPoint}"
+          }
+          val addressId = place.address.getOrElse(None) match {
+            case None => None
+            case Some(address: Address) => address.addressId
+          }
+          SQL( s"""INSERT into places(name, addressId, facebookId, geographicPoint, description, webSite, capacity,
             openingHours)
             VALUES ({name}, {addressId}, {facebookId}, $geographicPoint, {description}, {webSite}, {capacity},
             {openingHours})""")
@@ -80,12 +80,12 @@ object Place {
               )
               Some(placeId)
           }
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot save place: " + e.getMessage)
       }
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot save place: " + e.getMessage)
   }
+
 
   def find20Since(start: Int, center: String): Seq[Place] = {
     try {

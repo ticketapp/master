@@ -5,6 +5,7 @@ import anorm._
 import controllers._
 import play.api.db.DB
 import play.api.Play.current
+import services.Utilities._
 
 case class Genre (genreId: Long, name: String)
 
@@ -75,6 +76,9 @@ object Genre {
   
   def save(genre: Genre): Option[Long] = try {
     DB.withConnection { implicit connection =>
+      /*testIfExist("events", "facebookId", event.facebookId) match {
+      case true => None
+      case false =>*/
       SQL("""INSERT INTO genres(name) VALUES ({name})""")
         .on('name -> genre.name)
         .executeInsert()

@@ -33,21 +33,25 @@ object Image {
     }
   }
 
-  def findAll(): Seq[Image] = {
+  def findAll: Seq[Image] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM images").as(ImageParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Image.findAll: " + e.getMessage)
   }
 
-  def findAllByEvent(event: Event): List[Image] = {
+  def findAllByEvent(event: Event): List[Image] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM images WHERE eventId = {eventId}")
         .on('eventId -> event.eventId)
         .as(ImageParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Image.findAllByEvent: " + e.getMessage)
   }
 
-  def findAllByPlace(placeId: Long): List[Image] = {
+  def findAllByPlace(placeId: Long): List[Image] =  try {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *
              FROM Images
@@ -55,9 +59,11 @@ object Image {
         .on('placeId -> placeId)
         .as(ImageParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Image.findAllByPlace: " + e.getMessage)
   }
 
-  def findAllByArtist(artistId: Long): Set[Image] = {
+  def findAllByArtist(artistId: Long): Set[Image] = try {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *
              FROM Images
@@ -66,9 +72,11 @@ object Image {
         .as(ImageParser.*)
         .toSet
     }
+  } catch {
+    case e: Exception => throw new DAOException("Image.findAllByArtist: " + e.getMessage)
   }
   
-  def findAllByOrganizer(organizerId: Long): List[Image] = {
+  def findAllByOrganizer(organizerId: Long): List[Image] = try {
     DB.withConnection { implicit connection =>
       SQL( """SELECT *
              FROM Images
@@ -76,53 +84,54 @@ object Image {
         .on('organizerId -> organizerId)
         .as(ImageParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Image.findAllByOrganizer: " + e.getMessage)
   }
 
-  def find(imageId: Long): Option[Image] = {
+  def find(imageId: Long): Option[Image] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * from images WHERE placeId = {imageId}")
         .on('imageId -> imageId)
         .as(ImageParser.singleOpt)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Image.find: " + e.getMessage)
   }
 
-  def save(image: Image): Option[Long] = {
-    //println(image)
-    Utilities.testIfExist("images", "path", image.path) match {
-      case true =>
-        println("Image path already in database")
-        None
-      case false => try {
-        DB.withConnection { implicit connection =>
+  def save(image: Image): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      Utilities.testIfExist("images", "path", image.path) match {
+        case true =>
+          println("Image path already in database")
+          None
+        case false =>
           SQL("""INSERT INTO images(path, eventId, userId, placeId, organizerId, artistId)
-              VALUES({path}, {eventId}, {userId}, {placeId}, {organizerId}, {artistId})""")
+          VALUES({path}, {eventId}, {userId}, {placeId}, {organizerId}, {artistId})""")
             .on(
               'path -> image.path,
               'eventId -> image.eventId,
               'userId -> image.userId,
               'placeId -> image.placeId,
               'organizerId -> image.organizerId,
-              'artistId -> image.artistId
-            ).executeInsert()
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot save image: " + e.getMessage)
+              'artistId -> image.artistId)
+            .executeInsert()
       }
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot save image: " + e.getMessage)
   }
 
-  def saveEventImageRelation(eventId: Long, imageId: Long): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO eventsImages (eventId, imageId)
-            VALUES ({eventId}, {imageId})""").on(
-            'eventId -> eventId,
-            'imageId -> imageId
-          ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("saveEventImageRelation: " + e.getMessage)
+
+  def saveEventImageRelation(eventId: Long, imageId: Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL( """INSERT INTO eventsImages (eventId, imageId)
+          VALUES ({eventId}, {imageId})""").on(
+          'eventId -> eventId,
+          'imageId -> imageId
+        ).executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("saveEventImageRelation: " + e.getMessage)
   }
 }
 

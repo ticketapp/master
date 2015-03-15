@@ -95,35 +95,34 @@ object Organizer {
       + e.getMessage)
   }
 
-  def save(organizer: Organizer): Option[Long] = {
-    Utilities.testIfExist("organizers", "name", organizer.name) match {
-      case true => Some(-1)
-      case false => try {
-        //println(organizer.name)
-        DB.withConnection { implicit connection =>
-          SQL("""INSERT INTO organizers(name, facebookId, description, phone, publicTransit, website)
+  def save(organizer: Organizer): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      Utilities.testIfExist("organizers", "name", organizer.name) match {
+        case true => Some(-1)
+        case false =>
+          SQL( """INSERT INTO organizers(name, facebookId, description, phone, publicTransit, website)
             VALUES ({name}, {facebookId}, {description}, {phone}, {publicTransit}, {website})""")
             .on(
               'name -> organizer.name,
               'facebookId -> organizer.facebookId,
-              'description -> organizer.description ,
+              'description -> organizer.description,
               'phone -> organizer.phone,
               'publicTransit -> organizer.publicTransit,
               'website -> organizer.website
-          ).executeInsert() match {
+            ).executeInsert() match {
             case None => None
             case Some(organizerId: Long) =>
-              organizer.images.foreach( image =>
+              organizer.images.foreach(image =>
                 Image.save(image.copy(organizerId = Some(organizerId)))
               )
               Some(organizerId)
           }
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot create organizer: " + e.getMessage + organizer.name)
       }
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot create organizer: " + e.getMessage + organizer.name)
   }
+
 
   def returnOrganizerId(name: String): Long = try {
     DB.withConnection { implicit connection =>
