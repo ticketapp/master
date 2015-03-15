@@ -2,13 +2,10 @@ package securesocial
 
 import org.joda.time.DateTime
 import org.specs2.mutable._
-
 import play.api.test._
 import play.api.test.Helpers._
 import securesocial.core.providers.Token
-
 import services.{SSIdentity, InMemoryUserService}
-
 import securesocial.core._
 
 class UserSpec extends Specification {
