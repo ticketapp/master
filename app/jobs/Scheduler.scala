@@ -6,6 +6,7 @@ import play.api.libs.ws.Response
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
+import services.SearchSoundCloudTracks._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import services.Utilities.normalizeUrl
@@ -90,11 +91,12 @@ object Scheduler {
         } yield {
           println("artistsFromTitle = " + artistsFromTitle)
           val nonEmptyArtists = artistsFromDescription.flatten.toList ++ artistsFromTitle
-          val eventGenres = nonEmptyArtists.map { _.genres }.flatten
+          Future { nonEmptyArtists.map { getSoundCloudTracksForArtist }.map { _.map { _.map { Track.save } } } }
+          val eventGenres = nonEmptyArtists.map(_.genres).flatten
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
             formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,
-            nonEmptyArtists, List(), List(address), List(), eventGenres)
+            nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
         }
     })
     eventFacebookResponse.json.asOpt[Future[Event]](eventRead)
