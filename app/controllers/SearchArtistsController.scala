@@ -9,15 +9,16 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import jobs.Scheduler.formatDescription
-import services.Utilities.normalizeUrl
 import models.Artist
 import models.Image
 import models.Genre
 import play.api.libs.json.Reads._
+import services.Utilities.{ normalizeUrl, getNormalizedWebsitesInText }
 
 object SearchArtistsController extends Controller {
   val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
   val token = play.Play.application.configuration.getString("facebook.token")
+  val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     getEventuallyFacebookArtists(pattern).map { artists =>
@@ -159,11 +160,11 @@ object SearchArtistsController extends Controller {
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                  maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
-    val websitesSeq = websitesStringToWebsitesSet(maybeWebsites)
+    val websitesSet = getNormalizedWebsitesInText(maybeWebsites).filterNot(_.contains("facebook.com"))
     val images = Set(new Image(-1, cover))
     val description = formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
-    Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSeq, images, genres, Seq.empty)
+    Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSet, images, genres, Seq.empty)
   }
 
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
@@ -185,15 +186,5 @@ object SearchArtistsController extends Controller {
               .toSet
         }
       }
-  }
-
-  def websitesStringToWebsitesSet(websites: Option[String]): Set[String] = websites match {
-    case None => Set.empty
-    case Some(websites: String) =>
-      """((https?:\/\/(www\.)?)|www\.)""".r.split(websites.toLowerCase)
-        .map { _.trim.stripSuffix("/") }
-        .filter(_.nonEmpty)
-        .filterNot(_.contains("facebook.com"))
-        .toSet
   }
 }
