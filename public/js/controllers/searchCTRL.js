@@ -1,4 +1,4 @@
-app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', function($rootScope, $http, $scope, $filter, oboe){
+app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout', function($rootScope, $http, $scope, $filter, oboe, $timeout){
     $scope.limit = 20;
     $scope.artists = [];
     $scope.artistsFb = [];
@@ -176,32 +176,58 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selEvent == true) {
+                $timeout(function() {
+                    $scope.$apply(function () {
+                        $scope.events = $filter('filter')($scope.events, {name: _research})
+                        $scope.scopeIdList = [];
+                    })
+                },0);
                 $http.get('/events/containing/' + _research + '/' + $rootScope.geoLoc).
                     success(function (data, status, headers, config) {
-                        var scopeIdList = [];
-                        $scope.events = $filter('filter')($scope.events, {name :  _research});
-                        function getEventsId(el, index, array) {
-                            scopeIdList.push(el.eventId);
-                            console.log(scopeIdList)
-                        }
-                        $scope.events.forEach(getEventsId);
-                        if ($scope.events.length == 0) {
-                            $scope.events = data;
-                        } else {
-                            function uploadEvents(el, index, array) {
-                                if (scopeIdList.indexOf(el.eventId) == -1) {
+                        function uploadEvents(el, index, array) {
+                            $timeout(function() {
+                                $scope.$apply(function () {
+                                    function getEventsId(el, index, array) {
+                                        $scope.scopeIdList.push(el.eventId);
+                                    }
+                                    $scope.events.forEach(getEventsId);
+                                });
+                                if ($scope.scopeIdList.indexOf(el.eventId) == -1) {
                                     $scope.events.push(el);
-                                    scopeIdList.push(el.eventId);
-                                    console.log(el)
-                                } else {
-                                    console.log('yoyo')
+                                    $scope.scopeIdList.push(el.eventId);
+                                    console.log($scope.scopeIdList)
+                                    console.log(el.eventId)
                                 }
-                                console.log(scopeIdList)
-                            }
-                            for (var i = 0; i < data.length; i++) {
+                            },0);
+                        }
+                        for (var i = 0; i < data.length; i++) {
+                            if (data[i].name.indexOf(_research) > -1) {
                                 uploadEvents(data[i]);
                             }
                         }
+                        $http.get('/artists/containing/'+_research).
+                            success(function(data, status, headers, config) {
+                                function getArtistEvents (art) {
+                                    $http.get('/artists/'+ art.facebookUrl + '/events ').
+                                        success(function(data){
+                                            data.forEach(uploadEvents);
+                                            $rootScope.resizeImgHeight()
+                                        })
+                                }
+                                data.forEach(getArtistEvents)
+                            });
+                        $http.get('/places/containing/'+_research).
+                            success(function(data, status, headers, config) {
+                                function getPlaceEvents (place) {
+                                    $http.get('/places/'+ place.placeId + '/events ').
+                                        success(function(data){
+                                            console.log(data)
+                                            data.forEach(uploadEvents);
+                                            $rootScope.resizeImgHeight()
+                                        })
+                                }
+                                data.forEach(getPlaceEvents)
+                            });
                         $rootScope.resizeImgHeight()
                     }).
                     error(function (data, status, headers, config) {
@@ -242,7 +268,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             $rootScope.resizeImgHeight();
                             console.log($scope.artistsFb)
                         } else {
-                            console.log('yoyo')
                         }
                     }
                     value.forEach(updateArtistFb);
@@ -254,6 +279,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
     }
     search();
+    console.log($rootScope.geoLoc);
     $scope.moreLimit = function () {
         offset = offset + 20;
         $rootScope.resizeImgHeight();

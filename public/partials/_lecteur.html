@@ -22,7 +22,7 @@
                id="volume-slider"
                class="md-primary absolute" style="margin-left: 95px;z-index: 5;margin-top: -12px;width: 130px;background: white;">
     </md-slider>
-    <div class="column large-10 large-centered">
+    <div class="column large-11">
         <div class="float-left column small-1">
             <i ng-if="!onPlay" class="fi-play" ng-click="playPause()"></i>
             <i ng-if="onPlay" class="fi-pause" ng-click="playPause()"></i>
@@ -31,9 +31,38 @@
             <i class="fi-previous float-right" ng-click="prevTrack()"></i>
         </div>
         <div id="progressBar" class="progress small-9 primary float-left round">
-            <span id="progress" class="meter" style="width: 0%"></span>
+            <b style="color: #008CBA;font-size: 13px;
+margin-left: 5px;" class="absolute">{{playlist.name}} // {{playlist.by}} // {{trackActive.title}} // {{trackActive.artist.name}}</b>
+            <span id="progress" class="meter column padding0" style="width: 0%; overflow: hidden">
+                <b style="color: #ffffff;white-space: nowrap;overflow: hidden;font-size: 13px;
+margin-left: 5px;"
+                   class="absolute">
+                    {{playlist.name}} //
+                    {{playlist.by}} //
+                    {{trackActive.title}} //
+                    {{trackActive.artist.name}} //
+                    <a target="_blank" href="{{track.redirectUrl}}" style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
+                        <i style="display: block" class="fi-soundcloud"></i>
+                    </a>
+                    <a href="https://youtube.com/watch?v={{track.url}}"
+                       style="font-size: 27px;"
+                       ng-if="track.platform == 'Youtube'"
+                       target="_blank">
+                        <i style="display: block" class="fi-social-youtube"></i>
+                    </a>
+                </b>
+            </span>
         </div>
         <div class="column small-2">
+            <a target="_blank" href="{{trackActive.redirectUrl}}" style="font-size: 27px;" ng-if="trackActive.platform == 'Soundcloud'">
+                <i style="display: block" class="fi-soundcloud float-left"></i>
+            </a>
+            <a href="https://youtube.com/watch?v={{trackActive.url}}"
+               style="font-size: 27px;"
+               ng-if="trackActive.platform == 'Youtube'"
+               target="_blank">
+                <i style="display: block; margin-top: -7px; margin-right: 3px" class="fi-social-youtube float-left"></i>
+            </a>
             <div class="float-left" id="currentTime"></div>
             <i class="fi-next float-right" ng-click="nextTrack()"></i>
         </div>
@@ -52,9 +81,17 @@
                        ng-class="{'fi-pause': onPlay, 'fi-play': !onPlay}" ng-click="playPause()"></i>
                 </div>
                 <div as-sortable-item-handle class="trackInfos">
-                    {{track.artist}}<br/>
+                    <a href="#/artiste/{{track.artist.facebookUrl}}">{{track.artist.name}}</a><br/>
                     {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
-                    {{track.platform}}<br/>
+                    <a target="_blank" href="{{track.redirectUrl}}" style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
+                        <i style="display: block" class="fi-soundcloud"></i>
+                    </a>
+                    <a href="https://youtube.com/watch?v={{track.url}}"
+                       style="font-size: 27px;"
+                       ng-if="track.platform == 'Youtube'"
+                       target="_blank">
+                        <i style="display: block" class="fi-social-youtube"></i>
+                    </a>
                 </div>
             </div>
         </div>
