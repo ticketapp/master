@@ -1,11 +1,19 @@
-app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket){
+app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket, $timeout, $filter){
     $scope.bigTracks = true;
     $scope.trackLimit = 10;
     $scope.heightDesc = '147px';
     $scope.trackTitle = '';
     $scope.allDesc = false;
+    $scope.tracks = [];
     $scope.suggestQuery = function (trackName, artistName) {
         console.log(trackName, artistName)
+    };
+    $scope.filterTracks = function () {
+        $timeout(function () {
+            $scope.$apply(function(){
+                $scope.artiste.tracks = $filter('filter')($scope.tracks, {title: $scope.trackTitle})
+            })
+        },0)
     };
     function resizePageElem () {
         var waitForBinding = setInterval(function () {
@@ -21,6 +29,12 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                     }
                 }
                 var eventInfoConteners = document.getElementsByClassName('eventInfo');
+                if (document.getElementById('descContent') != null) {
+                    if (document.getElementById('descContent').clientHeight < 147) {
+                        $scope.heightDesc = '';
+                        $scope.$apply();
+                    }
+                }
                 if ($scope.artiste.events.length > 0) {
                     if ($scope.artiste.events.length == 1) {
                         document.getElementsByClassName('descriptionContent')[0].classList.remove('large-8');
@@ -100,7 +114,10 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
         $http.get('/artists/' + $routeParams.facebookUrl)
             .success(function (data, status) {
                 $scope.artiste = data;
-                refactorWebsites();
+                $scope.tracks = $scope.artiste.tracks;
+                if ($scope.artiste.websites != undefined) {
+                    refactorWebsites();
+                }
                 console.log(data)
                 $rootScope.loadingTracks = false
                 $http.get('/artists/'+ $routeParams.facebookUrl + '/events ').
