@@ -64,6 +64,7 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Future[Set[Track]] = {
+    Future { getAndSaveArtistStyleOnEchonest(echonestId, artist.facebookUrl) }
     getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
       getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
     }
@@ -185,7 +186,6 @@ object SearchYoutubeTracks {
   }
 
   def readEchonestSongs(result: JsValue): Set[String] = {
-    println(result)
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     (result \ "response" \ "songs")
       .asOpt[Set[Option[String]]](Reads.set(titleReads))
@@ -225,5 +225,30 @@ object SearchYoutubeTracks {
     (echonestResponse.json \ "response" \ "artists")
       .asOpt[Seq[(String, String)] ](collectOnlyValidTuples)
       .getOrElse(Seq.empty)
+  }
+
+  def getAndSaveArtistStyleOnEchonest(echonestId: String, artistFacebookUrl: String): Unit = {
+    WS.url("http://developer.echonest.com/api/v4/artist/profile")
+      .withQueryString(
+        "id" -> echonestId,
+        "format" -> "json",
+        "bucket" -> "genre",
+        "api_key" -> echonestApiKey)
+      .get()
+      .map { response =>
+        readEchonestGenres(response.json).map { genre =>
+          saveGenreForArtistInFuture(Option(genre), artistFacebookUrl)
+        }
+    }
+  }
+
+  def readEchonestGenres(echonestJsonResponse: JsValue): Array[String] = {
+    val genreReads: Reads[Option[String]] = (__ \\ "name").readNullable[String]
+    (echonestJsonResponse \ "response" \ "artist" \ "genres")
+      .asOpt[Set[Option[String]]](Reads.set(genreReads))
+      .getOrElse(Set.empty)
+      .flatten
+      .mkString(" ")
+      .split(" ")
   }
 }
