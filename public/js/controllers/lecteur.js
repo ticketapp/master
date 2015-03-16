@@ -31,7 +31,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                             console.log(event.artists[a].genres[g].name)
                             console.log(event.artists[a])
                             console.log($rootScope.playlist.genres)
-                            if ($rootScope.playlist.genres.toString().indexOf(event.artists[a].genres[g].name) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
+                            if ($rootScope.playlist.genres.toString().toLowerCase().indexOf(event.artists[a].genres[g].name.toLowerCase()) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
                                 artNames.push(event.artists[a].name);
                                 for (var t = 0; t < 4; t++) {
                                     if (played.indexOf(event.artists[a].tracks[t].title) == -1) {
@@ -139,14 +139,16 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         }
     }
     $scope.play = function (i) {
-        $timeout(function() {
-            $scope.$apply(function () {
-                $scope.showInfo = true;
-                $timeout(function () {
-                    $scope.showInfo = false;
-                }, 5000)
-            })
-        }, 0)
+        if ( $rootScope.playlist.tracks[i].nextShow != undefined) {
+            $timeout(function () {
+                $scope.$apply(function () {
+                    $scope.showInfo = true;
+                    $timeout(function () {
+                        $scope.showInfo = false;
+                    }, 5000)
+                })
+            }, 0)
+        }
         $scope.prevTrack = function () {
             i--;
             $scope.play(i);

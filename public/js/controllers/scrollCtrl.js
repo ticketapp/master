@@ -24,7 +24,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.tracks = [];
             window.location.href =('#/artiste/' + artist.facebookUrl);
             $rootScope.$apply;
-            var searchPattern  = document.getElementById('searchBar').value.trim()
+            var searchPattern  = document.getElementById('searchBar').value.trim();
             oboe.post('artists/createArtist', {
                 searchPattern: searchPattern,
                 artist: {

@@ -10,7 +10,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var _selEvent = $rootScope.activEvent;
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
-    var _research = '';
+    var _research = document.getElementById('searchBar').value.trim();
     function search () {
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
@@ -201,7 +201,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             },0);
                         }
                         for (var i = 0; i < data.length; i++) {
-                            if (data[i].name.indexOf(_research) > -1) {
+                            if (data[i].name.toLowerCase().indexOf(_research.toLowerCase()) > -1) {
                                 uploadEvents(data[i]);
                             }
                         }
@@ -279,6 +279,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
     }
     search();
+    if (_selArtist == true && _research.length > 2) {
+        searchArtistFb ();
+    }
     console.log($rootScope.geoLoc);
     $scope.moreLimit = function () {
         offset = offset + 20;
