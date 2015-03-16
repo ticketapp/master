@@ -9,6 +9,7 @@ import services.Utilities.normalizeUrl
 import scala.concurrent.Future
 import java.util.regex.Pattern
 import services.SearchSoundCloudTracks.normalizeTrackTitle
+import models.Genre.saveGenreForArtistInFuture
 
 object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
@@ -63,6 +64,7 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Future[Set[Track]] = {
+    Future { getAndSaveArtistStyleOnEchonest(echonestId, artist.facebookUrl) }
     getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
       getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
     }
@@ -85,17 +87,15 @@ object SearchYoutubeTracks {
   }
 
   def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
-    println("youtubeResponse = " + youtubeResponse.json)
     val youtubeTrackReads = (
       (__ \ "snippet" \ "title").readNullable[String] and
         (__ \ "id" \ "videoId").readNullable[String] and
-        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String] and
-        (__ \ "genre").readNullable[String]
-      )((title: Option[String], url: Option[String], thumbnailUrl: Option[String], genre: Option[String]) =>
-      (title, url, thumbnailUrl, genre))
+        (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
+      )((title: Option[String], url: Option[String], thumbnailUrl: Option[String]) =>
+      (title, url, thumbnailUrl))
     val collectOnlyValidTracks = Reads.seq(youtubeTrackReads).map { tracks =>
       tracks.collect {
-        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String), genre)
+        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
           if isArtistNameInTrackTitle(title, artist.name) =>
           Track(-1L, normalizeTrackTitle(title, artist.name), url, "Youtube", thumbnailUrl, artist.facebookUrl)
       }
@@ -225,5 +225,30 @@ object SearchYoutubeTracks {
     (echonestResponse.json \ "response" \ "artists")
       .asOpt[Seq[(String, String)] ](collectOnlyValidTuples)
       .getOrElse(Seq.empty)
+  }
+
+  def getAndSaveArtistStyleOnEchonest(echonestId: String, artistFacebookUrl: String): Unit = {
+    WS.url("http://developer.echonest.com/api/v4/artist/profile")
+      .withQueryString(
+        "id" -> echonestId,
+        "format" -> "json",
+        "bucket" -> "genre",
+        "api_key" -> echonestApiKey)
+      .get()
+      .map { response =>
+        readEchonestGenres(response.json).map { genre =>
+          saveGenreForArtistInFuture(Option(genre), artistFacebookUrl)
+        }
+    }
+  }
+
+  def readEchonestGenres(echonestJsonResponse: JsValue): Array[String] = {
+    val genreReads: Reads[Option[String]] = (__ \\ "name").readNullable[String]
+    (echonestJsonResponse \ "response" \ "artist" \ "genres")
+      .asOpt[Set[Option[String]]](Reads.set(genreReads))
+      .getOrElse(Set.empty)
+      .flatten
+      .mkString(" ")
+      .split(" ")
   }
 }

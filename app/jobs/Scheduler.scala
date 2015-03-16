@@ -11,7 +11,7 @@ import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
-import services.Utilities.{ normalizeUrl, normalizeString }
+import services.Utilities.{ normalizeUrl, normalizeString, getNormalizedWebsitesInText }
 import controllers.SearchArtistsController.{ getEventuallyArtistsInEventTitle, getFacebookArtistsByWebsites }
 
 object Scheduler {
@@ -80,9 +80,9 @@ object Scheduler {
 
         val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
         val eventuallyAddress = getGeographicPoint(new Address(-1l, None, city, zip, street))
-        val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getWebsitesInDescription(description))
+        val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getNormalizedWebsitesInText(description))
         val eventuallyMaybeArtistsFromTitle =
-          getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getWebsitesInDescription(description))
+          getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getNormalizedWebsitesInText(description))
 
         for {
           organizer <- eventuallyOrganizer
@@ -138,10 +138,7 @@ object Scheduler {
     }
   }
 
-  def getWebsitesInDescription(maybeDescription: Option[String]): Set[String] = maybeDescription match {
-    case None => Set.empty
-    case Some(description) => linkPattern.findAllIn(description).toSet.map { normalizeUrl }
-  }
+
 
   def createNewImageIfSourceExists(source: Option[String]): List[Image] = source match {
     case Some(path) => List(new Image(-1, path))

@@ -7,6 +7,9 @@ import play.api.db.DB
 import play.api.Play.current
 import services.Utilities._
 
+import scala.concurrent.Future
+import play.api.libs.concurrent.Execution.Implicits._
+
 case class Genre (genreId: Long, name: String)
 
 object Genre {
@@ -72,7 +75,6 @@ object Genre {
   } catch {
     case e: Exception => throw new DAOException("Problem with the method Genre.findAllContaining: " + e.getMessage)
   }
-
   
   def save(genre: Genre): Option[Long] = try {
     DB.withConnection { implicit connection =>
@@ -89,13 +91,11 @@ object Genre {
   }
 
   def findGenreId(genreName: String): Option[Long] = try {
-    val a = DB.withConnection { implicit connection =>
+    DB.withConnection { implicit connection =>
         SQL( """SELECT genreId FROM genres WHERE name = {name}""")
           .on('name -> genreName)
           .as(scalar[Option[Long]].single)
     }
-    println(a)
-    a
   } catch {
     case e: Exception => throw new DAOException("Event.findGenreId: " + e.getMessage)
   }
@@ -142,6 +142,14 @@ object Genre {
     case e: Exception => throw new DAOException("Genre.saveArtistGenreRelation: " + e.getMessage)
   }
 
+  def saveGenreForArtistInFuture(genreName: Option[String], artistFacebookUrl: String): Unit = {
+    Future {
+      genreName match {
+        case Some(genreFound) if genreFound.nonEmpty =>
+          saveWithArtistRelation(new Genre(-1, genreFound), artistFacebookUrl)
+      }
+    }
+  }
 
   def deleteGenre(genreId: Long): Long = try {
     DB.withConnection { implicit connection =>

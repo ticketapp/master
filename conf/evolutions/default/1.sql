@@ -7,9 +7,9 @@ CREATE TABLE addresses (
   street                    VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (geographicPoint) VALUES ('(44.1764121, 4.97134)');
-INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.187134)');
-INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.837234)');
+INSERT INTO addresses (geographicPoint) VALUES ('(44.17611, 4.97134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.18134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.83724)');
 INSERT INTO addresses (geographicPoint) VALUES ('(41.46787, 5.9147134)');
 
 CREATE TABLE orders ( --account701
@@ -29,7 +29,11 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
+<<<<<<< HEAD
 INSERT INTO infos (title, content) VALUES ('Timeline', 'H - 40 avant la bêta :) :)');
+=======
+INSERT INTO infos (title, content) VALUES ('Timeline', 'H - 2 avant la bêta :) :)');
+>>>>>>> 18b334f2509f3b908cb04411763b78e344ef90c5
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (

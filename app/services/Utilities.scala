@@ -52,4 +52,12 @@ object Utilities {
         e.getMessage)
     }
   }
+
+  def getNormalizedWebsitesInText(maybeDescription: Option[String]): Set[String] = maybeDescription match {
+    case None =>
+      Set.empty
+    case Some(description) =>
+      play.Play.application.configuration.getString("regex.linkPattern").r
+        .findAllIn(description).toSet.map { normalizeUrl }
+  }
 }
