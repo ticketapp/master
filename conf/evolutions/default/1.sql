@@ -29,11 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-<<<<<<< HEAD
 INSERT INTO infos (title, content) VALUES ('Timeline', 'H - 40 avant la bêta :) :)');
-=======
-INSERT INTO infos (title, content) VALUES ('Timeline', 'H - 2 avant la bêta :) :)');
->>>>>>> 18b334f2509f3b908cb04411763b78e344ef90c5
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
