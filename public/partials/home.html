@@ -12,6 +12,15 @@
     </div>
 </div>
 <div ng-if="$root.window == 'small'" ng-controller="phoneHomeCtrl" class="absolute top0 bottom0 right left" style="z-index: 11">
+    <div class="absolute zIndex5">
+        <input type="number" ng-model="time">
+        <a class="button" ng-click="info = !info">Infos</a>
+        <ul class="white" ng-if="info">
+            <li ng-repeat="info in infos">
+                <a>{{info.title}}</a>
+            </li>
+        </ul>
+    </div>
     <map ng-if="map"
          zoom="12"
          center="[{{mapCenter}}]"
@@ -21,50 +30,12 @@
          scaleControl="false"
          style="height: 100%"
          class="width100p">
-        <info-window position="{{ev.addresses[0].geographicPoint}}"
-                     visible-on-marker="contact"
-                     ng-repeat="ev in events"
-                     id="info">
-            <div ng-non-bindable class="width100p zIndex4" id="contactForm">
-                <h4 class="width100p text-center">Contactez-nous</h4>
-            </div>
-        </info-window>
-        <marker ng-repeat="ev in events"
+        <marker ng-repeat="(id, ev) in events"
                 visible="true"
+                ng-if="ev.countdown <= time && ev.countdown > 0"
                 id="contact"
-                on-click="showInfoWindow(event, 'info')"
+                on-click="goTo(event, id)"
                 position="{{ev.addresses[0].geographicPoint}}" icon="../assets/img/marker.png">
         </marker>
     </map>
-    <!--<map zoom="12"
-         ng-if="map"
-         center="[{{mapCenter}}]"
-         scrollwheel="false"
-         navigationControl="false"
-         mapTypeControl="false"
-         scaleControl="false"
-         style="height: 100%!important;"
-         class=" right left absolute zIndex1">
-        <info-window id="info" position="{{events[1].addresses[0].geographicPoint}}" visible-on-marker="contact">
-            <div ng-non-bindable class="width100p zIndex4" id="contactForm">
-                <h4 class="width100p text-center">Contactez-nous</h4>
-                <div class="column">
-                    <h6 style="cursor: pointer; color: #008CBA;">Nous ecrire</h6>
-                    <form ng-show="open" name="contactform" ng-submit="submit(contactform)" class="height250">
-                        <input type="email" ng-model="formData.inputEmail" id="inputEmail" name="inputEmail" placeholder="Email" required>
-                        <textarea ng-model="formData.inputMessage" id="inputMessage" class="fade" ng-minlength="10" required></textarea>
-                        <button type="submit" ng-click="submit()" class="btn btn-default btncontact" ng-disabled="submitButtonDisabled">Envoyer</button>
-                    </form>
-                </div>
-                <div class="column">
-                    <h6 class="float-left">Tel : </h6> <p class="float-left">04 78 27 73 88</p><br><br>
-                </div>
-                <div class="width100p">
-                    <h6 class="text-center width100p">Adresse</h6> <p class="width100p text-center">11 place St Paul, 69005 Lyon</p>
-                </div>
-            </div>
-        </info-window>
-        <marker id="contact" on-click="showInfoWindow(event, 'info')" position="{{events[1].addresses[0].geographicPoint}}" icon="../assets/img/marker.png">
-        </marker>
-    </map>-->
 </div>
