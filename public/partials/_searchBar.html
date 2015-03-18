@@ -1,12 +1,12 @@
 <input ng-if="!filter" id="searchBar" placeholder="Search" ng-model="$root.research"
        ng-model-options="{ getterSetter: true }"
-       class="column large-10">
+       class="column small-10">
 <input ng-if="filter" id="searchBar" placeholder="Filter by {{$root.filterType}}"
        ng-change="$root.resizeImgHeight()"
        ng-model="$root.filterQuery"
-       class="column large-10">
-<ul class="column large-2 padding0">
-    <a ng-click="filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
+       class="column small-10">
+<ul class="column small-2 padding0">
+    <a ng-if="filter" ng-click="$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
     <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
         <a>Filters <i class="fi-arrow-down"></i></a>
     </li>

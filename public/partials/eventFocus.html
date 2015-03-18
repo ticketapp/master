@@ -5,13 +5,14 @@
     <div class="columns large-12">
         <h2 id="eventTitle" class="column large-10" style="margin-top:0">{{event.name}}</h2>
         <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
+        le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a>
     </div>
     <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
         <div ng-bind-html="event.description" id="eventDescBind"></div>
     </div>
-    <div class="column large-4 float-left eventInfo" >
+    <div class="column large-4 float-left eventInfo" ng-if="event.tariffs.length > 0">
         <h2>Acheter des places</h2>
-        <li ng-repeat="tarif in event.tarifs" style="display: block;">
+        <li ng-repeat="tarif in event.tariffs" style="display: block;">
             <h4>{{tarif.denominations}}</h4>
             <h4 class="column large-4">{{tarif.prices}} €</h4>
             <select class="column large-4">
@@ -29,15 +30,15 @@
             <button class="column large-4">Acheter</button>
         </li>
     </div>
-    <div class="column large-4 float-left eventInfo" >
+    <div class="column large-4 float-left eventInfo" ng-if="event.artists.length > 0">
         <h2>Programmation</h2>
         <li ng-repeat="artist in event.artists" style="display: block;">
             <a href="#/artiste/{{artist.facebookUrl}}">{{artist.name}}</a>
             <i ng-if="artist.tracks.length > 0"
-               ng-click="$root.addAndPlay(artiste.tracks, artiste.name)"
+               ng-click="$root.addAndPlay(artist.tracks, artist)"
                class="fi-play-circle float-right"><a>PlayAll</a></i>
             <i ng-if="artist.tracks.length > 0"
-               ng-click="$root.addToPlaylist(artiste.tracks, artiste.name)"
+               ng-click="$root.addToPlaylist(artist.tracks, artist)"
                class="fi-plus float-right"><a>addAll</a></i>
         </li>
     </div>

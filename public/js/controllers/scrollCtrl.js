@@ -105,7 +105,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         };
         $rootScope.window = 'large';
         function marginContent () {
-            if ($rootScope.home == false) {
+            if ($rootScope.path != 'home') {
                 var waitForContentParallax = setTimeout(function () {
                     var content = document.getElementsByClassName('parallax-content');
                     if (content.length > 0) {
@@ -130,7 +130,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             }
         }
         function respClass () {
-            marginContent();
             $rootScope.resizeImgHeight();
             if (window.innerWidth > 0 && window.innerWidth <= 640) {
                 $scope.$apply(function () {
@@ -153,6 +152,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     $rootScope.window = 'xxlarge';
                 });
             }
+            marginContent();
         }
         $timeout(function () {
             respClass ();
@@ -172,69 +172,28 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $scope.gotoTop = '';
         function location() {
             if ($location.path() == '/') {
-                $rootScope.home = true;
-                $rootScope.pathArt = false;
-                $rootScope.pathEvent = false;
-                $rootScope.pathUsr = false;
-                $rootScope.pathPlace = false;
-                $rootScope.pathSearch = false;
+                $rootScope.path = 'home';
             } else if ($location.path() == '/search'){
-                $rootScope.pathArt = false;
-                $rootScope.home = false;
-                $rootScope.pathEvent = false;
-                $rootScope.pathUsr = false;
-                $rootScope.pathPlace = false;
-                $rootScope.pathSearch = true;
+                $rootScope.path = 'search';
             } else if ($location.path().indexOf('/artiste') > -1){
-                $rootScope.pathArt = true;
-                $rootScope.home = false;
-                $rootScope.pathEvent = false;
-                $rootScope.pathUsr = false;
-                $rootScope.pathPlace = false;
-                $rootScope.pathSearch = false;
+                $rootScope.path = 'art';
             } else if ($location.path().indexOf('/event') > -1){
-                $rootScope.pathEvent = true;
-                $rootScope.pathArt = false;
-                $rootScope.home = false;
-                $rootScope.pathUsr = false;
-                $rootScope.pathPlace = false;
-                $rootScope.pathSearch = false;
+                $rootScope.path = 'event';
             } else if ($location.path().indexOf('/user') > -1){
-                $rootScope.pathUsr = true;
-                $rootScope.pathArt = false;
-                $rootScope.pathEvent = false;
-                $rootScope.home = false;
-                $rootScope.pathPlace = false;
-                $rootScope.pathSearch = false;
+                $rootScope.path = 'usr';
             } else if ($location.path().indexOf('/lieu') > -1){
-                $rootScope.pathUsr = false;
-                $rootScope.pathArt = false;
-                $rootScope.pathEvent = false;
-                $rootScope.home = false;
-                $rootScope.pathPlace = true;
-                $rootScope.pathSearch = false;
+                $rootScope.path = 'place';
             }else if ($location.path().indexOf('/iframeEvents') > -1){
-                $rootScope.pathUsr = false;
-                $rootScope.pathArt = false;
-                $rootScope.pathEvent = false;
-                $rootScope.home = false;
-                $rootScope.pathPlace = false;
-                $rootScope.pathSearch = false;
-                $rootScope.pathiframe = true;
+                $rootScope.path = 'iframe';
             } else {
-                $rootScope.pathUsr = false;
-                $rootScope.pathArt = false;
-                $rootScope.pathEvent = false;
-                $rootScope.home = false;
-                $rootScope.pathPlace = false;
-                $rootScope.pathSearch = false;
+                $rootScope.path = false;
             }
+            marginContent();
             if ($location.path().indexOf('/createEvent') > -1) {
                 window.addEventListener('scroll', fixControl)
             } else {
                 window.removeEventListener('scroll', fixControl)
             }
-            marginContent();
         }
         $scope.$on('$locationChangeSuccess', function() {
             location();

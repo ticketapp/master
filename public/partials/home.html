@@ -29,9 +29,11 @@
          mapTypeControl="false"
          scaleControl="false"
          style="height: 100%"
+         navigationControl="false"
          class="width100p">
         <marker ng-repeat="(id, ev) in events"
                 visible="true"
+                optimized="false"
                 ng-if="ev.countdown <= time && ev.countdown > 0"
                 id="contact"
                 on-click="goTo(event, id)"

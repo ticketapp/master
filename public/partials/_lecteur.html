@@ -41,7 +41,7 @@
             <a ng-if="shuffle"><i class="fi-shuffle" ng-click="$parent.shuffle = !$parent.shuffle"></i></a>
             <i class="fi-previous float-right" ng-click="prevTrack()"></i>
         </div>
-        <div id="progressBar" class="progress small-9 primary float-left round">
+        <div id="progressBar" class="progress small-9 primary float-left round column padding0" style="overflow: hidden">
             <b style="color: #008CBA;font-size: 13px;
 margin-left: 5px;" class="absolute">{{playlist.name}} by {{playlist.by}} // {{trackActive.title}} // {{trackActive.artist.name}}</b>
             <span id="progress" class="meter column padding0" style="width: 0%; overflow: hidden">

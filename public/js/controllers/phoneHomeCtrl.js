@@ -4,8 +4,22 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
     $scope.time = 6;
     var offset = 0;
     $scope.goTo = function (e, id) {
-        id = $scope.events[id].eventId;
-        window.location.href =('#/event/' + id);
+        var redirectPath = 'event/' + $scope.events[id].eventId;
+        var eventsLength = $scope.events.length;
+        for (var i = 0; i < eventsLength; i++) {
+            if ($scope.events[i].countdown < $scope.time &&
+                $scope.events[i].countdown > 0 &&
+                i != id &&
+                $scope.events[id].places[0] != undefined &&
+                $scope.events[i].addresses[0] != undefined) {
+                    if ($scope.events[i].addresses[0].geographicPoint == $scope.events[id].addresses[0].geographicPoint) {
+                        console.log($scope.events[i])
+                        console.log($scope.events[id])
+                        redirectPath = 'lieu/' + $scope.events[id].places[0].placeId;
+                    }
+            }
+        }
+        window.location.href =('#/' + redirectPath);
     };
     $http.get('/infos').success(function (data, status, headers, config) {
         $scope.infos = data;

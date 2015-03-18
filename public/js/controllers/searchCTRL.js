@@ -10,7 +10,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var _selEvent = $rootScope.activEvent;
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
-    var _research = document.getElementById('searchBar').value.trim();
+    if (document.getElementById('searchBar') != null) {
+        var _research = document.getElementById('searchBar').value.trim();
+    } else {
+        var _research = '';
+    }
     function search () {
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
