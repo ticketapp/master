@@ -24,7 +24,7 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
             }
             $scope.event = data;
             console.log($scope.event);
-            if ( $rootScope.window != 'small' || $rootScope.window != 'medium') {
+            if ( $rootScope.window != 'small' && $rootScope.window != 'medium') {
                 var waitForBinding = setInterval(function () {
                     if (document.getElementById('eventDescBind').innerHTML.length > 0) {
                         clearInterval(waitForBinding);

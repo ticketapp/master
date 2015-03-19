@@ -9,6 +9,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     $scope.onPlay = false;
     $scope.levelVol = 100;
     $scope.shuffle = false;
+    $scope.playlistEnd = false;
     $scope.sortableOptions = {
         containment: '#sortable-container',
         //restrict move across columns. move only within column.
@@ -31,7 +32,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                             console.log(event.artists[a].genres[g].name)
                             console.log(event.artists[a])
                             console.log($rootScope.playlist.genres)
-                            if ($rootScope.playlist.genres.toString().indexOf(event.artists[a].genres[g].name) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
+                            if ($rootScope.playlist.genres.toString().toLowerCase().indexOf(event.artists[a].genres[g].name.toLowerCase()) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
                                 artNames.push(event.artists[a].name);
                                 for (var t = 0; t < 4; t++) {
                                     if (played.indexOf(event.artists[a].tracks[t].title) == -1) {
@@ -70,6 +71,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             }
             $scope.play(i);
             played = [];
+        } else if ( $scope.playlistEnd == true) {
+            var last = $rootScope.playlist.tracks.length;
+            var tracksLenght = tracks.length;
+            for (var tr = 0; tr < tracksLenght; tr++) {
+                pushTrack(tracks[tr], artist)
+            }
+            $scope.play(last);
+            $scope.playlistEnd = false;
         } else {
             var tracksLenght = tracks.length;
             for (var tr = 0; tr < tracksLenght; tr++) {
@@ -90,6 +99,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         }
         //Angularytics.trackEvent("listen music", artist);
         $scope.play(last);
+        $scope.playlistEnd = false;
         if ($rootScope.playlist.tracks.length == 0) {
             played = [];
         }
@@ -110,11 +120,18 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             if ($rootScope.playlist.tracks.every(alreadyPlayed) == true) {
                 console.log('all tracks already played')
                 var lastT = $rootScope.playlist.tracks.length;
-                for (var t = 0; t < playlistEvents.length; t++) {
-                    pushTrack(playlistEvents[t], playlistEvents[t].art)
+                if (playlistEvents.length > 0) {
+                    for (var t = 0; t < playlistEvents.length; t++) {
+                        pushTrack(playlistEvents[t], playlistEvents[t].art)
+                    }
+                    $rootScope.playlist.name = 'La selection';
+                    $rootScope.playlist.by = 'Claude';
+                    console.log($rootScope.playlist)
+                    $scope.play(lastT)
+                    playlistEvents = [];
+                } else {
+                    $scope.playlistEnd = true;
                 }
-                $scope.play(lastT);
-                playlistEvents = [];
             } else {
                 i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                 shuffle()
@@ -139,14 +156,16 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         }
     }
     $scope.play = function (i) {
-        $timeout(function() {
-            $scope.$apply(function () {
-                $scope.showInfo = true;
-                $timeout(function () {
-                    $scope.showInfo = false;
-                }, 5000)
-            })
-        }, 0)
+        if ( $rootScope.playlist.tracks[i].nextShow != undefined) {
+            $timeout(function () {
+                $scope.$apply(function () {
+                    $scope.showInfo = true;
+                    $timeout(function () {
+                        $scope.showInfo = false;
+                    }, 5000)
+                })
+            }, 0)
+        }
         $scope.prevTrack = function () {
             i--;
             $scope.play(i);
@@ -162,14 +181,18 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 } else {
                     console.log('playlist end')
                     var lastT = $rootScope.playlist.tracks.length;
-                    for (var t = 0; t < playlistEvents.length; t++) {
-                        pushTrack(playlistEvents[t], playlistEvents[t].art)
+                    if (playlistEvents.length > 0) {
+                        for (var t = 0; t < playlistEvents.length; t++) {
+                            pushTrack(playlistEvents[t], playlistEvents[t].art)
+                        }
+                        $rootScope.playlist.name = 'La selection';
+                        $rootScope.playlist.by = 'Claude';
+                        console.log($rootScope.playlist)
+                        $scope.play(lastT)
+                        playlistEvents = [];
+                    } else {
+                        $scope.playlistEnd = true;
                     }
-                    $rootScope.playlist.name = 'La selection';
-                    $rootScope.playlist.by = 'Claude';
-                    console.log($rootScope.playlist)
-                    $scope.play(lastT)
-                    playlistEvents = [];
                 }
             }
         };

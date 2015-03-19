@@ -1,8 +1,8 @@
-<div id="searchBlock" class="column large-6 large-offset-3 absolute" ng-if="!$root.pathSearch">
+<div id="searchBlock" class="column large-6 large-offset-3 absolute" ng-if="$root.path != 'search'">
     <ng-search-bar></ng-search-bar>
 </div>
 <div>
-    <ul id="events_contener" ng-class="{padding50: $root.pathSearch}"
+    <ul id="events_contener" ng-class="{paddingTop50: $root.path == 'search'}"
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
         <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0"
             data-ng-repeat="event in events |orderBy: order"

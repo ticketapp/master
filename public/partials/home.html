@@ -1,11 +1,44 @@
-<div ng-controller="CarouselCtrl" class="parallax-background">
-    <!--<video width="100%" id="videobg" autoplay>
-        <source src="https://www.youtube.com/embed/rDlXXWuK-So">
-    </video>-->
-    <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-show="elementEnCours == info">
-        <h2 ng-bind-html="info.title"></h2>
-        <div ng-bind-html="info.content"></div>
+<div ng-if="$root.window == 'medium' || $root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
+    <div ng-controller="CarouselCtrl" class="parallax-background top0">
+        <!--<video width="100%" id="videobg" autoplay>
+            <source src="https://www.youtube.com/embed/rDlXXWuK-So">
+        </video>-->
+        <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-show="elementEnCours == info">
+            <h2 ng-bind-html="info.title"></h2>
+            <div ng-bind-html="info.content"></div>
+        </div>
+    </div>
+    <div class="parallax-content ng-search">
     </div>
 </div>
-<div class="parallax-content ng-search">
+<div ng-if="$root.window == 'small'" ng-controller="phoneHomeCtrl" class="absolute top0 bottom0 right left" style="z-index: 11">
+    <div class="absolute zIndex5">
+        <input type="number" ng-model="time" ng-change="updateMarkers()">
+        <a class="button column small-4" ng-click="info = !info">Infos</a>
+        <ul class="white" ng-if="info">
+            <li ng-repeat="info in infos">
+                <a>{{info.title}}</a>
+            </li>
+        </ul>
+        <a class="button column small-4 margin0" href="#/search"><i class="fi-magnifying-glass"></i></a>
+        <a ng-if="$root.path != 'iframe'" class="button column small-4 margin0"
+           data-ng-controller="toolsCtrl" ng-click="open()">
+            <i class="fi-thumbnails"></i>
+        </a>
+    </div>
+    <map ng-if="map"
+         zoom="12"
+         center="[{{mapCenter}}]"
+         scrollwheel="false"
+         disable-default-u-i="true"
+         style="height: 100%"
+         class="width100p">
+        <!--<marker ng-repeat="(id, ev) in events"
+                visible="true"
+                optimized="false"
+                ng-if="ev.countdown <= time && ev.countdown > 0"
+                on-click="goTo(event, id)"
+                position="{{ev.addresses[0].geographicPoint}}" icon="../assets/img/marker.png">
+        </marker>-->
+    </map>
 </div>
