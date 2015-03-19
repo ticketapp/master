@@ -53,8 +53,8 @@ object Image {
 
   def findAllByPlace(placeId: Long): List[Image] =  try {
     DB.withConnection { implicit connection =>
-      SQL( """SELECT *
-             FROM Images
+      SQL("""SELECT *
+             FROM images
              WHERE placeId = {placeId}""")
         .on('placeId -> placeId)
         .as(ImageParser.*)
@@ -65,7 +65,7 @@ object Image {
 
   def findAllByArtist(artistId: Long): Set[Image] = try {
     DB.withConnection { implicit connection =>
-      SQL( """SELECT *
+      SQL("""SELECT *
              FROM Images
              WHERE artistId = {artistId}""")
         .on('artistId -> artistId)
@@ -78,7 +78,7 @@ object Image {
   
   def findAllByOrganizer(organizerId: Long): List[Image] = try {
     DB.withConnection { implicit connection =>
-      SQL( """SELECT *
+      SQL("""SELECT *
              FROM Images
              WHERE organizerId = {organizerId}""")
         .on('organizerId -> organizerId)

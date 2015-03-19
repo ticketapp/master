@@ -37,6 +37,7 @@ CREATE TABLE artists (
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
+  imagePath                 TEXT,
   description               TEXT,
   facebookUrl               VARCHAR(255) NOT NULL,
   websites                  TEXT,
@@ -46,6 +47,7 @@ CREATE TABLE artists (
 
 CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
                                         nameValue VARCHAR(255),
+                                        imagePathValue TEXT,
                                         descriptionValue TEXT,
                                         facebookUrlValue VARCHAR(255),
                                         websitesValue TEXT)
@@ -54,8 +56,8 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
   DECLARE artistIdToReturn int;;
 
   BEGIN
-    INSERT INTO artists (facebookId, name, description, facebookUrl, websites)
-    VALUES (facebookIdValue, nameValue, descriptionValue, facebookUrlValue, websitesValue)
+    INSERT INTO artists (facebookId, name, imagePathValue, description, facebookUrl, websites)
+    VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
     RETURNING artistId INTO artistIdToReturn;;
     RETURN artistIdToReturn;;
     EXCEPTION WHEN unique_violation
@@ -213,7 +215,6 @@ CREATE TABLE images (
   userId                    BIGINT references users(userId),
   placeId                   BIGINT references places(placeId),
   organizerId               BIGINT references organizers(organizerId),
-  artistId                  BIGINT references artists(artistId),
   infoId                    BIGINT references infos(infoId),
   trackId                   BIGINT references tracks(trackId),
   UNIQUE(path)

@@ -47,13 +47,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       "artist" -> mapping(
         "facebookId" -> optional(nonEmptyText(2)),
         "artistName" -> nonEmptyText(2),
+        "imagePath" -> optional(nonEmptyText(2)),
         "description"  -> optional(nonEmptyText),
         "facebookUrl"  -> nonEmptyText,
         "websites" -> seq(nonEmptyText(4)),
-        "images" -> seq(
-          mapping(
-            "path" -> nonEmptyText
-          )(Image.formApply)(Image.formUnapply)),
         "genres" -> seq(
           mapping(
             "name" -> nonEmptyText

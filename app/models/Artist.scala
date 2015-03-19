@@ -23,10 +23,10 @@ import scala.util.{Failure, Success}
 case class Artist (artistId: Option[Long],
                    facebookId: Option[String],
                    name: String,
+                   imagePath: Option[String] = None,
                    description: Option[String] = None,
                    facebookUrl: String,
                    websites: Set[String] = Set.empty,
-                   images: Set[Image] = Set.empty,
                    genres: Seq[Genre] = Seq.empty,
                    tracks: Seq[Track] = Seq.empty)
 
@@ -37,21 +37,22 @@ object Artist {
     get[Long]("artistId") ~
       get[Option[String]]("facebookId") ~
       get[String]("name") ~
+      get[Option[String]]("imagePath") ~
       get[Option[String]]("description") ~
       get[String]("facebookUrl") ~
       get[Option[String]]("websites") map {
-      case artistId ~ facebookId ~ name ~ description ~ facebookUrl ~ websites =>
-        Artist(Option(artistId), facebookId, name, description, facebookUrl,
-          websites.getOrElse("").split(",").toSet, Set(), Seq.empty, Seq.empty)
+      case artistId ~ facebookId ~ name ~ imagePath ~ description ~ facebookUrl ~ websites =>
+        Artist(Option(artistId), facebookId, name, imagePath, description, facebookUrl,
+          websites.getOrElse("").split(",").toSet, Seq.empty, Seq.empty)
     }
   }
 
-  def formApply(facebookId: Option[String], name: String, description: Option[String], facebookUrl: String,
-                websites: Seq[String], images: Seq[Image], genres: Seq[Genre], tracks: Seq[Track]): Artist =
-    new Artist(None, facebookId, name, description, facebookUrl, websites.toSet, images.toSet, genres, tracks)
+  def formApply(facebookId: Option[String], name: String, imagePath: Option[String], description: Option[String],
+                facebookUrl: String, websites: Seq[String], genres: Seq[Genre], tracks: Seq[Track]): Artist =
+    new Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet, genres, tracks)
   def formUnapply(artist: Artist) =
-    Option((artist.facebookId, artist.name, artist.description, artist.facebookUrl, artist.websites.toSeq,
-      artist.images.toSeq, artist.genres.toSeq, artist.tracks.toSeq))
+    Option((artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
+      artist.websites.toSeq, artist.genres.toSeq, artist.tracks.toSeq))
 
   case class PatternAndArtist (searchPattern: String, artist: Artist)
   def formWithPatternApply(searchPattern: String, artist: Artist) = new PatternAndArtist(searchPattern, artist)
@@ -59,7 +60,6 @@ object Artist {
     Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
   
   def artistWithProperties(artist: Artist): Artist = artist.copy(
-      images = Image.findAllByArtist(artist.artistId.getOrElse(-1)),
       tracks = Track.findAllByArtist(artist.facebookUrl),
       genres = Genre.findAllByArtist(artist.artistId.getOrElse(-1L).toInt)
   )
@@ -134,7 +134,6 @@ object Artist {
           'websites -> artist.websites.mkString(","))
         .as(scalar[Option[Long]].single) match {
           case Some(artistId: Long) =>
-            artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId))) }
             artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
             artist.tracks.foreach { Track.save }
             Option(artistId)
