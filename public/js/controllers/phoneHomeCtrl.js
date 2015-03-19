@@ -2,7 +2,59 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
     $scope.events = [];
     $scope.infos = [];
     $scope.time = 6;
+    var changeTime = true;
     var offset = 0;
+    var map;
+    $scope.updateMarkers = function () {
+        $scope.dynMarkers = [];
+        if ($scope.markerClusterer != undefined) {
+            $scope.markerClusterer.clearMarkers();
+        }
+        var eventsLength = $scope.events.length;
+        for (var i=0; i<eventsLength; i++) {
+            if ($scope.events[i].countdown <= $scope.time && $scope.events[i].countdown > 0 && $scope.events[i].addresses[0] != undefined) {
+                var geoPoint = $scope.events[i].addresses[0].geographicPoint;
+                console.log(geoPoint.substring(0, geoPoint.indexOf(',')));
+                console.log(geoPoint.replace(/^.+,/,''));
+                var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
+                $scope.dynMarkers.push(new google.maps.Marker({position: latLng}));
+            }
+        }
+        $scope.markerClusterer = new MarkerClusterer(map, $scope.dynMarkers, {});
+        $scope.markerClusterer.zoomOnClick_ = false;
+        console.log($scope.markerClusterer)
+        var markersLength = $scope.markerClusterer.markers_.length
+        for (i = 0; i < markersLength; i++) {
+            var marker = $scope.markerClusterer.markers_[i]
+            google.maps.event.addListener(marker, 'click', function(marker) {
+               console.log(marker)
+            });
+        }
+        google.maps.event.addListener($scope.markerClusterer, 'clusterclick', function(cluster) {
+            console.log(cluster)
+            var eventsLength = $scope.events.length;
+            var redirectPath = '';
+            for (var i = 0; i < eventsLength; i++) {
+                if ($scope.events[i].addresses[0] != undefined) {
+                    var geopoint = $scope.events[i].addresses[0].geographicPoint
+                    console.log(geoPoint.replace(/^.+,/,''))
+                    console.log(cluster.center_.D)
+                    if (geopoint.substring(0, geopoint.indexOf(',')) < cluster.center_.k + 0.00000001 &&
+                        geopoint.substring(0, geopoint.indexOf(',')) > cluster.center_.k - 0.00000001 &&
+                        geoPoint.replace(/^.+,/,'') < cluster.center_.D + 0.00000001 &&
+                        geoPoint.replace(/^.+,/,'') > cluster.center_.D - 0.00000001) {
+                        console.log($scope.events[i].places[0].placeId)
+                        redirectPath = 'lieu/' + $scope.events[i].places[0].placeId;
+                    }
+                }
+            }
+            window.location.href =('#/' + redirectPath);
+        })
+    };
+    $scope.$on('mapInitialized', function(event, evtMap) {
+        map = evtMap;
+        $scope.updateMarkers()
+    });
     $scope.goTo = function (e, id) {
         var redirectPath = 'event/' + $scope.events[id].eventId;
         var eventsLength = $scope.events.length;
@@ -37,19 +89,25 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                     }
                     if ($scope.events[i].startTime != undefined) {
                         $scope.events[i].countdown = Math.round(($scope.events[i].startTime - new Date()) / 3600000);
-                        if ($scope.time == 6 && $scope.events[i].countdown > $scope.time) {
-                            $scope.time = $scope.events[i].countdown;
-                        } else if ($scope.time != 6 && $scope.events[i].countdown < $scope.time && $scope.events[i].countdown > 6) {
-                            $scope.time = $scope.events[i].countdown;
+                        if (changeTime == true && $scope.events[i].addresses[0] != undefined) {
+                            if ($scope.time == 6 && $scope.events[i].countdown > $scope.time) {
+                                $scope.time = $scope.events[i].countdown;
+                            } else if ($scope.time != 6 && $scope.events[i].countdown < $scope.time && $scope.events[i].countdown > 6) {
+                                $scope.time = $scope.events[i].countdown;
+                            } else if ($scope.time != 6 && $scope.events[i].countdown < 6 && $scope.events[i].countdown > 0) {
+                                $scope.time = 6;
+                                changeTime = false;
+                            }
                         }
                     }
                 }
                 $scope.map = true;
+                $scope.updateMarkers()
             })
     }
     console.log($rootScope.geoLoc);
     if ($rootScope.geoLoc.length > 0) {
-        getEvents ()
+        getEvents ();
         $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
         $scope.mapCenter = $scope.mapCenter.replace(')', '');
     } else {
