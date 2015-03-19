@@ -109,8 +109,7 @@ object Track {
 
   def save(track: Track): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL( """INSERT INTO tracks(title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
-      VALUES ({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
+      SQL("""SELECT insertTrack({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
         .on(
           'title -> track.title,
           'url -> track.url,
@@ -118,12 +117,11 @@ object Track {
           'thumbnailUrl -> track.thumbnailUrl,
           'artistFacebookUrl -> track.artistFacebookUrl,
           'redirectUrl -> track.redirectUrl)
-        .executeInsert()
+        .as(scalar[Option[Long]].single)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot create track: " + e.getMessage)
+    case e: Exception => throw new DAOException("Track.save: " + e.getMessage)
   }
-
 
   def savePlaylistTrackRelation(playlistId: Long, trackId: Long): Option[Long] = try {
     DB.withConnection { implicit connection =>

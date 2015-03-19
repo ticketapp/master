@@ -7,7 +7,7 @@ CREATE TABLE addresses (
   street                    VARCHAR(255)
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (geographicPoint) VALUES ('(44.17611, 4.97134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(44.17611, 4.9714)');
 INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.18134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.83724)');
 INSERT INTO addresses (geographicPoint) VALUES ('(41.46787, 5.9147134)');
@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'H - 2 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 57 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -43,6 +43,28 @@ CREATE TABLE artists (
   UNIQUE(facebookId),
   UNIQUE(facebookUrl)
 );
+
+CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
+                                        nameValue VARCHAR(255),
+                                        descriptionValue TEXT,
+                                        facebookUrlValue VARCHAR(255),
+                                        websitesValue TEXT)
+  RETURNS INT AS
+  $$
+  DECLARE artistIdToReturn int;;
+
+  BEGIN
+    INSERT INTO artists (facebookId, name, description, facebookUrl, websites)
+    VALUES (facebookIdValue, nameValue, descriptionValue, facebookUrlValue, websitesValue)
+    RETURNING artistId INTO artistIdToReturn;;
+    RETURN artistIdToReturn;;
+    EXCEPTION WHEN unique_violation
+    THEN
+      SELECT artistId INTO artistIdToReturn FROM artists WHERE facebookId = facebookIdValue;;
+      RETURN artistIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE organizers (
   organizerId             SERIAL PRIMARY KEY,
@@ -64,6 +86,21 @@ CREATE TABLE genres (
   UNIQUE(name)
 );
 
+CREATE OR REPLACE FUNCTION insertGenre(nameValue VARCHAR(255)) RETURNS INT AS
+  $$
+  DECLARE genreIdToReturn int;;
+
+  BEGIN
+    INSERT INTO genres (NAME) VALUES (nameValue) RETURNING genreId INTO genreIdToReturn;;
+      RETURN genreIdToReturn;;
+      EXCEPTION WHEN unique_violation
+    THEN
+      SELECT genreId INTO genreIdToReturn FROM genres WHERE name = nameValue;;
+      RETURN genreIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
+
 CREATE TABLE tracks (
   trackId                 SERIAL PRIMARY KEY,
   title                   VARCHAR(255) NOT NULL,
@@ -75,6 +112,27 @@ CREATE TABLE tracks (
   UNIQUE(url)
 );
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
+
+CREATE OR REPLACE FUNCTION insertTrack(titleValue VARCHAR(255),
+                                       urlValue TEXT,
+                                       platformValue VARCHAR(255),
+                                       thumbnailUrlValue TEXT,
+                                       artistFacebookUrlValue VARCHAR(255),
+                                       redirectUrlValue VARCHAR(255))
+  RETURNS INT AS
+  $$
+  DECLARE trackIdToReturn int;;
+  BEGIN
+    INSERT INTO tracks (title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
+      VALUES (titleValue, urlValue, platformValue, thumbnailUrlValue, artistFacebookUrlValue, redirectUrlValue)
+      RETURNING trackId INTO trackIdToReturn;;
+      RETURN trackIdToReturn;;
+    EXCEPTION WHEN unique_violation THEN
+      SELECT trackId INTO trackIdToReturn FROM tracks WHERE url = urlValue;;
+      RETURN trackIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE users (
   userId                    SERIAL PRIMARY KEY,
@@ -387,27 +445,27 @@ CREATE TABLE eventsGenres (
 );
 
 CREATE TABLE eventsOrganizers (
-  eventId INT REFERENCES events (eventId),
-  organizerId INT REFERENCES organizers(organizerId),
+  eventId                 INT REFERENCES events (eventId),
+  organizerId             INT REFERENCES organizers(organizerId),
   PRIMARY KEY (eventId, organizerId)
 );
 
 CREATE TABLE eventsAddresses (
-  eventId INT REFERENCES events (eventId),
-  addressId INT REFERENCES addresses(addressId),
+  eventId                 INT REFERENCES events (eventId),
+  addressId               INT REFERENCES addresses(addressId),
   PRIMARY KEY (eventId, addressId)
 );
 ---INSERT INTO eventsAddresses VALUES(1, 2);
 
 CREATE TABLE usersOrganizers (
-  userId INT REFERENCES users (userId),
-  organizerId INT REFERENCES organizers(organizerId),
+  userId                  INT REFERENCES users (userId),
+  organizerId             INT REFERENCES organizers(organizerId),
   PRIMARY KEY (userId, organizerId)
 );
 
 CREATE TABLE eventsArtists (
-  eventId INT REFERENCES events (eventId),
-  artistId INT REFERENCES artists (artistId),
+  eventId                 INT REFERENCES events (eventId),
+  artistId                INT REFERENCES artists (artistId),
   PRIMARY KEY (eventId, artistId)
 );
 
@@ -418,10 +476,29 @@ CREATE TABLE usersArtists (
 );
 
 CREATE TABLE artistsGenres (
-  artistFacebookUrl       VARCHAR(255) REFERENCES artists (facebookUrl),
+  artistId                INT REFERENCES artists (artistId),
   genreId                 INT REFERENCES genres (genreId),
-  PRIMARY KEY (artistFacebookUrl, genreId)
+  counter                 INT NOT NULL,
+  PRIMARY KEY (artistId, genreId)
 );
+
+CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(artistIdValue INT, genreIdValue INT) RETURNS VOID AS
+  $$
+    BEGIN
+      LOOP
+        UPDATE artistsGenres SET counter = counter + 1 WHERE artistId = artistIdValue AND genreId = genreIdValue;;
+        IF found THEN
+          RETURN;;
+        END IF;;
+        BEGIN
+          INSERT INTO artistsGenres(artistId, genreId, counter) VALUES (artistIdValue, genreIdValue, 1);;
+          RETURN;;
+        EXCEPTION WHEN unique_violation THEN
+        END;;
+      END LOOP;;
+    END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE playlists (
   playlistId              SERIAL PRIMARY KEY,

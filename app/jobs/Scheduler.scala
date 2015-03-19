@@ -90,12 +90,17 @@ object Scheduler {
           artistsFromDescription <- eventuallyMaybeArtistsFromDescription
           artistsFromTitle <- eventuallyMaybeArtistsFromTitle
         } yield {
-          val nonEmptyArtists = artistsFromDescription.flatten.toList ++ artistsFromTitle
-          Future { nonEmptyArtists.map { getSoundCloudTracksForArtist }.map { _.map { _.map { Track.save } } } }
-          Future { nonEmptyArtists.map { artist =>
-            getYoutubeTracksForArtist(artist, normalizeArtistName(artist.name)) }.map { _.map { _.map { Track.save } } }
+          val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
+          nonEmptyArtists.map { artist =>
+            val artistWithId = artist.copy(artistId = Artist.save(artist))
+            Future { getSoundCloudTracksForArtist(artistWithId).map { _.map { Track.save } } }
+            Future {
+              getYoutubeTracksForArtist(artistWithId, normalizeArtistName(artistWithId.name)).map {
+              _.map(Track.save)
+              }
+            }
           }
-          val eventGenres = nonEmptyArtists.map(_.genres).flatten
+          val eventGenres = nonEmptyArtists.map(_.genres).flatten.toSeq
           new Event(-1L, facebookId, true, true, new Date(), name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
             formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,

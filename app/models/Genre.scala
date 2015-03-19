@@ -43,14 +43,13 @@ object Genre {
     case e: Exception => throw new DAOException("Problem with the method Genre.findAllByEvent: " + e.getMessage)
   }
 
-  def findAllByArtist(artistFacebookUrl: String): Set[Genre] = try {
+  def findAllByArtist(artistFacebookId: Int): Seq[Genre] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM artistsGenres gA
-             INNER JOIN genres g ON g.genreId = gA.genreId where gA.artistFacebookUrl = {artistFacebookUrl}""")
-        .on('artistFacebookUrl -> artistFacebookUrl)
+             INNER JOIN genres g ON g.genreId = gA.genreId where gA.artistFacebookId = {artistFacebookId}""")
+        .on('artistFacebookId -> artistFacebookId)
         .as(GenreParser.*)
-        .toSet
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot get all genres by artist: " + e.getMessage)
@@ -58,7 +57,7 @@ object Genre {
 
   def find(genreId: Long): Option[Genre] = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from genres WHERE genreId = {genreId}")
+      SQL("SELECT * FROM genres WHERE genreId = {genreId}")
         .on('genreId -> genreId)
         .as(GenreParser.singleOpt)
     }
@@ -78,13 +77,10 @@ object Genre {
   
   def save(genre: Genre): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      testIfExist("genres", "name", genre.name) match {
-        case true => findGenreId(genre.name)
-        case false =>
-          SQL( """INSERT INTO genres(name) VALUES ({name})""")
-            .on('name -> genre.name)
-            .executeInsert()
-      }
+      SQL("""SELECT insertGenre({name})""")
+        .on('name -> genre.name)
+        .as(scalar[Option[Long]].single)
+        //.execute()
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot create genre: " + e.getMessage)
@@ -100,7 +96,6 @@ object Genre {
     case e: Exception => throw new DAOException("Event.findGenreId: " + e.getMessage)
   }
 
-  
   def saveWithEventRelation(genre: Genre, eventId: Long): Option[Long] = {
     save(genre) match {
       case Some(genreId: Long) => saveEventGenreRelation(eventId, genreId)
@@ -121,32 +116,30 @@ object Genre {
     case e: Exception => throw new DAOException("saveEventGenreRelation: " + e.getMessage)
   }
 
-
-  def saveWithArtistRelation(genre: Genre, artistFacebookUrl: String): Option[Long] = {
+  def saveWithArtistRelation(genre: Genre, artistId: Int): Boolean = {
     save(genre) match {
-      case Some(genreId: Long) => saveArtistGenreRelation(artistFacebookUrl, genreId)
-      case _ => None
+      case Some(genreId: Long) => saveArtistGenreRelation(artistId, genreId.toInt)
+      case _ => false
     }
   }
 
-  def saveArtistGenreRelation(artistFacebookUrl: String, genreId: Long) = try {
+  def saveArtistGenreRelation(artistId: Int, genreId: Int): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO artistsGenres (artistFacebookUrl, genreId)
-          VALUES ({artistFacebookUrl}, {genreId})""")
+      SQL("""SELECT insertOrUpdateArtistGenreRelation({artistId}, {genreId})""")
         .on(
-          'artistFacebookUrl -> artistFacebookUrl,
+          'artistId -> artistId,
           'genreId -> genreId)
-        .executeInsert()
+        .execute()
     }
   } catch {
     case e: Exception => throw new DAOException("Genre.saveArtistGenreRelation: " + e.getMessage)
   }
 
-  def saveGenreForArtistInFuture(genreName: Option[String], artistFacebookUrl: String): Unit = {
+  def saveGenreForArtistInFuture(genreName: Option[String], artistId: Int): Unit = {
     Future {
       genreName match {
         case Some(genreFound) if genreFound.nonEmpty =>
-          saveWithArtistRelation(new Genre(-1, genreFound), artistFacebookUrl)
+          saveWithArtistRelation(new Genre(-1, genreFound), artistId)
       }
     }
   }

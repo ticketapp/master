@@ -64,7 +64,7 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Future[Set[Track]] = {
-    Future { getAndSaveArtistStyleOnEchonest(echonestId, artist.facebookUrl) }
+    Future { getAndSaveArtistStyleOnEchonest(echonestId, artist.artistId.getOrElse(-1L)) }
     getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
       getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
     }
@@ -227,7 +227,7 @@ object SearchYoutubeTracks {
       .getOrElse(Seq.empty)
   }
 
-  def getAndSaveArtistStyleOnEchonest(echonestId: String, artistFacebookUrl: String): Unit = {
+  def getAndSaveArtistStyleOnEchonest(echonestId: String, artistId: Long): Unit = {
     WS.url("http://developer.echonest.com/api/v4/artist/profile")
       .withQueryString(
         "id" -> echonestId,
@@ -237,7 +237,7 @@ object SearchYoutubeTracks {
       .get()
       .map { response =>
         readEchonestGenres(response.json).map { genre =>
-          saveGenreForArtistInFuture(Option(genre), artistFacebookUrl)
+          saveGenreForArtistInFuture(Option(genre), artistId.toInt)
         }
     }
   }

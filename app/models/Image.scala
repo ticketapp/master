@@ -28,7 +28,7 @@ object Image {
       get[Option[Long]]("userId") ~
       get[Option[Long]]("placeId") ~
       get[Option[Long]]("organizerId") map {
-      case imageId ~ path ~ eventId ~ userId ~ placeId ~ organizerId=>
+      case imageId ~ path ~ eventId ~ userId ~ placeId ~ organizerId =>
         Image(imageId, path, eventId, userId, placeId, organizerId)
     }
   }

@@ -164,7 +164,7 @@ object SearchArtistsController extends Controller {
     val images = Set(new Image(-1, cover))
     val description = formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
-    Artist(-1, Option(facebookId), name, description, facebookUrl, websitesSet, images, genres, Seq.empty)
+    Artist(None, Option(facebookId), name, description, facebookUrl, websitesSet, images, genres.toSeq, Seq.empty)
   }
 
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {

@@ -6,25 +6,28 @@ import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
 import controllers.WebServiceException
+import services.SearchSoundCloudTracks._
+import services.SearchYoutubeTracks._
 import services.Utilities
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 import java.util.Date
 import play.api.libs.ws.Response
+import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WS
 import scala.util.{Failure, Success}
 
-case class Artist (artistId: Long,
+case class Artist (artistId: Option[Long],
                    facebookId: Option[String],
                    name: String,
                    description: Option[String] = None,
                    facebookUrl: String,
                    websites: Set[String] = Set.empty,
                    images: Set[Image] = Set.empty,
-                   genres: Set[Genre] = Set.empty,
+                   genres: Seq[Genre] = Seq.empty,
                    tracks: Seq[Track] = Seq.empty)
 
 object Artist {
@@ -38,14 +41,14 @@ object Artist {
       get[String]("facebookUrl") ~
       get[Option[String]]("websites") map {
       case artistId ~ facebookId ~ name ~ description ~ facebookUrl ~ websites =>
-        Artist(artistId, facebookId, name, description, facebookUrl,
-          websites.getOrElse("").split(",").toSet, Set(), Set(), Seq.empty)
+        Artist(Option(artistId), facebookId, name, description, facebookUrl,
+          websites.getOrElse("").split(",").toSet, Set(), Seq.empty, Seq.empty)
     }
   }
 
   def formApply(facebookId: Option[String], name: String, description: Option[String], facebookUrl: String,
                 websites: Seq[String], images: Seq[Image], genres: Seq[Genre], tracks: Seq[Track]): Artist =
-    new Artist(-1L, facebookId, name, description, facebookUrl, websites.toSet, images.toSet, genres.toSet, tracks)
+    new Artist(None, facebookId, name, description, facebookUrl, websites.toSet, images.toSet, genres, tracks)
   def formUnapply(artist: Artist) =
     Option((artist.facebookId, artist.name, artist.description, artist.facebookUrl, artist.websites.toSeq,
       artist.images.toSeq, artist.genres.toSeq, artist.tracks.toSeq))
@@ -54,16 +57,18 @@ object Artist {
   def formWithPatternApply(searchPattern: String, artist: Artist) = new PatternAndArtist(searchPattern, artist)
   def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =
     Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
-
+  
+  def artistWithProperties(artist: Artist): Artist = artist.copy(
+      images = Image.findAllByArtist(artist.artistId.getOrElse(-1)),
+      tracks = Track.findAllByArtist(artist.facebookUrl),
+      genres = Genre.findAllByArtist(artist.artistId.getOrElse(-1L).toInt)
+  )
 
   def findAll: Seq[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM artists")
         .as(ArtistParser.*)
-        .map(artist => artist.copy(
-          images = Image.findAllByArtist(artist.artistId),
-          tracks = Track.findAllByArtist(artist.facebookUrl),
-          genres = Genre.findAllByArtist(artist.facebookUrl)))
+        .map(artistWithProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -77,10 +82,7 @@ object Artist {
              WHERE eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(ArtistParser.*)
-        .map(artist => artist.copy(
-            images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.facebookUrl),
-            tracks = Track.findAllByArtist(artist.facebookUrl)))
+        .map(artistWithProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -91,10 +93,7 @@ object Artist {
       SQL("SELECT * FROM artists WHERE artistId = {artistId}")
         .on('artistId -> artistId)
         .as(ArtistParser.singleOpt)
-        .map(artist => artist.copy(
-          images = Image.findAllByArtist(artistId),
-          genres = Genre.findAllByArtist(artist.facebookUrl),
-          tracks = Track.findAllByArtist(artist.facebookUrl)))
+        .map(artistWithProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -105,11 +104,7 @@ object Artist {
       SQL("SELECT * FROM artists WHERE facebookUrl = {facebookUrl}")
         .on('facebookUrl -> facebookUrl)
         .as(ArtistParser.singleOpt)
-        .map( artist =>
-          artist.copy(
-            images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.facebookUrl),
-            tracks = Track.findAllByArtist(artist.facebookUrl)))
+        .map(artistWithProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -122,55 +117,37 @@ object Artist {
           |LIKE '%'||{searchPatternLowCase}||'%' LIMIT 10""".stripMargin)
         .on('searchPatternLowCase -> searchPattern.toLowerCase)
         .as(ArtistParser.*)
-        .map(artist =>
-          artist.copy(
-            images = Image.findAllByArtist(artist.artistId),
-            genres = Genre.findAllByArtist(artist.facebookUrl),
-            tracks = Track.findAllByArtist(artist.facebookUrl)))
+        .map(artistWithProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with method Artist.findAllContaining: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.findAllContaining: " + e.getMessage)
   }
 
   def save(artist: Artist): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      Utilities.testIfExist("artists", "name", artist.name) match {
-        case true => Some(-1)
-        case false =>
-          SQL( """INSERT INTO artists(facebookId, name, description, facebookUrl, websites)
-            VALUES ({facebookId}, {name}, {description}, {facebookUrl}, {websites})""")
-            .on(
-              'facebookId -> artist.facebookId,
-              'name -> artist.name,
-              'facebookUrl -> artist.facebookUrl,
-              'description -> artist.description,
-              'websites -> artist.websites.mkString(","))
-            .executeInsert()
-          match {
-            case None => None
-            case Some(artistId: Long) =>
-              artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId)))}
-              artist.genres.foreach {
-                Genre.saveWithArtistRelation(_, artist.facebookUrl)
-              }
-              artist.tracks.foreach {
-                Track.save
-              }
-              Option(artistId)
-          }
+      SQL("""SELECT insertArtist({facebookId}, {name}, {description}, {facebookUrl}, {websites})""")
+        .on(
+          'facebookId -> artist.facebookId,
+          'name -> artist.name,
+          'facebookUrl -> artist.facebookUrl,
+          'description -> artist.description,
+          'websites -> artist.websites.mkString(","))
+        .as(scalar[Option[Long]].single) match {
+          case Some(artistId: Long) =>
+            artist.images.foreach { image => Image.save(image.copy(artistId = Some(artistId))) }
+            artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
+            artist.tracks.foreach { Track.save }
+            Option(artistId)
+          case None => None
       }
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot create artist: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
   }
 
-
-  def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = {
-    save(artist) match {
-      case Some(-1) => saveEventArtistRelation(eventId, returnArtistId(artist.name))
-      case Some(artistId) => saveEventArtistRelation(eventId, artistId)
-      case None => None
-    }
+  def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = save(artist) match {
+    case None => None
+    case Some(artistId: Long) => saveEventArtistRelation(eventId, artistId)
   }
 
   def returnArtistId(name: String): Long = try {
