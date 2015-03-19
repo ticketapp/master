@@ -28,6 +28,23 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
             var marker = $scope.markerClusterer.markers_[i]
             google.maps.event.addListener(marker, 'click', function(marker) {
                console.log(marker)
+                var redirectPath = ''
+                var eventsLength = $scope.events.length;
+                for (var i = 0; i < eventsLength; i++) {
+                    if ($scope.events[i].countdown <= $scope.time &&
+                        $scope.events[i].countdown > 0 &&
+                        $scope.events[i].addresses[0] != undefined) {
+                        var geopoint = $scope.events[i].addresses[0].geographicPoint
+                        if (geopoint.substring(0, geopoint.indexOf(',')) < marker.latLng.k + 0.00000001 &&
+                            geopoint.substring(0, geopoint.indexOf(',')) > marker.latLng.k - 0.00000001 &&
+                            geoPoint.replace(/^.+,/,'') < marker.latLng.D + 0.00000001 &&
+                            geoPoint.replace(/^.+,/,'') > marker.latLng.D - 0.00000001) {
+                            console.log($scope.events[i])
+                            redirectPath = 'event/' + $scope.events[i].eventId;
+                        }
+                    }
+                }
+                window.location.href =('#/' + redirectPath);
             });
         }
         google.maps.event.addListener($scope.markerClusterer, 'clusterclick', function(cluster) {
