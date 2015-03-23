@@ -36,7 +36,7 @@ object Scheduler {
           .map {
           readFacebookEvent(_) match {
             case Some(eventuallyFacebookEvent) => eventuallyFacebookEvent map { saveEvent(_, placeId) }
-            case None => println("Cannot create event: empty event created in readFacebookEvent")
+            case None => println("Empty event readed by Scheduler.readFacebookEvent")
           }
         }
       }

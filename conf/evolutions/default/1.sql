@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 57 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 56 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -56,7 +56,7 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
   DECLARE artistIdToReturn int;;
 
   BEGIN
-    INSERT INTO artists (facebookId, name, imagePathValue, description, facebookUrl, websites)
+    INSERT INTO artists (facebookId, name, imagePath, description, facebookUrl, websites)
     VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
     RETURNING artistId INTO artistIdToReturn;;
     RETURN artistIdToReturn;;
