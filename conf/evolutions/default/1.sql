@@ -10,7 +10,7 @@ CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
 INSERT INTO addresses (geographicPoint) VALUES ('(44.1761, 4.9714)');
 INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.1834)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.83724)');
-INSERT INTO addresses (geographicPoint) VALUES ('(41.46787, 5.9147134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(41.4678, 5.9147134)');
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
