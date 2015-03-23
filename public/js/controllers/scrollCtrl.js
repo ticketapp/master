@@ -31,7 +31,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     facebookUrl: artist.facebookUrl,
                     artistName: artist.name,
                     facebookId: artist.facebookId,
-                    images: artist.images,
+                    imagePath: artist.imagePath,
                     websites: artist.websites,
                     description: artist.description,
                     genre: artist.genre

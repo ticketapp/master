@@ -17,7 +17,7 @@
                 <div class="img_min_evnt">
                     <div class="toGrow">
                         <a href="#/artiste/{{artist.facebookUrl}}">
-                            <img src="{{artist.images[0].path}}" alt="une belle image" class="min"/>
+                            <img src="{{artist.imagePath}}" alt="une belle image" class="min"/>
                         </a>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                 <div class="img_min_evnt">
                     <div class="toGrow">
                         <img ng-click="createArtist(artist)"
-                             src="{{ artist.images[0].path }}"
+                             src="{{ artist.imagePath }}"
                              alt="une belle image" class="min pointer"/>
                     </div>
                 </div>

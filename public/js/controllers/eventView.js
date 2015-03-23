@@ -9,10 +9,6 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
     $scope.lessZoom = function() {
         $scope.zoom = $scope.zoom - 1;
     };
-        $http.get('https://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
-            success(function(data){
-                console.log(data)
-            });
     $http.get('/events/' + $routeParams.id)
         .success(function(data, status){
             if (data.addresses.length > 0) {
