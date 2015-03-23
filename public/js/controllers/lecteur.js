@@ -279,6 +279,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 }
                 goToTrackActive ()
             }
+            document.getElementById('musicPlayer').play();
         } else if ($rootScope.playlist.tracks[i].platform == 'Youtube') {
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             //document.getElementById('musicPlayer').classList.add('ng-hide');
@@ -287,14 +288,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
             function onPlayerReady(event) {
                 console.log('youtube')
-                event.target.playVideo();
-                $scope.onPlay = true;
-                $scope.$apply();
+                console.log(event.target)
                 $scope.playPause = function () {
                     if ($scope.onPlay == false) {
                         event.target.playVideo();
                         $scope.onPlay = true;
-                        $scope.$apply();
                     } else {
                         event.target.pauseVideo();
                         $scope.onPlay = false;
@@ -312,6 +310,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     $scope.$apply();
                     yPlayer.playVideo();
                 };
+                console.log(document.getElementById('youtubePlayer').getAttribute('src'));
+                yPlayer.unMute();
+                yPlayer.playVideo();
+                $scope.onPlay = true;
+                $scope.$apply();
                 if (i > 0) {
                     function goToTrackActive () {
                         if (document.getElementsByClassName('trackContener').length >= i) {

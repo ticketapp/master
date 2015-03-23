@@ -125,10 +125,13 @@ object Artist {
 
   def save(artist: Artist): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT insertArtist({facebookId}, {name}, {description}, {facebookUrl}, {websites})""")
+      SQL(
+        """SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl},
+          |{websites})""".stripMargin)
         .on(
           'facebookId -> artist.facebookId,
           'name -> artist.name,
+          'imagePath -> artist.imagePath,
           'facebookUrl -> artist.facebookUrl,
           'description -> artist.description,
           'websites -> artist.websites.mkString(","))
