@@ -105,15 +105,14 @@ object Image {
           println("Image path already in database")
           None
         case false =>
-          SQL("""INSERT INTO images(path, eventId, userId, placeId, organizerId, artistId)
-          VALUES({path}, {eventId}, {userId}, {placeId}, {organizerId}, {artistId})""")
+          SQL("""INSERT INTO images(path, eventId, userId, placeId, organizerId)
+          VALUES({path}, {eventId}, {userId}, {placeId}, {organizerId})""")
             .on(
               'path -> image.path,
               'eventId -> image.eventId,
               'userId -> image.userId,
               'placeId -> image.placeId,
-              'organizerId -> image.organizerId,
-              'artistId -> image.artistId)
+              'organizerId -> image.organizerId)
             .executeInsert()
       }
     }

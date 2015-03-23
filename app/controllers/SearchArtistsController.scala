@@ -163,7 +163,7 @@ object SearchArtistsController extends Controller {
     val websitesSet = getNormalizedWebsitesInText(maybeWebsites).filterNot(_.contains("facebook.com"))
     val description = formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
-    Artist(None, Option(facebookId), name, description, Option(cover), facebookUrl, websitesSet, genres.toSeq,
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq,
       Seq.empty)
   }
 

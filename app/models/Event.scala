@@ -99,7 +99,6 @@ object Event {
     case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
   }
   
-
   def findAllByPlace(placeId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
@@ -146,14 +145,14 @@ object Event {
   
   def findAllByOrganizer(organizerId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
-      SQL(""" SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
+      SQL("""SELECT s.eventId, s.facebookId, s.isPublic, s.isActive, s.creationDateTime,
             s.name, s.geographicPoint, s.description, s.startTime,
             s.endTime, s.ageRestriction
-        FROM eventsOrganizers eO
-        INNER JOIN events s ON s.eventId = eO.eventId
-        WHERE eO.organizerId = {organizerId}
-        ORDER BY s.creationDateTime DESC
-        LIMIT 20""")
+            FROM eventsOrganizers eO
+            INNER JOIN events s ON s.eventId = eO.eventId
+            WHERE eO.organizerId = {organizerId}
+            ORDER BY s.creationDateTime DESC
+            LIMIT 20""")
         .on('organizerId -> organizerId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
@@ -223,52 +222,37 @@ object Event {
     case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
   }
 
-
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      testIfExist("events", "facebookId", event.facebookId) match {
-        case true => None
-        case false =>
-          val geographicPoint = event.geographicPoint.getOrElse("") match {
-            case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
-            case _ => "{geographicPoint}"
-          }
-          SQL(s"""INSERT INTO
+      val geographicPoint = event.geographicPoint.getOrElse("") match {
+        case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
+        case _ => "{geographicPoint}"
+      }
+      SQL(s"""INSERT INTO
             events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
             startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive},
             {creationDateTime}, {name}, $geographicPoint, {description}, {startTime}, {endTime},
             {ageRestriction}) """)
-            .on(
-              'facebookId -> event.facebookId,
-              'isPublic -> event.isPublic,
-              'isActive -> event.isActive,
-              'creationDateTime -> event.creationDateTime,
-              'name -> event.name,
-              'geographicPoint -> event.geographicPoint,
-              'description -> event.description,
-              'startTime -> event.startTime,
-              'endTime -> event.endTime,
-              'ageRestriction -> event.ageRestriction)
-            .executeInsert() match {
-            case None => None
-            case Some(eventId: Long) =>
-              event.organizers.foreach { organizer =>
-                Organizer.saveWithEventRelation(organizer, eventId)
-              }
-              event.tariffs.foreach { tariff =>
-                Tariff.save(tariff.copy(eventId = eventId))
-              }
-              event.images.foreach { image =>
-                Image.save(image.copy(eventId = Some(eventId)))
-              }
-              event.artists.foreach { artist =>
-                Artist.saveWithEventRelation(artist, eventId)
-              }
-              event.genres.foreach { genre =>
-                Genre.saveWithEventRelation(genre, eventId)
-              }
-              Option(eventId)
-          }
+        .on(
+          'facebookId -> event.facebookId,
+          'isPublic -> event.isPublic,
+          'isActive -> event.isActive,
+          'creationDateTime -> event.creationDateTime,
+          'name -> event.name,
+          'geographicPoint -> event.geographicPoint,
+          'description -> event.description,
+          'startTime -> event.startTime,
+          'endTime -> event.endTime,
+          'ageRestriction -> event.ageRestriction)
+        .as(scalar[Option[Long]].single) match {
+        case None => None
+        case Some(eventId: Long) =>
+          event.organizers.foreach { Organizer.saveWithEventRelation(_, eventId) }
+          event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
+          event.images.foreach { image => Image.save(image.copy(eventId = Some(eventId))) }
+          event.artists.foreach { Artist.saveWithEventRelation(_, eventId) }
+          event.genres.foreach { Genre.saveWithEventRelation(_, eventId) }
+          Option(eventId)
       }
     }
   } catch {

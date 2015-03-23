@@ -8,7 +8,7 @@ CREATE TABLE addresses (
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
 INSERT INTO addresses (geographicPoint) VALUES ('(44.17611, 4.9714)');
-INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.18134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.1834)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.83724)');
 INSERT INTO addresses (geographicPoint) VALUES ('(41.46787, 5.9147134)');
 
@@ -190,6 +190,33 @@ CREATE TABLE events (
   UNIQUE(facebookId)
 );
 CREATE INDEX eventGeographicPoint ON events USING GIST (geographicPoint);
+
+CREATE OR REPLACE FUNCTION insertEvent(facebookIdValue VARCHAR(63),
+                                       isPublicValue BOOLEAN,
+                                       isActiveValue BOOLEAN,
+                                       creationDateTimeValue TIMESTAMP,
+                                       nameValue VARCHAR(255),
+                                       geographicPointValue point,
+                                       descriptionValue TEXT,
+                                       startTimeValue TIMESTAMP,
+                                       endTimeValue TIMESTAMP,
+                                       ageRestrictionValue SMALLINT)
+  RETURNS INT AS
+  $$
+  DECLARE eventIdToReturn int;;
+  BEGIN
+    INSERT INTO events (facebookid, ispublic, isactive, creationdatetime, name, geographicpoint, description, 
+                        starttime, endtime, agerestriction) 
+    VALUES (facebookidValue, ispublicValue, isactiveValue, creationdatetimeValue, nameValue, geographicpointValue, 
+            descriptionValue, starttimeValue, endtimeValue, agerestrictionValue)
+    RETURNING eventId INTO eventIdToReturn;;
+    RETURN eventIdToReturn;;
+  EXCEPTION WHEN unique_violation THEN
+    SELECT eventId INTO eventIdToReturn FROM events WHERE facebookId = facebookIdValue;;
+    RETURN eventIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,

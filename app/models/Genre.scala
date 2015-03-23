@@ -43,12 +43,12 @@ object Genre {
     case e: Exception => throw new DAOException("Problem with the method Genre.findAllByEvent: " + e.getMessage)
   }
 
-  def findAllByArtist(artistFacebookId: Int): Seq[Genre] = try {
+  def findAllByArtist(artistId: Int): Seq[Genre] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
-             FROM artistsGenres gA
-             INNER JOIN genres g ON g.genreId = gA.genreId where gA.artistFacebookId = {artistFacebookId}""")
-        .on('artistFacebookId -> artistFacebookId)
+             FROM artistsGenres aG
+             INNER JOIN genres g ON g.genreId = aG.genreId where aG.artistId = {artistId}""")
+        .on('artistId -> artistId)
         .as(GenreParser.*)
     }
   } catch {
