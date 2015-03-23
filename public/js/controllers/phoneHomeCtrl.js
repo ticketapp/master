@@ -2,6 +2,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
     $scope.events = [];
     $scope.infos = [];
     $scope.time = 6;
+    $scope.zoom = 12;
     var changeTime = true;
     var offset = 0;
     var map;
@@ -67,6 +68,14 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
             }
             window.location.href =('#/' + redirectPath);
         })
+        google.maps.event.addListener(map, 'zoom_changed', function() {
+            // 3 seconds after the center of the map has changed, pan back to the
+            // marker.
+            if (map.zoom < $scope.zoom) {
+                $scope.zoom = map.zoom;
+                console.log($scope.zoom)
+            }
+        });
     };
     $scope.$on('mapInitialized', function(event, evtMap) {
         map = evtMap;
