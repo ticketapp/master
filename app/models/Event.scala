@@ -232,7 +232,7 @@ object Event {
             events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
             startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive},
             {creationDateTime}, {name}, $geographicPoint, {description}, {startTime}, {endTime},
-            {ageRestriction}) """)
+            {ageRestriction})""")
         .on(
           'facebookId -> event.facebookId,
           'isPublic -> event.isPublic,
@@ -247,18 +247,17 @@ object Event {
         .as(scalar[Option[Long]].single) match {
         case None => None
         case Some(eventId: Long) =>
-          event.organizers.foreach { Organizer.saveWithEventRelation(_, eventId) }
+          event.organizers.foreach { println;Organizer.saveWithEventRelation(_, eventId) }
           event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
           event.images.foreach { image => Image.save(image.copy(eventId = Some(eventId))) }
           event.artists.foreach { Artist.saveWithEventRelation(_, eventId) }
-          event.genres.foreach { Genre.saveWithEventRelation(_, eventId) }
+          event.genres.foreach { println;Genre.saveWithEventRelation(_, eventId) }
           Option(eventId)
       }
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot save event: (Event.save method) " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.save --> " + e.getMessage)
   }
-
 
   def update(event: Event): Unit = try {
     DB.withConnection { implicit connection =>
