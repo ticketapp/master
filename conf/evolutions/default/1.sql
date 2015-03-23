@@ -56,7 +56,7 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
   DECLARE artistIdToReturn int;;
 
   BEGIN
-    INSERT INTO artists (facebookId, name, imagePathValue, description, facebookUrl, websites)
+    INSERT INTO artists (facebookId, name, imagePath, description, facebookUrl, websites)
     VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
     RETURNING artistId INTO artistIdToReturn;;
     RETURN artistIdToReturn;;
