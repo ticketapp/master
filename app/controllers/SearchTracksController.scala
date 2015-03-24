@@ -13,6 +13,6 @@ object SearchTracksController extends Controller {
   def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) =
   Action.async {
     getYoutubeTracksByTitleAndArtistName(Artist(None, None, artistName, None, None, artistFacebookUrl), trackTitle)
-      .map { tracks => Ok(Json.toJson(tracks)) }
+      .map { tracks => Ok(Json.toJson(tracks.filterNot(_.title contains trackTitle))) }
   }
 }
