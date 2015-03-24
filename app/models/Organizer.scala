@@ -15,7 +15,7 @@ case class Organizer (organizerId: Long,
                       addressId: Option[Long] = None,
                       phone: Option[String] = None,
                       publicTransit: Option[String] = None,
-                      website: Option[String] = None,
+                      websites: Option[String] = None,
                       verified: Boolean = false,
                       images: List[Image] = List.empty,
                       address: Option[Address] = None)
@@ -106,7 +106,7 @@ object Organizer {
               'description -> organizer.description,
               'phone -> organizer.phone,
               'publicTransit -> organizer.publicTransit,
-              'website -> organizer.website
+              'website -> organizer.websites
             ).executeInsert() match {
             case None => None
             case Some(organizerId: Long) =>
@@ -119,8 +119,8 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Organizer.save: " + e.getMessage +
-      organizer.name + " " + organizer.website + " " + organizer.name.length + "/" +
-      organizer.website.getOrElse("").length)
+      organizer.name + " " + organizer.websites + " " + organizer.name.length + "/" +
+      organizer.websites.getOrElse("").length)
   }
 
 

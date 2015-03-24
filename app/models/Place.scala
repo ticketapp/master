@@ -60,9 +60,9 @@ object Place {
             case None => None
             case Some(address: Address) => address.addressId
           }
-          SQL(s"""INSERT INTO places(name, addressId, facebookId, geographicPoint, description, webSite, capacity,
+          SQL(s"""INSERT INTO places(name, addressId, facebookId, geographicPoint, description, webSites, capacity,
             openingHours)
-            VALUES ({name}, {addressId}, {facebookId}, $geographicPoint, {description}, {webSite}, {capacity},
+            VALUES ({name}, {addressId}, {facebookId}, $geographicPoint, {description}, {webSites}, {capacity},
             {openingHours})""")
             .on(
               'name -> place.name,
@@ -70,7 +70,7 @@ object Place {
               'facebookId -> place.facebookId,
               'geographicPoint -> None,
               'description -> place.description,
-              'webSite -> getNormalizedWebsitesInText(place.webSite).mkString(","),
+              'webSites -> getNormalizedWebsitesInText(place.webSite).mkString(","),
               'capacity -> place.capacity,
               'openingHours -> place.openingHours)
             .executeInsert() match {
