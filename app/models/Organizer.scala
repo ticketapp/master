@@ -34,10 +34,10 @@ object Organizer {
       get[Option[Long]]("addressId") ~
       get[Option[String]]("phone") ~
       get[Option[String]]("publicTransit") ~
-      get[Option[String]]("website") ~
+      get[Option[String]]("websites") ~
       get[Boolean]("verified") map {
-      case organizerId ~ facebookId ~ name ~ description ~ addressId ~ phone ~ publicTransit ~ website ~ verified =>
-        Organizer(organizerId, facebookId, name, description, addressId, phone, publicTransit, website, verified)
+      case organizerId ~ facebookId ~ name ~ description ~ addressId ~ phone ~ publicTransit ~ websites ~ verified =>
+        Organizer(organizerId, facebookId, name, description, addressId, phone, publicTransit, websites, verified)
     }
   }
 
@@ -98,15 +98,15 @@ object Organizer {
         case true => Some(-1)
         case false =>
           SQL(
-            """INSERT INTO organizers(name, facebookId, description, phone, publicTransit, website)
-              |VALUES ({name}, {facebookId}, {description}, {phone}, {publicTransit}, {website})""".stripMargin)
+            """INSERT INTO organizers(name, facebookId, description, phone, publicTransit, websites)
+              |VALUES ({name}, {facebookId}, {description}, {phone}, {publicTransit}, {websites})""".stripMargin)
             .on(
               'name -> organizer.name,
               'facebookId -> organizer.facebookId,
               'description -> organizer.description,
               'phone -> organizer.phone,
               'publicTransit -> organizer.publicTransit,
-              'website -> organizer.websites
+              'websites -> organizer.websites
             ).executeInsert() match {
             case None => None
             case Some(organizerId: Long) =>

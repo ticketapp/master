@@ -14,7 +14,7 @@ case class Place (placeId: Long,
                   facebookId: Option[String] = None,
                   geographicPoint: Option[String],
                   description: Option[String] = None,
-                  webSite: Option[String] = None,
+                  webSites: Option[String] = None,
                   capacity: Option[Int] = None,
                   openingHours: Option[String] = None,
                   images: List[Image] = List(),
@@ -28,7 +28,7 @@ object Place {
 
   def formUnapply(place: Place): Option[(String, Option[String], Option[String], Option[String], Option[String],
     Option[Int], Option[String])] = Some((place.name, place.facebookId, place.geographicPoint, place.description,
-    place.webSite, place.capacity, place.openingHours))
+    place.webSites, place.capacity, place.openingHours))
 
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
@@ -36,13 +36,13 @@ object Place {
       get[Option[String]]("facebookId") ~
       get[Option[String]]("geographicPoint") ~
       get[Option[String]]("description") ~
-      get[Option[String]]("webSite") ~
+      get[Option[String]]("webSites") ~
       get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") ~
       get[Option[Long]]("addressId") map {
-        case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSite ~ capacity ~ openingHours ~
+        case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
           addressId =>
-          Place(placeId, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, List(),
+          Place(placeId, name, facebookId, geographicPoint, description, webSites, capacity, openingHours, List(),
             Address.find(addressId))
     }
   }
@@ -70,15 +70,13 @@ object Place {
               'facebookId -> place.facebookId,
               'geographicPoint -> None,
               'description -> place.description,
-              'webSites -> getNormalizedWebsitesInText(place.webSite).mkString(","),
+              'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
               'capacity -> place.capacity,
               'openingHours -> place.openingHours)
             .executeInsert() match {
             case None => None
             case Some(placeId: Long) =>
-              place.images.foreach(image =>
-                Image.save(image.copy(placeId = Some(placeId)))
-              )
+              place.images.foreach(image => Image.save(image.copy(placeId = Some(placeId))))
               Some(placeId)
           }
       }
@@ -86,16 +84,15 @@ object Place {
   } catch {
     case e: Exception => throw new DAOException("Cannot save place: " + e.getMessage)
   }
-
-
+  
   def find20Since(start: Int, center: String): Seq[Place] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL(s""" SELECT *
-          FROM places
-          ORDER BY geographicPoint <-> point '$center'
-          LIMIT 20
-          OFFSET $start""")
+        SQL(
+          s"""SELECT *
+             |FROM places
+             |ORDER BY geographicPoint <-> point '$center'
+             |LIMIT 20 OFFSET $start""".stripMargin)
           .as(PlaceParser.*)
           .map(place => place.copy(images = Image.findAllByPlace(place.placeId)))
       }

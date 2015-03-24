@@ -15,12 +15,11 @@ object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
-  def getYoutubeTracksForArtist(artist: Artist, pattern: String): Future[Set[Track]] = {
+  def getYoutubeTracksForArtist(artist: Artist, pattern: String): Future[Set[Track]] =
     getMaybeEchonestIdByFacebookId(artist) flatMap {
       case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
       case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
     }
-  }
 
   def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Future[Set[Track]] = {
     val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksForArtist

@@ -76,7 +76,7 @@ CREATE TABLE organizers (
   addressId               BIGINT references addresses(addressId),
   phone                   VARCHAR(15),
   publicTransit           TEXT,
-  website                 TEXT,
+  websites                TEXT,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   UNIQUE(facebookId),
   UNIQUE(name)
@@ -224,7 +224,7 @@ CREATE TABLE places (
   addressId                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
   description               TEXT,
-  webSite                   TEXT,
+  webSites                  TEXT,
   facebookMiniature         text,
   capacity                  INT,
   openingHours              VARCHAR(255),
