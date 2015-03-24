@@ -8,7 +8,7 @@ CREATE TABLE addresses (
 );
 CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
 INSERT INTO addresses (geographicPoint) VALUES ('(44.1761, 4.9714)');
-INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.1834)');
+INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.83724)');
 INSERT INTO addresses (geographicPoint) VALUES ('(41.4678, 5.9147134)');
 
@@ -76,7 +76,7 @@ CREATE TABLE organizers (
   addressId               BIGINT references addresses(addressId),
   phone                   VARCHAR(15),
   publicTransit           TEXT,
-  website                 VARCHAR(255),
+  website                 TEXT,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   UNIQUE(facebookId),
   UNIQUE(name)
@@ -173,7 +173,6 @@ CREATE TABLE users_token (
   expirationTime            TIMESTAMP NOT NULL,
   isSignUp                  BOOLEAN NOT NULL
 );
-
 
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,

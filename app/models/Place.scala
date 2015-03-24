@@ -5,9 +5,9 @@ import anorm._
 import play.api.db.DB
 import play.api.Play.current
 import controllers.DAOException
-import services.Utilities
 import scala.util.Try
 import scala.util.matching.Regex
+import services.Utilities.{testIfExist, geographicPointToString, getNormalizedWebsitesInText}
 
 case class Place (placeId: Long,
                   name: String,
@@ -40,7 +40,8 @@ object Place {
       get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") ~
       get[Option[Long]]("addressId") map {
-        case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSite ~ capacity ~ openingHours ~ addressId =>
+        case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSite ~ capacity ~ openingHours ~
+          addressId =>
           Place(placeId, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, List(),
             Address.find(addressId))
     }
@@ -48,7 +49,7 @@ object Place {
 
   def save(place: Place): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      Utilities.testIfExist("places", "facebookId", place.facebookId) match {
+      testIfExist("places", "facebookId", place.facebookId) match {
         case true => None
         case false =>
           val geographicPoint = place.geographicPoint.getOrElse("") match {
@@ -59,7 +60,7 @@ object Place {
             case None => None
             case Some(address: Address) => address.addressId
           }
-          SQL( s"""INSERT into places(name, addressId, facebookId, geographicPoint, description, webSite, capacity,
+          SQL(s"""INSERT INTO places(name, addressId, facebookId, geographicPoint, description, webSite, capacity,
             openingHours)
             VALUES ({name}, {addressId}, {facebookId}, $geographicPoint, {description}, {webSite}, {capacity},
             {openingHours})""")
@@ -67,9 +68,9 @@ object Place {
               'name -> place.name,
               'addressId -> addressId,
               'facebookId -> place.facebookId,
-              'geographicPoint -> place.geographicPoint,
+              'geographicPoint -> None,
               'description -> place.description,
-              'webSite -> place.webSite,
+              'webSite -> getNormalizedWebsitesInText(place.webSite).mkString(","),
               'capacity -> place.capacity,
               'openingHours -> place.openingHours)
             .executeInsert() match {

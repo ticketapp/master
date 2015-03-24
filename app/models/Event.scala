@@ -85,13 +85,13 @@ object Event {
 
   def find20Since(start: Int, center: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
-      SQL( s""" SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
-       events.name, events.geographicPoint, events.description, events.startTime,
-          events.endTime, events.ageRestriction
-      FROM events
-      ORDER BY geographicPoint <-> point '$center'
-      LIMIT 20
-      OFFSET $start""")
+      SQL(
+        s"""SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.creationDateTime,
+           |events.name, events.geographicPoint, events.description, events.startTime,events.endTime,
+           |events.ageRestriction
+           |FROM events
+           |ORDER BY geographicPoint <-> point '$center'
+           |LIMIT 20 OFFSET $start""".stripMargin)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
@@ -119,25 +119,17 @@ object Event {
 
   def findAllByGenre(genreId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
-      SQL(""" SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
-            e.name, e.geographicPoint, e.description, e.startTime,
-            e.endTime, e.ageRestriction
-        FROM eventsGenres eG
-        INNER JOIN events e ON e.eventId = eG.eventId
-        WHERE eG.genreId = {genreId}
-        ORDER BY e.creationDateTime DESC
-        LIMIT 20""")
+      SQL(
+        """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime, e.name, e.geographicPoint,
+          |e.description, e.startTime, e.endTime, e.ageRestriction
+          |FROM eventsGenres eG
+          |INNER JOIN events e ON e.eventId = eG.eventId
+          |WHERE eG.genreId = {genreId}
+          |ORDER BY e.creationDateTime DESC
+          |LIMIT 20""".stripMargin)
         .on('genreId -> genreId)
         .as(EventParser.*)
-        .map { event => event.copy(
-        images = Image.findAllByEvent(event),
-        organizers = Organizer.findAllByEvent(event),
-        artists = Artist.findAllByEvent(event),
-        tariffs = Tariff.findAllByEvent(event),
-        places = Place.findAllByEvent(event.eventId),
-        genres = Genre.findAllByEvent(event.eventId),
-        addresses = Address.findAllByEvent(event))
-      }
+        .map(getPropertiesOfEvent)
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot get events by genre: " + e.getMessage)
@@ -164,45 +156,36 @@ object Event {
   def findAllByArtist(facebookUrl: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       val artistId = Artist.returnArtistIdByFacebookUrl(facebookUrl)
-      SQL("""SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime,
-            e.name, e.geographicPoint, e.description, e.startTime,
-            e.endTime, e.ageRestriction
-          FROM eventsArtists eA
-          INNER JOIN events e ON e.eventId = eA.eventId
-          WHERE eA.artistId = {artistId}
-          ORDER BY e.creationDateTime DESC
-          LIMIT 20""")
+      SQL(
+        """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.creationDateTime, e.name, e.geographicPoint,
+          |e.description, e.startTime, e.endTime, e.ageRestriction
+          |FROM eventsArtists eA INNER JOIN events e ON e.eventId = eA.eventId
+          |WHERE eA.artistId = {artistId}
+          |ORDER BY e.creationDateTime DESC
+          |LIMIT 20""".stripMargin)
         .on('artistId -> artistId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot get events by organizer: " + e.getMessage)
+    case e: Exception => throw new DAOException("Even.findAllByArtist: " + e.getMessage)
   }
 
   def findAllContaining(pattern: String, center: String): Seq[Event] = center match {
     case geographicPointPattern(_) =>
       try {
         DB.withConnection { implicit connection =>
-          SQL(s"""SELECT *
-          FROM events WHERE LOWER(name)
-          LIKE '%'||{patternLowCase}||'%'
-          ORDER BY geographicPoint <-> point '$center'
-          LIMIT 20""")
+          SQL(
+            s"""SELECT * FROM events WHERE LOWER(name)
+               |LIKE '%'||{patternLowCase}||'%'
+               |ORDER BY geographicPoint <-> point '$center'
+               |LIMIT 20""".stripMargin)
             .on('patternLowCase -> pattern.toLowerCase)
             .as(EventParser.*)
-            .map(event => event.copy(
-            images = Image.findAllByEvent(event),
-            organizers = Organizer.findAllByEvent(event),
-            artists = Artist.findAllByEvent(event),
-            tariffs = Tariff.findAllByEvent(event),
-            places = Place.findAllByEvent(event.eventId),
-            genres = Genre.findAllByEvent(event.eventId),
-            addresses = Address.findAllByEvent(event))
-            )
+            .map(getPropertiesOfEvent)
         }
       } catch {
-        case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
+        case e: Exception => throw new DAOException("Event.findAllContaining: " + e.getMessage)
       }
     case _ => Seq.empty
   }
@@ -231,18 +214,18 @@ object Event {
             case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
             case _ => "{geographicPoint}"
           }
-          SQL( s"""INSERT INTO
-            events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint, description,
-            startTime, endTime, ageRestriction) values ({facebookId}, {isPublic}, {isActive},
-            {creationDateTime}, {name}, $geographicPoint, {description}, {startTime}, {endTime},
-            {ageRestriction}) """)
+          SQL(
+            s"""INSERT INTO events(facebookId, isPublic, isActive, creationDateTime, name, geographicPoint,
+               |description,startTime, endTime, ageRestriction)
+               |VALUES ({facebookId}, {isPublic}, {isActive},{creationDateTime}, {name}, $geographicPoint,
+               |{description}, {startTime}, {endTime},{ageRestriction}) """.stripMargin)
             .on(
               'facebookId -> event.facebookId,
               'isPublic -> event.isPublic,
               'isActive -> event.isActive,
               'creationDateTime -> event.creationDateTime,
               'name -> event.name,
-              'geographicPoint -> event.geographicPoint,
+              'geographicPoint -> None,
               'description -> event.description,
               'startTime -> event.startTime,
               'endTime -> event.endTime,
@@ -276,9 +259,10 @@ object Event {
 
   def update(event: Event): Unit = try {
     DB.withConnection { implicit connection =>
-      SQL( """UPDATE events
-        SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
-        WHERE facebookId={facebookId}""")
+      SQL(
+        """UPDATE events
+          |SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
+          |WHERE facebookId={facebookId}""".stripMargin)
         .on(
           'facebookId -> event.facebookId,
           'name -> event.name,
@@ -300,8 +284,9 @@ object Event {
         .on('userId -> userId)
         .as(scalar[Option[Long]].single) match {
         case None => throw new DAOException("Cannot follow event: didn't find id with this userId")
-        case Some(id) => SQL("""INSERT INTO eventsFollowed(userId, eventId)
-          VALUES ({userId}, {eventId})""")
+        case Some(id) => SQL(
+          """INSERT INTO eventsFollowed(userId, eventId)
+            |VALUES ({userId}, {eventId})""".stripMargin)
           .on(
             'userId -> id,
             'eventId -> eventId)

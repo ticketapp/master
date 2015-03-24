@@ -41,13 +41,16 @@ object Organizer {
     }
   }
 
+  def getOrganizerProperties(organizer: Organizer): Organizer = organizer.copy(
+    images = Image.findAllByOrganizer(organizer.organizerId),
+    address = Address.find(organizer.addressId))
+
+
   def findAll: List[Organizer] = try {
     DB.withConnection { implicit connection =>
       SQL("select * from organizers")
         .as(OrganizerParser.*)
-        .map(organizer => organizer.copy(
-          images = Image.findAllByOrganizer(organizer.organizerId),
-          address = Address.find(organizer.addressId)))
+        .map(getOrganizerProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Method organizer.findAll: " + e.getMessage)
@@ -60,9 +63,7 @@ object Organizer {
              INNER JOIN organizers a ON a.organizerId = eA.organizerId where eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(OrganizerParser.*)
-        .map(organizer => organizer.copy(
-          images = Image.findAllByOrganizer(organizer.organizerId),
-          address = Address.find(organizer.addressId)))
+        .map(getOrganizerProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Method organizer.findAll: " + e.getMessage)
@@ -73,9 +74,7 @@ object Organizer {
       SQL("SELECT * FROM organizers WHERE organizerId = {organizerId}")
         .on('organizerId -> organizerId)
         .as(OrganizerParser.singleOpt)
-        .map(organizer => organizer.copy(
-          images = Image.findAllByOrganizer(organizer.organizerId),
-          address = Address.find(organizer.addressId)))
+        .map(getOrganizerProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Method organizer.find: " + e.getMessage)
@@ -86,9 +85,7 @@ object Organizer {
       SQL("SELECT * FROM organizers WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
         .on('patternLowCase -> pattern.toLowerCase)
         .as(OrganizerParser.*)
-        .map(organizer => organizer.copy(
-          images = Image.findAllByOrganizer(organizer.organizerId),
-          address = Address.find(organizer.addressId)))
+        .map(getOrganizerProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with the method Organizer.findAllContaining: "
@@ -100,8 +97,9 @@ object Organizer {
       Utilities.testIfExist("organizers", "name", organizer.name) match {
         case true => Some(-1)
         case false =>
-          SQL( """INSERT INTO organizers(name, facebookId, description, phone, publicTransit, website)
-            VALUES ({name}, {facebookId}, {description}, {phone}, {publicTransit}, {website})""")
+          SQL(
+            """INSERT INTO organizers(name, facebookId, description, phone, publicTransit, website)
+              |VALUES ({name}, {facebookId}, {description}, {phone}, {publicTransit}, {website})""".stripMargin)
             .on(
               'name -> organizer.name,
               'facebookId -> organizer.facebookId,
@@ -120,13 +118,15 @@ object Organizer {
       }
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot create organizer: " + e.getMessage + organizer.name)
+    case e: Exception => throw new DAOException("Organizer.save: " + e.getMessage +
+      organizer.name + " " + organizer.website + " " + organizer.name.length + "/" +
+      organizer.website.getOrElse("").length)
   }
 
 
   def returnOrganizerId(name: String): Long = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT organizerId from organizers WHERE name = {name}")
+      SQL("SELECT organizerId FROM organizers WHERE name = {name}")
         .on('name -> name)
         .as(scalar[Long].single)
     }

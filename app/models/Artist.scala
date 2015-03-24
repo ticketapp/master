@@ -52,7 +52,7 @@ object Artist {
     new Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet, genres, tracks)
   def formUnapply(artist: Artist) =
     Option((artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
-      artist.websites.toSeq, artist.genres.toSeq, artist.tracks.toSeq))
+      artist.websites.toSeq, artist.genres, artist.tracks))
 
   case class PatternAndArtist (searchPattern: String, artist: Artist)
   def formWithPatternApply(searchPattern: String, artist: Artist) = new PatternAndArtist(searchPattern, artist)
@@ -126,8 +126,7 @@ object Artist {
   def save(artist: Artist): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl},
-          |{websites})""".stripMargin)
+        """SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
         .on(
           'facebookId -> artist.facebookId,
           'name -> artist.name,
