@@ -6,7 +6,7 @@
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
         <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0"
             data-ng-repeat="event in events |orderBy: order"
-            ng-show= " filterQuery.length <= 1 || filterQuery == undefined">
+            ng-show= "filteredGenres.length || filterQuery.length <= 1 || filterQuery == undefined">
         </li>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-3 medium-6 float-left margin0"
