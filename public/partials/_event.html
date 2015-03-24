@@ -25,7 +25,7 @@ overflow: hidden;">{{ event.name }}</h4></a>
         </div>
         <br/>
         <div class="description_event_min">
-            <a ng-repeat="genre in event.genres">{{genre.name}}</a>
+            <a ng-repeat="genre in filteredGenres = (event.genres | filter: filterQuery)" class="ng-hide">{{genre.name}}</a>
             <a href="#/artiste/{{artist.facebookUrl}}" data-ng-repeat="artist in event.artists">
                 {{ artist.name }}
             </a>
