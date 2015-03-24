@@ -29,9 +29,9 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     for (var a = 0; a < evArtLenght; a++) {
                         console.log(artNames)
                         for(var g = 0; g < event.artists[a].genres.length; g++) {
-                            console.log(event.artists[a].genres[g].name)
+                            /*console.log(event.artists[a].genres[g].name)
                             console.log(event.artists[a])
-                            console.log($rootScope.playlist.genres)
+                            console.log($rootScope.playlist.genres)*/
                             if ($rootScope.playlist.genres.toString().toLowerCase().indexOf(event.artists[a].genres[g].name.toLowerCase()) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
                                 artNames.push(event.artists[a].name);
                                 for (var t = 0; t < 4; t++) {
@@ -288,7 +288,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
             function onPlayerReady(event) {
                 console.log('youtube')
-                console.log(event.target)
                 $scope.playPause = function () {
                     if ($scope.onPlay == false) {
                         event.target.playVideo();
@@ -310,11 +309,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     $scope.$apply();
                     yPlayer.playVideo();
                 };
-                console.log(document.getElementById('youtubePlayer').getAttribute('src'));
                 yPlayer.unMute();
                 yPlayer.playVideo();
                 $scope.onPlay = true;
                 $scope.$apply();
+
                 if (i > 0) {
                     function goToTrackActive () {
                         if (document.getElementsByClassName('trackContener').length >= i) {

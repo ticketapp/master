@@ -87,7 +87,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selPlace == true) {
-                $http.get('/places').
+                $http.get('/places/offset/'+ offset+ '/' + $rootScope.geoLoc).
                     success(function(data, status, headers, config) {
                         if (data != $scope.places) {
                             $scope.places = data;

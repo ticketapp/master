@@ -50,7 +50,7 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
 
     $rootScope.createPlaces = function () {
         var places = [];
-        var placeName =[];
+        var placesName =[];
         function getPlacesById (searchPlaces) {
             $http.get('https://graph.facebook.com/v2.2/'+ searchPlaces.id +'/?fields=checkins,cover,description,hours,id,likes,link,location,name,phone,website,picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
                 success(function(data, status, headers, config) {
@@ -87,13 +87,33 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                         "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
                             }
                         }
-                        $http.post('/places/create', {
-                            name: data.name,
-                            facebookId: data.id,
-                            capacity: data.checkins,
-                            description:data.description,
-                            webSite:data.website
-                        })
+                        function getPositionAndCreate (place) {
+                            $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' +
+                                place.location.street + '+' +
+                                place.location.zip + '+' +
+                                place.location.city + '+' +
+                                place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
+                                success(function (data) {
+                                    console.log(data)
+                                    var loc = '(' + data.results[0].geometry.location.lat +
+                                        ',' + data.results[0].geometry.location.lng + ')';
+                                    console.log(loc)
+                                    $http.post('/places/create', {
+                                        name: place.name,
+                                        facebookId: place.id,
+                                        geographicPoint: loc,
+                                        capacity: place.checkins,
+                                        description: place.description,
+                                        webSite: place.website
+                                    }).success(function(data){
+                                        console.log(data)
+                                    }).error(function(data){
+                                        console.log(data)
+                                    })
+                                });
+                        }
+                        places.push(data);
+                        getPositionAndCreate(data);
                     }
                 }).
                 error(function(data, status, headers, config) {
@@ -131,10 +151,10 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                 if (txtFile.status === 200) {  // file is found
                     allText = txtFile.responseText;
                     lines = txtFile.responseText.split("\n");
-                    for (var l=0; l<lines.length; l++) {
+                    for (var l=0; l<10; l++) {
                         if (lines[l] == "Salles de 400 à 1200 places" || lines[l] == "Salles de moins de 400 places") {
-                            placeName.push(lines[l-1].replace(/ /g, "+"));
-                            console.log(placeName)
+                            placesName.push(lines[l-1].replace(/ /g, "+"));
+                            console.log(placesName)
                             getPlacesByName(lines[l-1].replace(/ /g, "+"))
                         }
                     }
@@ -142,6 +162,6 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
             }
         };
         txtFile.send(null);
-        console.log(placeName.length)
+        console.log(placesName.length)
     }
 }]);
