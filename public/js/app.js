@@ -13,8 +13,10 @@ var app = angular.module('MonApp',['ngAnimate',
     'ngWebsocket',
     'ui.sortable']);
 
-app.config(function($routeProvider, $locationProvider, AngularyticsProvider){
+app.config(function($routeProvider, $locationProvider, AngularyticsProvider, $httpProvider){
     AngularyticsProvider.setEventHandlers(['Console', 'GoogleUniversal']);
+    $httpProvider.defaults.useXDomain = true;
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
     $routeProvider
     .when('/', {templateUrl: 'assets/partials/home.html'})
     .when('/events',{templateUrl: 'assets/partials/events.html'})

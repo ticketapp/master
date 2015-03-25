@@ -4,8 +4,26 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $scope.heightDesc = '147px';
     $scope.trackTitle = '';
     $scope.allDesc = false;
-    $scope.suggestQuery = function (trackName, artistName) {
-        console.log(trackName, artistName)
+    $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
+        console.log(trackTitle, artistName);
+        if (trackTitle.length >= 2) {
+            artistName = artistName.toLowerCase().replace('officiel', '');
+            artistName = artistName.toLowerCase().replace('official', '');
+            artistName = artistName.toLowerCase().replace('music', '');
+            artistName = artistName.toLowerCase().replace('musique', '');
+            artistName = artistName.toLowerCase().replace('musik', '');
+            console.log(artistName)
+            $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
+                success(function (data) {
+                    console.log(data)
+                    for (var i = 0; i < data.length; i++) {
+                        $scope.artiste.tracks.push(data[i])
+                    }
+                }).
+                error(function (data) {
+                    console.log(data)
+                })
+        }
     };
     $scope.filterTracks = function () {
         $timeout(function () {

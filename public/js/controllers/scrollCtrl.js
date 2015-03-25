@@ -12,6 +12,10 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }
         /*else {
          }*/
+        /*$http.get('http://www.corsproxy.com/youtube.com/get_video_info?video_id=X8pBHM9u4ko').
+            success(function (data) {
+                console.log(data)
+            })*/
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
         };

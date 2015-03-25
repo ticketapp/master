@@ -6,7 +6,7 @@
 <div ng-show="showInfo" class="EventinfoTrack">
     <a href="#/artiste/{{trackActive.artist.facebookUrl}}"><h3>{{trackActive.artist.name}}</h3></a>
     Prochain concert prez de chez vous : <br/>
-    <a href="#/event/{{trackActive.nextShow.id}}">
+    <a href="#/event/{{trackActive.nextShow.eventId}}">
         {{trackActive.nextShow.name}}
     </a><br/>
     Le {{trackActive.nextShow.startTime | date:'dd/MM' }} @

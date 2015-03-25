@@ -47,7 +47,7 @@
                 <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$parent.suggest = !$parent.suggest">Suggérer une track</a>
                 <div ng-if="suggest">
                     <input ng-model="trackTitleSuggest" placeholder="track title">
-                    <a class="button" ng-click="suggestQuery(trackTitleSuggest, artiste.name)">Valider</a>
+                    <a class="button" ng-click="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">Valider</a>
                 </div>
             </div>
         </div>
@@ -58,11 +58,11 @@
             <b>Désolé, nous n'avons pour le moment aucune track pour cet artist.
                 <br/>Vous pouvez ici suggerer une track à ajouter</b><br/>
             <input placeholder="track title" ng-model="trackTitleSuggest">
-            <a class="button" ng-click="suggestQuery(trackTitleSuggest, artiste.name)">Valider</a>
+            <a class="button" ng-click="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">Valider</a>
         </div>
         <div ng-if="tracksFiltered.length == 0 && trackTitle.length > 0" class="column large-12 text-center">
             <b>Désolé, nous n'avons pour le moment aucune track "{{trackTitle}}" pour cet artist.</b><br/>
-            <a class="button" ng-click="suggestQuery(trackTitle, artiste.name)">Suggérer la track {{trackTitle}}</a>
+            <a class="button" ng-click="suggestQuery(trackTitle, artiste.name, artiste.facebookUrl)">Suggérer la track {{trackTitle}}</a>
         </div>
         <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit)" class="column paddingBottom10" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
             <div class="column large-12 arTrack">

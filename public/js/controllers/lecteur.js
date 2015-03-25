@@ -217,7 +217,9 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                 document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
                 document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
+                document.getElementById('youtubePlayer').removeEventListener('ended', $scope.next);
                 document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
+                document.getElementById('youtubePlayer').removeEventListener("timeupdate", updateProgress);
             }
         };
         $scope.remPlaylist = function () {
@@ -226,10 +228,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
+            document.getElementById('youtubePlayer').removeEventListener('ended', $scope.next);
             document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
+            document.getElementById('youtubePlayer').removeEventListener("timeupdate", updateProgress);
         };
         document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
+        document.getElementById('youtubePlayer').removeEventListener('ended', $scope.next);
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
+        document.getElementById('youtubePlayer').removeEventListener("timeupdate", updateProgress);
         $scope.trackActive = $rootScope.playlist.tracks[i];
         if ($rootScope.playlist.tracks[i].platform == 'Soundcloud') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
@@ -281,95 +287,173 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             }
             document.getElementById('musicPlayer').play();
         } else if ($rootScope.playlist.tracks[i].platform == 'Youtube') {
-            document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
-            //document.getElementById('musicPlayer').classList.add('ng-hide');
-            document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
-            //document.getElementById('youtubePlayer').classList.remove('ng-hide');
-            document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
-            function onPlayerReady(event) {
-                console.log('youtube')
-                $scope.playPause = function () {
-                    if ($scope.onPlay == false) {
-                        event.target.playVideo();
+            if ($rootScope.window == 'small' || $rootScope.window == 'medium') {
+                document.getElementById('youtubePlayer').outerHTML = "<video id='youtubePlayer' autoplay></video>";
+                document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
+                if ($rootScope.playlist.tracks[i].url != undefined) {
+                    var youtubeId = $rootScope.playlist.tracks[i].url;
+                    YoutubeVideo(youtubeId, function (video) {
+                        console.log(video.title);
+                        var webm = video.getSource("video/webm", "medium");
+                        var mp4 = video.getSource("video/mp4", "medium");
+                        document.getElementById('youtubePlayer').setAttribute('src', mp4.url);
+                        $timeout(function () {
+                            $scope.$apply(function () {
+                                $scope.onPlay = true;
+                            });
+                        }, 0);
+                        $scope.playPause = function () {
+                            if ($scope.onPlay == false) {
+                                document.getElementById('youtubePlayer').play();
+                                $timeout(function () {
+                                    $scope.$apply(function () {
+                                        $scope.onPlay = true;
+                                    });
+                                })
+                            } else {
+                                document.getElementById('youtubePlayer').pause();
+                                $scope.onPlay = false;
+                            }
+                        };
+                        $scope.volume = function () {
+                            document.getElementById('youtubePlayer').volume = $scope.levelVol / 100
+                        };
+                        function updateProgress() {
+                            var progress = document.getElementById("progress");
+                            var value = 0;
+                            if (document.getElementById('youtubePlayer').currentTime > 0) {
+                                value = 100 / document.getElementById('youtubePlayer').duration * document.getElementById('youtubePlayer').currentTime;
+                            }
+                            progress.style.width = value + "%";
+                            document.getElementById('currentTime').innerHTML =
+                                readableDuration(document.getElementById('youtubePlayer').currentTime) +
+                                ' / ' + readableDuration(document.getElementById('youtubePlayer').duration);
+                        }
+
+                        document.getElementById("progressBar").onclick = function (event) {
+                            document.getElementById('youtubePlayer').currentTime =
+                                document.getElementById('youtubePlayer').duration * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
+                                / document.getElementById("progressBar").clientWidth)
+                        };
+                        document.getElementById('youtubePlayer').addEventListener("timeupdate", updateProgress);
+                        if (i > 0) {
+                            function goToTrackActive() {
+                                if (document.getElementsByClassName('trackContener').length >= i) {
+                                    $timeout(function () {
+                                        var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
+                                        document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
+                                    }, 100);
+                                } else {
+                                    goToTrackActive()
+                                }
+                            }
+
+                            goToTrackActive()
+                        }
+                        document.getElementById('youtubePlayer').play();
+                    });
+                    document.getElementById('youtubePlayer').play();
+                } else {
+                    $scope.nextTrack();
+                }
+            } else {
+                document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
+                //document.getElementById('musicPlayer').classList.add('ng-hide');
+                document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
+                //document.getElementById('youtubePlayer').classList.remove('ng-hide');
+                document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
+                function onPlayerReady(event) {
+                    console.log('youtube')
+                    $scope.playPause = function () {
+                        if ($scope.onPlay == false) {
+                            event.target.playVideo();
+                            $scope.onPlay = true;
+                        } else {
+                            event.target.pauseVideo();
+                            $scope.onPlay = false;
+                        }
+                    };
+                    var yPlayer = event.target;
+                    $scope.volume = function () {
+                        yPlayer.setVolume($scope.levelVol);
+                    };
+                    document.getElementById("progressBar").onclick = function (event) {
+                        var newPos = yPlayer.getDuration() * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
+                            / document.getElementById("progressBar").clientWidth);
+                        yPlayer.seekTo(newPos, true);
                         $scope.onPlay = true;
-                    } else {
-                        event.target.pauseVideo();
-                        $scope.onPlay = false;
-                    }
-                };
-                var yPlayer = event.target;
-                $scope.volume = function () {
-                    yPlayer.setVolume($scope.levelVol);
-                };
-                document.getElementById("progressBar").onclick = function (event) {
-                    var newPos = yPlayer.getDuration() * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
-                        / document.getElementById("progressBar").clientWidth);
-                    yPlayer.seekTo(newPos, true);
+                        $scope.$apply();
+                        yPlayer.playVideo();
+                    };
+                    console.log(window)
+                    yPlayer.unMute();
+                    yPlayer.playVideo();
                     $scope.onPlay = true;
                     $scope.$apply();
-                    yPlayer.playVideo();
-                };
-                yPlayer.unMute();
-                yPlayer.playVideo();
-                $scope.onPlay = true;
-                $scope.$apply();
 
-                if (i > 0) {
-                    function goToTrackActive () {
-                        if (document.getElementsByClassName('trackContener').length >= i) {
-                            $timeout(function() {
-                                var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                                document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
-                            }, 100);
-                        } else {
-                            goToTrackActive ()
-                        }
-                    }
-                    goToTrackActive ()
-                }
-            }
-            function onPlayerStateChange(event) {
-                if (event.data === 1) {
-                    var duration = event.target.getDuration();
-                    var curentDuration = event.target.getCurrentTime();
-                    updateProgressYt = setInterval(function () {
-                        curentDuration = event.target.getCurrentTime();
-                        var prog = document.getElementById("progress");
-                        var val = 0;
-                        if (curentDuration > 0) {
-                            val = 100 / duration * curentDuration;
-                        }
-                        prog.style.width = val + "%";
-                        document.getElementById('currentTime').innerHTML =
-                            readableDuration(curentDuration) +
-                            ' / ' + readableDuration(duration);
-                        if (val == 100) {
-                            if (typeof(updateProgressYt) != "undefined") {
-                                clearInterval(updateProgressYt);
+                    if (i > 0) {
+                        function goToTrackActive() {
+                            if (document.getElementsByClassName('trackContener').length >= i) {
+                                $timeout(function () {
+                                    var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
+                                    document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
+                                }, 100);
+                            } else {
+                                goToTrackActive()
                             }
                         }
-                    }, 100);
-                } else {
-                    if (typeof(updateProgressYt) != "undefined") {
-                        clearInterval(updateProgressYt);
+
+                        goToTrackActive()
                     }
                 }
-                if(event.data === 0) {
-                    $scope.nextTrack()
+
+                function onPlayerStateChange(event) {
+                    if (event.data === 1) {
+                        var duration = event.target.getDuration();
+                        var curentDuration = event.target.getCurrentTime();
+                        updateProgressYt = setInterval(function () {
+                            curentDuration = event.target.getCurrentTime();
+                            var prog = document.getElementById("progress");
+                            var val = 0;
+                            if (curentDuration > 0) {
+                                val = 100 / duration * curentDuration;
+                            }
+                            prog.style.width = val + "%";
+                            document.getElementById('currentTime').innerHTML =
+                                readableDuration(curentDuration) +
+                                ' / ' + readableDuration(duration);
+                            if (val == 100) {
+                                if (typeof(updateProgressYt) != "undefined") {
+                                    clearInterval(updateProgressYt);
+                                }
+                            }
+                        }, 100);
+                    } else {
+                        if (typeof(updateProgressYt) != "undefined") {
+                            clearInterval(updateProgressYt);
+                        }
+                    }
+                    if (event.data === 0) {
+                        $scope.nextTrack()
+                    }
                 }
+
+                var player = new YT.Player('youtubePlayer', {
+                    height: '200',
+                    width: '100%',
+                    videoId: $rootScope.playlist.tracks[i].url,
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange,
+                        'onError': function () {
+                            $scope.nextTrack()
+                        }
+                    }
+                });
             }
-            var player = new YT.Player('youtubePlayer', {
-                height: '200',
-                width: '100%',
-                videoId: $rootScope.playlist.tracks[i].url,
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange,
-                    'onError' : function () {$scope.nextTrack()}
-                }
-            });
         }
         document.getElementById('musicPlayer').addEventListener('ended', $scope.nextTrack);
+        document.getElementById('youtubePlayer').addEventListener('ended', $scope.nextTrack);
     };
     /*$scope.savePlaylist = function () {
         $http.post('/playlist',
