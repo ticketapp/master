@@ -20,9 +20,11 @@ object SearchTracksController extends Controller {
   Action.async {
     getYoutubeTracksByTitleAndArtistName(Artist(None, None, artistName, None, None, artistFacebookUrl), trackTitle)
       .map { tracks =>
-      Ok(Json.toJson(tracks.filter(track =>
-        normalizeString(track.title).toLowerCase contains normalizeString(trackTitle).toLowerCase))
-      )
+        val tracksFiltered = tracks.filter(track =>
+          normalizeString(track.title).toLowerCase contains normalizeString(trackTitle).toLowerCase
+        )
+        Future { tracksFiltered.map(Track.save)}
+        Ok(Json.toJson(tracksFiltered))
     }
   }
 
