@@ -10,7 +10,6 @@ import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import jobs.Scheduler.formatDescription
 import models.Artist
-import models.Image
 import models.Genre
 import play.api.libs.json.Reads._
 import services.Utilities.{ normalizeUrl, getNormalizedWebsitesInText }
