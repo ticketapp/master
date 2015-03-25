@@ -79,7 +79,7 @@ margin-left: 5px;"
     </div>
 </div>
 <div ng-show="showLecteur" class="width100p float-left">
-    <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>
+    <video class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></video>
     <div class="width100p playlistScroller" style="overflow-x: auto;">
         <div ng-if="playlist.tracks.length > 0" style="position: relative; overflow-x: auto; display: inline-flex;"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
             <div ng-class="{onplay : track == trackActive}" class="float-left trackContener"
