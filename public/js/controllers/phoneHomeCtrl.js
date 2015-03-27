@@ -36,10 +36,11 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                         $scope.events[i].countdown > 0 &&
                         $scope.events[i].addresses[0] != undefined) {
                         var geopoint = $scope.events[i].addresses[0].geographicPoint
-                        if (geopoint.substring(0, geopoint.indexOf(',')) < marker.latLng.k + 0.00000001 &&
-                            geopoint.substring(0, geopoint.indexOf(',')) > marker.latLng.k - 0.00000001 &&
-                            geoPoint.replace(/^.+,/,'') < marker.latLng.D + 0.00000001 &&
-                            geoPoint.replace(/^.+,/,'') > marker.latLng.D - 0.00000001) {
+                        console.log(geopoint)
+                        if (geopoint.substring(0, geopoint.indexOf(',')) < marker.latLng.k + 0.000001 &&
+                            geopoint.substring(0, geopoint.indexOf(',')) > marker.latLng.k - 0.000001 &&
+                            geopoint.replace(/^.+,/,'') < marker.latLng.D + 0.000001 &&
+                            geopoint.replace(/^.+,/,'') > marker.latLng.D - 0.000001) {
                             console.log($scope.events[i])
                             redirectPath = 'event/' + $scope.events[i].eventId;
                         }
@@ -53,14 +54,16 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
             var eventsLength = $scope.events.length;
             var redirectPath = '';
             for (var i = 0; i < eventsLength; i++) {
-                if ($scope.events[i].addresses[0] != undefined) {
-                    var geopoint = $scope.events[i].addresses[0].geographicPoint
-                    console.log(geoPoint.replace(/^.+,/,''))
+                if ($scope.events[i].addresses[0] != undefined &&
+                    $scope.events[i].countdown <= $scope.time &&
+                    $scope.events[i].countdown > 0) {
+                    var geopoints = $scope.events[i].addresses[0].geographicPoint
+                    console.log(geopoints.replace(/^.+,/,''))
                     console.log(cluster.center_.D)
-                    if (geopoint.substring(0, geopoint.indexOf(',')) < cluster.center_.k + 0.00000001 &&
-                        geopoint.substring(0, geopoint.indexOf(',')) > cluster.center_.k - 0.00000001 &&
-                        geoPoint.replace(/^.+,/,'') < cluster.center_.D + 0.00000001 &&
-                        geoPoint.replace(/^.+,/,'') > cluster.center_.D - 0.00000001) {
+                    if (geopoints.substring(0, geopoints.indexOf(',')) < cluster.center_.k + 0.000001 &&
+                        geopoints.substring(0, geopoints.indexOf(',')) > cluster.center_.k - 0.000001 &&
+                        geopoints.replace(/^.+,/,'') < cluster.center_.D + 0.000001 &&
+                        geopoints.replace(/^.+,/,'') > cluster.center_.D - 0.000001) {
                         console.log($scope.events[i].places[0].placeId)
                         redirectPath = 'lieu/' + $scope.events[i].places[0].placeId;
                     }
