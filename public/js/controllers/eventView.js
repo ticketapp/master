@@ -11,8 +11,8 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
     };
     $http.get('/events/' + $routeParams.id)
         .success(function(data, status){
-            if (data.addresses.length > 0) {
-                data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace("(", "");
+            if (data.places.length > 0) {
+                data.addresses[0].geographicPoint = data.places[0].geographicPoint.replace("(", "");
                 data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(")", "");
                 data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(",", ", ");
                 $scope.adresses = true;

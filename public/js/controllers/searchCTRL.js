@@ -89,10 +89,23 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             if (_selPlace == true) {
                 $http.get('/places/offset/'+ offset+ '/' + $rootScope.geoLoc).
                     success(function(data, status, headers, config) {
-                        if (data != $scope.places) {
-                            $scope.places = data;
+                        var scopeIdList = [];
+                        function getPlaceId(el, index, array) {
+                            scopeIdList.push(el.placeId);
                         }
-                        $rootScope.resizeImgHeight()
+                        $scope.places.forEach(getPlaceId);
+                        if ($scope.places.length == 0) {
+                            $scope.places = data;
+                        } else {
+                            function uploadPlaces(el, index, array) {
+                                if (scopeIdList.indexOf(el.placeId) == -1) {
+                                    $scope.places.push(el);
+                                }
+                            }
+                            data.forEach(uploadPlaces)
+                        }
+                        console.log($scope.places)
+                        $rootScope.resizeImgHeight();
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs

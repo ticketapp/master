@@ -110,8 +110,8 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                 var eventsLength = $scope.events.length;
                 console.log(eventsLength)
                 for (var i = 0; i < eventsLength; i++) {
-                    if ( $scope.events[i].addresses[0] != undefined) {
-                        $scope.events[i].addresses[0].geographicPoint = $scope.events[i].addresses[0].geographicPoint.replace('(', '').replace(')', '');
+                    if ( $scope.events[i].places[0] != undefined) {
+                        $scope.events[i].addresses[0].geographicPoint = $scope.events[i].places[0].geographicPoint.replace('(', '').replace(')', '');
                     }
                     if ($scope.events[i].startTime != undefined) {
                         $scope.events[i].countdown = Math.round(($scope.events[i].startTime - new Date()) / 3600000);

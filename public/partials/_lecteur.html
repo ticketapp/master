@@ -26,7 +26,7 @@
     <i ng-click="remPlaylist()" class="fi-trash float-left" style="margin: 0 4px;"></i>
     <i ng-click="savePlaylist = !savePlaylist" ng-if="$root.window != 'small'" class="fi-save float-left" style="margin: 0 4px;"></i>
     <i ng-if="trackActive.platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
-    <i class="fi-volume float-left" ng-if="$root.window != 'small'" ng-click="showVol = !showVol" style="margin: 0 4px;"></i>
+    <i class="fi-volume float-left" ng-if="$root.window != 'small'" ng-click="$parent.showVol = !$parent.showVol" style="margin: 0 4px;"></i>
     <md-slider ng-hide="!showVol" flex ng-change="volume()"
                ng-model="levelVol" min="0" max="100"
                aria-label="volume"
@@ -79,7 +79,7 @@ margin-left: 5px;"
     </div>
 </div>
 <div ng-show="showLecteur" class="width100p float-left">
-    <video class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></video>
+    <video class="width100p ng-hide" id="musicPlayer" style="position: fixed"></video>
     <div class="width100p playlistScroller" style="overflow-x: auto;">
         <div ng-if="playlist.tracks.length > 0" style="position: relative; overflow-x: auto; display: inline-flex;"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
             <div ng-class="{onplay : track == trackActive}" class="float-left trackContener"

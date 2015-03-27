@@ -242,6 +242,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             } else {
                 $scope.nextTrack();
             }
+            document.getElementById('musicPlayer').addEventListener("contextmenu", function (e) { e.preventDefault(); e.stopPropagation(); }, false);
+
+            // hide the controls if they're visible
+            if (document.getElementById('musicPlayer').hasAttribute("controls")) {
+                document.getElementById('musicPlayer').removeAttribute("controls")
+            }
             $timeout(function () {
                 $scope.$apply(function () {
                     $scope.onPlay = true;
@@ -290,73 +296,58 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 if ($rootScope.playlist.tracks[i].url != undefined) {
                     var youtubeId = $rootScope.playlist.tracks[i].url;
                     YoutubeVideo(youtubeId, function (video) {
-                        console.log(video.title);
                         var webm = video.getSource("video/webm", "medium");
                         var mp4 = video.getSource("video/mp4", "medium");
                         document.getElementById('musicPlayer').setAttribute('src', mp4.url);
-                        $timeout(function () {
-                            $scope.$apply(function () {
-                                $scope.onPlay = true;
-                            });
-                        }, 0);
-                        $scope.playPause = function () {
-                            if ($scope.onPlay == false) {
-                                document.getElementById('musicPlayer').play();
-                                $timeout(function () {
-                                    $scope.$apply(function () {
-                                        $scope.onPlay = true;
-                                    });
-                                })
-                            } else {
-                                document.getElementById('musicPlayer').pause();
-                                $scope.onPlay = false;
-                            }
-                        };
-                        $scope.volume = function () {
-                            document.getElementById('musicPlayer').volume = $scope.levelVol / 100
-                        };
-                        function updateProgress() {
-                            var progress = document.getElementById("progress");
-                            var value = 0;
-                            if (document.getElementById('musicPlayer').currentTime > 0) {
-                                value = 100 / document.getElementById('musicPlayer').duration * document.getElementById('youtubePlayer').currentTime;
-                            }
-                            if (document.getElementById('musicPlayer').currentTime == document.getElementById('musicPlayer').duration) {
-                                $scope.nextTrack()
-                            }
-                            progress.style.width = value + "%";
-                            document.getElementById('currentTime').innerHTML =
-                                readableDuration(document.getElementById('musicPlayer').currentTime) +
-                                ' / ' + readableDuration(document.getElementById('musicPlayer').duration);
-                        }
-
-                        document.getElementById("progressBar").onclick = function (event) {
-                            document.getElementById('musicPlayer').currentTime =
-                                document.getElementById('musicPlayer').duration * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
-                                / document.getElementById("progressBar").clientWidth)
-                        };
-                        document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
-                        if (i > 0) {
-                            function goToTrackActive() {
-                                if (document.getElementsByClassName('trackContener').length >= i) {
-                                    $timeout(function () {
-                                        var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                                        document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
-                                    }, 100);
-                                } else {
-                                    goToTrackActive()
-                                }
-                            }
-
-                            goToTrackActive()
-                        }
-                        document.getElementById('musicPlayer').play();
                     });
                 } else {
                     $scope.nextTrack();
                 }
+                document.getElementById('musicPlayer').addEventListener("contextmenu", function (e) { e.preventDefault(); e.stopPropagation(); }, false);
+                // hide the controls if they're visible
+                if (document.getElementById('musicPlayer').hasAttribute("controls")) {
+                    document.getElementById('musicPlayer').removeAttribute("controls")
+                }
+                $scope.playPause = function () {
+                    if ($scope.onPlay == false) {
+                        document.getElementById('musicPlayer').play();
+                        $timeout(function () {
+                            $scope.$apply(function () {
+                                $scope.onPlay = true;
+                            });
+                        })
+                    } else {
+                        document.getElementById('musicPlayer').pause();
+                        $scope.onPlay = false;
+                    }
+                };
+                $scope.volume = function () {
+                    document.getElementById('musicPlayer').volume = $scope.levelVol / 100
+                };
+                document.getElementById("progressBar").onclick = function (event) {
+                    document.getElementById('musicPlayer').currentTime =
+                        document.getElementById('musicPlayer').duration * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
+                        / document.getElementById("progressBar").clientWidth)
+                };
+                if (i > 0) {
+                    if (document.getElementsByClassName('trackContener').length >= i) {
+                        $timeout(function () {
+                            var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
+                            document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
+                        }, 100);
+                    } else {
+                        goToTrackActive()
+                    }
+                }
+                document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
+                document.getElementById('musicPlayer').play();
+                $timeout(function () {
+                    $scope.$apply(function () {
+                        $scope.onPlay = true;
+                    });
+                }, 0);
             } else {
-                //document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
+                document.getElementById('musicPlayer').pause();
                 //document.getElementById('musicPlayer').classList.add('ng-hide');
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                 //document.getElementById('youtubePlayer').classList.remove('ng-hide');
@@ -373,6 +364,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                         }
                     };
                     var yPlayer = event.target;
+                    yPlayer.setVolume($scope.levelVol);
                     $scope.volume = function () {
                         yPlayer.setVolume($scope.levelVol);
                     };
