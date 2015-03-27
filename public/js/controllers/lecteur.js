@@ -299,6 +299,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                         var webm = video.getSource("video/webm", "medium");
                         var mp4 = video.getSource("video/mp4", "medium");
                         document.getElementById('musicPlayer').setAttribute('src', mp4.url);
+                        document.getElementById('musicPlayer').play();
                     });
                 } else {
                     $scope.nextTrack();
@@ -339,13 +340,13 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                         goToTrackActive()
                     }
                 }
-                document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
-                document.getElementById('musicPlayer').play();
                 $timeout(function () {
                     $scope.$apply(function () {
                         $scope.onPlay = true;
                     });
                 }, 0);
+                document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
+                document.getElementById('musicPlayer').play();
             } else {
                 document.getElementById('musicPlayer').pause();
                 //document.getElementById('musicPlayer').classList.add('ng-hide');
