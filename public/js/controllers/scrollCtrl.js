@@ -206,6 +206,18 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.activEvent = true;
         $rootScope.activPlace = false;
         $rootScope.activUsr = false;
+        $rootScope.maxStart = 604800000;
     }
 ]);
+app.filter('millSecondsToTimeString', function() {
+    return function(millseconds) {
+        var seconds = Math.floor(millseconds / 1000);
+        var days = Math.floor(seconds / 86400);
+        var hours = Math.floor((seconds % 86400) / 3600);
+        var timeString = '';
+        if(days > 0) timeString += (days > 1) ? (days + " days ") : (days + " day ");
+        if(hours > 0) timeString += (hours > 1) ? (hours + " hours ") : (hours + " hour ");
+        return timeString;
+    }
+});
 

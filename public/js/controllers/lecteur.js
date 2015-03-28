@@ -10,6 +10,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     $scope.levelVol = 100;
     $scope.shuffle = false;
     $scope.playlistEnd = false;
+    var offset = 0;
     $scope.sortableOptions = {
         containment: '#sortable-container',
         //restrict move across columns. move only within column.
@@ -22,7 +23,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     var artNames = [];
     var i = 0;
     function eventsPlaylist () {
-        $http.get('/events/offset/0/' + $rootScope.geoLoc).
+        $http.get('/events/offset/' + offset +'/' + $rootScope.geoLoc).
             success(function(data){
                 function getEventsArtsts (event) {
                    var evArtLenght = event.artists.length
@@ -45,7 +46,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                         }
                     }
                 }
-                data.forEach(getEventsArtsts)
+                data.forEach(getEventsArtsts);
+                if (playlistEvents.length == 0 && offset < 100) {
+                    offset = offset + 20;
+                    eventsPlaylist ()
+                    console.log(offset)
+                }
             })
     }
     function pushTrack (track, art) {
@@ -64,6 +70,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $rootScope.playlist.tracks.push($scope.newTrack);
     }
     $rootScope.addToPlaylist = function (tracks, artist) {
+        offset = 0;
         if ($rootScope.playlist.tracks.length == 0) {
             var tracksLenght = tracks.length;
             for (var tr = 0; tr < tracksLenght; tr++) {
@@ -92,6 +99,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         eventsPlaylist();
     };
     $rootScope.addAndPlay = function (tracks, artist) {
+        offset = 0;
         var last = $rootScope.playlist.tracks.length;
         var tracksLenght = tracks.length;
         for (var tr = 0; tr < tracksLenght; tr++) {
