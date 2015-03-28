@@ -135,15 +135,14 @@ object Track {
     case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
   }
 
-
   def deleteTrack(trackId: Long): Long = try {
     DB.withConnection { implicit connection =>
-      SQL("""DELETE FROM tracks WHERE trackId={trackId}""").on('trackId -> trackId).executeUpdate()
+      SQL("""DELETE FROM tracks WHERE trackId={trackId}""")
+        .on('trackId -> trackId).executeUpdate()
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot delete track: " + e.getMessage)
   }
-
 
   def followTrack(userId : Long, trackId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>

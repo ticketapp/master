@@ -19,13 +19,12 @@ object Scheduler {
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
   val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
-  def start = {
-    Place.findAllIdsAndFacebookIds.map { placeIdAndFacebookId: (Long, String) =>
-      saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2)
-    }
+  def start = Place.findAllAsTupleIdFacebookIdAndGeographicPoint.map {
+    placeIdAndFacebookId: (Long, String, Option[String]) =>
+      saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2, placeIdAndFacebookId._3)
   }
 
-  def saveEventsOfPlace(placeId: Long, placeFacebookId: String) = {
+  def saveEventsOfPlace(placeId: Long, placeFacebookId: String, placeGeographicPoint: Option[String]) = {
     getEventsIdsByPlace(placeFacebookId).map {
       _.map { eventId =>
         WS.url("https://graph.facebook.com/v2.2/" + eventId)
@@ -35,8 +34,10 @@ object Scheduler {
           .get()
           .map {
           readFacebookEvent(_) match {
-            case Some(eventuallyFacebookEvent) => eventuallyFacebookEvent map { saveEvent(_, placeId) }
-            case None => println("Empty event readed by Scheduler.readFacebookEvent")
+            case Some(eventuallyFacebookEvent) => eventuallyFacebookEvent map {
+              saveEvent(_, placeId, placeGeographicPoint)
+            }
+            case None => println("Empty event read by Scheduler.readFacebookEvent")
           }
         }
       }
@@ -51,9 +52,9 @@ object Scheduler {
       .map { readEventsIdsFromResponse }
   }
 
-  def saveEvent(facebookEvent: Event, placeId: Long) = {
-    Event.save(facebookEvent) match {
-      case None => Event.update(facebookEvent) //delete old imgs and insert news
+  def saveEvent(facebookEvent: Event, placeId: Long, placeGeographicPoint: Option[String]) = {
+    Event.save(facebookEvent.copy(geographicPoint = placeGeographicPoint)) match {
+      case None => Event.update(facebookEvent) //delete old images and insert news
       case Some(eventId) =>
         Place.saveEventPlaceRelation(eventId, placeId)
         facebookEvent.addresses.map { address =>

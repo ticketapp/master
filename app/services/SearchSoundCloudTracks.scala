@@ -105,7 +105,8 @@ object SearchSoundCloudTracks {
         (__ \ "artwork_url").readNullable[String] and
         (__ \ "genre").readNullable[String]
       )((url: Option[String], title: Option[String], redirectUrl: Option[String], avatarUrl: Option[String],
-         thumbnail: Option[String], genre: Option[String]) => (url, title, redirectUrl, thumbnail, avatarUrl, genre))
+         thumbnail: Option[String], genre: Option[String]) =>
+      (url, title, redirectUrl, thumbnail, avatarUrl, genre))
     val onlyTracksWithUrlTitleAndThumbnail =
       Reads.seq(soundCloudTrackReads).map { collectOnlyValidTracksAndSaveArtistGenres(_, artist) }
 

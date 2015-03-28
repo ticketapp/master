@@ -124,15 +124,19 @@ object Place {
     case e: Exception => throw new DAOException("Place.findAllByEvent: " + e.getMessage)
   }
 
-  def findAllIdsAndFacebookIds: Seq[(Long, String)] = try {
+  def findAllAsTupleIdFacebookIdAndGeographicPoint: Seq[(Long, String, Option[String])] = try {
     val placeIdFacebookIdParser = {
       get[Long]("placeId") ~
-        get[String]("facebookId") map {
-        case placeId ~ facebookId => (placeId, facebookId)
+        get[String]("facebookId") ~
+        get[Option[String]]("geographicPoint") map {
+        case placeId ~ facebookId ~ geographicPoint => (placeId, facebookId, geographicPoint)
       }
     }
     DB.withConnection { implicit connection =>
-      SQL("SELECT placeId, facebookId FROM places WHERE facebookId IS NOT NULL")
+      SQL(
+        """SELECT placeId, facebookId, geographicPoint 
+          |FROM places 
+          |WHERE facebookId IS NOT NULL""".stripMargin)
         .as(placeIdFacebookIdParser.*)
     }
   } catch {
