@@ -6,7 +6,7 @@
        ng-model="$root.filterQuery"
        class="column small-10">
 <ul class="column small-2 padding0">
-    <a ng-if="filter" ng-click="$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
+    <a ng-if="filter || $root.order == 'startTime'" ng-click="$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
     <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
         <a>Filters <i class="fi-arrow-down"></i></a>
     </li>
@@ -23,7 +23,7 @@
                 Ville
             </a>
         </li>
-        <li ng-click="$root.order = 'startTime'; $parent.selectFilter = false"
+        <li ng-click="$root.order = 'startTime'; $parent.selectFilter = false;"
             style="display:block;" class="column large-12 pointer"
             ng-show="$root.activEvent"
             ng-class="{'primCol': $root.order == 'startTime'}"
