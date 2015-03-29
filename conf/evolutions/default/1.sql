@@ -271,15 +271,16 @@ CREATE OR REPLACE FUNCTION insertPlace(
   descriptionValue               VARCHAR,
   webSitesValue                  VARCHAR,
   capacityValue                  INT,
-  openingHoursValue              VARCHAR(255))
+  openingHoursValue              VARCHAR(255),
+  imagePathValue                 VARCHAR)
   RETURNS INT AS
   $$
 DECLARE placeIdToReturn int;;
   BEGIN
     INSERT INTO places (name, geographicPoint, addressId, facebookId, description, webSites,
-                        capacity, openingHours)
+                        capacity, openingHours, imagePath)
     VALUES (nameValue, POINT(geographicPointValue), addressIdValue::BIGINT, facebookIdValue, descriptionValue,
-            webSitesValue, capacityValue, openingHoursValue)
+            webSitesValue, capacityValue, openingHoursValue, imagePathValue)
     RETURNING placeId INTO placeIdToReturn;;
     RETURN placeIdToReturn;;
   EXCEPTION WHEN unique_violation THEN

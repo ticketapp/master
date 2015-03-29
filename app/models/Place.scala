@@ -21,12 +21,14 @@ case class Place (placeId: Long,
 object Place {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
-                webSite: Option[String], capacity: Option[Int], openingHours: Option[String]): Place =
-    new Place(-1L, name, facebookId, geographicPoint, description, webSite, capacity, openingHours)
+                webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
+                imagePath: Option[String]): Place =
+    new Place(-1L, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath)
 
   def formUnapply(place: Place): Option[(String, Option[String], Option[String], Option[String], Option[String],
-    Option[Int], Option[String])] = Some((place.name, place.facebookId, place.geographicPoint, place.description,
-    place.webSites, place.capacity, place.openingHours))
+    Option[Int], Option[String], Option[String])] =
+    Some((place.name, place.facebookId, place.geographicPoint, place.description, place.webSites, place.capacity,
+      place.openingHours, place.imagePath))
 
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
@@ -54,7 +56,7 @@ object Place {
       }
       SQL(
         s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
-           |{webSites}, {capacity}, {openingHours})""".stripMargin)
+           |{webSites}, {capacity}, {openingHours}, {imagePath})""".stripMargin)
         .on(
           'name -> place.name,
           'addressId -> addressId,
@@ -63,7 +65,8 @@ object Place {
           'description -> place.description,
           'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
           'capacity -> place.capacity,
-          'openingHours -> place.openingHours)
+          'openingHours -> place.openingHours,
+          'imagePath -> place.imagePath)
         .as(scalar[Option[Long]].single)
     }
   } catch {
