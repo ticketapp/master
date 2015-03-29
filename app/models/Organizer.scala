@@ -94,14 +94,14 @@ object Organizer {
 
   def save(organizer: Organizer): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      println((organizer.facebookId, organizer.name, organizer.description, organizer.phone, organizer.websites))
       SQL(
-        """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {websites})""")
+        """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {publicTransit}, {websites})""")
         .on(
           'facebookId -> organizer.facebookId,
           'name -> organizer.name,
           'description -> organizer.description,
           'phone -> organizer.phone,
+          'publicTransit -> organizer.publicTransit,
           'websites -> organizer.websites)
         .as(scalar[Option[Long]].single) match {
         case None => None

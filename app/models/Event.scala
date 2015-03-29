@@ -98,7 +98,7 @@ object Event {
     case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
   }
 
-  def find20SinceStartingInInterval(start: Int, center: String, hourInterval: Int): Seq[Event] = try {
+  def find20InHourIntervalWithOffsetNearCenterPoint(start: Int, center: String, hourInterval: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
         s"""SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.name,
@@ -111,7 +111,7 @@ object Event {
         .map(getPropertiesOfEvent)
     }
   } catch {
-    case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.find20SinceStartingInInterval: " + e.getMessage)
   }
 
   def findAllByPlace(placeId: Long): Seq[Event] = try {

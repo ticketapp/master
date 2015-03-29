@@ -75,6 +75,7 @@ CREATE TABLE organizers (
   description             VARCHAR,
   addressId               BIGINT references addresses(addressId),
   phone                   VARCHAR(15),
+  publicTransit           VARCHAR,
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   UNIQUE(facebookId),
@@ -86,13 +87,14 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
   nameValue          VARCHAR(255),
   descriptionValue   VARCHAR,
   phoneValue         VARCHAR(15),
+  publicTransitValue VARCHAR,
   websitesValue      VARCHAR)
   RETURNS INT AS
   $$
   DECLARE organizerIdToReturn int;;
   BEGIN
-    INSERT INTO organizers (facebookId, name, description, phone, websites)
-    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, websitesValue)
+    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites)
+    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue)
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
