@@ -9,7 +9,7 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 
-case class Track (trackId: Long, 
+case class Track (trackId: Option[Long],
                   title: String, 
                   url: String, 
                   platform: String, 
@@ -23,9 +23,9 @@ object Track {
   def formApplyForTrackCreatedWithArtist(title: String, url: String, platform: String, thumbnailUrl: Option[String],
   userThumbnailUrl: Option[String], artistFacebookUrl: String): Track = {
     thumbnailUrl match {
-      case Some(thumbnail: String) => new Track(-1L, title, url, platform, thumbnail, artistFacebookUrl)
+      case Some(thumbnail: String) => new Track(None, title, url, platform, thumbnail, artistFacebookUrl)
       case None => userThumbnailUrl match {
-        case Some(userThumbnail: String) => new Track(-1L, title, url, platform, userThumbnail, artistFacebookUrl)
+        case Some(userThumbnail: String) => new Track(None, title, url, platform, userThumbnail, artistFacebookUrl)
         case None => throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
       }
     }
@@ -34,7 +34,7 @@ object Track {
     Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None, track.artistFacebookUrl))
 
   def formApply(title: String, url: String, platform: String, thumbnailUrl: String, artistFacebookUrl: String): Track =
-   new Track(-1L, title, url, platform, thumbnailUrl, artistFacebookUrl)
+   new Track(None, title, url, platform, thumbnailUrl, artistFacebookUrl)
   def formUnapply(track: Track) =
     Some((track.title, track.url, track.platform, track.thumbnailUrl, track.artistFacebookUrl))
 
@@ -46,7 +46,7 @@ object Track {
       get[String]("thumbnailUrl") ~
       get[String]("artistFacebookUrl") map {
       case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl =>
-        Track(trackId, title, url, platform, thumbnailUrl, artistFacebookUrl)
+        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl)
     }
   }
 
@@ -59,9 +59,7 @@ object Track {
 
   def findAllByArtist(artistFacebookUrl: String): Seq[Track] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM tracks
-             WHERE artistFacebookUrl = {artistFacebookUrl}""")
+      SQL("""SELECT * FROM tracks WHERE artistFacebookUrl = {artistFacebookUrl}""")
         .on('artistFacebookUrl -> artistFacebookUrl)
         .as(TrackParser.*)
     }
@@ -71,10 +69,10 @@ object Track {
 
   def findTracksByPlaylistId(playlistId: Long): Seq[Track] = {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM playlistsTracks pT
-             INNER JOIN tracks t ON t.trackId = pT.trackId
-             WHERE pT.eventId = {eventId}""")
+      SQL(
+        """SELECT * FROM playlistsTracks pT
+          |INNER JOIN tracks t ON t.trackId = pT.trackId
+          |WHERE pT.eventId = {eventId}""".stripMargin)
         .on('playlistId -> playlistId)
         .as(TrackParser.*)
     }
@@ -96,7 +94,7 @@ object Track {
           .as(TrackParser.*)
       }
     } catch {
-      case e: Exception => throw new DAOException("Problem with the method Track.findAllContaining: " + e.getMessage)
+      case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
     }
   }
 
@@ -125,8 +123,10 @@ object Track {
 
   def savePlaylistTrackRelation(playlistId: Long, trackId: Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL( """INSERT INTO playlistsTracks (playlistId, trackId)
-          VALUES ({playlistId}, {trackId})""").on(
+      SQL(
+        """INSERT INTO playlistsTracks (playlistId, trackId)
+          |VALUES ({playlistId}, {trackId})""".stripMargin)
+        .on(
           'playlistId -> playlistId,
           'trackId -> trackId)
         .executeInsert()
@@ -137,11 +137,13 @@ object Track {
 
   def deleteTrack(trackId: Long): Long = try {
     DB.withConnection { implicit connection =>
-      SQL("""DELETE FROM tracks WHERE trackId={trackId}""")
-        .on('trackId -> trackId).executeUpdate()
+      SQL(
+        """DELETE FROM tracks WHERE trackId={trackId}""".stripMargin)
+        .on('trackId -> trackId)
+        .executeUpdate()
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot delete track: " + e.getMessage)
+    case e: Exception => throw new DAOException("Track.deleteTrack: " + e.getMessage)
   }
 
   def followTrack(userId : Long, trackId : Long): Option[Long] = try {

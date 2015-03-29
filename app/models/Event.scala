@@ -234,18 +234,10 @@ object Event {
         .as(scalar[Option[Long]].single) match {
         case None => None
         case Some(eventId: Long) =>
-          event.organizers.foreach { organizer =>
-            Organizer.saveWithEventRelation(organizer, eventId)
-          }
-          event.tariffs.foreach { tariff =>
-            Tariff.save(tariff.copy(eventId = eventId))
-          }
-          event.artists.foreach { artist =>
-            Artist.saveWithEventRelation(artist, eventId)
-          }
-          event.genres.foreach { genre =>
-            Genre.saveWithEventRelation(genre, eventId)
-          }
+          event.organizers.foreach { organizer => Organizer.saveWithEventRelation(organizer, eventId) }
+          event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
+          event.artists.foreach { artist => Artist.saveWithEventRelation(artist, eventId) }
+          event.genres.foreach { genre => Genre.saveWithEventRelation(genre, eventId) }
           Option(eventId)
       }
     }
