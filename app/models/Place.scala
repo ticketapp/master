@@ -63,7 +63,7 @@ object Place {
           SQL(
             s"""INSERT INTO places(name, addressId, facebookId, geographicPoint, description,
                |webSites, capacity, openingHours)
-               |VALUES ({name}, {addressId}, {facebookId},$geographicPoint, {description},
+               |VALUES ({name}, {addressId}, {facebookId}, $geographicPoint, {description},
                |{webSites}, {capacity}, {openingHours})""".stripMargin)
             .on(
               'name -> place.name,
