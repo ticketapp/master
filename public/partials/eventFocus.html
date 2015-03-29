@@ -46,7 +46,7 @@
         <h2>Organisateur</h2>
         <div data-ng-repeat="organizer in event.organizers">
             <a href="#/user/{{organizer.organizerId}}" class="column large-12 padding0">
-                <img src="{{organizer.images[0].path}}" class="relative width100p"/>
+                <img src="{{organizer.imagePath}}" class="relative width100p"/>
             </a>
             <h3 class="column large-8"><a href="#/user/{{organizer.organizerId}}">{{ organizer.name }}</a></h3>
             <button style='margin-top:5px; float:right'>Suivre</button>
