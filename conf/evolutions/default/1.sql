@@ -28,7 +28,11 @@ CREATE TABLE infos (
   content                   TEXT
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
+<<<<<<< HEAD
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
+=======
+INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!')
+>>>>>>> 871e71c71692bca6d41bd460076e2a9bdf53e501
 INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 50 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
