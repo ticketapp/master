@@ -3,7 +3,7 @@
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
-        <p>le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a></p>
+        <p>le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places"> {{ place.name }}</a></p>
         <h2 id="eventTitle" class="column large-10" style="margin-top:0">{{event.name}}</h2>
         <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
     </div>
