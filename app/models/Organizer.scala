@@ -92,8 +92,7 @@ object Organizer {
         .map(getOrganizerProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Organizer.findAllContaining: "
-      + e.getMessage)
+    case e: Exception => throw new DAOException("Organizer.findAllContaining: " + e.getMessage)
   }
 
   def save(organizer: Organizer): Option[Long] = try {
@@ -125,22 +124,20 @@ object Organizer {
     case e: Exception => throw new DAOException("Organizer.returnOrganizerId: " + e.getMessage)
   }
 
-  def saveWithEventRelation(organizer: Organizer, eventId: Long): Option[Long] = {
+  def saveWithEventRelation(organizer: Organizer, eventId: Long): Boolean = {
     save(organizer) match {
-      case Some(-1) => saveEventOrganizerRelation(eventId, returnOrganizerId(organizer.name))
       case Some(i) => saveEventOrganizerRelation(eventId, i)
-      case None => None
+      case None => false
     }
   }
 
-  def saveEventOrganizerRelation(eventId: Long, organizerId: Long): Option[Long] = try {
+  def saveEventOrganizerRelation(eventId: Long, organizerId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL( """INSERT INTO eventsOrganizers (eventId, organizerId)
-        VALUES ({eventId}, {organizerId})""")
+      SQL( """SELECT insertEventOrganizerRelation({eventId}, {organizerId})""")
         .on(
           'eventId -> eventId,
           'organizerId -> organizerId)
-        .executeInsert()
+        .execute()
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)

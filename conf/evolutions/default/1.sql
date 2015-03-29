@@ -533,6 +533,18 @@ CREATE TABLE eventsOrganizers (
   organizerId             INT REFERENCES organizers(organizerId),
   PRIMARY KEY (eventId, organizerId)
 );
+CREATE OR REPLACE FUNCTION insertEventOrganizerRelation(
+  eventIdValue            BIGINT,
+  organizerIdValue        BIGINT)
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO eventsOrganizers (eventId, organizerId)
+    VALUES (eventIdValue, organizerIdValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE eventsAddresses (
   eventId                 INT REFERENCES events (eventId),
