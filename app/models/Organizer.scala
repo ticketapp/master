@@ -48,7 +48,7 @@ object Organizer {
 
   def findAll: List[Organizer] = try {
     DB.withConnection { implicit connection =>
-      SQL("select * from organizers")
+      SQL("SELECT * FROM organizers")
         .as(OrganizerParser.*)
         .map(getOrganizerProperties)
     }
@@ -94,29 +94,22 @@ object Organizer {
 
   def save(organizer: Organizer): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      Utilities.testIfExist("organizers", "name", organizer.name) match {
-        case true => Some(-1)
-        case false =>
-          SQL(
-            """INSERT INTO organizers(name, facebookId, description, phone, publicTransit, websites)
-              |VALUES ({name}, {facebookId}, {description}, {phone}, {publicTransit}, {websites})""".stripMargin)
-            .on(
-              'name -> organizer.name,
-              'facebookId -> organizer.facebookId,
-              'description -> organizer.description,
-              'phone -> organizer.phone,
-              'publicTransit -> organizer.publicTransit,
-              'websites -> organizer.websites
-            ).executeInsert() match {
-            case None => None
-            case Some(organizerId: Long) =>
-              organizer.images.foreach(image =>
-                Image.save(image.copy(organizerId = Some(organizerId)))
-              )
-              Some(organizerId)
-          }
+      SQL(
+        """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {publicTransit}, {websites})""")
+        .on(
+          'facebookId -> organizer.facebookId,
+          'name -> organizer.name,
+          'description -> organizer.description,
+          'phone -> organizer.phone,
+          'publicTransit -> organizer.publicTransit,
+          'websites -> organizer.websites)
+        .as(scalar[Option[Long]].single) match {
+        case None => None
+        case Some(organizerId: Long) =>
+          organizer.images.foreach(image => Image.save(image.copy(organizerId = Some(organizerId))))
+          Some(organizerId)
       }
-    }
+  }
   } catch {
     case e: Exception => throw new DAOException("Organizer.save: " + e.getMessage +
       organizer.name + " " + organizer.websites + " " + organizer.name.length + "/" +

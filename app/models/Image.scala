@@ -51,18 +51,6 @@ object Image {
     case e: Exception => throw new DAOException("Image.findAllByEvent: " + e.getMessage)
   }
 
-  def findAllByPlace(placeId: Long): List[Image] =  try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM images
-             WHERE placeId = {placeId}""")
-        .on('placeId -> placeId)
-        .as(ImageParser.*)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Image.findAllByPlace: " + e.getMessage)
-  }
-
   def findAllByArtist(artistId: Long): Set[Image] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *

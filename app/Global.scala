@@ -7,15 +7,14 @@ import jobs.Scheduler
 
 object Global extends GlobalSettings {
 
-  override def onStart(app: Application) {
-
-    Akka.system.scheduler.schedule(10.seconds, 12.hours) {
-      println("Scheduler started")
-      Scheduler.start
-    }
-    /*play.api.Play.mode(app) match {
+  override def onStart(app: Application): Unit = {
+    play.api.Play.mode(app) match {
       case play.api.Mode.Test => // do not schedule anything for Test
-      case _ => startScheduler(app)
-    }*/
+      case _ =>
+        Akka.system.scheduler.schedule(10.seconds, 12.hours) {
+          println("Scheduler started")
+          Scheduler.start
+      }
+    }
   }
 }

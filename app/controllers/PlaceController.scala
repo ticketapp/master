@@ -50,7 +50,8 @@ object PlaceController extends Controller {
     "description" -> optional(nonEmptyText(2)),
     "webSite" -> optional(nonEmptyText(4)),
     "capacity" -> optional(number),
-    "openingHours" -> optional(nonEmptyText(4))
+    "openingHours" -> optional(nonEmptyText(4)),
+    "imagePath" -> optional(nonEmptyText(2))
   )(Place.formApply)(Place.formUnapply)
   )
   

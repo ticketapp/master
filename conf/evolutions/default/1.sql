@@ -24,12 +24,12 @@ CREATE TABLE comments (
 
 CREATE TABLE infos (
   infoId                    SERIAL PRIMARY KEY,
-  title                     TEXT NOT NULL,
-  content                   TEXT
+  title                     VARCHAR NOT NULL,
+  content                   VARCHAR
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 53 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 49 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -37,20 +37,20 @@ CREATE TABLE artists (
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
-  imagePath                 TEXT,
-  description               TEXT,
+  imagePath                 VARCHAR,
+  description               VARCHAR,
   facebookUrl               VARCHAR(255) NOT NULL,
-  websites                  TEXT,
+  websites                  VARCHAR,
   UNIQUE(facebookId),
   UNIQUE(facebookUrl)
 );
 
 CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
                                         nameValue VARCHAR(255),
-                                        imagePathValue TEXT,
-                                        descriptionValue TEXT,
+                                        imagePathValue VARCHAR,
+                                        descriptionValue VARCHAR,
                                         facebookUrlValue VARCHAR(255),
-                                        websitesValue TEXT)
+                                        websitesValue VARCHAR)
   RETURNS INT AS
   $$
   DECLARE artistIdToReturn int;;
@@ -72,15 +72,42 @@ CREATE TABLE organizers (
   organizerId             SERIAL PRIMARY KEY,
   facebookId              VARCHAR(63),
   name                    VARCHAR(255) NOT NULL,
-  description             TEXT,
+  description             VARCHAR,
   addressId               BIGINT references addresses(addressId),
   phone                   VARCHAR(15),
-  publicTransit           TEXT,
-  websites                TEXT,
+  publicTransit           VARCHAR,
+  websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   UNIQUE(facebookId),
   UNIQUE(name)
 );
+
+CREATE OR REPLACE FUNCTION insertOrganizer(
+  facebookIdValue    VARCHAR(63),
+  nameValue          VARCHAR(255),
+  descriptionValue   VARCHAR,
+  phoneValue         VARCHAR(15),
+  publicTransitValue VARCHAR,
+  websitesValue      VARCHAR)
+  RETURNS INT AS
+  $$
+  DECLARE organizerIdToReturn int;;
+  BEGIN
+    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites)
+    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue)
+    RETURNING organizerId
+      INTO organizerIdToReturn;;
+    RETURN organizerIdToReturn;;
+    EXCEPTION WHEN unique_violation
+    THEN
+      SELECT organizerId
+      INTO organizerIdToReturn
+      FROM organizers
+      WHERE facebookId = facebookIdValue;;
+      RETURN organizerIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;;
 
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
@@ -106,9 +133,9 @@ LANGUAGE plpgsql;
 CREATE TABLE tracks (
   trackId                 SERIAL PRIMARY KEY,
   title                   VARCHAR(255) NOT NULL,
-  url                     TEXT NOT NULL,
+  url                     VARCHAR NOT NULL,
   platform                VARCHAR(255) NOT NULL,
-  thumbnailUrl            TEXT NOT NULL,
+  thumbnailUrl            VARCHAR NOT NULL,
   artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
   redirectUrl             VARCHAR(255),
   UNIQUE(url)
@@ -116,9 +143,9 @@ CREATE TABLE tracks (
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 CREATE OR REPLACE FUNCTION insertTrack(titleValue VARCHAR(255),
-                                       urlValue TEXT,
+                                       urlValue VARCHAR,
                                        platformValue VARCHAR(255),
-                                       thumbnailUrlValue TEXT,
+                                       thumbnailUrlValue VARCHAR,
                                        artistFacebookUrlValue VARCHAR(255),
                                        redirectUrlValue VARCHAR(255))
   RETURNS INT AS
@@ -158,10 +185,10 @@ CREATE TABLE users_login (
   lastName                  VARCHAR(255) NOT NULL,
   fullName                  VARCHAR(255) NOT NULL,
   email                     VARCHAR(255),
-  avatarUrl                 TEXT,
+  avatarUrl                 VARCHAR,
   authMethod                VARCHAR(255) NOT NULL,
-  oAuth1Info                TEXT,
-  oAuth2Info                TEXT,
+  oAuth1Info                VARCHAR,
+  oAuth2Info                VARCHAR,
   passwordInfo              VARCHAR(255),
   UNIQUE(userId)
 );
@@ -177,12 +204,12 @@ CREATE TABLE users_token (
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,
   facebookId                VARCHAR(63),
-  isPublic                  boolean NOT NULL,
-  isActive                  boolean NOT NULL,
+  isPublic                  BOOLEAN NOT NULL,
+  isActive                  BOOLEAN NOT NULL,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           point,
-  description               TEXT,
+  geographicPoint           POINT,
+  description               VARCHAR,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP,
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
@@ -190,27 +217,27 @@ CREATE TABLE events (
 );
 CREATE INDEX eventGeographicPoint ON events USING GIST (geographicPoint);
 
-CREATE OR REPLACE FUNCTION insertEvent(facebookIdValue VARCHAR(63),
-                                       isPublicValue BOOLEAN,
-                                       isActiveValue BOOLEAN,
-                                       creationDateTimeValue TIMESTAMP,
-                                       nameValue VARCHAR(255),
-                                       geographicPointValue point,
-                                       descriptionValue TEXT,
-                                       startTimeValue TIMESTAMP,
-                                       endTimeValue TIMESTAMP,
-                                       ageRestrictionValue SMALLINT)
+CREATE OR REPLACE FUNCTION insertEvent(
+  facebookIdValue                VARCHAR(63),
+  isPublicValue                  BOOLEAN,
+  isActiveValue                  BOOLEAN,
+  nameValue                      VARCHAR(255),
+  geographicPointValue           VARCHAR(63),
+  descriptionValue               VARCHAR,
+  startTimeValue                 TIMESTAMP with time zone,
+  endTimeValue                   TIMESTAMP with time zone,
+  ageRestrictionValue            INT)
   RETURNS INT AS
   $$
   DECLARE eventIdToReturn int;;
   BEGIN
-    INSERT INTO events (facebookid, ispublic, isactive, creationdatetime, name, geographicpoint, description, 
-                        starttime, endtime, agerestriction) 
-    VALUES (facebookidValue, ispublicValue, isactiveValue, creationdatetimeValue, nameValue, geographicpointValue, 
-            descriptionValue, starttimeValue, endtimeValue, agerestrictionValue)
+    INSERT INTO events (facebookid, ispublic, isactive, name, geographicpoint, description, starttime,
+                        endtime, agerestriction)
+    VALUES (facebookidValue, ispublicValue, isactiveValue, nameValue, POINT(geographicpointValue),
+            descriptionValue, starttimeValue, endtimeValue, agerestrictionValue::SMALLINT)
     RETURNING eventId INTO eventIdToReturn;;
     RETURN eventIdToReturn;;
-  EXCEPTION WHEN unique_violation THEN
+    EXCEPTION WHEN unique_violation THEN
     SELECT eventId INTO eventIdToReturn FROM events WHERE facebookId = facebookIdValue;;
     RETURN eventIdToReturn;;
   END;;
@@ -220,22 +247,50 @@ LANGUAGE plpgsql;
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           point,
+  geographicPoint           POINT,
   addressId                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
-  description               TEXT,
-  webSites                  TEXT,
-  facebookMiniature         text,
+  description               VARCHAR,
+  webSites                  VARCHAR,
+  facebookMiniature         VARCHAR,
   capacity                  INT,
   openingHours              VARCHAR(255),
+  imagePath                 VARCHAR,
   UNIQUE(facebookId)
 );
-INSERT into places(name, facebookId) values ('Le transbordeur', '117030545096697');
+INSERT into places(name, geographicPoint, facebookId) values ('Le transbordeur', POINT('(5.5,1.4)'), '117030545096697');
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
+
+CREATE OR REPLACE FUNCTION insertPlace(
+  nameValue                      VARCHAR(255),
+  geographicPointValue           VARCHAR(63),
+  addressIdValue                 INT,
+  facebookIdValue                VARCHAR(63),
+  descriptionValue               VARCHAR,
+  webSitesValue                  VARCHAR,
+  capacityValue                  INT,
+  openingHoursValue              VARCHAR(255),
+  imagePathValue                 VARCHAR)
+  RETURNS INT AS
+  $$
+DECLARE placeIdToReturn int;;
+  BEGIN
+    INSERT INTO places (name, geographicPoint, addressId, facebookId, description, webSites,
+                        capacity, openingHours, imagePath)
+    VALUES (nameValue, POINT(geographicPointValue), addressIdValue::BIGINT, facebookIdValue, descriptionValue,
+            webSitesValue, capacityValue, openingHoursValue, imagePathValue)
+    RETURNING placeId INTO placeIdToReturn;;
+    RETURN placeIdToReturn;;
+  EXCEPTION WHEN unique_violation THEN
+    SELECT placeId INTO placeIdToReturn FROM places WHERE facebookId = facebookIdValue;;
+    RETURN placeIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
-  path                      TEXT NOT NULL,
+  path                      VARCHAR NOT NULL,
   category                  VARCHAR(31),
   eventId                   BIGINT references events(eventId),
   userId                    BIGINT references users(userId),
