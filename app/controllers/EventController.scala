@@ -28,7 +28,6 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-
   def eventsByPlace(placeId: Long) = Action {
     Ok(Json.toJson(Event.findAllByPlace(placeId)))
   }
@@ -60,10 +59,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       "startTime" -> date("yyyy-MM-dd HH:mm"),
       "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
       "ageRestriction" -> number,
-      "images" -> list(
-        mapping(
-          "path" -> nonEmptyText
-        )(Image.formApply)(Image.formUnapply)),
+      "imagePath" -> optional(nonEmptyText(2)),
       "tariffs" -> list(
         mapping(
           "denomination" -> nonEmptyText,
