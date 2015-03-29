@@ -49,37 +49,27 @@ object Place {
 
   def save(place: Place): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      testIfExist("places", "facebookId", place.facebookId) match {
-        case true => None
-        case false =>
-          val geographicPoint = place.geographicPoint.getOrElse("") match {
-            case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
-            case _ => "{geographicPoint}"
-          }
-          val addressId = place.address.getOrElse(None) match {
-            case None => None
-            case Some(address: Address) => address.addressId
-          }
-          SQL(
-            s"""INSERT INTO places(name, addressId, facebookId, geographicPoint, description,
-               |webSites, capacity, openingHours)
-               |VALUES ({name}, {addressId}, {facebookId},$geographicPoint, {description},
-               |{webSites}, {capacity}, {openingHours})""".stripMargin)
-            .on(
-              'name -> place.name,
-              'addressId -> addressId,
-              'facebookId -> place.facebookId,
-              'geographicPoint -> None,
-              'description -> place.description,
-              'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
-              'capacity -> place.capacity,
-              'openingHours -> place.openingHours)
-            .executeInsert() match {
-            case None => None
-            case Some(placeId: Long) =>
-              place.images.foreach(image => Image.save(image.copy(placeId = Some(placeId))))
-              Some(placeId)
-          }
+      val addressId = place.address match {
+        case None => None
+        case Some(address: Address) => Some(address.addressId)
+      }
+      SQL(
+        s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
+           |{webSites}, {capacity}, {openingHours})""".stripMargin)
+        .on(
+          'name -> place.name,
+          'addressId -> addressId,
+          'facebookId -> place.facebookId,
+          'geographicPoint -> place.geographicPoint,
+          'description -> place.description,
+          'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
+          'capacity -> place.capacity,
+          'openingHours -> place.openingHours)
+        .as(scalar[Option[Long]].single) match {
+        case None => None
+        case Some(placeId: Long) =>
+          place.images.foreach(image => Image.save(image.copy(placeId = Some(placeId))))
+          Some(placeId)
       }
     }
   } catch {

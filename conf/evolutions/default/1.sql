@@ -28,11 +28,7 @@ CREATE TABLE infos (
   content                   TEXT
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
-<<<<<<< HEAD
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-=======
-INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!')
->>>>>>> 871e71c71692bca6d41bd460076e2a9bdf53e501
 INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 50 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
@@ -224,18 +220,44 @@ LANGUAGE plpgsql;
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           point,
+  geographicPoint           POINT,
   addressId                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
   description               TEXT,
   webSites                  TEXT,
-  facebookMiniature         text,
+  facebookMiniature         TEXT,
   capacity                  INT,
   openingHours              VARCHAR(255),
   UNIQUE(facebookId)
 );
-INSERT into places(name, facebookId) values ('Le transbordeur', '117030545096697');
+INSERT into places(name, geographicPoint, facebookId) values ('Le transbordeur', POINT('(5.5,1.4)'), '117030545096697');
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
+
+CREATE OR REPLACE FUNCTION insertPlace(
+  nameValue                      VARCHAR(255),
+  geographicPointValue           VARCHAR(63),
+  addressIdValue                 INT,
+  facebookIdValue                VARCHAR(63),
+  descriptionValue               TEXT,
+  webSitesValue                  TEXT,
+  capacityValue                  INT,
+  openingHoursValue              VARCHAR(255))
+  RETURNS INT AS
+  $$
+DECLARE placeIdToReturn int;;
+  BEGIN
+    INSERT INTO places (name, geographicPoint, addressId, facebookId, description, webSites,
+                        capacity, openingHours)
+    VALUES (nameValue, POINT(geographicPointValue), addressIdValue::BIGINT, facebookIdValue, descriptionValue,
+            webSitesValue, capacityValue, openingHoursValue)
+    RETURNING placeId INTO placeIdToReturn;;
+    RETURN placeIdToReturn;;
+  EXCEPTION WHEN unique_violation THEN
+    SELECT placeId INTO placeIdToReturn FROM places WHERE facebookId = facebookIdValue;;
+    RETURN placeIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,

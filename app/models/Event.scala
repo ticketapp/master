@@ -6,8 +6,7 @@ import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
 import java.util.Date
-import play.libs.Scala
-import services.Utilities.{testIfExist, geographicPointToString}
+import services.Utilities.geographicPointToString
 
 case class Event(eventId: Option[Long],
                  facebookId: Option[String],
@@ -222,7 +221,7 @@ object Event {
           'geographicPoint -> event.geographicPoint,
           'description -> event.description,
           'startTime -> event.startTime,
-          'endTime -> event.endTime.getOrElse(None),
+          'endTime -> event.endTime,
           'ageRestriction -> event.ageRestriction)
         .as(scalar[Option[Long]].single) match {
         case None => None
