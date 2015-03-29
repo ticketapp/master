@@ -48,7 +48,7 @@ object Organizer {
 
   def findAll: List[Organizer] = try {
     DB.withConnection { implicit connection =>
-      SQL("select * from organizers")
+      SQL("SELECT * FROM organizers")
         .as(OrganizerParser.*)
         .map(getOrganizerProperties)
     }
@@ -94,21 +94,19 @@ object Organizer {
 
   def save(organizer: Organizer): Option[Long] = try {
     DB.withConnection { implicit connection =>
+      println((organizer.facebookId, organizer.name, organizer.description, organizer.phone, organizer.websites))
       SQL(
-        """SELECT insertOrganizers({name}, {facebookId}, {description}, {phone}, {publicTransit}, {websites})""")
+        """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {websites})""")
         .on(
-          'name -> organizer.name,
           'facebookId -> organizer.facebookId,
+          'name -> organizer.name,
           'description -> organizer.description,
           'phone -> organizer.phone,
-          'publicTransit -> organizer.publicTransit,
           'websites -> organizer.websites)
         .as(scalar[Option[Long]].single) match {
         case None => None
         case Some(organizerId: Long) =>
-          organizer.images.foreach(image =>
-            Image.save(image.copy(organizerId = Some(organizerId)))
-          )
+          organizer.images.foreach(image => Image.save(image.copy(organizerId = Some(organizerId))))
           Some(organizerId)
       }
   }

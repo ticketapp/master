@@ -9,6 +9,7 @@ GET           /admin                                         controllers.Admin.i
 
 ################################## Events ###############################################
 GET           /events/offset/:offset/:geographicPoint        controllers.EventController.events(offset: Int, geographicPoint: String)
+GET           /events/offsetAndMaxStartTime/:offset/:geographicPoint/:hourInterval  controllers.EventController.eventsWithMaxStartTime(offset: Int, geographicPoint: String, hourInterval: Int)
 GET           /events/:id                                    controllers.EventController.event(id: Long)
 POST          /events/create                                 controllers.EventController.createEvent
 POST          /events/:eventId/follow                        controllers.EventController.followEvent(eventId: Long)

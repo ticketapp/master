@@ -98,6 +98,22 @@ object Event {
     case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
   }
 
+  def find20SinceStartingInInterval(start: Int, center: String, hourInterval: Int): Seq[Event] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT events.eventId, events.facebookId, events.isPublic, events.isActive, events.name,
+           |events.geographicPoint, events.description, events.startTime, events.endTime, events.ageRestriction
+           |FROM events
+           |WHERE startTime < (CURRENT_TIMESTAMP + interval '$hourInterval hours')
+           |ORDER BY geographicPoint <-> point '$center'
+           |LIMIT 20 OFFSET $start""".stripMargin)
+        .as(EventParser.*)
+        .map(getPropertiesOfEvent)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
+  }
+
   def findAllByPlace(placeId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -204,12 +220,6 @@ object Event {
 
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>
-     /* println(event.geographicPoint)
-      val geographicPoint = event.geographicPoint.getOrElse("") match {
-        case geographicPointPattern(geoPoint) => s"""$geoPoint"""
-        case _ => "{geographicPoint}"
-      }
-      val test: String = "(5.5,1.4)"*/
       SQL(
         s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint},
            |{description}, {startTime}, {endTime}, {ageRestriction})""".stripMargin)

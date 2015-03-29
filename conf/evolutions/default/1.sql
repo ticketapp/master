@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 50 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 49 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -75,7 +75,6 @@ CREATE TABLE organizers (
   description             VARCHAR,
   addressId               BIGINT references addresses(addressId),
   phone                   VARCHAR(15),
-  publicTransit           VARCHAR,
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   UNIQUE(facebookId),
@@ -86,17 +85,14 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
   facebookIdValue    VARCHAR(63),
   nameValue          VARCHAR(255),
   descriptionValue   VARCHAR,
-  addressIdValue     INT, --bigint
   phoneValue         VARCHAR(15),
-  publicTransitValue VARCHAR,
   websitesValue      VARCHAR)
   RETURNS INT AS
   $$
   DECLARE organizerIdToReturn int;;
   BEGIN
-    INSERT INTO organizers (facebookId, name, description, addressId, phone, publicTransit, websites)
-    VALUES (facebookIdValue, nameValue, descriptionValue, addressIdValue :: BIGINT, phoneValue, publicTransitValue, 
-            websitesValue)
+    INSERT INTO organizers (facebookId, name, description, phone, websites)
+    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, websitesValue)
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
