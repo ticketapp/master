@@ -5,6 +5,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     $scope.users = [];
     $scope.places = [];
     $scope.events = [];
+    $scope.loadingMore = true;
     var offset = 0;
     var _selArtist = $rootScope.activArtist;
     var _selEvent = $rootScope.activEvent;
@@ -43,6 +44,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         }
                         console.log($scope.events)
                         $rootScope.resizeImgHeight();
+                        $scope.loadingMore = false;
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -68,6 +70,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             data.forEach(uploadArtists)
                         }
                         $rootScope.resizeImgHeight();
+                        $scope.loadingMore = false;
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -81,6 +84,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             $scope.users = data;
                         }
                         $rootScope.resizeImgHeight()
+                        $scope.loadingMore = false;
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -107,6 +111,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         }
                         console.log($scope.places)
                         $rootScope.resizeImgHeight();
+                        $scope.loadingMore = false;
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -135,6 +140,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             data.forEach(uploadArtists)
                         }
                         $rootScope.resizeImgHeight();
+                        $scope.loadingMore = false;
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -161,6 +167,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             data.forEach(uploadPlaces)
                         }
                         $rootScope.resizeImgHeight()
+                        $scope.loadingMore = false;
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -187,6 +194,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             data.forEach(uploadUsers);
                         }
                         $rootScope.resizeImgHeight()
+                        $scope.loadingMore = false;
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -223,6 +231,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 uploadEvents(data[i]);
                             }
                         }
+                        $scope.loadingMore = false;
                         $http.get('/artists/containing/'+_research).
                             success(function(data, status, headers, config) {
                                 function getArtistEvents (art) {
@@ -233,6 +242,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                         })
                                 }
                                 data.forEach(getArtistEvents)
+                                $scope.loadingMore = false;
                             });
                         $http.get('/places/containing/'+_research).
                             success(function(data, status, headers, config) {
@@ -247,6 +257,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 data.forEach(getPlaceEvents)
                             });
                         $rootScope.resizeImgHeight()
+                        $scope.loadingMore = false;
                     }).
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
@@ -303,6 +314,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     console.log($rootScope.geoLoc);
     $scope.moreLimit = function () {
         offset = offset + 20;
+        $scope.loadingMore = true;
         $rootScope.resizeImgHeight();
         search();
     };
@@ -328,6 +340,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             searchArtistFb();
             $scope.limit = 20;
             offset = 0;
+            if (newName == true) {
+                $scope.loadingMore = true;
+            }
         }
         return _selArtist;
     };
@@ -337,6 +352,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             search();
             $scope.limit = 20;
             offset = 0;
+            if (newName == true) {
+                $scope.loadingMore = true;
+            }
         }
         return _selEvent;
     };
@@ -346,6 +364,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             search();
             $scope.limit = 20;
             offset = 0;
+            if (newName == true) {
+                $scope.loadingMore = true;
+            }
         }
         return _selPlace;
     };
@@ -355,6 +376,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             search();
             $scope.limit = 20;
             offset = 0;
+            if (newName == true) {
+                $scope.loadingMore = true;
+            }
         }
         return _selUsr;
     };

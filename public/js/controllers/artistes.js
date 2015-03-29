@@ -140,7 +140,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                     refactorWebsites();
                 }
                 console.log(data)
-                $rootScope.loadingTracks = false
+                $rootScope.loadingTracks = false;
                 $http.get('/artists/'+ $routeParams.facebookUrl + '/events ').
                     success(function(data){
                         $scope.artiste.events = data;
