@@ -212,6 +212,7 @@ CREATE TABLE events (
   description               VARCHAR,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP,
+  imagePath                 VARCHAR,
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
   UNIQUE(facebookId)
 );
@@ -226,15 +227,16 @@ CREATE OR REPLACE FUNCTION insertEvent(
   descriptionValue               VARCHAR,
   startTimeValue                 TIMESTAMP with time zone,
   endTimeValue                   TIMESTAMP with time zone,
+  imagePathValue                 VARCHAR,
   ageRestrictionValue            INT)
   RETURNS INT AS
   $$
   DECLARE eventIdToReturn int;;
   BEGIN
     INSERT INTO events (facebookid, ispublic, isactive, name, geographicpoint, description, starttime,
-                        endtime, agerestriction)
+                        endtime, imagePath, agerestriction)
     VALUES (facebookidValue, ispublicValue, isactiveValue, nameValue, POINT(geographicpointValue),
-            descriptionValue, starttimeValue, endtimeValue, agerestrictionValue::SMALLINT)
+            descriptionValue, starttimeValue, endtimeValue, imagePathValue, agerestrictionValue::SMALLINT)
     RETURNING eventId INTO eventIdToReturn;;
     RETURN eventIdToReturn;;
     EXCEPTION WHEN unique_violation THEN

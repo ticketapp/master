@@ -103,7 +103,7 @@ object Scheduler {
           val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
           new Event(None, facebookId, true, true, name, None,
             formatDescription(description), formatDate(startTime).getOrElse(new Date()),
-            formatDate(endTime), 16, List(new Image(-1L, source)), List(organizer).flatten,
+            formatDate(endTime), 16, Option(source), List(organizer).flatten,
             nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
         }
     })
