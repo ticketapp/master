@@ -24,8 +24,8 @@ CREATE TABLE comments (
 
 CREATE TABLE infos (
   infoId                    SERIAL PRIMARY KEY,
-  title                     TEXT NOT NULL,
-  content                   TEXT
+  title                     VARCHAR NOT NULL,
+  content                   VARCHAR
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
@@ -37,20 +37,20 @@ CREATE TABLE artists (
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
-  imagePath                 TEXT,
-  description               TEXT,
+  imagePath                 VARCHAR,
+  description               VARCHAR,
   facebookUrl               VARCHAR(255) NOT NULL,
-  websites                  TEXT,
+  websites                  VARCHAR,
   UNIQUE(facebookId),
   UNIQUE(facebookUrl)
 );
 
 CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
                                         nameValue VARCHAR(255),
-                                        imagePathValue TEXT,
-                                        descriptionValue TEXT,
+                                        imagePathValue VARCHAR,
+                                        descriptionValue VARCHAR,
                                         facebookUrlValue VARCHAR(255),
-                                        websitesValue TEXT)
+                                        websitesValue VARCHAR)
   RETURNS INT AS
   $$
   DECLARE artistIdToReturn int;;
@@ -72,11 +72,11 @@ CREATE TABLE organizers (
   organizerId             SERIAL PRIMARY KEY,
   facebookId              VARCHAR(63),
   name                    VARCHAR(255) NOT NULL,
-  description             TEXT,
+  description             VARCHAR,
   addressId               BIGINT references addresses(addressId),
   phone                   VARCHAR(15),
-  publicTransit           TEXT,
-  websites                TEXT,
+  publicTransit           VARCHAR,
+  websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   UNIQUE(facebookId),
   UNIQUE(name)
@@ -106,9 +106,9 @@ LANGUAGE plpgsql;
 CREATE TABLE tracks (
   trackId                 SERIAL PRIMARY KEY,
   title                   VARCHAR(255) NOT NULL,
-  url                     TEXT NOT NULL,
+  url                     VARCHAR NOT NULL,
   platform                VARCHAR(255) NOT NULL,
-  thumbnailUrl            TEXT NOT NULL,
+  thumbnailUrl            VARCHAR NOT NULL,
   artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
   redirectUrl             VARCHAR(255),
   UNIQUE(url)
@@ -116,9 +116,9 @@ CREATE TABLE tracks (
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 CREATE OR REPLACE FUNCTION insertTrack(titleValue VARCHAR(255),
-                                       urlValue TEXT,
+                                       urlValue VARCHAR,
                                        platformValue VARCHAR(255),
-                                       thumbnailUrlValue TEXT,
+                                       thumbnailUrlValue VARCHAR,
                                        artistFacebookUrlValue VARCHAR(255),
                                        redirectUrlValue VARCHAR(255))
   RETURNS INT AS
@@ -158,10 +158,10 @@ CREATE TABLE users_login (
   lastName                  VARCHAR(255) NOT NULL,
   fullName                  VARCHAR(255) NOT NULL,
   email                     VARCHAR(255),
-  avatarUrl                 TEXT,
+  avatarUrl                 VARCHAR,
   authMethod                VARCHAR(255) NOT NULL,
-  oAuth1Info                TEXT,
-  oAuth2Info                TEXT,
+  oAuth1Info                VARCHAR,
+  oAuth2Info                VARCHAR,
   passwordInfo              VARCHAR(255),
   UNIQUE(userId)
 );
@@ -182,7 +182,7 @@ CREATE TABLE events (
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
   geographicPoint           POINT,
-  description               TEXT,
+  description               VARCHAR,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP,
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
@@ -196,7 +196,7 @@ CREATE OR REPLACE FUNCTION insertEvent(
   isActiveValue                  BOOLEAN,
   nameValue                      VARCHAR(255),
   geographicPointValue           VARCHAR(63),
-  descriptionValue               TEXT,
+  descriptionValue               VARCHAR,
   startTimeValue                 TIMESTAMP with time zone,
   endTimeValue                   TIMESTAMP with time zone,
   ageRestrictionValue            INT)
@@ -223,11 +223,12 @@ CREATE TABLE places (
   geographicPoint           POINT,
   addressId                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
-  description               TEXT,
-  webSites                  TEXT,
-  facebookMiniature         TEXT,
+  description               VARCHAR,
+  webSites                  VARCHAR,
+  facebookMiniature         VARCHAR,
   capacity                  INT,
   openingHours              VARCHAR(255),
+  imagePath                 VARCHAR,
   UNIQUE(facebookId)
 );
 INSERT into places(name, geographicPoint, facebookId) values ('Le transbordeur', POINT('(5.5,1.4)'), '117030545096697');
@@ -238,8 +239,8 @@ CREATE OR REPLACE FUNCTION insertPlace(
   geographicPointValue           VARCHAR(63),
   addressIdValue                 INT,
   facebookIdValue                VARCHAR(63),
-  descriptionValue               TEXT,
-  webSitesValue                  TEXT,
+  descriptionValue               VARCHAR,
+  webSitesValue                  VARCHAR,
   capacityValue                  INT,
   openingHoursValue              VARCHAR(255))
   RETURNS INT AS
@@ -261,7 +262,7 @@ LANGUAGE plpgsql;
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
-  path                      TEXT NOT NULL,
+  path                      VARCHAR NOT NULL,
   category                  VARCHAR(31),
   eventId                   BIGINT references events(eventId),
   userId                    BIGINT references users(userId),

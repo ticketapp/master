@@ -5,9 +5,7 @@ import anorm._
 import play.api.db.DB
 import play.api.Play.current
 import controllers.DAOException
-import scala.util.Try
-import scala.util.matching.Regex
-import services.Utilities.{testIfExist, geographicPointToString, getNormalizedWebsitesInText}
+import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 
 case class Place (placeId: Long,
                   name: String,
@@ -17,7 +15,7 @@ case class Place (placeId: Long,
                   webSites: Option[String] = None,
                   capacity: Option[Int] = None,
                   openingHours: Option[String] = None,
-                  images: List[Image] = List(),
+                  imagePath: Option[String] = None,
                   address : Option[Address] = None)
 
 object Place {
@@ -39,17 +37,17 @@ object Place {
       get[Option[String]]("webSites") ~
       get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") ~
-      get[Option[Long]]("addressId") map {
-        case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
-          addressId =>
-          Place(placeId, name, facebookId, geographicPoint, description, webSites, capacity, openingHours, List(),
+      get[Option[Long]]("addressId") ~
+      get[Option[String]]("imagePath") map {
+      case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
+        addressId  ~ imagePath =>
+          Place(placeId, name, facebookId, geographicPoint, description, webSites, capacity, openingHours, imagePath,
             Address.find(addressId))
     }
   }
 
   def save(place: Place): Option[Long] = try {
     DB.withConnection { implicit connection =>
-<<<<<<< HEAD
       val addressId = place.address match {
         case None => None
         case Some(address: Address) => Some(address.addressId)
@@ -66,48 +64,10 @@ object Place {
           'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
           'capacity -> place.capacity,
           'openingHours -> place.openingHours)
-        .as(scalar[Option[Long]].single) match {
-        case None => None
-        case Some(placeId: Long) =>
-          place.images.foreach(image => Image.save(image.copy(placeId = Some(placeId))))
-          Some(placeId)
-=======
-      testIfExist("places", "facebookId", place.facebookId) match {
-        case true => None
-        case false =>
-          val geographicPoint = place.geographicPoint.getOrElse("") match {
-            case geographicPointPattern(geoPoint) => s"""point '$geoPoint'"""
-            case _ => "{geographicPoint}"
-          }
-          val addressId = place.address.getOrElse(None) match {
-            case None => None
-            case Some(address: Address) => address.addressId
-          }
-          SQL(
-            s"""INSERT INTO places(name, addressId, facebookId, geographicPoint, description,
-               |webSites, capacity, openingHours)
-               |VALUES ({name}, {addressId}, {facebookId}, $geographicPoint, {description},
-               |{webSites}, {capacity}, {openingHours})""".stripMargin)
-            .on(
-              'name -> place.name,
-              'addressId -> addressId,
-              'facebookId -> place.facebookId,
-              'geographicPoint -> None,
-              'description -> place.description,
-              'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
-              'capacity -> place.capacity,
-              'openingHours -> place.openingHours)
-            .executeInsert() match {
-            case None => None
-            case Some(placeId: Long) =>
-              place.images.foreach(image => Image.save(image.copy(placeId = Some(placeId))))
-              Some(placeId)
-          }
->>>>>>> c00c91c0f5800b7d2ad16820dac97bb554c79f0b
-      }
+        .as(scalar[Option[Long]].single)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot save place: " + e.getMessage)
+    case e: Exception => throw new DAOException("Place.save: " + e.getMessage)
   }
   
   def find20Since(start: Int, center: String): Seq[Place] = try {
@@ -118,7 +78,6 @@ object Place {
            |ORDER BY geographicPoint <-> point '$center'
            |LIMIT 20 OFFSET $start""".stripMargin)
         .as(PlaceParser.*)
-        .map(place => place.copy(images = Image.findAllByPlace(place.placeId)))
     }
   } catch {
     case e: Exception => throw new DAOException("Place.find20Since: " + e.getMessage)
@@ -129,7 +88,6 @@ object Place {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM places")
         .as(PlaceParser.*)
-        .map( p => p.copy(images = Image.findAllByPlace(p.placeId)))
     }
   } catch {
     case e: Exception => throw new DAOException("Place.findAll: " + e.getMessage)
@@ -184,7 +142,7 @@ object Place {
       SQL("SELECT * FROM places WHERE placeId = {placeId}")
         .on('placeId -> placeId)
         .as(PlaceParser.singleOpt)
-    } map(p => p.copy(images = Image.findAllByPlace(p.placeId)))
+    }
   } catch {
     case e: Exception => throw new DAOException("Place.find: " + e.getMessage)
   }
