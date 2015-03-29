@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 54 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'M - 50 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -177,11 +177,11 @@ CREATE TABLE users_token (
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,
   facebookId                VARCHAR(63),
-  isPublic                  boolean NOT NULL,
-  isActive                  boolean NOT NULL,
+  isPublic                  BOOLEAN NOT NULL,
+  isActive                  BOOLEAN NOT NULL,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           point,
+  geographicPoint           POINT,
   description               TEXT,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP,
@@ -190,27 +190,27 @@ CREATE TABLE events (
 );
 CREATE INDEX eventGeographicPoint ON events USING GIST (geographicPoint);
 
-CREATE OR REPLACE FUNCTION insertEvent(facebookIdValue VARCHAR(63),
-                                       isPublicValue BOOLEAN,
-                                       isActiveValue BOOLEAN,
-                                       creationDateTimeValue TIMESTAMP,
-                                       nameValue VARCHAR(255),
-                                       geographicPointValue point,
-                                       descriptionValue TEXT,
-                                       startTimeValue TIMESTAMP,
-                                       endTimeValue TIMESTAMP,
-                                       ageRestrictionValue SMALLINT)
+CREATE OR REPLACE FUNCTION insertEvent(
+  facebookIdValue                VARCHAR(63),
+  isPublicValue                  BOOLEAN,
+  isActiveValue                  BOOLEAN,
+  nameValue                      VARCHAR(255),
+  geographicPointValue           VARCHAR(63),
+  descriptionValue               TEXT,
+  startTimeValue                 TIMESTAMP with time zone,
+  endTimeValue                   TIMESTAMP with time zone,
+  ageRestrictionValue            INT)
   RETURNS INT AS
   $$
   DECLARE eventIdToReturn int;;
   BEGIN
-    INSERT INTO events (facebookid, ispublic, isactive, creationdatetime, name, geographicpoint, description, 
-                        starttime, endtime, agerestriction) 
-    VALUES (facebookidValue, ispublicValue, isactiveValue, creationdatetimeValue, nameValue, geographicpointValue, 
-            descriptionValue, starttimeValue, endtimeValue, agerestrictionValue)
+    INSERT INTO events (facebookid, ispublic, isactive, name, geographicpoint, description, starttime,
+                        endtime, agerestriction)
+    VALUES (facebookidValue, ispublicValue, isactiveValue, nameValue, POINT(geographicpointValue),
+            descriptionValue, starttimeValue, endtimeValue, agerestrictionValue::SMALLINT)
     RETURNING eventId INTO eventIdToReturn;;
     RETURN eventIdToReturn;;
-  EXCEPTION WHEN unique_violation THEN
+    EXCEPTION WHEN unique_violation THEN
     SELECT eventId INTO eventIdToReturn FROM events WHERE facebookId = facebookIdValue;;
     RETURN eventIdToReturn;;
   END;;
