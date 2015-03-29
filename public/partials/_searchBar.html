@@ -23,7 +23,7 @@
                 Ville
             </a>
         </li>
-        <li ng-click="$root.order = 'startTime'; $parent.selectFilter = false;"
+        <!--<li ng-click="$root.order = 'startTime'; $parent.selectFilter = false;"
             style="display:block;" class="column large-12 pointer"
             ng-show="$root.activEvent"
             ng-class="{'primCol': $root.order == 'startTime'}"
@@ -31,7 +31,7 @@
             <a>
                 Date
             </a>
-        </li>
+        </li>-->
     </ul>
 </ul>
 <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
@@ -54,3 +54,10 @@
        ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">
     Users
 </label>
+<md-slider flex ng-change="$root.selStart($root.maxStart)"
+           ng-model="$root.maxStart" min="3600000" max="2419200000" step="3600000"
+           aria-label="volume"
+           id="volume-slider"
+           class="md-primary column large-8">
+</md-slider>
+        <div class="column large-3">{{$root.maxStart | millSecondsToTimeString}}</div>

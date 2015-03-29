@@ -10,6 +10,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var _selEvent = $rootScope.activEvent;
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
+    var _selStart = new Date() + $rootScope.maxStart;
     if (document.getElementById('searchBar') != null) {
         var _research = document.getElementById('searchBar').value.trim();
     } else {
@@ -356,5 +357,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             offset = 0;
         }
         return _selUsr;
+    };
+    var StartTimer;
+    var doneStartInterval = 600;
+    $scope.selStart = function(newName) {
+        if (angular.isDefined(newName)) {
+            _selStart = new Date() + newName;
+            clearTimeout(StartTimer);
+            StartTimer = setTimeout(search, doneStartInterval);                
+            $scope.limit = 20;
+            offset = 0;
+        }
+        return _selStart;
     };
 }]);
