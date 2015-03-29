@@ -82,6 +82,35 @@ CREATE TABLE organizers (
   UNIQUE(name)
 );
 
+CREATE OR REPLACE FUNCTION insertOrganizer(
+  facebookIdValue    VARCHAR(63),
+  nameValue          VARCHAR(255),
+  descriptionValue   VARCHAR,
+  addressIdValue     INT, --bigint
+  phoneValue         VARCHAR(15),
+  publicTransitValue VARCHAR,
+  websitesValue      VARCHAR)
+  RETURNS INT AS
+  $$
+  DECLARE organizerIdToReturn int;;
+  BEGIN
+    INSERT INTO organizers (facebookId, name, description, addressId, phone, publicTransit, websites)
+    VALUES (facebookIdValue, nameValue, descriptionValue, addressIdValue :: BIGINT, phoneValue, publicTransitValue, 
+            websitesValue)
+    RETURNING organizerId
+      INTO organizerIdToReturn;;
+    RETURN organizerIdToReturn;;
+    EXCEPTION WHEN unique_violation
+    THEN
+      SELECT organizerId
+      INTO organizerIdToReturn
+      FROM organizers
+      WHERE facebookId = facebookIdValue;;
+      RETURN organizerIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;;
+
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
   name                    VARCHAR(255) NOT NULL,
