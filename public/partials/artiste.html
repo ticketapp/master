@@ -45,10 +45,10 @@
                 <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$root.addAndPlay(artiste.tracks, artiste)"><i class="fi-play"></i> Play all</a>
                 <a class="button" ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0" ng-click="$root.addToPlaylist(artiste.tracks, artiste)"><i class="fi-plus"></i> Add all</a>
                 <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$parent.suggest = !$parent.suggest">Suggérer une track</a>
-                <div ng-if="suggest">
-                    <input ng-model="trackTitleSuggest" placeholder="track title">
-                    <a class="button" ng-click="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">Valider</a>
-                </div>
+                <form ng-if="suggest" ng-submit="suggestQuery($parent.trackTitle, artiste.name, artiste.facebookUrl)">
+                    <input ng-model="$parent.trackTitle" ng-change="filterTracks()" placeholder="track title">
+                    <input type="submit" class="button"/>
+                </form>
             </div>
         </div>
         <div layout="row" layout-sm="column" layout-align="space-around" class="column" ng-if="$root.loadingTracks">
@@ -57,8 +57,10 @@
         <div ng-if="artiste.tracks.length == 0 && trackTitle.length == 0 && !$root.loadingTracks" class="column large-12 text-center">
             <b>Désolé, nous n'avons pour le moment aucune track pour cet artist.
                 <br/>Vous pouvez ici suggerer une track à ajouter</b><br/>
-            <input placeholder="track title" ng-model="trackTitleSuggest">
-            <a class="button" ng-click="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">Valider</a>
+            <form ng-submit="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">
+                <input placeholder="track title" ng-model="trackTitleSuggest">
+                <input class="button" type="submit" />
+            </form>
         </div>
         <div ng-if="tracksFiltered.length == 0 && trackTitle.length > 0" class="column large-12 text-center">
             <b>Désolé, nous n'avons pour le moment aucune track "{{trackTitle}}" pour cet artist.</b><br/>

@@ -73,7 +73,7 @@
                 <div class="img_min_evnt">
                     <div class="toGrow">
                         <a href="#/lieu/{{place.placeId}}">
-                            <img src="{{ place.images[0].path }}" alt="une belle image" class="min"/>
+                            <img src="{{ place.imagePath }}" alt="une belle image" class="min"/>
                         </a>
                     </div>
                 </div>
@@ -98,6 +98,9 @@
             </div>
         </li>
     </ul>
+    <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
     <div ng-if="events.length >= limit || artists.length >= limit || artistsFb.length >= limit || places.length >= limit || users.length >= limit"
          layout="row" layout-align="center center">
         <button ng-click="moreLimit(); $parent.limit = $parent.limit + 20" class="column large-5">More</button>

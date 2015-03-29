@@ -2,7 +2,7 @@
     <div class="img_min_evnt" style="height: 100px">
         <div class="toGrow">
             <a href="#/event/{{event.eventId}}">
-                <img src="{{ event.images[0].path }}" class="width100p" alt="yo"/>
+                <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
             </a>
         </div>
     </div>
@@ -12,7 +12,7 @@ overflow: hidden;">{{ event.name }}</h4></a>
         Par
         <a href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
            data-tooltip-placement="bottom"
-           data-tooltip-html-unsafe="<div><div style='height:112.8px; overflow:hidden;'><a href='#/user/{{organizer.organizerId}}'><img src='{{ organizer.images[0].path }}'/></a></div><a href='#/user/{{organizer.organizerId}}'><h4 class='column large-6'>{{organizer.name}}</h4></a><button style='margin-top:5px; float:right'>Suivre</button></div>"
+           data-tooltip-html-unsafe="<div><div style='height:112.8px; overflow:hidden;'><a href='#/user/{{organizer.organizerId}}'><img src='{{ organizer.imagePath }}'/></a></div><a href='#/user/{{organizer.organizerId}}'><h4 class='column large-6'>{{organizer.name}}</h4></a><button style='margin-top:5px; float:right'>Suivre</button></div>"
            data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover">{{organizer.name}} </a>
         <br/>
         <div class="infos_event">
