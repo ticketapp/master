@@ -40,8 +40,9 @@ object OrganizerController extends Controller {
 
   val organizerBindingForm = Form(
     mapping(
-      "facebookId" -> optional(nonEmptyText()),
-      "name" -> nonEmptyText(2)
+      "facebookId" -> optional(nonEmptyText(2)),
+      "name" -> nonEmptyText(2),
+      "imagePath" -> optional(nonEmptyText(2))
     )(Organizer.formApply)(Organizer.formUnapply)
   )
 

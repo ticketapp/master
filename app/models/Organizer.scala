@@ -8,7 +8,7 @@ import play.api.db.DB
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
 
-case class Organizer (organizerId: Long,
+case class Organizer (organizerId: Option[Long],
                       facebookId: Option[String] = None,
                       name: String,
                       description: Option[String] = None,
@@ -17,14 +17,16 @@ case class Organizer (organizerId: Long,
                       publicTransit: Option[String] = None,
                       websites: Option[String] = None,
                       verified: Boolean = false,
-                      images: List[Image] = List.empty,
+                      imagePath: Option[String] = None,
                       address: Option[Address] = None)
 
 object Organizer {
   val token = play.Play.application.configuration.getString("facebook.token")
 
-  def formApply(facebookId: Option[String], name: String): Organizer = new Organizer(-1L, facebookId, name)
-  def formUnapply(organizer: Organizer): Option[(Option[String], String)] = Some((organizer.facebookId, organizer.name))
+  def formApply(facebookId: Option[String], name: String, imagePath: Option[String]): Organizer =
+    new Organizer(None, facebookId, name, imagePath)
+  def formUnapply(organizer: Organizer): Option[(Option[String], String, Option[String])] =
+    Some((organizer.facebookId, organizer.name, organizer.imagePath))
 
   private val OrganizerParser: RowParser[Organizer] = {
     get[Long]("organizerId") ~
@@ -35,16 +37,18 @@ object Organizer {
       get[Option[String]]("phone") ~
       get[Option[String]]("publicTransit") ~
       get[Option[String]]("websites") ~
-      get[Boolean]("verified") map {
-      case organizerId ~ facebookId ~ name ~ description ~ addressId ~ phone ~ publicTransit ~ websites ~ verified =>
-        Organizer(organizerId, facebookId, name, description, addressId, phone, publicTransit, websites, verified)
+      get[Boolean]("verified") ~
+      get[Option[String]]("imagePath") map {
+      case organizerId ~ facebookId ~ name ~ description ~ addressId ~ phone ~ publicTransit ~ websites ~ verified ~
+        imagePath =>
+        Organizer(Option(organizerId), facebookId, name, description, addressId, phone, publicTransit, websites,
+          verified, imagePath)
     }
   }
 
   def getOrganizerProperties(organizer: Organizer): Organizer = organizer.copy(
-    images = Image.findAllByOrganizer(organizer.organizerId),
-    address = Address.find(organizer.addressId))
-
+    address = Address.find(organizer.addressId)
+  )
 
   def findAll: List[Organizer] = try {
     DB.withConnection { implicit connection =>
@@ -95,27 +99,21 @@ object Organizer {
   def save(organizer: Organizer): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {publicTransit}, {websites})""")
+        """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {publicTransit}, {websites},
+          |{imagePath})""".stripMargin)
         .on(
           'facebookId -> organizer.facebookId,
           'name -> organizer.name,
           'description -> organizer.description,
           'phone -> organizer.phone,
           'publicTransit -> organizer.publicTransit,
-          'websites -> organizer.websites)
-        .as(scalar[Option[Long]].single) match {
-        case None => None
-        case Some(organizerId: Long) =>
-          organizer.images.foreach(image => Image.save(image.copy(organizerId = Some(organizerId))))
-          Some(organizerId)
-      }
-  }
+          'websites -> organizer.websites,
+          'imagePath -> organizer.imagePath)
+        .as(scalar[Option[Long]].single)
+    }
   } catch {
-    case e: Exception => throw new DAOException("Organizer.save: " + e.getMessage +
-      organizer.name + " " + organizer.websites + " " + organizer.name.length + "/" +
-      organizer.websites.getOrElse("").length)
+    case e: Exception => throw new DAOException("Organizer.save: " + e.getMessage)
   }
-
 
   def returnOrganizerId(name: String): Long = try {
     DB.withConnection { implicit connection =>
@@ -124,7 +122,7 @@ object Organizer {
         .as(scalar[Long].single)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot return Organizer Id: " + e.getMessage)
+    case e: Exception => throw new DAOException("Organizer.returnOrganizerId: " + e.getMessage)
   }
 
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Option[Long] = {
