@@ -11,7 +11,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var _selEvent = $rootScope.activEvent;
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
-    var _selStart = new Date() + $rootScope.maxStart;
+    var _selStart = $rootScope.maxStart;
     if (document.getElementById('searchBar') != null) {
         var _research = document.getElementById('searchBar').value.trim();
     } else {
@@ -25,7 +25,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         $scope.filterSearch = _research;
         if (_research.length == 0) {
             if (_selEvent == true) {
-                $http.get('/events/offset/'+ offset+ '/' + $rootScope.geoLoc).
+                var eventsLenght = $scope.events.length;
+                var maxStartTime =  _selStart + new Date().getTime();
+                for (var e = 0; e < eventsLenght; e++) {
+                    console.log(maxStartTime)
+                    if ($scope.events[e].startTime > maxStartTime) {
+                        $scope.events.splice(e, 1)
+                        $scope.$apply();
+                        e = e -1;
+                    }
+                }
+                $http.get('/events/offsetAndMaxStartTime/'+ offset+ '/' + $rootScope.geoLoc + '/' + _selStart/3600000).
                     success(function (data, status, headers, config) {
                         var scopeIdList = [];
                         function getEventId(el, index, array) {
@@ -386,7 +396,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var doneStartInterval = 600;
     $scope.selStart = function(newName) {
         if (angular.isDefined(newName)) {
-            _selStart = new Date() + newName;
+            _selStart = newName;
             clearTimeout(StartTimer);
             StartTimer = setTimeout(search, doneStartInterval);                
             $scope.limit = 20;

@@ -45,8 +45,8 @@
                 <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$root.addAndPlay(artiste.tracks, artiste)"><i class="fi-play"></i> Play all</a>
                 <a class="button" ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0" ng-click="$root.addToPlaylist(artiste.tracks, artiste)"><i class="fi-plus"></i> Add all</a>
                 <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$parent.suggest = !$parent.suggest">Suggérer une track</a>
-                <form ng-if="suggest" ng-submit="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">
-                    <input ng-model="trackTitleSuggest" placeholder="track title">
+                <form ng-if="suggest" ng-submit="suggestQuery($parent.trackTitle, artiste.name, artiste.facebookUrl)">
+                    <input ng-model="$parent.trackTitle" ng-change="filterTracks()" placeholder="track title">
                     <input type="submit" class="button"/>
                 </form>
             </div>

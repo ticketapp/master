@@ -111,7 +111,8 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                             geographicPoint: loc,
                                             capacity: place.checkins,
                                             description: place.description,
-                                            webSite: place.website
+                                            webSite: place.website,
+                                            imagePath : place.cover.source
                                         }).success(function(data){
                                             console.log(data)
                                         }).error(function(data){
