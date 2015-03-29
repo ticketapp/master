@@ -54,7 +54,7 @@ object Event {
       get[Int]("ageRestriction") ~
       get[Option[String]]("imagePath") map {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ name ~ geographicPoint ~ description ~
-        startTime ~ endTime ~ ageRestriction ~ imagePath=>
+        startTime ~ endTime ~ ageRestriction ~ imagePath =>
         Event.apply(Some(eventId), facebookId, isPublic, isActive, name, geographicPoint, description,
           startTime, endTime, ageRestriction, imagePath, List.empty, List.empty, List.empty, List.empty)
     }

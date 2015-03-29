@@ -78,6 +78,7 @@ CREATE TABLE organizers (
   publicTransit           VARCHAR,
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
+  imagePath               VARCHAR,
   UNIQUE(facebookId),
   UNIQUE(name)
 );
@@ -88,13 +89,14 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
   descriptionValue   VARCHAR,
   phoneValue         VARCHAR(15),
   publicTransitValue VARCHAR,
-  websitesValue      VARCHAR)
+  websitesValue      VARCHAR,
+  imagePathValue      VARCHAR)
   RETURNS INT AS
   $$
   DECLARE organizerIdToReturn int;;
   BEGIN
-    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites)
-    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue)
+    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites, imagePath)
+    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue, imagePathValue)
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
@@ -260,8 +262,9 @@ CREATE TABLE places (
   imagePath                 VARCHAR,
   UNIQUE(facebookId)
 );
-INSERT into places(name, geographicPoint, facebookId) values ('Le transbordeur', POINT('(5.5,1.4)'), '117030545096697');
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
+INSERT into places(name, geographicPoint, facebookId)
+values ('Le transbordeur', POINT('(45.783808,4.860598)'), '117030545096697');
 
 CREATE OR REPLACE FUNCTION insertPlace(
   nameValue                      VARCHAR(255),
@@ -294,15 +297,12 @@ CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
   path                      VARCHAR NOT NULL,
   category                  VARCHAR(31),
-  eventId                   BIGINT references events(eventId),
   userId                    BIGINT references users(userId),
-  placeId                   BIGINT references places(placeId),
   organizerId               BIGINT references organizers(organizerId),
   infoId                    BIGINT references infos(infoId),
   trackId                   BIGINT references tracks(trackId),
   UNIQUE(path)
 );
----INSERT INTO images (path, alt, eventId, userId) VALUES ('1.jpg', 'alt', 1, 1);
 
 CREATE TABLE tariffs (
   tariffId                 SERIAL PRIMARY KEY,

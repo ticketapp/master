@@ -143,13 +143,6 @@ object Scheduler {
     }
   }
 
-
-
-  def createNewImageIfSourceExists(source: Option[String]): List[Image] = source match {
-    case Some(path) => List(new Image(-1, path))
-    case None => List.empty
-  }
-
   def splitArtistNamesInTitle(title: String): List[String] =
     "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
 
@@ -163,8 +156,8 @@ object Scheduler {
         (__ \ "website").readNullable[String])
       .apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
               public_transit: Option[String], website: Option[String]) =>
-      Organizer(-1L, Some(organizerId), name, formatDescription(description), None, phone, public_transit,
-        website, verified = false, createNewImageIfSourceExists(source), None))
+      Organizer(None, Some(organizerId), name, formatDescription(description), None, phone, public_transit,
+        website, verified = false, source, None))
     organizer.json.asOpt[Organizer](readOrganizer)
   }
 
