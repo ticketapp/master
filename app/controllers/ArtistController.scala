@@ -62,12 +62,23 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
             "platform" -> nonEmptyText,
             "thumbnail" -> optional(nonEmptyText),
             "avatarUrl" -> optional(nonEmptyText),
-            "artistFacebookUrl" -> nonEmptyText(2)
+            "artistFacebookUrl" -> nonEmptyText(2),
+            "redirectUrl" -> optional(nonEmptyText(2))
           )(Track.formApplyForTrackCreatedWithArtist)(Track.formUnapplyForTrackCreatedWithArtist)
         )
       )(Artist.formApply)(Artist.formUnapply)
     )(Artist.formWithPatternApply)(Artist.formWithPatternUnapply)
   )
+  /*
+   val trackBindingForm = Form(mapping(
+    "title" -> nonEmptyText(2),
+    "url" -> nonEmptyText(3),
+    "platform" -> nonEmptyText(3),
+    "thumbnailUrl" -> nonEmptyText(2),
+    "artistFacebookUrl" -> nonEmptyText(2),
+    "redirectUrl" -> optional(nonEmptyText(2))
+  )(Track.formApply)(Track.formUnapply))
+   */
 
   def createArtist = Action { implicit request =>
     try {

@@ -21,17 +21,19 @@ object Track {
   implicit val trackWrites = Json.writes[Track]
 
   def formApplyForTrackCreatedWithArtist(title: String, url: String, platform: String, thumbnailUrl: Option[String],
-  userThumbnailUrl: Option[String], artistFacebookUrl: String): Track = {
+  userThumbnailUrl: Option[String], artistFacebookUrl: String, redirectUrl: Option[String]): Track = {
     thumbnailUrl match {
-      case Some(thumbnail: String) => new Track(None, title, url, platform, thumbnail, artistFacebookUrl)
+      case Some(thumbnail: String) => new Track(None, title, url, platform, thumbnail, artistFacebookUrl, redirectUrl)
       case None => userThumbnailUrl match {
-        case Some(userThumbnail: String) => new Track(None, title, url, platform, userThumbnail, artistFacebookUrl)
-        case None => throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
+        case Some(userThumbnail: String) =>
+          new Track(None, title, url, platform, userThumbnail, artistFacebookUrl, redirectUrl)
+        case None =>
+          throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
       }
     }
   }
-  def formUnapplyForTrackCreatedWithArtist(track: Track) =
-    Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None, track.artistFacebookUrl))
+  def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.title, track.url, track.platform,
+    Some(track.thumbnailUrl), None, track.artistFacebookUrl, track.redirectUrl))
 
   def formApply(title: String, url: String, platform: String, thumbnailUrl: String, artistFacebookUrl: String,
                 redirectUrl: Option[String]): Track =
@@ -45,9 +47,10 @@ object Track {
       get[String]("url") ~
       get[String]("platform") ~
       get[String]("thumbnailUrl") ~
-      get[String]("artistFacebookUrl") map {
-      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl =>
-        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl)
+      get[String]("artistFacebookUrl") ~
+      get[Option[String]]("redirectUrl") map {
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl =>
+        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
     }
   }
 
