@@ -113,7 +113,7 @@ LANGUAGE plpgsql;;
 
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
-  name                    VARCHAR(255) NOT NULL,
+  name                    CITEXT NOT NULL,
   UNIQUE(name)
 );
 
