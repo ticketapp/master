@@ -95,31 +95,29 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                             }
                         }
                         function getPositionAndCreate (place) {
-                            $timeout(function() {
-                                $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' +
-                                    place.location.street + '+' +
-                                    place.location.zip + '+' +
-                                    place.location.city + '+' +
-                                    place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
-                                    success(function (data) {
+                            $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' +
+                                place.location.street + '+' +
+                                place.location.zip + '+' +
+                                place.location.city + '+' +
+                                place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
+                                success(function (data) {
+                                    console.log(data)
+                                    var loc = '(' + data.results[0].geometry.location.lat +
+                                        ',' + data.results[0].geometry.location.lng + ')';
+                                    $http.post('/places/create', {
+                                        name: place.name,
+                                        facebookId: place.id,
+                                        geographicPoint: loc,
+                                        capacity: place.checkins,
+                                        description: place.description,
+                                        webSite: place.website,
+                                        imagePath : place.cover.source
+                                    }).success(function(data){
                                         console.log(data)
-                                        var loc = '(' + data.results[0].geometry.location.lat +
-                                            ',' + data.results[0].geometry.location.lng + ')';
-                                        $http.post('/places/create', {
-                                            name: place.name,
-                                            facebookId: place.id,
-                                            geographicPoint: loc,
-                                            capacity: place.checkins,
-                                            description: place.description,
-                                            webSite: place.website,
-                                            imagePath : place.cover.source
-                                        }).success(function(data){
-                                            console.log(data)
-                                        }).error(function(data){
-                                            console.log(data)
-                                        })
-                                    });
-                            }, 500)
+                                    }).error(function(data){
+                                        console.log(data)
+                                    })
+                                });
                         }
                         //places.push(data);
                         getPositionAndCreate(data);
@@ -165,13 +163,28 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                 if (txtFile.status === 200) {  // file is found
                     allText = txtFile.responseText;
                     lines = txtFile.responseText.split("\n");
-                    for (var l=0; l<lines.length; l++) {
+                    var l = 1;                     //  set your counter to 1
+                    function myLoop () {           //  create a loop function
+                        setTimeout(function () {    //  call a 3s setTimeout when the loop is called
+                            if (lines[l] == "Salles de 400 à 1200 places" || lines[l] == "Salles de moins de 400 places") {
+                                //placesName.push(lines[l-1].replace(/ /g, "+"));
+                                // console.log("places", placesName.length)
+                                getPlacesByName(lines[l-1].replace(/ /g, "+"))
+                            }          //  your code here
+                            l++;                     //  increment the counter
+                            if (l < lines.length) {            //  if the counter < 10, call the loop function
+                                myLoop();             //  ..  again which will trigger another
+                            }                        //  ..  setTimeout()
+                        }, 100)
+                    }
+                    myLoop();
+                    /*for (var l=0; l<lines.length; l++) {
                         if (lines[l] == "Salles de 400 à 1200 places" || lines[l] == "Salles de moins de 400 places") {
                             //placesName.push(lines[l-1].replace(/ /g, "+"));
                             // console.log("places", placesName.length)
                             getPlacesByName(lines[l-1].replace(/ /g, "+"))
                         }
-                    }
+                    }*/
                 }
             }
         };

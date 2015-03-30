@@ -3,9 +3,41 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
     $scope.infos = [];
     $scope.time = 6;
     $scope.zoom = 12;
+    var time = 168;
     var changeTime = true;
     var offset = 0;
     var map;
+    function getEvents () {
+        if (time == 168) {
+            $scope.map = false;
+        }
+        $http.get('/events/offsetAndMaxStartTime/'+ offset+ '/' + $rootScope.geoLoc + '/' + time).
+            success(function (data, status, headers, config) {
+                $scope.events = data;
+                var eventsLength = $scope.events.length;
+                console.log(eventsLength)
+                for (var i = 0; i < eventsLength; i++) {
+                    if ( $scope.events[i].places[0] != undefined) {
+                        $scope.events[i].addresses[0].geographicPoint = $scope.events[i].places[0].geographicPoint.replace('(', '').replace(')', '');
+                    }
+                    if ($scope.events[i].startTime != undefined) {
+                        $scope.events[i].countdown = Math.round(($scope.events[i].startTime - new Date()) / 3600000);
+                        if (changeTime == true && $scope.events[i].addresses[0] != undefined && time == 168) {
+                            if ($scope.time == 6 && $scope.events[i].countdown > $scope.time) {
+                                $scope.time = $scope.events[i].countdown;
+                            } else if ($scope.time != 6 && $scope.events[i].countdown < $scope.time && $scope.events[i].countdown > 6) {
+                                $scope.time = $scope.events[i].countdown;
+                            } else if ($scope.time != 6 && $scope.events[i].countdown < 6 && $scope.events[i].countdown > 0) {
+                                $scope.time = 6;
+                                changeTime = false;
+                            }
+                        }
+                    }
+                }
+                $scope.map = true;
+                $scope.updateMarkers()
+            })
+    }
     $scope.updateMarkers = function () {
         $scope.dynMarkers = [];
         if ($scope.markerClusterer != undefined) {
@@ -79,6 +111,10 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                 console.log($scope.zoom)
             }
         });
+        if ($scope.time > time) {
+            time = $scope.time;
+            getEvents();
+        }
     };
     $scope.$on('mapInitialized', function(event, evtMap) {
         map = evtMap;
@@ -105,35 +141,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
     $http.get('/infos').success(function (data, status, headers, config) {
         $scope.infos = data;
     });
-    function getEvents () {
-        $scope.map = false;
-        $http.get('/events/offset/' + offset + '/' + $rootScope.geoLoc).
-            success(function (data, status, headers, config) {
-                $scope.events = data;
-                var eventsLength = $scope.events.length;
-                console.log(eventsLength)
-                for (var i = 0; i < eventsLength; i++) {
-                    if ( $scope.events[i].places[0] != undefined) {
-                        $scope.events[i].addresses[0].geographicPoint = $scope.events[i].places[0].geographicPoint.replace('(', '').replace(')', '');
-                    }
-                    if ($scope.events[i].startTime != undefined) {
-                        $scope.events[i].countdown = Math.round(($scope.events[i].startTime - new Date()) / 3600000);
-                        if (changeTime == true && $scope.events[i].addresses[0] != undefined) {
-                            if ($scope.time == 6 && $scope.events[i].countdown > $scope.time) {
-                                $scope.time = $scope.events[i].countdown;
-                            } else if ($scope.time != 6 && $scope.events[i].countdown < $scope.time && $scope.events[i].countdown > 6) {
-                                $scope.time = $scope.events[i].countdown;
-                            } else if ($scope.time != 6 && $scope.events[i].countdown < 6 && $scope.events[i].countdown > 0) {
-                                $scope.time = 6;
-                                changeTime = false;
-                            }
-                        }
-                    }
-                }
-                $scope.map = true;
-                $scope.updateMarkers()
-            })
-    }
+
     console.log($rootScope.geoLoc);
     if ($rootScope.geoLoc.length > 0) {
         getEvents ();
