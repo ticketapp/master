@@ -12,7 +12,8 @@ object TrackController extends Controller {
     "url" -> nonEmptyText(3),
     "platform" -> nonEmptyText(3),
     "thumbnailUrl" -> nonEmptyText(2),
-    "artistFacebookUrl" -> nonEmptyText(2)
+    "artistFacebookUrl" -> nonEmptyText(2),
+    "redirectUrl" -> optional(nonEmptyText(2))
   )(Track.formApply)(Track.formUnapply))
 
   def createTrack = Action { implicit request =>
