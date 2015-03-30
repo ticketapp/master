@@ -33,6 +33,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         $scope.events.splice(e, 1)
                         $scope.$apply();
                         e = e -1;
+                        eventsLenght = eventsLenght - 1;
                     }
                 }
                 $http.get('/events/offsetAndMaxStartTime/'+ offset+ '/' + $rootScope.geoLoc + '/' + _selStart/3600000).
