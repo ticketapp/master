@@ -146,8 +146,8 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
   }
 
-  def saveWithEventRelation(artist: Artist, eventId: Long): Option[Long] = save(artist) match {
-    case None => None
+  def saveWithEventRelation(artist: Artist, eventId: Long): Boolean = save(artist) match {
+    case None => false
     case Some(artistId: Long) => saveEventArtistRelation(eventId, artistId)
   }
 
@@ -170,17 +170,16 @@ object Artist {
   }
 
 
-  def saveEventArtistRelation(eventId: Long, artistId: Long): Option[Long] = try {
+  def saveEventArtistRelation(eventId: Long, artistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO eventsArtists (eventId, artistId)
-        VALUES ({eventId}, {artistId})""")
+      SQL("""SELECT insertEventArtistRelation({eventId}, {artistId})""")
         .on(
           'eventId -> eventId,
           'artistId -> artistId)
-        .executeInsert()
+        .execute()
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.saveEventArtistRelation: " + e.getMessage)
   }
 
   def deleteArtist(artistId: Long): Long = try {

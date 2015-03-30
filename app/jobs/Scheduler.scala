@@ -80,7 +80,7 @@ object Scheduler {
          city: Option[String], maybeOwnerId: Option[String]) => {
 
         val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
-        val address = new Address(-1l, None, city, zip, street)
+        val address = new Address(None, None, city, zip, street)
         val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getNormalizedWebsitesInText(description))
         val eventuallyMaybeArtistsFromTitle =
           getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getNormalizedWebsitesInText(description))
