@@ -8,7 +8,7 @@ import play.api.Play.current
 import services.Utilities.geographicPointToString
 
 
-case class Address (addressId: Long,
+case class Address (addressId: Option[Long],
                     geographicPoint: Option[String],
                     city: Option[String],
                     zip: Option[String],
@@ -22,12 +22,12 @@ object Address {
       get[Option[String]]("zip") ~
       get[Option[String]]("street") map {
       case addressId ~ geographicPoint ~ city ~ zip ~ street =>
-        Address(addressId, geographicPoint, city, zip, street)
+        Address(Option(addressId), geographicPoint, city, zip, street)
     }
   }
 
   def formApply(city: Option[String], zip: Option[String], street: Option[String]) =
-    new Address(-1L, None, city, zip, street)
+    new Address(None, None, city, zip, street)
   def formUnapply(address: Address): Option[(Option[String], Option[String], Option[String])] =
     Some((address.city, address.zip, address.street))
 
@@ -37,19 +37,20 @@ object Address {
       SQL("SELECT * FROM addresses").as(AddressParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Address.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Address.findAll: " + e.getMessage)
   }
 
   def findAllByEvent(event: Event): List[Address] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM eventsAddresses eA
-             INNER JOIN addresses a ON a.addressId = eA.addressId where eA.eventId = {eventId}""")
+      SQL(
+        """SELECT * FROM eventsAddresses eA
+          |INNER JOIN addresses a ON a.addressId = eA.addressId
+          |WHERE eA.eventId = {eventId}""".stripMargin)
         .on('eventId -> event.eventId)
         .as(AddressParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Address.findAllByEvent: " + e.getMessage)
+    case e: Exception => throw new DAOException("Address.findAllByEvent: " + e.getMessage)
   }
 
   def find(addressId: Option[Long]): Option[Address] = addressId match {
@@ -61,7 +62,7 @@ object Address {
           .as(AddressParser.singleOpt)
       }
     } catch {
-      case e: Exception => throw new DAOException("Problem with the method Address.find: " + e.getMessage)
+      case e: Exception => throw new DAOException("Address.find: " + e.getMessage)
     }
   }
   /*
@@ -85,10 +86,7 @@ object Address {
     case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
   }
 
-
   def saveAddressAndEventRelation(address: Address, id: Long): Option[Long] = {
-    //, relationClass: String
-    //sécurité geographicPoint
     address.geographicPoint match {
       case None =>
         try {
@@ -128,22 +126,23 @@ object Address {
     }
   }
 
-   def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO eventsAddresses (eventId, addressId)
-          VALUES ({eventId}, {addressId})""")
-          .on(
-            'eventId -> eventId,
-            'addressId -> addressId)
-          .executeInsert()
-      }
-   } catch {
-     case e: Exception => throw new DAOException("saveEventAddressRelation: " + e.getMessage)
-   }
+  def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """INSERT INTO eventsAddresses (eventId, addressId)
+          |VALUES ({eventId}, {addressId})""".stripMargin)
+        .on(
+          'eventId -> eventId,
+          'addressId -> addressId)
+        .executeInsert()
+    }
+  } catch {
+   case e: Exception => throw new DAOException("Address.saveEventAddressRelation: " + e.getMessage)
+  }
 
   def deleteAddress(addressId: Long): Long = try {
     DB.withConnection { implicit connection =>
-      SQL("""DELETE FROM addresses WHERE addressId={addressId}""")
+      SQL("""DELETE FROM addresses WHERE addressId = {addressId}""")
         .on('addressId -> addressId)
         .executeUpdate()
     }
@@ -153,7 +152,7 @@ object Address {
 
   def followAddress(userId : Long, addressId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("insert into addressFollowed(userId, addressId) values ({userId}, {addressId})").on(
+      SQL("INSERT INTO addressFollowed(userId, addressId) VALUES ({userId}, {addressId})").on(
         'userId -> userId,
         'addressId -> addressId)
         .executeInsert()

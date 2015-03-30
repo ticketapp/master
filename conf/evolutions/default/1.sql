@@ -521,6 +521,19 @@ CREATE TABLE eventsPlaces (
   placeId                 INT REFERENCES places (placeId),
   PRIMARY KEY (eventId, placeId)
 );
+CREATE OR REPLACE FUNCTION insertEventPlaceRelation(
+  eventIdValue            BIGINT,
+  placeIdValue        BIGINT)
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO eventsPlaces (eventId, placeId)
+    VALUES (eventIdValue, placeIdValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
+
 
 CREATE TABLE eventsGenres (
   eventId                 INT REFERENCES events (eventId),
@@ -564,6 +577,18 @@ CREATE TABLE eventsArtists (
   artistId                INT REFERENCES artists (artistId),
   PRIMARY KEY (eventId, artistId)
 );
+CREATE OR REPLACE FUNCTION insertEventArtistRelation(
+  eventIdValue            BIGINT,
+  artistIdValue        BIGINT)
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO eventsArtists (eventId, artistId)
+    VALUES (eventIdValue, artistIdValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE usersArtists (
   userId                  INT REFERENCES users (userId),

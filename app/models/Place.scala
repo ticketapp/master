@@ -7,7 +7,7 @@ import play.api.Play.current
 import controllers.DAOException
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 
-case class Place (placeId: Long,
+case class Place (placeId: Option[Long],
                   name: String,
                   facebookId: Option[String] = None,
                   geographicPoint: Option[String],
@@ -23,7 +23,7 @@ object Place {
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
                 imagePath: Option[String]): Place =
-    new Place(-1L, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath)
+    new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath)
 
   def formUnapply(place: Place): Option[(String, Option[String], Option[String], Option[String], Option[String],
     Option[Int], Option[String], Option[String])] =
@@ -43,7 +43,7 @@ object Place {
       get[Option[String]]("imagePath") map {
       case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
         addressId  ~ imagePath =>
-          Place(placeId, name, facebookId, geographicPoint, description, webSites, capacity, openingHours, imagePath,
+          Place(Option(placeId), name, facebookId, geographicPoint, description, webSites, capacity, openingHours, imagePath,
             Address.find(addressId))
     }
   }
@@ -128,7 +128,6 @@ object Place {
     case e: Exception => throw new DAOException("Place.findAllIdsAndFacebookIds: " + e.getMessage)
   }
 
-
   def findAllContaining(pattern: String): Seq[Place] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM places WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 5")
@@ -138,7 +137,6 @@ object Place {
   } catch {
     case e: Exception => throw new DAOException("Place.findAllContaining: " + e.getMessage)
   }
-
 
   def find(placeId: Long): Option[Place] = try {
     DB.withConnection { implicit connection =>
@@ -166,11 +164,12 @@ object Place {
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Option[Long] = {
     try {
       DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO eventsPlaces (eventId, placeId)
-          VALUES ({eventId}, {placeId})""").on(
+        SQL(
+          """SELECT insertEventPlaceRelation({eventId}, {placeId})""")
+          .on(
             'eventId -> eventId,
-            'placeId -> placeId
-          ).executeInsert()
+            'placeId -> placeId)
+          .as(scalar[Option[Long]].single)
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save in eventsPlaces : " + e.getMessage)

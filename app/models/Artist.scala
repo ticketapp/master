@@ -172,15 +172,14 @@ object Artist {
 
   def saveEventArtistRelation(eventId: Long, artistId: Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO eventsArtists (eventId, artistId)
-        VALUES ({eventId}, {artistId})""")
+      SQL("""SELECT insertEventArtistRelation({eventId}, {artistId})""")
         .on(
           'eventId -> eventId,
           'artistId -> artistId)
-        .executeInsert()
+        .as(scalar[Option[Long]].single)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot save in eventsArtists : " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.saveEventArtistRelation: " + e.getMessage)
   }
 
   def deleteArtist(artistId: Long): Long = try {
