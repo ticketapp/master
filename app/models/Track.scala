@@ -33,10 +33,11 @@ object Track {
   def formUnapplyForTrackCreatedWithArtist(track: Track) =
     Some((track.title, track.url, track.platform, Some(track.thumbnailUrl), None, track.artistFacebookUrl))
 
-  def formApply(title: String, url: String, platform: String, thumbnailUrl: String, artistFacebookUrl: String): Track =
-   new Track(None, title, url, platform, thumbnailUrl, artistFacebookUrl)
+  def formApply(title: String, url: String, platform: String, thumbnailUrl: String, artistFacebookUrl: String,
+                redirectUrl: Option[String]): Track =
+   new Track(None, title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
   def formUnapply(track: Track) =
-    Some((track.title, track.url, track.platform, track.thumbnailUrl, track.artistFacebookUrl))
+    Some((track.title, track.url, track.platform, track.thumbnailUrl, track.artistFacebookUrl, track.redirectUrl))
 
   private val TrackParser: RowParser[Track] = {
     get[Long]("trackId") ~
