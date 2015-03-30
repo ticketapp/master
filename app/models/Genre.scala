@@ -33,26 +33,28 @@ object Genre {
 
   def findAllByEvent(eventId: Long): Seq[Genre] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM eventsGenres eA
-             INNER JOIN genres a ON a.genreId = eA.genreId where eA.eventId = {eventId}""")
+      SQL(
+        """SELECT * FROM eventsGenres eA
+          |INNER JOIN genres a ON a.genreId = eA.genreId
+          |WHERE eA.eventId = {eventId}""".stripMargin)
         .on('eventId -> eventId)
         .as(GenreParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Genre.findAllByEvent: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.findAllByEvent: " + e.getMessage)
   }
 
   def findAllByArtist(artistId: Int): Seq[Genre] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM artistsGenres aG
-             INNER JOIN genres g ON g.genreId = aG.genreId where aG.artistId = {artistId}""")
+      SQL(
+        """SELECT * FROM artistsGenres aG
+          |INNER JOIN genres g ON g.genreId = aG.genreId
+          |WHERE aG.artistId = {artistId}""".stripMargin)
         .on('artistId -> artistId)
         .as(GenreParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot get all genres by artist: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.findAllByArtist: " + e.getMessage)
   }
 
   def find(genreId: Long): Option[Genre] = try {
@@ -62,7 +64,7 @@ object Genre {
         .as(GenreParser.singleOpt)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Genre.find: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.find: " + e.getMessage)
   }
 
   def findAllContaining(pattern: String): Seq[Genre] = try {
@@ -80,7 +82,6 @@ object Genre {
       SQL("""SELECT insertGenre({name})""")
         .on('name -> genre.name)
         .as(scalar[Option[Long]].single)
-        //.execute()
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot create genre: " + e.getMessage)
@@ -96,24 +97,24 @@ object Genre {
     case e: Exception => throw new DAOException("Event.findGenreId: " + e.getMessage)
   }
 
-  def saveWithEventRelation(genre: Genre, eventId: Long): Option[Long] = {
+  def saveWithEventRelation(genre: Genre, eventId: Long): Boolean = {
     save(genre) match {
       case Some(genreId: Long) => saveEventGenreRelation(eventId, genreId)
-      case _ => None
+      case _ => false
     }
   }
 
-  def saveEventGenreRelation(eventId: Long, genreId: Long): Option[Long] = try {
+  def saveEventGenreRelation(eventId: Long, genreId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO eventsGenres (eventId, genreId)
-          VALUES ({eventId}, {genreId})""")
+      SQL(
+        """SELECT insertEventGenreRelation({eventId}, {genreId})""")
         .on(
           'eventId -> eventId,
           'genreId -> genreId)
-        .executeInsert()
+        .execute()
     }
   } catch {
-    case e: Exception => throw new DAOException("saveEventGenreRelation: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.saveEventGenreRelation: " + e.getMessage)
   }
 
   def saveWithArtistRelation(genre: Genre, artistId: Int): Boolean = {
