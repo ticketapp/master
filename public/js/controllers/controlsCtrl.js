@@ -175,7 +175,7 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                             if (l < lines.length) {            //  if the counter < 10, call the loop function
                                 myLoop();             //  ..  again which will trigger another
                             }                        //  ..  setTimeout()
-                        }, 100)
+                        }, 50)
                     }
                     myLoop();
                     /*for (var l=0; l<lines.length; l++) {

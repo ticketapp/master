@@ -8,9 +8,9 @@
     <div class="column float-right paddingLeft0 paddingRight0 eventInfo"
          style="padding-bottom: 0; padding-left: 0; padding-right: 0;"
         ng-hide="organizer.description == undefined && largeMap == true"
-         ng-class="{'large-12': orgaEvents.length == 0, 'large-8': orgaEvents.length == 1, 'large-4':orgaEvents.length > 1}">
-        <div ng-if="largeMap == false" style="height: {{heightMap}};" class="column width100p padding0">
-            <div class="column large-4 absolute" style="background: #ffffff;
+         ng-class="{'margin0': organizer.description == undefined && organizer.geographicPoint == undefined, 'large-12': orgaEvents.length == 0, 'large-8': orgaEvents.length == 1, 'large-4':orgaEvents.length > 1}">
+        <div ng-if="largeMap == false && map == true" style="height: {{heightMap}};" class="column width100p padding0">
+            <!--<div class="column large-4 absolute" style="background: #ffffff;
             box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
             margin-left: 5px;
             margin-top: 5px;
@@ -21,7 +21,7 @@
                     {{event.addresses[0].zip}}
                     {{event.addresses[0].city}}
                 </div>
-            </div>
+            </div>-->
             <map ng-if="map"
                  zoom="14"
                  center="[{{organizer.geographicPoint}}]"
@@ -51,7 +51,7 @@
 
          >
         <div style="height: {{heightMap}}">
-            <div class="column large-4 absolute" style="background: #ffffff;
+            <!--<div class="column large-4 absolute" style="background: #ffffff;
             box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-left: 5px; margin-top: 5px; z-index: 1;">
                 <h4>{{event.place}}</h4>
                 <div style="font-size: 12px;">
@@ -59,7 +59,7 @@
                     {{event.addresses[0].zip}}
                     {{event.addresses[0].city}}
                 </div>
-            </div>
+            </div>-->
             <map ng-if="map"
                  zoom="15"
                  center="[{{organizer.geographicPoint}}]"

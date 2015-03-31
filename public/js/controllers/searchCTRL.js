@@ -26,7 +26,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (_research.length == 0) {
             if (_selEvent == true) {
                 var eventsLenght = $scope.events.length;
-                var maxStartTime =  _selStart + new Date().getTime();
+                var maxStartTime =  _selStart*3600000 + new Date().getTime();
                 for (var e = 0; e < eventsLenght; e++) {
                     console.log(maxStartTime)
                     if ($scope.events[e].startTime > maxStartTime) {
@@ -36,7 +36,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         eventsLenght = eventsLenght - 1;
                     }
                 }
-                $http.get('/events/offsetAndMaxStartTime/'+ offset+ '/' + $rootScope.geoLoc + '/' + _selStart/3600000).
+                $http.get('/events/offsetAndMaxStartTime/'+ offset+ '/' + $rootScope.geoLoc + '/' + _selStart).
                     success(function (data, status, headers, config) {
                         var scopeIdList = [];
                         function getEventId(el, index, array) {
@@ -399,9 +399,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _selStart = newName;
             clearTimeout(StartTimer);
+            $rootScope.changeStep(newName);
             StartTimer = setTimeout(search, doneStartInterval);                
             $scope.limit = 20;
             offset = 0;
+            $scope.loadingMore = true;
         }
         return _selStart;
     };

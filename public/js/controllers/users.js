@@ -22,9 +22,12 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                             clearInterval(waitEvents);
                             var indexEventRef = (Math.ceil(
                                     eventInfoConteners[0].clientHeight / eventsContener[0].clientHeight) * 2);
-                            if (indexEventRef >= $scope.orgaEvents.length - 1) {
-                                $scope.largeMap = true;
-                                $scope.$apply();
+                            if (indexEventRef >= $scope.orgaEvents.length - 1 && eventInfoConteners[0].clientHeight > (eventsContener[0].clientHeight/3)*2) {
+                                if ($scope.organizer.geographicPoint != undefined) {
+                                    console.log(1)
+                                    $scope.largeMap = true;
+                                    $scope.$apply();
+                                }
                                 eventInfoConteners = document.getElementsByClassName('eventInfo');
                                 if (indexEventRef - 1 < eventsContener.length - 1 && indexEventRef - 1 > 0) {
                                     var lastEventPos = eventsContener[indexEventRef - 1].getBoundingClientRect();
@@ -45,7 +48,11 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                                     console.log(eventsContener[0].clientHeight / 3);
                                     if (newHeight < -(eventsContener[0].clientHeight / 3) && $scope.orgaEvents.length > 1) {
                                         $scope.medMap = true;
-                                        $scope.descHeight = eventsContener[0].clientHeight + 290;
+                                        if ($scope.organizer.geographicPoint != undefined) {
+                                            $scope.descHeight = eventsContener[0].clientHeight + 290;
+                                        } else {
+                                            $scope.descHeight = eventsContener[0].clientHeight
+                                        }
                                     } else if (newHeight < (eventsContener[0].clientHeight) / 3) {
                                         if (eventsContener.length == 1 || eventsContener.length % 2 == 0) {
                                             $scope.fullMap = true;
@@ -69,12 +76,12 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                             } else {
                                 $scope.largeMap = false;
                                 var lastEventPos;
-                                if (indexEventRef <= 0) {
+                                console.log(indexEventRef)
+                                if (indexEventRef <= 0 || eventsContener.length == 1) {
                                     lastEventPos = eventsContener[0].getBoundingClientRect()
                                 } else {
                                     lastEventPos = eventsContener[indexEventRef - 1].getBoundingClientRect();
                                 }
-                                console.log(indexEventRef)
                                 var descPos = eventInfoConteners[0].getBoundingClientRect();
                                 var newHeight = (lastEventPos.bottom - descPos.bottom) - 9;
                                 console.log(newHeight)
@@ -84,18 +91,26 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                                     console.log(newHeight);
                                     console.log(eventsContener[0])
                                 }
+                                if ($scope.organizer.geographicPoint == undefined && $scope.organizer.description != undefined) {
+                                    eventInfoConteners[0].style.minHeight = eventsContener[0].clientHeight - 10 + 'px';
+                                    console.log(eventsContener[0].clientHeight)
+                                }
                                 $scope.heightMap = newHeight + 'px';
                                 //$scope.heightMap = lastEventPos.bottom - descPos.bottom;
                             }
-                            $scope.map = true;
+                            if ($scope.organizer.geographicPoint != undefined) {
+                                $scope.map = true;
+                            }
                             $scope.$apply();
                         }
                     }, 500)
                 });
             } else {
-                $scope.map = true;
-                $scope.largeMap = true;
-                $scope.fullMap = true;
+                if ($scope.organizer.geographicPoint != undefined) {
+                    $scope.map = true;
+                    $scope.largeMap = true;
+                    $scope.fullMap = true;
+                }
             }
         });
     $http.get('/' + $scope.getUrl + '/' + $routeParams.id)

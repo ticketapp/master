@@ -19,6 +19,23 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
         };
+        $rootScope.step = 1;
+        $rootScope.NewMaxTime = 720;
+        $rootScope.changeStep = function (time) {
+            if (time <= 24) {
+                $rootScope.step = 1;
+                $rootScope.NewMaxTime = 28;
+            } else if (time > 24 && time <= 168) {
+                $rootScope.step = 24;
+                $rootScope.NewMaxTime = 200;
+            } else if (time > 168 && time <= 720) {
+                $rootScope.step = 168;
+                $rootScope.NewMaxTime = 800;
+            } else if (time > 720) {
+                $rootScope.step = 720;
+                $rootScope.NewMaxTime = 8760;
+            }
+        };
         $rootScope.passArtisteToCreateToFalse();
         $rootScope.createArtist = function (artist) {
             $rootScope.loadingTracks = true;
@@ -206,12 +223,12 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.activEvent = true;
         $rootScope.activPlace = false;
         $rootScope.activUsr = false;
-        $rootScope.maxStart = 604800000;
+        $rootScope.maxStart = 168;
     }
 ]);
 app.filter('millSecondsToTimeString', function() {
     return function(millseconds) {
-        var seconds = Math.floor(millseconds / 1000);
+        var seconds = Math.floor(millseconds*3600000 / 1000);
         var days = Math.floor(seconds / 86400);
         var hours = Math.floor((seconds % 86400) / 3600);
         var timeString = '';
