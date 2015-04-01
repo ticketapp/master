@@ -11,7 +11,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var _selEvent = $rootScope.activEvent;
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
-    var _selStart = $rootScope.maxStart;
+    var _selStart = ($rootScope.maxStart-23)*24;
     if (document.getElementById('searchBar') != null) {
         var _research = document.getElementById('searchBar').value.trim();
     } else {
@@ -397,9 +397,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var doneStartInterval = 600;
     $scope.selStart = function(newName) {
         if (angular.isDefined(newName)) {
+            newName = parseInt(newName)
+            if (newName > 23 && newName <= 38) {
+                newName = (newName-23)*24
+            } else if (newName > 38 && newName <= 42) {
+                newName = (newName-38)*168;
+            } else if (newName > 42) {
+                newName = (newName-42)*720;
+            }
+            $rootScope.changeTimeEventView(newName);
             _selStart = newName;
             clearTimeout(StartTimer);
-            $rootScope.changeStep(newName);
             StartTimer = setTimeout(search, doneStartInterval);                
             $scope.limit = 20;
             offset = 0;
