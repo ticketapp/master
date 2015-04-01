@@ -12,12 +12,14 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
             artistName = artistName.toLowerCase().replace('music', '');
             artistName = artistName.toLowerCase().replace('musique', '');
             artistName = artistName.toLowerCase().replace('musik', '');
+            artistName = artistName.toLowerCase().replace(/[^\w\s].*/, '');
             console.log(artistName)
             $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
                 success(function (data) {
                     console.log(data)
                     for (var i = 0; i < data.length; i++) {
-                        $scope.artiste.tracks.push(data[i])
+                        $scope.artiste.tracks.push(data[i]);
+                        $scope.tracks.push(data[i])
                     }
                 }).
                 error(function (data) {

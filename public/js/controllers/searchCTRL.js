@@ -397,7 +397,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var doneStartInterval = 600;
     $scope.selStart = function(newName) {
         if (angular.isDefined(newName)) {
-            newName = parseInt(newName)
             if (newName > 23 && newName <= 38) {
                 newName = (newName-23)*24
             } else if (newName > 38 && newName <= 42) {
