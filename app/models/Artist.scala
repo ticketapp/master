@@ -59,7 +59,7 @@ object Artist {
   def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =
     Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
   
-  def artistWithProperties(artist: Artist): Artist = artist.copy(
+  def getArtistProperties(artist: Artist): Artist = artist.copy(
       tracks = Track.findAllByArtist(artist.facebookUrl),
       genres = Genre.findAllByArtist(artist.artistId.getOrElse(-1L).toInt)
   )
@@ -68,10 +68,23 @@ object Artist {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM artists")
         .as(ArtistParser.*)
-        .map(artistWithProperties)
+        .map(getArtistProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
+  }
+
+  def findSinceOffsetBy(number: Int, offset: Int): Seq[Artist] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT *
+           |FROM artists
+           |LIMIT $number OFFSET $offset""".stripMargin)
+        .as(ArtistParser.*)
+        .map(getArtistProperties)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
   }
 
   def findAllByEvent(event: Event): List[Artist] = try {
@@ -82,7 +95,7 @@ object Artist {
              WHERE eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
         .as(ArtistParser.*)
-        .map(artistWithProperties)
+        .map(getArtistProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -93,7 +106,7 @@ object Artist {
       SQL("SELECT * FROM artists WHERE artistId = {artistId}")
         .on('artistId -> artistId)
         .as(ArtistParser.singleOpt)
-        .map(artistWithProperties)
+        .map(getArtistProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -104,7 +117,7 @@ object Artist {
       SQL("SELECT * FROM artists WHERE facebookUrl = {facebookUrl}")
         .on('facebookUrl -> facebookUrl)
         .as(ArtistParser.singleOpt)
-        .map(artistWithProperties)
+        .map(getArtistProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
@@ -117,7 +130,7 @@ object Artist {
           |LIKE '%'||{searchPatternLowCase}||'%' LIMIT 10""".stripMargin)
         .on('searchPatternLowCase -> searchPattern.toLowerCase)
         .as(ArtistParser.*)
-        .map(artistWithProperties)
+        .map(getArtistProperties)
     }
   } catch {
     case e: Exception => throw new DAOException("Artist.findAllContaining: " + e.getMessage)

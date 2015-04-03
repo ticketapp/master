@@ -106,8 +106,7 @@ object Genre {
 
   def saveEventGenreRelation(eventId: Long, genreId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT insertEventGenreRelation({eventId}, {genreId})""")
+      SQL("""SELECT insertEventGenreRelation({eventId}, {genreId})""")
         .on(
           'eventId -> eventId,
           'genreId -> genreId)
