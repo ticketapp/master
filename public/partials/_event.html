@@ -9,11 +9,23 @@
     <div class=" text_evnt_min" >
         <a href="#/event/{{event.eventId}}"><h4 style="height: 2.8em;
 overflow: hidden;">{{ event.name }}</h4></a>
-        Par
-        <a href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
-           data-tooltip-placement="bottom"
-           data-tooltip-html-unsafe="<div><div style='height:112.8px; overflow:hidden;'><a href='#/user/{{organizer.organizerId}}'><img src='{{ organizer.imagePath }}'/></a></div><a href='#/user/{{organizer.organizerId}}'><h4 class='column large-6'>{{organizer.name}}</h4></a><button style='margin-top:5px; float:right'>Suivre</button></div>"
-           data-tooltip-append-to-body="true" data-tooltip-trigger="mouseover">{{organizer.name}} </a>
+        <span class="dropDown" data-ng-repeat="organizer in event.organizers">
+            Par
+            <a href="#/user/{{organizer.organizerId}}">{{organizer.name}} </a>
+            <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
+                <div>
+                    <div style='height:112.8px; overflow:hidden;'>
+                        <a href='#/user/{{organizer.organizerId}}'>
+                            <img src='{{ organizer.imagePath }}'/>
+                        </a>
+                    </div>
+                    <a href='#/user/{{organizer.organizerId}}'>
+                        <h4 class='column large-6'>{{organizer.name}}</h4>
+                    </a>
+                    <button style='margin-top:5px; float:right'>Suivre</button>
+                </div>
+            </ul>
+        </span>
         <br/>
         <div class="infos_event">
             <i class="icon-calendar"></i>{{ event.startTime | date:'dd/MM' }}

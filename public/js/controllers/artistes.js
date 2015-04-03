@@ -136,6 +136,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
         $rootScope.loadingTracks = true;
         $http.get('/artists/' + $routeParams.facebookUrl)
             .success(function (data, status) {
+                $rootScope.marginContent();
                 $scope.artiste = data;
                 $scope.tracks = $scope.artiste.tracks;
                 if ($scope.artiste.websites != undefined) {
@@ -149,7 +150,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                         watchWindowSize();
                     }).
                     error(function(data) {
-                        watchWindowSize();
+                        //watchWindowSize();
                     })
             }).error(function (data, status) {
             });

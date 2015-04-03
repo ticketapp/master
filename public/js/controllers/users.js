@@ -115,6 +115,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         });
     $http.get('/' + $scope.getUrl + '/' + $routeParams.id)
         .success(function(data, status){
+            $rootScope.marginContent();
             $scope.organizer = data;
             console.log(data);
             if ($scope.organizer.geographicPoint != undefined) {

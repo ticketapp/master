@@ -399,11 +399,12 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             if (newName > 23 && newName <= 38) {
                 newName = (newName-23)*24
-            } else if (newName > 38 && newName <= 42) {
-                newName = (newName-38)*168;
-            } else if (newName > 42) {
-                newName = (newName-42)*720;
+            } else if (newName > 38 && newName <= 40) {
+                newName = (newName-36)*168;
+            } else if (newName > 40) {
+                newName = (newName-39)*720;
             }
+            console.log(newName)
             $rootScope.changeTimeEventView(newName);
             _selStart = newName;
             clearTimeout(StartTimer);
