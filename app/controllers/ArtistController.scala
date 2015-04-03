@@ -19,6 +19,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Artist.findAll))
   }
 
+  def artistsSinceOffsetBy(number: Int, offset: Int) = Action {
+    Ok(Json.toJson(Artist.findSinceOffsetBy(number, offset)))
+  }
+
   def artist(artistId: Long) = Action {
     Artist.find(artistId) match {
       case Some(x) => Ok(Json.toJson(x))

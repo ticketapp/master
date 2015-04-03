@@ -20,6 +20,7 @@ GET           /events/city/:pattern                          controllers.EventCo
 
 ################################## Artists ##############################################
 GET           /artists                                       controllers.ArtistController.artists
+GET           /artists/since/:offset/:number                  controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
 GET           /artists/:facebookUrl                          controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
 GET           /artists/byId/:id                              controllers.ArtistController.artist(id: Long)
 POST          /artists/createArtist                          controllers.ArtistController.createArtist
