@@ -19,11 +19,15 @@
     <button>Save</button>
     <button ng-click="savePlaylist = !savePlaylist">cancel</button>
 </div>
-<div class="zIndex1 column large-12">
+<div class="zIndex1" ng-class="{'column large-12': $root.window != 'small'}">
     <!--<a class="close float-right">X</a>-->
-    <i ng-click="$parent.showLecteur = true" ng-if="!showLecteur" style="margin: 0 4px;" class="fi-plus float-left"></i>
-    <i ng-click="$parent.showLecteur = false" ng-if="showLecteur" style="margin: 0 4px;" class="fi-minus float-left"></i>
-    <i ng-click="remPlaylist()" class="fi-trash float-left" style="margin: 0 4px;"></i>
+    <i ng-click="showLecteur = !showLecteur" style="margin: 0 4px;" class="float-left"
+       ng-class="{'column small-3 button margin0': $root.window == 'small', 'fi-minus': showLecteur == true, 'fi-plus': showLecteur == false}"></i>
+
+    <i ng-click="remPlaylist()" class="fi-trash float-left" style="margin: 0 4px;" ng-class="{'column small-3 button margin0': $root.window == 'small'}"></i>
+    <i ng-if="$root.window == 'small'" ng-class="{'fi-pause': onPlay == true, 'fi-play': onPlay == false}" class="column small-3 button margin0" ng-click="playPause()"></i>
+    <i class="fi-shuffle column small-3 button margin0" ng-click="$parent.shuffle = !$parent.shuffle" ng-if="!shuffle && $root.window == 'small'"></i>
+    <a ng-if="shuffle && $root.window == 'small'"><i class="fi-shuffle column small-3 button margin0" ng-click="$parent.shuffle = !$parent.shuffle"></i></a>
     <i ng-click="savePlaylist = !savePlaylist" ng-if="$root.window != 'small'" class="fi-save float-left" style="margin: 0 4px;"></i>
     <i ng-if="trackActive.platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
     <i class="fi-volume float-left" ng-if="$root.window != 'small'" ng-click="$parent.showVol = !$parent.showVol" style="margin: 0 4px;"></i>
@@ -35,13 +39,12 @@
     </md-slider>
     <div class="column large-11 small-10 padding0">
         <div class="float-left column small-3 large-1">
-            <i ng-if="!onPlay" id="playBtn" class="fi-play" ng-click="playPause()"></i>
-            <i ng-if="onPlay" class="fi-pause" ng-click="playPause()"></i>
-            <i class="fi-shuffle" ng-click="$parent.shuffle = !$parent.shuffle" ng-if="!shuffle"></i>
-            <a ng-if="shuffle"><i class="fi-shuffle" ng-click="$parent.shuffle = !$parent.shuffle"></i></a>
+            <i ng-if="$root.window != 'small'" ng-class="{'fi-pause': onPlay == true, 'fi-play': onPlay == false}" ng-click="playPause()"></i>
+            <i class="fi-shuffle" ng-class="{'fi-pause': onPlay == true, 'fi-play': onPlay == false}" ng-click="$parent.shuffle = !$parent.shuffle" ng-if="!shuffle && $root.window != 'small'"></i>
+            <a ng-if="shuffle && $root.window != 'small'"><i class="fi-shuffle" ng-click="$parent.shuffle = !$parent.shuffle"></i></a>
             <i class="fi-previous float-right" ng-if="$root.window != 'small'" ng-click="prevTrack()"></i>
         </div>
-        <div id="progressBar" class="progress small-9 primary float-left round column padding0" style="overflow: hidden">
+        <div id="progressBar" class="progress small-10 primary float-left round column padding0" style="overflow: hidden">
             <b style="color: #008CBA;font-size: 13px;
 margin-left: 5px;" class="absolute">{{playlist.name}} by {{playlist.by}} // {{trackActive.title}} // {{trackActive.artist.name}}</b>
             <span id="progress" class="meter column padding0" style="width: 0%; overflow: hidden">
@@ -63,13 +66,13 @@ margin-left: 5px;"
                 </b>
             </span>
         </div>
-        <div class="column small-6 large-2">
-            <a target="_blank" href="{{trackActive.redirectUrl}}" style="font-size: 27px;" ng-if="trackActive.platform == 'Soundcloud' && $root.window != 'small'">
+        <div class="column small-2 large-2">
+            <a target="_blank" href="{{trackActive.redirectUrl}}" style="font-size: 27px;" ng-if="trackActive.platform == 'Soundcloud'">
                 <i style="display: block" class="fi-soundcloud float-left"></i>
             </a>
             <a href="https://youtube.com/watch?v={{trackActive.url}}"
                style="font-size: 27px;"
-               ng-if="trackActive.platform == 'Youtube' && $root.window != 'small'"
+               ng-if="trackActive.platform == 'Youtube'"
                target="_blank">
                 <i style="display: block; margin-top: -7px; margin-right: 3px" class="fi-social-youtube float-left"></i>
             </a>
@@ -79,9 +82,9 @@ margin-left: 5px;"
     </div>
 </div>
 <div ng-show="showLecteur" class="width100p float-left">
-    <video class="width100p ng-hide" id="musicPlayer" style="position: fixed"></video>
+    <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed"></audio>
     <div class="width100p playlistScroller" style="overflow-x: auto;">
-        <div ng-if="playlist.tracks.length > 0" style="position: relative; overflow-x: auto; display: inline-flex;"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
+        <div ng-if="playlist.tracks.length > 0" style="position: relative; overflow: auto; max-height: 150px; display: inline-flex; min-width: 100%"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
             <div ng-class="{onplay : track == trackActive}" class="float-left trackContener"
                  as-sortable-item ng-repeat="track in playlist.tracks">
                 <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>

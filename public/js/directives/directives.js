@@ -80,7 +80,13 @@ app.directive('footer', function(){
       templateUrl:'assets/partials/_footer.html'
     }
 });
-
+app.directive('ngIssues', function(){
+    return{
+        restrict : 'A',
+        controller: 'issuesCtrl',
+        templateUrl:'assets/partials/_issues.html'
+    }
+});
 app.directive('ngLecteur', function(){
     return{
         restrict : 'C',

@@ -179,6 +179,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             $scope.play(i);
         };
         $scope.nextTrack = function () {
+            $scope.onPlay = false;
             if ($scope.shuffle == true) {
                 i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                 shuffle()
@@ -240,13 +241,25 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         };
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
+        document.getElementById('musicPlayer').addEventListener('error', $scope.nextTrack);
         console.log(document.getElementById('musicPlayer'))
         $scope.trackActive = $rootScope.playlist.tracks[i];
-        if ($rootScope.playlist.tracks[i].platform == 'Soundcloud') {
+        if ($rootScope.playlist.tracks[i].platform == 'Soundcloud' || $rootScope.window == 'small' || $rootScope.window == 'medium') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             /*document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';*/
             if ($rootScope.playlist.tracks[i].url != undefined) {
-                document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist.tracks[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
+                if ($rootScope.playlist.tracks[i].platform == 'Soundcloud') {
+                    document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist.tracks[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
+                } else {
+                    var youtubeId = $rootScope.playlist.tracks[i].url;
+                    YoutubeVideo(youtubeId, function (video) {
+                        var webm = video.getSource("video/webm", "medium");
+                        var mp4 = video.getSource("video/mp4", "medium");
+                        document.getElementById('musicPlayer').setAttribute('src', mp4.url);
+                        document.getElementById('musicPlayer').play();
+                        document.getElementById('musicPlayer').addEventListener('error', $scope.nextTrack);
+                    });
+                }
             } else {
                 $scope.nextTrack();
             }
@@ -298,159 +311,100 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             }
             document.getElementById('musicPlayer').play();
         } else if ($rootScope.playlist.tracks[i].platform == 'Youtube') {
-            if ($rootScope.window == 'small' || $rootScope.window == 'medium') {
-                /*document.getElementById('youtubePlayer').outerHTML = "<video id='youtubePlayer' autoplay></video>";
-                document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';*/
-                if ($rootScope.playlist.tracks[i].url != undefined) {
-                    var youtubeId = $rootScope.playlist.tracks[i].url;
-                    YoutubeVideo(youtubeId, function (video) {
-                        var webm = video.getSource("video/webm", "medium");
-                        var mp4 = video.getSource("video/mp4", "medium");
-                        document.getElementById('musicPlayer').setAttribute('src', mp4.url);
-                        document.getElementById('musicPlayer').play();
-                    });
-                } else {
-                    $scope.nextTrack();
-                }
-                document.getElementById('musicPlayer').addEventListener("contextmenu", function (e) { e.preventDefault(); e.stopPropagation(); }, false);
-                // hide the controls if they're visible
-                if (document.getElementById('musicPlayer').hasAttribute("controls")) {
-                    document.getElementById('musicPlayer').removeAttribute("controls")
-                }
+            document.getElementById('musicPlayer').pause();
+            //document.getElementById('musicPlayer').classList.add('ng-hide');
+            document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
+            //document.getElementById('youtubePlayer').classList.remove('ng-hide');
+            document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
+            function onPlayerReady(event) {
+                console.log('youtube')
                 $scope.playPause = function () {
                     if ($scope.onPlay == false) {
-                        document.getElementById('musicPlayer').play();
-                        $timeout(function () {
-                            $scope.$apply(function () {
-                                $scope.onPlay = true;
-                            });
-                        })
+                        event.target.playVideo();
+                        $scope.onPlay = true;
                     } else {
-                        document.getElementById('musicPlayer').pause();
+                        event.target.pauseVideo();
                         $scope.onPlay = false;
                     }
                 };
+                var yPlayer = event.target;
+                yPlayer.setVolume($scope.levelVol);
                 $scope.volume = function () {
-                    document.getElementById('musicPlayer').volume = $scope.levelVol / 100
+                    yPlayer.setVolume($scope.levelVol);
                 };
                 document.getElementById("progressBar").onclick = function (event) {
-                    document.getElementById('musicPlayer').currentTime =
-                        document.getElementById('musicPlayer').duration * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
-                        / document.getElementById("progressBar").clientWidth)
-                };
-                if (i > 0) {
-                    if (document.getElementsByClassName('trackContener').length >= i) {
-                        $timeout(function () {
-                            var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                            document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
-                        }, 100);
-                    } else {
-                        goToTrackActive()
-                    }
-                }
-                $timeout(function () {
-                    $scope.$apply(function () {
-                        $scope.onPlay = true;
-                    });
-                }, 0);
-                document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
-                document.getElementById('musicPlayer').play();
-            } else {
-                document.getElementById('musicPlayer').pause();
-                //document.getElementById('musicPlayer').classList.add('ng-hide');
-                document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
-                //document.getElementById('youtubePlayer').classList.remove('ng-hide');
-                document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
-                function onPlayerReady(event) {
-                    console.log('youtube')
-                    $scope.playPause = function () {
-                        if ($scope.onPlay == false) {
-                            event.target.playVideo();
-                            $scope.onPlay = true;
-                        } else {
-                            event.target.pauseVideo();
-                            $scope.onPlay = false;
-                        }
-                    };
-                    var yPlayer = event.target;
-                    yPlayer.setVolume($scope.levelVol);
-                    $scope.volume = function () {
-                        yPlayer.setVolume($scope.levelVol);
-                    };
-                    document.getElementById("progressBar").onclick = function (event) {
-                        var newPos = yPlayer.getDuration() * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
-                            / document.getElementById("progressBar").clientWidth);
-                        yPlayer.seekTo(newPos, true);
-                        $scope.onPlay = true;
-                        $scope.$apply();
-                        yPlayer.playVideo();
-                    };
-                    console.log(window)
-                    yPlayer.unMute();
-                    yPlayer.playVideo();
+                    var newPos = yPlayer.getDuration() * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
+                        / document.getElementById("progressBar").clientWidth);
+                    yPlayer.seekTo(newPos, true);
                     $scope.onPlay = true;
                     $scope.$apply();
+                    yPlayer.playVideo();
+                };
+                console.log(window)
+                yPlayer.unMute();
+                yPlayer.playVideo();
+                $scope.onPlay = true;
+                $scope.$apply();
 
-                    if (i > 0) {
-                        function goToTrackActive() {
-                            if (document.getElementsByClassName('trackContener').length >= i) {
-                                $timeout(function () {
-                                    var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                                    document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
-                                }, 100);
-                            } else {
-                                goToTrackActive()
+                if (i > 0) {
+                    function goToTrackActive() {
+                        if (document.getElementsByClassName('trackContener').length >= i) {
+                            $timeout(function () {
+                                var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
+                                document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
+                            }, 100);
+                        } else {
+                            goToTrackActive()
+                        }
+                    }
+
+                    goToTrackActive()
+                }
+            }
+
+            function onPlayerStateChange(event) {
+                if (event.data === 1) {
+                    var duration = event.target.getDuration();
+                    var curentDuration = event.target.getCurrentTime();
+                    updateProgressYt = setInterval(function () {
+                        curentDuration = event.target.getCurrentTime();
+                        var prog = document.getElementById("progress");
+                        var val = 0;
+                        if (curentDuration > 0) {
+                            val = 100 / duration * curentDuration;
+                        }
+                        prog.style.width = val + "%";
+                        document.getElementById('currentTime').innerHTML =
+                            readableDuration(curentDuration) +
+                            ' / ' + readableDuration(duration);
+                        if (val == 100) {
+                            if (typeof(updateProgressYt) != "undefined") {
+                                clearInterval(updateProgressYt);
                             }
                         }
-
-                        goToTrackActive()
+                    }, 100);
+                } else {
+                    if (typeof(updateProgressYt) != "undefined") {
+                        clearInterval(updateProgressYt);
                     }
                 }
+                if (event.data === 0) {
+                    $scope.nextTrack()
+                }
+            }
 
-                function onPlayerStateChange(event) {
-                    if (event.data === 1) {
-                        var duration = event.target.getDuration();
-                        var curentDuration = event.target.getCurrentTime();
-                        updateProgressYt = setInterval(function () {
-                            curentDuration = event.target.getCurrentTime();
-                            var prog = document.getElementById("progress");
-                            var val = 0;
-                            if (curentDuration > 0) {
-                                val = 100 / duration * curentDuration;
-                            }
-                            prog.style.width = val + "%";
-                            document.getElementById('currentTime').innerHTML =
-                                readableDuration(curentDuration) +
-                                ' / ' + readableDuration(duration);
-                            if (val == 100) {
-                                if (typeof(updateProgressYt) != "undefined") {
-                                    clearInterval(updateProgressYt);
-                                }
-                            }
-                        }, 100);
-                    } else {
-                        if (typeof(updateProgressYt) != "undefined") {
-                            clearInterval(updateProgressYt);
-                        }
-                    }
-                    if (event.data === 0) {
+            var player = new YT.Player('youtubePlayer', {
+                height: '200',
+                width: '100%',
+                videoId: $rootScope.playlist.tracks[i].url,
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': function () {
                         $scope.nextTrack()
                     }
                 }
-
-                var player = new YT.Player('youtubePlayer', {
-                    height: '200',
-                    width: '100%',
-                    videoId: $rootScope.playlist.tracks[i].url,
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange,
-                        'onError': function () {
-                            $scope.nextTrack()
-                        }
-                    }
-                });
-            }
+            });
         }
     };
     /*$scope.savePlaylist = function () {

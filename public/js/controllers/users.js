@@ -6,7 +6,18 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
     } else {
         $scope.getUrl = 'organizers'
     }
-
+    $http.get('/' + $scope.getUrl + '/' + $routeParams.id)
+        .success(function(data, status){
+            $scope.organizer = data;
+            $rootScope.marginContent();
+            console.log(data);
+            if ($scope.organizer.geographicPoint != undefined) {
+                $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace("(", "");
+                $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(")", "");
+                $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(",", ", ");
+            }
+        }).error(function(data, status){
+        });
     $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
         .success(function(data, status){
             $scope.orgaEvents = data;
@@ -112,16 +123,5 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                     $scope.fullMap = true;
                 }
             }
-        });
-    $http.get('/' + $scope.getUrl + '/' + $routeParams.id)
-        .success(function(data, status){
-            $scope.organizer = data;
-            console.log(data);
-            if ($scope.organizer.geographicPoint != undefined) {
-                $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace("(", "");
-                $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(")", "");
-                $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(",", ", ");
-            }
-        }).error(function(data, status){
         });
 });

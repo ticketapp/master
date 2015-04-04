@@ -111,7 +111,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             }, 100)
         };
         $rootScope.window = 'large';
-        function marginContent () {
+         $rootScope.marginContent = function() {
             if ($rootScope.path != 'home') {
                 var waitForContentParallax = setTimeout(function () {
                     var content = document.getElementsByClassName('parallax-content');
@@ -159,13 +159,13 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     $rootScope.window = 'xxlarge';
                 });
             }
-            marginContent();
+            $rootScope.marginContent();
         }
         $timeout(function () {
             respClass ();
         }, 0);
         window.onresize = respClass;
-        angular.element(document).ready(marginContent());
+        angular.element(document).ready($rootScope.marginContent());
         function fixControl () {
             var titlePos = document.getElementById('eventTitle').getBoundingClientRect();
             if (document.getElementById('wysiwygControl').getBoundingClientRect().top <= 0) {
@@ -195,7 +195,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             } else {
                 $rootScope.path = false;
             }
-            marginContent();
             if ($location.path().indexOf('/createEvent') > -1) {
                 window.addEventListener('scroll', fixControl)
             } else {
@@ -218,8 +217,11 @@ app.filter('millSecondsToTimeString', function() {
         var seconds = Math.floor(millseconds*3600000 / 1000);
         var days = Math.floor(seconds / 86400);
         var hours = Math.floor((seconds % 86400) / 3600);
+        var months = Math.floor(days / 30);
         var timeString = '';
-        if(days > 0) timeString += (days > 1) ? (days + " days ") : (days + " day ");
+        console.log(months)
+        if(months > 0) timeString += (months > 1) ? (months + " months ") : (months + " months ");
+        if(days > 0 && months == 0) timeString += (days > 1) ? (days + " days ") : (days + " day ");
         if(hours > 0) timeString += (hours > 1) ? (hours + " hours ") : (hours + " hour ");
         return timeString;
     }

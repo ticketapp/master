@@ -1,13 +1,18 @@
 <div id="searchBlock" class="column large-6 large-offset-3 absolute" ng-if="$root.path != 'search'">
     <ng-search-bar></ng-search-bar>
 </div>
+<a class="button"
+   ng-if="$root.activPlace && searchPat.length > 3"
+        ng-click="searchNewPlace(searchPat)">
+    SuggestPlace {{searchPat}}
+</a>
 <div>
     <ul id="events_contener" ng-class="{paddingTop50: $root.path == 'search'}"
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
-        <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0"
+        <div ng-if="$root.activEvent && events.length > 0" class=" column small-12 medium-6 large-3 min_contener data-ng-event margin0"
             data-ng-repeat="event in events |orderBy: order"
             ng-show= "filteredGenres.length || filterQuery.length <= 1 || filterQuery == undefined">
-        </li>
+        </div>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-3 medium-6 float-left margin0"
             data-ng-repeat="artist in artists | filter: filterSearch"
@@ -71,14 +76,31 @@
             data-ng-repeat="place in places" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
-                    <div class="toGrow">
+                    <div class="toGrow" ng-if="place.placeId != -1">
                         <a href="#/lieu/{{place.placeId}}">
+                            <img src="{{ place.imagePath }}" ng-if="place.imagePath.length > 0" alt="une belle image" class="min"/>
+                            <map ng-if="place.imagePath.length == 0 || place.imagePath == undefined"
+                                 zoom="14"
+                                 center="[{{place.geographicPoint}}]"
+                                 scrollwheel="false"
+                                 navigationControl="false"
+                                 mapTypeControl="false"
+                                 scaleControl="false"
+                                 class="width100p img_min_evnt">
+                                <marker visible="true" position="{{place.geographicPoint}}" icon="../assets/img/marker.png">
+                                </marker>
+                            </map>
+                        </a>
+                    </div>
+                    <div class="toGrow" ng-if="place.placeId == -1">
+                        <a ng-click="createNewPlace(place)">
                             <img src="{{ place.imagePath }}" alt="une belle image" class="min"/>
                         </a>
                     </div>
                 </div>
                 <div class=" text_evnt_min" >
-                    <a href="#/lieu/{{place.placeId}}"><h4>{{ place.name }}</h4></a>
+                    <a ng-if="place.placeId != -1" href="#/lieu/{{place.placeId}}"><h4>{{ place.name }}</h4></a>
+                    <a ng-if="place.placeId == -1" ng-click="createNewPlace(place)"><h4>{{ place.name }}</h4></a>
                 </div>
             </div>
         </li>
