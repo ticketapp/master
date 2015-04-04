@@ -159,13 +159,6 @@ object Event {
         .on('genre -> genre)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
-      /*
-      SELECT a.*
-FROM artistsGenres aG
-  INNER JOIN artists a ON a.artistId = aG.artistId
-  INNER JOIN genres g ON g.genreId=aG.genreId
-WHERE g.name='dub'
-       */
     }
   } catch {
     case e: Exception => throw new DAOException("Event.findAllByGenre: " + e.getMessage)
@@ -192,8 +185,10 @@ WHERE g.name='dub'
       SQL(
         """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.name, e.geographicPoint,
           |e.description, e.startTime, e.endTime, e.ageRestriction, e.imagePath
-          |FROM eventsArtists eA INNER JOIN events e ON e.eventId = eA.eventId
-          |WHERE eA.artistId = (SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl})
+          |FROM eventsArtists eA
+          | INNER JOIN events e ON e.eventId = eA.eventId
+          | INNER JOIN artists a ON a.artistId = eA.artistId
+          |WHERE a.facebookUrl = {facebookUrl}
           |ORDER BY e.creationDateTime DESC
           |LIMIT 20""".stripMargin)
         .on('facebookUrl -> facebookUrl)
