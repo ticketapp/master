@@ -104,19 +104,56 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                     console.log(data)
                                     var loc = '(' + data.results[0].geometry.location.lat +
                                         ',' + data.results[0].geometry.location.lng + ')';
-                                    $http.post('/places/create', {
-                                        name: place.name,
-                                        facebookId: place.id,
-                                        geographicPoint: loc,
-                                        capacity: place.checkins,
-                                        description: place.description,
-                                        webSite: place.website,
-                                        imagePath : place.cover.source
-                                    }).success(function(data){
-                                        console.log(data)
-                                    }).error(function(data){
-                                        console.log(data)
-                                    })
+                                    if (place.cover != undefined) {
+                                        $http.post('/places/create', {
+                                            name: place.name,
+                                            facebookId: place.id,
+                                            geographicPoint: loc,
+                                            capacity: place.checkins,
+                                            description: place.description,
+                                            webSite: place.website,
+                                            imagePath : place.cover.source
+                                        }).success(function(data){
+                                            console.log(data)
+                                        }).error(function(data){
+                                            console.log(data)
+                                        })
+                                        $rootScope.resizeImgHeight();
+                                    } else {
+                                        $http.get('https://graph.facebook.com/v2.2/' + searchPlaces.id + '/?fields=cover, picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+                                            success(function (data) {
+                                                console.log(data)
+                                                $http.post('/places/create', {
+                                                    name: place.name,
+                                                    facebookId: place.id,
+                                                    geographicPoint: loc,
+                                                    capacity: place.checkins,
+                                                    description: place.description,
+                                                    webSite: place.website,
+                                                    imagePath: data.source
+                                                }).success(function (data) {
+                                                    console.log(data)
+                                                }).error(function (data) {
+                                                    console.log(data)
+                                                })
+                                                $rootScope.resizeImgHeight();
+                                            }).
+                                            error(function () {
+                                                $http.post('/places/create', {
+                                                    name: place.name,
+                                                    facebookId: place.id,
+                                                    geographicPoint: loc,
+                                                    capacity: place.checkins,
+                                                    description: place.description,
+                                                    webSite: place.website
+                                                }).success(function (data) {
+                                                    console.log(data)
+                                                }).error(function (data) {
+                                                    console.log(data)
+                                                })
+                                                $rootScope.resizeImgHeight();
+                                            })
+                                    }
                                 });
                         }
                         //places.push(data);
@@ -134,13 +171,19 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                 success(function (data, status, headers, config) {
                     data = data.data;
                     for (var iv = 0; iv < data.length; iv++) {
-                        if (data[iv].category == 'Concert venue' || data[iv].category == 'Club') {
+                        if (data[iv].category == 'Concert venue' ||
+                            data[iv].category == 'Club' ||
+                            data[iv].category == 'Bar' ||
+                            data[iv].category == 'Arts/entertainment/nightlife') {
                             getPlacesById(data[iv]);
                             //count = count + 1;
                             //console.log(count)
                         } else if (data[iv].category_list != undefined) {
                             for (var ii = 0; ii < data[iv].category_list.length; ii++) {
-                                if (data[iv].category_list[ii].name == 'Concert Venue' || data[iv].category_list[ii].name == 'Club') {
+                                if (data[iv].category_list[ii].name == 'Concert Venue' ||
+                                    data[iv].category_list[ii].name == 'Club' ||
+                                    data[iv].category_list[ii].name == 'Bar' ||
+                                    data[iv].category_list[ii].name == "Nightlife") {
                                     getPlacesById(data[iv]);
                                     //count = count + 1;
                                     //console.log(count)

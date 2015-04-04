@@ -17,6 +17,147 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     } else {
         var _research = '';
     }
+    $scope.createNewPlace = function (place) {
+        $http.post('/places/create', {
+            name: place.name,
+            facebookId: place.facebookId,
+            geographicPoint: place.geographicPoint,
+            capacity: place.capacity,
+            description: place.description,
+            webSite: place.webSite,
+            imagePath : place.imagePath
+        }).success(function(data){
+            console.log(data)
+            window.location.href =('#/lieu/' + data.placeId);
+        }).error(function(data){
+            console.log(data)
+        })
+    }
+    $scope.searchNewPlace = function (placeName) {
+        function getPlacesById (searchPlaces) {
+            $http.get('https://graph.facebook.com/v2.2/'+ searchPlaces.id +'/?fields=checkins,cover,description,hours,id,likes,link,location,name,phone,website,picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+                success(function(data, status, headers, config) {
+                    flag = 0;
+                    if (data.location != undefined) {
+                        if (data.location.country == undefined || data.location.country != 'France') {
+                            flag = 1;
+                        }
+                    } else {
+                        flag = 1;
+                    }
+                    if (flag == 0){
+                        //count2 = count2 + 1;
+                        //console.log("c2", count2);
+                        var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
+                        if (data.description == undefined) {
+                            data.description = "";
+                        }
+                        data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
+                        data.description = data.description.replace(/(\n)/g, " <br/>");
+                        if (matchedLinks = data.description.match(links)) {
+                            var m = matchedLinks;
+                            var unique = [];
+                            for (var ii = 0; ii < m.length; ii++) {
+                                var current = m[ii];
+                                if (unique.indexOf(current) < 0) unique.push(current);
+                            }
+                            for (var i=0; i < unique.length; i++) {
+                                data.description = data.description.replace(new RegExp(unique[i],"g"),
+                                        "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
+                            }
+                        }
+                        function getPositionAndCreate (place) {
+                            $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' +
+                                place.location.street + '+' +
+                                place.location.zip + '+' +
+                                place.location.city + '+' +
+                                place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
+                                success(function (data) {
+                                    console.log(place)
+                                    var loc = '(' + data.results[0].geometry.location.lat +
+                                        ',' + data.results[0].geometry.location.lng + ')';
+                                    if (place.cover != undefined) {
+                                        $scope.places.push({
+                                            placeId: -1,
+                                            name: place.name,
+                                            facebookId: place.id,
+                                            geographicPoint: loc,
+                                            capacity: place.checkins,
+                                            description: place.description,
+                                            webSite: place.website,
+                                            imagePath: place.cover.source
+                                        });
+                                        $rootScope.resizeImgHeight();
+                                    } else {
+                                        $http.get('https://graph.facebook.com/v2.2/'+ searchPlaces.id +'/?fields=cover, picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+                                            success(function (data) {
+                                                console.log(data)
+                                                $scope.places.push({
+                                                    placeId: -1,
+                                                    name: place.name,
+                                                    facebookId: place.id,
+                                                    geographicPoint: loc,
+                                                    capacity: place.checkins,
+                                                    description: place.description,
+                                                    webSite: place.website,
+                                                    imagePath: data.source
+                                                })
+                                                $rootScope.resizeImgHeight();
+                                            }).
+                                            error(function () {
+                                                $scope.places.push({
+                                                    placeId: -1,
+                                                    name: place.name,
+                                                    facebookId: place.id,
+                                                    geographicPoint: loc,
+                                                    capacity: place.checkins,
+                                                    description: place.description,
+                                                    webSite: place.website
+                                                })
+                                                $rootScope.resizeImgHeight();
+                                            })
+                                    }
+                                });
+                        }
+                        //places.push(data);
+                        getPositionAndCreate(data);
+                    }
+                }).
+                error(function(data, status, headers, config) {
+                    console.log(data);
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                });
+        }
+        $http.get('https://graph.facebook.com/v2.2/search?q=' + placeName + '&type=page&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+            success(function (data, status, headers, config) {
+                data = data.data;
+                console.log(data)
+                for (var iv = 0; iv < data.length; iv++) {
+                    if (data[iv].category == 'Concert venue' ||
+                        data[iv].category == 'Club' ||
+                        data[iv].category == 'Bar' ||
+                        data[iv].category == 'Arts/entertainment/nightlife') {
+                        getPlacesById(data[iv])
+                        console.log(data[iv])
+                    } else if (data[iv].category_list != undefined) {
+                        for (var ii = 0; ii < data[iv].category_list.length; ii++) {
+                            if (data[iv].category_list[ii].name == 'Concert Venue' ||
+                                data[iv].category_list[ii].name == 'Club' ||
+                                data[iv].category_list[ii].name == 'Bar' ||
+                                data[iv].category_list[ii].name == "Nightlife") {
+                                    getPlacesById(data[iv]);
+                            }
+                        }
+                    }
+                }
+            }).
+            error(function (data, status, headers, config) {
+                console.log(data)
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
+    }
     function search () {
         $rootScope.activArtist = _selArtist;
         $rootScope.activEvent = _selEvent;
@@ -110,16 +251,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             scopeIdList.push(el.placeId);
                         }
                         $scope.places.forEach(getPlaceId);
-                        if ($scope.places.length == 0) {
-                            $scope.places = data;
-                        } else {
-                            function uploadPlaces(el, index, array) {
-                                if (scopeIdList.indexOf(el.placeId) == -1) {
-                                    $scope.places.push(el);
+                        function uploadPlaces(el, index, array) {
+                            if (scopeIdList.indexOf(el.placeId) == -1) {
+                                if (el.geographicPoint != undefined) {
+                                    el.geographicPoint = el.geographicPoint.replace("(", "");
+                                    el.geographicPoint = el.geographicPoint.replace(")", "");
+                                    el.geographicPoint = el.geographicPoint.replace(",", ", ");
                                 }
+                                $scope.places.push(el);
                             }
-                            data.forEach(uploadPlaces)
                         }
+                        data.forEach(uploadPlaces)
                         console.log($scope.places)
                         $rootScope.resizeImgHeight();
                         $scope.loadingMore = false;
@@ -167,16 +309,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             scopeIdList.push(el.placeId);
                         }
                         $scope.places.forEach(getPlaceId);
-                        if ($scope.places.length == 0) {
-                            $scope.places = data;
-                        } else {
                             function uploadPlaces(el, index, array) {
                                 if (scopeIdList.indexOf(el.placeId) == -1) {
+                                    if (el.geographicPoint != undefined) {
+                                        el.geographicPoint = el.geographicPoint.replace("(", "");
+                                        el.geographicPoint = el.geographicPoint.replace(")", "");
+                                        el.geographicPoint = el.geographicPoint.replace(",", ", ");
+                                    }
                                     $scope.places.push(el);
                                 }
                             }
                             data.forEach(uploadPlaces)
-                        }
                         $rootScope.resizeImgHeight()
                         $scope.loadingMore = false;
                     }).
@@ -333,7 +476,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var doneTypingInterval = 600;
     $scope.research = function(newName) {
         if (angular.isDefined(newName)) {
-            _research = newName
+            _research = newName;
+            $scope.searchPat = newName;
             $scope.limit = 20;
             offset = 0;
             if (_selArtist == true && _research.length > 2) {
