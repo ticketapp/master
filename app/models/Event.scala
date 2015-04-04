@@ -163,15 +163,14 @@ object Event {
 
   def findAllByArtist(facebookUrl: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
-      val artistId = Artist.returnArtistIdByFacebookUrl(facebookUrl)
       SQL(
         """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.name, e.geographicPoint,
           |e.description, e.startTime, e.endTime, e.ageRestriction, e.imagePath
           |FROM eventsArtists eA INNER JOIN events e ON e.eventId = eA.eventId
-          |WHERE eA.artistId = {artistId}
+          |WHERE eA.artistId = (SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl})
           |ORDER BY e.creationDateTime DESC
           |LIMIT 20""".stripMargin)
-        .on('artistId -> artistId)
+        .on('facebookUrl -> facebookUrl)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
@@ -201,7 +200,7 @@ object Event {
   def findAllByCityPattern(cityPattern: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT * FROM events e
+        """SELECT e.* FROM events e
           |JOIN eventsAddresses eA on e.eventId = eA.eventId
           |JOIN addresses a ON a.addressId = eA.eventId
           |WHERE a.isEvent = TRUE AND LOWER(name)

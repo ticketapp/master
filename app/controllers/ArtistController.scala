@@ -15,12 +15,10 @@ import scala.concurrent.Future
 
 
 object ArtistController extends Controller with securesocial.core.SecureSocial {
-  def artists = Action {
-    Ok(Json.toJson(Artist.findAll))
-  }
+  def artists = Action { Ok(Json.toJson(Artist.findAll)) }
 
   def artistsSinceOffsetBy(number: Int, offset: Int) = Action {
-    Ok(Json.toJson(Artist.findSinceOffsetBy(number, offset)))
+    Ok(Json.toJson(Artist.findSinceOffset(number, offset)))
   }
 
   def artist(artistId: Long) = Action {
@@ -35,6 +33,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       case Some(artist) => Ok(Json.toJson(artist))
       case None =>  Ok
     }
+  }
+
+  def artistsByGenre(genre: String, numberOfArtistsToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Artist.findByGenre(genre, numberOfArtistsToReturn, offset)))
   }
 
   def findArtistsContaining(pattern: String) = Action {

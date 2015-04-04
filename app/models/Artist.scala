@@ -74,12 +74,12 @@ object Artist {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
   }
 
-  def findSinceOffsetBy(number: Int, offset: Int): Seq[Artist] = try {
+  def findSinceOffset(numberOfArtistsToReturn: Int, offset: Int): Seq[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL(
         s"""SELECT *
            |FROM artists
-           |LIMIT $number OFFSET $offset""".stripMargin)
+           |LIMIT $numberOfArtistsToReturn OFFSET $offset""".stripMargin)
         .as(ArtistParser.*)
         .map(getArtistProperties)
     }
@@ -94,6 +94,23 @@ object Artist {
              INNER JOIN artists a ON a.artistId = eA.artistId
              WHERE eA.eventId = {eventId}""")
         .on('eventId -> event.eventId)
+        .as(ArtistParser.*)
+        .map(getArtistProperties)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
+  }
+
+  def findByGenre(genre: String, numberOfArtistsToReturn: Int, offset: Int): Seq[Artist] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT a.*
+          |FROM artistsGenres aG
+          |  INNER JOIN artists a ON a.artistId = aG.artistId
+          |  INNER JOIN genres g ON g.genreId = aG.genreId
+          |WHERE g.name = {genre}
+          |LIMIT $numberOfArtistsToReturn OFFSET $offset""".stripMargin)
+        .on('genre -> genre)
         .as(ArtistParser.*)
         .map(getArtistProperties)
     }
