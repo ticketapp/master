@@ -127,7 +127,7 @@ object Event {
     case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
 
-  def findAllByGenre(genreId: Long): Seq[Event] = try {
+  def findAllByGenreId(genreId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.name, e.geographicPoint,
@@ -143,6 +143,32 @@ object Event {
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot get events by genre: " + e.getMessage)
+  }
+
+  def findAllByGenre(genre: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT e.*
+           |FROM eventsGenres eG
+           |  INNER JOIN events e ON e.eventId = eG.eventId
+           |  INNER JOIN genres g ON g.genreId = eG.genreId
+           |WHERE g.name = {genre}
+           |ORDER BY e.creationDateTime DESC
+           |LIMIT $numberToReturn
+           |OFFSET $offset""".stripMargin)
+        .on('genre -> genre)
+        .as(EventParser.*)
+        .map(getPropertiesOfEvent)
+      /*
+      SELECT a.*
+FROM artistsGenres aG
+  INNER JOIN artists a ON a.artistId = aG.artistId
+  INNER JOIN genres g ON g.genreId=aG.genreId
+WHERE g.name='dub'
+       */
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findAllByGenre: " + e.getMessage)
   }
 
   def findAllByOrganizer(organizerId: Long): Seq[Event] = try {

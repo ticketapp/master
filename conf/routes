@@ -50,8 +50,8 @@ GET         /organizers/:organizerId/events                controllers.EventCont
 
 
 ################################# Genres ############################################
-GET     /genres/:genre/:numberOfArtistsToReturn/:offset/artists   controllers.ArtistController.artistsByGenre(genre: String, numberOfArtistsToReturn: Int, offset: Int)
-
+GET     /genres/:genre/:numberToReturn/:offset/artists   controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET     /genres/:genre/:numberToReturn/:offset/events    controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
 
 ################################# Tracks ############################################
 POST        /tracks/create                                  controllers.TrackController.createTrack

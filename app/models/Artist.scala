@@ -101,7 +101,7 @@ object Artist {
     case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
   }
 
-  def findByGenre(genre: String, numberOfArtistsToReturn: Int, offset: Int): Seq[Artist] = try {
+  def findByGenre(genre: String, numberToReturn: Int, offset: Int): Seq[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL(
         s"""SELECT a.*
@@ -109,7 +109,7 @@ object Artist {
           |  INNER JOIN artists a ON a.artistId = aG.artistId
           |  INNER JOIN genres g ON g.genreId = aG.genreId
           |WHERE g.name = {genre}
-          |LIMIT $numberOfArtistsToReturn OFFSET $offset""".stripMargin)
+          |LIMIT $numberToReturn OFFSET $offset""".stripMargin)
         .on('genre -> genre)
         .as(ArtistParser.*)
         .map(getArtistProperties)

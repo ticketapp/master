@@ -35,8 +35,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def artistsByGenre(genre: String, numberOfArtistsToReturn: Int, offset: Int) = Action {
-    Ok(Json.toJson(Artist.findByGenre(genre, numberOfArtistsToReturn, offset)))
+  def artistsByGenre(genre: String, numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Artist.findByGenre(genre, numberToReturn, offset)))
   }
 
   def findArtistsContaining(pattern: String) = Action {
