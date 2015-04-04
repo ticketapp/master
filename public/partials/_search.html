@@ -4,10 +4,10 @@
 <div>
     <ul id="events_contener" ng-class="{paddingTop50: $root.path == 'search'}"
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-4">
-        <li ng-if="$root.activEvent && events.length > 0" class="min_contener data-ng-event margin0"
+        <div ng-if="$root.activEvent && events.length > 0" class=" column small-12 medium-6 large-3 min_contener data-ng-event margin0"
             data-ng-repeat="event in events |orderBy: order"
             ng-show= "filteredGenres.length || filterQuery.length <= 1 || filterQuery == undefined">
-        </li>
+        </div>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-3 medium-6 float-left margin0"
             data-ng-repeat="artist in artists | filter: filterSearch"
