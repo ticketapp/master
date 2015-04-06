@@ -50,13 +50,14 @@ object Playlist {
 
   def save(playlist: Playlist): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO playlists(name) VALUES({name})""")
-        .on('name -> playlist.name)
+      SQL("""INSERT INTO playlists(userId, name) VALUES({userId}, {name})""")
+        .on('userId -> playlist.userId,
+            'name -> playlist.name)
         .executeInsert() match {
         case None =>
           None
         case Some(playlistId: Long) =>
-          playlist.tracksId.foreach(trackId => Track.savePlaylistTrackRelation(trackId, playlistId))
+          playlist.tracksId.foreach(trackId => Track.savePlaylistTrackRelation(playlistId, trackId))
           Some(playlistId)
       }
     }

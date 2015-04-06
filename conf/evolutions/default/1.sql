@@ -649,19 +649,14 @@ LANGUAGE plpgsql;
 
 CREATE TABLE playlists (
   playlistId              SERIAL PRIMARY KEY,
-  name                    VARCHAR(255) NOT NULL
+  userId                  VARCHAR(255) REFERENCES users_login (userId),
+  name                    VARCHAR(255)
 );
 
 CREATE TABLE playlistTracks (
   playlistId              BIGINT REFERENCES playlists (playlistId),
   trackId                 BIGINT REFERENCES tracks (trackId),
   PRIMARY KEY (playlistId, trackId)
-);
-
-CREATE TABLE usersPlaylists (
-  userId                  VARCHAR(255) REFERENCES users_login (userId),
-  playlistId              BIGINT REFERENCES playlists (playlistId),
-  PRIMARY KEY (userId, playlistId)
 );
 
 # --- !Downs
