@@ -7,9 +7,9 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import services.Utilities.normalizeUrl
 import scala.concurrent.Future
-import java.util.regex.Pattern
 import services.SearchSoundCloudTracks.normalizeTrackTitle
 import models.Genre.saveGenreForArtistInFuture
+import scala.language.postfixOps
 
 object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
@@ -63,7 +63,7 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Future[Set[Track]] = {
-    Future { getAndSaveArtistStyleOnEchonest(echonestId, artist.artistId.getOrElse(-1L)) }
+    Future { saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId.getOrElse(-1L))) }
     getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
       getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
     }
@@ -218,7 +218,7 @@ object SearchYoutubeTracks {
     val collectOnlyValidTuples = Reads.seq(TupleEnIdFbIdReads).map { tuples =>
       tuples.collect {
         case (echonestId: String, Some(facebookId: Seq[String])) if facebookId.nonEmpty =>
-          (echonestId, facebookId(0))
+          (echonestId, facebookId.head)
       }
     }
     (echonestResponse.json \ "response" \ "artists")
@@ -226,7 +226,7 @@ object SearchYoutubeTracks {
       .getOrElse(Seq.empty)
   }
 
-  def getAndSaveArtistStyleOnEchonest(echonestId: String, artistId: Long): Unit = {
+  def getArtistGenresOnEchonest(echonestId: String, artistId: Long): Future[(Long, Array[String])] = {
     WS.url("http://developer.echonest.com/api/v4/artist/profile")
       .withQueryString(
         "id" -> echonestId,
@@ -234,10 +234,14 @@ object SearchYoutubeTracks {
         "bucket" -> "genre",
         "api_key" -> echonestApiKey)
       .get()
-      .map { response =>
-        readEchonestGenres(response.json).map { genre =>
-          saveGenreForArtistInFuture(Option(genre), artistId.toInt)
-        }
+      .map { response => (artistId, readEchonestGenres(response.json)) }
+  }
+
+  def saveArtistGenres(tupleArtistIdGenres: Future[(Long, Array[String])]): Unit = {
+    tupleArtistIdGenres.map { artistIdGenres =>
+      artistIdGenres._2.foreach { genre =>
+        saveGenreForArtistInFuture(Option(genre), artistIdGenres._1.toInt)
+      }
     }
   }
 
