@@ -8,6 +8,8 @@ import play.api.mvc.{Action, Controller}
 import securesocial.core._
 import play.api.libs.concurrent.Execution.Implicits._
 
+import scala.concurrent.Future
+
 object PlaylistController extends Controller with securesocial.core.SecureSocial {
 
   def findByUser = SecuredAction { implicit request =>
@@ -16,10 +18,9 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
 
   val playlistBindingForm = Form(mapping(
     "name" -> nonEmptyText,
-    "tracksId" -> seq(
-      mapping(
-        "trackId" -> longNumber
-      )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
+    "tracksId" -> seq(mapping(
+      "trackId" -> longNumber
+    )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))
 
   def create = SecuredAction { implicit request =>
@@ -30,8 +31,12 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       },
       playlistNameAndTracksId => {
         val userId = request.user.identityId.userId
-        Ok(Json.toJson(Playlist.save(
-          Playlist(None, userId, playlistNameAndTracksId.name, playlistNameAndTracksId.tracksId))))
+        val playlist = Playlist(None, userId, playlistNameAndTracksId.name, playlistNameAndTracksId.tracksId)
+        println(playlist)
+        val playlistId = Playlist.save(playlist)
+        //Future { save tracks playlist relation (tracks shouldn't be in playlist as id but as tracks that
+        //are Seq.empty if not rendered
+        Ok(Json.toJson(playlistId))
       }
     )
   }
