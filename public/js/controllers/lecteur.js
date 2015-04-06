@@ -24,16 +24,18 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     var i = 0;
     $scope.createNewPlaylist = function (playlist) {
         var tracksToSave = [];
-        for (var i=0; i < playlist.tracks; i++) {
-            tracksToSave.push(playlist.tracks[i].trackId)
+        console.log(playlist)
+        for (var i=0; i < playlist.tracks.length; i++) {
+            tracksToSave.push({trackId: playlist.tracks[i].trackId})
         }
-        console.log(tracksToSave)
+        console.log(tracksToSave);
         $http.post('/playlists/create', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
                 console.log(data)
             }).
             error(function (data) {
                 console.log(data)
+                $scope.error = data;
             })
     };
     function eventsPlaylist () {
@@ -81,6 +83,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.newTrack.url = track.url;
         $scope.newTrack.artist = art;
         $scope.newTrack.title = track.title;
+        $scope.newTrack.trackId = track.trackId;
         $rootScope.playlist.tracks.push($scope.newTrack);
     }
     $rootScope.addToPlaylist = function (tracks, artist) {

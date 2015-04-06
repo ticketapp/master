@@ -30,6 +30,7 @@ app.controller('toolsCtrl', function ($scope, $modal, $log, $rootScope) {
 app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope, items, connected, $http) {
     $scope.items = items;
     $scope.getPlaylists = function() {
+        console.log(document.getElementsByTagName('iframe')[0].contentWindow.location.href)
         $http.get('/playlists').
             success(function(data) {
                 $scope.playlists = data;

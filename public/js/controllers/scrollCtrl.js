@@ -16,6 +16,12 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             success(function (data) {
                 console.log(data)
             })*/
+        $rootScope.passConnectedToFalse = function () {
+            $rootScope.connected = false;
+        };
+        $rootScope.passConnectedToTrue = function () {
+            $rootScope.connected = true;
+        };
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
         };

@@ -3,6 +3,7 @@
     <a href="/authenticate/google"> <img src="/assets/securesocial/images/providers/google.png"></a>
     <a ng-click="authMail = true">Auth by mail</a>
 </div>
+        <iframe src="/authenticate/google"></iframe>
 <form ng-if="!signUp && authMail" action="http://localhost:9000/authenticate/userpass" class="column large-12" autocomplete="off" method="POST">
     <fieldset>
         <div class="column large-12" id="username_field">
