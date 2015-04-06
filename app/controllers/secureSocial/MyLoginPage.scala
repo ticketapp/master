@@ -14,17 +14,16 @@
  * limitations under the License.
  *
  */
-package securesocial.mycontrollers
+package controllers.secureSocial
 
-import play.api.mvc.{Session, DiscardingCookie, Action, Controller}
-import securesocial.controllers.{TemplatesPlugin, ProviderController}
-import securesocial.core._
-import play.api.Play
-import Play.current
-import providers.UsernamePasswordProvider
-import providers.utils.RoutesHelper
 import play.Logger
-
+import play.api.Play
+import play.api.Play.current
+import play.api.mvc.{Action, Controller}
+import securesocial.controllers.{ProviderController, TemplatesPlugin}
+import securesocial.core._
+import securesocial.core.providers.UsernamePasswordProvider
+import securesocial.core.providers.utils.RoutesHelper
 
 /**
  * The Login page controller

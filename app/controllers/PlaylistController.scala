@@ -22,7 +22,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))
 
-  def createPlaylist = SecuredAction { implicit request =>
+  def create = SecuredAction { implicit request =>
     playlistBindingForm.bindFromRequest().fold(
       formWithErrors => {
         println(formWithErrors.errorsAsJson)
