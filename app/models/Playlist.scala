@@ -7,60 +7,60 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 
-case class Playlist (playlistId: Long, userId: Long, name: String, tracks: Seq[Track])
+case class Playlist(playlistId: Option[Long], userId: String, name: String, tracksId: Seq[Long])
 
 object Playlist {
   implicit val playlistWrites = Json.writes[Playlist]
 
-  
-  def formApply(userId: Long, name: String, tracksId: Seq[Track]): Playlist = new Playlist(-1L, userId, name, tracksId)
+  def trackIdFormApply(trackId: Long): Long = trackId
+  def trackIdFormUnapply(trackId: Long): Option[Long] = Option(trackId)
 
+  case class PlaylistNameAndTracksId(name: String, tracksId: Seq[Long])
+  def formApply(name: String, tracksId: Seq[Long]) =
+    PlaylistNameAndTracksId(name, tracksId)
+  def formUnapply(playlistNameAndTracksId: PlaylistNameAndTracksId) =
+    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksId))
+
+  /*def formApply(userId: Long, name: String, tracksId: Seq[Track]): Playlist =
+    new Playlist(-1L, userId, name, tracksId)
   def formUnapply(playlist: Playlist): Option[(Long, String, Seq[Track])] =
-    Some((playlist.userId, playlist.name, playlist.tracks))
+    Option((playlist.userId, playlist.name, playlist.tracks))*/
 
   private val playlistParser: RowParser[Playlist] = {
     get[Long]("playlistId") ~
-      get[Long]("userId") ~
+      get[String]("userId") ~
       get[String]("name") map {
-      case playlistId ~ userId ~ name =>
-        Playlist.apply(playlistId, userId, name, Seq.empty)
+      case playlistId ~ userId ~ name => Playlist.apply(Option(playlistId), userId, name, Seq.empty)
     }
   }
 
-  def findByUserId(userId: Long): Seq[Playlist] = {
+  def findByUserId(userId: String): Seq[Playlist] = try {
     DB.withConnection { implicit connection =>
-      SQL( """SELECT *
-             FROM usersPlaylists uP
-             INNER JOIN playlists p ON p.playlistId = uP.playlistId
-             WHERE uP.userId = {userId}
-           """)
+      SQL(
+        """SELECT * FROM usersPlaylists uP
+          | INNER JOIN playlists p ON p.playlistId = uP.playlistId
+          | WHERE uP.userId = {userId} """.stripMargin)
       .on('userId -> userId)
       .as(playlistParser.*)
-      .map( playlist => playlist.copy(
-        tracks = Track.findTracksByPlaylistId(playlist.playlistId)
-      ))
+      .map(playlist => playlist.copy(tracksId = Track.findTracksIdByPlaylistId(playlist.playlistId)))
     }
+  } catch {
+    case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
   }
 
-  def save(playlist: Playlist): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL(
-          """INSERT INTO playlists(name)
-            VALUES({name})
-          """).on(
-            'name -> playlist.name
-          ).executeInsert()  match {
-          case None => None
-          case Some(playlistId: Long) =>
-            playlist.tracks.foreach(track =>
-              Track.saveTrackAndPlaylistRelation(track, playlistId)
-            )
-            Some(playlistId)
-        }
+  def save(playlist: Playlist): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""INSERT INTO playlists(name) VALUES({name})""")
+        .on('name -> playlist.name)
+        .executeInsert() match {
+        case None =>
+          None
+        case Some(playlistId: Long) =>
+          playlist.tracksId.foreach(trackId => Track.savePlaylistTrackRelation(trackId, playlistId))
+          Some(playlistId)
       }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot save playlist: " + e.getMessage)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot save playlist: " + e.getMessage)
   }
 }

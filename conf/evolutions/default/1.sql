@@ -332,6 +332,20 @@ CREATE TABLE tickets (
 ---  tariffId                 BIGINT REFERENCES tariffs(tariffId)
 ---);
 
+CREATE TABLE issues (
+  issueId                   SERIAL PRIMARY KEY,
+  title                     VARCHAR,
+  content                   VARCHAR,
+  userId                    VARCHAR(255) REFERENCES users_login (userId),
+  fixed                     BOOLEAN
+);
+
+CREATE TABLE issuesComments (
+  title                     VARCHAR,
+  content                   VARCHAR,
+  userId                    VARCHAR(255) REFERENCES users_login (userId)
+);
+
 CREATE TABLE usersTools (
   tools                     VARCHAR(255) NOT NULL,
   userId                    BIGINT REFERENCES users(userId),
@@ -645,7 +659,7 @@ CREATE TABLE playlistTracks (
 );
 
 CREATE TABLE usersPlaylists (
-  userId                  BIGINT REFERENCES users (userId),
+  userId                  VARCHAR(255) REFERENCES users_login (userId),
   playlistId              BIGINT REFERENCES playlists (playlistId),
   PRIMARY KEY (userId, playlistId)
 );
