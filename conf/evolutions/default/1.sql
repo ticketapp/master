@@ -653,7 +653,7 @@ CREATE TABLE playlists (
   name                    VARCHAR(255)
 );
 
-CREATE TABLE playlistTracks (
+CREATE TABLE playlistsTracks (
   playlistId              BIGINT REFERENCES playlists (playlistId),
   trackId                 BIGINT REFERENCES tracks (trackId),
   PRIMARY KEY (playlistId, trackId)
@@ -661,7 +661,7 @@ CREATE TABLE playlistTracks (
 
 # --- !Downs
 DROP TABLE IF EXISTS usersPlaylists;
-DROP TABLE IF EXISTS playlistTracks;
+DROP TABLE IF EXISTS playlistsTracks;
 DROP TABLE IF EXISTS playlists;
 DROP TABLE IF EXISTS eventsGenres;
 DROP TABLE IF EXISTS eventsPlaces;
