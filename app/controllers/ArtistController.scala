@@ -101,9 +101,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     )
     val youtubeTracksEnumerator = Enumerator.flatten(
       getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
-        .map { youtubeTracks => Enumerator(Json.toJson(youtubeTracks + Track(Option(-2L), "", "", "", "", ""))) }
+        .map { youtubeTracks => Enumerator(Json.toJson(youtubeTracks)) }
     )
-    Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator)
+    Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator).andThen(Enumerator.eof)
   }
 
   def deleteArtist(artistId: Long) = Action {
