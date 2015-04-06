@@ -1,18 +1,12 @@
 app.controller('issuesCtrl', function ($scope, $http) {
    $scope.newComment= [];
    $scope.newIssue= [];
-   $scope.issues = [
-       {title: 'issue 1.title',
-           content: 'yoyoyoyooyoyoyooyoy',
-           comments: [{
-               title: 'comment',
-               content: 'jdhsjhjshdj'
-           }]
-       },
-       {title: 'second title',
-           content: 'fofofzk,nsnnksnknnsknsk',
-           comments: [{title: 'comment', content: 'jdhsjhjshdj'}]}
-   ];
+   $scope.issues = [];
+    $scope.issuesLimit = 10;
+    $http.get('/issues').
+        success(function(data) {
+            $scope.issues = data;
+        });
     $scope.getIssues = function (issueTitle) {
         console.log(issueTitle)
     };
@@ -22,7 +16,15 @@ app.controller('issuesCtrl', function ($scope, $http) {
     };
     $scope.addIssue = function () {
         $scope.issues.push($scope.newIssue);
-        $scope.newComment= [];
+        console.log($scope.newIssue)
+        $http.post('/issues', {content: $scope.newIssue.content, title: $scope.newIssue.title}).
+            success(function(data) {
+                console.log(data)
+                $scope.newIssue= [];
+            }).
+            error(function (data) {
+                console.log(data)
+            })
     };
 
 });

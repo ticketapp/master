@@ -1,8 +1,15 @@
 <div class="column large-12">
+    <h1>Issues</h1>
     <input placeholder="inputName" placeolder="issue title" ng-model="newIssue.title"
            ng-change="getIssues(newIssue.title)">
+    <a class="button" ng-click="addNewIssue = !addNewIssue">AddIssue</a>
+    <form ng-show="addNewIssue" ng-submit="addIssue()">
+        <input ng-model="newIssue.title" placeholder="newIssue.title">
+        <textarea ng-model="newIssue.content"></textarea>
+        <input type="submit">
+    </form>
     <ul class="column large-12">
-        <ul ng-repeat="issue in issues | limitTo: 10">
+        <ul ng-repeat="issue in issues | limitTo: issuesLimit | filter: newIssue.title">
             <h1 ng-click="viewIssue = !viewIssue"><a>{{issue.title}}</a></h1>
             <div class="column large-12"
                     ng-if="viewIssue">
@@ -25,11 +32,6 @@
                 </div>
             </div>
         </ul>
-        <a class="button" ng-click="addNewIssue = !addNewIssue">AddIssue</a>
-        <form ng-show="addNewIssue" ng-submit="addIssue()">
-            <input ng-model="newIssue.title" placeholder="newIssue.title">
-            <textarea ng-model="newIssue.content"></textarea>
-            <input type="submit">
-        </form>
+        <a class="button" ng-click="$parent.issuesLimit = $parent.issuesLimit + 10" ng-if="issues.length > issuesLimit">More</a>
     </ul>
 </div>

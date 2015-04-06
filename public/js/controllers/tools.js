@@ -1,5 +1,5 @@
 app.controller('toolsCtrl', function ($scope, $modal, $log, $rootScope) {
-    $scope.items = ['<a href="#/createEvent" class="btn btn-primary">Créer un évènement</a>', '<a class="button" href="/logout">Logout</a>'];
+    $scope.items = ['<a href="#/createEvent" class="button">Créer un évènement</a>', '<a class="button" href="/logout">Logout</a>'];
     $scope.connected = $rootScope.connected;
     console.log($scope.connected)
     $scope.open = function () {
@@ -29,6 +29,13 @@ app.controller('toolsCtrl', function ($scope, $modal, $log, $rootScope) {
 
 app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope, items, connected, $http) {
     $scope.items = items;
+    $scope.getPlaylists = function() {
+        $http.get('/playlists').
+            success(function(data) {
+                $scope.playlists = data;
+                console.log(data)
+            })
+    };
     $scope.ok = function () {
         $modalInstance.close();
     };

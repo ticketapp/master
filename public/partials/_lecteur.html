@@ -16,7 +16,7 @@
 </div>
 <div ng-show="savePlaylist" class="absolute zIndex1" style="background: #ffffff">
     <input type="text" ng-model="$root.playlist.name" placeholder="PlaylistName">
-    <button>Save</button>
+    <button ng-click="createNewPlaylist(playlist)">Save</button>
     <button ng-click="savePlaylist = !savePlaylist">cancel</button>
 </div>
 <div class="zIndex1" ng-class="{'column large-12': $root.window != 'small'}">
@@ -28,7 +28,7 @@
     <i ng-if="$root.window == 'small'" ng-class="{'fi-pause': onPlay == true, 'fi-play': onPlay == false}" class="column small-3 button margin0" ng-click="playPause()"></i>
     <i class="fi-shuffle column small-3 button margin0" ng-click="$parent.shuffle = !$parent.shuffle" ng-if="!shuffle && $root.window == 'small'"></i>
     <a ng-if="shuffle && $root.window == 'small'"><i class="fi-shuffle column small-3 button margin0" ng-click="$parent.shuffle = !$parent.shuffle"></i></a>
-    <i ng-click="savePlaylist = !savePlaylist" ng-if="$root.window != 'small'" class="fi-save float-left" style="margin: 0 4px;"></i>
+    <i ng-click="$parent.savePlaylist = !$parent.savePlaylist" ng-if="$root.window != 'small'" class="fi-save float-left" style="margin: 0 4px;"></i>
     <i ng-if="trackActive.platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
     <i class="fi-volume float-left" ng-if="$root.window != 'small'" ng-click="$parent.showVol = !$parent.showVol" style="margin: 0 4px;"></i>
     <md-slider ng-hide="!showVol" flex ng-change="volume()"
@@ -44,7 +44,7 @@
             <a ng-if="shuffle && $root.window != 'small'"><i class="fi-shuffle" ng-click="$parent.shuffle = !$parent.shuffle"></i></a>
             <i class="fi-previous float-right" ng-if="$root.window != 'small'" ng-click="prevTrack()"></i>
         </div>
-        <div id="progressBar" class="progress small-10 primary float-left round column padding0" style="overflow: hidden">
+        <div id="progressBar" class="progress small-10 large-9 primary float-left round column padding0" style="overflow: hidden">
             <b style="color: #008CBA;font-size: 13px;
 margin-left: 5px;" class="absolute">{{playlist.name}} by {{playlist.by}} // {{trackActive.title}} // {{trackActive.artist.name}}</b>
             <span id="progress" class="meter column padding0" style="width: 0%; overflow: hidden">

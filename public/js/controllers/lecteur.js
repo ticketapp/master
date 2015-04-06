@@ -22,6 +22,20 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     var played = [];
     var artNames = [];
     var i = 0;
+    $scope.createNewPlaylist = function (playlist) {
+        var tracksToSave = [];
+        for (var i=0; i < playlist.tracks; i++) {
+            tracksToSave.push(playlist.tracks[i].trackId)
+        }
+        console.log(tracksToSave)
+        $http.post('/playlists/create', {name: playlist.name, tracksId: tracksToSave}).
+            success(function (data) {
+                console.log(data)
+            }).
+            error(function (data) {
+                console.log(data)
+            })
+    };
     function eventsPlaylist () {
         $http.get('/events/offset/' + offset +'/' + $rootScope.geoLoc).
             success(function(data){

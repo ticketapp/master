@@ -398,6 +398,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 data.forEach(getArtistEvents)
                                 $scope.loadingMore = false;
                             });
+                        $http.get('/genres/'+ _research +'/20/' + offset + '/events ').
+                            success(function(data, status, headers, config) {
+                                data.forEach(uploadEvents);
+                                $rootScope.resizeImgHeight()
+                            });
                         $http.get('/places/containing/'+_research).
                             success(function(data, status, headers, config) {
                                 function getPlaceEvents (place) {
