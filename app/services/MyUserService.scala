@@ -27,7 +27,7 @@ faire en sorte que ca find si luser est déjà enregistré au save
  */
   def find(id: IdentityId): Option[Identity] = {
     if ( Logger.isDebugEnabled ) {
-      Logger.debug("Find identity by IdentityId: %s".format(id))
+      Logger.debug(s"Find identity by IdentityId: $id")
     }
     val ret = DB.withConnection { implicit  connection =>
       SQL(s"SELECT ${USERS.FIELDS} FROM users_login WHERE userId={userId} AND providerId={providerId}").on(
@@ -41,7 +41,7 @@ faire en sorte que ca find si luser est déjà enregistré au save
 
   def findByEmailAndProvider(email: String, providerId: String): Option[Identity] = {
     if ( Logger.isDebugEnabled ) {
-      Logger.debug("Find identity by email and providerId: %s and %s".format(email, providerId))
+      Logger.debug(s"Find identity by email and providerId: $email and $providerId")
     }
     DB.withConnection { implicit  connection =>
       SQL(s"SELECT ${USERS.FIELDS} FROM users_login WHERE email={email} AND providerId={providerId}").on(

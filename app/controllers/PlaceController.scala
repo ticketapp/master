@@ -52,8 +52,7 @@ object PlaceController extends Controller {
     "capacity" -> optional(number),
     "openingHours" -> optional(nonEmptyText(4)),
     "imagePath" -> optional(nonEmptyText(2))
-  )(Place.formApply)(Place.formUnapply)
-  )
+  )(Place.formApply)(Place.formUnapply))
   
   def createPlace = Action { implicit request =>
     placeBindingForm.bindFromRequest().fold(

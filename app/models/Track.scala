@@ -68,19 +68,26 @@ object Track {
         .as(TrackParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with method Track.findAllByArtist: " + e.getMessage)
+    case e: Exception => throw new DAOException("Track.findAllByArtist: " + e.getMessage)
   }
 
-  def findTracksByPlaylistId(playlistId: Long): Seq[Track] = {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT * FROM playlistsTracks pT
-          |INNER JOIN tracks t ON t.trackId = pT.trackId
-          |WHERE pT.eventId = {eventId}""".stripMargin)
-        .on('playlistId -> playlistId)
-        .as(TrackParser.*)
+  def findTracksIdByPlaylistId(playlistId: Option[Long]): Seq[Long] = playlistId match {
+    case None => Seq.empty
+    case Some(id) => try {
+      DB.withConnection { implicit connection =>
+        SQL(
+          """SELECT trackId FROM playlistsTracks pT
+            |INNER JOIN tracks t ON t.trackId = pT.trackId
+            |WHERE pT.eventId = {eventId}""".stripMargin)
+          .on('playlistId -> playlistId)
+          .as(trackIdParser.*)
+      }
+    } catch {
+      case e: Exception => throw new DAOException("Track.findTracksIdByPlaylistId: " + e.getMessage)
     }
   }
+
+  private val trackIdParser = { get[Long]("trackId") map { case trackId => trackId } }
 
   def find(trackId: Long): Option[Track] = {
     DB.withConnection { implicit connection =>
@@ -101,14 +108,14 @@ object Track {
       case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
     }
   }
-
-  def saveTrackAndPlaylistRelation(track: Track, playlistId: Long): Option[Long] = {
+/*
+  def saveTrackPlaylistRelation(trackId: Long, playlistId: Long): Option[Long] = {
     save(track) match {
       case Some(trackId: Long) => savePlaylistTrackRelation(playlistId, trackId)
       case _ => None
     }
   }
-
+*/
   def save(track: Track): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertTrack({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
