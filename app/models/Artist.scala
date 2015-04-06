@@ -220,7 +220,7 @@ object Artist {
       ).executeUpdate()
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot save in deleteArtist : " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.deleteArtist : " + e.getMessage)
   }
 
   def followArtist(userId : Long, artistId : Long): Option[Long] = try {
