@@ -55,7 +55,8 @@ object Artist {
       artist.websites.toSeq, artist.genres, artist.tracks))
 
   case class PatternAndArtist (searchPattern: String, artist: Artist)
-  def formWithPatternApply(searchPattern: String, artist: Artist) = new PatternAndArtist(searchPattern, artist)
+  def formWithPatternApply(searchPattern: String, artist: Artist) =
+    new PatternAndArtist(searchPattern, artist)
   def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =
     Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
   
@@ -224,7 +225,7 @@ object Artist {
 
   def followArtist(userId : Long, artistId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("insert into artistsFollowed(userId, artistId) values ({userId}, {artistId})").on(
+      SQL("INSERT INTO artistsFollowed(userId, artistId) VALUES ({userId}, {artistId})").on(
         'userId -> userId,
         'artistId -> artistId
       ).executeInsert()

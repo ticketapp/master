@@ -63,7 +63,8 @@ GET         /tracks/youtubeTrackInfo/:youtubeId                                 
 GET         /infos                     controllers.Application.infos
 
 ################################# Issues ################################################
-GET         /issues                    controllers.issueController.
+GET         /issues                    controllers.IssueController.issues
+POST        /issues                    controllers.IssueController.create
 
 ################################## Users ################################################
 GET           /users                                                                      controllers.UserController.users

@@ -7,7 +7,7 @@ import play.api.db.DB
 import play.api.Play.current
 import services.Utilities.geographicPointToString
 
-case class Issue (issueId: Option[Long], title: String, content: String, userId: String, fixed: Boolean)
+case class Issue(issueId: Option[Long], title: String, content: String, userId: String, fixed: Boolean)
 
 case class IssueComment(title: String, content: String, userId: String)
 
@@ -30,11 +30,9 @@ object Issue {
       case title ~ content ~ userId => IssueComment(title, content, userId)
     }
   }
-
-  def issueFormApply(title: String, content: String, userId: String, fixed: Boolean) =
-    new Issue(None, title, content, userId, fixed)
-  def issueFormUnapply(issue: Issue) =
-    Some((issue.title, issue.content, issue.userId, issue.fixed))
+  case class PartialIssue(title: String, content: String)
+  def issueFormApply(title: String, content: String) = new PartialIssue(title, content)
+  def issueFormUnapply(partialIssue: PartialIssue) = Some((partialIssue.title, partialIssue.content))
 
   def findAll: List[Issue] = try {
     DB.withConnection { implicit connection =>
@@ -44,12 +42,13 @@ object Issue {
     case e: Exception => throw new DAOException("Issue.findAll: " + e.getMessage)
   }
 
-  def issueCommentFormApply(title: String, content: String, userId: String) =
-    new IssueComment(title, content, userId)
-  def issueCommentFormUnapply(issueComment: IssueComment) =
-    Some((issueComment.title, issueComment.content, issueComment.userId))
+  case class PartialIssueComment(title: String, content: String)
+  def issueCommentFormApply(title: String, content: String) =
+    new PartialIssueComment(title, content)
+  def issueCommentFormUnapply(partialIssueComment: PartialIssueComment) =
+    Some((partialIssueComment.title, partialIssueComment.content))
 
-  def findAllCommentForIssueId(issueId: Option[Long]): Seq[IssueComment] = try {
+  def findAllCommentsForIssueId(issueId: Option[Long]): Seq[IssueComment] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM issuesComments WHERE issueId = {issueId}")
         .on('issueId -> issueId)
@@ -57,5 +56,20 @@ object Issue {
     }
   } catch {
     case e: Exception => throw new DAOException("Issue.findAllCommentForIssueId: " + e.getMessage)
+  }
+
+  def save(issue: Issue): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """INSERT INTO issues(title, content, userId)
+          |VALUES ({title}, {content}, {userId})""".stripMargin)
+        .on(
+          'title -> issue.title,
+          'content -> issue.content,
+          'userId -> issue.userId)
+        .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Issue.save: " + e.getMessage)
   }
 }

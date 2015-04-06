@@ -43,8 +43,8 @@ object LoginPage extends Controller
     val to = ProviderController.landingUrl
     if ( SecureSocial.currentUser.isDefined ) {
       // if the user is already logged in just redirect to the app
-      if ( Logger.isDebugEnabled() ) {
-        Logger.debug("User already logged in, skipping login page. Redirecting to %s".format(to))
+      if ( Logger.isDebugEnabled ) {
+        Logger.debug(s"User already logged in, skipping login page. Redirecting to $to")
       }
       Redirect( to )
     } else {
@@ -52,7 +52,7 @@ object LoginPage extends Controller
       if ( SecureSocial.enableRefererAsOriginalUrl ) {
         SecureSocial.withRefererAsOriginalUrl(Ok(use[TemplatesPlugin].getLoginPage(request, UsernamePasswordProvider.loginForm)))
       } else {
-        import Play.current
+        import play.api.Play.current
         Ok(use[TemplatesPlugin].getLoginPage(request, UsernamePasswordProvider.loginForm))
 
       }

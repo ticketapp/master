@@ -334,10 +334,10 @@ CREATE TABLE tickets (
 
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
-  title                     VARCHAR,
+  title                     VARCHAR NOT NULL,
   content                   VARCHAR,
   userId                    VARCHAR(255) REFERENCES users_login (userId),
-  fixed                     BOOLEAN
+  fixed                     BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE issuesComments (
