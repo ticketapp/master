@@ -37,9 +37,8 @@ object Playlist {
   def findByUserId(userId: String): Seq[Playlist] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT * FROM usersPlaylists uP
-          | INNER JOIN playlists p ON p.playlistId = uP.playlistId
-          | WHERE uP.userId = {userId} """.stripMargin)
+        """SELECT * FROM playlists
+          | WHERE userId = {userId} """.stripMargin)
       .on('userId -> userId)
       .as(playlistParser.*)
       .map(playlist => playlist.copy(tracksId = Track.findTracksIdByPlaylistId(playlist.playlistId)))

@@ -76,9 +76,8 @@ object Track {
     case Some(id) => try {
       DB.withConnection { implicit connection =>
         SQL(
-          """SELECT trackId FROM playlistsTracks pT
-            |INNER JOIN tracks t ON t.trackId = pT.trackId
-            |WHERE pT.eventId = {eventId}""".stripMargin)
+          """SELECT trackId FROM playlistsTracks
+            |WHERE playlistId = {playlistId}""".stripMargin)
           .on('playlistId -> playlistId)
           .as(trackIdParser.*)
       }
@@ -108,14 +107,7 @@ object Track {
       case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
     }
   }
-/*
-  def saveTrackPlaylistRelation(trackId: Long, playlistId: Long): Option[Long] = {
-    save(track) match {
-      case Some(trackId: Long) => savePlaylistTrackRelation(playlistId, trackId)
-      case _ => None
-    }
-  }
-*/
+
   def save(track: Track): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertTrack({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
