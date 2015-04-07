@@ -7,7 +7,6 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import securesocial.core._
 import play.api.libs.concurrent.Execution.Implicits._
-
 import scala.concurrent.Future
 
 object PlaylistController extends Controller with securesocial.core.SecureSocial {
