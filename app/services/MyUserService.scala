@@ -21,9 +21,7 @@ import scala.language.postfixOps
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
 /*
 
-
 faire en sorte que ca find si luser est déjà enregistré au save
-
 
 
  */

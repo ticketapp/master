@@ -37,4 +37,8 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       }
     )
   }
+
+  def delete(playlistId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Ok(Json.toJson(Playlist.delete(request.user.identityId.userId, playlistId)))
+  }
 }

@@ -31,7 +31,6 @@ object Address {
   def formUnapply(address: Address): Option[(Option[String], Option[String], Option[String])] =
     Some((address.city, address.zip, address.street))
 
-
   def findAll: List[Address] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM addresses").as(AddressParser.*)
@@ -44,8 +43,8 @@ object Address {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT * FROM eventsAddresses eA
-          |INNER JOIN addresses a ON a.addressId = eA.addressId
-          |WHERE eA.eventId = {eventId}""".stripMargin)
+          | INNER JOIN addresses a ON a.addressId = eA.addressId
+          | WHERE eA.eventId = {eventId}""".stripMargin)
         .on('eventId -> event.eventId)
         .as(AddressParser.*)
     }

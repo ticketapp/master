@@ -63,4 +63,17 @@ object Playlist {
   } catch {
     case e: Exception => throw new DAOException("Cannot save playlist: " + e.getMessage)
   }
+
+  def delete(userId: String, playlistId: Long): Boolean = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM playlists
+          | WHERE userId = {userId}
+          | AND playlistId = {playlistId} """.stripMargin)
+        .on('playlistId -> playlistId)
+        .execute()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Playlist.delete: " + e.getMessage)
+  }
 }
