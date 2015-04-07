@@ -36,8 +36,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             error(function (data) {
                 console.log(data)
                 var object = {name: playlist.name , tracksId: tracksToSave};
-                $scope.error = data;
-                $rootScope.storeLastReq('post', '/playlists/create', object)
+                $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist'+ playlist.name + 'est enregistée')
             })
     };
     function eventsPlaylist () {
@@ -88,6 +87,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.newTrack.trackId = track.trackId;
         $rootScope.playlist.tracks.push($scope.newTrack);
     }
+    $rootScope.loadPlaylist = function (playlist) {
+        $rootScope.playlist.name = playlist.name;
+        /*$rootScope.playlist.tracks = [];
+        $rootScope.playlist.genres = [];*/
+        alert('playlist')
+    };
     $rootScope.addToPlaylist = function (tracks, artist) {
         offset = 0;
         if ($rootScope.playlist.tracks.length == 0) {

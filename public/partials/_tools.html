@@ -8,10 +8,10 @@
     <div ng-if="$root.connected == true">
         <div class="column large-3" ng-repeat="item in items" data-ng-bind-html="item" ng-click="cancel()"></div>
     </div>
-    <a class="button" ng-click="viewIssues = !viewIssues"> Issues </a>
-    <a class="button" ng-click="getPlaylists(); viewPlaylists = !viewPlaylists"> playlists </a>
+    <a class="button" ng-click="viewIssues = !viewIssues; viewPlaylists = false"> Issues </a>
+    <a class="button" ng-click="getPlaylists(); viewIssues = false; viewPlaylists = !viewPlaylists"> playlists </a>
     <div ng-if="viewPlaylists">
-        <a ng-repeat="playlist in playlists">{{playlist.name}}</a>
+        <ul ng-repeat="playlist in playlists"><a ng-click="$root.loadPlaylist(playlist)">{{playlist.name}}</a></ul>
         <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
     </div>
     <div ng-if="viewIssues" ng-issues></div>

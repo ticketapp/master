@@ -7,21 +7,31 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http) {
                 clearInterval(changePath)
             }
             if (connectWin.location.href == 'http://localhost:9000/#/') {
-                console.log(connectWin.location.href);
+                clearInterval(changePath)
                 if (connectWin.document.getElementById('top').getAttribute("ng-init") == '$root.connected = true') {
                     $rootScope.passConnectedToTrue();
-                    console.log($rootScope.lastReq);
                     connectWin.close();
                     if ($rootScope.lastReq != {}) {
                         if ($rootScope.lastReq.method == 'post') {
-                            $http.post($rootScope.lastReq.path, $rootScope.lastReq.object).
-                                success(function (data) {
-                                    console.log(data);
-                                    $rootScope.lastReq = {};
-                                }).
-                                error(function (data) {
-                                    console.log(data)
-                                })
+                            if ($rootScope.lastReq.object != "") {
+                                $http.post($rootScope.lastReq.path, $rootScope.lastReq.object).
+                                    success(function (data) {
+                                        alert($rootScope.lastReq.success);
+                                        $rootScope.lastReq = {};
+                                    }).
+                                    error(function (data) {
+                                        console.log(data)
+                                    })
+                            } else {
+                                $http.post($rootScope.lastReq.path).
+                                    success(function (data) {
+                                        alert($rootScope.lastReq.success);
+                                        $rootScope.lastReq = {};
+                                    }).
+                                    error(function (data) {
+                                        console.log(data)
+                                    })
+                            }
                         }
                     }
                 }

@@ -401,6 +401,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         $http.get('/genres/'+ _research +'/20/' + offset + '/events ').
                             success(function(data, status, headers, config) {
                                 data.forEach(uploadEvents);
+                                console.log(data)
                                 $rootScope.resizeImgHeight()
                             });
                         $http.get('/places/containing/'+_research).

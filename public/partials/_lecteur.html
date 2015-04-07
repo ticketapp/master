@@ -14,7 +14,7 @@
     {{trackActive.nextShow.places[0].name}}
     </a>
 </div>
-<form ng-submit="createNewPlaylist(playlist)" ng-show="savePlaylist" class="absolute zIndex5" style="background: #ffffff">
+<form ng-submit="createNewPlaylist(playlist); savePlaylist = !savePlaylist" ng-show="savePlaylist" class="absolute zIndex5" style="background: #ffffff">
     <input type="text" ng-model="$root.playlist.name" placeholder="PlaylistName">
     <input type="submit" class="button">
     <button ng-click="savePlaylist = !savePlaylist">cancel</button>
@@ -112,9 +112,4 @@ margin-left: 5px;"
             </div>
         </div>
     </div>
-</div>
-<div class="fixed top0 width100p height100p" style="background: #ffffff" ng-if="error.length > 0">
-    <h1>Vous devez être connecté</h1>
-    <ng-connect></ng-connect>
-    <a class="button" ng-click="$parent.error = '';">Annuler</a>
 </div>

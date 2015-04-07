@@ -8,6 +8,11 @@
             <div ng-if="$root.path == 'home' || $root.path == 'search'" ng-show="$root.path == 'search'" id="searchTopBlock" class="ng-hide width100p" ng-class="{'paddingTop50': $root.window == 'small'}">
                 <ng-search-bar class="white column large-12 padding0"></ng-search-bar>
             </div>
+            <div class="ng-hide fixed top0 width100p height100p" style="background: #ffffff" ng-if="needConnect" ng-show="!$root.connected">
+                <h1>Vous devez vous connecter</h1>
+                <ng-connect></ng-connect>
+                <a class="button" ng-click="$parent.needConnect = false;">Annuler</a>
+            </div>
         </div>
     <!--</ul>
 </nav>-->

@@ -16,6 +16,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             success(function (data) {
                 console.log(data)
             })*/
+        $scope.needConnect = false;
         $rootScope.lastReq = {};
         $rootScope.passConnectedToFalse = function () {
             $rootScope.connected = false;
@@ -24,6 +25,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $timeout(function () {
                 $rootScope.$apply(function() {
                     $rootScope.connected = true;
+                    $scope.needConnect = false;
                 })
             }, 0)
         };
@@ -33,9 +35,10 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.changeTimeEventView = function (time) {
             $rootScope.maxStartView = time;
         };
-        $rootScope.storeLastReq = function (method, path, object) {
+        $rootScope.storeLastReq = function (method, path, object, success, error) {
+            $scope.needConnect = true;
             $rootScope.lastReq = {
-                'method': method, 'path': path, 'object':object
+                'method': method, 'path': path, 'object':object, 'success':success, 'error': error
             };
             console.log($rootScope.lastReq)
         };

@@ -159,6 +159,7 @@
             padding-bottom: 5px;
             margin: 0;
         }
+        md-toast{position: fixed!important;}
         .f-dropdown{opacity: 0}
         .dropDown:hover > .f-dropdown {
             position: absolute;
