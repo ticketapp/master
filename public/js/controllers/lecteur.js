@@ -35,7 +35,9 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             }).
             error(function (data) {
                 console.log(data)
+                var object = {name: playlist.name , tracksId: tracksToSave};
                 $scope.error = data;
+                $rootScope.storeLastReq('post', '/playlists/create', object)
             })
     };
     function eventsPlaylist () {

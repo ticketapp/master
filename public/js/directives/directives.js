@@ -129,6 +129,7 @@ app.directive('ngLecture', function(){
 app.directive('ngConnect', function(){
     return{
         restrict : 'E',
+        controller : 'connectCtrl',
         templateUrl : 'assets/partials/_connectForm.html'
     }
 });

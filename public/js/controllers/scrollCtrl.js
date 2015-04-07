@@ -16,17 +16,28 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             success(function (data) {
                 console.log(data)
             })*/
+        $rootScope.lastReq = {};
         $rootScope.passConnectedToFalse = function () {
             $rootScope.connected = false;
         };
         $rootScope.passConnectedToTrue = function () {
-            $rootScope.connected = true;
+            $timeout(function () {
+                $rootScope.$apply(function() {
+                    $rootScope.connected = true;
+                })
+            }, 0)
         };
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
         };
         $rootScope.changeTimeEventView = function (time) {
             $rootScope.maxStartView = time;
+        };
+        $rootScope.storeLastReq = function (method, path, object) {
+            $rootScope.lastReq = {
+                'method': method, 'path': path, 'object':object
+            };
+            console.log($rootScope.lastReq)
         };
         $rootScope.passArtisteToCreateToFalse();
         $rootScope.createArtist = function (artist) {
