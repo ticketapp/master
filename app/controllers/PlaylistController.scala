@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 object PlaylistController extends Controller with securesocial.core.SecureSocial {
 
-  def findByUser = SecuredAction { implicit request =>
+  def findByUser = SecuredAction(ajaxCall = true) { implicit request =>
     Ok(Json.toJson(Playlist.findByUserId(request.user.identityId.userId)))
   }
 
@@ -23,7 +23,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
     )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))
 
-  def create = SecuredAction { implicit request =>
+  def create = SecuredAction(ajaxCall = true) { implicit request =>
     playlistBindingForm.bindFromRequest().fold(
       formWithErrors => {
         println(formWithErrors.errorsAsJson)

@@ -21,7 +21,7 @@ object IssueController extends Controller with securesocial.core.SecureSocial {
     "content" -> nonEmptyText(8)
   )(Issue.issueCommentFormApply)(Issue.issueCommentFormUnapply))
 
-  def create = SecuredAction { implicit request =>
+  def create = SecuredAction(ajaxCall = true) { implicit request =>
     issueBindingForm.bindFromRequest().fold(
       formWithErrors => {
         println(formWithErrors.errorsAsJson)
@@ -34,7 +34,7 @@ object IssueController extends Controller with securesocial.core.SecureSocial {
     )
   }
 
-  /*def createComment = SecuredAction { implicit request =>
+  /*def createComment = SecuredAction(ajaxCall = true) { implicit request =>
     issueBindingForm.bindFromRequest().fold(
       formWithErrors => {
         println(formWithErrors.errorsAsJson)

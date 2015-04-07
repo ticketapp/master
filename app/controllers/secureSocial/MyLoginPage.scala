@@ -43,7 +43,7 @@ object LoginPage extends Controller
     val to = ProviderController.landingUrl
     if ( SecureSocial.currentUser.isDefined ) {
       // if the user is already logged in just redirect to the app
-      if ( Logger.isDebugEnabled ) {
+      if ( Logger.isDebugEnabled() ) {
         Logger.debug(s"User already logged in, skipping login page. Redirecting to $to")
       }
       Redirect( to )
