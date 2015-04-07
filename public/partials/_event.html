@@ -7,8 +7,11 @@
         </div>
     </div>
     <div class=" text_evnt_min" >
-        <a href="#/event/{{event.eventId}}"><h4 style="height: 2.8em;
-overflow: hidden;">{{ event.name }}</h4></a>
+        <a href="#/event/{{event.eventId}}">
+            <h4 style="height: 2.8em; overflow: hidden;">
+                {{ event.name }}
+            </h4>
+        </a>
         <span class="dropDown" data-ng-repeat="organizer in event.organizers">
             Par
             <a href="#/user/{{organizer.organizerId}}">{{organizer.name}} </a>

@@ -17,7 +17,7 @@
              class="column large-4 medium-6 float-left margin0"
             data-ng-repeat="artist in artists | filter: filterSearch"
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
-            style="padding-bottom: 20px;">
+            style="padding-bottom: 10px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -43,7 +43,7 @@
              ng-if="$root.activArtist && artistsFb.length > 0"
             data-ng-repeat="artist in artistsFb "
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
-            style="padding-bottom: 20px;">
+            style="padding-bottom: 10px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">

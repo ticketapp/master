@@ -35,8 +35,10 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             }).
             error(function (data) {
                 console.log(data)
-                var object = {name: playlist.name , tracksId: tracksToSave};
-                $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist'+ playlist.name + 'est enregistée')
+                if (data.error == 'Credentials required') {
+                    var object = {name: playlist.name, tracksId: tracksToSave};
+                    $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist "' + playlist.name + '" est enregistée')
+                }
             })
     };
     function eventsPlaylist () {
