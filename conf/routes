@@ -50,6 +50,7 @@ GET           /organizers/:organizerId/events                                   
 GET         /playlists                    controllers.PlaylistController.findByUser
 POST        /playlists/create             controllers.PlaylistController.create
 DELETE      /playlists/:playlistId        controllers.PlaylistController.delete(playlistId: Long)
+POST        /playlists/addTracks          controllers.PlaylistController.addTracks
 
 ################################# Genres ############################################
 GET         /genres/:genre/:numberToReturn/:offset/artists                              controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)

@@ -6,6 +6,7 @@ import controllers.DAOException
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
+import securesocial.core.Event
 
 case class Playlist(playlistId: Option[Long], userId: String, name: String, tracks: Seq[Track])
 
@@ -20,11 +21,6 @@ object Playlist {
     PlaylistNameAndTracksId(name, tracksId)
   def formUnapply(playlistNameAndTracksId: PlaylistNameAndTracksId) =
     Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksId))
-
-  /*def formApply(userId: Long, name: String, tracksId: Seq[Track]): Playlist =
-    new Playlist(-1L, userId, name, tracksId)
-  def formUnapply(playlist: Playlist): Option[(Long, String, Seq[Track])] =
-    Option((playlist.userId, playlist.name, playlist.tracks))*/
 
   private val playlistParser: RowParser[Playlist] = {
     get[Long]("playlistId") ~
@@ -56,8 +52,7 @@ object Playlist {
         case None =>
           None
         case Some(playlistId: Long) =>
-          playlistNameAndTracksId.tracksId.foreach(trackId =>
-            Track.savePlaylistTrackRelation(playlistId, trackId))
+          playlistNameAndTracksId.tracksId.foreach(trackId => Track.savePlaylistTrackRelation(playlistId, trackId))
           Some(playlistId)
       }
     }
@@ -76,5 +71,16 @@ object Playlist {
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.delete: " + e.getMessage)
+  }
+
+  case class PlaylistIdAndTracksId(id: Long, tracksId: Seq[Long])
+  def addTracksFormApply(id: Long, tracksId: Seq[Long]) =
+    PlaylistIdAndTracksId(id, tracksId)
+  def addTracksFormUnapply(playlistIdAndTracksId: PlaylistIdAndTracksId) =
+    Option((playlistIdAndTracksId.id, playlistIdAndTracksId.tracksId))
+
+  def addTracksInPlaylist(userId: String, playlistIdAndTracksId: PlaylistIdAndTracksId): Unit = {
+    playlistIdAndTracksId.tracksId.foreach(trackId =>
+      Track.savePlaylistTrackRelation(playlistIdAndTracksId.id, trackId))
   }
 }

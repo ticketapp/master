@@ -38,6 +38,29 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
     )
   }
 
+  val addTracksInPlaylistBindingForm = Form(mapping(
+    "id" -> longNumber,
+    "tracksId" -> seq(mapping(
+      "trackId" -> longNumber
+    )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
+  )(Playlist.addTracksFormApply)(Playlist.addTracksFormUnapply))
+
+  def addTracks() = SecuredAction(ajaxCall = true) { implicit request =>
+    addTracksInPlaylistBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        println(formWithErrors.errorsAsJson)
+        BadRequest(formWithErrors.errorsAsJson)
+      },
+      playlistIdAndTracksId => {
+        Playlist.addTracksInPlaylist(request.user.identityId.userId, playlistIdAndTracksId)
+//        ??
+        //Future { save tracks playlist relation (tracks shouldn't be in playlist as id but as tracks that
+        //are Seq.empty if not rendered???
+        Ok
+      }
+    )
+  }
+
   def delete(playlistId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
     Ok(Json.toJson(Playlist.delete(request.user.identityId.userId, playlistId)))
   }

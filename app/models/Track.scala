@@ -87,9 +87,6 @@ object Track {
     case e: Exception => throw new DAOException("Track.findTracksIdByPlaylistId: " + e.getMessage)
   }
 
-
-  private val trackIdParser = { get[Long]("trackId") map { case trackId => trackId } }
-
   def find(trackId: Long): Option[Track] = {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM tracks WHERE trackId = {trackId}")
