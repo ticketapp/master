@@ -62,7 +62,7 @@ object Issue {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO issues(title, content, userId)
-          |VALUES ({title}, {content}, {userId})""".stripMargin)
+          | VALUES ({title}, {content}, {userId})""".stripMargin)
         .on(
           'title -> issue.title,
           'content -> issue.content,

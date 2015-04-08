@@ -269,18 +269,15 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """UPDATE events
-          |SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
-          |WHERE facebookId={facebookId}""".stripMargin)
+          | SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
+          | WHERE facebookId={facebookId}""".stripMargin)
         .on(
           'facebookId -> event.facebookId,
           'name -> event.name,
           'description -> event.description,
           'startTime -> event.startTime,
           'endTime -> event.endTime)
-        .executeUpdate() match {
-        case 1 =>
-        case _ =>
-      }
+        .executeUpdate()
     }
   } catch {
     case e: Exception => throw new DAOException("Event.update: " + e.getMessage)
@@ -311,11 +308,11 @@ object Event {
         DB.withConnection { implicit connection =>
           SQL(
             s"""SELECT * FROM events e
-               |JOIN eventsAddresses eA on e.eventId = eA.eventId
-               |JOIN addresses a ON a.addressId = eA.eventId
-               |WHERE a.isEvent = TRUE
-               |ORDER BY a.geographicPoint <-> point '$center'
-               |LIMIT 50""".stripMargin)
+               |  JOIN eventsAddresses eA on e.eventId = eA.eventId
+               |  JOIN addresses a ON a.addressId = eA.eventId
+               |    WHERE a.isEvent = TRUE
+               |  ORDER BY a.geographicPoint <-> point '$center'
+               |  LIMIT 50""".stripMargin)
             .as(EventParser.*)
             .map(getPropertiesOfEvent)
         }

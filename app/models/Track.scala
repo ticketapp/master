@@ -41,7 +41,7 @@ object Track {
   def formUnapply(track: Track) =
     Some((track.title, track.url, track.platform, track.thumbnailUrl, track.artistFacebookUrl, track.redirectUrl))
 
-  private val TrackParser: RowParser[Track] = {
+  private val trackParser: RowParser[Track] = {
     get[Long]("trackId") ~
       get[String]("title") ~
       get[String]("url") ~
@@ -57,7 +57,7 @@ object Track {
   def findAll: Seq[Track] = {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM tracks")
-        .as(TrackParser.*)
+        .as(trackParser.*)
     }
   }
 
@@ -65,26 +65,28 @@ object Track {
     DB.withConnection { implicit connection =>
       SQL("""SELECT * FROM tracks WHERE artistFacebookUrl = {artistFacebookUrl}""")
         .on('artistFacebookUrl -> artistFacebookUrl)
-        .as(TrackParser.*)
+        .as(trackParser.*)
     }
   } catch {
     case e: Exception => throw new DAOException("Track.findAllByArtist: " + e.getMessage)
   }
 
-  def findTracksIdByPlaylistId(playlistId: Option[Long]): Seq[Long] = playlistId match {
-    case None => Seq.empty
-    case Some(id) => try {
-      DB.withConnection { implicit connection =>
-        SQL(
-          """SELECT trackId FROM playlistsTracks
-            |WHERE playlistId = {playlistId}""".stripMargin)
-          .on('playlistId -> playlistId)
-          .as(trackIdParser.*)
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Track.findTracksIdByPlaylistId: " + e.getMessage)
+  def findTracksByPlaylistId(playlistId: Option[Long]): Seq[Track] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT tracks.* FROM playlistsTracks playlistsTracks
+          | INNER JOIN tracks tracks
+          |   ON tracks.trackId = playlistsTracks.trackId
+          | INNER JOIN playlists playlists
+          |   ON playlists.playlistId = playlistsTracks.playlistId
+          |WHERE playlists.playlistId = {playlistId}""".stripMargin)
+        .on('playlistId -> playlistId)
+        .as(trackParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Track.findTracksIdByPlaylistId: " + e.getMessage)
   }
+
 
   private val trackIdParser = { get[Long]("trackId") map { case trackId => trackId } }
 
@@ -92,7 +94,7 @@ object Track {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM tracks WHERE trackId = {trackId}")
         .on('trackId -> trackId)
-        .as(TrackParser.singleOpt)
+        .as(trackParser.singleOpt)
     }
   }
 
@@ -101,7 +103,7 @@ object Track {
       DB.withConnection { implicit connection =>
         SQL("SELECT * FROM tracks WHERE LOWER(title) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
           .on('patternLowCase -> pattern.toLowerCase)
-          .as(TrackParser.*)
+          .as(trackParser.*)
       }
     } catch {
       case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
@@ -128,7 +130,7 @@ object Track {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO playlistsTracks (playlistId, trackId)
-          |VALUES ({playlistId}, {trackId})""".stripMargin)
+          | VALUES ({playlistId}, {trackId})""".stripMargin)
         .on(
           'playlistId -> playlistId,
           'trackId -> trackId)
@@ -141,7 +143,7 @@ object Track {
   def deleteTrack(trackId: Long): Long = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """DELETE FROM tracks WHERE trackId={trackId}""".stripMargin)
+        """DELETE FROM tracks WHERE trackId = {trackId}""".stripMargin)
         .on('trackId -> trackId)
         .executeUpdate()
     }

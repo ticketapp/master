@@ -30,7 +30,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       },
       playlistNameAndTracksId => {
         val userId = request.user.identityId.userId
-        val playlistId = Playlist.save(Playlist(None, userId, playlistNameAndTracksId.name, playlistNameAndTracksId.tracksId))
+        val playlistId = Playlist.save(userId, playlistNameAndTracksId)
         //Future { save tracks playlist relation (tracks shouldn't be in playlist as id but as tracks that
         //are Seq.empty if not rendered
         Ok(Json.toJson(playlistId))

@@ -7,7 +7,7 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 
-case class Playlist(playlistId: Option[Long], userId: String, name: String, tracksId: Seq[Long])
+case class Playlist(playlistId: Option[Long], userId: String, name: String, tracks: Seq[Track])
 
 object Playlist {
   implicit val playlistWrites = Json.writes[Playlist]
@@ -38,25 +38,26 @@ object Playlist {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT * FROM playlists
-          | WHERE userId = {userId} """.stripMargin)
+          | WHERE userId = {userId}""".stripMargin)
       .on('userId -> userId)
       .as(playlistParser.*)
-      .map(playlist => playlist.copy(tracksId = Track.findTracksIdByPlaylistId(playlist.playlistId)))
+      .map(playlist => playlist.copy(tracks = Track.findTracksByPlaylistId(playlist.playlistId)))
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
   }
 
-  def save(playlist: Playlist): Option[Long] = try {
+  def save(userId: String, playlistNameAndTracksId: PlaylistNameAndTracksId): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO playlists(userId, name) VALUES({userId}, {name})""")
-        .on('userId -> playlist.userId,
-            'name -> playlist.name)
+        .on('userId -> userId,
+            'name -> playlistNameAndTracksId.name)
         .executeInsert() match {
         case None =>
           None
         case Some(playlistId: Long) =>
-          playlist.tracksId.foreach(trackId => Track.savePlaylistTrackRelation(playlistId, trackId))
+          playlistNameAndTracksId.tracksId.foreach(trackId =>
+            Track.savePlaylistTrackRelation(playlistId, trackId))
           Some(playlistId)
       }
     }
