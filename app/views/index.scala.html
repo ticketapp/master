@@ -5,7 +5,7 @@
     <ul nav-menu="active" data-ng-controller="scrollCtrl">
 	    -->
         <div id="top" class="left column width100p fixed margin0 padding0" data-ng-controller="scrollCtrl" ng-init="$root.connected = @connected">
-            <div ng-if="$root.path == 'home' || $root.path == 'search'" ng-show="$root.path == 'search'" id="searchTopBlock" class="ng-hide width100p" ng-class="{'paddingTop50': $root.window == 'small'}">
+            <div ng-if="$root.path == 'home' || $root.path == 'search'"  id="searchTopBlock" class="width100p" ng-class="{'hiddenBlock': $root.path != 'serach','paddingTop50': $root.window == 'small'}">
                 <ng-search-bar class="white column large-12 padding0"></ng-search-bar>
             </div>
         </div>
