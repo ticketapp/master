@@ -31,8 +31,8 @@
     <i ng-click="$parent.savePlaylist = !$parent.savePlaylist" ng-if="$root.window != 'small'" class="fi-save float-left" style="margin: 0 4px;"></i>
     <i ng-if="trackActive.platform == 'Youtube'" ng-click="$parent.showVideo = !$parent.showVideo" class="fi-video float-left"></i>
     <i class="fi-volume float-left" ng-if="$root.window != 'small'" ng-click="$parent.showVol = !$parent.showVol" style="margin: 0 4px;"></i>
-    <md-slider ng-hide="!showVol" flex ng-change="volume()"
-               ng-model="levelVol" min="0" max="100"
+    <md-slider ng-if="showVol" flex ng-change="volume()"
+               ng-model="$parent.levelVol" min="0" max="100"
                aria-label="volume"
                id="volume-slider"
                class="md-primary absolute" style="margin-left: 95px;z-index: 5;margin-top: -12px;width: 130px;background: white;">

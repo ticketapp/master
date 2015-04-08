@@ -1,4 +1,4 @@
-app.controller('issuesCtrl', function ($scope, $http) {
+app.controller('issuesCtrl', function ($scope, $http, $rootScope) {
    $scope.newComment= [];
    $scope.newIssue= [];
    $scope.issues = [];
@@ -15,15 +15,19 @@ app.controller('issuesCtrl', function ($scope, $http) {
         $scope.newComment= [];
     };
     $scope.addIssue = function () {
-        $scope.issues.push($scope.newIssue);
-        console.log($scope.newIssue)
         $http.post('/issues', {content: $scope.newIssue.content, title: $scope.newIssue.title}).
             success(function(data) {
                 console.log(data)
+                $scope.issues.push($scope.newIssue);
                 $scope.newIssue= [];
             }).
             error(function (data) {
                 console.log(data)
+                if (data.error == 'Credentials required') {
+                    var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
+                    $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
+                    alert('vous devez vous connecter')
+                }
             })
     };
 

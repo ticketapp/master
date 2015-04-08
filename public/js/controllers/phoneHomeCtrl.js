@@ -45,12 +45,46 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
         }
         var eventsLength = $scope.events.length;
         for (var i=0; i<eventsLength; i++) {
-            if ($scope.events[i].countdown <= $scope.time && $scope.events[i].countdown > 0 && $scope.events[i].addresses[0] != undefined) {
+            if ($scope.events[i].countdown <= $scope.time && $scope.events[i].addresses[0] != undefined) {
                 var geoPoint = $scope.events[i].addresses[0].geographicPoint;
                 console.log(geoPoint.substring(0, geoPoint.indexOf(',')));
                 console.log(geoPoint.replace(/^.+,/,''));
-                var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
-                $scope.dynMarkers.push(new google.maps.Marker({position: latLng}));
+                var markerGenre;
+                function pushMarker (markerGenre, geoPoint) {
+                    var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
+                    $scope.dynMarkers.push(new google.maps.Marker({position: latLng, icon: '../assets/img/' + markerGenre}));
+                }
+                if ($scope.events[i].genres.length == 0) {
+                    markerGenre = 'music187.png';
+                } else {
+                    var foundMarkerGenre = false;
+                    for (var g = 0; g < $scope.events[i].genres.length; g++) {
+                        console.log($scope.events[i].genres[g])
+                        if ($scope.events[i].genres[g].name == 'electro' ||
+                            $scope.events[i].genres[g].name == 'techno' ||
+                            $scope.events[i].genres[g].name == 'd&b' ||
+                            $scope.events[i].genres[g].name == 'drum' ||
+                            $scope.events[i].genres[g].name == 'dubstep' ||
+                            $scope.events[i].genres[g].name == 'trance' && foundMarkerGenre == false) {
+                            console.log('yryr')
+                            markerGenre = 'music200.png';
+                            foundMarkerGenre = true;
+                        } else if ($scope.events[i].genres[g].name.indexOf('rock') > -1 && foundMarkerGenre == false) {
+                            markerGenre = 'rock3.png';
+                            foundMarkerGenre = true;
+                        } else if ($scope.events[i].genres[g].name.indexOf('reggae') > -1 ||
+                            $scope.events[i].genres[g].name == 'dub' && foundMarkerGenre == false) {
+                            markerGenre = 'jamaica_640.png';
+                            foundMarkerGenre = true;
+                        }
+                        console.log(markerGenre)
+                    }
+                    if (foundMarkerGenre == false) {
+                        markerGenre = 'music187.png';
+                    }
+                }
+                console.log(markerGenre)
+                pushMarker(markerGenre, geoPoint);
             }
         }
         $scope.markerClusterer = new MarkerClusterer(map, $scope.dynMarkers, {});

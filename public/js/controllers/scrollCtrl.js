@@ -1,5 +1,5 @@
-app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket', 'oboe',
-    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe) {
+app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket', 'oboe', '$modal', '$log',
+    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe, $modal, $log) {
         $rootScope.geoLoc = '';
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
@@ -36,7 +36,24 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.maxStartView = time;
         };
         $rootScope.storeLastReq = function (method, path, object, success, error) {
-            $scope.needConnect = true;
+            //$scope.needConnect = true;
+            var modalInstance = $modal.open({
+                templateUrl: 'assets/partials/connectionModal.html',
+                controller: 'ModalInstanceCtrl',
+                resolve: {
+                    items: function () {
+                        return $scope.items;
+                    },
+                    connected: function () {
+                        return $scope.connected;
+                    }
+                }
+            });
+            modalInstance.result.then(function (selectedItem) {
+                $scope.selected = selectedItem;
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
             $rootScope.lastReq = {
                 'method': method, 'path': path, 'object':object, 'success':success, 'error': error
             };
@@ -108,8 +125,11 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         function resizeArtistsText (ImgHeight) {
             var artists = document.getElementsByClassName('textArtistMin');
             for (var i = 0; i < artists.length; i++) {
-                var newTextHeight = 110.5 - (ImgHeight/2) - 10 + 'px';
-                artists[i].style.height = newTextHeight;
+                var newTextHeight = 110.5 - (ImgHeight/2) - 10;
+                if (newTextHeight < 31) {
+                    newTextHeight = 31;
+                }
+                artists[i].style.height = newTextHeight + 'px';
             }
         }
         $rootScope.resizeImgHeight = function () {

@@ -1,18 +1,18 @@
 <div class="modal-header">
     <h3 class="modal-title column small-9">Tools</h3>
-    <a ng-click="cancel()" class="column small-3"><i class="fi-x float-right"></i></a>
+    <a ng-click="cancel()" class="float-right close">&times;</a>
 </div>
 <div class="modal-body column large-12">
     <ng-connect ng-if="$root.connected == false">
     </ng-connect>
-    <div ng-if="$root.connected == true">
-        <div class="column large-3" ng-repeat="item in items" data-ng-bind-html="item" ng-click="cancel()"></div>
-    </div>
+    <a  ng-if="$root.connected == true" href="#/createEvent" ng-click="cancel()" class="button">Créer un évènement</a>
     <a class="button" ng-click="viewIssues = !viewIssues; viewPlaylists = false"> Issues </a>
     <a class="button" ng-click="getPlaylists(); viewIssues = false; viewPlaylists = !viewPlaylists"> playlists </a>
+    <a  ng-if="$root.connected == true" class="button" ng-click="logout()">Logout</a>
     <div ng-if="viewPlaylists">
         <ul ng-repeat="playlist in playlists"><a ng-click="$root.loadPlaylist(playlist)">{{playlist.name}}</a></ul>
         <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
+        <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>
     </div>
     <div ng-if="viewIssues" ng-issues></div>
 </div>

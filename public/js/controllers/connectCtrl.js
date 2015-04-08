@@ -1,12 +1,20 @@
 app.controller('connectCtrl', function ($scope, $rootScope, $http) {
+    $scope.connectByMail = function () {
+        $http.post('/authenticate/userpass', {username: $scope.username, password: $scope.password}).
+            success(function (data) {
+                console.log(data)
+            }).
+            error(function (data) {
+                console.log(data)
+            })
+    };
     $scope.connectLink = function (url) {
-        var connectWin = window.open(url, "", "toolbar=no, scrollbars=no, resizable=no, width=400, height=400")
-        var connectWinPath = connectWin.location.href;
+        var connectWin = window.open(url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
         var changePath = setInterval(function() {
             if (connectWin.location.href == undefined) {
                 clearInterval(changePath)
             }
-            if (connectWin.location.href == 'http://localhost:9000/#/') {
+            if (connectWin.location.href == 'http://localhost:9000/#/connected') {
                 clearInterval(changePath)
                 if (connectWin.document.getElementById('top').getAttribute("ng-init") == '$root.connected = true') {
                     $rootScope.passConnectedToTrue();

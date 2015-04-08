@@ -25,7 +25,7 @@ app.directive('ngSearch', function(){
             var positionElementInPage;
             var flag = false;
             if (window.location.hash.indexOf('search')>-1) {
-                $(document).find('#searchTopBlock').removeClass("ng-hide");
+                $(document).find('#searchTopBlock').removeClass("hiddenBlock");
                 $(document).find('#searchTopBar').focus();
             } else {
                 $(window).scroll(function() {
@@ -35,15 +35,14 @@ app.directive('ngSearch', function(){
                     }
                     if ($(window).scrollTop()>= positionElementInPage - 60) {
                         // fixed
-                        $(element).find('#searchBlock').addClass("ng-hide");
-                        $(document).find('#searchTopBlock').removeClass("ng-hide");
+                        $(element).find('#searchBlock').addClass("hiddenBlock");
+                        $(document).find('#searchTopBlock').removeClass("hiddenBlock");
                         $(document).find('#searchTopBar').focus();
-
                     } else {
                         // relative
-                        $(element).find('#searchBlock').removeClass("ng-hide");
+                        $(element).find('#searchBlock').removeClass("hiddenBlock");
                         $(element).find('#searchBlock').find('input').focus();
-                        $(document).find('#searchTopBlock').addClass("ng-hide");
+                        $(document).find('#searchTopBlock').addClass("hiddenBlock");
                         flag = false;
                     }
                 });

@@ -204,23 +204,19 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selArtist == true) {
-                $http.get('/artists').
+                $http.get('/artists/since/' + offset + '/20').
                     success(function (data, status, headers, config) {
                         var scopeIdList = [];
                         function getArtistId(el, index, array) {
                             scopeIdList.push(el.artistId);
                         }
                         $scope.artists.forEach(getArtistId);
-                        if ($scope.artists.length == 0) {
-                            $scope.artists = data;
-                        } else {
-                            function uploadArtists(el, index, array) {
-                                if (scopeIdList.indexOf(el.artistId) == -1) {
-                                    $scope.artists.push(el);
-                                }
+                        function uploadArtists(el, index, array) {
+                            if (scopeIdList.indexOf(el.artistId) == -1) {
+                                $scope.artists.push(el);
                             }
-                            data.forEach(uploadArtists)
                         }
+                        data.forEach(uploadArtists)
                         $rootScope.resizeImgHeight();
                         $scope.loadingMore = false;
                     }).
