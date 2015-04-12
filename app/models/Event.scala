@@ -6,6 +6,7 @@ import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
 import java.util.Date
+import securesocial.core.IdentityId
 import services.Utilities.geographicPointToString
 
 case class Event(eventId: Option[Long],
@@ -18,6 +19,8 @@ case class Event(eventId: Option[Long],
                  startTime: Date,
                  endTime: Option[Date],
                  ageRestriction: Int,
+                 tariffRange: Option[String],
+                 ticketSellers: Option[String],
                  imagePath: Option[String],
                  organizers: List[Organizer],
                  artists: List[Artist],
@@ -29,16 +32,15 @@ case class Event(eventId: Option[Long],
 object Event {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
-                endTime: Option[Date], ageRestriction: Int, imagePath: Option[String], tariffs: List[Tariff],
-                addresses: List[Address]): Event = {
+                endTime: Option[Date], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
+                imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event = {
     new Event(None, None, true, true, name, geographicPoint, description, startTime, endTime, ageRestriction,
-      imagePath, List.empty, List.empty, tariffs, addresses)
+      tariffRange, ticketSellers, imagePath, List.empty, List.empty, tariffs, addresses)
   }
 
-  def formUnapply(event: Event): Option[(String, Option[String], Option[String], Date, Option[Date], Int,
-    Option[String], List[Tariff], List[Address])] = {
+  def formUnapply(event: Event) = {
     Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,
-      event.imagePath, event.tariffs, event.addresses))
+      event.tariffRange, event.ticketSellers, event.imagePath, event.tariffs, event.addresses))
   }
 
   private val EventParser: RowParser[Event] = {
@@ -52,11 +54,13 @@ object Event {
       get[Date]("startTime") ~
       get[Option[Date]]("endTime") ~
       get[Int]("ageRestriction") ~
+      get[Option[String]]("tariffRange") ~
+      get[Option[String]]("ticketSellers") ~
       get[Option[String]]("imagePath") map {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ name ~ geographicPoint ~ description ~
-        startTime ~ endTime ~ ageRestriction ~ imagePath =>
-        Event.apply(Some(eventId), facebookId, isPublic, isActive, name, geographicPoint, description,
-          startTime, endTime, ageRestriction, imagePath, List.empty, List.empty, List.empty, List.empty)
+        startTime ~ endTime ~ ageRestriction ~ tariffRange ~ ticketSellers ~ imagePath =>
+        Event.apply(Some(eventId), facebookId, isPublic, isActive, name, geographicPoint, description, startTime,
+          endTime, ageRestriction, tariffRange, ticketSellers, imagePath, List.empty, List.empty, List.empty, List.empty)
     }
   }
 
@@ -114,8 +118,7 @@ object Event {
   def findAllByPlace(placeId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT event.eventId, event.facebookId, event.isPublic, event.isActive, event.name, event.geographicPoint, 
-          |event.description, event.startTime, event.endTime, event.ageRestriction, event.imagePath
+        """SELECT event.*
           |FROM eventsPlaces eP INNER JOIN events event ON event.eventId = eP.eventId
           |WHERE eP.placeId = {placeId} 
           |ORDER BY event.creationDateTime DESC LIMIT 20""".stripMargin)
@@ -130,8 +133,7 @@ object Event {
   def findAllByGenreId(genreId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.name, e.geographicPoint,
-          |e.description, e.startTime, e.endTime, e.ageRestriction, e.imagePath
+        """SELECT e.*
           |FROM eventsGenres eG
           |INNER JOIN events e ON e.eventId = eG.eventId
           |WHERE eG.genreId = {genreId}
@@ -167,8 +169,7 @@ object Event {
   def findAllByOrganizer(organizerId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.name, 
-          |e.geographicPoint, e.description, e.startTime, e.endTime, e.ageRestriction, e.imagePath
+        """SELECT e.*
           |FROM eventsOrganizers eO INNER JOIN events e ON e.eventId = eO.eventId
           |WHERE eO.organizerId = {organizerId} 
           |ORDER BY e.creationDateTime DESC LIMIT 20""".stripMargin)
@@ -183,8 +184,7 @@ object Event {
   def findAllByArtist(facebookUrl: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.eventId, e.facebookId, e.isPublic, e.isActive, e.name, e.geographicPoint,
-          |e.description, e.startTime, e.endTime, e.ageRestriction, e.imagePath
+        """SELECT e.*
           |FROM eventsArtists eA
           | INNER JOIN events e ON e.eventId = eA.eventId
           | INNER JOIN artists a ON a.artistId = eA.artistId
@@ -300,6 +300,19 @@ object Event {
     }
   } catch {
     case e: Exception => throw new DAOException("Event.follow: " + e.getMessage)
+  }
+
+  def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""select e.* from events e
+            |  INNER JOIN eventsfollowed ef ON e.eventid = ef.eventid
+            |WHERE ef.userid = {userId}""")
+        .on('userId -> userId.userId)
+        .as(EventParser.*)
+        .map(getPropertiesOfEvent)
+      }
+  } catch {
+    case e: Exception => throw new DAOException("Event.getFollowedEvents: " + e.getMessage)
   }
 
   def findAllInCircle(center: String): List[Event] = center match {

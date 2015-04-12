@@ -6,6 +6,7 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
+import securesocial.core.Identity
 
 import scala.util.matching.Regex
 
@@ -64,6 +65,8 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
       "ageRestriction" -> number,
       "imagePath" -> optional(nonEmptyText(2)),
+      "tariffRange" -> optional(nonEmptyText(3)),
+      "ticketSellers" -> optional(nonEmptyText(3)),
       "tariffs" -> list(
         mapping(
           "denomination" -> nonEmptyText,
@@ -97,6 +100,13 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     Event.followEvent(request.user.identityId.userId, eventId)
     //Redirect(request.getHeader("referer"))
     Ok
+  }
+
+  def getFollowedEvents = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Event.getFollowedEvents(identity.identityId)))
+    }
   }
 
   def findEventsInCircle(peripheral: String) = Action {

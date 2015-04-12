@@ -1,6 +1,7 @@
 package jobs
 
 import java.util.Date
+import controllers.SchedulerException
 import models.Genre._
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
@@ -82,34 +83,42 @@ object Scheduler {
 
       val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
       val address = new Address(None, None, city, zip, street)
-      val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getNormalizedWebsitesInText(description))
+
+      val normalizedWebsites: Set[String] = getNormalizedWebsitesInText(description)
+      val ticketSellers = findTicketSellers(normalizedWebsites)
+      val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(normalizedWebsites)
       val eventuallyMaybeArtistsFromTitle =
-        getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getNormalizedWebsitesInText(description))
+        getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), normalizedWebsites)
 
       for {
         organizer <- eventuallyOrganizer
         artistsFromDescription <- eventuallyMaybeArtistsFromDescription
         artistsFromTitle <- eventuallyMaybeArtistsFromTitle
       } yield {
+
         val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
-        nonEmptyArtists.map { artist =>
-          val artistWithId = artist.copy(artistId = Artist.save(artist))
-          //getSoundCloudTracks => if soundcloud not in websites => post addArtistWebsite (add controller, route and model)
-          Future { getSoundCloudTracksForArtist(artistWithId).map { _.map { Track.save } } }
-          Future {
-            getYoutubeTracksForArtist(artistWithId, normalizeArtistName(artistWithId.name)).map {
-              _.map(Track.save)
-            }
-          }
-        }
+        saveArtistsAndTheirTracks(nonEmptyArtists)
+
         val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
+
         new Event(None, facebookId, true, true, name, None,
           formatDescription(description), formatDate(startTime).getOrElse(new Date()),
-          formatDate(endTime), 16, Option(source), List(organizer).flatten,
+          formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
           nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
       }
     })
     eventFacebookResponse.json.asOpt[Future[Event]](eventRead)
+  }
+
+  def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
+    artists.map { artist =>
+      val artistWithId = artist.copy(artistId = Artist.save(artist))
+      //getSoundCloudTracks => if soundcloud not in websites => post addArtistWebsite (add controller, route and model)
+      getSoundCloudTracksForArtist(artistWithId).map { _.map { Track.save } }
+      getYoutubeTracksForArtist(artistWithId, normalizeArtistName(artistWithId.name)).map {
+        _.map(Track.save)
+      }
+    }
   }
 
   def readEventsIdsFromResponse(resp: Response): Seq[String] = {
@@ -144,6 +153,31 @@ object Scheduler {
               .replaceAll( """\t""", "    ")
               .replaceAll( """</a>/""", "</a> ") +
               "</div>")
+  }
+
+  def findPrices(description: Option[String]): Option[String] = description match {
+    case None =>
+      None
+    case Some(desc) =>
+      try {
+        """(\d+[,.]?\d+)\s*€""".r.findAllIn(desc).matchData.map { priceMatcher =>
+          priceMatcher.group(1).replace(",", ".").toFloat
+        }.toList match {
+          case list: List[Float] if list.isEmpty => None
+          case prices => Option(prices.min.toString + "-" + prices.max.toString)
+        }
+      } catch {
+        case e: Exception => throw new SchedulerException("findPrices: " + e.getMessage)
+      }
+  }
+
+  def findTicketSellers(normalizedWebsites: Set[String]): Option[String] = {
+    normalizedWebsites.filter(website =>
+      website.contains("digitick") | website.contains("weezevent") | website.contains("yurplan") |
+        website.contains("eventbrite") | website.contains("ticketmaster")| website.contains("ticketnet")) match {
+      case set: Set[String] if set.isEmpty => None
+      case websites: Set[String] => Option(websites.mkString(","))
+    }
   }
 
   def splitArtistNamesInTitle(title: String): List[String] =
