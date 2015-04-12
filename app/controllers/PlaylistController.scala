@@ -43,7 +43,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
     "tracksId" -> seq(mapping(
       "trackId" -> longNumber
     )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
-  )(Playlist.addTracksFormApply)(Playlist.addTracksFormUnapply))
+  )(Playlist.addOrRemoveTracksFormApply)(Playlist.addOrRemoveTracksFormUnapply))
 
   def addTracks() = SecuredAction(ajaxCall = true) { implicit request =>
     addTracksInPlaylistBindingForm.bindFromRequest().fold(
@@ -52,6 +52,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
         BadRequest(formWithErrors.errorsAsJson)
       },
       playlistIdAndTracksId => {
+        //if (SELECT 1 WHERE playlistId = playlistIdAndTracksId.playlistId) AND userId = request.user.identityId.userId)
         Playlist.addTracksInPlaylist(request.user.identityId.userId, playlistIdAndTracksId)
 //        ??
         //Future { save tracks playlist relation (tracks shouldn't be in playlist as id but as tracks that

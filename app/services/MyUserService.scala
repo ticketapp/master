@@ -72,6 +72,7 @@ faire en sorte que ca find si luser est déjà enregistré au save
     }
 
     try {
+      //upsert
       DB.withConnection { implicit connection =>
         SQL(
           s"""INSERT INTO users_login(${USERS.FIELDS_LESS_ID})

@@ -1,7 +1,5 @@
 package models
 
-import java.sql.Connection
-
 import anorm.SqlParser._
 import anorm._
 import controllers._
@@ -132,6 +130,18 @@ object Track {
           'playlistId -> playlistId,
           'trackId -> trackId)
         .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
+  }
+
+  def deletePlaylistTrackRelation(playlistId: Long, trackId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM playlistsTracks
+          | WHERE playlistId = {playlistId}""".stripMargin)
+        .on('playlistId -> playlistId)
+        .executeUpdate()
     }
   } catch {
     case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)

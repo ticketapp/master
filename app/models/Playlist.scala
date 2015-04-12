@@ -6,7 +6,6 @@ import controllers.DAOException
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
-import securesocial.core.Event
 
 case class Playlist(playlistId: Option[Long], userId: String, name: String, tracks: Seq[Track])
 
@@ -60,27 +59,36 @@ object Playlist {
     case e: Exception => throw new DAOException("Cannot save playlist: " + e.getMessage)
   }
 
+  //delete tracksPlaylist relation too
+  //and do the same verifications for adding and removing tracks
   def delete(userId: String, playlistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL(
+      val booleanExecute = SQL(
         """DELETE FROM playlists
           | WHERE userId = {userId}
-          | AND playlistId = {playlistId} """.stripMargin)
+          | AND playlistId = {playlistId}""".stripMargin)
         .on('playlistId -> playlistId)
         .execute()
+      println(booleanExecute)
+      booleanExecute
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.delete: " + e.getMessage)
   }
 
   case class PlaylistIdAndTracksId(id: Long, tracksId: Seq[Long])
-  def addTracksFormApply(id: Long, tracksId: Seq[Long]) =
+  def addOrRemoveTracksFormApply(id: Long, tracksId: Seq[Long]) =
     PlaylistIdAndTracksId(id, tracksId)
-  def addTracksFormUnapply(playlistIdAndTracksId: PlaylistIdAndTracksId) =
+  def addOrRemoveTracksFormUnapply(playlistIdAndTracksId: PlaylistIdAndTracksId) =
     Option((playlistIdAndTracksId.id, playlistIdAndTracksId.tracksId))
 
   def addTracksInPlaylist(userId: String, playlistIdAndTracksId: PlaylistIdAndTracksId): Unit = {
     playlistIdAndTracksId.tracksId.foreach(trackId =>
       Track.savePlaylistTrackRelation(playlistIdAndTracksId.id, trackId))
+  }
+
+  def deleteTracksInPlaylist(userId: String, playlistIdAndTracksId: PlaylistIdAndTracksId): Unit = {
+    playlistIdAndTracksId.tracksId.foreach(trackId =>
+      Track.deletePlaylistTrackRelation(playlistIdAndTracksId.id, trackId))
   }
 }

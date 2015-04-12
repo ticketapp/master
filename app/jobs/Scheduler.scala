@@ -11,6 +11,7 @@ import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
+import scala.util.matching.Regex
 import services.Utilities.{ normalizeUrl, normalizeString, getNormalizedWebsitesInText }
 import controllers.SearchArtistsController.{ getEventuallyArtistsInEventTitle, getFacebookArtistsByWebsites }
 
@@ -65,47 +66,48 @@ object Scheduler {
 
   def readFacebookEvent(eventFacebookResponse: Response): Option[Future[Event]] = {
     val eventRead = (
-        (__ \ "description").readNullable[String] and
-        (__ \ "cover" \ "source").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "id").readNullable[String] and
-        (__ \ "start_time").readNullable[String] and
-        (__ \ "endTime").readNullable[String] and
-        (__ \ "venue" \ "street").readNullable[String] and
-        (__ \ "venue" \ "zip").readNullable[String] and
-        (__ \ "venue" \ "city").readNullable[String] and
-        (__ \ "owner" \ "id").readNullable[String]
-      )((description: Option[String], source: String, name: String, facebookId: Option[String],
-         startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
-         city: Option[String], maybeOwnerId: Option[String]) => {
+      (__ \ "description").readNullable[String] and
+      (__ \ "cover" \ "source").read[String] and
+      (__ \ "name").read[String] and
+      (__ \ "id").readNullable[String] and
+      (__ \ "start_time").readNullable[String] and
+      (__ \ "endTime").readNullable[String] and
+      (__ \ "venue" \ "street").readNullable[String] and
+      (__ \ "venue" \ "zip").readNullable[String] and
+      (__ \ "venue" \ "city").readNullable[String] and
+      (__ \ "owner" \ "id").readNullable[String]
+    )((description: Option[String], source: String, name: String, facebookId: Option[String],
+       startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
+       city: Option[String], maybeOwnerId: Option[String]) => {
 
-        val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
-        val address = new Address(None, None, city, zip, street)
-        val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getNormalizedWebsitesInText(description))
-        val eventuallyMaybeArtistsFromTitle =
-          getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getNormalizedWebsitesInText(description))
+      val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
+      val address = new Address(None, None, city, zip, street)
+      val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(getNormalizedWebsitesInText(description))
+      val eventuallyMaybeArtistsFromTitle =
+        getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), getNormalizedWebsitesInText(description))
 
-        for {
-          organizer <- eventuallyOrganizer
-          artistsFromDescription <- eventuallyMaybeArtistsFromDescription
-          artistsFromTitle <- eventuallyMaybeArtistsFromTitle
-        } yield {
-          val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
-          nonEmptyArtists.map { artist =>
-            val artistWithId = artist.copy(artistId = Artist.save(artist))
-            Future { getSoundCloudTracksForArtist(artistWithId).map { _.map { Track.save } } }
-            Future {
-              getYoutubeTracksForArtist(artistWithId, normalizeArtistName(artistWithId.name)).map {
-                _.map(Track.save)
-              }
+      for {
+        organizer <- eventuallyOrganizer
+        artistsFromDescription <- eventuallyMaybeArtistsFromDescription
+        artistsFromTitle <- eventuallyMaybeArtistsFromTitle
+      } yield {
+        val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
+        nonEmptyArtists.map { artist =>
+          val artistWithId = artist.copy(artistId = Artist.save(artist))
+          //getSoundCloudTracks => if soundcloud not in websites => post addArtistWebsite (add controller, route and model)
+          Future { getSoundCloudTracksForArtist(artistWithId).map { _.map { Track.save } } }
+          Future {
+            getYoutubeTracksForArtist(artistWithId, normalizeArtistName(artistWithId.name)).map {
+              _.map(Track.save)
             }
           }
-          val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
-          new Event(None, facebookId, true, true, name, None,
-            formatDescription(description), formatDate(startTime).getOrElse(new Date()),
-            formatDate(endTime), 16, Option(source), List(organizer).flatten,
-            nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
         }
+        val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
+        new Event(None, facebookId, true, true, name, None,
+          formatDescription(description), formatDate(startTime).getOrElse(new Date()),
+          formatDate(endTime), 16, Option(source), List(organizer).flatten,
+          nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
+      }
     })
     eventFacebookResponse.json.asOpt[Future[Event]](eventRead)
   }
@@ -125,22 +127,23 @@ object Scheduler {
     case _ => None
   }
 
-  def formatDescription(description: Option[String]): Option[String] = {
-    //see if not faster to useGetWebsitesInDescription and after replace all matched ?
-    description match {
-      case None => None
-      case Some(desc) => Some("<div class='column large-12'>" +
-        linkPattern.replaceAllIn(desc, m =>
-          if (m.toString contains "@")
-            "<i>" + m + "</i>"
-          else
-            "<a href='http://" + m + "'>" + m + "</a>")
-          .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
-          .replaceAll( """\n""", "<br/>")
-          .replaceAll( """\t""", "    ")
-          .replaceAll( """</a>/""", "</a> ") +
-        "</div>")
-    }
+  def formatDescription(description: Option[String]): Option[String] = description match {
+  //see if not faster to useGetWebsitesInDescription and after replace all matched ?
+    case None =>
+      None
+    case Some(desc) =>
+      def stringToLinks(matcher: Regex.Match) =
+        if (matcher.toString contains "@")
+          "<i>" + matcher + "</i>"
+        else
+          "<a href='http://" + matcher + "'>" + matcher + "</a>"
+      Option("<div class='column large-12'>" +
+        linkPattern.replaceAllIn(desc, m => stringToLinks(m))
+              .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
+              .replaceAll( """\n""", "<br/>")
+              .replaceAll( """\t""", "    ")
+              .replaceAll( """</a>/""", "</a> ") +
+              "</div>")
   }
 
   def splitArtistNamesInTitle(title: String): List[String] =
@@ -213,9 +216,7 @@ object Scheduler {
       Future { address }
   }
 
-  def normalizeArtistName(artistName: String): String = {
-    normalizeString(artistName)
-  }
+  def normalizeArtistName(artistName: String): String = normalizeString(artistName)
 
   def getArtistsFromTitle(title: String): Set[String] = {
     /*val artistsFromTitle: List[String] = splitArtistNamesInTitle(name)
