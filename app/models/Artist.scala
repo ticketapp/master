@@ -178,6 +178,10 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
   }
 
+  def addWebsite(artistId: Option[Long], normalizedUrl: String) = {
+
+  }
+
   def saveWithEventRelation(artist: Artist, eventId: Long): Boolean = save(artist) match {
     case None => false
     case Some(artistId: Long) => saveEventArtistRelation(eventId, artistId)
