@@ -128,10 +128,8 @@ object Scheduler {
     case Some(track: Track) => track.redirectUrl match {
       case None =>
       case Some(redirectUrl) => val normalizedUrl = normalizeUrl(redirectUrl)
-        println(normalizedUrl)
         if (!artist.websites.contains(
           normalizeUrl(normalizedUrl).dropRight(normalizedUrl.length - normalizedUrl.lastIndexOf("/")))) {
-          println("add it")
             Artist.addWebsite(artist.artistId, normalizedUrl)
         }
     }
@@ -161,13 +159,13 @@ object Scheduler {
         if (matcher.toString contains "@")
           "<i>" + matcher + "</i>"
         else
-          "<a href='http://" + matcher + "'>" + matcher + "</a>"
+          """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) + """</a>"""
       Option("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m => stringToLinks(m))
               .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
               .replaceAll( """\n""", "<br/>")
-              .replaceAll( """\t""", "    ")
-              .replaceAll( """</a>/""", "</a> ") +
+              .replaceAll( """\t""", "    ") +
+              //.replaceAll( """</a>/""", "</a> ") +
               "</div>")
   }
 
