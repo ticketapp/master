@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 20 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 17 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -493,7 +493,7 @@ CREATE TABLE account627 (
 CREATE TABLE bank ( --account512
   id                      SERIAL PRIMARY KEY,
   datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
-  name                    VARCHAR(255) DEFAULT 'tamere666' NOT NULL,
+  name                    VARCHAR(255) DEFAULT '666' NOT NULL,
   amount                  NUMERIC NOT NULL,
   debit                   Boolean NOT NULL,
   paymentReference        INT DEFAULT 0 NOT NULL,

@@ -113,7 +113,6 @@ object Scheduler {
   def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
     artists.map { artist =>
       val artistWithId = artist.copy(artistId = Artist.save(artist))
-      //getSoundCloudTracks => if soundcloud not in websites => post addArtistWebsite (add controller, route and model)
       getSoundCloudTracksForArtist(artistWithId).map { tracks =>
         addSoundCloudWebsiteIfNotInWebsites(tracks.headOption, artistWithId)
         tracks.map { Track.save }
@@ -129,8 +128,10 @@ object Scheduler {
     case Some(track: Track) => track.redirectUrl match {
       case None =>
       case Some(redirectUrl) => val normalizedUrl = normalizeUrl(redirectUrl)
+        println(normalizedUrl)
         if (!artist.websites.contains(
           normalizeUrl(normalizedUrl).dropRight(normalizedUrl.length - normalizedUrl.lastIndexOf("/")))) {
+          println("add it")
             Artist.addWebsite(artist.artistId, normalizedUrl)
         }
     }
