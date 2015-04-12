@@ -518,20 +518,20 @@ CREATE TABLE eventsFollowed (
 );
 
 CREATE TABLE artistsFollowed (
-  userId                   INT REFERENCES users(userId),
+  userId                   VARCHAR REFERENCES users_login(userId),
   artistId                 INT REFERENCES artists(artistId),
   PRIMARY KEY (userId, artistId)
 );
 
 CREATE TABLE placesFollowed (
-  userId                   INT REFERENCES users(userId),
+  userId                   VARCHAR REFERENCES users_login(userId),
   placeId                  INT REFERENCES places(placeId),
   PRIMARY KEY (userId, placeId)
 );
 
 CREATE TABLE usersFollowed (
-  userIdFollower          INT REFERENCES users(userId),
-  userIdFollowed          INT REFERENCES users(userId),
+  userIdFollower          VARCHAR REFERENCES users_login(userId),
+  userIdFollowed          VARCHAR REFERENCES users_login(userId),
   PRIMARY KEY (userIdFollower, userIdFollowed)
 );
 

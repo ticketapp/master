@@ -238,8 +238,8 @@ object Event {
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint},
-           |{description}, {startTime}, {endTime}, {imagePath}, {ageRestriction})""".stripMargin)
+        s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint}, {description}, {startTime},
+           |{endTime}, {imagePath}, {ageRestriction}, {tariffRange}, {ticketSellers})""".stripMargin)
         .on(
           'facebookId -> event.facebookId,
           'isPublic -> event.isPublic,
@@ -250,7 +250,9 @@ object Event {
           'startTime -> event.startTime,
           'endTime -> event.endTime,
           'imagePath -> event.imagePath,
-          'ageRestriction -> event.ageRestriction)
+          'ageRestriction -> event.ageRestriction,
+          'tariffRange -> event.tariffRange,
+          'ticketSellers -> event.ticketSellers)
         .as(scalar[Option[Long]].single) match {
         case None => None
         case Some(eventId: Long) =>
