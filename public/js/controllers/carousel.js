@@ -2,9 +2,9 @@ app.controller("CarouselCtrl",function($scope, $timeout, $http, $sce, $rootScope
    $scope.infos=[];
    $http.get('/infos').success(function (data, status, headers, config) {
        $scope.infos = data;
-       if ($rootScope.window == 'large') {
+       /*if ($rootScope.window == 'large') {
            $scope.infos.push({title: '', content: $sce.trustAsHtml('<iframe src="http://localhost:9000/" height="350px" width="25%"></iframe><span class="column large-8">Test smartPhone</span>')})
-       }
+       }*/
        updateInfo();
    }).error(function (data, status, headers, config) {
    });

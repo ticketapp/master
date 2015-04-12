@@ -1,11 +1,11 @@
 <input ng-if="!filter" id="searchBar" placeholder="Search" ng-model="$root.research"
        ng-model-options="{ getterSetter: true }"
-       class="column small-10">
+       class="column small-10 medium-3">
 <input ng-if="filter" id="searchBar" placeholder="Filter by {{$root.filterType}}"
        ng-change="$root.resizeImgHeight()"
        ng-model="$root.filterQuery"
-       class="column small-10">
-<ul class="column small-2 padding0">
+       class="column small-10 medium-3">
+<!--<ul class="column small-2 padding0">
     <a ng-if="filter || $root.order == 'startTime'" ng-click="$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
     <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
         <a>Filters <i class="fi-arrow-down"></i></a>
@@ -31,9 +31,9 @@
             <a>
                 Date
             </a>
-        </li>-->
+        </li>
     </ul>
-</ul>
+</ul>-->
 <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
        ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)"
        ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">
@@ -61,5 +61,7 @@
                id="volume-slider"
                class="md-primary column medium-8">
     </md-slider>
-    <div class="column medium-3">{{$root.maxStartView | millSecondsToTimeString}}</div>
+    <h3 class="column medium-3 margin0" style="color: white;">
+        {{$root.maxStartView | millSecondsToTimeString}}
+    </h3>
 </div>

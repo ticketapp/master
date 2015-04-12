@@ -19,6 +19,35 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                 $scope.adresses = true;
                 console.log($scope.adresses);
             }
+            if (data.tariffRange != undefined) {
+                var tariffs = data.tariffRange.split('-');
+                console.log(tariffs)
+                if (tariffs[1] > tariffs[0]) {
+                    data.tariffRange = tariffs[0] + '€ - ' + tariffs[1] + '€';
+                } else {
+                    data.tariffRange = tariffs[0] + '€';
+                }
+            }
+            if (data.ticketSellers != undefined) {
+                if (data.ticketSellers.indexOf("digitick") > -1) {
+                    data.ticketPlatform = "digitick";
+                }
+                if (data.ticketSellers.indexOf("weezevent") > -1) {
+                    data.ticketPlatform = "weezevent";
+                }
+                if (data.ticketSellers.indexOf("yurplan") > -1) {
+                    data.ticketPlatform = "yurplan";
+                }
+                if (data.ticketSellers.indexOf("eventbrite") > -1) {
+                    data.ticketPlatform = "eventbrite";
+                }
+                if (data.ticketSellers.indexOf("ticketmaster") > -1) {
+                    data.ticketPlatform = "ticketmaster";
+                }
+                if (data.ticketSellers.indexOf("ticketnet") > -1) {
+                    data.ticketPlatform = "ticketnet";
+                }
+            }
             $scope.event = data;
             console.log($scope.event);
             if ( $rootScope.window != 'small' && $rootScope.window != 'medium') {

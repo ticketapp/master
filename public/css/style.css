@@ -198,43 +198,38 @@
 
         #searchBlock, #searchTopBlock {
             text-align: center;
-        }
-        #searchBar, #searchTopBar {
-            height:50px;
-            margin: 0;
-            float:left;
-        }
-        #searchBlock .inputName {
-            width: 25%;
-            float: left;
-            position: relative;
-            top: 0;
-            bottom: 0;
-            margin: 0;
-            height: 50px;
-            line-height: 50px;
-            background: #008CBA;
-        }
-        #searchBlock {
-            margin-top : -110px;
-            background: #ffffff;
+            background: rgba(0, 0, 0, 0.5);
             padding: 10px;
             transform: translate3d(0, -1px, 0);
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
-            max-width: 93%;
+            max-width: 100%;
         }
-        #searchTopBlock .inputName {
-            width: 25%;
+        #searchBlock md-slider, #searchTopBlock md-slider {
+            height: 20px;
+            margin-top: -10px;
+        }
+
+        #searchBar, #searchTopBar {
+            height:40px;
+            margin: 0;
+            float:left;
+        }
+        #searchBlock {
+            margin-top : -105px;
+
+        }
+        .inputName {
+            width: 18.6%;
             float: left;
             position: relative;
             top: 0;
             bottom: 0;
             margin: 0;
-            height: 50px;
-            line-height: 50px;
+            height: 40px;
+            line-height: 40px;
             background: #008CBA;
         }
-        #searchTopBlock .inputName.active, #searchBlock .inputName.active, .inputName:hover {
+        .inputName.active, .inputName:hover {
             background: #007095!important;
             color: #ffffff;
         }

@@ -30,6 +30,12 @@
             <button class="column large-4">Acheter</button>
         </li>
     </div>
+    <div class="column large-4 float-left eventInfo" ng-if="event.tariffRange.length != undefined ||
+    event.ticketSellers != undefined">
+        <h2>Tarifs</h2>
+        <h3 class="float-left">{{event.tariffRange}}</h3>
+        <a href="http://www.{{event.ticketSellers}}" class="button float-right" target="_blank">Acheter des places sur {{event.ticketPlatform}}</a>
+    </div>
     <div class="column large-4 float-left eventInfo" ng-if="event.artists.length > 0">
         <h2>Programmation</h2>
         <li ng-repeat="artist in event.artists" style="display: block;">
