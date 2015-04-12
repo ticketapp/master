@@ -18,6 +18,8 @@ case class Event(eventId: Option[Long],
                  startTime: Date,
                  endTime: Option[Date],
                  ageRestriction: Int,
+                 tariffRange: Option[String],
+                 ticketSellers: Option[String],
                  imagePath: Option[String],
                  organizers: List[Organizer],
                  artists: List[Artist],
@@ -29,16 +31,15 @@ case class Event(eventId: Option[Long],
 object Event {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
-                endTime: Option[Date], ageRestriction: Int, imagePath: Option[String], tariffs: List[Tariff],
-                addresses: List[Address]): Event = {
+                endTime: Option[Date], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
+                imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event = {
     new Event(None, None, true, true, name, geographicPoint, description, startTime, endTime, ageRestriction,
-      imagePath, List.empty, List.empty, tariffs, addresses)
+      tariffRange, ticketSellers, imagePath, List.empty, List.empty, tariffs, addresses)
   }
 
-  def formUnapply(event: Event): Option[(String, Option[String], Option[String], Date, Option[Date], Int,
-    Option[String], List[Tariff], List[Address])] = {
+  def formUnapply(event: Event) = {
     Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,
-      event.imagePath, event.tariffs, event.addresses))
+      event.tariffRange, event.ticketSellers, event.imagePath, event.tariffs, event.addresses))
   }
 
   private val EventParser: RowParser[Event] = {
@@ -52,11 +53,13 @@ object Event {
       get[Date]("startTime") ~
       get[Option[Date]]("endTime") ~
       get[Int]("ageRestriction") ~
+      get[Option[String]]("tariffRange") ~
+      get[Option[String]]("ticketSellers") ~
       get[Option[String]]("imagePath") map {
       case eventId ~ facebookId ~ isPublic ~ isActive ~ name ~ geographicPoint ~ description ~
-        startTime ~ endTime ~ ageRestriction ~ imagePath =>
-        Event.apply(Some(eventId), facebookId, isPublic, isActive, name, geographicPoint, description,
-          startTime, endTime, ageRestriction, imagePath, List.empty, List.empty, List.empty, List.empty)
+        startTime ~ endTime ~ ageRestriction ~ tariffRange ~ ticketSellers ~ imagePath =>
+        Event.apply(Some(eventId), facebookId, isPublic, isActive, name, geographicPoint, description, startTime,
+          endTime, ageRestriction, tariffRange, ticketSellers, imagePath, List.empty, List.empty, List.empty, List.empty)
     }
   }
 

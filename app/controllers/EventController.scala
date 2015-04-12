@@ -64,6 +64,8 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
       "ageRestriction" -> number,
       "imagePath" -> optional(nonEmptyText(2)),
+      "tariffRange" -> optional(nonEmptyText(3)),
+      "ticketSellers" -> optional(nonEmptyText(3)),
       "tariffs" -> list(
         mapping(
           "denomination" -> nonEmptyText,

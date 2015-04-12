@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 3 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 2 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -216,6 +216,8 @@ CREATE TABLE events (
   endTime                   TIMESTAMP,
   imagePath                 VARCHAR,
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
+  tariffRange               VARCHAR(15),
+  ticketSellers             VARCHAR,
   UNIQUE(facebookId)
 );
 CREATE INDEX eventGeographicPoint ON events USING GIST (geographicPoint);
@@ -230,15 +232,18 @@ CREATE OR REPLACE FUNCTION insertEvent(
   startTimeValue                 TIMESTAMP with time zone,
   endTimeValue                   TIMESTAMP with time zone,
   imagePathValue                 VARCHAR,
-  ageRestrictionValue            INT)
+  ageRestrictionValue            INT,
+  tariffRangeValue               VARCHAR(15),
+  ticketSellersValue             VARCHAR)
   RETURNS INT AS
   $$
   DECLARE eventIdToReturn int;;
   BEGIN
     INSERT INTO events (facebookid, ispublic, isactive, name, geographicpoint, description, starttime,
-                        endtime, imagePath, agerestriction)
+                        endtime, imagePath, agerestriction, tariffRange, ticketSellers)
     VALUES (facebookidValue, ispublicValue, isactiveValue, nameValue, POINT(geographicpointValue),
-            descriptionValue, starttimeValue, endtimeValue, imagePathValue, agerestrictionValue::SMALLINT)
+            descriptionValue, starttimeValue, endtimeValue, imagePathValue, agerestrictionValue::SMALLINT,
+            tariffRangeValue, ticketSellersValue)
     RETURNING eventId INTO eventIdToReturn;;
     RETURN eventIdToReturn;;
     EXCEPTION WHEN unique_violation THEN
