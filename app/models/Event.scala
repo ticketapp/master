@@ -306,7 +306,7 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL("""select e.* from events e
             |  INNER JOIN eventsfollowed ef ON e.eventid = ef.eventid
-            |WHERE ef.userid = {userId}""")
+            |WHERE ef.userid = {userId}""".stripMargin)
         .on('userId -> userId.userId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
