@@ -99,7 +99,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                 var eventsLength = $scope.events.length;
                 for (var i = 0; i < eventsLength; i++) {
                     if ($scope.events[i].countdown <= $scope.time &&
-                        $scope.events[i].countdown > 0 &&
                         $scope.events[i].addresses[0] != undefined) {
                         var geopoint = $scope.events[i].addresses[0].geographicPoint
                         console.log(geopoint)
@@ -121,8 +120,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
             var redirectPath = '';
             for (var i = 0; i < eventsLength; i++) {
                 if ($scope.events[i].addresses[0] != undefined &&
-                    $scope.events[i].countdown <= $scope.time &&
-                    $scope.events[i].countdown > 0) {
+                    $scope.events[i].countdown <= $scope.time ) {
                     var geopoints = $scope.events[i].addresses[0].geographicPoint
                     console.log(geopoints.replace(/^.+,/,''))
                     console.log(cluster.center_.D)

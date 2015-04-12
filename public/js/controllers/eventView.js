@@ -60,6 +60,7 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                     if (data.error == 'Credentials required') {
                         $rootScope.storeLastReq('post', '/events/'+ id + '/follow', '', 'vous suivez maintenant ' + $scope.event.name)
                     }
+                    console.log(data)
                 })
         };
 }]);

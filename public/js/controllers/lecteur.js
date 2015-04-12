@@ -41,6 +41,15 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 }
             })
     };
+    $rootScope.deletePlaylist = function (playlistId) {
+        $http.delete('/playlists/' + playlistId).
+            success(function (data) {
+                console.log(data)
+            }).
+            error (function (data) {
+                console.log(data)
+        })
+    };
     function eventsPlaylist () {
         $http.get('/events/offset/' + offset +'/' + $rootScope.geoLoc).
             success(function(data){
@@ -75,6 +84,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     }
     function pushTrack (track, art) {
         $scope.newTrack = {};
+        console.log(track)
+        console.log(art)
         if (track.platform == 'Soundcloud') {
             $scope.newTrack.redirectUrl = track.redirectUrl;
         }
@@ -91,9 +102,30 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     }
     $rootScope.loadPlaylist = function (playlist) {
         $rootScope.playlist.name = playlist.name;
-        /*$rootScope.playlist.tracks = [];
-        $rootScope.playlist.genres = [];*/
-        alert('playlist')
+        $rootScope.playlist.tracks = [];
+        $rootScope.playlist.genres = [];
+        var tracksLenght = playlist.tracks.length;
+        var tr = 0;
+        function addtr (tr) {
+            $http.get('/artists/' + playlist.tracks[tr].artistFacebookUrl).
+                success(function (data) {
+                    pushTrack(playlist.tracks[tr], data);
+                    if (tr == 0) {
+                        $scope.play(i);
+                    }
+                    if (tr < tracksLenght -1) {
+                        addtr(tr + 1)
+                    }
+                    function addGenres (genre) {
+                        $rootScope.playlist.genres = $rootScope.playlist.genres.concat(genre.name);
+                    }
+                    data.genres.forEach(addGenres);
+                    eventsPlaylist();
+                })
+        }
+        addtr(tr);
+        $scope.playlistEnd = false;
+        played = [];
     };
     $rootScope.addToPlaylist = function (tracks, artist) {
         offset = 0;
@@ -253,7 +285,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             $rootScope.playlist.tracks.splice(index, 1);
             if (index == $rootScope.playlist.tracks.length && index == i) {
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
-                document.getElementById('musicPlayer').outerHTML = '<video class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></video>';
+                document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
                 /*document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
                 document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);*/
             }
@@ -262,7 +294,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             $rootScope.playlist.tracks = [];
             played = [];
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
-            document.getElementById('musicPlayer').outerHTML = '<video class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></video>';
+            document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
             document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         };

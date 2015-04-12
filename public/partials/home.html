@@ -4,7 +4,7 @@
             <source src="https://www.youtube.com/embed/rDlXXWuK-So">
         </video>-->
         <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-show="elementEnCours == info">
-            <h2 ng-bind-html="info.title"></h2>
+            <h4 ng-if="info.title.length > 0" ng-bind-html="info.title"></h4>
             <div ng-bind-html="info.content"></div>
         </div>
     </div>
