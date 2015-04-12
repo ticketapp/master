@@ -512,7 +512,7 @@ CREATE TABLE account623 (
 );
 
 CREATE TABLE eventsFollowed (
-  userId                   INT REFERENCES users_login(id),
+  userId                   VARCHAR REFERENCES users_login(userId),
   eventId                  BIGINT REFERENCES events(eventId),
   PRIMARY KEY (userId, eventId)
 );
