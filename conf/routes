@@ -14,6 +14,7 @@ GET           /events/:id                                                       
 POST          /events/create                                                              controllers.EventController.createEvent
 POST          /events/:eventId/follow                                                     controllers.EventController.followEvent(eventId: Long)
 GET           /events/followed/                                                           controllers.EventController.getFollowedEvents
+GET           /events/:eventId/isEventFollowed                                            controllers.EventController.isEventFollowed(eventId: Long)
 GET           /events/containing/:pattern/:center                                         controllers.EventController.findEventsContaining(pattern: String, center:String)
 #GET     /events/circle/                controllers.EventController.findEventsInCircle(center = "")
 GET           /events/circle/:center                                                      controllers.EventController.findEventsInCircle(center: String)

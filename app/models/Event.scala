@@ -7,7 +7,7 @@ import anorm._
 import anorm.SqlParser._
 import java.util.Date
 import securesocial.core.IdentityId
-import services.Utilities.geographicPointToString
+import services.Utilities.{testIfExist, geographicPointToString}
 
 case class Event(eventId: Option[Long],
                  facebookId: Option[String],
@@ -313,6 +313,19 @@ object Event {
       }
   } catch {
     case e: Exception => throw new DAOException("Event.getFollowedEvents: " + e.getMessage)
+  }
+
+  def isEventFollowed(userId: IdentityId, eventId: Long): Boolean = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT exists(SELECT 1 FROM eventsFollowed
+           |  WHERE userId = {userId} AND eventId = {eventId})""".stripMargin)
+        .on("userId" -> userId.userId,
+            "eventId" -> eventId)
+        .as(scalar[Boolean].single)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.isEventFollowed: " + e.getMessage)
   }
 
   def findAllInCircle(center: String): List[Event] = center match {

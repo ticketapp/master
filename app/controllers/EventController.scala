@@ -109,6 +109,13 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
+  def isEventFollowed(eventId: Long) = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Event.isEventFollowed(identity.identityId, eventId)))
+    }
+  }
+
   def findEventsInCircle(peripheral: String) = Action {
     Ok(Json.toJson(Event.findAllInCircle(peripheral)))
   }
