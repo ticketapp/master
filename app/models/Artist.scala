@@ -6,6 +6,7 @@ import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
 import controllers.WebServiceException
+import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import services.Utilities
@@ -232,5 +233,33 @@ object Artist {
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot follow artist: " + e.getMessage)
+  }
+
+  def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""select a.* from artists a
+            |  INNER JOIN artistsfollowed af ON a.artistid = af.artistid
+            |WHERE af.userid = {userId}""".stripMargin)
+        .on('userId -> userId.userId)
+        .as(ArtistParser.*)
+        .map(getArtistProperties)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Artist.getFollowedArtists: " + e.getMessage)
+  }
+
+  def isArtistFollowed(userId: IdentityId, artistId: Long): Boolean = try {
+    println(userId.userId)
+    println(artistId)
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT exists(SELECT 1 FROM artistsFollowed
+          |  WHERE userId = {userId} AND artistId = {artistId})""".stripMargin)
+        .on("userId" -> userId.userId,
+          "artistId" -> artistId)
+        .as(scalar[Boolean].single)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Artist.isArtistFollowed: " + e.getMessage)
   }
 }

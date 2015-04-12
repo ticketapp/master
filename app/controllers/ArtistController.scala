@@ -9,6 +9,7 @@ import play.api.libs.iteratee.Enumerator
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
+import securesocial.core.Identity
 import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
 import scala.concurrent.Future
@@ -114,5 +115,19 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def followArtist(artistId : Long) = Action {
     //Artist.followArtist(userId, artistId)
     Redirect(routes.Admin.indexAdmin())
+  }
+
+  def getFollowedArtists = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Artist.getFollowedArtists(identity.identityId)))
+    }
+  }
+
+  def isArtistFollowed(artistId: Long) = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Artist.isArtistFollowed(identity.identityId, artistId)))
+    }
   }
 }
