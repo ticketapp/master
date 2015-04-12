@@ -82,6 +82,20 @@ object Playlist {
   def addOrRemoveTracksFormUnapply(playlistIdAndTracksId: PlaylistIdAndTracksId) =
     Option((playlistIdAndTracksId.id, playlistIdAndTracksId.tracksId))
 
+
+  def existsPlaylistForUser(userId: String, playlistId: Long): Boolean = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT exists(SELECT 1 FROM playlists
+          |  WHERE userId = {userId} AND playlistId = {playlistId})""".stripMargin)
+        .on("userId" -> userId,
+          "playlistId" -> playlistId)
+        .as(scalar[Boolean].single)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Artist.isArtistFollowed: " + e.getMessage)
+  }
+
   def addTracksInPlaylist(userId: String, playlistIdAndTracksId: PlaylistIdAndTracksId): Unit = {
     playlistIdAndTracksId.tracksId.foreach(trackId =>
       Track.savePlaylistTrackRelation(playlistIdAndTracksId.id, trackId))

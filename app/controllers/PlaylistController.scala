@@ -1,6 +1,7 @@
 package controllers
 
 import models.Playlist
+import models.Playlist.existsPlaylistForUser
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
@@ -31,8 +32,6 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       playlistNameAndTracksId => {
         val userId = request.user.identityId.userId
         val playlistId = Playlist.save(userId, playlistNameAndTracksId)
-        //Future { save tracks playlist relation (tracks shouldn't be in playlist as id but as tracks that
-        //are Seq.empty if not rendered
         Ok(Json.toJson(playlistId))
       }
     )
@@ -45,6 +44,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
     )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
   )(Playlist.addOrRemoveTracksFormApply)(Playlist.addOrRemoveTracksFormUnapply))
 
+
   def addTracks() = SecuredAction(ajaxCall = true) { implicit request =>
     addTracksInPlaylistBindingForm.bindFromRequest().fold(
       formWithErrors => {
@@ -52,17 +52,37 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
         BadRequest(formWithErrors.errorsAsJson)
       },
       playlistIdAndTracksId => {
-        //if (SELECT 1 WHERE playlistId = playlistIdAndTracksId.playlistId) AND userId = request.user.identityId.userId)
-        Playlist.addTracksInPlaylist(request.user.identityId.userId, playlistIdAndTracksId)
-//        ??
-        //Future { save tracks playlist relation (tracks shouldn't be in playlist as id but as tracks that
-        //are Seq.empty if not rendered???
-        Ok
+        val userId = request.user.identityId.userId
+        if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
+          Future { Playlist.addTracksInPlaylist(userId, playlistIdAndTracksId) }
+          Ok
+        } else
+          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))
+      }
+    )
+  }
+
+  def deleteTracks() = SecuredAction(ajaxCall = true) { implicit request =>
+    addTracksInPlaylistBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        println(formWithErrors.errorsAsJson)
+        BadRequest(formWithErrors.errorsAsJson)
+      },
+      playlistIdAndTracksId => {
+        val userId = request.user.identityId.userId
+        if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
+          Future { Playlist.deleteTracksInPlaylist(userId, playlistIdAndTracksId) }
+          Ok
+        } else
+          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))
       }
     )
   }
 
   def delete(playlistId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Playlist.delete(request.user.identityId.userId, playlistId)))
+    if(existsPlaylistForUser(request.user.identityId.userId, playlistId))
+      Ok(Json.toJson(Playlist.delete(request.user.identityId.userId, playlistId)))
+    else
+      Ok(Json.toJson("There is no playlist with this playlist Id for this user"))
   }
 }
