@@ -12,8 +12,16 @@
     </div>
 </div>
 <div ng-if="$root.window == 'small'" ng-controller="phoneHomeCtrl" class="absolute top0 bottom0 right left" style="z-index: 11">
-    <div class="absolute zIndex5">
-        <input type="number" ng-model="time" ng-change="updateMarkers()">
+    <div class="absolute zIndex5 column">
+        <md-slider flex ng-change="updateMarkers()"
+                   ng-model="time" min="1" max="51" step="1"
+                   aria-label="volume"
+                   id="volume-slider"
+                   class="md-primary column medium-8 padding0 margin0" md-discrete>
+        </md-slider>
+        <h4 class="column medium-3 margin0" style="color: white;">
+            Evenements dans les <span ng-if="selectedTime < 24">prochaines</span><span ng-if="selectedTime >= 24">prochains</span> {{selectedTime | millSecondsToTimeString}}
+        </h4>
         <a class="button column small-4" ng-click="info = !info">Infos</a>
         <ul class="white" ng-if="info">
             <li ng-repeat="info in infos">

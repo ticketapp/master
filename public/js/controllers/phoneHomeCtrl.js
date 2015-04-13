@@ -2,6 +2,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
     $scope.events = [];
     $scope.infos = [];
     $scope.time = 6;
+    $scope.selectedTime = 6;
     $scope.zoom = 12;
     var time = 168;
     var changeTime = true;
@@ -23,12 +24,12 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                     if ($scope.events[i].startTime != undefined) {
                         $scope.events[i].countdown = Math.round(($scope.events[i].startTime - new Date()) / 3600000);
                         if (changeTime == true && $scope.events[i].addresses[0] != undefined && time == 168) {
-                            if ($scope.time == 6 && $scope.events[i].countdown > $scope.time) {
-                                $scope.time = $scope.events[i].countdown;
-                            } else if ($scope.time != 6 && $scope.events[i].countdown < $scope.time && $scope.events[i].countdown > 6) {
-                                $scope.time = $scope.events[i].countdown;
-                            } else if ($scope.time != 6 && $scope.events[i].countdown < 6 && $scope.events[i].countdown > 0) {
-                                $scope.time = 6;
+                            if ($scope.selectedTime == 6 && $scope.events[i].countdown > $scope.selectedTime) {
+                                $scope.selectedTime = $scope.events[i].countdown;
+                            } else if ($scope.selectedTime != 6 && $scope.events[i].countdown < $scope.selectedTime && $scope.events[i].countdown > 6) {
+                                $scope.selectedTime = $scope.events[i].countdown;
+                            } else if ($scope.selectedTime != 6 && $scope.events[i].countdown < 6 && $scope.events[i].countdown > 0) {
+                                $scope.selectedTime = 6;
                                 changeTime = false;
                             }
                         }
@@ -39,13 +40,22 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
             })
     }
     $scope.updateMarkers = function () {
+        if ($scope.time > 23 && $scope.time <= 38) {
+            $scope.selectedTime = ($scope.time-23)*24
+        } else if ($scope.time > 38 && $scope.time <= 40) {
+            $scope.selectedTime = ($scope.time-36)*168;
+        } else if ($scope.time > 40) {
+             $scope.selectedTime = ($scope.time-39)*720;
+        } else {
+            $scope.selectedTime = $scope.time;
+        }
         $scope.dynMarkers = [];
         if ($scope.markerClusterer != undefined) {
             $scope.markerClusterer.clearMarkers();
         }
         var eventsLength = $scope.events.length;
         for (var i=0; i<eventsLength; i++) {
-            if ($scope.events[i].countdown <= $scope.time && $scope.events[i].addresses[0] != undefined) {
+            if ($scope.events[i].countdown <= $scope.selectedTime && $scope.events[i].addresses[0] != undefined) {
                 var geoPoint = $scope.events[i].addresses[0].geographicPoint;
                 console.log(geoPoint.substring(0, geoPoint.indexOf(',')));
                 console.log(geoPoint.replace(/^.+,/,''));
@@ -98,7 +108,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                 var redirectPath = ''
                 var eventsLength = $scope.events.length;
                 for (var i = 0; i < eventsLength; i++) {
-                    if ($scope.events[i].countdown <= $scope.time &&
+                    if ($scope.events[i].countdown <= $scope.selectedTime &&
                         $scope.events[i].addresses[0] != undefined) {
                         var geopoint = $scope.events[i].addresses[0].geographicPoint
                         console.log(geopoint)
@@ -120,7 +130,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
             var redirectPath = '';
             for (var i = 0; i < eventsLength; i++) {
                 if ($scope.events[i].addresses[0] != undefined &&
-                    $scope.events[i].countdown <= $scope.time ) {
+                    $scope.events[i].countdown <= $scope.selectedTime ) {
                     var geopoints = $scope.events[i].addresses[0].geographicPoint
                     console.log(geopoints.replace(/^.+,/,''))
                     console.log(cluster.center_.D)
@@ -143,8 +153,8 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                 console.log($scope.zoom)
             }
         });
-        if ($scope.time > time) {
-            time = $scope.time;
+        if ($scope.selectedTime > time) {
+            time = $scope.selectedTime;
             getEvents();
         }
     };
@@ -156,7 +166,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
         var redirectPath = 'event/' + $scope.events[id].eventId;
         var eventsLength = $scope.events.length;
         for (var i = 0; i < eventsLength; i++) {
-            if ($scope.events[i].countdown < $scope.time &&
+            if ($scope.events[i].countdown < $scope.selectedTime &&
                 $scope.events[i].countdown > 0 &&
                 i != id &&
                 $scope.events[id].places[0] != undefined &&

@@ -260,9 +260,9 @@ app.filter('millSecondsToTimeString', function() {
         var months = Math.floor(days / 30);
         var timeString = '';
         console.log(months)
-        if(months > 0) timeString += (months > 1) ? (months + " months ") : (months + " months ");
-        if(days > 0 && months == 0) timeString += (days > 1) ? (days + " days ") : (days + " day ");
-        if(hours > 0) timeString += (hours > 1) ? (hours + " hours ") : (hours + " hour ");
+        if(months > 0) timeString += (months > 1) ? (months + " mois ") : (months + " mois ");
+        if(days > 0 && months == 0) timeString += (days > 1) ? (days + " jours ") : (days + " jours ");
+        if(hours > 0) timeString += (hours > 1) ? (hours + " heures ") : (hours + " heure ");
         return timeString;
     }
 });

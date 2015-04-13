@@ -13,7 +13,7 @@
 /*Colors*/
     .primCol {background: #008CBA; color : #ffffff}
     .primCol > a {color : #ffffff}
-    .primCol:hover {background: #007095}
+    /*.primCol:hover {background: #007095}*/
     .white {background: #ffffff}
 /*z-index*/
     .zIndex1{z-index:1;}

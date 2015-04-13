@@ -66,7 +66,7 @@
             <b>Désolé, nous n'avons pour le moment aucune track "{{trackTitle}}" pour cet artist.</b><br/>
             <a class="button" ng-click="suggestQuery(trackTitle, artiste.name, artiste.facebookUrl)">Suggérer la track {{trackTitle}}</a>
         </div>
-        <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit)" class="column paddingBottom10 medium-6" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
+        <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit) track by $index" class="column paddingBottom10 medium-6" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
             <div class="column large-12 arTrack">
                 <div ng-if="track.thumbnailUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
                     <i class="fi-play playInImg" ng-click="$root.addToPlaylist([track], artiste)"></i>
