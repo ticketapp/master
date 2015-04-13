@@ -37,16 +37,46 @@
         <i ng-if="heightDesc == '147px' && allDesc == false" class="fi-plus pointer" ng-click="$parent.heightDesc = 'auto'; calcResize()"></i>
         <i ng-if="heightDesc == 'auto'" class="fi-minus pointer" ng-click="$parent.heightDesc = '147px'; calcResize()"></i>
     </div>
-    <div class="column large-4 float-left eventInfo tracksContener" >
-        <div class="column large-12">
-            <h3 class="column large-6">Tracks</h3>
-            <input class="column large-6 marginTop20" ng-if="tracks.length > 0 || trackTitle.length > 0" ng-model="$parent.trackTitle" ng-change="filterTracks()" placeholder="filter tracks"/>
-            <div class="float-left column large-12">
-                <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$root.addAndPlay(artiste.tracks, artiste)"><i class="fi-play"></i> Play all</a>
-                <a class="button" ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0" ng-click="$root.addToPlaylist(artiste.tracks, artiste)"><i class="fi-plus"></i> Add all</a>
-                <a class="button" ng-if="tracksFiltered.length > 0" ng-click="$parent.suggest = !$parent.suggest">Suggérer une track</a>
+    <div class="float-left width100p" ng-if="$root.window == 'small'">
+        <a ng-click="$parent.$parent.showTracks = true; $parent.$parent.showEvents = false"
+           ng-init="$parent.$parent.showTracks = true"
+           ng-class="{'active': $parent.$parent.showTracks == true}"
+           class="button column small-6">Tracks</a>
+        <a ng-click="$parent.$parent.showTracks = false; $parent.$parent.showEvents = true"
+           ng-class="{'active': $parent.$parent.showEvents == true}"
+           class="button column small-6">Events</a>
+    </div>
+    <div class="column large-4 float-left tracksContener padding0"
+         ng-class="{'eventInfo': $root.window != 'small'}"
+            ng-if="$root.window != 'small' || $parent.showTracks == true">
+        <div class="column large-12" ng-class="{'padding0': $root.window == 'small'}">
+            <h3 ng-if="$root.window != 'small'" class="column large-6">Tracks</h3>
+            <input class="column large-6 marginTop20" ng-if="tracks.length > 0 || trackTitle.length > 0"
+                   ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()" placeholder="filter tracks"/>
+            <div class="float-left column large-12 padding0">
+                <a class="button large-2 small-4 medium-3 column float-left"
+                   style="min-height: 40px; line-height: 40px;"
+                   ng-if="tracksFiltered.length > 0"
+                   ng-click="$root.addAndPlay(artiste.tracks, artiste)"
+                        ng-class="{'padding0': $root.window == 'small'}">
+                    <i class="fi-play"></i> Play all
+                </a>
+                <a class="button large-2 small-4 medium-3 column float-left"
+                   style="min-height: 40px; line-height: 40px;"
+                   ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0"
+                   ng-class="{'padding0': $root.window == 'small'}"
+                   ng-click="$root.addToPlaylist(artiste.tracks, artiste)">
+                    <i class="fi-plus"></i> Add all
+                </a>
+                <a class="button large-2 small-4 medium-3 column float-left"
+                   style="min-height: 40px; line-height: 40px;"
+                   ng-class="{'padding0': $root.window == 'small'}"
+                   ng-if="tracksFiltered.length > 0"
+                   ng-click="$parent.suggest = !$parent.suggest">
+                    Suggérer
+                </a>
                 <form ng-if="suggest" ng-submit="suggestQuery($parent.trackTitle, artiste.name, artiste.facebookUrl)">
-                    <input ng-model="$parent.trackTitle" ng-change="filterTracks()" placeholder="track title">
+                    <input ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()" placeholder="track title">
                     <input type="submit" class="button"/>
                 </form>
             </div>
@@ -54,7 +84,8 @@
         <div layout="row" layout-sm="column" layout-align="space-around" class="column" ng-if="$root.loadingTracks">
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
-        <div ng-if="artiste.tracks.length == 0 && trackTitle.length == 0 && !$root.loadingTracks" class="column large-12 text-center">
+        <div ng-if="artiste.tracks.length == 0 && trackTitle.length == 0 && !$root.loadingTracks"
+             class="column large-12 text-center">
             <b>Désolé, nous n'avons pour le moment aucune track pour cet artist.
                 <br/>Vous pouvez ici suggerer une track à ajouter</b><br/>
             <form ng-submit="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">
@@ -66,25 +97,33 @@
             <b>Désolé, nous n'avons pour le moment aucune track "{{trackTitle}}" pour cet artist.</b><br/>
             <a class="button" ng-click="suggestQuery(trackTitle, artiste.name, artiste.facebookUrl)">Suggérer la track {{trackTitle}}</a>
         </div>
-        <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit) track by $index" class="column paddingBottom10 medium-6" ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false}">
+        <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit) track by $index"
+             class="column paddingBottom10 medium-6"
+             ng-class="{'large-12': bigTracks == true, 'large-6': bigTracks == false, 'padding0': $root.window == 'small'}">
             <div class="column large-12 arTrack">
-                <div ng-if="track.thumbnailUrl != undefined" class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
+                <div ng-if="track.thumbnailUrl != undefined"
+                     class="img-circularPlayer"
+                     style="background-image: url('{{track.thumbnailUrl}}');"
+                        ng-class="{'padding0 margin0': $root.window == 'small'}">
                     <i class="fi-play playInImg" ng-click="$root.addToPlaylist([track], artiste)"></i>
                 </div>
-                <div class="column small-8">{{track.title}}</div>
-                <div>
+                <div ng-class="{'column large-8 small-9': $root.window != 'small'}">{{track.title}}</div>
+                <div ng-if="$root.window != 'small'">
                     <i class="fi-plus float-right" style="font-size: 26px;" ng-click="$root.addToPlaylist([track], artiste)"></i>
                     <i class="fi-play-circle float-right" style="font-size: 26px;" ng-click="$root.addAndPlay([track], artiste)"></i>
                 </div>
-                <a target="_blank" href="{{track.redirectUrl}}" class="column small-7" style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
-                    <i style="display: block" class="fi-soundcloud"></i>
+                <a target="_blank"
+                   href="{{track.redirectUrl}}"
+                   class="column small-7"
+                   style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
+                    <i style="display: block" ng-class="{'float-right': $root.window == 'small'}" class="fi-soundcloud"></i>
                 </a>
                 <a href="https://youtube.com/watch?v={{track.url}}"
                    class="column small-7"
                    style="font-size: 27px;"
                    ng-if="track.platform == 'Youtube'"
                    target="_blank">
-                    <i style="display: block" class="fi-social-youtube"></i>
+                    <i style="display: block" ng-class="{'float-right': $root.window == 'small'}" class="fi-social-youtube"></i>
                 </a>
             </div>
         </div>
@@ -93,8 +132,12 @@
             <button ng-if="trackLimit > 10 && trackTitle.length <= 1" ng-click="$parent.trackLimit = 10">Less tracks</button>
         </div>
     </div>
-    <ul id="events_contener" ng-if="$root.window == 'small' || $root.window == 'medium'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 small-block-grid-1 medium-block-grid-2 large-block-grid-4">
-        <li class="min_contener data-ng-event margin0" data-ng-repeat="event in artiste.events"></li>
+    <ul id="events_contener"
+        ng-if="$root.window == 'medium' || ($root.window == 'small' && $parent.showEvents == true)"
+        style="text-align: justify;"
+        class="descriptionContent column padding0 large-8 float-left margin0 small-block-grid-1 medium-block-grid-2 large-block-grid-4">
+        <li class="min_contener data-ng-event padding0 margin0" data-ng-repeat="event in artiste.events"></li>
+        <h3 ng-show="artiste.events.length == 0">Pas d'événements pour cet artisite pour le moments</h3>
     </ul>
 </div>
 

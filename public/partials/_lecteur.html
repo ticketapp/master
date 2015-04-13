@@ -84,13 +84,17 @@ margin-left: 5px;"
         </span>
     </div>
     <div class="float-left column large-2 padding0 small-4" style="height: 20px;">
-        <a target="_blank" href="{{trackActive.redirectUrl}}" style="font-size: 27px;" ng-if="trackActive.platform == 'Soundcloud'">
+        <a target="_blank" href="{{trackActive.redirectUrl}}"
+           style="font-size: 24px; height: 20px; padding-left: 5px"
+           class="float-left primCol"
+           ng-if="trackActive.platform == 'Soundcloud'">
             <i style="display: block; height:20px; width:35px;" class="fi-soundcloud float-left"></i>
         </a>
         <a href="https://youtube.com/watch?v={{trackActive.url}}"
-           style="font-size: 25px;"
+           style="font-size: 24px; height: 20px; padding-left: 5px"
            ng-if="trackActive.platform == 'Youtube'"
-           target="_blank">
+           target="_blank"
+                class="float-left primCol">
             <i style="display: block; margin-top: -7px; margin-right: 3px" class="fi-social-youtube float-left"></i>
         </a>
         <i ng-if="trackActive.platform == 'Youtube'"
