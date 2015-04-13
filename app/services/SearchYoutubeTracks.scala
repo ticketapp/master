@@ -1,6 +1,7 @@
 package services
 
 import models.{Artist, Track}
+import play.api.libs.iteratee.Enumerator
 import play.api.libs.ws.{WS, Response}
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -18,8 +19,7 @@ object SearchYoutubeTracks {
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Future[Set[Track]] =
     getMaybeEchonestIdByFacebookId(artist) flatMap {
       case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
-      case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
-    }
+      case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern) }
 
   def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Future[Set[Track]] = {
     val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksForArtist
@@ -177,7 +177,7 @@ object SearchYoutubeTracks {
       .flatMap { result =>
         val total = (result \ "response" \ "total").asOpt[Int]
         val songs = readEchonestSongs(result)
-        total exists (_ > start + 100) match {
+        total.exists(_ > start + 100) && start < 800 match {
           case false => Future.successful(songs)
           case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)
         }

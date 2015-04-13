@@ -157,6 +157,7 @@ object Artist {
 
   def save(artist: Artist): Option[Long] = try {
     DB.withConnection { implicit connection =>
+      val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
       SQL(
         """SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
         .on(
@@ -165,7 +166,7 @@ object Artist {
           'imagePath -> artist.imagePath,
           'facebookUrl -> artist.facebookUrl,
           'description -> artist.description,
-          'websites -> artist.websites.mkString(","))
+          'websites -> websites)
         .as(scalar[Option[Long]].single) match {
           case Some(artistId: Long) =>
             artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
@@ -178,8 +179,19 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
   }
 
-  def addWebsite(artistId: Option[Long], normalizedUrl: String) = {
-
+  def addWebsite(artistId: Option[Long], normalizedUrl: String): Int = {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """UPDATE artists
+          |  SET websites = case
+          |    WHEN websites IS NULL THEN {normalizedUrl}
+          |    ELSE websites || ',' || {normalizedUrl}
+          |  END
+          |WHERE artistId = {artistId}""".stripMargin)
+        .on('artistId -> artistId,
+            'normalizedUrl -> normalizedUrl)
+        .executeUpdate()
+    }
   }
 
   def saveWithEventRelation(artist: Artist, eventId: Long): Boolean = save(artist) match {
@@ -253,8 +265,6 @@ object Artist {
   }
 
   def isArtistFollowed(userId: IdentityId, artistId: Long): Boolean = try {
-    println(userId.userId)
-    println(artistId)
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM artistsFollowed

@@ -113,7 +113,6 @@ object Scheduler {
   def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
     artists.map { artist =>
       val artistWithId = artist.copy(artistId = Artist.save(artist))
-      //getSoundCloudTracks => if soundcloud not in websites => post addArtistWebsite (add controller, route and model)
       getSoundCloudTracksForArtist(artistWithId).map { tracks =>
         addSoundCloudWebsiteIfNotInWebsites(tracks.headOption, artistWithId)
         tracks.map { Track.save }
@@ -160,13 +159,13 @@ object Scheduler {
         if (matcher.toString contains "@")
           "<i>" + matcher + "</i>"
         else
-          "<a href='http://" + matcher + "'>" + matcher + "</a>"
+          """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) + """</a>"""
       Option("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m => stringToLinks(m))
               .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
               .replaceAll( """\n""", "<br/>")
-              .replaceAll( """\t""", "    ")
-              .replaceAll( """</a>/""", "</a> ") +
+              .replaceAll( """\t""", "    ") +
+              //.replaceAll( """</a>/""", "</a> ") +
               "</div>")
   }
 
