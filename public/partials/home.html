@@ -32,6 +32,27 @@
          scrollwheel="false"
          disable-default-u-i="true"
          style="height: 100%"
+         styles="[
+                 {
+                     stylers:[
+                         {hue:'#00654C'},
+                         {visibility:'simplified'},
+                         {gamma:0.5},
+                         {weight:0.5}
+                     ]
+                 },
+                 {
+                    elementType:'labels',
+                    stylers:[
+                        {visibility:'off'}
+                    ]
+                },
+                {featureType:'water',
+                    stylers:[
+                        {color:'#008CBA'}
+                    ]
+                }
+            ]"
          class="width100p">
         <!--<marker ng-repeat="(id, ev) in events"
                 visible="true"

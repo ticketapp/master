@@ -4,7 +4,7 @@
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
         <p>le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places"> {{ place.name }}</a></p>
-        <h2 id="eventTitle" class="column large-10" style="margin-top:0">{{event.name}}</h2>
+        <h2 id="eventTitle" class="column large-10 padding0" style="margin-top:0">{{event.name}}</h2>
         <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
     </div>
     <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
@@ -34,7 +34,10 @@
     event.ticketSellers != undefined">
         <h2>Tarifs</h2>
         <h3 class="float-left">{{event.tariffRange}}</h3>
-        <a href="http://www.{{event.ticketSellers}}" class="button float-right" target="_blank">Acheter des places sur {{event.ticketPlatform}}</a>
+        <a ng-if="event.ticketSellers != undefined"
+           href="http://www.{{event.ticketSellers}}"
+           class="button float-right"
+           target="_blank">Acheter des places sur {{event.ticketPlatform}}</a>
     </div>
     <div class="column large-4 float-left eventInfo" ng-if="event.artists.length > 0">
         <h2>Programmation</h2>
@@ -68,30 +71,90 @@
         </div>
     </div>
     <div class="column large-4 float-left eventInfo padding0">
-        <div class="column large-4 absolute" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); margin-left: 5px; margin-top: 5px; z-index: 1;" ng-if="adresses">
-            <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places"><h4>{{place.name}}</h4></a>
-            <div style="font-size: 12px;">
+        <div class="column large-12 zIndex1 absolute" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4)" ng-if="adresses">
+            <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places" class="column large-12">
+                <b>{{place.name}}</b>
+            </a>
+            <div style="font-size: 12px;" class="column large-5">
                 {{event.addresses[0].street}}<br/>
                 {{event.addresses[0].zip}}
                 {{event.addresses[0].city}}
             </div>
-            <a class="button" ng-click="moreZoom()">+</a>
-            <a class="button" ng-click="lessZoom()">-</a>
+            <div class="column large-7">
+                <a class="button mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
+                <a class="button mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
+                <a class="button mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
+                    <i class="fi-map"></i>
+                </a>
+                <a>
+                    {{directionInfos.routes[0].legs[0].distance.text}}
+                    {{directionInfos.routes[0].legs[0].duration.text}}
+                </a>
+                <span ng-if="selectTravel" class="width100p float-left ">
+                    {{$root.infoDirection}}
+                    <a class="button mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
+                       ng-click="changeTravelMode('WALKING')">
+                        Walking
+                    </a>
+                    <a class="button mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
+                     ng-click="changeTravelMode('BICYCLING')">
+                        Bicycle
+                    </a>
+                    <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
+                       ng-click="changeTravelMode('TRANSIT')">
+                        Transit
+                    </a>-->
+                    <a class="button mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
+                       ng-click="changeTravelMode('DRIVING')">
+                        Drive
+                    </a>
+                </span>
+            </div>
         </div>
         <map ng-if="map && adresses"
              zoom="{{zoom}}"
              center="[{{event.addresses[0].geographicPoint}}]"
              scrollwheel="false"
              navigationControl="false"
+             disable-default-u-i="true"
              mapTypeControl="false"
              scaleControl="false"
+             styles="[
+                 {
+                     stylers:[
+                         {hue:'#00654C'},
+                         {visibility:'simplified'},
+                         {gamma:0.5},
+                         {weight:0.5}
+                     ]
+                 },
+                 {
+                    elementType:'labels',
+                    stylers:[
+                        {visibility:'off'}
+                    ]
+                },
+                {featureType:'water',
+                    stylers:[
+                        {color:'#008CBA'}
+                    ]
+                }
+            ]"
              style="height: 300px"
              class="width100p">
-            <marker visible="true" position="{{event.addresses[0].geographicPoint}}" icon="../assets/img/marker.png">
+            <directions
+                draggable="true"
+                panel="directions-panel"
+                travel-mode="{{travelMode}}"
+                origin="{{start}}"
+                destination="{{event.addresses[0].geographicPoint}}">
+             </directions>
+            <marker visible="true" position="{{event.addresses[0].geographicPoint}}" >
             </marker>
+            <transit-layer></transit-layer>
         </map>
     </div>
-    <div ng-if="$root.window == 'small' || $root.window == 'medium'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
+    <div ng-if="$root.window == 'small' || $root.window == 'medium'" class="descriptionContent float-left" style="text-align: justify;">
         <div ng-bind-html="event.description"></div>
     </div>
 </div>

@@ -33,7 +33,7 @@ app.directive('ngSearch', function(){
                     positionElementInPage = $(element).find('#searchBar').offset().top;
                     flag = true;
                     }
-                    if ($(window).scrollTop()>= positionElementInPage - 60) {
+                    if ($(window).scrollTop()>= positionElementInPage - 10) {
                         // fixed
                         $(element).find('#searchBlock').addClass("hiddenBlock");
                         $(document).find('#searchTopBlock').removeClass("hiddenBlock");
