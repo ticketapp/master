@@ -379,7 +379,7 @@ top: 0;
 .as-sortable-placeholder {
     display: inline-block;
     width: 124px;
-    height: 110px;
+    max-height: 110px;
     float: left;
 }
 

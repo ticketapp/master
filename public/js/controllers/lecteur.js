@@ -1,4 +1,5 @@
-app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', function ($scope, $rootScope, $timeout, $http, Angularytics){
+app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', '$modal',
+    function ($scope, $rootScope, $timeout, $http, Angularytics, $modal){
     $rootScope.playlist = [];
     $rootScope.playlist.name = "";
     $rootScope.playlist.genres = [];
@@ -22,24 +23,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     var played = [];
     var artNames = [];
     var i = 0;
-    $scope.createNewPlaylist = function (playlist) {
-        var tracksToSave = [];
-        console.log(playlist)
-        for (var i=0; i < playlist.tracks.length; i++) {
-            tracksToSave.push({trackId: playlist.tracks[i].trackId})
-        }
-        console.log(tracksToSave);
-        $http.post('/playlists/create', {name: playlist.name, tracksId: tracksToSave}).
-            success(function (data) {
-                console.log(data)
-            }).
-            error(function (data) {
-                console.log(data)
-                if (data.error == 'Credentials required') {
-                    var object = {name: playlist.name, tracksId: tracksToSave};
-                    $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist "' + playlist.name + '" est enregistée')
-                }
-            })
+    $scope.savePlaylist = function () {
+        console.log('ui')
+        var modalInstance = $modal.open({
+            templateUrl: 'assets/partials/_savePlaylistForm.html',
+            controller: 'savePlaylistCtrl'
+        });
+        modalInstance.result.then( function () {
+        });
     };
     $rootScope.deletePlaylist = function (playlistId) {
         $http.delete('/playlists/' + playlistId).
@@ -470,3 +461,27 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         )
     }*/
 }]);
+app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance, $http) {
+    $scope.createNewPlaylist = function (playlist) {
+        var tracksToSave = [];
+        console.log(playlist)
+        for (var i=0; i < playlist.tracks.length; i++) {
+            tracksToSave.push({trackId: playlist.tracks[i].trackId})
+        }
+        console.log(tracksToSave);
+        $http.post('/playlists/create', {name: playlist.name, tracksId: tracksToSave}).
+            success(function (data) {
+                console.log(data)
+            }).
+            error(function (data) {
+                console.log(data)
+                if (data.error == 'Credentials required') {
+                    var object = {name: playlist.name, tracksId: tracksToSave};
+                    $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist "' + playlist.name + '" est enregistée')
+                }
+            })
+    };
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+});
