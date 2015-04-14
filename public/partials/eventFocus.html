@@ -3,9 +3,9 @@
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
-        <p>le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places"> {{ place.name }}</a></p>
-        <h2 id="eventTitle" class="column large-10 padding0" style="margin-top:0">{{event.name}}</h2>
+        <p class="column large-10 padding0">le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places"> {{ place.name }}</a></p>
         <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
+        <h2 id="eventTitle" class="column padding0" style="margin-top:0">{{event.name}}</h2>
     </div>
     <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" class="descriptionContent column large-8 float-left" style="text-align: justify;">
         <div ng-bind-html="event.description" id="eventDescBind"></div>
@@ -41,14 +41,20 @@
     </div>
     <div class="column large-4 float-left eventInfo" ng-if="event.artists.length > 0">
         <h2>Programmation</h2>
-        <li ng-repeat="artist in event.artists" style="display: block;">
-            <a href="#/artiste/{{artist.facebookUrl}}">{{artist.name}}</a>
+        <li ng-repeat="artist in event.artists"
+            style="display: block;
+            background-image: url('{{artist.imagePath}}');
+            background-size: 100%"
+            class="float-left width100p padding10">
+            <a class="float-left" href="#/artiste/{{artist.facebookUrl}}">
+                <h2 style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5); color: white;">{{artist.name}}</h2>
+            </a>
             <i ng-if="artist.tracks.length > 0"
                ng-click="$root.addAndPlay(artist.tracks, artist)"
-               class="fi-play-circle float-right"><a>PlayAll</a></i>
-            <i ng-if="artist.tracks.length > 0"
+               class="fi-play button float-right marginTop10"></i>
+            <i ng-if="artist.tracks.length > 0 && $root.playlist.tracks.length > 0"
                ng-click="$root.addToPlaylist(artist.tracks, artist)"
-               class="fi-plus float-right"><a>addAll</a></i>
+               class="fi-plus button float-right marginTop10"></i>
         </li>
     </div>
     <div class="column large-4 float-left eventInfo" >

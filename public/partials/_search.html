@@ -28,9 +28,9 @@
                 </div>
                 <div class=" textArtistMin" style="height: 30px">
                     <a href="#/artiste/{{artist.facebookUrl}}">
-                        <h4 style="margin-bottom: 0;">
+                        <h3 style="margin-bottom: 0;">
                         {{ artist.name }}
-                        </h4>
+                        </h3>
                     </a>
                     <a ng-if="filterType == 'genre'"
                        ng-repeat="genre in filteredEntries = (artist.genres | filter: filterQuery)"
@@ -52,11 +52,11 @@
                              alt="une belle image" class="min pointer"/>
                     </div>
                 </div>
-                <div class=" textArtistMin" style="height: 30px">
+                <div class="textArtistMin" style="height: 30px">
                     <a ng-click="createArtist(artist)">
-                        <h4 style="margin-bottom: 0;">
+                        <h3 style="margin-bottom: 0;">
                             {{ artist.name }}
-                        </h4>
+                        </h3>
                     </a>
                     <i ng-show="artist.tracks.length > 0" class="fi-play-circle"
                        style="font-size: 26px;"
@@ -72,7 +72,9 @@
         <div layout="row" layout-sm="column" layout-align="space-around" class="float-left" ng-if="loadingFbArt">
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
-        <li class="min_contener margin0" ng-if="$root.activPlace && places.length > 0"
+        <div class="column large-4 medium-6 float-left margin0"
+            ng-if="$root.activPlace && places.length > 0"
+            style="padding-bottom: 10px;"
             data-ng-repeat="place in places" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
@@ -98,12 +100,12 @@
                         </a>
                     </div>
                 </div>
-                <div class=" text_evnt_min" >
-                    <a ng-if="place.placeId != -1" href="#/lieu/{{place.placeId}}"><h4>{{ place.name }}</h4></a>
-                    <a ng-if="place.placeId == -1" ng-click="createNewPlace(place)"><h4>{{ place.name }}</h4></a>
+                <div class="textArtistMin" style="height: 30px" >
+                    <a ng-if="place.placeId != -1" href="#/lieu/{{place.placeId}}"><h3>{{ place.name }}</h3></a>
+                    <a ng-if="place.placeId == -1" ng-click="createNewPlace(place)"><h3>{{ place.name }}</h3></a>
                 </div>
             </div>
-        </li>
+        </div>
         <li class="min_contener margin0" ng-if="$root.activUsr && users.length > 0"
             data-ng-repeat="user in users">
             <div class="block_event_min">

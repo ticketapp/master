@@ -17,9 +17,9 @@
                     {{event.addresses[0].city}}
                 </div>
                 <div class="column large-7">
-                    <a class="button mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
-                    <a class="button mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
-                    <a class="button mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
+                    <a class=" mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
+                    <a class=" mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
+                    <a class=" mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
                         <i class="fi-map"></i>
                     </a>
                     <a>
@@ -28,11 +28,11 @@
                     </a>
                 <span ng-if="selectTravel" class="width100p float-left ">
                     {{$root.infoDirection}}
-                    <a class="button mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
+                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
                        ng-click="changeTravelMode('WALKING')">
                         Walking
                     </a>
-                    <a class="button mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
+                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
                        ng-click="changeTravelMode('BICYCLING')">
                         Bicycle
                     </a>
@@ -40,7 +40,7 @@
                        ng-click="changeTravelMode('TRANSIT')">
                         Transit
                     </a>-->
-                    <a class="button mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
+                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
                        ng-click="changeTravelMode('DRIVING')">
                         Drive
                     </a>

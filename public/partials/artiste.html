@@ -54,21 +54,21 @@
             <input class="column large-6 marginTop20" ng-if="tracks.length > 0 || trackTitle.length > 0"
                    ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()" placeholder="filter tracks"/>
             <div class="float-left column large-12 padding0">
-                <a class="button large-2 small-4 medium-3 column float-left"
+                <a class="button large-2 small-4 medium-3 column float-left padding0"
                    style="min-height: 40px; line-height: 40px;"
                    ng-if="tracksFiltered.length > 0"
                    ng-click="$root.addAndPlay(artiste.tracks, artiste)"
                         ng-class="{'padding0': $root.window == 'small'}">
                     <i class="fi-play"></i> Play all
                 </a>
-                <a class="button large-2 small-4 medium-3 column float-left"
+                <a class="button large-2 small-4 medium-3 column float-left padding0"
                    style="min-height: 40px; line-height: 40px;"
                    ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0"
                    ng-class="{'padding0': $root.window == 'small'}"
                    ng-click="$root.addToPlaylist(artiste.tracks, artiste)">
                     <i class="fi-plus"></i> Add all
                 </a>
-                <a class="button large-2 small-4 medium-3 column float-left"
+                <a class="button large-2 small-4 medium-3 column float-left padding0"
                    style="min-height: 40px; line-height: 40px;"
                    ng-class="{'padding0': $root.window == 'small'}"
                    ng-if="tracksFiltered.length > 0"
@@ -107,7 +107,7 @@
                         ng-class="{'padding0 margin0': $root.window == 'small'}">
                     <i class="fi-play playInImg" ng-click="$root.addToPlaylist([track], artiste)"></i>
                 </div>
-                <div ng-class="{'column large-8 small-9': $root.window != 'small'}">{{track.title}}</div>
+                <div ng-class="{'column large-8 small-9': $root.window != 'small'}" style="overflow: hidden; height: 48px;">{{track.title}}</div>
                 <div ng-if="$root.window != 'small'">
                     <i class="fi-plus float-right" style="font-size: 26px;" ng-click="$root.addToPlaylist([track], artiste)"></i>
                     <i class="fi-play-circle float-right" style="font-size: 26px;" ng-click="$root.addAndPlay([track], artiste)"></i>

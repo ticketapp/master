@@ -15,6 +15,7 @@
     .primCol > a {color : #ffffff}
     /*.primCol:hover {background: #007095}*/
     .white {background: #ffffff}
+    .active{background: #007095}
 /*z-index*/
     .zIndex1{z-index:1;}
     .zIndex2{z-index:2;}
