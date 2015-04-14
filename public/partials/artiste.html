@@ -25,8 +25,8 @@
             </a>
         </h2>
     </div>
-    <ul id="events_contener" ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0 large-block-grid-2">
-        <li class="min_contener data-ng-event margin0" data-ng-repeat="event in artiste.events"></li>
+    <ul id="events_contener" ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'" style="text-align: justify;" class="descriptionContent column large-8 float-left margin0">
+        <div class="min_contener data-ng-event margin0 column large-6 float-left" data-ng-repeat="event in artiste.events"></div>
     </ul>
     <div ng-if="artiste.description.length > 0" class="column large-4 float-left eventInfo" >
         <h3>{{artiste.name}}</h3>
@@ -72,10 +72,12 @@
                    style="min-height: 40px; line-height: 40px;"
                    ng-class="{'padding0': $root.window == 'small'}"
                    ng-if="tracksFiltered.length > 0"
-                   ng-click="$parent.suggest = !$parent.suggest">
+                   ng-click="$parent.$parent.suggest = !$parent.$parent.suggest">
                     Suggérer
                 </a>
-                <form ng-if="suggest" ng-submit="suggestQuery($parent.trackTitle, artiste.name, artiste.facebookUrl)">
+                <form ng-if="$parent.suggest"
+                      ng-submit="suggestQuery($parent.trackTitle, artiste.name, artiste.facebookUrl)"
+                        class="column large-12">
                     <input ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()" placeholder="track title">
                     <input type="submit" class="button"/>
                 </form>

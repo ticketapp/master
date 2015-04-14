@@ -14,7 +14,7 @@
         </a>
         <span class="dropDown" data-ng-repeat="organizer in event.organizers">
             Par
-            <a href="#/user/{{organizer.organizerId}}">{{organizer.name}} </a>
+            <a href="#/user/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}} </a>
             <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
                 <div>
                     <div style='height:112.8px; overflow:hidden;'>
@@ -36,7 +36,22 @@
             <i class="icon-calendar"></i>{{ event.endTime | date:'dd/MM' }}
             <i class="icon-time"></i> {{ event.endTime | date:'HH:mm' }} <br/>
             <i class="icon-map-marker"></i>
-            <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a>
+            <span class="dropDown" data-ng-repeat="place in event.places">
+            @
+            <a href="#/lieu/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+            <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
+                <div>
+                    <div style='height:112.8px; overflow:hidden;'>
+                        <a href="#/lieu/{{ place.placeId }}" >
+                            <img src="{{ place.imagePath }}" ng-if="place.imagePath.length > 0"/>
+                        </a>
+                    </div>
+                    <a href="#/lieu/{{ place.placeId }}">
+                        <h4 class='column large-6'>{{ place.name}}</h4>
+                    </a>
+                    <button style='margin-top:5px; float:right'>Suivre</button>
+                </div>
+            </ul>
         </div>
         <br/>
         <div class="description_event_min">

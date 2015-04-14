@@ -1,4 +1,4 @@
-<div class="column large-12">
+<div class="column large-12" ng-if="$root.connected == false">
     <a ng-click="connectLink('http://localhost:9000/authenticate/facebook')"> <img src="/assets/securesocial/images/providers/facebook.png"></a>
     <a ng-click="connectLink('http://localhost:9000/authenticate/google')"> <img src="/assets/securesocial/images/providers/google.png"></a>
     <a ng-click="authMail = !authMail">Auth by mail</a>
@@ -45,3 +45,4 @@
         </div>
     </fieldset>
 </form>
+<h2  ng-if="$root.connected == true">Vous êtes connecté</h2>

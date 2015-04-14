@@ -12,7 +12,18 @@
     <div ng-if="viewPlaylists">
         <ul ng-repeat="playlist in playlists">
             <a ng-click="$root.loadPlaylist(playlist)">{{playlist.name}}</a>
-            <a ng-click="$root.deletePlaylist(playlist.playlistId)" class="float-right">delete playlist</a>
+            <a ng-click="confirmDelete = !confirmDelete" class="float-right">supprimer la playlist</a>
+            <div class="column large-12" ng-show="confirmDelete">
+                Etes vous sur de vouloir supprimer la playlist "{{playlist.name}}" ?
+                <a class="button"
+                   ng-click="$root.deletePlaylist(playlist.playlistId); confirmDelete = false">
+                    Supprimer
+                </a>
+                <a class="button"
+                   ng-click="confirmDelete = false">
+                    Annuler
+               </a>
+            </div>
         </ul>
         <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
         <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>

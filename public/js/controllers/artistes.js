@@ -6,6 +6,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $scope.allDesc = false;
     $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
         console.log(trackTitle, artistName);
+        $scope.suggest = false;
         if (trackTitle.length >= 2) {
             artistName = artistName.toLowerCase().replace('officiel', '');
             artistName = artistName.toLowerCase().replace('official', '');
@@ -20,6 +21,9 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                     for (var i = 0; i < data.length; i++) {
                         $scope.artiste.tracks.push(data[i]);
                         $scope.tracks.push(data[i])
+                    }
+                    if (data.length == 0) {
+                        alert('Nous n\'avons pas trouvé' + trackTitle)
                     }
                 }).
                 error(function (data) {
