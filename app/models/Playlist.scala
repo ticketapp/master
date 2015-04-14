@@ -1,8 +1,10 @@
 package models
 
+import java.sql.Connection
+
 import anorm.SqlParser._
 import anorm._
-import controllers.DAOException
+import controllers.{PlaylistDoesNotExistException, DAOException}
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -63,14 +65,22 @@ object Playlist {
   //and do the same verifications for adding and removing tracks
   def delete(userId: String, playlistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
-      val booleanExecute = SQL(
-        """DELETE FROM playlists
-          | WHERE userId = {userId}
-          | AND playlistId = {playlistId}""".stripMargin)
-        .on('playlistId -> playlistId)
-        .execute()
-      println(booleanExecute)
-      booleanExecute
+      println(userId)
+      println(playlistId)
+      if (existsPlaylistForUser(userId, playlistId)) {
+        SQL(
+          """DELETE FROM playlistsTracks
+            | WHERE playlistId = {playlistId};
+            |DELETE FROM playlists
+            | WHERE userId = {userId}
+            | AND playlistId = {playlistId}""".stripMargin)
+          .on(
+            'userId -> userId,
+            'playlistId -> playlistId)
+          .execute()
+      } else {
+        throw new PlaylistDoesNotExistException("There is no playlist for this user Id and this playlist Id.")
+      }
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.delete: " + e.getMessage)
@@ -83,15 +93,13 @@ object Playlist {
     Option((playlistIdAndTracksId.id, playlistIdAndTracksId.tracksId))
 
 
-  def existsPlaylistForUser(userId: String, playlistId: Long): Boolean = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT exists(SELECT 1 FROM playlists
-          |  WHERE userId = {userId} AND playlistId = {playlistId})""".stripMargin)
-        .on("userId" -> userId,
-          "playlistId" -> playlistId)
-        .as(scalar[Boolean].single)
-    }
+  def existsPlaylistForUser(userId: String, playlistId: Long)(implicit connection: Connection): Boolean = try {
+    SQL(
+      """SELECT exists(SELECT 1 FROM playlists
+        |  WHERE userId = {userId} AND playlistId = {playlistId})""".stripMargin)
+      .on("userId" -> userId,
+        "playlistId" -> playlistId)
+      .as(scalar[Boolean].single)
   } catch {
     case e: Exception => throw new DAOException("Artist.isArtistFollowed: " + e.getMessage)
   }

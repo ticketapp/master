@@ -53,11 +53,11 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       },
       playlistIdAndTracksId => {
         val userId = request.user.identityId.userId
-        if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
+        //if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
           Future { Playlist.addTracksInPlaylist(userId, playlistIdAndTracksId) }
           Ok
-        } else
-          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))
+        /*} else
+          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))*/
       }
     )
   }
@@ -70,19 +70,16 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       },
       playlistIdAndTracksId => {
         val userId = request.user.identityId.userId
-        if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
+        //if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
           Future { Playlist.deleteTracksInPlaylist(userId, playlistIdAndTracksId) }
           Ok
-        } else
-          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))
+        /*} else
+          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))*/
       }
     )
   }
 
   def delete(playlistId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    if(existsPlaylistForUser(request.user.identityId.userId, playlistId))
-      Ok(Json.toJson(Playlist.delete(request.user.identityId.userId, playlistId)))
-    else
-      Ok(Json.toJson("There is no playlist with this playlist Id for this user"))
+    Ok(Json.toJson(Playlist.delete(request.user.identityId.userId, playlistId)))
   }
 }

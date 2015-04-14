@@ -70,7 +70,7 @@ object Organizer {
         .map(getOrganizerProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Method organizer.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Organizer.findAll: " + e.getMessage)
   }
 
   def find(organizerId: Long): Option[Organizer] = try {
@@ -96,10 +96,16 @@ object Organizer {
   }
 
   def save(organizer: Organizer): Option[Long] = try {
+    println(organizer.phone)
     DB.withConnection { implicit connection =>
+      val placeIdWithSameFacebookId = SQL(
+        """SELECT organizerId FROM organizers
+          | WHERE facebookId = {facebookId}""".stripMargin)
+        .on("facebookId" -> organizer.facebookId)
+        .as(scalar[Long].singleOpt)
       SQL(
         """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {publicTransit}, {websites},
-          |{imagePath})""".stripMargin)
+          |{imagePath}, {placeId})""".stripMargin)
         .on(
           'facebookId -> organizer.facebookId,
           'name -> organizer.name,
@@ -107,7 +113,8 @@ object Organizer {
           'phone -> organizer.phone,
           'publicTransit -> organizer.publicTransit,
           'websites -> organizer.websites,
-          'imagePath -> organizer.imagePath)
+          'imagePath -> organizer.imagePath,
+          'placeId -> placeIdWithSameFacebookId)
         .as(scalar[Option[Long]].single)
     }
   } catch {

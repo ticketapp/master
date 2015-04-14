@@ -54,9 +54,14 @@ object Place {
         case None => None
         case Some(address: Address) => Some(address.addressId)
       }
+      val organizerIdWithSameFacebookId = SQL(
+        """SELECT placeId FROM places
+          | WHERE facebookId = {facebookId}""".stripMargin)
+        .on("facebookId" -> place.facebookId)
+        .as(scalar[Long].singleOpt)
       SQL(
         s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
-           |{webSites}, {capacity}, {openingHours}, {imagePath})""".stripMargin)
+           |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
         .on(
           'name -> place.name,
           'addressId -> addressId,
@@ -66,7 +71,8 @@ object Place {
           'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
           'capacity -> place.capacity,
           'openingHours -> place.openingHours,
-          'imagePath -> place.imagePath)
+          'imagePath -> place.imagePath,
+          'organizerId -> organizerIdWithSameFacebookId)
         .as(scalar[Option[Long]].single)
     }
   } catch {
