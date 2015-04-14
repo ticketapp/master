@@ -184,16 +184,24 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             scopeIdList.push(el.eventId);
                         }
                         $scope.events.forEach(getEventId);
-                        if ($scope.events.length == 0) {
-                            $scope.events = data;
-                        } else {
-                            function uploadEvents(el, index, array) {
-                                if (scopeIdList.indexOf(el.eventId) == -1) {
-                                    $scope.events.push(el);
+                        function uploadEvents(el, index, array) {
+                            if (scopeIdList.indexOf(el.eventId) == -1) {
+                                el.priceColor = 'rgb(0, 140, 186)';
+                                if (el.tariffRange != undefined) {
+                                    var tariffs = el.tariffRange.split('-');
+                                    if (tariffs[1] > tariffs[0]) {
+                                        el.tariffRange = tariffs[0].replace('.0', '') + '€ - ' +
+                                            tariffs[1].replace('.0', '') + '€';
+                                    } else {
+                                        el.tariffRange = tariffs[0].replace('.0', '') + '€';
+                                    }
+                                    el.priceColor = 'rgb(' + tariffs[0]*10 + ',' + (250 - (tariffs[0]*10 ) )+
+                                        ',' + (175 - (tariffs[0]*10 )) + ')'
                                 }
+                                $scope.events.push(el);
                             }
-                            data.forEach(uploadEvents)
                         }
+                        data.forEach(uploadEvents)
                         console.log($scope.events)
                         $rootScope.resizeImgHeight();
                         $scope.loadingMore = false;
@@ -369,6 +377,15 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                     $scope.events.forEach(getEventsId);
                                 });
                                 if ($scope.scopeIdList.indexOf(el.eventId) == -1) {
+                                    if (el.tariffRange != undefined) {
+                                        var tariffs = el.tariffRange.split('-');
+                                        if (tariffs[1] > tariffs[0]) {
+                                            el.tariffRange = tariffs[0].replace('.0', '') +
+                                                '€ - ' + tariffs[1].replace('.0', '') + '€';
+                                        } else {
+                                            el.tariffRange = tariffs[0].replace('.0', '') + '€';
+                                        }
+                                    }
                                     $scope.events.push(el);
                                     $scope.scopeIdList.push(el.eventId);
                                     console.log($scope.scopeIdList)
