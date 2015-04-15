@@ -44,52 +44,23 @@
                         <a href="#/lieu/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
                     </b>
                     <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
-                        <div>
-                            <div style='height:112.8px; overflow:hidden;'>
-                                <a href="#/lieu/{{ place.placeId }}" >
-                                    <img src="{{ place.imagePath }}" ng-if="place.imagePath.length > 0"/>
-                                    <map ng-if="place.imagePath.length == 0 ||
-                                    place.imagePath == undefined && showMap"
-                                         zoom="14"
-                                         center="[{{place.geographicPoint}}]"
-                                         scrollwheel="false"
-                                         navigationControl="false"
-                                         mapTypeControl="false"
-                                         scaleControl="false"
-                                         styles="[
-                                     {
-                                         stylers:[
-                                             {hue:'#00654C'},
-                                             {visibility:'simplified'},
-                                             {gamma:0.5},
-                                             {weight:0.5}
-                                         ]
-                                     },
-                                     {
-                                        elementType:'labels',
-                                        stylers:[
-                                            {visibility:'off'}
-                                        ]
-                                    },
-                                    {featureType:'water',
-                                        stylers:[
-                                            {color:'#008CBA'}
-                                        ]
-                                    }
-                                ]"
-                                         class="width100p img_min_evnt">
-                                        <marker visible="true" position="{{place.geographicPoint}}">
-                                        </marker>
-                                    </map>
-                                </a>
-                            </div>
-                            <b>
-                                <a href="#/lieu/{{ place.placeId }}">
-                                    <h3 class='column large-6'>{{ place.name}}</h3>
-                                </a>
-                            </b>
+                        <li style="display: block;"
+                            class="float-left width100p paddingTop10 paddingBottom10
+                            paddingRight10 marginBottom10 relative">
+                            <a href="#/user/{{place.placeId}}"
+                               class="absolute width100p height100p imgBlur"
+                               style="display: block;
+                                    background-image: url('{{place.imagePath}}');
+                                    background-size: 100%"></a>
+                            <a class="float-left relative" href="#/user/{{place.organizerId}}">
+                                <h1 class="margin0"
+                                    style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);
+                                    color: {{event.priceColor}};">
+                                    {{place.name}}
+                                </h1>
+                            </a>
                             <button style='margin-top:5px; float:right'>Suivre</button>
-                        </div>
+                        </li>
                     </ul>
                 </span>
             </div>
@@ -101,19 +72,23 @@
                         <a href="#/user/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}} </a>
                     </b>
                     <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
-                        <div>
-                            <div style='height:112.8px; overflow:hidden;'>
-                                <a href='#/user/{{organizer.organizerId}}'>
-                                    <img src='{{ organizer.imagePath }}'/>
-                                </a>
-                            </div>
-                            <b>
-                                <a href='#/user/{{organizer.organizerId}}'>
-                                    <h3 class='column large-6'>{{organizer.name}}</h3>
-                                </a>
-                            </b>
+                        <li style="display: block;"
+                            class="float-left width100p paddingTop10 paddingBottom10
+                            paddingRight10 marginBottom10 relative">
+                            <a href="#/user/{{organizer.organizerId}}"
+                               class="absolute width100p height100p imgBlur"
+                               style="display: block;
+                                    background-image: url('{{organizer.imagePath}}');
+                                    background-size: 100%"></a>
+                            <a class="float-left relative" href="#/user/{{organizer.organizerId}}">
+                                <h1 class="margin0"
+                                    style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);
+                                    color: {{event.priceColor}};">
+                                    {{organizer.name}}
+                                </h1>
+                            </a>
                             <button style='margin-top:5px; float:right'>Suivre</button>
-                        </div>
+                        </li>
                     </ul>
                 </span>
             </div>
@@ -134,11 +109,12 @@
                         ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <li style="display: block;"
                             class="float-left width100p paddingTop10 paddingBottom10 paddingRight10 marginBottom10 relative">
-                            <a href="#/artiste/{{artist.facebookUrl}}" class="absolute width100p height100p"
+                            <a href="#/artiste/{{artist.facebookUrl}}" class="absolute width100p height100p imgBlur"
                                style="display: block;
-                  -webkit-filter: sepia(0.5) blur(2px);
-            background-image: url('{{artist.imagePath}}');
-            background-size: 100%"></a>
+                                background-image: url('{{artist.imagePath}}');
+                                background-size: 100%">
+
+                            </a>
                             <a class="float-left relative" href="#/artiste/{{artist.facebookUrl}}">
                                 <h1 class="margin0"
                                     style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);

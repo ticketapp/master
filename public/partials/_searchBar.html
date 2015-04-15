@@ -54,7 +54,9 @@
        ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">
     Users
 </label>
-<div class="column large-12 padding0"  ng-if="$root.activEvent">
+<div class="column large-12 padding0"
+     ng-if="$root.activEvent &&
+     (searchPat == undefined || searchPat.length == 0)">
     <md-slider flex ng-change="$root.selStart($root.maxStart)"
                ng-model="$root.maxStart" min="1" max="51" step="1"
                aria-label="volume"

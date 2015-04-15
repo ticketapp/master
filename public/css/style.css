@@ -188,6 +188,12 @@ md-toast{position: fixed!important;}
 .f-dropdown:hover {
     opacity: 1;
 }
+.imgBlur {
+    -webkit-filter: sepia(0.5) blur(2px);
+    -moz-filter: sepia(0.5) blur(2px);
+    -ms-filter: sepia(0.5) blur(2px);
+    -o-filter: sepia(0.5) blur(2px);
+}
 .eventInfo {box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;}
 .pages_contain{margin-right:auto; margin-left:auto; width:99%;}
 .wrapper-outer {width: 100%; color:black; padding-bottom: 200px;}

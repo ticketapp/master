@@ -44,11 +44,11 @@
         <li ng-repeat="artist in event.artists"
             style="display: block;"
             class="float-left width100p paddingTop10 paddingBottom10 paddingRight10 marginBottom10 relative">
-            <a href="#/artiste/{{artist.facebookUrl}}" class="absolute width100p height100p"
+            <a href="#/artiste/{{artist.facebookUrl}}" class="absolute width100p height100p imgBlur"
                   style="display: block;
-                  -webkit-filter: sepia(0.5) blur(2px);
-            background-image: url('{{artist.imagePath}}');
-            background-size: 100%"></a>
+                    background-image: url('{{artist.imagePath}}');
+                    background-size: 100%">
+            </a>
             <a class="float-left relative" href="#/artiste/{{artist.facebookUrl}}">
                 <h2 class="margin0"
                     style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5); color: white;">{{artist.name}}</h2>
@@ -66,16 +66,18 @@
             <a href="#/user/{{organizer.organizerId}}" class="column large-12 padding0">
                 <img src="{{organizer.imagePath}}" class="relative width100p"/>
             </a>
-            <h3 class="column large-8"><a href="#/user/{{organizer.organizerId}}">{{ organizer.name }}</a></h3>
+            <h3 class="column large-8">
+                <a>
+                    <i class="fa pointer"
+                       ng-if="organizer.description != undefined"
+                       ng-class="{'fa-chevron-down': !$parent.readDesc,
+                       'fa-chevron-up': $parent.readDesc}"
+                       ng-click="$parent.readDesc = !$parent.readDesc">
+                    </i>
+                </a>
+                <a href="#/user/{{organizer.organizerId}}">{{ organizer.name }}</a>
+            </h3>
             <button style='margin-top:5px; float:right'>Suivre</button>
-            <i class=" fa fa-chevron-down column large-12 pointer"
-               ng-if="!readDesc && organizer.description != undefined"
-               ng-click="$parent.readDesc = !$parent.readDesc">
-           </i>
-            <i class=" fa fa-chevron-up column large-12 pointer"
-               ng-if="readDesc"
-               ng-click="$parent.readDesc = !$parent.readDesc">
-           </i>
            <div style="text-align: justify;" ng-if="readDesc" data-ng-bind-html="organizer.description"></div>
         </div>
     </div>
