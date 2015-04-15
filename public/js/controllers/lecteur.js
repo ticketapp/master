@@ -112,22 +112,64 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         offset = 0;
         if ($rootScope.playlist.tracks.length == 0) {
             var tracksLenght = tracks.length;
+            var needRepeat = false;
             if (tracksLenght > 100) {
                 tracksLenght = 100;
+                needRepeat = true
             }
             for (var tr = 0; tr < tracksLenght; tr++) {
                 pushTrack(tracks[tr], artist)
             }
             $scope.play(i);
+            $scope.playlistEnd = false;
+            if (needRepeat == true) {
+                tracksLenght = tracks.length;
+                var start = 100;
+                function pushAllTracks (start) {
+                    for (tr = start; tr < start + 100; tr++) {
+                        if (tracks[tr] != undefined) {
+                            pushTrack(tracks[tr], artist)
+                        } else {
+                            return;
+                        }
+                    }
+                }
+                if (start < tracksLenght) {
+                    start = start + 100;
+                    pushAllTracks(start)
+                }
+            }
             played = [];
         } else if ( $scope.playlistEnd == true) {
             var last = $rootScope.playlist.tracks.length;
             var tracksLenght = tracks.length;
+            var needRepeat = false;
+            if (tracksLenght > 100) {
+                tracksLenght = 100;
+                needRepeat = true
+            }
             for (var tr = 0; tr < tracksLenght; tr++) {
                 pushTrack(tracks[tr], artist)
             }
             $scope.play(last);
             $scope.playlistEnd = false;
+            if (needRepeat == true) {
+                tracksLenght = tracks.length;
+                var start = 100;
+                function pushAllTracks (start) {
+                    for (tr = start; tr < start + 100; tr++) {
+                        if (tracks[tr] != undefined) {
+                            pushTrack(tracks[tr], artist)
+                        } else {
+                            return;
+                        }
+                    }
+                }
+                if (start < tracksLenght) {
+                    start = start + 100;
+                    pushAllTracks(start)
+                }
+            }
         } else {
             var tracksLenght = tracks.length;
             for (var tr = 0; tr < tracksLenght; tr++) {
@@ -312,11 +354,18 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 } else {
                     var youtubeId = $rootScope.playlist.tracks[i].url;
                     YoutubeVideo(youtubeId, function (video) {
-                        var webm = video.getSource("video/webm", "medium");
-                        var mp4 = video.getSource("video/mp4", "medium");
-                        document.getElementById('musicPlayer').setAttribute('src', mp4.url);
-                        document.getElementById('musicPlayer').play();
-                        document.getElementById('musicPlayer').addEventListener('error', $scope.nextTrack);
+                        if (video.status == 'ok') {
+                            var webm = video.getSource("video/webm", "medium");
+                            var mp4 = video.getSource("video/mp4", "medium");
+                            document.getElementById('musicPlayer').setAttribute('src', mp4.url);
+                            document.getElementById('musicPlayer').play();
+                            $scope.$apply(function () {
+                                $scope.onPlay = true;
+                            });
+                            document.getElementById('musicPlayer').addEventListener('error', $scope.nextTrack);
+                        } else {
+                            $scope.nextTrack();
+                        }
                     });
                 }
             } else {
@@ -359,8 +408,10 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 function goToTrackActive () {
                     if (document.getElementsByClassName('trackContener').length >= i) {
                         $timeout(function() {
-                            var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                            document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
+                            if (document.getElementsByClassName('trackContener')[i] != undefined) {
+                                var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
+                                document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
+                            }
                         }, 100);
                     } else {
                         goToTrackActive ()

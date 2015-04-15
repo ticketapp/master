@@ -6853,7 +6853,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 }
 
 .layout-demo :not([layout]) {
-    border: 1px solid #eee;
+    border: 1px solid #a0d3e8;
     padding: 8px;
     font-size: 16px;
 }
@@ -7053,7 +7053,7 @@ code:not(.highlight) {
     transition: all 0.45s cubic-bezier(0.35, 0, 0.25, 1);
     max-height: 448px;
     min-height: 448px;
-    background: #fff;
+    background: #a0d3e8;
     overflow: hidden;
 }
 
@@ -7144,7 +7144,7 @@ md-tabs.demo-source-tabs .active md-tab-label {
 md-toolbar.demo-toolbar,
 .demo-source-tabs md-tab,
 .demo-source-tabs .tabs-header {
-    background: #E0E0E0 !important;
+    background: #a0d3e8!important;
     color: #616161;
 }
 md-toolbar.demo-toolbar md-tab-label {
