@@ -1,4 +1,4 @@
-app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
+app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout) {
     $scope.events = [];
     $scope.infos = [];
     $scope.time = 6;
@@ -116,7 +116,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
                             geopoint.substring(0, geopoint.indexOf(',')) > marker.latLng.k - 0.000001 &&
                             geopoint.replace(/^.+,/,'') < marker.latLng.D + 0.000001 &&
                             geopoint.replace(/^.+,/,'') > marker.latLng.D - 0.000001) {
-                            console.log($scope.events[i])
                             redirectPath = 'event/' + $scope.events[i].eventId;
                         }
                     }
@@ -128,20 +127,35 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http) {
             console.log(cluster)
             var eventsLength = $scope.events.length;
             var redirectPath = '';
+            var count =0;
+            var places = '';
             for (var i = 0; i < eventsLength; i++) {
                 if ($scope.events[i].addresses[0] != undefined &&
                     $scope.events[i].countdown <= $scope.selectedTime ) {
                     var geopoints = $scope.events[i].addresses[0].geographicPoint
-                    console.log(geopoints.replace(/^.+,/,''))
-                    console.log(cluster.center_.D)
-                    if (geopoints.substring(0, geopoints.indexOf(',')) < cluster.center_.k + 0.000001 &&
-                        geopoints.substring(0, geopoints.indexOf(',')) > cluster.center_.k - 0.000001 &&
-                        geopoints.replace(/^.+,/,'') < cluster.center_.D + 0.000001 &&
-                        geopoints.replace(/^.+,/,'') > cluster.center_.D - 0.000001) {
-                        console.log($scope.events[i].places[0].placeId)
-                        redirectPath = 'lieu/' + $scope.events[i].places[0].placeId;
+                    var markerLength = cluster.markers_.length;
+                    for (var m = 0; m < markerLength; m++) {
+                        if (geopoints.substring(0, geopoints.indexOf(',')) < cluster.markers_[m].position.k + 0.000001 &&
+                            geopoints.substring(0, geopoints.indexOf(',')) > cluster.markers_[m].position.k - 0.000001 &&
+                            geopoints.replace(/^.+,/, '') < cluster.markers_[m].position.D + 0.000001 &&
+                            geopoints.replace(/^.+,/, '') > cluster.markers_[m].position.D - 0.000001) {
+                            if (places.indexOf($scope.events[i].places[0].placeId) == -1) {
+                                places = places + ', ' + $scope.events[i].places[0].placeId;
+                                count = count + 1;
+                            }
+                        }
                     }
                 }
+            }
+            if (count == 1) {
+                redirectPath = 'lieu/' + places.replace(', ', '');
+            } else {
+                $timeout(function () {
+                    $scope.$apply(function () {
+                        $scope.mapCenter = cluster.center_.k + ',' + cluster.center_.D;
+                        $scope.zoom = 14;
+                    })
+                }, 0)
             }
             window.location.href =('#/' + redirectPath);
         })
