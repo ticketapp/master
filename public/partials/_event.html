@@ -36,9 +36,33 @@
             </div>
             <br/>
             <div class="infos_event">
-                <span class="dropDown" data-ng-repeat="organizer in event.organizers">
-                    Par
-                    <a href="#/user/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}} </a>
+                <span class="dropDown" data-ng-repeat="place in event.places">
+                    <i class="fa fa-map-marker" style="font-size: 30px; color: {{event.priceColor}};"></i>
+                    <b style="vertical-align: text-bottom;">
+                        <a href="#/lieu/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+                    </b>
+                    <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
+                        <div>
+                            <div style='height:112.8px; overflow:hidden;'>
+                                <a href="#/lieu/{{ place.placeId }}" >
+                                    <img src="{{ place.imagePath }}" ng-if="place.imagePath.length > 0"/>
+                                </a>
+                            </div>
+                            <a href="#/lieu/{{ place.placeId }}">
+                                <h4 class='column large-6'>{{ place.name}}</h4>
+                            </a>
+                            <button style='margin-top:5px; float:right'>Suivre</button>
+                        </div>
+                    </ul>
+                </span>
+            </div>
+            <div class="infos_event">
+                <span class="dropDown" ng-show="organizer.name != event.places[0].name"
+                      data-ng-repeat="organizer in event.organizers">
+                    <i class="fa fa-user" style="font-size: 30px; color: {{event.priceColor}};"></i>
+                    <b style="vertical-align: text-bottom;">
+                        <a href="#/user/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}} </a>
+                    </b>
                     <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <div>
                             <div style='height:112.8px; overflow:hidden;'>
@@ -54,29 +78,39 @@
                     </ul>
                 </span>
             </div>
-            <div class="infos_event">
-                <span class="dropDown" data-ng-repeat="place in event.places">
-                @
-                <a href="#/lieu/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
-                <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
-                    <div>
-                        <div style='height:112.8px; overflow:hidden;'>
-                            <a href="#/lieu/{{ place.placeId }}" >
-                                <img src="{{ place.imagePath }}" ng-if="place.imagePath.length > 0"/>
-                            </a>
-                        </div>
-                        <a href="#/lieu/{{ place.placeId }}">
-                            <h4 class='column large-6'>{{ place.name}}</h4>
-                        </a>
-                        <button style='margin-top:5px; float:right'>Suivre</button>
-                    </div>
-                </ul>
-            </div>
-            <div class="description_event_min">
+            <div class="description_event_min height60">
                 <a ng-repeat="genre in filteredGenres = (event.genres | filter: filterQuery)" class="ng-hide">{{genre.name}}</a>
-                <a href="#/artiste/{{artist.facebookUrl}}" data-ng-repeat="artist in event.artists">
-                    {{ artist.name }}
-                </a>
+                <span class="dropDown float-left"
+                      data-ng-repeat="artist in event.artists">
+                    <a href="#/artiste/{{artist.facebookUrl}}">
+                        <h3 style="color: {{event.priceColor}};" class="float-left margin0"
+                                ng-mouseover="showDrop = true;">
+                            {{ artist.name }}
+                            <b ng-show="$index != event.artists.length - 1"> -&nbsp;</b>
+                        </h3>
+                    </a>
+                    <ul class="f-dropdown marginTop30"
+                        ng-class="{'left right': $index > 0 && $parent.showDrop == true}"
+                        ng-mouseleave="$parent.showDrop = false;"
+                        ng-if="$root.window != 'small' && $root.window != 'medium'">
+                        <div>
+                            <div style='height:112.8px; overflow:hidden;'>
+                                <a href="#/artiste/{{artist.facebookUrl}}">
+                                    <img src='{{ artist.imagePath }}'/>
+                                </a>
+                            </div>
+                            <a href="#/artiste/{{artist.facebookUrl}}">
+                                <h4 class='column large-6'>{{artist.name}}</h4>
+                            </a>
+                            <button style='margin-top:5px; float:right'>Suivre</button>
+                            <div class="img-circularPlayer float-right                                                                                                                                                                                                  "
+                                 style="background: {{event.priceColor}}">
+                                <i class="pauseInImg fi-play"
+                                   ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
+                            </div>
+                        </div>
+                    </ul>
+                </span>
                 <!--<a ng-repeat="genre in filteredEventGenre = (event.genres | filter: name: filterQuery)"
                         >{{genre.name}}</a>-->
             </div>

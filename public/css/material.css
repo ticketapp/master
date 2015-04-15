@@ -6898,10 +6898,6 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 .hide { display: none !important; }
 
 
-a {
-    color: #3f51b5;
-}
-
 table {
     margin-bottom: 20px;
     max-width: 100%;

@@ -377,14 +377,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                     $scope.events.forEach(getEventsId);
                                 });
                                 if ($scope.scopeIdList.indexOf(el.eventId) == -1) {
+                                    el.priceColor = 'rgb(0, 140, 186)';
                                     if (el.tariffRange != undefined) {
                                         var tariffs = el.tariffRange.split('-');
                                         if (tariffs[1] > tariffs[0]) {
-                                            el.tariffRange = tariffs[0].replace('.0', '') +
-                                                '€ - ' + tariffs[1].replace('.0', '') + '€';
+                                            el.tariffRange = tariffs[0].replace('.0', '') + '€ - ' +
+                                                tariffs[1].replace('.0', '') + '€';
                                         } else {
                                             el.tariffRange = tariffs[0].replace('.0', '') + '€';
                                         }
+                                        el.priceColor = 'rgb(' + tariffs[0]*10 + ',' + (250 - (tariffs[0]*10 ) )+
+                                            ',' + (175 - (tariffs[0]*10 )) + ')'
                                     }
                                     $scope.events.push(el);
                                     $scope.scopeIdList.push(el.eventId);
