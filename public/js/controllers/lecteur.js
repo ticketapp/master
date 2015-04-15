@@ -24,7 +24,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     var artNames = [];
     var i = 0;
     $scope.savePlaylist = function () {
-        console.log('ui')
         var modalInstance = $modal.open({
             templateUrl: 'assets/partials/_savePlaylistForm.html',
             controller: 'savePlaylistCtrl'
@@ -35,10 +34,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     $rootScope.deletePlaylist = function (playlistId) {
         $http.delete('/playlists/' + playlistId).
             success(function (data) {
-                console.log(data)
             }).
             error (function (data) {
-                console.log(data)
         })
     };
     function eventsPlaylist () {
@@ -47,11 +44,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 function getEventsArtsts (event) {
                    var evArtLenght = event.artists.length
                     for (var a = 0; a < evArtLenght; a++) {
-                        console.log(artNames)
                         for(var g = 0; g < event.artists[a].genres.length; g++) {
-                            /*console.log(event.artists[a].genres[g].name)
-                            console.log(event.artists[a])
-                            console.log($rootScope.playlist.genres)*/
                             if ($rootScope.playlist.genres.toString().toLowerCase().indexOf(event.artists[a].genres[g].name.toLowerCase()) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
                                 artNames.push(event.artists[a].name);
                                 for (var t = 0; t < 4; t++) {
@@ -69,14 +62,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 if (playlistEvents.length == 0 && offset < 100) {
                     offset = offset + 20;
                     eventsPlaylist ()
-                    console.log(offset)
                 }
             })
     }
     function pushTrack (track, art) {
         $scope.newTrack = {};
-        console.log(track)
-        console.log(art)
         if (track.platform == 'Soundcloud') {
             $scope.newTrack.redirectUrl = track.redirectUrl;
         }
@@ -122,6 +112,9 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         offset = 0;
         if ($rootScope.playlist.tracks.length == 0) {
             var tracksLenght = tracks.length;
+            if (tracksLenght > 100) {
+                tracksLenght = 100;
+            }
             for (var tr = 0; tr < tracksLenght; tr++) {
                 pushTrack(tracks[tr], artist)
             }
@@ -151,12 +144,34 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         offset = 0;
         var last = $rootScope.playlist.tracks.length;
         var tracksLenght = tracks.length;
+        var needRepeat = false;
+        if (tracksLenght > 100) {
+            tracksLenght = 100;
+            needRepeat = true
+        }
         for (var tr = 0; tr < tracksLenght; tr++) {
             pushTrack(tracks[tr], artist)
         }
         //Angularytics.trackEvent("listen music", artist);
         $scope.play(last);
         $scope.playlistEnd = false;
+        if (needRepeat == true) {
+            tracksLenght = tracks.length;
+            var start = 100;
+            function pushAllTracks (start) {
+                for (tr = start; tr < start + 100; tr++) {
+                    if (tracks[tr] != undefined) {
+                        pushTrack(tracks[tr], artist)
+                    } else {
+                        return;
+                    }
+                }
+            }
+            if (start < tracksLenght) {
+                start = start + 100;
+                pushAllTracks(start)
+            }
+        }
         if ($rootScope.playlist.tracks.length == 0) {
             played = [];
         }
@@ -175,7 +190,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             shuffle()
         } else if (played.indexOf($rootScope.playlist.tracks[i].title) > -1) {
             if ($rootScope.playlist.tracks.every(alreadyPlayed) == true) {
-                console.log('all tracks already played')
                 var lastT = $rootScope.playlist.tracks.length;
                 if (playlistEvents.length > 0) {
                     for (var t = 0; t < playlistEvents.length; t++) {
@@ -183,7 +197,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     }
                     $rootScope.playlist.name = 'La selection';
                     $rootScope.playlist.by = 'Claude';
-                    console.log($rootScope.playlist)
                     $scope.play(lastT)
                     playlistEvents = [];
                 } else {
@@ -237,7 +250,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     i++;
                     $scope.play(i);
                 } else {
-                    console.log('playlist end')
                     var lastT = $rootScope.playlist.tracks.length;
                     if (playlistEvents.length > 0) {
                         for (var t = 0; t < playlistEvents.length; t++) {
@@ -245,7 +257,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                         }
                         $rootScope.playlist.name = 'La selection';
                         $rootScope.playlist.by = 'Claude';
-                        console.log($rootScope.playlist)
                         $scope.play(lastT)
                         playlistEvents = [];
                     } else {
@@ -291,7 +302,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         };
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         document.getElementById('musicPlayer').addEventListener('error', $scope.nextTrack);
-        console.log(document.getElementById('musicPlayer'))
         $scope.trackActive = $rootScope.playlist.tracks[i];
         if ($rootScope.playlist.tracks[i].platform == 'Soundcloud' || $rootScope.window == 'small' || $rootScope.window == 'medium') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
@@ -366,7 +376,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             //document.getElementById('youtubePlayer').classList.remove('ng-hide');
             document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
             function onPlayerReady(event) {
-                console.log('youtube')
                 $scope.playPause = function () {
                     if ($scope.onPlay == false) {
                         event.target.playVideo();
@@ -389,7 +398,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     $scope.$apply();
                     yPlayer.playVideo();
                 };
-                console.log(window)
                 yPlayer.unMute();
                 yPlayer.playVideo();
                 $scope.onPlay = true;
@@ -464,17 +472,13 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
 app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance, $http) {
     $scope.createNewPlaylist = function (playlist) {
         var tracksToSave = [];
-        console.log(playlist)
         for (var i=0; i < playlist.tracks.length; i++) {
             tracksToSave.push({trackId: playlist.tracks[i].trackId})
         }
-        console.log(tracksToSave);
         $http.post('/playlists/create', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
-                console.log(data)
             }).
             error(function (data) {
-                console.log(data)
                 if (data.error == 'Credentials required') {
                     var object = {name: playlist.name, tracksId: tracksToSave};
                     $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist "' + playlist.name + '" est enregistée')

@@ -45,17 +45,13 @@
                     </b>
                     <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <li style="display: block;"
-                            class="float-left width100p paddingTop10 paddingBottom10
-                            paddingRight10 marginBottom10 relative">
+                            class="float-left width100p relative">
                             <a href="#/user/{{place.placeId}}"
-                               class="absolute width100p height100p imgBlur"
-                               style="display: block;
-                                    background-image: url('{{place.imagePath}}');
-                                    background-size: 100%"></a>
-                            <a class="float-left relative" href="#/user/{{place.organizerId}}">
-                                <h1 class="margin0"
-                                    style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);
-                                    color: {{event.priceColor}};">
+                               class="width100p padding0">
+                                <img class="width100p " src="{{place.imagePath}}">
+                            </a>
+                            <a class="float-left" href="#/user/{{place.placeId}}">
+                                <h1 class="margin0">
                                     {{place.name}}
                                 </h1>
                             </a>
@@ -73,17 +69,13 @@
                     </b>
                     <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <li style="display: block;"
-                            class="float-left width100p paddingTop10 paddingBottom10
-                            paddingRight10 marginBottom10 relative">
+                            class="float-left width100p relative">
                             <a href="#/user/{{organizer.organizerId}}"
-                               class="absolute width100p height100p imgBlur"
-                               style="display: block;
-                                    background-image: url('{{organizer.imagePath}}');
-                                    background-size: 100%"></a>
-                            <a class="float-left relative" href="#/user/{{organizer.organizerId}}">
-                                <h1 class="margin0"
-                                    style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);
-                                    color: {{event.priceColor}};">
+                               class="width100p padding0">
+                                <img class="width100p " src="{{organizer.imagePath}}">
+                                    </a>
+                            <a class="float-left" href="#/user/{{organizer.organizerId}}">
+                                <h1 class="margin0">
                                     {{organizer.name}}
                                 </h1>
                             </a>
@@ -114,13 +106,6 @@
                                 background-image: url('{{artist.imagePath}}');
                                 background-size: 100%">
 
-                            </a>
-                            <a class="float-left relative" href="#/artiste/{{artist.facebookUrl}}">
-                                <h1 class="margin0"
-                                    style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);
-                                    color: {{event.priceColor}};">
-                                    {{artist.name}}
-                                </h1>
                             </a>
                             <div class="img-circularPlayer float-right marginTop20 relative"
                                  style="background: rgba(0, 0, 0, 0.42);">
