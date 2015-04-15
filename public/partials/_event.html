@@ -25,7 +25,8 @@
             à
             <b> {{ event.endTime | date:'HH:mm' }} </b>
         </i>
-        <i ng-if="$root.window == 'small'" class="float-right fi-plus"
+        <i ng-if="$root.window == 'small'" style="color: {{event.priceColor}}; font-size: 30px;"
+           class="float-right  fa fa-chevron-down"
            ng-click="$parent.showEventDetail = !$parent.showEventDetail">
        </i>
         <span ng-show="$root.window != 'small' || showEventDetail">
@@ -78,7 +79,7 @@
                     </ul>
                 </span>
             </div>
-            <div class="description_event_min height60">
+            <div class="description_event_min" style="height: 60px;">
                 <a ng-repeat="genre in filteredGenres = (event.genres | filter: filterQuery)" class="ng-hide">{{genre.name}}</a>
                 <span class="dropDown float-left"
                       data-ng-repeat="artist in event.artists">
@@ -103,7 +104,8 @@
                                 <h4 class='column large-6'>{{artist.name}}</h4>
                             </a>
                             <button style='margin-top:5px; float:right'>Suivre</button>
-                            <div class="img-circularPlayer float-right                                                                                                                                                                                                  "
+                            <div class="img-circularPlayer float-right"
+                                 ng-if="artist.tracks.length > 0"
                                  style="background: {{event.priceColor}}">
                                 <i class="pauseInImg fi-play"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>

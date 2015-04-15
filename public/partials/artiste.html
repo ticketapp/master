@@ -5,7 +5,7 @@
     <div class="columns large-12">
         <h2 id="eventTitle">
             {{artiste.name}}
-            <i ng-if="otherWebsite == true" class="float-right fi-plus" ng-click="$parent.showUrls = !$parent.showUrls" style="margin-left: 5px; cursor: pointer"></i>
+            <i ng-if="otherWebsite == true" class="float-right  fa fa-chevron-down" ng-click="$parent.showUrls = !$parent.showUrls" style="margin-left: 5px; cursor: pointer"></i>
             <ul class="absolute zIndex4 right" ng-if="showUrls" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
                 <li ng-repeat="website in artiste.websites" ng-if="website.name == 'website'" style="display: block; margin: 10px">
                     <a href="http://www.{{website.url}}" target="_blank">{{website.url}}</a>
@@ -34,8 +34,8 @@
              style="max-height : {{heightDesc}}; overflow: hidden"
              id="descContent">
         </div>
-        <i ng-if="heightDesc == '147px' && allDesc == false" class="fi-plus pointer" ng-click="$parent.heightDesc = 'auto'; calcResize()"></i>
-        <i ng-if="heightDesc == 'auto'" class="fi-minus pointer" ng-click="$parent.heightDesc = '147px'; calcResize()"></i>
+        <i ng-if="heightDesc == '147px' && allDesc == false" class=" fa fa-chevron-down pointer" ng-click="$parent.heightDesc = 'auto'; calcResize()"></i>
+        <i ng-if="heightDesc == 'auto'" class=" fa fa-chevron-up pointer" ng-click="$parent.heightDesc = '147px'; calcResize()"></i>
     </div>
     <div class="float-left width100p" ng-if="$root.window == 'small'">
         <a ng-click="$parent.$parent.showTracks = true; $parent.$parent.showEvents = false"

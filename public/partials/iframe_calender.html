@@ -4,14 +4,14 @@
            ng-model="$root.filterQuery"
            class="column small-10 zIndex5">
     <ul class="column padding0 zIndex5 white" ng-class="{'small-2': filter && $root.order != 'startTime', 'small-12': !filter || $root.order == 'startTime'}">
-        <a ng-if="$parent.filter == true" ng-click="$parent.$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
+        <a target="_blank"ng-if="$parent.filter == true" ng-click="$parent.$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
         <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
             <a>Filters <i class="fi-arrow-down"></i></a>
         </li>
         <ul ng-if="selectFilter" class="absolute white zIndex5 column large-12">
             <li style="display:block;" class="column large-12 pointer"
                 ng-click="$parent.$parent.filter = true; $root.filterType = 'genre'; $parent.selectFilter = false">
-                <a target="_blank" >
+                <a target="_blank"target="_blank" >
                     Genre
                 </a>
             </li>
@@ -34,7 +34,7 @@
     </ul>
 </div>
 <div style="padding-top: 70px;">
-    <div class="column large-3 float-left margin0"
+    <div class="column large-4 float-left margin0"
          data-ng-repeat="event in events | orderBy: $root.order">
         <div class="block_event_min">
             <div class="img_min_evnt" style="height: 100px">
@@ -43,35 +43,73 @@
                         <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
                     </a>
                 </div>
+                <a target="_blank" href="#/event/{{event.eventId}}">
+                    <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
+                        {{ event.name }}
+                    </h3>
+                </a>
             </div>
             <div class=" text_evnt_min" >
-                <a target="_blank" href="#/event/{{event.eventId}}"><h4 style="height: 2.8em;
-    overflow: hidden;">{{ event.name }}</h4></a>
-                <i ng-if="!showDetails" class="fi-plus" ng-click="$parent.showDetails = !$parent.showDetails"></i>
-                <i ng-if="showDetails" class="fi-minus" ng-click="$parent.showDetails = !$parent.showDetails"></i>
+                <i  style="font-size: 30px; color: {{event.priceColor}};"
+                    class="fi-calendar">
+                </i>
+                <b style="vertical-align: text-bottom;">
+                    {{ event.startTime | date:'dd/MM' }}
+                    <i>à</i>
+                    {{ event.startTime | date:'HH:mm' }}
+                </b>
+                <i ng-show="event.endTime">au
+                    <b> {{ event.endTime | date:'dd/MM' }} </b>
+                    à
+                    <b> {{ event.endTime | date:'HH:mm' }} </b>
+                </i>
+                <i ng-if="!showDetails"
+                   style="color: {{event.priceColor}}; font-size: 30px;"
+                   class="float-right  fa fa-chevron-down pointer "
+                   ng-click="$parent.showDetails = !$parent.showDetails">
+                </i>
+                <i ng-if="showDetails"
+                   style="color: {{event.priceColor}}; font-size: 30px;"
+                   class="float-right fa fa-chevron-up pointer"
+                   ng-click="$parent.showDetails = !$parent.showDetails">
+                </i>
                 <div ng-if="showDetails">
-                    Par
-                    <a target="_blank" href="#/user/{{organizer.organizerId}}" class="custom-trigger" data-ng-repeat="organizer in event.organizers"
-                       >{{organizer.name}} </a>
+                    <div class="img-circularPlayer float-right"
+                         ng-if="event.tariffRange != undefined"
+                         style="background: {{event.priceColor}}; padding-top: 26px; color: #ffffff; text-align: center;">
+                        <b>{{event.tariffRange}}</b>
+                    </div>
                     <br/>
                     <div class="infos_event">
-                        <i class="icon-calendar"></i>{{ event.startTime | date:'dd/MM' }}
-                        <i class="icon-time"></i> {{ event.startTime | date:'HH:mm' }}<b ng-show="event.endTime"> - </b>
-                        <i class="icon-calendar"></i>{{ event.endTime | date:'dd/MM' }}
-                        <i class="icon-time"></i> {{ event.endTime | date:'HH:mm' }} <br/>
-                        <i class="icon-map-marker"></i>
-                        <a target="_blank" href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places">@ {{ place.name }}</a>
+                        <span  data-ng-repeat="place in event.places">
+                            <i class="fa fa-map-marker" style="font-size: 30px; color: {{event.priceColor}};"></i>
+                            <b style="vertical-align: text-bottom;">
+                                <a target="_blank"href="#/lieu/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+                            </b>                    
+                        </span>
                     </div>
-                    <br/>
-                    <div class="description_event_min">
-                        <a target="_blank" href="#/artiste/{{artist.facebookUrl}}" data-ng-repeat="artist in event.artists">
-                            {{ artist.name }}
-                        </a>
-                        <!--<a target="_blank" ng-repeat="genre in filteredEventGenre = (event.genres | filter: name: filterQuery)"
-                                >{{genre.name}}</a>-->
+                    <div class="infos_event">
+                        <span  ng-show="organizer.name != event.places[0].name"
+                              data-ng-repeat="organizer in event.organizers">
+                            <i class="fa fa-user" style="font-size: 30px; color: {{event.priceColor}};"></i>
+                            <b style="vertical-align: text-bottom;">
+                                <a target="_blank"href="#/user/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}} </a>
+                            </b>                    
+                        </span>
                     </div>
-                    <br/>
-                </div>
+                    <div class="description_event_min" style="height: 60px;">
+                        <a target="_blank"ng-repeat="genre in filteredGenres = (event.genres | filter: filterQuery)" class="ng-hide">{{genre.name}}</a>
+                        <span class="float-left"
+                              data-ng-repeat="artist in event.artists">
+                            <a target="_blank"href="#/artiste/{{artist.facebookUrl}}">
+                                <h3 style="color: {{event.priceColor}};" class="float-left margin0"
+                                    ng-mouseover="showDrop = true;">
+                                    {{ artist.name }}
+                                    <b ng-show="$index != event.artists.length - 1"> -&nbsp;</b>
+                                </h3>
+                            </a>
+                        </span>
+                    </div>
             </div>
         </div>
     </div>

@@ -18,8 +18,8 @@
     <!--<a class="close float-right">X</a>-->
     <div class="column primCol padding0" ng-class="{'large-4': showLecteur, 'large-2': !showLecteur}">
         <i ng-click="showLecteur = !showLecteur" class="float-left lecteurControls"
-           ng-class="{'fi-minus': showLecteur == true,
-           'fi-plus': showLecteur == false,
+           ng-class="{'fa fa-chevron-down': showLecteur == true,
+           'fa fa-chevron-up': showLecteur == false,
            'small-3': $root.window == 'small' && showLecteur == false,
            'small-2': $root.window == 'small' && showLecteur == true
            }"></i>

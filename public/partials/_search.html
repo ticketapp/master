@@ -14,7 +14,7 @@
             ng-show= "filteredGenres.length || filterQuery.length <= 1 || filterQuery == undefined">
         </div>
         <div ng-if="$root.activArtist && artists.length > 0"
-             class="column large-4 medium-6 float-left margin0"
+             class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0"
             data-ng-repeat="artist in artists | filter: filterSearch"
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
             style="padding-bottom: 10px;">
@@ -25,13 +25,13 @@
                             <img src="{{artist.imagePath}}" alt="une belle image" class="min"/>
                         </a>
                     </div>
-                </div>
-                <div class=" textArtistMin" style="height: 30px">
                     <a href="#/artiste/{{artist.facebookUrl}}">
-                        <h3 style="margin-bottom: 0;">
-                        {{ artist.name }}
+                        <h3 style="margin-bottom: 0;" class="minTitle">
+                            {{ artist.name }}
                         </h3>
                     </a>
+                </div>
+                <div>
                     <a ng-if="filterType == 'genre'"
                        ng-repeat="genre in filteredEntries = (artist.genres | filter: filterQuery)"
                        ng-click="$root.filterQuery = genre.name"
@@ -51,12 +51,12 @@
                              src="{{ artist.imagePath }}"
                              alt="une belle image" class="min pointer"/>
                     </div>
+                    <h3 style="margin-bottom: 0;" class="minTitle">
+                        {{ artist.name }}
+                    </h3>
                 </div>
-                <div class="textArtistMin" style="height: 30px">
+                <div style="height: 30px">
                     <a ng-click="createArtist(artist)">
-                        <h3 style="margin-bottom: 0;">
-                            {{ artist.name }}
-                        </h3>
                     </a>
                     <i ng-show="artist.tracks.length > 0" class="fi-play-circle"
                        style="font-size: 26px;"
@@ -120,10 +120,14 @@
                             <img src="{{ place.imagePath }}" alt="une belle image" class="min"/>
                         </a>
                     </div>
-                </div>
-                <div class="textArtistMin" style="height: 30px" >
-                    <a ng-if="place.placeId != -1" href="#/lieu/{{place.placeId}}"><h3>{{ place.name }}</h3></a>
-                    <a ng-if="place.placeId == -1" ng-click="createNewPlace(place)"><h3>{{ place.name }}</h3></a>
+                    <a ng-if="place.placeId != -1" href="#/lieu/{{place.placeId}}">
+                        <h3 class="minTitle">{{ place.name }}
+                        </h3>
+                    </a>
+                    <a ng-if="place.placeId == -1" ng-click="createNewPlace(place)">
+                        <h3 class="minTitle">{{ place.name }}
+                        </h3>
+                    </a>
                 </div>
             </div>
         </div>
@@ -136,9 +140,7 @@
                             <img src="{{ user.images[0].path }}" alt="une belle image" class="min"/>
                         </a>
                     </div>
-                </div>
-                <div class=" text_evnt_min" >
-                    <a href="#/user/{{user.userId}}"><h4>{{user.nickname}}</h4></a>
+                    <a href="#/user/{{user.userId}}"><h3 class="minTitle">{{user.nickname}}</h3></a>
                 </div>
             </div>
         </li>
