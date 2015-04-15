@@ -26,7 +26,8 @@
             <b> {{ event.endTime | date:'HH:mm' }} </b>
         </i>
         <i ng-if="$root.window == 'small'" style="color: {{event.priceColor}}; font-size: 30px;"
-           class="float-right  fa fa-chevron-down"
+           class="float-right fa "
+           ng-class="{'fa-chevron-down': !showEventDetail, 'fa-chevron-up': showEventDetail}"
            ng-click="$parent.showEventDetail = !$parent.showEventDetail">
        </i>
         <span ng-show="$root.window != 'small' || showEventDetail">
@@ -131,23 +132,27 @@
                         ng-class="{'left right': $index > 0 && $parent.showDrop == true}"
                         ng-mouseleave="$parent.showDrop = false;"
                         ng-if="$root.window != 'small' && $root.window != 'medium'">
-                        <div>
-                            <div style='height:112.8px; overflow:hidden;'>
-                                <a href="#/artiste/{{artist.facebookUrl}}">
-                                    <img src='{{ artist.imagePath }}'/>
-                                </a>
-                            </div>
-                            <a href="#/artiste/{{artist.facebookUrl}}">
-                                <h3 class='column large-6'>{{artist.name}}</h3>
+                        <li style="display: block;"
+                            class="float-left width100p paddingTop10 paddingBottom10 paddingRight10 marginBottom10 relative">
+                            <a href="#/artiste/{{artist.facebookUrl}}" class="absolute width100p height100p"
+                               style="display: block;
+                  -webkit-filter: sepia(0.5) blur(2px);
+            background-image: url('{{artist.imagePath}}');
+            background-size: 100%"></a>
+                            <a class="float-left relative" href="#/artiste/{{artist.facebookUrl}}">
+                                <h1 class="margin0"
+                                    style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);
+                                    color: {{event.priceColor}};">
+                                    {{artist.name}}
+                                </h1>
                             </a>
-                            <button style='margin-top:5px; float:right'>Suivre</button>
-                            <div class="img-circularPlayer float-right"
-                                 ng-if="artist.tracks.length > 0"
-                                 style="background: {{event.priceColor}}">
-                                <i class="pauseInImg fi-play"
+                            <div class="img-circularPlayer float-right marginTop20 relative"
+                                 style="background: rgba(0, 0, 0, 0.42);">
+                                <i class="pauseInImg ng-scope fi-play"
+                                   style="color: {{event.priceColor}}; font-size: 80px;"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
                             </div>
-                        </div>
+                        </li>
                     </ul>
                 </span>
                 <!--<a ng-repeat="genre in filteredEventGenre = (event.genres | filter: name: filterQuery)"
