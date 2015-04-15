@@ -4,6 +4,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $scope.heightDesc = '147px';
     $scope.trackTitle = '';
     $scope.allDesc = false;
+    $scope.selectedTab = 0;
     $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
         console.log(trackTitle, artistName);
         $scope.suggest = false;
@@ -38,78 +39,6 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
             })
         },0)
     };
-    function resizePageElem () {
-        var waitForBinding = setInterval(function () {
-            if (document.getElementsByClassName('data-ng-event').length == $scope.artiste.events.length) {
-                clearInterval(waitForBinding);
-                function passElementTo100() {
-                    eventInfoConteners[i].classList.remove('large-4');
-                    eventInfoConteners[i].classList.remove('large-8');
-                    eventInfoConteners[i].classList.add('large-12');
-                    if (eventInfoConteners[i].className.indexOf('tracksContener') > -1) {
-                        $scope.bigTracks = false;
-                        $scope.$apply();
-                    }
-                }
-                var eventInfoConteners = document.getElementsByClassName('eventInfo');
-                if (document.getElementById('descContent') != null) {
-                    if (document.getElementById('descContent').clientHeight < 147) {
-                        $scope.heightDesc = '';
-                        $scope.$apply();
-                    }
-                }
-                if ($scope.artiste.events.length > 0) {
-                    if ($scope.artiste.events.length == 1) {
-                        $scope.bigTracks = false;
-                        $scope.$apply();
-                        document.getElementsByClassName('descriptionContent')[0].classList.remove('large-8');
-                        document.getElementsByClassName('descriptionContent')[0].classList.add('large-4');
-                        document.getElementsByClassName('descriptionContent')[0].classList.add('paddingLeft0');
-                        document.getElementsByClassName('data-ng-event')[0].classList.add('width100p');
-                        document.getElementsByClassName('min_contener')[0].classList.add('padding0');
-                        $rootScope.resizeImgHeight();
-                        for (var i = 0; i < eventInfoConteners.length; i++) {
-                            eventInfoConteners[i].classList.remove('large-4');
-                            eventInfoConteners[i].classList.add('large-8');
-                            if (eventInfoConteners[i].offsetLeft < 30) {
-                                passElementTo100()
-                            }
-                        }
-                    }
-                    for (var i = 0; i < eventInfoConteners.length; i++) {
-                        if (eventInfoConteners[i].offsetLeft < 30) {
-                            passElementTo100()
-                        }
-                    }
-                    $rootScope.resizeImgHeight();
-                } else {
-                    for (var i = 0; i < eventInfoConteners.length; i++) {
-                        passElementTo100()
-                    }
-                    if (document.getElementById('descContent') != null &&
-                        document.getElementById('descContent').clientHeight < 147) {
-                        $scope.allDesc = true;
-                        $scope.$apply();
-                    } else {
-                        $scope.allDesc = false;
-                        $scope.$apply();
-                    }
-                    $rootScope.resizeImgHeight();
-                }
-            }
-        }, 100);
-    }
-    function watchWindowSize () {
-        if ($rootScope.window != 'small' && $rootScope.window != 'medium') {
-            resizePageElem()
-        } else {
-            $rootScope.$watch('window', function (newval) {
-                if (newval == 'large' || newval == 'xlarge' || newval == 'xxlarge') {
-                    resizePageElem()
-                }
-            })
-        }
-    }
     function refactorWebsites () {
         for (var i = 0; i < $scope.artiste.websites.length; i++) {
             $scope.artiste.websites[i] = {url: $scope.artiste.websites[i]};
@@ -132,7 +61,6 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
         trackContener.classList.remove('large-12');
         trackContener.classList.remove('large-8');
         trackContener.classList.add('large-4');
-        watchWindowSize();
     };
     if ($rootScope.artisteToCreate == false) {
         $scope.artiste = [];
@@ -151,6 +79,9 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                 $http.get('/artists/'+ $routeParams.facebookUrl + '/events ').
                     success(function(data){
                         $scope.artiste.events = [];
+                        if (data.length == 0) {
+                            $scope.selectedTab = 1;
+                        }
                         function pushEvent (el) {
                             el.priceColor = 'rgb(0, 140, 186)';
                             if (el.tariffRange != undefined) {
@@ -167,7 +98,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                             $scope.artiste.events.push(el);
                         }
                         data.forEach(pushEvent)
-                        watchWindowSize();
+                        $rootScope.resizeImgHeight();
                     }).
                     error(function(data) {
                         //watchWindowSize();
@@ -177,7 +108,6 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     } else {
         refactorWebsites();
         $rootScope.passArtisteToCreateToFalse();
-        watchWindowSize();
     }
     $rootScope.resizeImgHeight();
 });
