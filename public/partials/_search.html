@@ -72,7 +72,7 @@
         <div layout="row" layout-sm="column" layout-align="space-around" class="float-left" ng-if="loadingFbArt">
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
-        <div class="column large-4 medium-6 float-left margin0"
+        <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0"
             ng-if="$root.activPlace && places.length > 0"
             style="padding-bottom: 10px;"
             data-ng-repeat="place in places" >
@@ -85,9 +85,7 @@
                                  zoom="14"
                                  center="[{{place.geographicPoint}}]"
                                  scrollwheel="false"
-                                 navigationControl="false"
-                                 mapTypeControl="false"
-                                 scaleControl="false"
+                                 disable-default-u-i="true"
                                  styles="[
                                      {
                                          stylers:[

@@ -150,7 +150,23 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                 $rootScope.loadingTracks = false;
                 $http.get('/artists/'+ $routeParams.facebookUrl + '/events ').
                     success(function(data){
-                        $scope.artiste.events = data;
+                        $scope.artiste.events = [];
+                        function pushEvent (el) {
+                            el.priceColor = 'rgb(0, 140, 186)';
+                            if (el.tariffRange != undefined) {
+                                var tariffs = el.tariffRange.split('-');
+                                if (tariffs[1] > tariffs[0]) {
+                                    el.tariffRange = tariffs[0].replace('.0', '') + '€ - ' +
+                                        tariffs[1].replace('.0', '') + '€';
+                                } else {
+                                    el.tariffRange = tariffs[0].replace('.0', '') + '€';
+                                }
+                                el.priceColor = 'rgb(' + tariffs[0]*10 + ',' + (250 - (tariffs[0]*10 ) )+
+                                    ',' + (175 - (tariffs[0]*10 )) + ')'
+                            }
+                            $scope.artiste.events.push(el);
+                        }
+                        data.forEach(pushEvent)
                         watchWindowSize();
                     }).
                     error(function(data) {

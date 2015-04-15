@@ -59,7 +59,23 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
             }
             $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
                 .success(function(data, status){
-                    $scope.orgaEvents = data;
+                    $scope.orgaEvents = [];
+                    function pushEvent (el) {
+                        el.priceColor = 'rgb(0, 140, 186)';
+                        if (el.tariffRange != undefined) {
+                            var tariffs = el.tariffRange.split('-');
+                            if (tariffs[1] > tariffs[0]) {
+                                el.tariffRange = tariffs[0].replace('.0', '') + '€ - ' +
+                                    tariffs[1].replace('.0', '') + '€';
+                            } else {
+                                el.tariffRange = tariffs[0].replace('.0', '') + '€';
+                            }
+                            el.priceColor = 'rgb(' + tariffs[0]*10 + ',' + (250 - (tariffs[0]*10 ) )+
+                                ',' + (175 - (tariffs[0]*10 )) + ')'
+                        }
+                        $scope.orgaEvents.push(el);
+                    }
+                    data.forEach(pushEvent)
                     $rootScope.resizeImgHeight();
                     if ($scope.orgaEvents.length > 0 && $rootScope.window != 'small' && $rootScope.window != 'medium') {
                         angular.element(document).ready(function(){
@@ -68,7 +84,6 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                                 var eventsContener = document.getElementsByClassName('data-ng-event');
                                 console.log(eventsContener.length)
                                 if (eventsContener.length == $scope.orgaEvents.length) {
-                                    console.log('yo')
                                     clearInterval(waitEvents);
                                     var indexEventRef = (Math.ceil(
                                             eventInfoConteners[0].clientHeight / eventsContener[0].clientHeight) * 2);

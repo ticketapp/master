@@ -47,11 +47,46 @@
                             <div style='height:112.8px; overflow:hidden;'>
                                 <a href="#/lieu/{{ place.placeId }}" >
                                     <img src="{{ place.imagePath }}" ng-if="place.imagePath.length > 0"/>
+                                    <map ng-if="place.imagePath.length == 0 ||
+                                    place.imagePath == undefined && showMap"
+                                         zoom="14"
+                                         center="[{{place.geographicPoint}}]"
+                                         scrollwheel="false"
+                                         navigationControl="false"
+                                         mapTypeControl="false"
+                                         scaleControl="false"
+                                         styles="[
+                                     {
+                                         stylers:[
+                                             {hue:'#00654C'},
+                                             {visibility:'simplified'},
+                                             {gamma:0.5},
+                                             {weight:0.5}
+                                         ]
+                                     },
+                                     {
+                                        elementType:'labels',
+                                        stylers:[
+                                            {visibility:'off'}
+                                        ]
+                                    },
+                                    {featureType:'water',
+                                        stylers:[
+                                            {color:'#008CBA'}
+                                        ]
+                                    }
+                                ]"
+                                         class="width100p img_min_evnt">
+                                        <marker visible="true" position="{{place.geographicPoint}}">
+                                        </marker>
+                                    </map>
                                 </a>
                             </div>
-                            <a href="#/lieu/{{ place.placeId }}">
-                                <h4 class='column large-6'>{{ place.name}}</h4>
-                            </a>
+                            <b>
+                                <a href="#/lieu/{{ place.placeId }}">
+                                    <h3 class='column large-6'>{{ place.name}}</h3>
+                                </a>
+                            </b>
                             <button style='margin-top:5px; float:right'>Suivre</button>
                         </div>
                     </ul>
@@ -71,9 +106,11 @@
                                     <img src='{{ organizer.imagePath }}'/>
                                 </a>
                             </div>
-                            <a href='#/user/{{organizer.organizerId}}'>
-                                <h4 class='column large-6'>{{organizer.name}}</h4>
-                            </a>
+                            <b>
+                                <a href='#/user/{{organizer.organizerId}}'>
+                                    <h3 class='column large-6'>{{organizer.name}}</h3>
+                                </a>
+                            </b>
                             <button style='margin-top:5px; float:right'>Suivre</button>
                         </div>
                     </ul>
@@ -101,7 +138,7 @@
                                 </a>
                             </div>
                             <a href="#/artiste/{{artist.facebookUrl}}">
-                                <h4 class='column large-6'>{{artist.name}}</h4>
+                                <h3 class='column large-6'>{{artist.name}}</h3>
                             </a>
                             <button style='margin-top:5px; float:right'>Suivre</button>
                             <div class="img-circularPlayer float-right"

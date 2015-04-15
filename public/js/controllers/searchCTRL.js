@@ -187,6 +187,14 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         function uploadEvents(el, index, array) {
                             if (scopeIdList.indexOf(el.eventId) == -1) {
                                 el.priceColor = 'rgb(0, 140, 186)';
+                                var placeLenght = el.places.length
+                                for (var i = 0; i < placeLenght; i++) {
+                                    if (el.places[i].geographicPoint != undefined) {
+                                        el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
+                                        el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
+                                        el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
+                                    }
+                                }
                                 if (el.tariffRange != undefined) {
                                     var tariffs = el.tariffRange.split('-');
                                     if (tariffs[1] > tariffs[0]) {
@@ -378,6 +386,14 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 });
                                 if ($scope.scopeIdList.indexOf(el.eventId) == -1) {
                                     el.priceColor = 'rgb(0, 140, 186)';
+                                    var placeLenght = el.places.length
+                                    for (var i = 0; i < placeLenght; i++) {
+                                        if (el.places[i].geographicPoint != undefined) {
+                                            el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
+                                            el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
+                                            el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
+                                        }
+                                    }
                                     if (el.tariffRange != undefined) {
                                         var tariffs = el.tariffRange.split('-');
                                         if (tariffs[1] > tariffs[0]) {
