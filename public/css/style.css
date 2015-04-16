@@ -176,10 +176,14 @@ md-tabs-ink-bar {background: #a0d3e8!important;}
 }
 md-toast{position: fixed!important;}
 .f-dropdown{opacity: 0;}
+@keyframes drop {
+    from {left: -99999px; opacity: 0}
+    to {left: 0; opacity: 1}
+}
 .dropDown:hover > .f-dropdown {
     position: absolute;
     float: left;
-    left: auto;
+    left: 20px;
     max-width: 90%;
     -webkit-animation-delay: .5s;
     -moz-animation-delay: .5s;
@@ -193,10 +197,10 @@ md-toast{position: fixed!important;}
     -moz-animation-duration:.8s;
     -ms-animation-duration:.8s;
     -o-animation-duration:.8s;
-    -webkit-animation-name: fadeIn;
-    -moz-animation-name: fadeIn;
-    -ms-animation-name: fadeIn;
-    -o-animation-name: fadeIn;
+    -webkit-animation-name: drop;
+    -moz-animation-name: drop;
+    -ms-animation-name: drop;
+    -o-animation-name: drop;
     opacity: 1;
 }
 .f-dropdown:hover {

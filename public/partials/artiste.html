@@ -25,7 +25,8 @@
             </a>
         </h2>
     </div>
-    <div ng-if="artiste.description.length > 0" ng-init="limitDesc = '147px';" class="column large-12 float-left" >
+    <div ng-if="artiste.description.length > 0" ng-init="limitDesc = '147px';"
+         class="column large-12 float-left padding0" >
         <div data-ng-bind-html="artiste.description" style="height: {{limitDesc}}; overflow: hidden;">
         </div>
         <div class="column large-12">
@@ -59,7 +60,7 @@
                 </md-content>
             </md-tab>
             <md-tab label="Tracks">
-                <md-content class="md-padding">
+                <md-content>
                     <input class="column float-left large-6 marginTop20 height50 small-12"
                            ng-if="tracks.length > 0 || trackTitle.length > 0"
                            ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()"
