@@ -14,7 +14,7 @@ case class Track (trackId: Option[Long],
                   thumbnailUrl: String,
                   artistFacebookUrl: String,
                   redirectUrl: Option[String] = None,
-                  rank: Option[Int] = None)
+                  playlistRank: Option[Float] = None)
 
 object Track {
   implicit val trackWrites = Json.writes[Track]
@@ -47,10 +47,9 @@ object Track {
       get[String]("platform") ~
       get[String]("thumbnailUrl") ~
       get[String]("artistFacebookUrl") ~
-      get[Option[String]]("redirectUrl") ~
-      get[Option[Int]]("rank") map {
-      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl ~ rank =>
-        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl, rank)
+      get[Option[String]]("redirectUrl")  map {
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl =>
+        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
     }
   }
 

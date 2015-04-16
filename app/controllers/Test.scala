@@ -36,31 +36,23 @@ object Test extends Controller {
   }*/
 
   def test1 = Action  {
-      val ps = Seq("0650415125", "04 75 64 30 65", "07.50.89.63.36", "0475643065, 0750896336",
-      "0033 75 64 30 65-0610646630")
-
-    def normalizeNumber(phoneNumbers: Seq[String]): Seq[Seq[String]] = {
-      println(phoneNumbers)
-      phoneNumbers.map { phoneNumber => phoneNumber.replaceAll("[^0-9,]", "").split(",").toSeq
-        .map { phoneNumber =>
-        //        if (phoneNumber.length > 12) {
-        println(phoneNumber.drop(12))
-        println(phoneNumber.drop(phoneNumber.indexOf('0', 10)))
-        phoneNumber
-      }
-      }
-    }
-    println(normalizeNumber(ps))
-
     val a = Seq("0231862915", "04 72 76 89 09", "00336504154", "033746464",
       "33654654546", "01.40.20.40.25 (Billetterie)", "+33299673212")
+
     for (b <- a) {
-      if (b.replaceAll("[^0-9,]", "").startsWith("0033")) {
-        println("0" + b.replaceAll("[^0-9,]", "").drop(4))
-      }
-      if (b.replaceAll("[^0-9,]", "").startsWith("33")) {
-        println("0" + b.replaceAll("[^0-9,]", "").drop(4))
-      }
+      val c = b.replaceAll("[^0-9+]", "")
+      val d = normalizePhoneNumberPrefix(c).take(10)
+    }
+
+
+    def normalizePhoneNumberPrefix(phoneNumber: String): String = phoneNumber match {
+      case phoneNumberStartsWith0033 if phoneNumberStartsWith0033.startsWith("0033") =>
+        "0" + phoneNumber.drop(4)
+      case phoneNumberStartsWith33 if phoneNumberStartsWith33.startsWith("33") =>
+        "0" + phoneNumber.drop(2)
+      case phoneNumberStartsWithPlus33 if phoneNumberStartsWithPlus33.startsWith("+33") =>
+        "0" + phoneNumber.drop(3)
+      case alreadyNormalized: String => alreadyNormalized
     }
 
     Ok
