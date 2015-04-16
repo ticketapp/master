@@ -13,7 +13,8 @@ case class Track (trackId: Option[Long],
                   platform: String, 
                   thumbnailUrl: String,
                   artistFacebookUrl: String,
-                  redirectUrl: Option[String] = None)
+                  redirectUrl: Option[String] = None,
+                  rank: Option[Int] = None)
 
 object Track {
   implicit val trackWrites = Json.writes[Track]
@@ -46,9 +47,10 @@ object Track {
       get[String]("platform") ~
       get[String]("thumbnailUrl") ~
       get[String]("artistFacebookUrl") ~
-      get[Option[String]]("redirectUrl") map {
-      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl =>
-        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
+      get[Option[String]]("redirectUrl") ~
+      get[Option[Int]]("rank") map {
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl ~ rank =>
+        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl, rank)
     }
   }
 
