@@ -15,3 +15,7 @@ case class SchedulerException(message: String) extends Exception(message) {
 case class PlaylistDoesNotExistException(message: String) extends Exception(message) {
   println("PlaylistDoesNotExistException: " + message)
 }
+
+case class PlaylistUpdateTrackWithoutRank(message: String) extends Exception(message) {
+  println("PlaylistUpdateTrackWithoutRank: " + message)
+}

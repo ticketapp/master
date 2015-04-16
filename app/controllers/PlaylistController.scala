@@ -19,8 +19,9 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
   val playlistBindingForm = Form(mapping(
     "name" -> nonEmptyText,
     "tracksId" -> seq(mapping(
-      "trackId" -> longNumber
-    )(Playlist.idFormApply)(Playlist.idFormUnapply))
+      "trackId" -> longNumber,
+      "trackRank" -> bigDecimal
+    )(Playlist.idAndRankFormApply)(Playlist.idAndRankFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))
 
   def create = SecuredAction(ajaxCall = true) { implicit request =>
@@ -92,7 +93,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
     "tracksInfo" -> seq(mapping(
       "trackId" -> longNumber,
       "action" -> nonEmptyText,
-      "trackId" -> optional(longNumber)
+      "trackRank" -> optional(bigDecimal)
     )(Playlist.trackInfoFormApply)(Playlist.trackInfoFormUnapply))
   )(Playlist.updateFormApply)(Playlist.updateFormUnapply))
 

@@ -3,6 +3,7 @@ package models
 import anorm.SqlParser._
 import anorm._
 import controllers._
+import models.Playlist.TrackIdAndRank
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -73,7 +74,7 @@ object Track {
   def findTracksByPlaylistId(playlistId: Option[Long]): Seq[Track] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT tracks.* FROM playlistsTracks playlistsTracks
+        """SELECT tracks.*, playlistTracks.rank FROM playlistsTracks playlistsTracks
           | INNER JOIN tracks tracks
           |   ON tracks.trackId = playlistsTracks.trackId
           | INNER JOIN playlists playlists
@@ -122,14 +123,15 @@ object Track {
     case e: Exception => throw new DAOException("Track.save: " + e.getMessage)
   }
 
-  def savePlaylistTrackRelation(playlistId: Long, trackId: Long): Option[Long] = try {
+  def savePlaylistTrackRelation(playlistId: Long, trackIdAndRank: TrackIdAndRank): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """INSERT INTO playlistsTracks (playlistId, trackId)
-          | VALUES ({playlistId}, {trackId})""".stripMargin)
+        """INSERT INTO playlistsTracks (playlistId, trackId, rank)
+          | VALUES ({playlistId}, {trackId}, {rank})""".stripMargin)
         .on(
           'playlistId -> playlistId,
-          'trackId -> trackId)
+          'trackId -> trackIdAndRank.id,
+          'trackId -> trackIdAndRank.rank)
         .executeInsert()
     }
   } catch {

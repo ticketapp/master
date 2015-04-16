@@ -4,7 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
-import controllers.{PlaylistDoesNotExistException, DAOException}
+import controllers.{PlaylistUpdateTrackWithoutRank, PlaylistDoesNotExistException, DAOException}
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -14,14 +14,15 @@ case class Playlist(playlistId: Option[Long], userId: String, name: String, trac
 object Playlist {
   implicit val playlistWrites = Json.writes[Playlist]
 
-  def idFormApply(id: Long): Long = id
-  def idFormUnapply(id: Long): Option[Long] = Option(id)
+  case class TrackIdAndRank(id: Long, rank: BigDecimal)
+  def idAndRankFormApply(id: Long, rank: BigDecimal) = TrackIdAndRank(id, rank)
+  def idAndRankFormUnapply(trackIdAndRank: TrackIdAndRank) = Option((trackIdAndRank.id, trackIdAndRank.rank))
 
-  case class PlaylistNameAndTracksId(name: String, tracksId: Seq[Long])
-  def formApply(name: String, tracksId: Seq[Long]) =
-    PlaylistNameAndTracksId(name, tracksId)
-  def formUnapply(playlistNameAndTracksId: PlaylistNameAndTracksId) =
-    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksId))
+  case class PlaylistNameTracksIdAndRank(name: String, tracksIdAndRank: Seq[TrackIdAndRank])
+  def formApply(name: String, tracksIdAndRank: Seq[TrackIdAndRank]) =
+    PlaylistNameTracksIdAndRank(name, tracksIdAndRank)
+  def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
+    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
 
   private val playlistParser: RowParser[Playlist] = {
     get[Long]("playlistId") ~
@@ -44,16 +45,17 @@ object Playlist {
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
   }
 
-  def save(userId: String, playlistNameAndTracksId: PlaylistNameAndTracksId): Option[Long] = try {
+  def save(userId: String, playlistNameTracksIdAndRank: PlaylistNameTracksIdAndRank): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO playlists(userId, name) VALUES({userId}, {name})""")
         .on('userId -> userId,
-            'name -> playlistNameAndTracksId.name)
+            'name -> playlistNameTracksIdAndRank.name)
         .executeInsert() match {
         case None =>
           None
         case Some(playlistId: Long) =>
-          playlistNameAndTracksId.tracksId.foreach(trackId => Track.savePlaylistTrackRelation(playlistId, trackId))
+          playlistNameTracksIdAndRank.tracksIdAndRank.foreach(trackIdAndRank =>
+            Track.savePlaylistTrackRelation(playlistId, trackIdAndRank))
           Some(playlistId)
       }
     }
@@ -88,8 +90,8 @@ object Playlist {
   def addOrRemoveTracksFormUnapply(playlistIdAndTracksId: PlaylistIdAndTracksId) =
     Option((playlistIdAndTracksId.id, playlistIdAndTracksId.tracksId))
 */
-  case class TrackInfo(trackId: Long, action: String, trackRank: Option[Long])
-  def trackInfoFormApply(trackId: Long, action: String, trackRank: Option[Long]) =
+  case class TrackInfo(trackId: Long, action: String, trackRank: Option[BigDecimal])
+  def trackInfoFormApply(trackId: Long, action: String, trackRank: Option[BigDecimal]) =
     TrackInfo(trackId, action, trackRank)
   def trackInfoFormUnapply(trackInfo: TrackInfo) =
     Option((trackInfo.trackId, trackInfo.action, trackInfo.trackRank))
@@ -114,22 +116,28 @@ object Playlist {
   def update(userId: String, playlistIdAndTracksInfo: PlaylistIdAndTracksInfo): Unit = try {
     DB.withConnection { implicit connection =>
       if (existsPlaylistForUser(userId, playlistIdAndTracksInfo.id)) {
-        for (trackInfo <- playlistIdAndTracksInfo.tracksInfo) {
-          trackInfo match {
-            case trackToUpdate: TrackInfo if trackInfo.action == "M" =>
-              updateTrackRank(playlistIdAndTracksInfo.id, trackToUpdate)
-            case trackToDelete: TrackInfo if trackInfo.action == "D" =>
-              Track.deletePlaylistTrackRelation(playlistIdAndTracksInfo.id, trackToDelete.trackId)
-            case trackToAdd: TrackInfo if trackInfo.action == "A" =>
-              Track.savePlaylistTrackRelation(playlistIdAndTracksInfo.id, trackToAdd.trackId)
-          }
-        }
+        for (trackInfo <- playlistIdAndTracksInfo.tracksInfo)
+          proceedTrackUpdateDependingOfAction(playlistIdAndTracksInfo.id, trackInfo)
       } else {
         throw new PlaylistDoesNotExistException("There is no playlist for this user Id and this playlist Id.")
       }
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.delete: " + e.getMessage)
+  }
+
+  def proceedTrackUpdateDependingOfAction(playlistId: Long, trackInfo: TrackInfo): Unit = trackInfo match {
+    case trackToUpdate: TrackInfo if trackInfo.action == "M" =>
+      updateTrackRank(playlistId, trackToUpdate)
+    case trackToDelete: TrackInfo if trackInfo.action == "D" =>
+      Track.deletePlaylistTrackRelation(playlistId, trackToDelete.trackId)
+    case trackToAdd: TrackInfo if trackInfo.action == "A" =>
+      try {
+        Track.savePlaylistTrackRelation(playlistId,
+          TrackIdAndRank(trackToAdd.trackId, trackToAdd.trackRank.get))
+      } catch {
+        case e: NoSuchElementException => PlaylistUpdateTrackWithoutRank("Playlist.update")
+      }
   }
 
   def updateTrackRank(playlistId: Long, trackInfo: TrackInfo): Unit = try {

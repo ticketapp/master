@@ -42,6 +42,13 @@ object Test extends Controller {
     for (b <- a) {
       val c = b.replaceAll("[^0-9+]", "")
       val d = normalizePhoneNumberPrefix(c).take(10)
+      if (d.length > 10) {
+        val e = normalizePhoneNumberPrefix(d.drop(10))
+        if (e.length > 10) {
+          val f = normalizePhoneNumberPrefix(e.drop(10))
+        }
+      }
+
     }
 
 
