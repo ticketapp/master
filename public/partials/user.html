@@ -81,195 +81,117 @@
         </map>
     </div>
 </div>
-<div class="parallax-content column" style="background: #ffffff">
-    <div class="columns large-12">
+<div class="parallax-content column paddingLeft0 paddingRight0" style="background: #ffffff">
+    <!--<div class="columns large-12">
         <h2 id="eventTitle">{{organizer.name}}</h2>
     </div>
-    <div class="column float-right paddingLeft0 paddingRight0 eventInfo"
-         style="padding-bottom: 0; padding-left: 0; padding-right: 0;"
-        ng-hide="(organizer.description == undefined && largeMap == true) || organizer.imagePath == undefined"
-         ng-class="{'margin0': organizer.description == undefined && organizer.geographicPoint == undefined, 'large-12': orgaEvents.length == 0, 'large-8': orgaEvents.length == 1, 'large-4':orgaEvents.length > 1}">
-        <div ng-if="largeMap == false && map == true" style="height: {{heightMap}};" class="column width100p padding0">
-            <div class="column large-12 zIndex1 absolute" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4)" ng-if="map">
-                <div style="font-size: 12px;" class="column large-5">
-                    {{event.addresses[0].street}}<br/>
-                    {{event.addresses[0].zip}}
-                    {{event.addresses[0].city}}
+    <div class="column large-6">
+        <div ng-if="organizer.description.length > 0" ng-init="limitDesc = '250px';"
+             class="column large-12 float-left padding0" >
+            <div data-ng-bind-html="organizer.description" style="height: {{limitDesc}}; overflow: hidden;">
+            </div>
+            <div class="column large-12">
+                <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
+                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
+                     ng-if="organizer.description.length > 600 && limitDesc == '147px'">
+                    <i class="pauseInImg ng-scope fa fa-chevron-down pointer"
+                       style="font-size: 50px;"
+                       ng-click="$parent.limitDesc = 'auto'"></i>
                 </div>
-                <div class="column large-7">
-                    <a class=" mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
-                    <a class=" mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
-                    <a class=" mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
-                        <i class="fi-map"></i>
-                    </a>
-                    <a>
-                        {{directionInfos.routes[0].legs[0].distance.text}}
-                        {{directionInfos.routes[0].legs[0].duration.text}}
-                    </a>
-                <span ng-if="selectTravel" class="width100p float-left ">
-                    {{$root.infoDirection}}
-                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
-                       ng-click="changeTravelMode('WALKING')">
-                        Walking
-                    </a>
-                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
-                       ng-click="changeTravelMode('BICYCLING')">
-                        Bicycle
-                    </a>
-                    <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
-                       ng-click="changeTravelMode('TRANSIT')">
-                        Transit
-                    </a>-->
-                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
-                       ng-click="changeTravelMode('DRIVING')">
-                        Drive
-                    </a>
-                </span>
+                <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
+                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
+                     ng-if="limitDesc == 'auto'">
+                    <i class="pauseInImg ng-scope fa fa-chevron-up pointer"
+                       style="font-size: 50px;"
+                       ng-click="$parent.limitDesc = '147px'"></i>
                 </div>
             </div>
-            <map ng-if="map"
-                 zoom="{{zoom}}"
-                 center="[{{organizer.geographicPoint}}]"
-                 scrollwheel="false"
-                 navigationControl="false"
-                 disable-default-u-i="true"
-                 mapTypeControl="false"
-                 scaleControl="false"
-                 styles="[
-                 {
-                     stylers:[
-                         {hue:'#00654C'},
-                         {visibility:'simplified'},
-                         {gamma:0.5},
-                         {weight:0.5}
-                     ]
-                 },
-                 {
-                    elementType:'labels',
-                    stylers:[
-                        {visibility:'off'}
-                    ]
-                },
-                {featureType:'water',
-                    stylers:[
-                        {color:'#008CBA'}
-                    ]
-                }
-            ]"
-                 style="height: 100%; min-height: 300px;"
-                 class="width100p">
-                <directions
-                        draggable="true"
-                        panel="directions-panel"
-                        travel-mode="{{travelMode}}"
-                        origin="{{start}}"
-                        destination="{{organizer.geographicPoint}}">
-                </directions>
-                <marker visible="true" position="{{organizer.geographicPoint}}" >
-                </marker>
-                <transit-layer></transit-layer>
-            </map>
         </div>
-        <div data-ng-bind-html="organizer.description"
-             class="column width100p"
-             style="max-height: {{descHeight}}px; overflow: hidden">
-         </div>
-        <i class="fa fa-chevron-down" ng-if="descHeight > 0" ng-click="$parent.descHeight = 'auto'"></i>
-    </div>
-    <div class="column large-4 float-left margin0 data-ng-event"
-         data-ng-repeat="event in orgaEvents"
-         ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
-    </div>
-    <div class="column float-right eventInfo column padding0"
-         ng-if="largeMap == true"
-         ng-class="{'large-8': orgaEvents.length == 1 || orgaEvents.length %2 != 0 || medMap == true, 'scaleMap': medMap == true, 'large-12': fullMap == true, 'large-4':orgaEvents.length > 1}"
-
-         >
-        <div style="height: {{heightMap}};">
-            <div class="column large-12 zIndex1 absolute" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4)" ng-if="map">
-                <div style="font-size: 12px;" class="column large-5">
-                    {{event.addresses[0].street}}<br/>
-                    {{event.addresses[0].zip}}
-                    {{event.addresses[0].city}}
-                </div>
-                <div class="column large-7">
-                    <a class=" mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
-                    <a class=" mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
-                    <a class=" mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
-                        <i class="fi-map"></i>
-                    </a>
-                    <a>
-                        {{directionInfos.routes[0].legs[0].distance.text}}
-                        {{directionInfos.routes[0].legs[0].duration.text}}
-                    </a>
-                <span ng-if="selectTravel" class="width100p float-left ">
-                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
-                       ng-click="changeTravelMode('WALKING')">
-                        Walking
-                    </a>
-                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
-                       ng-click="changeTravelMode('BICYCLING')">
-                        Bicycle
-                    </a>
-                    <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
-                       ng-click="changeTravelMode('TRANSIT')">
-                        Transit
-                    </a>-->
-                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
-                       ng-click="changeTravelMode('DRIVING')">
-                        Drive
-                    </a>
-                </span>
-                </div>
+    </div>-->
+    <div ng-if="organizer.imagePath != undefined && map == true"
+         style="height: 300px;" class="column large-12 marginBottom20">
+        <div class="column large-12 zIndex1 absolute">
+            <div style="font-size: 12px;" class="column large-5">
+                <h2>{{organizer.name}}</h2>
+                {{organizer.addresses[0].street}}<br/>
+                {{organizer.addresses[0].zip}}
+                {{organizer.addresses[0].city}}
             </div>
-            <map ng-if="map"
-                 zoom="{{zoom}}"
-                 center="[{{organizer.geographicPoint}}]"
-                 scrollwheel="false"
-                 navigationControl="false"
-                 disable-default-u-i="true"
-                 mapTypeControl="false"
-                 scaleControl="false"
-                 styles="[
-                 {
-                     stylers:[
-                         {hue:'#00654C'},
-                         {visibility:'simplified'},
-                         {gamma:0.5},
-                         {weight:0.5}
-                     ]
-                 },
-                 {
-                    elementType:'labels',
-                    stylers:[
-                        {visibility:'off'}
-                    ]
-                },
-                {featureType:'water',
-                    stylers:[
-                        {color:'#008CBA'}
-                    ]
-                }
-            ]"
-                 style="height: 100%;"
-                 class="width100p">
-                <directions
-                        draggable="true"
-                        panel="directions-panel"
-                        travel-mode="{{travelMode}}"
-                        origin="{{start}}"
-                        destination="{{organizer.geographicPoint}}">
-                </directions>
-                <marker visible="true" position="{{organizer.geographicPoint}}" >
-                </marker>
-                <transit-layer></transit-layer>
-            </map>
+            <div class="column large-7">
+                <a class=" mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
+                <a class=" mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
+                <a class=" mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
+                    <i class="fi-map"></i>
+                </a>
+                <a>
+                    {{directionInfos.routes[0].legs[0].distance.text}}
+                    {{directionInfos.routes[0].legs[0].duration.text}}
+                </a>
+            <span ng-if="selectTravel" class="width100p float-left ">
+                {{$root.infoDirection}}
+                <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
+                   ng-click="changeTravelMode('WALKING')">
+                    Walking
+                </a>
+                <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
+                   ng-click="changeTravelMode('BICYCLING')">
+                    Bicycle
+                </a>
+                <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
+                   ng-click="changeTravelMode('TRANSIT')">
+                    Transit
+                </a>-->
+                <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
+                   ng-click="changeTravelMode('DRIVING')">
+                    Drive
+                </a>
+            </span>
+            </div>
         </div>
+        <map zoom="{{zoom}}"
+             center="[{{organizer.geographicPoint}}]"
+             scrollwheel="false"
+             navigationControl="false"
+             disable-default-u-i="true"
+             mapTypeControl="false"
+             scaleControl="false"
+             styles="[
+             {
+                 stylers:[
+                     {hue:'#00654C'},
+                     {visibility:'simplified'},
+                     {gamma:0.5},
+                     {weight:0.5}
+                 ]
+             },
+             {
+                elementType:'labels',
+                stylers:[
+                    {visibility:'off'}
+                ]
+            },
+            {featureType:'water',
+                stylers:[
+                    {color:'#008CBA'}
+                ]
+            }
+        ]"
+             style="height: 100%; min-height: 300px;"
+             class="width100p">
+            <directions
+                    draggable="true"
+                    panel="directions-panel"
+                    travel-mode="{{travelMode}}"
+                    origin="{{start}}"
+                    destination="{{organizer.geographicPoint}}">
+            </directions>
+            <marker visible="true" position="{{organizer.geographicPoint}}" >
+            </marker>
+            <transit-layer></transit-layer>
+        </map>
     </div>
     <div class="column large-4 medium-6 float-left margin0 data-ng-event"
-         ng-if="$root.window == 'medium' || $root.window == 'small'"
-         data-ng-repeat="event in orgaEvents"
-            ng-class="{'padding0': $root.window == 'small'}">
+         data-ng-repeat="event in orgaEvents">
     </div>
 </div>
 
