@@ -120,12 +120,9 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
 
         };
         function resizeArtistsText (ImgHeight) {
-            var artists = document.getElementsByClassName('textArtistMin');
+            var artists = document.getElementsByClassName('minNoText');
             for (var i = 0; i < artists.length; i++) {
-                var newTextHeight = 110.5 - (ImgHeight/2) - 10;
-                if (newTextHeight < 31) {
-                    newTextHeight = 31;
-                }
+                var newTextHeight = 94 + (ImgHeight/2);
                 artists[i].style.height = newTextHeight + 'px';
             }
         }

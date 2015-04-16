@@ -14,7 +14,7 @@
             ng-show= "filteredGenres.length || filterQuery.length <= 1 || filterQuery == undefined">
         </div>
         <div ng-if="$root.activArtist && artists.length > 0"
-             class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0"
+             class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
             data-ng-repeat="artist in artists | filter: filterSearch"
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
             style="padding-bottom: 10px;">
@@ -39,7 +39,7 @@
                 </div>
             </div>
         </div>
-        <div class="column large-4 medium-6 float-left margin0"
+        <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
              ng-if="$root.activArtist && artistsFb.length > 0"
             data-ng-repeat="artist in artistsFb "
             ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
@@ -72,7 +72,7 @@
         <div layout="row" layout-sm="column" layout-align="space-around" class="float-left" ng-if="loadingFbArt && !loadingMore">
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
-        <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0"
+        <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
             ng-if="$root.activPlace && places.length > 0"
             style="padding-bottom: 10px;"
             data-ng-repeat="place in places" >
