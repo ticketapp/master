@@ -1,5 +1,85 @@
 <div class="parallax-background" style="background: #ffffff!important;">
-    <img class="width100p" src="{{ organizer.imagePath }}"/>
+    <img class="width100p" src="{{ organizer.imagePath }}" ng-if="organizer.imagePath != undefined"/>
+    <div style="height: 100%;" ng-if="organizer.imagePath == undefined">
+        <div class="column large-12 zIndex1 absolute" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4)" ng-if="map">
+            <div style="font-size: 12px;" class="column large-5">
+                {{event.addresses[0].street}}<br/>
+                {{event.addresses[0].zip}}
+                {{event.addresses[0].city}}
+            </div>
+            <div class="column large-7">
+                <a class=" mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
+                <a class=" mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
+                <a class=" mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
+                    <i class="fi-map"></i>
+                </a>
+                <a>
+                    {{directionInfos.routes[0].legs[0].distance.text}}
+                    {{directionInfos.routes[0].legs[0].duration.text}}
+                </a>
+                <span ng-if="selectTravel" class="width100p float-left ">
+                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
+                       ng-click="changeTravelMode('WALKING')">
+                        Walking
+                    </a>
+                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
+                       ng-click="changeTravelMode('BICYCLING')">
+                        Bicycle
+                    </a>
+                    <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
+                       ng-click="changeTravelMode('TRANSIT')">
+                        Transit
+                    </a>-->
+                    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
+                       ng-click="changeTravelMode('DRIVING')">
+                        Drive
+                    </a>
+                </span>
+            </div>
+        </div>
+        <map ng-if="map"
+             zoom="{{zoom}}"
+             center="[{{organizer.geographicPoint}}]"
+             scrollwheel="false"
+             navigationControl="false"
+             disable-default-u-i="true"
+             mapTypeControl="false"
+             scaleControl="false"
+             styles="[
+                 {
+                     stylers:[
+                         {hue:'#00654C'},
+                         {visibility:'simplified'},
+                         {gamma:0.5},
+                         {weight:0.5}
+                     ]
+                 },
+                 {
+                    elementType:'labels',
+                    stylers:[
+                        {visibility:'off'}
+                    ]
+                },
+                {featureType:'water',
+                    stylers:[
+                        {color:'#008CBA'}
+                    ]
+                }
+            ]"
+             style="height: 100%;"
+             class="width100p">
+            <directions
+                    draggable="true"
+                    panel="directions-panel"
+                    travel-mode="{{travelMode}}"
+                    origin="{{start}}"
+                    destination="{{organizer.geographicPoint}}">
+            </directions>
+            <marker visible="true" position="{{organizer.geographicPoint}}" >
+            </marker>
+            <transit-layer></transit-layer>
+        </map>
+    </div>
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
@@ -7,7 +87,7 @@
     </div>
     <div class="column float-right paddingLeft0 paddingRight0 eventInfo"
          style="padding-bottom: 0; padding-left: 0; padding-right: 0;"
-        ng-hide="organizer.description == undefined && largeMap == true"
+        ng-hide="(organizer.description == undefined && largeMap == true) || organizer.imagePath == undefined"
          ng-class="{'margin0': organizer.description == undefined && organizer.geographicPoint == undefined, 'large-12': orgaEvents.length == 0, 'large-8': orgaEvents.length == 1, 'large-4':orgaEvents.length > 1}">
         <div ng-if="largeMap == false && map == true" style="height: {{heightMap}};" class="column width100p padding0">
             <div class="column large-12 zIndex1 absolute" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4)" ng-if="map">

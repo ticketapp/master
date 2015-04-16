@@ -5805,6 +5805,7 @@ md-slider {
     display: block;
     margin-left: 4px;
     margin-right: 4px;
+    background: transparent!important;
     /**
    * Track
    */
@@ -5868,7 +5869,7 @@ md-slider .md-sign {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
-    display: flex;
+    display: none;
     -webkit-box-align: center;
     -webkit-align-items: center;
     -ms-flex-align: center;

@@ -206,6 +206,9 @@ md-toast{position: fixed!important;}
 .f-dropdown:hover {
     opacity: 1;
 }
+.f-dropdown > li:hover {
+    background: white!important;
+}
 .imgBlur {
     -webkit-filter: sepia(0.5) blur(2px);
     -moz-filter: sepia(0.5) blur(2px);

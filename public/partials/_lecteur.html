@@ -31,7 +31,7 @@
                 ng-class="{'small-2': $root.window == 'small' && showLecteur == true}"></i>
         <i class="fi-volume float-left lecteurControls" ng-show="showLecteur" ng-if="$root.window != 'small'"
            ng-mouseover="$parent.showVol = true"></i>
-        <div style="padding-left: 200px;" class="absolute" ng-if="showVol" ng-mouseleave="$parent.showVol = false">
+        <div style="padding-left: 50px; margin-left: 150px;" class="absolute" ng-if="showVol" ng-mouseleave="$parent.showVol = false">
             <md-slider  flex ng-change="volume()"
                        ng-model="$parent.levelVol" min="0" max="100"
                        aria-label="volume"
