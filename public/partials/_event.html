@@ -47,8 +47,9 @@
                         <li style="display: block;"
                             class="float-left width100p relative">
                             <a href="#/user/{{place.placeId}}"
-                               class="width100p padding0" style="height: 150px; overflow: hidden" ng-if="place.imagePath != undefined">
-                                <img class="width100p " src="{{place.imagePath}}">
+                               class="width100p padding0" style="height: 140px; overflow: hidden;
+                               background-color: {{event.priceColor}}">
+                                <img class="width100p " src="{{place.imagePath}}" ng-if="place.imagePath != undefined">
                             </a>
                             <a class="float-left" href="#/user/{{place.placeId}}">
                                 <h1 class="margin0">

@@ -71,8 +71,8 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                             } else {
                                 el.tariffRange = tariffs[0].replace('.0', '') + '€';
                             }
-                            el.priceColor = 'rgb(' + tariffs[0]*10 + ',' + (250 - (tariffs[0]*10 ) )+
-                                ',' + (175 - (tariffs[0]*10 )) + ')'
+                            el.priceColor = 'rgb(' + tariffs[0]*2 + ',' + (200 - (tariffs[0]*4 ) )+
+                                ',' + tariffs[0]*4 + ')'
                         }
                         $scope.orgaEvents.push(el);
                     }

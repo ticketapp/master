@@ -113,8 +113,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         if ($rootScope.playlist.tracks.length == 0) {
             var tracksLenght = tracks.length;
             var needRepeat = false;
-            if (tracksLenght > 100) {
-                tracksLenght = 100;
+            if (tracksLenght > 10) {
+                tracksLenght = 10;
                 needRepeat = true
             }
             for (var tr = 0; tr < tracksLenght; tr++) {
@@ -124,7 +124,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             $scope.playlistEnd = false;
             if (needRepeat == true) {
                 tracksLenght = tracks.length;
-                var start = 100;
+                var start = 10;
                 function pushAllTracks (start) {
                     for (tr = start; tr < start + 100; tr++) {
                         if (tracks[tr] != undefined) {
@@ -187,8 +187,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         var last = $rootScope.playlist.tracks.length;
         var tracksLenght = tracks.length;
         var needRepeat = false;
-        if (tracksLenght > 100) {
-            tracksLenght = 100;
+        if (tracksLenght > 10) {
+            tracksLenght = 10;
             needRepeat = true
         }
         for (var tr = 0; tr < tracksLenght; tr++) {
@@ -199,7 +199,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.playlistEnd = false;
         if (needRepeat == true) {
             tracksLenght = tracks.length;
-            var start = 100;
+            var start = 10;
             function pushAllTracks (start) {
                 for (tr = start; tr < start + 100; tr++) {
                     if (tracks[tr] != undefined) {
@@ -526,13 +526,15 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
         for (var i=0; i < playlist.tracks.length; i++) {
             tracksToSave.push({trackId: playlist.tracks[i].trackId})
         }
-        $http.post('/playlists/create', {name: playlist.name, tracksId: tracksToSave}).
+        console.log(playlist)
+        $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
+                alert('votre playlist ' + playlist.name + ' est enregistrée')
             }).
             error(function (data) {
                 if (data.error == 'Credentials required') {
                     var object = {name: playlist.name, tracksId: tracksToSave};
-                    $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist "' + playlist.name + '" est enregistée')
+                    $rootScope.storeLastReq('post', '/playlists', object, 'votre playlist "' + playlist.name + '" est enregistée')
                 }
             })
     };

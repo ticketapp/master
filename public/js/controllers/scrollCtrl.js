@@ -81,7 +81,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     genre: artist.genre
                 }
             }).start(function (data, etc) {
-                    console.log(etc, data);
+                    $rootScope.loadingTracks = true;
                 })
                 /*.node('champ.*', function (value) {
                  $scope.items.push(value);
@@ -89,12 +89,9 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 .done(function (value) {
                     $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
                     $rootScope.tracks = $rootScope.artiste.tracks;
-                    if (value.constructor === Array) {
-                        console.log(value);
-                    }
                     $rootScope.$apply();
+                    $rootScope.loadingTracks = false;
                     function saveTrack (track) {
-                        $rootScope.loadingTracks = false;
                         console.log('yo')
 
                         if (track.redirectUrl == undefined) {
@@ -123,12 +120,9 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
 
         };
         function resizeArtistsText (ImgHeight) {
-            var artists = document.getElementsByClassName('textArtistMin');
+            var artists = document.getElementsByClassName('minNoText');
             for (var i = 0; i < artists.length; i++) {
-                var newTextHeight = 110.5 - (ImgHeight/2) - 10;
-                if (newTextHeight < 31) {
-                    newTextHeight = 31;
-                }
+                var newTextHeight = 94 + (ImgHeight/2);
                 artists[i].style.height = newTextHeight + 'px';
             }
         }
