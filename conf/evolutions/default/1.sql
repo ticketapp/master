@@ -10,7 +10,7 @@ CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
 INSERT INTO addresses (geographicPoint) VALUES ('(44.1761, 4.974)');
 INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.134)');
 INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.83724)');
-INSERT INTO addresses (geographicPoint) VALUES ('(41.4678, 5.9147134)');
+INSERT INTO addresses (geographicPoint) VALUES ('(41.4678, 5.915134)');
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
@@ -29,7 +29,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 13 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 12 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (

@@ -113,8 +113,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         if ($rootScope.playlist.tracks.length == 0) {
             var tracksLenght = tracks.length;
             var needRepeat = false;
-            if (tracksLenght > 100) {
-                tracksLenght = 100;
+            if (tracksLenght > 10) {
+                tracksLenght = 10;
                 needRepeat = true
             }
             for (var tr = 0; tr < tracksLenght; tr++) {
@@ -124,7 +124,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             $scope.playlistEnd = false;
             if (needRepeat == true) {
                 tracksLenght = tracks.length;
-                var start = 100;
+                var start = 10;
                 function pushAllTracks (start) {
                     for (tr = start; tr < start + 100; tr++) {
                         if (tracks[tr] != undefined) {
@@ -187,8 +187,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         var last = $rootScope.playlist.tracks.length;
         var tracksLenght = tracks.length;
         var needRepeat = false;
-        if (tracksLenght > 100) {
-            tracksLenght = 100;
+        if (tracksLenght > 10) {
+            tracksLenght = 10;
             needRepeat = true
         }
         for (var tr = 0; tr < tracksLenght; tr++) {
@@ -199,7 +199,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.playlistEnd = false;
         if (needRepeat == true) {
             tracksLenght = tracks.length;
-            var start = 100;
+            var start = 10;
             function pushAllTracks (start) {
                 for (tr = start; tr < start + 100; tr++) {
                     if (tracks[tr] != undefined) {

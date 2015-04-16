@@ -81,7 +81,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     genre: artist.genre
                 }
             }).start(function (data, etc) {
-                    console.log(etc, data);
+                    $rootScope.loadingTracks = true;
                 })
                 /*.node('champ.*', function (value) {
                  $scope.items.push(value);
@@ -89,12 +89,9 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 .done(function (value) {
                     $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
                     $rootScope.tracks = $rootScope.artiste.tracks;
-                    if (value.constructor === Array) {
-                        console.log(value);
-                    }
                     $rootScope.$apply();
+                    $rootScope.loadingTracks = false;
                     function saveTrack (track) {
-                        $rootScope.loadingTracks = false;
                         console.log('yo')
 
                         if (track.redirectUrl == undefined) {
