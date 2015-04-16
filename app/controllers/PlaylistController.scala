@@ -20,7 +20,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
     "name" -> nonEmptyText,
     "tracksId" -> seq(mapping(
       "trackId" -> longNumber
-    )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
+    )(Playlist.idFormApply)(Playlist.idFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))
 
   def create = SecuredAction(ajaxCall = true) { implicit request =>
@@ -36,14 +36,13 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       }
     )
   }
-
+/*
   val addTracksInPlaylistBindingForm = Form(mapping(
     "id" -> longNumber,
     "tracksId" -> seq(mapping(
       "trackId" -> longNumber
-    )(Playlist.trackIdFormApply)(Playlist.trackIdFormUnapply))
+    )(Playlist.idFormApply)(Playlist.idFormUnapply))
   )(Playlist.addOrRemoveTracksFormApply)(Playlist.addOrRemoveTracksFormUnapply))
-
 
   def addTracks() = SecuredAction(ajaxCall = true) { implicit request =>
     addTracksInPlaylistBindingForm.bindFromRequest().fold(
@@ -75,6 +74,38 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
           Ok
         /*} else
           Ok(Json.toJson("There is no playlist with this playlist Id for this user"))*/
+      }
+    )
+  }*/
+
+  /*
+  case class TrackInfo(trackId: Long, action: Char, trackRank: Option[Long])
+  case class PlaylistIdAndTracksInfo(id: Long, tracksInfo: Seq[TrackInfo])
+  def updateFormApply(id: Long, tracksInfo: Seq[TrackInfo]) =
+    PlaylistIdAndTracksInfo(id, tracksInfo)
+  def updateFormUnapply(playlistIdAndTracksInfo: PlaylistIdAndTracksInfo) =
+    Option((playlistIdAndTracksInfo.id, playlistIdAndTracksInfo.tracksInfo))
+   */
+
+  val updatePlaylistBindingForm = Form(mapping(
+    "playlistId" -> longNumber,
+    "tracksInfo" -> seq(mapping(
+      "trackId" -> longNumber,
+      "action" -> nonEmptyText,
+      "trackId" -> optional(longNumber)
+    )(Playlist.trackInfoFormApply)(Playlist.trackInfoFormUnapply))
+  )(Playlist.updateFormApply)(Playlist.updateFormUnapply))
+
+  def update() = SecuredAction(ajaxCall = true) { implicit request =>
+    updatePlaylistBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        println(formWithErrors.errorsAsJson)
+        BadRequest(formWithErrors.errorsAsJson)
+      },
+      playlistIdAndTracksInfo => {
+        val userId = request.user.identityId.userId
+        Future { Playlist.update(userId, playlistIdAndTracksInfo) }
+        Ok
       }
     )
   }

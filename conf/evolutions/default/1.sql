@@ -74,13 +74,15 @@ CREATE TABLE organizers (
   name                    VARCHAR(255) NOT NULL,
   description             VARCHAR,
   addressId               BIGINT references addresses(addressId),
-  phone                   VARCHAR(15),
+  phone                   VARCHAR(255),
   publicTransit           VARCHAR,
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   imagePath               VARCHAR,
+  placeId                 BIGINT,
   UNIQUE(facebookId),
-  UNIQUE(name)
+  UNIQUE(name),
+  UNIQUE(placeId)
 );
 
 CREATE OR REPLACE FUNCTION insertOrganizer(
@@ -90,13 +92,14 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
   phoneValue         VARCHAR(15),
   publicTransitValue VARCHAR,
   websitesValue      VARCHAR,
-  imagePathValue      VARCHAR)
+  imagePathValue     VARCHAR,
+  placeIdValue       BIGINT)
   RETURNS INT AS
   $$
   DECLARE organizerIdToReturn int;;
   BEGIN
-    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites, imagePath)
-    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue, imagePathValue)
+    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites, imagePath, placeId)
+    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue, imagePathValue, placeIdValue)
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
@@ -265,7 +268,9 @@ CREATE TABLE places (
   capacity                  INT,
   openingHours              VARCHAR(255),
   imagePath                 VARCHAR,
-  UNIQUE(facebookId)
+  organizerId               BIGINT,
+  UNIQUE(facebookId),
+  UNIQUE(organizerId)
 );
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
 INSERT into places(name, geographicPoint, facebookId)
@@ -280,15 +285,16 @@ CREATE OR REPLACE FUNCTION insertPlace(
   webSitesValue                  VARCHAR,
   capacityValue                  INT,
   openingHoursValue              VARCHAR(255),
-  imagePathValue                 VARCHAR)
+  imagePathValue                 VARCHAR,
+  organizerIdValue               BIGINT)
   RETURNS INT AS
   $$
 DECLARE placeIdToReturn int;;
   BEGIN
     INSERT INTO places (name, geographicPoint, addressId, facebookId, description, webSites,
-                        capacity, openingHours, imagePath)
+                        capacity, openingHours, imagePath, organizerId)
     VALUES (nameValue, POINT(geographicPointValue), addressIdValue::BIGINT, facebookIdValue, descriptionValue,
-            webSitesValue, capacityValue, openingHoursValue, imagePathValue)
+            webSitesValue, capacityValue, openingHoursValue, imagePathValue, organizerIdValue)
     RETURNING placeId INTO placeIdToReturn;;
     RETURN placeIdToReturn;;
   EXCEPTION WHEN unique_violation THEN
@@ -661,6 +667,7 @@ CREATE TABLE playlists (
 CREATE TABLE playlistsTracks (
   playlistId              BIGINT REFERENCES playlists (playlistId),
   trackId                 BIGINT REFERENCES tracks (trackId),
+  trackRank               INT NOT NULL,
   PRIMARY KEY (playlistId, trackId)
 );
 

@@ -167,7 +167,7 @@ object Artist {
           'facebookUrl -> artist.facebookUrl,
           'description -> artist.description,
           'websites -> websites)
-        .as(scalar[Option[Long]].single) match {
+        .as(scalar[Long].singleOpt) match {
           case Some(artistId: Long) =>
             artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
             artist.tracks.foreach { Track.save }
