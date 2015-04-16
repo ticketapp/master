@@ -89,7 +89,7 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
   facebookIdValue    VARCHAR(63),
   nameValue          VARCHAR(255),
   descriptionValue   VARCHAR,
-  phoneValue         VARCHAR(15),
+  phoneValue         VARCHAR(255),
   publicTransitValue VARCHAR,
   websitesValue      VARCHAR,
   imagePathValue     VARCHAR,
@@ -667,7 +667,7 @@ CREATE TABLE playlists (
 CREATE TABLE playlistsTracks (
   playlistId              BIGINT REFERENCES playlists (playlistId),
   trackId                 BIGINT REFERENCES tracks (trackId),
-  trackRank               INT NOT NULL,
+  trackRank               FLOAT NOT NULL,
   PRIMARY KEY (playlistId, trackId)
 );
 

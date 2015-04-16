@@ -73,7 +73,7 @@ object Artist {
         .map(getArtistProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.findAll: " + e.getMessage)
   }
 
   def findSinceOffset(numberOfArtistsToReturn: Int, offset: Int): Seq[Artist] = try {

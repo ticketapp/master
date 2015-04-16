@@ -27,7 +27,7 @@ object Playlist {
     get[Long]("playlistId") ~
       get[String]("userId") ~
       get[String]("name") map {
-      case playlistId ~ userId ~ name => Playlist.apply(Option(playlistId), userId, name, Seq.empty)
+      case playlistId ~ userId ~ name => Playlist(Option(playlistId), userId, name, Seq.empty)
     }
   }
 
