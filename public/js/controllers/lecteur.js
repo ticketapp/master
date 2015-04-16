@@ -526,13 +526,15 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
         for (var i=0; i < playlist.tracks.length; i++) {
             tracksToSave.push({trackId: playlist.tracks[i].trackId})
         }
-        $http.post('/playlists/create', {name: playlist.name, tracksId: tracksToSave}).
+        console.log(playlist)
+        $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
+                alert('votre playlist ' + playlist.name + ' est enregistrée')
             }).
             error(function (data) {
                 if (data.error == 'Credentials required') {
                     var object = {name: playlist.name, tracksId: tracksToSave};
-                    $rootScope.storeLastReq('post', '/playlists/create', object, 'votre playlist "' + playlist.name + '" est enregistée')
+                    $rootScope.storeLastReq('post', '/playlists', object, 'votre playlist "' + playlist.name + '" est enregistée')
                 }
             })
     };

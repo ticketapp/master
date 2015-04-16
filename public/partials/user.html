@@ -82,18 +82,18 @@
     </div>
 </div>
 <div class="parallax-content column paddingLeft0 paddingRight0" style="background: #ffffff">
-    <!--<div class="columns large-12">
+    <div class="columns large-12">
         <h2 id="eventTitle">{{organizer.name}}</h2>
     </div>
-    <div class="column large-6">
-        <div ng-if="organizer.description.length > 0" ng-init="limitDesc = '250px';"
+    <div class="column large-12">
+        <div ng-if="organizer.description.length > 0" ng-init="limitDesc = '120px';"
              class="column large-12 float-left padding0" >
             <div data-ng-bind-html="organizer.description" style="height: {{limitDesc}}; overflow: hidden;">
             </div>
             <div class="column large-12">
                 <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
                      style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
-                     ng-if="organizer.description.length > 600 && limitDesc == '147px'">
+                     ng-if="organizer.description.length > 300 && limitDesc == '120px'">
                     <i class="pauseInImg ng-scope fa fa-chevron-down pointer"
                        style="font-size: 50px;"
                        ng-click="$parent.limitDesc = 'auto'"></i>
@@ -103,11 +103,11 @@
                      ng-if="limitDesc == 'auto'">
                     <i class="pauseInImg ng-scope fa fa-chevron-up pointer"
                        style="font-size: 50px;"
-                       ng-click="$parent.limitDesc = '147px'"></i>
+                       ng-click="$parent.limitDesc = '120px'"></i>
                 </div>
             </div>
         </div>
-    </div>-->
+    </div>
     <div ng-if="organizer.imagePath != undefined && map == true"
          style="height: 300px;" class="column large-12 marginBottom20">
         <div class="column large-12 zIndex1 absolute">
