@@ -1,6 +1,6 @@
 app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket, $timeout, $filter){
     $scope.bigTracks = true;
-    $scope.trackLimit = 10;
+    $scope.trackLimit = 12;
     $scope.heightDesc = '147px';
     $scope.trackTitle = '';
     $scope.allDesc = false;
