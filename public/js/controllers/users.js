@@ -75,9 +75,9 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace("(", "");
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(")", "");
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(",", ", ");
+                $scope.map = true;
             }
             refactorWebsites();
-            $scope.map = true;
             $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
                 .success(function(data, status){
                     $scope.orgaEvents = [];
