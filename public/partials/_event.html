@@ -5,6 +5,13 @@
                 <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
             </a>
         </div>
+        <div class="absolute top0">
+            <i ng-repeat="genre in event.genres"
+               ng-click="$root.research(genre.name); $root.redirectToSearch(genre.name)"
+               class="eventMinFilter">
+                {{genre.name}}
+            </i>
+        </div>
         <a href="#/event/{{event.eventId}}">
             <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
                 {{ event.name }}
@@ -60,6 +67,13 @@
                         </li>
                     </ul>
                 </span>
+                <i
+                  style="vertical-align: text-bottom;"
+                  class="eventMinFilter"
+                  ng-if="event.addresses[0].city.length > 0"
+                  ng-click="$root.research(event.addresses[0].city); $root.redirectToSearch(event.addresses[0].city)">
+                    ({{event.addresses[0].city}})
+                </i>
             </div>
             <div class="infos_event">
                 <span class="dropDown" ng-show="organizer.name != event.places[0].name"

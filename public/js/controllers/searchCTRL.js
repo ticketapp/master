@@ -12,7 +12,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var _selUsr = $rootScope.activUsr;
     var _selPlace = $rootScope.activPlace;
     var _selStart = ($rootScope.maxStart-23)*24;
-    if (document.getElementById('searchBar') != null) {
+    if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
+        var _research = $rootScope.storeSearch;
+        $rootScope.remStoreSearch();
+    } else if (document.getElementById('searchBar') != null) {
         var _research = document.getElementById('searchBar').value.trim();
     } else {
         var _research = '';
@@ -447,6 +450,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                         })
                                 }
                                 data.forEach(getPlaceEvents)
+                            });
+                        $http.get('/events/city/' + _research).
+                            success(function (data) {
+                                data.forEach(uploadEvents);
+                                $rootScope.resizeImgHeight()
                             });
                         $rootScope.resizeImgHeight()
                         $scope.loadingMore = false;

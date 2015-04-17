@@ -598,6 +598,10 @@ top: 0;
 .lecteur_content{background-color:black;}
 
 /*Events*/
+.eventMinFilter:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
 #events_contener{margin-top: 60px; margin-left: 0; margin-right: 0;}
 #events_contener>li{display:block;}
 /*#events_contener:hover>li{opacity:0.5;}*/
