@@ -1,4 +1,4 @@
-app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket, $timeout, $filter){
+app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket, $timeout, $filter, $modal){
     $scope.bigTracks = true;
     $scope.trackLimit = 12;
     $scope.heightDesc = '147px';
@@ -25,14 +25,38 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                         $scope.tracks.push(data[i])
                     }
                     if (data.length == 0) {
-                        alert('Nous n\'avons pas trouvé "' + trackTitle + '"')
+                        $scope.info = 'Nous n\'avons pas trouvé "' + trackTitle + '"';
+                        var modalInstance = $modal.open({
+                            templateUrl: 'assets/partials/_infoModal.html',
+                            controller: 'infoModalCtrl',
+                            resolve: {
+                                info: function () {
+                                    return $scope.info;
+                                }
+                            }
+                        });
+                        modalInstance.result.then(function () {
+                            $log.info('Modal dismissed at: ' + new Date());
+                        });
                     }
                 }).
                 error(function (data) {
                     console.log(data)
                 })
         } else {
-            alert('le nom de la track doit faire plus de deux lettres')
+            $scope.info = 'le nom de la track doit faire plus de deux lettres';
+            var modalInstance = $modal.open({
+                templateUrl: 'assets/partials/_infoModal.html',
+                controller: 'infoModalCtrl',
+                resolve: {
+                    info: function () {
+                        return $scope.info;
+                    }
+                }
+            });
+            modalInstance.result.then(function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
         }
     };
     $scope.filterTracks = function () {

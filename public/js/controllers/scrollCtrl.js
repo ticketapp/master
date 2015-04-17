@@ -18,6 +18,30 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             })*/
         $scope.needConnect = false;
         $rootScope.lastReq = {};
+        $rootScope.follow = function (route, id, name) {
+            $http.post('/'+ route +'/'+ id + '/follow').
+                success(function (data) {
+                    $scope.info = 'vous suivez maintenant ' + name;
+                    var modalInstance = $modal.open({
+                        templateUrl: 'assets/partials/_infoModal.html',
+                        controller: 'infoModalCtrl',
+                        resolve: {
+                            info: function () {
+                                return $scope.info;
+                            }
+                        }
+                    });
+                    modalInstance.result.then(function () {
+                        $log.info('Modal dismissed at: ' + new Date());
+                    });
+                }).
+                error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        $rootScope.storeLastReq('post', '/events/'+ id + '/follow', '', 'vous suivez maintenant ' + name)
+                    }
+                    console.log(data)
+                })
+        };
         $rootScope.passConnectedToFalse = function () {
             $rootScope.connected = false;
         };
@@ -268,5 +292,11 @@ app.filter('millSecondsToTimeString', function() {
         if(hours > 0) timeString += (hours > 1) ? (hours + " heures ") : (hours + " heure ");
         return timeString;
     }
+});
+app.controller('infoModalCtrl', function ($scope, $rootScope, $modalInstance, $http, info) {
+    $scope.info = info;
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
 });
 

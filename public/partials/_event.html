@@ -63,7 +63,9 @@
                                     {{place.name}}
                                 </h1>
                             </a>
-                            <button style='height:55px; float:right'>Suivre</button>
+                            <button style='height:55px; float:right' ng-click="$root.follow('places', place.placeId, place.name)">
+                                Suivre
+                            </button>
                         </li>
                     </ul>
                 </span>
@@ -94,7 +96,10 @@
                                     {{organizer.name}}
                                 </h1>
                             </a>
-                            <button style='height:55px; float:right'>Suivre</button>
+                            <button style='height:55px; float:right'
+                                    ng-click="$root.follow('organizers', organizer.organizerId, organizer.name)">
+                                Suivre
+                            </button>
                         </li>
                     </ul>
                 </span>
@@ -128,6 +133,10 @@
                                    style="color: {{event.priceColor}}; font-size: 80px;"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
                             </div>
+                            <button style='height:55px; float:left; margin-top: 30px;'
+                                    ng-click="$root.follow('artists', artist.artistId, artist.name)">
+                                Suivre
+                            </button>
                         </li>
                     </ul>
                 </span>

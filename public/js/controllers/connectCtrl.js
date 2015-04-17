@@ -1,4 +1,4 @@
-app.controller('connectCtrl', function ($scope, $rootScope, $http) {
+app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
     $scope.connectByMail = function () {
         $http.post('/authenticate/userpass', {username: $scope.username, password: $scope.password}).
             success(function (data) {
@@ -24,7 +24,19 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http) {
                             if ($rootScope.lastReq.object != "") {
                                 $http.post($rootScope.lastReq.path, $rootScope.lastReq.object).
                                     success(function (data) {
-                                        alert($rootScope.lastReq.success);
+                                        $scope.info = $rootScope.lastReq.success;
+                                        var modalInstance = $modal.open({
+                                            templateUrl: 'assets/partials/_infoModal.html',
+                                            controller: 'infoModalCtrl',
+                                            resolve: {
+                                                info: function () {
+                                                    return $scope.info;
+                                                }
+                                            }
+                                        });
+                                        modalInstance.result.then(function () {
+                                            $log.info('Modal dismissed at: ' + new Date());
+                                        });
                                         $rootScope.lastReq = {};
                                     }).
                                     error(function (data) {
@@ -33,7 +45,19 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http) {
                             } else {
                                 $http.post($rootScope.lastReq.path).
                                     success(function (data) {
-                                        alert($rootScope.lastReq.success);
+                                        $scope.info = $rootScope.lastReq.success;
+                                        var modalInstance = $modal.open({
+                                            templateUrl: 'assets/partials/_infoModal.html',
+                                            controller: 'infoModalCtrl',
+                                            resolve: {
+                                                info: function () {
+                                                    return $scope.info;
+                                                }
+                                            }
+                                        });
+                                        modalInstance.result.then(function () {
+                                            $log.info('Modal dismissed at: ' + new Date());
+                                        });
                                         $rootScope.lastReq = {};
                                     }).
                                     error(function (data) {

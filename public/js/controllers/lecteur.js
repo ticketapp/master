@@ -533,7 +533,19 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
         console.log(tracksToSave)
         $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
-                alert('votre playlist ' + playlist.name + ' est enregistrée')
+                $scope.info = 'votre playlist ' + playlist.name + ' est enregistrée';
+                var modalInstance = $modal.open({
+                    templateUrl: 'assets/partials/_infoModal.html',
+                    controller: 'infoModalCtrl',
+                    resolve: {
+                        info: function () {
+                            return $scope.info;
+                        }
+                    }
+                });
+                modalInstance.result.then(function () {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
             }).
             error(function (data) {
                 if (data.error == 'Credentials required') {

@@ -26,7 +26,6 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope) {
                 if (data.error == 'Credentials required') {
                     var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
                     $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
-                    alert('vous devez vous connecter')
                 }
             })
     };

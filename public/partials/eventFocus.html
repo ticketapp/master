@@ -4,7 +4,7 @@
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
         <p class="column large-10 padding0">le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places"> {{ place.name }}</a></p>
-        <button class="float-right" ng-click="follow(event.eventId)">Suivre</button>
+        <button class="float-right" ng-click="$root.follow('events', event.eventId, event.name)">Suivre</button>
         <h2 id="eventTitle" class="column padding0" style="margin-top:0">{{event.name}}</h2>
     </div>
     <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'"
