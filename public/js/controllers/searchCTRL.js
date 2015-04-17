@@ -2,7 +2,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     $scope.limit = 20;
     $scope.artists = [];
     $scope.artistsFb = [];
-    $scope.users = [];
+    $scope.organizers = [];
     $scope.places = [];
     $scope.events = [];
     $scope.loadingMore = true;
@@ -245,10 +245,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selUsr == true) {
-                $http.get('/users').
+                $http.get('/organizers').
                     success(function(data, status, headers, config) {
-                        if (data != $scope.users) {
-                            $scope.users = data;
+                        if (data != $scope.organizers) {
+                            $scope.organizers = data;
                         }
                         $rootScope.resizeImgHeight()
                         $scope.loadingMore = false;
@@ -344,20 +344,20 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selUsr == true) {
-                $scope.users.forEach(getUsersId);
-                $scope.users = $filter('filter')($scope.users, {nickname :  _research});
-                $http.get('/users/containing/'+_research).
+                $scope.organizers = $filter('filter')($scope.organizers, {nickname :  _research});
+                $http.get('/organizers/containing/'+_research).
                     success(function(data, status, headers, config) {
                         var scopeIdList = [];
-                        function getUsersId(el, index, array) {
-                            scopeIdList.push(el.userId);
+                        function getOrganizerId(el, index, array) {
+                            scopeIdList.push(el.organizerId);
                         }
-                        if ($scope.users.length == 0) {
-                            $scope.users = data;
+                        $scope.organizers.forEach(getOrganizerId);
+                        if ($scope.organizers.length == 0) {
+                            $scope.organizers = data;
                         } else {
                             function uploadUsers(el, index, array) {
-                                if ($scope.users.indexOf(el) < -1) {
-                                    $scope.users.push(el);
+                                if ($scope.organizers.indexOf(el) < -1) {
+                                    $scope.organizers.push(el);
                                 }
                             }
                             data.forEach(uploadUsers);

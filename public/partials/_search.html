@@ -110,16 +110,16 @@
                 </div>
             </div>
         </div>
-        <li class="min_contener margin0" ng-if="$root.activUsr && users.length > 0"
-            data-ng-repeat="user in users">
+        <li class="min_contener margin0" ng-if="$root.activUsr && organizers.length > 0"
+            data-ng-repeat="organizer in organizers">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
-                        <a href="#/user/{{user.userId}}">
-                            <img src="{{ user.images[0].path }}" alt="une belle image" class="min"/>
+                        <a href="#/user/{{organizer.organizerId}}">
+                            <img src="{{ organizer.imagePath }}" alt="une belle image" class="min"/>
                         </a>
                     </div>
-                    <a href="#/user/{{user.userId}}"><h3 class="minTitle">{{user.nickname}}</h3></a>
+                    <a href="#/user/{{organizer.organizerId}}"><h3 class="minTitle">{{organizer.name}}</h3></a>
                 </div>
             </div>
         </li>
