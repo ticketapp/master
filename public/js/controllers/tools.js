@@ -27,7 +27,7 @@ app.controller('toolsCtrl', function ($scope, $modal, $log, $rootScope) {
 // Please note that $modalInstance represents a modal window (instance) dependency.
 // It is not the same as the $modal service used above.
 
-app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope, items, connected, $http) {
+app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope, items, connected, $http, $modal) {
     $scope.items = items;
     $scope.logout = function () {
         $http.get('/logout').

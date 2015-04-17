@@ -520,9 +520,13 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         }
     };
 }]);
-app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance, $http) {
+app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance, $http, $modal) {
     $scope.createNewPlaylist = function (playlist) {
         var tracksToSave = [];
+        $scope.newPlaylist = true;
+        if ($rootScope.playlist.name.length > 0) {
+            $scope.newPlaylist = false;
+        }
         for (var i=0; i < playlist.tracks.length; i++) {
             tracksToSave.push({trackId: playlist.tracks[i].trackId, trackRank: i})
         }
