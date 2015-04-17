@@ -328,6 +328,9 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.closeTrack = function (index) {
             $rootScope.playlist.tracks.splice(index, 1);
             if (index == $rootScope.playlist.tracks.length && index == i) {
+                $rootScope.playlist.tracks = [];
+                played = [];
+                playlistEvents = [];
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                 document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
                 /*document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
@@ -337,6 +340,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.remPlaylist = function () {
             $rootScope.playlist.tracks = [];
             played = [];
+            playlistEvents = [];
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
