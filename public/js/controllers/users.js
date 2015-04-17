@@ -4,6 +4,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
     $scope.heightMap = '300px';
     $scope.travelMode = 'DRIVE';
     $scope.directionInfos ='';
+    $scope.showDesc = false;
     $scope.moreZoom = function() {
         $scope.zoom = $scope.zoom + 1;
     };

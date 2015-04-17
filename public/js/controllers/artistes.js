@@ -3,7 +3,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $scope.trackLimit = 12;
     $scope.heightDesc = '147px';
     $scope.trackTitle = '';
-    $scope.allDesc = false;
+    $scope.showDesc = false;
     $scope.selectedTab = 0;
     $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
         console.log(trackTitle, artistName);

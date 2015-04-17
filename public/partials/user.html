@@ -81,30 +81,29 @@
         </map>
     </div>
 </div>
-<div class="parallax-content column paddingLeft0 paddingRight0" style="background: #ffffff">
-    <div class="columns large-12">
-        <h2 id="eventTitle">{{organizer.name}}</h2>
-    </div>
-    <div class="column large-12">
-        <div ng-if="organizer.description.length > 0" ng-init="limitDesc = '120px';"
-             class="column large-12 float-left padding0" >
-            <div data-ng-bind-html="organizer.description" style="height: {{limitDesc}}; overflow: hidden;">
-            </div>
-            <div class="column large-12">
-                <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
-                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
-                     ng-if="organizer.description.length > 300 && limitDesc == '120px'">
+<div class="parallax-content" style="background: #ffffff">
+    <h2 class="column">{{organizer.name}}</h2>
+    <div class="column large-12" ng-if="organizer.description.length > 0">
+        <div class="column large-12 float-left marginBottom10"
+             style="background-color: #e7e7e7">
+            <h2 class="float-left"
+                style="line-height: 50px;
+                  margin: 5px;
+                  color: rgb(105, 181, 205);
+                ">Présentation
+            </h2>
+                <div class="img-circularPlayer float-right"
+                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px">
                     <i class="pauseInImg ng-scope fa fa-chevron-down pointer"
                        style="font-size: 50px;"
-                       ng-click="$parent.limitDesc = 'auto'"></i>
-                </div>
-                <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
-                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
-                     ng-if="limitDesc == 'auto'">
+                       ng-if="showDesc == false"
+                       ng-click="$parent.showDesc = true"></i>
                     <i class="pauseInImg ng-scope fa fa-chevron-up pointer"
                        style="font-size: 50px;"
-                       ng-click="$parent.limitDesc = '120px'"></i>
+                       ng-if="showDesc == true"
+                       ng-click="$parent.showDesc = false"></i>
                 </div>
+            <div ng-if="showDesc == true" class="float-left" data-ng-bind-html="organizer.description">
             </div>
         </div>
     </div>
@@ -190,6 +189,7 @@
             <transit-layer></transit-layer>
         </map>
     </div>
+    <h2 class="column" ng-show="orgaEvents.length > 0">Evenements</h2>
     <div class="column large-4 medium-6 float-left margin0 data-ng-event"
          data-ng-repeat="event in orgaEvents">
     </div>

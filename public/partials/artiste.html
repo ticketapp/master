@@ -1,7 +1,7 @@
 <div class="parallax-background" style="background: #ffffff!important;">
     <img class="width100p" src="{{ artiste.imagePath }}"/>
 </div>
-<div class="parallax-content column" style="background: #ffffff">
+<div class="parallax-content">
     <div class="columns large-12">
         <h2 id="eventTitle">
             {{artiste.name}}
@@ -25,32 +25,36 @@
             </a>
         </h2>
     </div>
-    <div ng-if="artiste.description.length > 0" ng-init="limitDesc = '147px';"
-         class="column large-12 float-left padding0" >
-        <div data-ng-bind-html="artiste.description" style="height: {{limitDesc}}; overflow: hidden;">
-        </div>
-        <div class="column large-12">
-            <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
-                 style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
-                 ng-if="artiste.description.length > 600 && limitDesc == '147px'">
+    <div class="column large-12">
+        <div class="column large-12 float-left marginBottom10"
+             ng-if="artiste.description.length > 0"
+             style="background-color: #e7e7e7">
+            <h2 class="float-left"
+                style="line-height: 50px;
+                  margin: 5px;
+                  color: rgb(105, 181, 205);
+                ">Présentation
+            </h2>
+            <div class="img-circularPlayer float-right"
+                 style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px">
                 <i class="pauseInImg ng-scope fa fa-chevron-down pointer"
                    style="font-size: 50px;"
-                   ng-click="$parent.limitDesc = 'auto'"></i>
-            </div>
-            <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
-                 style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
-                 ng-if="limitDesc == 'auto'">
+                   ng-if="showDesc == false"
+                   ng-click="$parent.showDesc = true"></i>
                 <i class="pauseInImg ng-scope fa fa-chevron-up pointer"
                    style="font-size: 50px;"
-                   ng-click="$parent.limitDesc = '147px'"></i>
+                   ng-if="showDesc == true"
+                   ng-click="$parent.showDesc = false"></i>
+            </div>
+            <div ng-if="showDesc == true" class="float-left" data-ng-bind-html="artiste.description">
             </div>
         </div>
     </div>
-    <md-content class="md-padding">
+    <md-content class="column">
         <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
             <md-tab label="Evenements">
                 <md-content>
-                    <ul id="events_contener" style="padding-bottom: 100px;"
+                    <ul id="events_contener"
                         class="descriptionContent width100p float-left marginTop10">
                         <div class="min_contener data-ng-event margin0 column large-4 medium-6 float-left"
                              data-ng-repeat="event in artiste.events"
@@ -61,12 +65,12 @@
             </md-tab>
             <md-tab label="Tracks">
                 <md-content>
-                    <input class="column float-left large-6 marginTop20 height50 small-12"
+                    <input class="column float-left large-12 marginTop20 height50 small-12"
                            ng-if="tracks.length > 0 || trackTitle.length > 0"
                            ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()"
                            placeholder="filter tracks"/>
                     <div class="float-left column large-12 padding0">
-                        <a class="button large-2 medium-3 column float-left padding0"
+                        <a class="button column float-left padding0"
                            style="min-height: 40px; line-height: 40px;"
                            ng-if="tracksFiltered.length > 0"
                            ng-click="$root.addAndPlay(artiste.tracks, artiste)"
@@ -75,14 +79,14 @@
                            'small-4': $root.playlist.tracks.length > 0}">
                             <i class="fi-play"></i> Play all
                         </a>
-                        <a class="button large-2 small-4 medium-3 column float-left padding0"
+                        <a class="button column float-left padding0 small-4"
                            style="min-height: 40px; line-height: 40px;"
                            ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0"
                            ng-class="{'padding0': $root.window == 'small'}"
                            ng-click="$root.addToPlaylist(artiste.tracks, artiste)">
                             <i class="fi-plus"></i> Add all
                         </a>
-                        <a class="button large-2 small-4 medium-3 column float-left padding0"
+                        <a class="button column float-left padding0"
                            style="min-height: 40px; line-height: 40px;"
                            ng-class="{'padding0': $root.window == 'small',
                            'small-6': $root.playlist.tracks.length == 0,
@@ -110,13 +114,14 @@
                             <input class="button" type="submit" />
                         </form>
                     </div>
-                    <div ng-if="tracksFiltered.length == 0 && trackTitle.length > 0" class="column large-12 text-center">
+                    <div ng-if="tracksFiltered.length == 0 && trackTitle.length > 0"
+                         class="column large-12 text-center">
                         <b>Désolé, nous n'avons pour le moment aucune track "{{trackTitle}}" pour cet artist.</b><br/>
                         <a class="button" ng-click="suggestQuery(trackTitle, artiste.name, artiste.facebookUrl)">Suggérer la track {{trackTitle}}</a>
                     </div>
                     <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit) track by $index"
-                         class="column paddingBottom10 medium-6 large-4 paddingLeft0 float-left"
-                            ng-class="{'paddingRight0': $root.window == 'small'}">
+                         class="column paddingBottom10 medium-6 large-4 float-left"
+                            ng-class="{'paddingRight0 paddingLeft0': $root.window == 'small'}">
                         <div class="column large-12 arTrack">
                             <div ng-if="track.thumbnailUrl != undefined"
                                  class="img-circularPlayer"
