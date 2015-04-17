@@ -126,8 +126,23 @@
                             <div ng-if="track.thumbnailUrl != undefined"
                                  class="img-circularPlayer"
                                  style="background-image: url('{{track.thumbnailUrl}}');"
+                                 ng-mouseover="showPlayNow = true"
+                                 ng-mouseleave="showPlayNow = false"
                                  ng-class="{'padding0 margin0': $root.window == 'small'}">
-                                <i class="fi-play pauseInImg" ng-click="$root.addToPlaylist([track], artiste)"></i>
+                                <i class="fi-play pauseInImg"
+                                   ng-click="$root.addToPlaylist([track], artiste)">
+                                   </i>
+                                <a class="button absolute paddingTop20"
+                                   style="z-index: 12;
+                                              margin-bottom: 10px;
+                                              left: 20px;
+                                            }"
+                                   ng-if="showPlayNow"
+                                   ng-mouseover="$parent.showPlayNow = true"
+                                   ng-mouseleave="$parent.showPlayNow = false"
+                                   ng-click="$root.addAndPlay([track], artiste)">
+                                    <i class="fi-play"></i> Jouer maintenant
+                                </a>
                             </div>
                             <div ng-class="{'column large-8': $root.window != 'small'}"
                                  style="overflow: hidden; height: 48px;"><h3>{{track.title}}</h3></div>

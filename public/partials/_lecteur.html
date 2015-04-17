@@ -56,13 +56,13 @@
            ng-class="{'fi-pause': onPlay == true, 'fi-play': onPlay == false,
            'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
            'ng-hide': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}" ng-click="playPause()"></i>
+        <i class="fi-next lecteurControls float-left" ng-click="nextTrack()"
+           ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
+           'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
         <i class="fi-shuffle lecteurControls float-left" ng-show="showLecteur"
            ng-class="{'active': shuffle,
            'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"
            ng-click="shuffle = !shuffle"></i>
-        <i class="fi-next lecteurControls float-left" ng-click="nextTrack()"
-           ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
-           'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
     </div>
     <div id="progressBar" class="progress primary relative float-left padding0 margin0 column small-8"
          ng-class="{'large-6': showLecteur, 'large-8': !showLecteur}"
