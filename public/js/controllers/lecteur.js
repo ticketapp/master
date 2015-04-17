@@ -11,6 +11,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     $scope.levelVol = 100;
     $scope.shuffle = false;
     $scope.playlistEnd = false;
+    $scope.error = '';
     var offset = 0;
     $scope.sortableOptions = {
         containment: '#sortable-container',
@@ -297,8 +298,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                         for (var t = 0; t < playlistEvents.length; t++) {
                             pushTrack(playlistEvents[t], playlistEvents[t].art)
                         }
-                        $rootScope.playlist.name = 'La selection';
-                        $rootScope.playlist.by = 'Claude';
                         $scope.play(lastT)
                         playlistEvents = [];
                     } else {
@@ -307,6 +306,13 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 }
             }
         };
+        function error () {
+            $scope.error = 'Désolé une erreur de lecture s\'est produite.'
+            $timeout(function () {
+                $scope.error = ''
+            }, 2000)
+            $scope.nextTrack();
+        }
         played.push($rootScope.playlist.tracks[i].title);
         if (typeof(updateProgressYt) != "undefined") {
             clearInterval(updateProgressYt);
@@ -347,7 +353,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         };
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
-        document.getElementById('musicPlayer').addEventListener('error', $scope.nextTrack);
+        document.getElementById('musicPlayer').addEventListener('error', error);
         $scope.trackActive = $rootScope.playlist.tracks[i];
         if ($rootScope.playlist.tracks[i].platform == 'Soundcloud' || $rootScope.window == 'small' || $rootScope.window == 'medium') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
@@ -366,7 +372,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                             $scope.$apply(function () {
                                 $scope.onPlay = true;
                             });
-                            document.getElementById('musicPlayer').addEventListener('error', $scope.nextTrack);
+                            document.getElementById('musicPlayer').addEventListener('error', error);
                         } else {
                             $scope.nextTrack();
                         }
@@ -513,7 +519,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange,
                     'onError': function () {
-                        $scope.nextTrack()
+                        error()
                     }
                 }
             });

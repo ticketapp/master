@@ -3,6 +3,9 @@
     <div id="youtubePlayer">
     </div>
 </div>
+<div ng-if="error.length > 0" class="lecteurError animated fadeIn">
+    <h3>{{error}}</h3>
+</div>
 <div ng-show="showInfo" class="EventinfoTrack">
     <a href="#/artiste/{{trackActive.artist.facebookUrl}}"><h3>{{trackActive.artist.name}}</h3></a>
     Prochain concert prez de chez vous : <br/>
@@ -109,7 +112,7 @@ margin-left: 5px;"
            ng-show="$root.window != 'small' && $root.window != 'medium'" id="currentTime"></b>
     </div>
 </div>
-<div ng-show="showLecteur" class="width100p float-left">
+<div ng-show="showLecteur" class="width100p float-left white">
     <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed"></audio>
     <div class="width100p playlistScroller" style="overflow-x: auto;">
         <div ng-if="playlist.tracks.length > 0" style="position: relative; overflow: auto; max-height: 150px; display: inline-flex; min-width: 100%"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">

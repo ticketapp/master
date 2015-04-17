@@ -558,6 +558,19 @@ top: 0;
 .trackContener:hover {
     opacity: 1!important;
 }
+.lecteurError {
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.46);
+    color: white;
+    float: left;
+    padding: 0 5px 5px 0;
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
+.lecteurError > h3 {
+    margin: 5px;
+    color: white;
+}
 .playlistContener {
     font-size: 11px;
     width: auto;
@@ -569,7 +582,6 @@ top: 0;
     bottom: 0;
     position: fixed;
     width: 100%;
-    background: white;
     overflow-y: hidden;
     overflow-x: hidden;
     z-index: 12;
