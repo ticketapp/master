@@ -10,13 +10,11 @@
     <ul id="events_contener" ng-class="{paddingTop50: $root.path == 'search'}"
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-3">
         <div ng-if="$root.activEvent && events.length > 0" class="float-left column small-12 medium-6 large-4 min_contener data-ng-event margin0"
-            data-ng-repeat="event in events |orderBy: order"
-            ng-show= "filteredGenres.length || filterQuery.length <= 1 || filterQuery == undefined">
+            data-ng-repeat="event in events">
         </div>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
             data-ng-repeat="artist in artists | filter: filterSearch"
-            ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
             style="padding-bottom: 10px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
@@ -31,18 +29,11 @@
                         </h3>
                     </a>
                 </div>
-                <div>
-                    <a ng-if="filterType == 'genre'"
-                       ng-repeat="genre in filteredEntries = (artist.genres | filter: filterQuery)"
-                       ng-click="$root.filterQuery = genre.name"
-                       class="ng-hide"></a>
-                </div>
             </div>
         </div>
         <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
              ng-if="$root.activArtist && artistsFb.length > 0"
             data-ng-repeat="artist in artistsFb "
-            ng-show= "filteredEntries.length || filterQuery.length <= 1 || filterQuery == undefined"
             style="padding-bottom: 10px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
@@ -51,21 +42,11 @@
                              src="{{ artist.imagePath }}"
                              alt="une belle image" class="min pointer"/>
                     </div>
-                    <h3 style="margin-bottom: 0;" class="minTitle">
-                        {{ artist.name }}
-                    </h3>
-                </div>
-                <div style="height: 30px">
                     <a ng-click="createArtist(artist)">
+                        <h3 style="margin-bottom: 0;" class="minTitle">
+                            {{ artist.name }}
+                        </h3>
                     </a>
-                    <i ng-show="artist.tracks.length > 0" class="fi-play-circle"
-                       style="font-size: 26px;"
-                       ng-click="$root.addAndPlay(artist.tracks, artist.name)">
-                   </i>
-                    <a ng-if="filterType == 'genre'"
-                       ng-repeat="genre in filteredEntries = (artist.genres | filter: filterQuery)"
-                       ng-click="$root.filterQuery = genre.name"
-                            class="ng-hide"></a>
                 </div>
             </div>
         </div>

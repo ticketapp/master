@@ -44,7 +44,8 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         }, 500);
     };
     function refactorWebsites () {
-        /*for (var i = 0; i < $scope.organizer.websites.length; i++) {
+        $scope.organizer.websites = $scope.organizer.websites.split(',');
+        for (var i = 0; i < $scope.organizer.websites.length; i++) {
             console.log($scope.organizer.websites[i])
             $scope.organizer.websites[i] = {url: $scope.organizer.websites[i]};
             if ($scope.organizer.websites[i].url.indexOf('facebook') > -1) {
@@ -59,7 +60,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                 $scope.organizer.websites[i].name = 'website';
                 $scope.otherWebsite = true;
             }
-        }*/
+        }
     }
     if ($location.path().indexOf('lieu') > -1) {
         $scope.getUrl = 'places'
