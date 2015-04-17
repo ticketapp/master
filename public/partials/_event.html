@@ -56,7 +56,7 @@
                                     {{place.name}}
                                 </h1>
                             </a>
-                            <button style='margin-top:5px; float:right'>Suivre</button>
+                            <button style='height:55px; float:right'>Suivre</button>
                         </li>
                     </ul>
                 </span>
@@ -80,7 +80,7 @@
                                     {{organizer.name}}
                                 </h1>
                             </a>
-                            <button style='margin-top:5px; float:right'>Suivre</button>
+                            <button style='height:55px; float:right'>Suivre</button>
                         </li>
                     </ul>
                 </span>
@@ -99,7 +99,7 @@
                     <ul class="f-dropdown marginTop30"
                         ng-mouseleave="$parent.showDrop = false;"
                         ng-if="$root.window != 'small' && $root.window != 'medium'">
-                        <li style="display: block;"
+                        <li style="display: block; min-height: 100px"
                             class="float-left width100p paddingTop10 paddingBottom10 paddingRight10 marginBottom10 relative">
                             <a href="#/artiste/{{artist.facebookUrl}}" class="absolute width100p height100p imgBlur"
                                style="display: block;
@@ -108,7 +108,8 @@
 
                             </a>
                             <div class="img-circularPlayer float-right marginTop20 relative"
-                                 style="background: rgba(0, 0, 0, 0.42);">
+                                 style="background: rgba(0, 0, 0, 0.42);"
+                                    ng-if="artist.tracks.length > 0">
                                 <i class="pauseInImg ng-scope fi-play"
                                    style="color: {{event.priceColor}}; font-size: 80px;"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>

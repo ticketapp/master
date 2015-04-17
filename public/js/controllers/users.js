@@ -1,9 +1,10 @@
 app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http, $rootScope, $location, $timeout){
     $scope.map = false;
-    $scope.zoom = 14;
+    $scope.zoom = 13;
     $scope.heightMap = '300px';
     $scope.travelMode = 'DRIVE';
     $scope.directionInfos ='';
+    $scope.showDesc = false;
     $scope.moreZoom = function() {
         $scope.zoom = $scope.zoom + 1;
     };
@@ -42,6 +43,24 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
             }
         }, 500);
     };
+    function refactorWebsites () {
+        /*for (var i = 0; i < $scope.organizer.websites.length; i++) {
+            console.log($scope.organizer.websites[i])
+            $scope.organizer.websites[i] = {url: $scope.organizer.websites[i]};
+            if ($scope.organizer.websites[i].url.indexOf('facebook') > -1) {
+                $scope.organizer.websites[i].name = 'facebook';
+            } else if ($scope.organizer.websites[i].url.indexOf('twitter') > -1) {
+                $scope.organizer.websites[i].name = 'twitter';
+            } else if ($scope.organizer.websites[i].url.indexOf('soundcloud') > -1) {
+                $scope.organizer.websites[i].name = 'soundcloud';
+            } else if ($scope.organizer.websites[i].url.indexOf('mixcloud') > -1) {
+                $scope.organizer.websites[i].name = 'mixcloud';
+            } else {
+                $scope.organizer.websites[i].name = 'website';
+                $scope.otherWebsite = true;
+            }
+        }*/
+    }
     if ($location.path().indexOf('lieu') > -1) {
         $scope.getUrl = 'places'
     } else {
@@ -58,6 +77,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(",", ", ");
                 $scope.map = true;
             }
+            refactorWebsites();
             $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
                 .success(function(data, status){
                     $scope.orgaEvents = [];

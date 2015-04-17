@@ -328,6 +328,9 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.closeTrack = function (index) {
             $rootScope.playlist.tracks.splice(index, 1);
             if (index == $rootScope.playlist.tracks.length && index == i) {
+                $rootScope.playlist.tracks = [];
+                played = [];
+                playlistEvents = [];
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                 document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
                 /*document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
@@ -337,6 +340,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         $scope.remPlaylist = function () {
             $rootScope.playlist.tracks = [];
             played = [];
+            playlistEvents = [];
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
@@ -524,18 +528,19 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
     $scope.createNewPlaylist = function (playlist) {
         var tracksToSave = [];
         for (var i=0; i < playlist.tracks.length; i++) {
-            tracksToSave.push({trackId: playlist.tracks[i].trackId})
+            tracksToSave.push({trackId: playlist.tracks[i].trackId, trackRank: i})
         }
-        console.log(playlist)
+        console.log(tracksToSave)
         $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
                 alert('votre playlist ' + playlist.name + ' est enregistrée')
             }).
             error(function (data) {
                 if (data.error == 'Credentials required') {
-                    var object = {name: playlist.name, tracksId: tracksToSave};
+                    var object = {name: playlist.name, tracks: tracksToSave};
                     $rootScope.storeLastReq('post', '/playlists', object, 'votre playlist "' + playlist.name + '" est enregistée')
                 }
+                console.log(data)
             })
     };
     $scope.cancel = function () {

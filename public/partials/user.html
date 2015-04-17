@@ -81,30 +81,48 @@
         </map>
     </div>
 </div>
-<div class="parallax-content column paddingLeft0 paddingRight0" style="background: #ffffff">
-    <div class="columns large-12">
-        <h2 id="eventTitle">{{organizer.name}}</h2>
-    </div>
-    <div class="column large-12">
-        <div ng-if="organizer.description.length > 0" ng-init="limitDesc = '120px';"
-             class="column large-12 float-left padding0" >
-            <div data-ng-bind-html="organizer.description" style="height: {{limitDesc}}; overflow: hidden;">
-            </div>
-            <div class="column large-12">
-                <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
-                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
-                     ng-if="organizer.description.length > 300 && limitDesc == '120px'">
+<div class="parallax-content" style="background: #ffffff">
+    <h2 class="column">{{organizer.name}}
+        <i ng-if="otherWebsite == true" class="float-right  fa fa-chevron-down" ng-click="$parent.showUrls = !$parent.showUrls" style="margin-left: 5px; cursor: pointer"></i>
+        <ul class="absolute zIndex4 right" ng-if="showUrls" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+            <li ng-repeat="website in artiste.websites" ng-if="website.name == 'website'" style="display: block; margin: 10px">
+                <a href="http://www.{{website.url}}" target="_blank">{{website.url}}</a>
+            </li>
+        </ul>
+        <a ng-if="website.name != 'website'"
+           ng-repeat="website in artiste.websites"
+           href="http://www.{{website.url}}" target="_blank">
+            <i ng-class="{'fi-social-facebook' : website.name == 'facebook',
+                   'fi-social-twitter' : website.name == 'twitter',
+                   'fi-soundcloud' : website.name == 'soundcloud',
+                   'fi-mixcloud' : website.name == 'mixcloud'}"
+               class="float-right" style="margin-right: 5px;"></i>
+        </a>
+        <a href="http://www.facebook.com/{{artiste.facebookId}}" target="_blank">
+            <i class="float-right fi-social-facebook" style="margin-right: 5px;"></i>
+        </a>
+    </h2>
+    <div class="column large-12" ng-if="organizer.description.length > 0">
+        <div class="column large-12 float-left marginBottom10"
+             style="background-color: #e7e7e7">
+            <h2 class="float-left"
+                style="line-height: 50px;
+                  margin: 5px;
+                  color: rgb(105, 181, 205);
+                ">Présentation
+            </h2>
+                <div class="img-circularPlayer float-right"
+                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px">
                     <i class="pauseInImg ng-scope fa fa-chevron-down pointer"
                        style="font-size: 50px;"
-                       ng-click="$parent.limitDesc = 'auto'"></i>
-                </div>
-                <div class="img-circularPlayer float-none marginAuto marginTop20 relative"
-                     style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px"
-                     ng-if="limitDesc == 'auto'">
+                       ng-if="showDesc == false"
+                       ng-click="$parent.showDesc = true"></i>
                     <i class="pauseInImg ng-scope fa fa-chevron-up pointer"
                        style="font-size: 50px;"
-                       ng-click="$parent.limitDesc = '120px'"></i>
+                       ng-if="showDesc == true"
+                       ng-click="$parent.showDesc = false"></i>
                 </div>
+            <div ng-if="showDesc == true" class="float-left width100p" data-ng-bind-html="organizer.description">
             </div>
         </div>
     </div>
@@ -112,7 +130,6 @@
          style="height: 300px;" class="column large-12 marginBottom20">
         <div class="column large-12 zIndex1 absolute">
             <div style="font-size: 12px;" class="column large-5">
-                <h2>{{organizer.name}}</h2>
                 {{organizer.addresses[0].street}}<br/>
                 {{organizer.addresses[0].zip}}
                 {{organizer.addresses[0].city}}
@@ -190,6 +207,7 @@
             <transit-layer></transit-layer>
         </map>
     </div>
+    <h2 class="column" ng-show="orgaEvents.length > 0">Evenements</h2>
     <div class="column large-4 medium-6 float-left margin0 data-ng-event"
          data-ng-repeat="event in orgaEvents">
     </div>
