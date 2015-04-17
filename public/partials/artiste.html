@@ -18,10 +18,10 @@
                    'fi-social-twitter' : website.name == 'twitter',
                    'fi-soundcloud' : website.name == 'soundcloud',
                    'fi-mixcloud' : website.name == 'mixcloud'}"
-                   class="float-right" style="margin-left: 5px;"></i>
+                   class="float-right" style="margin-right: 5px;"></i>
             </a>
             <a href="http://www.facebook.com/{{artiste.facebookId}}" target="_blank">
-                <i class="float-right fi-social-facebook" style="margin-left: 5px;"></i>
+                <i class="float-right fi-social-facebook" style="margin-right: 5px;"></i>
             </a>
         </h2>
     </div>
@@ -46,7 +46,7 @@
                    ng-if="showDesc == true"
                    ng-click="$parent.showDesc = false"></i>
             </div>
-            <div ng-if="showDesc == true" class="float-left" data-ng-bind-html="artiste.description">
+            <div ng-if="showDesc == true" class="float-left width100p" data-ng-bind-html="artiste.description">
             </div>
         </div>
     </div>
@@ -65,7 +65,7 @@
             </md-tab>
             <md-tab label="Tracks">
                 <md-content>
-                    <input class="column float-left large-12 marginTop20 height50 small-12"
+                    <input class="column float-left marginTop20 height50 large-12"
                            ng-if="tracks.length > 0 || trackTitle.length > 0"
                            ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()"
                            placeholder="filter tracks"/>

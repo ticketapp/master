@@ -82,7 +82,26 @@
     </div>
 </div>
 <div class="parallax-content" style="background: #ffffff">
-    <h2 class="column">{{organizer.name}}</h2>
+    <h2 class="column">{{organizer.name}}
+        <i ng-if="otherWebsite == true" class="float-right  fa fa-chevron-down" ng-click="$parent.showUrls = !$parent.showUrls" style="margin-left: 5px; cursor: pointer"></i>
+        <ul class="absolute zIndex4 right" ng-if="showUrls" style="background: #ffffff; box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); padding-bottom: 10px; margin-bottom: 10px;">
+            <li ng-repeat="website in artiste.websites" ng-if="website.name == 'website'" style="display: block; margin: 10px">
+                <a href="http://www.{{website.url}}" target="_blank">{{website.url}}</a>
+            </li>
+        </ul>
+        <a ng-if="website.name != 'website'"
+           ng-repeat="website in artiste.websites"
+           href="http://www.{{website.url}}" target="_blank">
+            <i ng-class="{'fi-social-facebook' : website.name == 'facebook',
+                   'fi-social-twitter' : website.name == 'twitter',
+                   'fi-soundcloud' : website.name == 'soundcloud',
+                   'fi-mixcloud' : website.name == 'mixcloud'}"
+               class="float-right" style="margin-right: 5px;"></i>
+        </a>
+        <a href="http://www.facebook.com/{{artiste.facebookId}}" target="_blank">
+            <i class="float-right fi-social-facebook" style="margin-right: 5px;"></i>
+        </a>
+    </h2>
     <div class="column large-12" ng-if="organizer.description.length > 0">
         <div class="column large-12 float-left marginBottom10"
              style="background-color: #e7e7e7">
@@ -103,7 +122,7 @@
                        ng-if="showDesc == true"
                        ng-click="$parent.showDesc = false"></i>
                 </div>
-            <div ng-if="showDesc == true" class="float-left" data-ng-bind-html="organizer.description">
+            <div ng-if="showDesc == true" class="float-left width100p" data-ng-bind-html="organizer.description">
             </div>
         </div>
     </div>

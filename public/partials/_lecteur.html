@@ -14,24 +14,26 @@
     {{trackActive.nextShow.places[0].name}}
     </a>
 </div>
-<div class="zIndex1" ng-class="{'column large-12 padding0': $root.window != 'small'}">
+<div class="zIndex1" ng-class="{'column large-12 padding0': $root.window != 'small' && $root.window != 'medium'}">
     <!--<a class="close float-right">X</a>-->
     <div class="column primCol padding0" ng-class="{'large-4': showLecteur, 'large-2': !showLecteur}">
         <i ng-click="showLecteur = !showLecteur" class="float-left lecteurControls"
            ng-class="{'fa fa-chevron-down': showLecteur == true,
            'fa fa-chevron-up': showLecteur == false,
-           'small-3': $root.window == 'small' && showLecteur == false,
-           'small-2': $root.window == 'small' && showLecteur == true
+           'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
+           'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true
            }"></i>
         <i ng-click="remPlaylist()"
-           ng-class="{'small-2': $root.window == 'small' && showLecteur == true}"
+           ng-class="{'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"
            ng-show="showLecteur" class="fi-trash float-left  lecteurControls"></i>
         <i ng-click="savePlaylist()" ng-show="showLecteur"
            class="fi-save lecteurControls float-left"
-                ng-class="{'small-2': $root.window == 'small' && showLecteur == true}"></i>
-        <i class="fi-volume float-left lecteurControls" ng-show="showLecteur" ng-if="$root.window != 'small'"
+                ng-class="{'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
+        <i class="fi-volume float-left lecteurControls" ng-show="showLecteur"
+           ng-if="$root.window != 'small' && $root.window != 'medium'"
            ng-mouseover="$parent.showVol = true"></i>
-        <div style="padding-left: 50px; margin-left: 150px;" class="absolute" ng-if="showVol" ng-mouseleave="$parent.showVol = false">
+        <div style="padding-left: 50px; margin-left: 150px;" class="absolute" ng-if="showVol"
+             ng-mouseleave="$parent.showVol = false">
             <md-slider  flex ng-change="volume()"
                        ng-model="$parent.levelVol" min="0" max="100"
                        aria-label="volume"
@@ -47,19 +49,20 @@
             </md-slider>
         </div>
         <i class="fi-previous lecteurControls float-left"
-           ng-class="{'small-3': $root.window == 'small' && showLecteur == false,
-           'small-2': $root.window == 'small' && showLecteur == true}"
+           ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
+           'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"
            ng-click="prevTrack()"></i>
         <i class=" lecteurControls float-left"
            ng-class="{'fi-pause': onPlay == true, 'fi-play': onPlay == false,
-           'small-3': $root.window == 'small' && showLecteur == false,
-           'ng-hide': $root.window == 'small' && showLecteur == true}" ng-click="playPause()"></i>
+           'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
+           'ng-hide': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}" ng-click="playPause()"></i>
         <i class="fi-shuffle lecteurControls float-left" ng-show="showLecteur"
-           ng-class="{'active': shuffle, 'small-2': $root.window == 'small' && showLecteur == true}"
+           ng-class="{'active': shuffle,
+           'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"
            ng-click="shuffle = !shuffle"></i>
         <i class="fi-next lecteurControls float-left" ng-click="nextTrack()"
-           ng-class="{'small-3': $root.window == 'small' && showLecteur == false,
-           'small-2': $root.window == 'small' && showLecteur == true}"></i>
+           ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
+           'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
     </div>
     <div id="progressBar" class="progress primary relative float-left padding0 margin0 column small-8"
          ng-class="{'large-6': showLecteur, 'large-8': !showLecteur}"
@@ -71,7 +74,8 @@ margin-left: 5px;" class="absolute">{{trackActive.artist.name}}: {{trackActive.t
 margin-left: 5px;"
                class="absolute">
                 {{trackActive.artist.name}}: {{trackActive.title}}
-                <a target="_blank" href="{{track.redirectUrl}}" style="font-size: 27px;" ng-if="track.platform == 'Soundcloud'">
+                <a target="_blank" href="{{track.redirectUrl}}" style="font-size: 27px;"
+                   ng-if="track.platform == 'Soundcloud'">
                     <i style="display: block" class="fi-soundcloud"></i>
                 </a>
                 <a href="https://youtube.com/watch?v={{track.url}}"
@@ -101,7 +105,8 @@ margin-left: 5px;"
            ng-click="$parent.showVideo = !$parent.showVideo"
            class="fi-video lecteurControls float-left"
                 style="background: #a0d3e8"></i>
-        <b class="float-left" style="color: #ffffff" ng-show="$root.window != 'small'" id="currentTime"></b>
+        <b class="float-left" style="color: #ffffff"
+           ng-show="$root.window != 'small' && $root.window != 'medium'" id="currentTime"></b>
     </div>
 </div>
 <div ng-show="showLecteur" class="width100p float-left">
