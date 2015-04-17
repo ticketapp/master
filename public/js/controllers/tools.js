@@ -34,15 +34,33 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope
             success(function (data) {
                 console.log(data)
                 $rootScope.connected = false;
-                alert('vous êtes deconnecté')
+                $scope.info = 'vous êtes deconnecté';
+                var modalInstance = $modal.open({
+                    templateUrl: 'assets/partials/_infoModal.html',
+                    controller: 'infoModalCtrl',
+                    resolve: {
+                        info: function () {
+                            return $scope.info;
+                        }
+                    }
+                });
+                modalInstance.result.then(function () {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
             })
     };
     $scope.getPlaylists = function() {
         $http.get('/playlists').
             success(function(data) {
                 $scope.playlists = data;
-                console.log(data)
             })
+    };
+    $scope.deletePlaylist = function (playlistId) {
+        $http.delete('/playlists/' + playlistId).
+            success(function (data) {
+            }).
+            error (function (data) {
+        })
     };
     $scope.ok = function () {
         $modalInstance.close();

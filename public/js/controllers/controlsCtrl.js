@@ -12,37 +12,6 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
 
         window.addEventListener('scroll', otherListener);
     }
-    /*function getEvent () {
-        if ($location.path().indexOf('/event/') > -1) {
-            matched = $location.path().match(/\d.*//*);
-            /*$http.get('/events/' + matched[0])
-                .success(function(data, status){
-                    $scope.event = data;
-                    console.log(data);
-                }).error(function(data, status){
-                    console.log(data);
-                });
-            $scope.generate = function() {
-                $scope.buy = true;
-                $timeout(function () {
-                    var qrcode = new QRCode(document.getElementById("qrcode"), {
-                        width: 100,
-                        height: 100
-                    });
-
-                    function makeCode() {
-                        var code = '51151515155151515';
-                        qrcode.makeCode(code);
-                    }
-                    makeCode();
-                }, 100)
-            };
-            $scope.end = function () {
-                $scope.buy = false;
-            }
-        }
-    }
-    getEvent();*/
     $scope.back =  function () {
         history.back();
         $scope.$apply();
@@ -57,15 +26,6 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
             $http.get('https://graph.facebook.com/v2.2/'+ searchPlaces.id +'/?fields=checkins,cover,description,hours,id,likes,link,location,name,phone,website,picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
                 success(function(data, status, headers, config) {
                     flag = 0;
-                    /*for (m = 0; m < places.length; m++) {
-                        if (places[m].id == data.id){
-                            flag = 1;
-                        } /*else if (places[m].location.latitude == data.location.latitude && places[m].location.longitude == data.location.longitude && places[m].likes > data.likes) {
-                            flag = 1;
-                        } else if (places[m].location.latitude == data.location.latitude && places[m].location.longitude == data.location.longitude && places[m].likes < data.likes) {
-                            places.splice(m, 1);
-                        }
-                    }*/
                     if (data.location != undefined) {
                         if (data.location.country == undefined || data.location.country != 'France') {
                             flag = 1;
@@ -221,13 +181,6 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                         }, 50)
                     }
                     myLoop();
-                    /*for (var l=0; l<lines.length; l++) {
-                        if (lines[l] == "Salles de 400 à 1200 places" || lines[l] == "Salles de moins de 400 places") {
-                            //placesName.push(lines[l-1].replace(/ /g, "+"));
-                            // console.log("places", placesName.length)
-                            getPlacesByName(lines[l-1].replace(/ /g, "+"))
-                        }
-                    }*/
                 }
             }
         };

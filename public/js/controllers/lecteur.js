@@ -32,13 +32,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         modalInstance.result.then( function () {
         });
     };
-    $rootScope.deletePlaylist = function (playlistId) {
-        $http.delete('/playlists/' + playlistId).
-            success(function (data) {
-            }).
-            error (function (data) {
-        })
-    };
     function eventsPlaylist () {
         $http.get('/events/offset/' + offset +'/' + $rootScope.geoLoc).
             success(function(data){
@@ -351,9 +344,10 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
             document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
             document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
+            document.getElementById('musicPlayer').removeEventListener("error", error);
         };
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
-        document.getElementById('musicPlayer').addEventListener('error', error);
+        document.getElementById('musicPlayer').removeEventListener('error', error);
         $scope.trackActive = $rootScope.playlist.tracks[i];
         if ($rootScope.playlist.tracks[i].platform == 'Soundcloud' || $rootScope.window == 'small' || $rootScope.window == 'medium') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
@@ -525,10 +519,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             });
         }
     };
-    /*$scope.savePlaylist = function () {
-        $http.post('/playlist',
-        )
-    }*/
 }]);
 app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance, $http) {
     $scope.createNewPlaylist = function (playlist) {
@@ -539,6 +529,7 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
         console.log(tracksToSave)
         $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
+                $modalInstance.dismiss('cancel');
                 $scope.info = 'votre playlist ' + playlist.name + ' est enregistrée';
                 var modalInstance = $modal.open({
                     templateUrl: 'assets/partials/_infoModal.html',
@@ -555,10 +546,24 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
             }).
             error(function (data) {
                 if (data.error == 'Credentials required') {
+                    $modalInstance.dismiss();
                     var object = {name: playlist.name, tracks: tracksToSave};
                     $rootScope.storeLastReq('post', '/playlists', object, 'votre playlist "' + playlist.name + '" est enregistée')
+                } else {
+                    $scope.info = 'Désolé une erreur s\'est produite';
+                    var modalInstance = $modal.open({
+                        templateUrl: 'assets/partials/_infoModal.html',
+                        controller: 'infoModalCtrl',
+                        resolve: {
+                            info: function () {
+                                return $scope.info;
+                            }
+                        }
+                    });
+                    modalInstance.result.then(function () {
+                        $log.info('Modal dismissed at: ' + new Date());
+                    });
                 }
-                console.log(data)
             })
     };
     $scope.cancel = function () {

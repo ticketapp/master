@@ -313,10 +313,38 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 		}).
 			success(function(data, status, headers, config) {
 				window.location.href =('#/event/' + data.eventId);
-				console.log(data)
 			}).
 			error(function(data, status, headers, config) {
-				console.log(data)
+                if (data.error == 'Credentials required') {
+                    var object = {name: $scope.newEvent.name,
+                        description: $scope.newEvent.description,
+                        startTime: $filter('date')($scope.newEvent.startTime, "yyyy-MM-dd HH:mm"),
+                        endTime: $scope.newEvent.endTime,
+                        ageRestriction: $scope.newEvent.ageRestriction,
+                        images: $scope.newEvent.img,
+                        places: $scope.newEvent.place,
+                        users: $scope.newEvent.user,
+                        tariffs: $scope.newEvent.tarifs,
+                        facebookId: $scope.newEvent.facebookId,
+                        isPublic: $scope.newEvent.isPublic,
+                        artists: $scope.artists,
+                        addresses: $scope.newEvent.adresses}
+                    $rootScope.storeLastReq('post', '/events/create', object, 'votre événement est bien enregistrer')
+                } else {
+                    $scope.info = 'Désolé une erreur s\'est produite';
+                    var modalInstance = $modal.open({
+                        templateUrl: 'assets/partials/_infoModal.html',
+                        controller: 'infoModalCtrl',
+                        resolve: {
+                            info: function () {
+                                return $scope.info;
+                            }
+                        }
+                    });
+                    modalInstance.result.then(function () {
+                        $log.info('Modal dismissed at: ' + new Date());
+                    });
+                }
 				// called asynchronously if an error occurs
 				// or server returns response with an error status.
 			});

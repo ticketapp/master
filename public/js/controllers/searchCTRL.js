@@ -30,10 +30,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             webSite: place.webSite,
             imagePath : place.imagePath
         }).success(function(data){
-            console.log(data)
             window.location.href =('#/lieu/' + data.placeId);
         }).error(function(data){
-            console.log(data)
         })
     }
     $scope.searchNewPlace = function (placeName) {

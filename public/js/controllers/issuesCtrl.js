@@ -22,10 +22,23 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope) {
                 $scope.newIssue= [];
             }).
             error(function (data) {
-                console.log(data)
                 if (data.error == 'Credentials required') {
                     var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
                     $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
+                } else {
+                    $scope.info = 'Désolé une erreur s\'est produite';
+                    var modalInstance = $modal.open({
+                        templateUrl: 'assets/partials/_infoModal.html',
+                        controller: 'infoModalCtrl',
+                        resolve: {
+                            info: function () {
+                                return $scope.info;
+                            }
+                        }
+                    });
+                    modalInstance.result.then(function () {
+                        $log.info('Modal dismissed at: ' + new Date());
+                    });
                 }
             })
     };

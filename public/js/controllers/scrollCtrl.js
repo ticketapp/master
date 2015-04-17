@@ -38,8 +38,21 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                 error(function (data) {
                     if (data.error == 'Credentials required') {
                         $rootScope.storeLastReq('post', '/events/'+ id + '/follow', '', 'vous suivez maintenant ' + name)
+                    } else {
+                        $scope.info = 'Désolé une erreur s\'est produite';
+                        var modalInstance = $modal.open({
+                            templateUrl: 'assets/partials/_infoModal.html',
+                            controller: 'infoModalCtrl',
+                            resolve: {
+                                info: function () {
+                                    return $scope.info;
+                                }
+                            }
+                        });
+                        modalInstance.result.then(function () {
+                            $log.info('Modal dismissed at: ' + new Date());
+                        });
                     }
-                    console.log(data)
                 })
         };
         $rootScope.passConnectedToFalse = function () {
@@ -116,12 +129,9 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     $rootScope.$apply();
                     $rootScope.loadingTracks = false;
                     function saveTrack (track) {
-                        console.log('yo')
-
                         if (track.redirectUrl == undefined) {
                             track.redirectUrl = track.url;
                         }
-                        console.log('yoyo')
                         $http.post('/tracks/create', {
                             artistFacebookUrl: artist.facebookUrl,
                             redirectUrl : track.redirectUrl,
@@ -130,14 +140,12 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                             platform: track.platform,
                             thumbnailUrl: track.thumbnailUrl
                         }).error(function (data) {
-                            console.log(data)
                         })
                     }
                     value.forEach(saveTrack)
 
                 })
                 .fail(function (error) {
-                    console.log("Error: ", error);
                 });
         };
         $rootScope.resizePageElementsWithEvents = function() {

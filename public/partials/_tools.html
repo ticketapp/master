@@ -16,7 +16,7 @@
             <div class="column large-12" ng-show="confirmDelete">
                 Etes vous sur de vouloir supprimer la playlist "{{playlist.name}}" ?
                 <a class="button"
-                   ng-click="$root.deletePlaylist(playlist.playlistId); confirmDelete = false">
+                   ng-click="deletePlaylist(playlist.playlistId); confirmDelete = false">
                     Supprimer
                 </a>
                 <a class="button"
