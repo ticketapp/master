@@ -112,7 +112,7 @@ object SearchArtistsController extends Controller {
       }
     }
     soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
-      case Some(facebookUrls: Seq[String]) if facebookUrls.length > 0 => Option(facebookUrls(0))
+      case Some(facebookUrls: Seq[String]) if facebookUrls.length > 0 => Option(facebookUrls.head)
       case _ => None
     }
   }
@@ -147,10 +147,10 @@ object SearchArtistsController extends Controller {
         String, Option[String], Option[String])](readArtist)
       match {
         case Some((name, facebookId, "Musician/band", Some(cover: String), maybeWebsites,
-        link, maybeDescription, maybeGenre)) =>
+            link, maybeDescription, maybeGenre)) =>
           Option(makeArtist(name, facebookId, cover, maybeWebsites, link, maybeDescription, maybeGenre))
         case Some((name, facebookId, "Artist", Some(cover: String), maybeWebsites,
-        link, maybeDescription, maybeGenre)) =>
+            link, maybeDescription, maybeGenre)) =>
           Option(makeArtist(name, facebookId, cover, maybeWebsites, link, maybeDescription, maybeGenre))
         case _ => None
       }
@@ -159,11 +159,10 @@ object SearchArtistsController extends Controller {
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                  maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
-    val websitesSet = getNormalizedWebsitesInText(maybeWebsites).filterNot(_.contains("facebook.com"))
+    val websitesSet = getNormalizedWebsitesInText(maybeWebsites).filterNot(_.contains("facebook.com")).filterNot(_ == "")
     val description = formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
-    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq,
-      Seq.empty)
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq, Seq.empty)
   }
 
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {

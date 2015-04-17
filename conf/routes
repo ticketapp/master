@@ -57,8 +57,8 @@ PUT         /playlists                    controllers.PlaylistController.update
 DELETE      /playlists/:playlistId        controllers.PlaylistController.delete(playlistId: Long)
 
 ################################# Genres ############################################
-GET         /genres/:genre/:numberToReturn/:offset/artists                              controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
-GET         /genres/:genre/:numberToReturn/:offset/events                               controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET     /genres/:genre/:numberToReturn/:offset/artists      controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET     /genres/:genre/:numberToReturn/:offset/events       controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
 
 ################################# Tracks ############################################
 POST        /tracks/create                                                              controllers.TrackController.createTrack
