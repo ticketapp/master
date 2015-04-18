@@ -137,7 +137,7 @@
                                               margin-bottom: 10px;
                                               left: 20px;
                                             }"
-                                   ng-if="showPlayNow"
+                                   ng-if="showPlayNow && ($root.window != 'small' || $root.window != 'medium')"
                                    ng-mouseover="$parent.showPlayNow = true"
                                    ng-mouseleave="$parent.showPlayNow = false"
                                    ng-click="$root.addAndPlay([track], artiste)">
