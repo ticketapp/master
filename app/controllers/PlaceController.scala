@@ -30,6 +30,10 @@ object PlaceController extends Controller {
     Ok(Json.toJson(Place.findAllContaining(pattern)))
   }
 
+  def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Place.findNearCity(city, numberToReturn, offset)))
+  }
+
   def deletePlace(placeId: Long): Int = {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM places WHERE placeId={placeId}").on(

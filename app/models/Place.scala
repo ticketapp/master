@@ -92,14 +92,14 @@ object Place {
     case e: Exception => throw new DAOException("Place.findNear: " + e.getMessage)
   }
 
-  /*def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Place] = try {
     Address.findGeographicPointOfCity(city) match {
       case None => Seq.empty
       case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
     }
   } catch {
-    case e: Exception => throw new DAOException("Event.findNearCity: " + e.getMessage)
-  }*/
+    case e: Exception => throw new DAOException("Place.findNearCity: " + e.getMessage)
+  }
   
   def findAll: Seq[Place] = try {
     DB.withConnection { implicit connection =>
