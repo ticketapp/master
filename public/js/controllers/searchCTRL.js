@@ -221,7 +221,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selArtist == true) {
-                $http.get('/artists/since/' + offset + '/20').
+                $http.get('/artists/since/' + offset + '/12').
                     success(function (data, status, headers, config) {
                         var scopeIdList = [];
                         function getArtistId(el, index, array) {
@@ -243,7 +243,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selUsr == true) {
-                $http.get('/organizers').
+                $http.get('/places/' + $rootScope.geoLoc + '/12/' + offset).
                     success(function(data, status, headers, config) {
                         if (data != $scope.organizers) {
                             $scope.organizers = data;
@@ -257,7 +257,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selPlace == true) {
-                $http.get('/places/offset/'+ offset+ '/' + $rootScope.geoLoc).
+                $http.get('/places/' + $rootScope.geoLoc + '/12/' + offset).
                     success(function(data, status, headers, config) {
                         var scopeIdList = [];
                         function getPlaceId(el, index, array) {
@@ -333,6 +333,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 }
                             }
                             data.forEach(uploadPlaces)
+                        $http.get('/places/nearCity/' +  _research + '/12/' + offset).
+                            success(function (data) {
+                                data.forEach(uploadPlaces)
+                            });
                         $rootScope.resizeImgHeight()
                         $scope.loadingMore = false;
                     }).
@@ -434,7 +438,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         $http.get('/genres/'+ _research +'/20/' + offset + '/events ').
                             success(function(data, status, headers, config) {
                                 data.forEach(uploadEvents);
-                                console.log(data)
                                 $rootScope.resizeImgHeight()
                             });
                         $http.get('/places/containing/'+_research).
@@ -449,8 +452,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 }
                                 data.forEach(getPlaceEvents)
                             });
-                        $http.get('/events/city/' + _research).
+                        $http.get('/events/nearCity/' + _research + '/12/' + offset ).
                             success(function (data) {
+                                console.log(data)
                                 data.forEach(uploadEvents);
                                 $rootScope.resizeImgHeight()
                             });
@@ -469,7 +473,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         console.log(_research.length)
         if ($scope.artistsFb.length < $scope.limit && _selArtist == true && _research.length > 1) {
             $scope.loadingFbArt = true;
-            console.log('yo')
             $http.get('/artists/facebookContaining/'+_research)
                 /*.start(function (data, etc) {
                     console.log("Dude! We're goin'!", data, etc);

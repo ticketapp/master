@@ -33,7 +33,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         });
     };
     function eventsPlaylist () {
-        $http.get('/events/offset/' + offset +'/' + $rootScope.geoLoc).
+        $http.get('/events/nearGeoPoint/' + $rootScope.geoLoc + '/20/' + offset).
             success(function(data){
                 function getEventsArtsts (event) {
                    var evArtLenght = event.artists.length
