@@ -320,25 +320,5 @@ object Event {
   } catch {
     case e: Exception => throw new DAOException("Event.isEventFollowed: " + e.getMessage)
   }
-
-  def findAllInCircle(center: String): List[Event] = center match {
-    case geographicPointPattern(_) =>
-      try {
-        DB.withConnection { implicit connection =>
-          SQL(
-            s"""SELECT * FROM events e
-               |  JOIN eventsAddresses eA on e.eventId = eA.eventId
-               |  JOIN addresses a ON a.addressId = eA.eventId
-               |    WHERE a.isEvent = TRUE
-               |  ORDER BY a.geographicPoint <-> point '$center'
-               |  LIMIT 50""".stripMargin)
-            .as(EventParser.*)
-            .map(getPropertiesOfEvent)
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Event.findAllInCircle: " + e.getMessage)
-      }
-    case _ => List.empty
-  }
 }
 

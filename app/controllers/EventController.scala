@@ -121,8 +121,4 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       case Some(identity: Identity) => Ok(Json.toJson(Event.isEventFollowed(identity.identityId, eventId)))
     }
   }
-
-  def findEventsInCircle(peripheral: String) = Action {
-    Ok(Json.toJson(Event.findAllInCircle(peripheral)))
-  }
 }
