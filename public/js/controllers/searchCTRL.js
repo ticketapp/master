@@ -586,24 +586,46 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     };
     var StartTimer;
     var doneStartInterval = 600;
-    $scope.selStart = function(newName) {
-        if (angular.isDefined(newName)) {
-            if (newName > 23 && newName <= 38) {
-                newName = (newName-23)*24
-            } else if (newName > 38 && newName <= 40) {
-                newName = (newName-36)*168;
-            } else if (newName > 40) {
-                newName = (newName-39)*720;
-            }
-            console.log(newName)
-            $rootScope.changeTimeEventView(newName);
-            _selStart = newName;
-            clearTimeout(StartTimer);
-            StartTimer = setTimeout(search, doneStartInterval);                
-            $scope.limit = 20;
-            offset = 0;
-            $scope.loadingMore = true;
+    $scope.selStart = function() {
+        newName = $rootScope.maxStart;
+        if (newName > 23 && newName <= 38) {
+            newName = (newName-23)*24
+        } else if (newName > 38 && newName <= 40) {
+            newName = (newName-36)*168;
+        } else if (newName > 40) {
+            newName = (newName-39)*720;
         }
+        var textSlider = document.getElementsByClassName('md-thumb');
+        for (var i = 0; i < textSlider.length; i++) {
+            textSlider[i].innerHTML = '';
+            textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
+                $filter('millSecondsToTimeString')(newName) + '</b>';
+        }
+        _selStart = newName;
+        clearTimeout(StartTimer);
+        StartTimer = setTimeout(search, doneStartInterval);
+        $scope.limit = 20;
+        offset = 0;
+        $scope.loadingMore = true;
         return _selStart;
     };
+    var newName = $rootScope.maxStart;
+    if (newName > 23 && newName <= 38) {
+        newName = (newName-23)*24
+    } else if (newName > 38 && newName <= 40) {
+        newName = (newName-36)*168;
+    } else if (newName > 40) {
+        newName = (newName-39)*720;
+    }
+    var textSlider = document.getElementsByClassName('md-thumb');
+    var waitForSearchBar = setInterval(function () {
+        if ($rootScope.path == 'search' || textSlider.length >= 2) {
+            clearInterval(waitForSearchBar);
+            for (var i = 0; i < textSlider.length; i++) {
+                textSlider[i].innerHTML = '';
+                textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
+                    $filter('millSecondsToTimeString')(newName) + '</b>';
+            }
+        }
+    }, 100);
 }]);

@@ -28,13 +28,10 @@
 <div class="column large-12 padding0"
      ng-if="$root.activEvent &&
      (searchPat == undefined || searchPat.length == 0)">
-    <md-slider flex ng-change="$root.selStart($root.maxStart)"
+    <md-slider flex ng-change="selStart()"
                ng-model="$root.maxStart" min="1" max="51" step="1"
-               aria-label="volume"
-               id="volume-slider"
-               class="md-primary column medium-8 padding0" md-discrete>
+               aria-label="timeSlider"
+               id="timeSearchSlider"
+               class="md-primary column medium-8 padding0">
     </md-slider>
-    <h3 class="column medium-3 margin0" style="color: white;">
-        {{$root.maxStartView | millSecondsToTimeString}}
-    </h3>
 </div>

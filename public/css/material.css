@@ -5831,6 +5831,7 @@ md-slider .md-track-fill {
     transition: width 0.05s linear; }
 md-slider .md-track-ticks {
     position: absolute;
+    display: none;
     left: 0;
     right: 0;
     height: 100%; }
@@ -5920,6 +5921,7 @@ md-slider .md-focus-thumb {
     animation: sliderFocusThumb 0.4s linear; }
 md-slider .md-focus-ring {
     position: absolute;
+    display: none;
     left: -24px;
     top: 0px;
     width: 48px;
