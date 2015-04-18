@@ -14,6 +14,8 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.Play.current
 
+import scala.collection.mutable.ListBuffer
+
 object Utilities {
   implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
     val MetaDataItem(qualified, nullable, clazz) = meta
@@ -58,5 +60,31 @@ object Utilities {
     case Some(description) =>
       play.Play.application.configuration.getString("regex.linkPattern").r
         .findAllIn(description).toSet.map { normalizeUrl }
+  }
+
+  def phoneNumbersStringToSet(phoneNumbers: Option[String]): Set[String] = phoneNumbers match {
+    case None => Set.empty
+    case Some(phoneNumbersValue: String) =>
+      def normalizePhoneNumberPrefix(phoneNumber: String): String = phoneNumber match {
+        case phoneNumberStartsWith0033 if phoneNumberStartsWith0033.startsWith("0033") =>
+          "0" + phoneNumber.drop(4)
+        case phoneNumberStartsWith0033 if phoneNumberStartsWith0033.startsWith("+0033") =>
+          "0" + phoneNumber.drop(5)
+        case phoneNumberStartsWith33 if phoneNumberStartsWith33.startsWith("33") =>
+          "0" + phoneNumber.drop(2)
+        case phoneNumberStartsWithPlus33 if phoneNumberStartsWithPlus33.startsWith("+33") =>
+          "0" + phoneNumber.drop(3)
+        case alreadyNormalized: String => alreadyNormalized
+      }
+
+      var numberWithoutLetters = phoneNumbersValue.replaceAll("[^0-9+]", "")
+      var normalizedNumbers = ListBuffer.empty[String]
+
+      while (numberWithoutLetters.length >= 10) {
+        val withNormalizedPrefix = normalizePhoneNumberPrefix(numberWithoutLetters)
+        normalizedNumbers += withNormalizedPrefix.take(10)
+        numberWithoutLetters = withNormalizedPrefix.drop(10)
+      }
+      normalizedNumbers.toSet
   }
 }

@@ -25,7 +25,7 @@ import play.api.Play.current
 
 object InsertFrenchCities extends Controller {
   def insertFrenchCities() = Action {
-      val lines = Source.fromFile("/home/sim/Downloads/villes_france.sql").getLines()
+      val lines = Source.fromFile("textFiles/villes_france.sql").getLines()
       DB.withConnection { implicit connection =>
         var i = 0
         while (lines.hasNext && i < 2000) {

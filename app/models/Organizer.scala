@@ -109,7 +109,7 @@ object Organizer {
           'facebookId -> organizer.facebookId,
           'name -> organizer.name,
           'description -> organizer.description,
-          'phone -> organizer.phone,
+          'phone -> Utilities.phoneNumbersStringToSet(organizer.phone).mkString(","),
           'publicTransit -> organizer.publicTransit,
           'websites -> organizer.websites,
           'imagePath -> organizer.imagePath,

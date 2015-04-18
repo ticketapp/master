@@ -38,4 +38,5 @@ object JsonHelper {
   implicit val eventWrites = Json.writes[Event]
   implicit val infoWrites: Writes[Info] = Json.writes[Info]
   implicit val issueWrites: Writes[Issue] = Json.writes[Issue]
+  implicit val mailWrites: Writes[Mail] = Json.writes[Mail]
 }

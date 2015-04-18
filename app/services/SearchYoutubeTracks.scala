@@ -177,8 +177,8 @@ object SearchYoutubeTracks {
       .flatMap { result =>
         val total = (result \ "response" \ "total").asOpt[Int]
         val songs = readEchonestSongs(result)
-        /*println(songs)
-        println(start)*/
+        println(songs)
+        println(start)
         total.exists(_ > start + 100) && start < 300 match {
           case false => Future.successful(songs)
           case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)
