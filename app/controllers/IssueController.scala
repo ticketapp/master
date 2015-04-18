@@ -21,7 +21,6 @@ object IssueController extends Controller with securesocial.core.SecureSocial {
   )(Issue.issueFormApply)(Issue.issueFormUnapply))
 
   private val issueCommentBindingForm = Form(mapping(
-    "title" -> nonEmptyText(2),
     "content" -> nonEmptyText(8)
   )(Issue.issueCommentFormApply)(Issue.issueCommentFormUnapply))
 
@@ -44,9 +43,9 @@ object IssueController extends Controller with securesocial.core.SecureSocial {
         println(formWithErrors.errorsAsJson)
         BadRequest(formWithErrors.errorsAsJson)
       },
-      comment => {
+      commentContent => {
         Ok(Json.toJson(Issue.saveComment(
-          IssueComment(comment.title, comment.content, request.user.identityId.userId, issueId))))
+          IssueComment(commentContent, request.user.identityId.userId, issueId))))
       }
     )
   }
