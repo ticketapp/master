@@ -10,14 +10,14 @@ GET           /admin                                                            
 
 ################################## Events ###############################################
 GET           /events/nearGeoPoint/:geographicPoint/:numberToReturn/:offset               controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
-GET           /events/offsetAndMaxStartTime/:offset/:geographicPoint/:hourInterval        controllers.EventController.eventsWithMaxStartTime(offset: Int, geographicPoint: String, hourInterval: Int)
+GET           /events/inInterval/:hourInterval/:numberToReturn/:offset/:geographicPoint/  controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET           /events/:id                                                                 controllers.EventController.event(id: Long)
 POST          /events/create                                                              controllers.EventController.createEvent
 POST          /events/:eventId/follow                                                     controllers.EventController.followEvent(eventId: Long)
 GET           /events/followed/                                                           controllers.EventController.getFollowedEvents
 GET           /events/:eventId/isEventFollowed                                            controllers.EventController.isEventFollowed(eventId: Long)
 GET           /events/containing/:pattern/:center                                         controllers.EventController.findEventsContaining(pattern: String, center:String)
-#GET       /events/circle/                                                      controllers.EventController.findEventsInCircle(center = "")
+#GET           /events/circle/                                                      controllers.EventController.findEventsInCircle(center = "")
 GET           /events/city/:pattern                                                       controllers.EventController.findEventsByCityPattern(pattern: String)
 GET           /events/nearCity/:city/:numberToReturn/:offset                              controllers.EventController.findEventsNearCity(city: String, numberToReturn: Int, offset: Int)
 

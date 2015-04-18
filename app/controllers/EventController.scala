@@ -21,10 +21,11 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def eventsWithMaxStartTime(offset: Int, geographicPoint: String, hourInterval: Int) = Action {
+  def eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int) = Action {
     geographicPoint match {
       case geographicPointPattern(_) =>
-        Ok(Json.toJson(Event.find20InHourIntervalWithOffsetNearCenterPoint(offset, geographicPoint, hourInterval)))
+        Ok(Json.toJson(
+          Event.findInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
       case _ =>
         Ok(Json.toJson("Invalid geographicPoint"))
     }
