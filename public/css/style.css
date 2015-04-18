@@ -231,6 +231,7 @@ md-toast{position: fixed!important;}
     width: 100%;}
 .footer_inner{width:95%; margin:auto; color: #ffffff}
 .footer_inner > div > a {line-height: 30px}
+.footer_inner > div > h1 {text-align: center}
 .scaleMap {-webkit-transform: scale(0.96);}
 /*filters top*/
 

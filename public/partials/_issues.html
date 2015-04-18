@@ -4,16 +4,20 @@
            ng-change="getIssues(newIssue.title); selectedIssue = false">
     <a class="button" ng-click="addNewIssue = !addNewIssue; selectedIssue = false">AddIssue</a>
     <form ng-show="addNewIssue" name="formIssue" ng-submit="addIssue()">
-        <input ng-model="newIssue.title" ng-minlength="8" required name="issueTitle" placeholder="newIssue.title">
-        <div ng-messages="formIssue.newIssue.$error">
-            <div ng-message="required">Ce champ est obligatoire</div>
-            <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
-        </div>
-        <textarea ng-minlength="8" required name="issueContent" ng-model="newIssue.content"></textarea>
-        <div ng-messages="formIssue.issueContent.$error">
-            <div ng-message="required">Ce champ est obligatoire</div>
-            <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
-        </div>
+        <md-input-container flex>
+            <input ng-model="newIssue.title" ng-minlength="8" required name="issueTitle" placeholder="newIssue.title">
+            <div ng-messages="formIssue.issueTitle.$error">
+                <div ng-message="required">Ce champ est obligatoire</div>
+                <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+            </div>
+        </md-input-container>
+        <md-input-container flex>
+            <textarea ng-minlength="8" required name="issueContent" ng-model="newIssue.content"></textarea>
+            <div ng-messages="formIssue.issueContent.$error">
+                <div ng-message="required">Ce champ est obligatoire</div>
+                <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+            </div>
+        </md-input-container>
         <input class="button" type="submit">
         <a class="button" ng-click="addNewIssue = false">Annuler</a>
     </form>
@@ -21,7 +25,7 @@
         <md-progress-circular md-mode="indeterminate"></md-progress-circular>
     </div>
     <ul class="column large-12" ng-show="selectedIssue == false">
-        <ul ng-repeat="issue in issues | limitTo: issuesLimit | filter: newIssue.title">
+        <ul ng-repeat="issue in issues | filter: newIssue.title">
             <h1 ng-click="$parent.selectedIssue = issue"><a>{{issue.title}}</a></h1>
         </ul>
         <a class="button" ng-click="$parent.issuesLimit = $parent.issuesLimit + 10" ng-if="issues.length > issuesLimit">More</a>
@@ -35,12 +39,14 @@
                 <p>{{comment.content}}</p>
             </div>
             <form ng-show="addNewComment" name="commentForm" ng-submit="addComment($index)">
-                <textarea ng-minlength="8" required name="commentContent"
-                          ng-model="newComment.content"></textarea>
-                <div ng-messages="commentForm.commentContent.$error">
-                    <div ng-message="required">Ce champ est obligatoire</div>
-                    <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
-                </div>
+                <md-input-container flex>
+                    <textarea ng-minlength="8" required name="commentContent"
+                              ng-model="newComment.content"></textarea>
+                    <div ng-messages="commentForm.commentContent.$error">
+                        <div ng-message="required">Ce champ est obligatoire</div>
+                        <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+                    </div>
+                </md-input-container>
                 <input type="submit">
             </form>
             <a class="button" ng-if="selectedIssue.comments.length > 0"

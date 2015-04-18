@@ -1,32 +1,37 @@
-<div class="footer_inner" ng-controller="footerCtrl">
-    <div class="column large-4">
+<div class="footer_inner" ng-class="{'center': $root.window == 'small'}" ng-controller="footerCtrl">
+    <div class="column medium-4">
         <h1>Infos</h1>
-        <a class="column large-12" ng-click="openIssues('issues')">FAQ / Issues</a>
-        <a class="column large-12" ng-click="openIssues('contact')">Contactez-nous</a>
-        <a class="column large-12">Mentions légales</a>
-        <a class="column large-12">Cookies</a>
+        <a class="column medium-12" ng-click="openIssues('issues')">FAQ / Issues</a>
+        <a class="column medium-12" ng-click="openIssues('contact')">Contactez-nous</a>
+        <a class="column medium-12">Mentions légales</a>
+        <a class="column medium-12">Cookies</a>
     </div>
-    <div class="column large-4">
+    <div class="column medium-4">
         <h1>Api's</h1>
-        <a href="http://www.facebook.com" target="_blank" class="column large-12">
-            <i class="fi-social-facebook float-left marginRight10" style="font-size: 22px;width: 40px;"></i>
+        <a href="http://www.facebook.com" target="_blank" class="column medium-12">
+            <i class="fi-social-facebook center marginRight10"
+               ng-class="{'float-left': $root.window != 'small'}"
+               style="font-size: 22px;width: 40px;"></i>
             <b>Facebook Api</b>
         </a>
-        <a href="http://soundcloud.com" target="_blank" class="column large-12">
-            <i class="fa fa-soundcloud float-left marginRight10"
+        <a href="http://www.soundcloud.com" target="_blank" class="column medium-12">
+            <i class="fa fa-soundcloud center marginRight10"
+               ng-class="{'float-left': $root.window != 'small'}"
                     style="color: white; font-size: 22px;width: 40px;"></i>
             <b>Soundcloud Api</b>
         </a>
-        <a href="http://www.youtube.com" target="_blank" class="column large-12">
-            <i class="fi-social-youtube float-left marginRight10" style="font-size: 22px;width: 40px;"></i>
+        <a href="http://www.youtube.com" target="_blank" class="column medium-12">
+            <i class="fi-social-youtube center marginRight10"
+               ng-class="{'float-left': $root.window != 'small'}"
+               style="font-size: 22px;width: 40px;"></i>
             <b>Youtube Api</b>
         </a>
 
-        <a href="http://developer.echonest.com/" target="_blank" class="column large-12">
+        <a href="http://developer.echonest.com/" target="_blank" class="column medium-12">
             <img src="assets/img/echonest.png">
         </a>
     </div>
-    <div class="column large-4">
+    <div class="column medium-4">
         <h1>Partenaires</h1>
     </div>
 </div>
