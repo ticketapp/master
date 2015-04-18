@@ -12,9 +12,26 @@ CREATE TABLE addresses (
   geographicPoint           POINT,
   city                      VARCHAR(127),
   zip                       VARCHAR(15),
-  street                    VARCHAR(255)
+  street                    VARCHAR
 );
 CREATE INDEX geographicPointAdresses ON addresses USING GIST (geographicPoint);
+
+CREATE OR REPLACE FUNCTION insertAddress(
+  geographicPointValue           VARCHAR(63),
+  cityValue                      VARCHAR(127),
+  zipValue                       VARCHAR(15),
+  streetValue                    VARCHAR)
+  RETURNS INT AS
+  $$
+  DECLARE addressIdToReturn int;;
+  BEGIN
+    INSERT INTO addresses (geographicPoint, city, zip, street)
+      VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
+    RETURNING addressId INTO addressIdToReturn;;
+    RETURN addressIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,

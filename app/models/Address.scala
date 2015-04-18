@@ -64,20 +64,13 @@ object Address {
       case e: Exception => throw new DAOException("Address.find: " + e.getMessage)
     }
   }
-  /*
-  def findByOrganizer(organizerId: Long): Option[Address] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM addresses WHERE addressId = {addressId}")
-        .on('organizerId -> organizerId)
-        .as(AddressParser.singleOpt)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Problem with the method Address.find: " + e.getMessage)
-  }
-*/
+
   def findAllContaining(pattern: String): Seq[Address] = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM addresses WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
+      SQL(
+        """SELECT * FROM addresses
+          |  WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
+          |LIMIT 10""".stripMargin)
         .on('patternLowCase -> pattern.toLowerCase)
         .as(AddressParser.*)
     }
@@ -85,51 +78,26 @@ object Address {
     case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
   }
 
-  def saveAddressAndEventRelation(address: Address, id: Long): Option[Long] = {
-    address.geographicPoint match {
-      case None =>
-        try {
-          DB.withConnection { implicit connection =>
-            SQL( s"""INSERT INTO addresses(city, zip, street)
-              VALUES ({city}, {zip}, {street})""")
-              .on(
-                'city -> address.city,
-                'zip -> address.zip,
-                'street -> address.street
-              ).executeInsert() match {
-                case Some(x: Long) => saveEventAddressRelation(id, x)
-                case _ => None
-              }
-          }
-        } catch {
-          case e: Exception => throw new DAOException("Cannot create address: " + e.getMessage)
-        }
-
-      case Some(geoPoint: String) => try {
-        val geoPointValue = geoPoint
-        DB.withConnection { implicit connection =>
-          SQL( s"""INSERT INTO addresses(geographicPoint, city, zip, street)
-            VALUES (point '$geoPointValue', {city}, {zip}, {street})""")
-            .on(
-              'city -> address.city,
-              'zip -> address.zip,
-              'street -> address.street)
-            .executeInsert() match {
-              case Some(x: Long) => saveEventAddressRelation(id, x)
-              case _ => None
-            }
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Cannot create address: " + e.getMessage)
-      }
+  def saveAddressAndEventRelation(address: Address, id: Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      val addressId = SQL("""SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
+        .on(
+          'geographicPoint -> address.geographicPoint,
+          'city -> address.city,
+          'zip -> address.zip,
+          'street -> address.street)
+        .as(scalar[Long].single)
+      saveEventAddressRelation(id, addressId)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Address.saveAddressAndEventRelation: " + e.getMessage)
   }
 
   def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO eventsAddresses (eventId, addressId)
-          |VALUES ({eventId}, {addressId})""".stripMargin)
+          | VALUES ({eventId}, {addressId})""".stripMargin)
         .on(
           'eventId -> eventId,
           'addressId -> addressId)

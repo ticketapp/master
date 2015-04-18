@@ -220,8 +220,8 @@ object Event {
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint}, {description}, {startTime},
-           |{endTime}, {imagePath}, {ageRestriction}, {tariffRange}, {ticketSellers})""".stripMargin)
+        s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint}, {description},
+           |{startTime}, {endTime}, {imagePath}, {ageRestriction}, {tariffRange}, {ticketSellers})""".stripMargin)
         .on(
           'facebookId -> event.facebookId,
           'isPublic -> event.isPublic,
@@ -253,8 +253,8 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """UPDATE events
-          | SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
-          | WHERE facebookId={facebookId}""".stripMargin)
+          | SET name = {name}, description = {description}, startTime = {startTime}, endTime = {endTime}
+          | WHERE facebookId = {facebookId}""".stripMargin)
         .on(
           'facebookId -> event.facebookId,
           'name -> event.name,
@@ -272,7 +272,7 @@ object Event {
       SQL("""SELECT id FROM users_login WHERE userId = {userId}""")
         .on('userId -> userId)
         .as(scalar[Option[Long]].single) match {
-        case None => throw new DAOException("Cannot follow event: didn't find id with this userId")
+        case None => throw new DAOException("Event.followEvent")
         case Some(id) => SQL(
           """INSERT INTO eventsFollowed(userId, eventId)
             |VALUES ({userId}, {eventId})""".stripMargin)
@@ -288,8 +288,8 @@ object Event {
 
   def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
     DB.withConnection { implicit connection =>
-      SQL("""select e.* from events e
-            |  INNER JOIN eventsfollowed ef ON e.eventid = ef.eventid
+      SQL("""SELECT e.* FROM events e
+            |  INNER JOIN eventsFollowed ef ON e.eventId = ef.eventId
             |WHERE ef.userid = {userId}""".stripMargin)
         .on('userId -> userId.userId)
         .as(EventParser.*)

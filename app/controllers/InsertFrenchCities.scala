@@ -34,7 +34,7 @@ object InsertFrenchCities extends Controller {
           if (line != "" && line.take(1) == "(") {
             val splitedLine = line.split(",")
             try {
-              val cityName: String = splitedLine(4).replaceAll("'", "")
+              val cityName: String = splitedLine(4).replaceAll("'", "").trim
               val geographicPoint: String = "(" + splitedLine(19).trim + "," + splitedLine(20).trim + ")"
               SQL(
                 s"""INSERT INTO frenchCities(name, geographicPoint)
