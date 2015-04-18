@@ -86,11 +86,11 @@ object Event {
     case e: Exception => throw new DAOException("Event.eventId: " + e.getMessage)
   }
 
-  def findNear(center: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
+  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
         s"""SELECT * FROM events
-           |  ORDER BY geographicPoint <-> point '$center'
+           |  ORDER BY geographicPoint <-> point '$geographicPoint'
            |LIMIT $numberToReturn
            |OFFSET $offset""".stripMargin)
         .as(EventParser.*)

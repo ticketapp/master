@@ -15,9 +15,9 @@ import scala.util.matching.Regex
 object PlaceController extends Controller {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
-  def places(offset: Int, geographicPoint: String) = Action {
+  def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action {
     geographicPoint match {
-      case geographicPointPattern(_) => Ok(Json.toJson(Place.find20Since(offset, geographicPoint)))
+      case geographicPointPattern(_) => Ok(Json.toJson(Place.findNear(geographicPoint, numberToReturn, offset)))
       case _ => Ok(Json.toJson("Invalid geographicPoint"))
     }
   }

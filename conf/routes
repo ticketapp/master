@@ -9,7 +9,7 @@ GET           /admin                                                            
 #POST    /admin/createTariff            controllers.Admin.createTariff
 
 ################################## Events ###############################################
-GET       /events/offset/:offset/:geographicPoint                               controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
+GET       /events/:geographicPoint/:numberToReturn/:offset                      controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
 GET       /events/offsetAndMaxStartTime/:offset/:geographicPoint/:hourInterval  controllers.EventController.eventsWithMaxStartTime(offset: Int, geographicPoint: String, hourInterval: Int)
 GET       /events/:id                                                           controllers.EventController.event(id: Long)
 POST      /events/create                                                        controllers.EventController.createEvent
@@ -36,7 +36,7 @@ GET           /artists/containing/:pattern                  controllers.ArtistCo
 GET           /artists/facebookContaining/:pattern          controllers.SearchArtistsController.getFacebookArtistsContaining(pattern: String)
 
 ################################## Places ###############################################
-GET           /places/offset/:offset/:geographicPoint       controllers.PlaceController.places(offset: Int, geographicPoint: String)
+GET           /places/:geographicPoint/:numberToReturn/:offset   controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET           /places/:id                                   controllers.PlaceController.place(id: Long)
 POST          /places/:placeId/follow                       controllers.PlaceController.followPlace(placeId: Long)
 GET           /places/containing/:pattern                   controllers.PlaceController.findPlacesContaining(pattern: String)

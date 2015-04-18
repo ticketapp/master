@@ -78,21 +78,29 @@ object Place {
   } catch {
     case e: Exception => throw new DAOException("Place.save: " + e.getMessage)
   }
-  
-  def find20Since(start: Int, center: String): Seq[Place] = try {
+
+  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Place] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT *
-           |FROM places
-           |ORDER BY geographicPoint <-> point '$center'
-           |LIMIT 20 OFFSET $start""".stripMargin)
+        s"""SELECT * FROM places
+           |  ORDER BY geographicPoint <-> point '$geographicPoint'
+           |LIMIT $numberToReturn
+           |OFFSET $offset""".stripMargin)
         .as(PlaceParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Place.find20Since: " + e.getMessage)
+    case e: Exception => throw new DAOException("Place.findNear: " + e.getMessage)
   }
 
-
+  /*def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
+    Address.findGeographicPointOfCity(city) match {
+      case None => Seq.empty
+      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findNearCity: " + e.getMessage)
+  }*/
+  
   def findAll: Seq[Place] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM places")
