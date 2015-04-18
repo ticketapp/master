@@ -124,6 +124,21 @@ object Event {
     }
   } catch {
     case e: Exception => throw new DAOException("Event.find20SinceStartingInInterval: " + e.getMessage)
+  }  
+  
+  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): Seq[Event]
+  = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT * FROM events
+           |  WHERE startTime < CURRENT_TIMESTAMP AND startTime > CURRENT_TIMESTAMP - interval '$hourInterval hour'
+           |ORDER BY geographicPoint <-> point '$geographicPoint'
+           |LIMIT $numberToReturn OFFSET $offset""".stripMargin)
+        .as(EventParser.*)
+        .map(getPropertiesOfEvent)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findPassedInHourIntervalNear: " + e.getMessage)
   }
 
   def findAllByPlace(placeId: Long): Seq[Event] = try {
@@ -279,17 +294,22 @@ object Event {
 
   def followEvent(userId: String, eventId: Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT id FROM users_login WHERE userId = {userId}""")
+      SQL(
+        """SELECT id FROM users_login
+          | WHERE userId = {userId}""".stripMargin)
         .on('userId -> userId)
-        .as(scalar[Option[Long]].single) match {
-        case None => throw new DAOException("Event.followEvent")
-        case Some(id) => SQL(
-          """INSERT INTO eventsFollowed(userId, eventId)
-            |VALUES ({userId}, {eventId})""".stripMargin)
-          .on(
-            'userId -> id,
-            'eventId -> eventId)
-          .executeInsert()
+        .as(scalar[Option[Long]].single)
+      match {
+        case None =>
+          throw new DAOException("Event.followEvent")
+        case Some(id) =>
+          SQL(
+            """INSERT INTO eventsFollowed(userId, eventId)
+              | VALUES ({userId}, {eventId})""".stripMargin)
+            .on(
+              'userId -> id,
+              'eventId -> eventId)
+            .executeInsert()
       }
     }
   } catch {
@@ -300,7 +320,7 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL("""SELECT e.* FROM events e
             |  INNER JOIN eventsFollowed ef ON e.eventId = ef.eventId
-            |WHERE ef.userid = {userId}""".stripMargin)
+            |WHERE ef.userId = {userId}""".stripMargin)
         .on('userId -> userId.userId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
@@ -322,4 +342,3 @@ object Event {
     case e: Exception => throw new DAOException("Event.isEventFollowed: " + e.getMessage)
   }
 }
-

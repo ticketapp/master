@@ -31,6 +31,17 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
+  def eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
+  = Action {
+    geographicPoint match {
+      case geographicPointPattern(_) =>
+        Ok(Json.toJson(
+          Event.findPassedInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
+      case _ =>
+        Ok(Json.toJson("Invalid geographicPoint"))
+    }
+  }
+
   def eventsByPlace(placeId: Long) = Action {
     Ok(Json.toJson(Event.findAllByPlace(placeId)))
   }
