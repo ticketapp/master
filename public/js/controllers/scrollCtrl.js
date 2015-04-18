@@ -1,5 +1,19 @@
-app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket', 'oboe', '$modal', '$log',
-    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe, $modal, $log) {
+app.filter('millSecondsToTimeString', function() {
+    return function(millseconds) {
+        var seconds = Math.floor(millseconds*3600000 / 1000);
+        var days = Math.floor(seconds / 86400);
+        var hours = Math.floor((seconds % 86400) / 3600);
+        var months = Math.floor(days / 30);
+        var timeString = '';
+        console.log(months)
+        if(months > 0) timeString += (months > 1) ? (months + " mois ") : (months + " mois ");
+        if(days > 0 && months == 0) timeString += (days > 1) ? (days + " jours ") : (days + " jours ");
+        if(hours > 0) timeString += (hours > 1) ? (hours + " heures ") : (hours + " heure ");
+        return timeString;
+    }
+});
+app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket', 'oboe', '$modal', '$log', '$filter',
+    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe, $modal, $log, $filter) {
         $rootScope.geoLoc = '';
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
@@ -68,9 +82,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         };
         $rootScope.passArtisteToCreateToFalse = function () {
             $rootScope.artisteToCreate = false;
-        };
-        $rootScope.changeTimeEventView = function (time) {
-            $rootScope.maxStartView = time;
         };
         $rootScope.storeLastReq = function (method, path, object, success, error) {
             //$scope.needConnect = true;
@@ -287,20 +298,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         }
     }
 ]);
-app.filter('millSecondsToTimeString', function() {
-    return function(millseconds) {
-        var seconds = Math.floor(millseconds*3600000 / 1000);
-        var days = Math.floor(seconds / 86400);
-        var hours = Math.floor((seconds % 86400) / 3600);
-        var months = Math.floor(days / 30);
-        var timeString = '';
-        console.log(months)
-        if(months > 0) timeString += (months > 1) ? (months + " mois ") : (months + " mois ");
-        if(days > 0 && months == 0) timeString += (days > 1) ? (days + " jours ") : (days + " jours ");
-        if(hours > 0) timeString += (hours > 1) ? (hours + " heures ") : (hours + " heure ");
-        return timeString;
-    }
-});
 app.controller('infoModalCtrl', function ($scope, $rootScope, $modalInstance, $http, info) {
     $scope.info = info;
     $scope.cancel = function () {

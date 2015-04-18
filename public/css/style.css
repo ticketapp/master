@@ -136,6 +136,16 @@ canvas {left:0;}
 .md-header-items {max-width: 100%!important;}
 md-tabs > .md-header { background: #008CBA!important;}
 md-tabs-ink-bar {background: #a0d3e8!important;}
+md-slider#timeSearchSlider > .md-thumb-container > .md-thumb {
+    width: 100px!important;
+    left: -28px!important;
+}
+md-slider#timeSearchSlider > .md-thumb-container > .md-thumb:after {
+    width: 100px!important;
+}
+md-slider#timeSearchSlider > .md-thumb-container > .md-thumb > b {
+    color: #ffffff;position: absolute;top: 0;z-index: 10;width: 100%;left: 0;font-size: 20px;
+}
 /* @font-face {
    font-family: 'Blanch-CapsInline';
    src: url('assets/fonts/Blanch-CapsInline.eot') format('embedded-opentype');
@@ -243,10 +253,6 @@ md-toast{position: fixed!important;}
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
     max-width: 100%;
 }
-#searchBlock md-slider, #searchTopBlock md-slider {
-    height: 20px;
-    margin-top: -10px;
-}
 
 #searchBar, #searchTopBar {
     height:40px;
@@ -254,7 +260,7 @@ md-toast{position: fixed!important;}
     float:left;
 }
 #searchBlock {
-    margin-top : -105px;
+    margin-top : -122px;
 
 }
 .inputName {
