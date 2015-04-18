@@ -44,7 +44,7 @@ object Utilities {
       DB.withConnection { implicit connection =>
         SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName={value} LIMIT 1)""")
           .on("value" -> value)
-          .as(scalar[Boolean].single)//.singleOpt _)
+          .as(scalar[Boolean].single)
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot select in database with method Utilities.testIfExistById: " +

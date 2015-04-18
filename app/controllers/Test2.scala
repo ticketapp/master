@@ -32,35 +32,6 @@ import json.JsonHelper._
 
 object Test2 extends Controller {
   def test2 = Action {
-    /*try {
-      DB.withConnection { implicit connection =>
-        /*testIfExist("events", "facebookId", event.facebookId) match {
-          case true => None
-          case false =>*/
-        println(event.geographicPoint)
-        val geographicPoint = event.geographicPoint.getOrElse("") match {
-          case geographicPointPattern(geoPoint) => s"""$geoPoint"""
-          case _ => "{geographicPoint}"
-        }
-        val test: String = "(5.5,1.4)"
-        val currentTimestamp: String = "CURRENT_TIMESTAMP"
-        SQL(
-          s"""SELECT insert({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint},
-             |{description}, {currentTimestamp}, {currentTimestamp}, {ageRestriction})""".stripMargin)
-          .on(
-            'facebookId -> event.facebookId,
-            'isPublic -> event.isPublic,
-            'isActive -> event.isActive,
-            'name -> event.name,
-            'currentTimestamp -> currentTimestamp,
-            'geographicPoint -> test,
-            'description -> event.description,
-            'startTime -> event.startTime,
-            'endTime -> event.endTime,
-            'ageRestriction -> event.ageRestriction)
-          .executeInsert()
-    }*/
-
 
     Ok("Okay\n")
   }
