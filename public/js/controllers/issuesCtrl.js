@@ -2,6 +2,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
     $scope.newComment= [];
     $scope.newIssue= [];
     $scope.issues = [];
+    $scope.viewComments = false;
     $scope.selectedIssue = false;
     $scope.issuesLimit = 10;
     $scope.loadingIssues = true;
@@ -14,10 +15,10 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
             });
     }
     getIssues()
-    $scope.getIssueComments = function (id, index) {
+    $scope.getIssueComments = function (id) {
         $http.get('/issues/'+ id + '/comments ').
             success(function (data) {
-                $scope.issues[index].comments = data
+                $scope.selectedIssue.comments = data
             }).
             error(function (data) {
                 console.log(data)
@@ -33,7 +34,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
                 $scope.addNewComment = false;
             }).error(function (data) {
                 if (data.error == 'Credentials required') {
-                    var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
+                    var object = {content: $scope.newComment.content};
                     $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
                     $rootScope.$watch('lastReq', function (newVal) {
                         console.log(newVal)

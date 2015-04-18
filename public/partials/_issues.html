@@ -35,8 +35,13 @@
         <a class="button" ng-click="$parent.selectedIssue = false">Retour</a>
         <div class="collumn large-12">
             <p>{{selectedIssue.content}}</p>
-            <div ng-show="viewComments" class="column large-12" ng-repeat="comment in selectedIssue.comments">
-                <p>{{comment.content}}</p>
+            <div ng-show="viewComments" class="column large-12">
+                <h2>Commentaires</h2>
+                <p ng-if="selectedIssue.comments.length == 0"> Pas de commentaires pour le moment</p>
+                <div ng-repeat="comment in selectedIssue.comments">
+                    <p>{{comment.content}}</p>
+                    <hr>
+                </div>
             </div>
             <form ng-show="addNewComment" name="commentForm" ng-submit="addComment(selectedIssue.index)">
                 <md-input-container flex>
@@ -50,9 +55,15 @@
                 <input class="button" type="submit">
                 <a class="button" ng-click="addNewComment = !addNewComment">Annuler</a>
             </form>
-            <a class="button" ng-if="selectedIssue.comments.length > 0"
-               ng-click="getIssueComments(selectedIssue.issueId, selectedIssue.index); $parent.viewComments = !$parent.viewComments">
+            <a class="button"
+               ng-show="viewComments == false"
+               ng-click="getIssueComments(selectedIssue.issueId); viewComments = true">
                 ViewComments
+            </a>
+            <a class="button"
+               ng-show="viewComments == true"
+               ng-click="viewComments = false">
+                HideComments
             </a>
             <a class="button" ng-show="!addNewComment" ng-click="addNewComment = !addNewComment">AddComment</a>
         </div>
