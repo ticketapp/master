@@ -377,6 +377,7 @@ CREATE TABLE issues (
 );
 
 CREATE TABLE issuesComments (
+  commentId                 SERIAL PRIMARY KEY,
   content                   VARCHAR,
   userId                    VARCHAR(255) REFERENCES users_login (userId),
   issueId                   BIGINT REFERENCES issues(issueId)
