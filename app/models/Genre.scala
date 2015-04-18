@@ -18,8 +18,9 @@ object Genre {
 
   private val GenreParser: RowParser[Genre] = {
     get[Long]("genreId") ~
-      get[String]("name") map {
-      case genreId ~ name => Genre(genreId, name)
+      get[String]("name") ~
+      get[Option[String]]("icon") map {
+      case genreId ~ name ~ icon => Genre(genreId, name, icon)
     }
   }
 
@@ -28,15 +29,15 @@ object Genre {
       SQL("SELECT * FROM genres").as(GenreParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Genre.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.findAll: " + e.getMessage)
   }
 
   def findAllByEvent(eventId: Long): Seq[Genre] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT * FROM eventsGenres eA
-          |INNER JOIN genres a ON a.genreId = eA.genreId
-          |WHERE eA.eventId = {eventId}""".stripMargin)
+          | INNER JOIN genres a ON a.genreId = eA.genreId
+          |   WHERE eA.eventId = {eventId}""".stripMargin)
         .on('eventId -> eventId)
         .as(GenreParser.*)
     }
@@ -48,8 +49,8 @@ object Genre {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT * FROM artistsGenres aG
-          |INNER JOIN genres g ON g.genreId = aG.genreId
-          |WHERE aG.artistId = {artistId}""".stripMargin)
+          | INNER JOIN genres g ON g.genreId = aG.genreId
+          |   WHERE aG.artistId = {artistId}""".stripMargin)
         .on('artistId -> artistId)
         .as(GenreParser.*)
     }
@@ -69,22 +70,26 @@ object Genre {
 
   def findAllContaining(pattern: String): Seq[Genre] = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM genres WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
+      SQL(
+        """SELECT * FROM genres
+          | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
+          | LIMIT 12""".stripMargin)
         .on('patternLowCase -> pattern.toLowerCase)
         .as(GenreParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Genre.findAllContaining: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.findAllContaining: " + e.getMessage)
   }
   
   def save(genre: Genre): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT insertGenre({name})""")
-        .on('name -> genre.name)
+      SQL("""SELECT insertGenre({name}, {icon})""")
+        .on('name -> genre.name,
+            'icon -> genre.icon)
         .as(scalar[Option[Long]].single)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot create genre: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.save: " + e.getMessage)
   }
 
   def findGenreId(genreName: String): Option[Long] = try {
@@ -146,7 +151,7 @@ object Genre {
 
   def deleteGenre(genreId: Long): Long = try {
     DB.withConnection { implicit connection =>
-      SQL("""DELETE FROM genres WHERE genreId={genreId}""")
+      SQL("""DELETE FROM genres WHERE genreId = {genreId}""")
         .on('genreId -> genreId)
         .executeUpdate()
     }
@@ -164,6 +169,6 @@ object Genre {
         .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot follow genre: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.followGenre: " + e.getMessage)
   }
 }
