@@ -1,15 +1,17 @@
-app.controller('issuesCtrl', function ($scope, $http, $rootScope) {
-   $scope.newComment= [];
-   $scope.newIssue= [];
-   $scope.issues = [];
+app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
+    $scope.newComment= [];
+    $scope.newIssue= [];
+    $scope.issues = [];
+    $scope.selectedIssue = false;
     $scope.issuesLimit = 10;
-    $http.get('/issues').
-        success(function(data) {
-            $scope.issues = data;
-        });
-    $scope.getIssues = function (issueTitle) {
-        console.log(issueTitle)
-    };
+    function getIssues () {
+        $http.get('/issues').
+            success(function (data) {
+                $scope.issues = data;
+                $scope.addNewIssue = false;
+            });
+    }
+    getIssues()
     $scope.addComment = function (i) {
         $scope.issues[i].comments.push($scope.newComment);
         $scope.newComment= [];
@@ -20,11 +22,18 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope) {
                 console.log(data)
                 $scope.issues.push($scope.newIssue);
                 $scope.newIssue= [];
+                $scope.addNewIssue = false;
             }).
             error(function (data) {
                 if (data.error == 'Credentials required') {
                     var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
                     $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
+                    $rootScope.$watch('lastReq', function (newVal) {
+                        console.log(newVal)
+                        if (JSON.stringify(newVal) === '{}') {
+                            getIssues()
+                        }
+                    })
                 } else {
                     $scope.info = 'Désolé une erreur s\'est produite';
                     var modalInstance = $modal.open({

@@ -32,7 +32,6 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope
     $scope.logout = function () {
         $http.get('/logout').
             success(function (data) {
-                console.log(data)
                 $rootScope.connected = false;
                 $scope.info = 'vous êtes deconnecté';
                 var modalInstance = $modal.open({

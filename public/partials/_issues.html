@@ -1,37 +1,50 @@
 <div class="column large-12">
     <h1>Issues</h1>
     <input placeholder="inputName" placeolder="issue title" ng-model="newIssue.title"
-           ng-change="getIssues(newIssue.title)">
-    <a class="button" ng-click="addNewIssue = !addNewIssue">AddIssue</a>
-    <form ng-show="addNewIssue" ng-submit="addIssue()">
-        <input ng-model="newIssue.title" placeholder="newIssue.title">
-        <textarea ng-model="newIssue.content"></textarea>
-        <input type="submit">
+           ng-change="getIssues(newIssue.title); selectedIssue = false">
+    <a class="button" ng-click="addNewIssue = !addNewIssue; selectedIssue = false">AddIssue</a>
+    <form ng-show="addNewIssue" name="formIssue" ng-submit="addIssue()">
+        <input ng-model="newIssue.title" ng-minlength="8" required name="issueTitle" placeholder="newIssue.title">
+        <div ng-messages="formIssue.newIssue.$error">
+            <div ng-message="required">Ce champ est obligatoire</div>
+            <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+        </div>
+        <textarea ng-minlength="8" required name="issueContent" ng-model="newIssue.content"></textarea>
+        <div ng-messages="formIssue.issueContent.$error">
+            <div ng-message="required">Ce champ est obligatoire</div>
+            <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+        </div>
+        <input class="button" type="submit">
+        <a class="button" ng-click="addNewIssue = false">Annuler</a>
     </form>
-    <ul class="column large-12">
+    <ul class="column large-12" ng-show="selectedIssue == false">
         <ul ng-repeat="issue in issues | limitTo: issuesLimit | filter: newIssue.title">
-            <h1 ng-click="viewIssue = !viewIssue"><a>{{issue.title}}</a></h1>
-            <div class="column large-12"
-                    ng-if="viewIssue">
-                <div class="collumn large-12">
-                    <p>{{issue.content}}</p>
-                    <div ng-show="viewComments" class="column large-12" ng-repeat="comment in issue.comments">
-                        <h1>{{comment.title}}</h1>
-                        <p>{{comment.content}}</p>
-                    </div>
-                    <form ng-show="addNewComment" ng-submit="addComment($index)">
-                        <input ng-model="newComment.title" placeholder="newComment.title">
-                        <textarea ng-model="newComment.content"></textarea>
-                        <input type="submit">
-                    </form>
-                    <a class="button" ng-if="issue.comments.length > 0"
-                       ng-click="$parent.viewComments = !$parent.viewComments">
-                        ViewComments
-                    </a>
-                    <a class="button" ng-click="addNewComment = !addNewComment">AddComment</a>
-                </div>
-            </div>
+            <h1 ng-click="$parent.selectedIssue = issue"><a>{{issue.title}}</a></h1>
         </ul>
         <a class="button" ng-click="$parent.issuesLimit = $parent.issuesLimit + 10" ng-if="issues.length > issuesLimit">More</a>
     </ul>
+    <div class="column large-12"
+         ng-if="selectedIssue != false">
+        <a class="button" ng-click="$parent.selectedIssue = false">Retour</a>
+        <div class="collumn large-12">
+            <p>{{selectedIssue.content}}</p>
+            <div ng-show="viewComments" class="column large-12" ng-repeat="comment in selectedIssue.comments">
+                <p>{{comment.content}}</p>
+            </div>
+            <form ng-show="addNewComment" name="commentForm" ng-submit="addComment($index)">
+                <textarea ng-minlength="8" required name="commentContent"
+                          ng-model="newComment.content"></textarea>
+                <div ng-messages="commentForm.commentContent.$error">
+                    <div ng-message="required">Ce champ est obligatoire</div>
+                    <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+                </div>
+                <input type="submit">
+            </form>
+            <a class="button" ng-if="selectedIssue.comments.length > 0"
+               ng-click="$parent.viewComments = !$parent.viewComments">
+                ViewComments
+            </a>
+            <a class="button" ng-click="addNewComment = !addNewComment">AddComment</a>
+        </div>
+    </div>
 </div>

@@ -81,7 +81,7 @@ app.directive('footer', function(){
 });
 app.directive('ngIssues', function(){
     return{
-        restrict : 'A',
+        restrict : 'AE',
         controller: 'issuesCtrl',
         templateUrl:'assets/partials/_issues.html'
     }
