@@ -112,9 +112,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Redirect(routes.Admin.indexAdmin())
   }
 
-  def followArtist(artistId : Long) = Action {
-    //Artist.followArtist(userId, artistId)
-    Redirect(routes.Admin.indexAdmin())
+  def followArtist(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Artist.followArtist(request.user.identityId.userId, artistId)
+    Ok
   }
 
   def getFollowedArtists = UserAwareAction { implicit request =>

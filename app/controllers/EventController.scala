@@ -104,7 +104,6 @@ object EventController extends Controller with securesocial.core.SecureSocial {
 
   def followEvent(eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
     Event.followEvent(request.user.identityId.userId, eventId)
-    //Redirect(request.getHeader("referer"))
     Ok
   }
 
