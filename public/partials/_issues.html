@@ -26,7 +26,7 @@
     </div>
     <ul class="column large-12" ng-show="selectedIssue == false">
         <ul ng-repeat="issue in issues | filter: newIssue.title">
-            <h1 ng-click="$parent.selectedIssue = issue"><a>{{issue.title}}</a></h1>
+            <h1 ng-click="$parent.selectedIssue = issue; $parent.selectedIssue.index = $index"><a>{{issue.title}}</a></h1>
         </ul>
         <a class="button" ng-click="$parent.issuesLimit = $parent.issuesLimit + 10" ng-if="issues.length > issuesLimit">More</a>
     </ul>
@@ -38,7 +38,7 @@
             <div ng-show="viewComments" class="column large-12" ng-repeat="comment in selectedIssue.comments">
                 <p>{{comment.content}}</p>
             </div>
-            <form ng-show="addNewComment" name="commentForm" ng-submit="addComment($index)">
+            <form ng-show="addNewComment" name="commentForm" ng-submit="addComment(selectedIssue.index)">
                 <md-input-container flex>
                     <textarea ng-minlength="8" required name="commentContent"
                               ng-model="newComment.content"></textarea>
@@ -47,10 +47,10 @@
                         <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
                     </div>
                 </md-input-container>
-                <input type="submit">
+                <input class="button" type="submit">
             </form>
             <a class="button" ng-if="selectedIssue.comments.length > 0"
-               ng-click="$parent.viewComments = !$parent.viewComments">
+               ng-click="getIssueComments(selectedIssue.issueId, selectedIssue.index); $parent.viewComments = !$parent.viewComments">
                 ViewComments
             </a>
             <a class="button" ng-click="addNewComment = !addNewComment">AddComment</a>

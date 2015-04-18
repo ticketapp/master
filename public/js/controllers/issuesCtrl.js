@@ -14,8 +14,26 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
             });
     }
     getIssues()
+    $scope.getIssueComments = function (id, index) {
+        $http.get('/issues/'+ id + '/comments ').
+            success(function (data) {
+                $scope.issues[index].comments = data
+            }).
+            error(function (data) {
+                console.log(data)
+            })
+    }
     $scope.addComment = function (i) {
+        if ($scope.issues[i].comments == undefined) {
+            $scope.issues[i].comments = [];
+        }
         $scope.issues[i].comments.push($scope.newComment);
+        $http.post('/issues/' + $scope.issues[i].issueId + '/comments', $scope.newComment).
+            success(function (data) {
+                console.log(data)
+            }).error(function (data) {
+                console.log(data)
+            });
         $scope.newComment= [];
     };
     $scope.addIssue = function () {
