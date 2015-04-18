@@ -97,7 +97,16 @@ object Event {
         .map(getPropertiesOfEvent)
     }
   } catch {
-    case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.findNear: " + e.getMessage)
+  }
+
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
+    Address.findGeographicPointOfCity(city) match {
+      case None => Seq.empty
+      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findNearCity: " + e.getMessage)
   }
 
   def find20InHourIntervalWithOffsetNearCenterPoint(start: Int, center: String, hourInterval: Int): Seq[Event] = try {

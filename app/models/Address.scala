@@ -117,14 +117,13 @@ object Address {
     case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
   }
 
-  def followAddress(userId : Long, addressId : Long): Option[Long] = try {
+  def findGeographicPointOfCity(city: String): Option[String] = try {
     DB.withConnection { implicit connection =>
-      SQL("INSERT INTO addressFollowed(userId, addressId) VALUES ({userId}, {addressId})").on(
-        'userId -> userId,
-        'addressId -> addressId)
-        .executeInsert()
+      SQL("""SELECT geographicPoint FROM frenchcities WHERE name = {city}""")
+        .on('city -> city)
+        .as(scalar[String].singleOpt)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot follow address: " + e.getMessage)
+    case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
   }
 }

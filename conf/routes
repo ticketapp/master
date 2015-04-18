@@ -19,7 +19,8 @@ GET       /events/:eventId/isEventFollowed                                      
 GET       /events/containing/:pattern/:center                                   controllers.EventController.findEventsContaining(pattern: String, center:String)
 #GET       /events/circle/                                                      controllers.EventController.findEventsInCircle(center = "")
 GET       /events/circle/:center                                                controllers.EventController.findEventsInCircle(center: String)
-GET       /events/city/:pattern                                                 controllers.EventController.findEventsByCity(pattern: String)
+GET       /events/city/:pattern                                                 controllers.EventController.findEventsByCityPattern(pattern: String)
+GET       /events/nearCity/:city/:numberToReturn/:offset                        controllers.EventController.findEventsNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################## Artists ##############################################
 GET           /artists                                      controllers.ArtistController.artists

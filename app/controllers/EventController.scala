@@ -54,8 +54,12 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Event.findAllContaining(pattern, center)))
   }
 
-  def findEventsByCity(pattern: String) = Action {
+  def findEventsByCityPattern(pattern: String) = Action {
     Ok(Json.toJson(Event.findAllByCityPattern(pattern)))
+  }
+
+  def findEventsNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Event.findNearCity(city, numberToReturn, offset)))
   }
 
   val eventBindingForm = Form(
