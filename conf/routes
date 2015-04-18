@@ -59,34 +59,36 @@ PUT           /playlists                                                        
 DELETE        /playlists/:playlistId                                                      controllers.PlaylistController.delete(playlistId: Long)
 
 ################################# Genres ############################################
-GET           /genres/:genre/:numberToReturn/:offset/artists                              controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
-GET           /genres/:genre/:numberToReturn/:offset/events                               controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET           /genres/:genre/:numberToReturn/:offset/artists        controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET           /genres/:genre/:numberToReturn/:offset/events         controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
 
 ################################# Tracks ############################################
-POST          /tracks/create                                                              controllers.TrackController.createTrack
-GET           /tracks/:artistName/:artistFacebookUrl/:trackTitle                          controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
-GET           /tracks/youtubeTrackInfo/:youtubeId                                         controllers.SearchTracksController.getYoutubeTrackInfos(youtubeId: String)
+POST          /tracks/create                                        controllers.TrackController.createTrack
+GET           /tracks/:artistName/:artistFacebookUrl/:trackTitle    controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
+GET           /tracks/youtubeTrackInfo/:youtubeId                   controllers.SearchTracksController.getYoutubeTrackInfos(youtubeId: String)
 
 ################################## Infos ################################################
-GET           /infos                                                                      controllers.Application.infos
+GET           /infos                                                controllers.Application.infos
 
 ################################# Issues ################################################
-GET           /issues                                                                     controllers.IssueController.issues
-POST          /issues                                                                     controllers.IssueController.create
+GET           /issues                                               controllers.IssueController.issues
+POST          /issues                                               controllers.IssueController.create
+GET           /issues/:issueId/comments                             controllers.IssueController.commentsForIssue(issueId: Long)
+POST          /issues/:issueId/comments                             controllers.IssueController.createComment(issueId: Long)
 
 ################################# Mails ################################################
-GET           /mails                                                                     controllers.MailController.mails
-POST          /mails                                                                     controllers.MailController.create
+GET           /mails                                                controllers.MailController.mails
+POST          /mails                                                controllers.MailController.create
 
 ################################## Users ################################################
-GET           /users                                                                      controllers.UserController.users
-GET           /users/:id                                                                  controllers.UserController.user(id: Long)
-GET           /users/containing/:pattern                                                  controllers.UserController.findUsersContaining(pattern: String)
-GET           /users/:userId/tools                                                        controllers.UserController.findToolsByUserId(userId: Long)
-GET           /users/geographicPoint/                                                     controllers.Application.getUserGeographicPoint
+GET           /users                                                controllers.UserController.users
+GET           /users/:id                                            controllers.UserController.user(id: Long)
+GET           /users/containing/:pattern                            controllers.UserController.findUsersContaining(pattern: String)
+GET           /users/:userId/tools                                  controllers.UserController.findToolsByUserId(userId: Long)
+GET           /users/geographicPoint/                               controllers.Application.getUserGeographicPoint
 
 ################################## Buy ticket ###########################################
-GET           /buyTicket                                                                  controllers.TicketController.buyTicket
+GET           /buyTicket                                            controllers.TicketController.buyTicket
 
 ################################## Accounting ###########################################
 GET           /orgaPayment                                                                controllers.AccountingController.orgaPayment

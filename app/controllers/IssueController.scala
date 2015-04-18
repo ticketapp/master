@@ -1,6 +1,6 @@
 package controllers
 
-import models.Issue
+import models.{IssueComment, Issue}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -10,6 +10,10 @@ import json.JsonHelper._
 
 object IssueController extends Controller with securesocial.core.SecureSocial {
   def issues = Action { Ok(Json.toJson(Issue.findAll)) }
+
+  def commentsForIssue(issueId: Long) = Action {
+    Ok(Json.toJson(Issue.findAllCommentsForIssueId(Option(issueId))))
+  }
 
   private val issueBindingForm = Form(mapping(
     "title" -> nonEmptyText(2),
@@ -34,16 +38,16 @@ object IssueController extends Controller with securesocial.core.SecureSocial {
     )
   }
 
-  /*def createComment = SecuredAction(ajaxCall = true) { implicit request =>
-    issueBindingForm.bindFromRequest().fold(
+  def createComment(issueId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    issueCommentBindingForm.bindFromRequest().fold(
       formWithErrors => {
         println(formWithErrors.errorsAsJson)
         BadRequest(formWithErrors.errorsAsJson)
       },
-      partialCommentIssue => {
-        Ok(Json.toJson(Issue.save(
-          Issue(None, partialIssue.title, partialIssue.content, request.user.identityId.userId, fixed = false))))
+      comment => {
+        Ok(Json.toJson(Issue.saveComment(
+          IssueComment(comment.title, comment.content, request.user.identityId.userId, issueId))))
       }
     )
-  }*/
+  }
 }

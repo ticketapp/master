@@ -50,7 +50,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 10 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 9 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -384,7 +384,8 @@ CREATE TABLE issues (
 CREATE TABLE issuesComments (
   title                     VARCHAR,
   content                   VARCHAR,
-  userId                    VARCHAR(255) REFERENCES users_login (userId)
+  userId                    VARCHAR(255) REFERENCES users_login (userId),
+  issueId                   BIGINT REFERENCES issues(issueId)
 );
 
 CREATE TABLE usersTools (
@@ -735,6 +736,7 @@ DROP TABLE IF EXISTS account63;
 DROP TABLE IF EXISTS account708;
 DROP TABLE IF EXISTS issues;
 DROP TABLE IF EXISTS issuesComments;
+DROP TABLE IF EXISTS receivedMails;
 DROP TABLE IF EXISTS usersTools;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS playlists;

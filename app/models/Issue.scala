@@ -9,7 +9,7 @@ import services.Utilities.geographicPointToString
 
 case class Issue(issueId: Option[Long], title: String, content: String, userId: String, fixed: Boolean)
 
-case class IssueComment(title: String, content: String, userId: String)
+case class IssueComment(title: String, content: String, userId: String, issueId: Long)
 
 object Issue {
   private val issueParser = {
@@ -26,10 +26,12 @@ object Issue {
   private val issueCommentParser = {
     get[String]("title") ~
       get[String]("content") ~
-      get[String]("userId") map {
-      case title ~ content ~ userId => IssueComment(title, content, userId)
+      get[String]("userId") ~
+      get[Long]("issueId") map {
+      case title ~ content ~ userId ~ issueId => IssueComment(title, content, userId, issueId)
     }
   }
+
   case class PartialIssue(title: String, content: String)
   def issueFormApply(title: String, content: String) = new PartialIssue(title, content)
   def issueFormUnapply(partialIssue: PartialIssue) = Some((partialIssue.title, partialIssue.content))
@@ -67,6 +69,22 @@ object Issue {
           'title -> issue.title,
           'content -> issue.content,
           'userId -> issue.userId)
+        .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Issue.save: " + e.getMessage)
+  }
+
+  def saveComment(comment: IssueComment): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """INSERT INTO comments(title, content, userId, issueId)
+          | VALUES ({title}, {content}, {userId}, {issueId})""".stripMargin)
+        .on(
+          'title -> comment.title,
+          'content -> comment.content,
+          'userId -> comment.userId,
+          'issueId -> comment.issueId)
         .executeInsert()
     }
   } catch {
