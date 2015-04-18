@@ -15,13 +15,10 @@
     <div class="absolute zIndex5 column">
         <md-slider flex ng-change="updateMarkers()"
                    ng-model="time" min="1" max="51" step="1"
-                   aria-label="volume"
-                   id="volume-slider"
-                   class="md-primary column medium-8 padding0 margin0" md-discrete>
+                   aria-label="timeSlider"
+                   id="timeSearchSlider"
+                   class="md-primary column medium-8 padding0 margin0">
         </md-slider>
-        <h4 class="column medium-3 margin0" style="color: white;">
-            Evenements dans les <span ng-if="selectedTime < 24">prochaines</span><span ng-if="selectedTime >= 24">prochains</span> {{selectedTime | millSecondsToTimeString}}
-        </h4>
         <a class="button column small-4" ng-click="info = !info">Infos</a>
         <ul class="white" ng-if="info">
             <li ng-repeat="info in infos">
@@ -62,12 +59,5 @@
                 }
             ]"
          class="width100p">
-        <!--<marker ng-repeat="(id, ev) in events"
-                visible="true"
-                optimized="false"
-                ng-if="ev.countdown <= time && ev.countdown > 0"
-                on-click="goTo(event, id)"
-                position="{{ev.addresses[0].geographicPoint}}" icon="../assets/img/marker.png">
-        </marker>-->
     </map>
 </div>
