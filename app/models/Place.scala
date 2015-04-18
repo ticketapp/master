@@ -162,17 +162,16 @@ object Place {
     case e: Exception => throw new DAOException("Place.find: " + e.getMessage)
   }
 
-  def followPlace(placeId : Long)={//: Option[Long] = {
-    /*try {
-      DB.withConnection { implicit connection =>
-        SQL("insert into placesFollowed(userId, placeId) values ({userId}, {placeId})").on(
+  def followPlace(userId: String, placeId : Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("insert into placesFollowed(userId, placeId) values ({userId}, {placeId})")
+        .on(
           'userId -> userId,
-          'placeId -> placeId
-        ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot follow place: " + e.getMessage)
-    }*/
+          'placeId -> placeId)
+        .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.followPlace: " + e.getMessage)
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Boolean = try {

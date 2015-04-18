@@ -12,7 +12,7 @@ import json.JsonHelper.placeWrites
 
 import scala.util.matching.Regex
 
-object PlaceController extends Controller {
+object PlaceController extends Controller with securesocial.core.SecureSocial {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action {
@@ -42,9 +42,9 @@ object PlaceController extends Controller {
     }
   }
 
-  def followPlace(placeId : Long) = Action {
-    Place.followPlace(placeId)
-    Redirect(routes.Admin.indexAdmin())
+  def followPlace(placeId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Place.followPlace(request.user.identityId.userId, placeId)
+    Ok
   }
 
   val placeBindingForm = Form(mapping(

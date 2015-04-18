@@ -10,7 +10,7 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import json.JsonHelper.organizerWrites
 
-object OrganizerController extends Controller {
+object OrganizerController extends Controller with securesocial.core.SecureSocial {
   def organizers = Action {
     Ok(Json.toJson(Organizer.findAll))
   }
@@ -33,9 +33,9 @@ object OrganizerController extends Controller {
     case e: Exception => throw new DAOException("Cannot delete Organizer: " + e.getMessage)
   }
 
-  def followOrganizer(organizerId : Long) = Action {
-    Organizer.followOrganizer(organizerId)
-    Redirect(routes.Admin.indexAdmin())
+  def followOrganizer(organizerId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Organizer.followOrganizer(request.user.identityId.userId, organizerId)
+    Ok
   }
 
   val organizerBindingForm = Form(

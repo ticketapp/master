@@ -159,16 +159,17 @@ object Organizer {
     case e: Exception => throw new DAOException("Cannot save in delete Organizer: " + e.getMessage)
   }
 
-  def followOrganizer(organizerId : Long) = {//: Option[Long] = {
-    /*try {
-      DB.withConnection { implicit connection =>
-        SQL("insert into organizersFollowed(userId, organizerId) values ({userId}, {organizerId})").on(
+  def followOrganizer(userId: String, organizerId : Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """INSERT INTO organizersFollowed(userId, organizerId)
+          | VALUES ({userId}, {organizerId})""".stripMargin)
+        .on(
           'userId -> userId,
-          'organizerId -> organizerId
-        ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot follow organizer: " + e.getMessage)
-    }*/
+          'organizerId -> organizerId)
+        .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.followOrganizer: " + e.getMessage)
   }
 }

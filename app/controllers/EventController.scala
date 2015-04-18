@@ -7,7 +7,6 @@ import play.api.libs.json.Json
 import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
 import securesocial.core.Identity
-
 import scala.util.matching.Regex
 
 object EventController extends Controller with securesocial.core.SecureSocial {
