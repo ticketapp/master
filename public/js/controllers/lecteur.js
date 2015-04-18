@@ -332,6 +332,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 playlistEvents = [];
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                 document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
+                document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>'
+                $scope.showVideo = false;
                 /*document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
                 document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);*/
             }
@@ -342,6 +344,8 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
             playlistEvents = [];
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
+            document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>'
+            $scope.showVideo = false;
             document.getElementById('musicPlayer').removeEventListener('ended', $scope.next);
             document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
             document.getElementById('musicPlayer').removeEventListener("error", error);
@@ -367,8 +371,46 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                                 $scope.onPlay = true;
                             });
                             document.getElementById('musicPlayer').addEventListener('error', error);
+                            $scope.insertVideo = function () {
+                                if ($scope.showVideo == true) {
+                                    document.getElementById('minVideoPlayer').setAttribute('src', mp4.url);
+                                    document.getElementById('minVideoPlayer').play();
+                                    document.getElementById('minVideoPlayer').currentTime = document.getElementById('musicPlayer').currentTime;
+                                    document.getElementById('musicPlayer').pause();
+                                    $scope.playPause = function () {
+                                        if ($scope.onPlay == false) {
+                                            document.getElementById('minVideoPlayer').play();
+                                            $timeout(function(){
+                                                $scope.$apply(function () {
+                                                    $scope.onPlay = true;
+                                                });
+                                            })
+                                        } else {
+                                            document.getElementById('minVideoPlayer').pause();
+                                            $scope.onPlay = false;
+                                        }
+                                    };
+                                } else {
+                                    document.getElementById('musicPlayer').currentTime = document.getElementById('minVideoPlayer').currentTime;
+                                    document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>'
+                                    document.getElementById('musicPlayer').play();
+                                    $scope.playPause = function () {
+                                        if ($scope.onPlay == false) {
+                                            document.getElementById('musicPlayer').play();
+                                            $timeout(function(){
+                                                $scope.$apply(function () {
+                                                    $scope.onPlay = true;
+                                                });
+                                            })
+                                        } else {
+                                            document.getElementById('musicPlayer').pause();
+                                            $scope.onPlay = false;
+                                        }
+                                    };
+                                }
+                            }
                         } else {
-                            $scope.nextTrack();
+                            document.getElementById('musicPlayer').addEventListener('error', error);
                         }
                     });
                 }
