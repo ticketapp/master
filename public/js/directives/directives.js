@@ -86,6 +86,13 @@ app.directive('ngIssues', function(){
         templateUrl:'assets/partials/_issues.html'
     }
 });
+app.directive('ngContact', function(){
+    return{
+        restrict : 'AE',
+        controller: 'contactCtrl',
+        templateUrl:'assets/partials/_contact.html'
+    }
+});
 app.directive('ngLecteur', function(){
     return{
         restrict : 'C',

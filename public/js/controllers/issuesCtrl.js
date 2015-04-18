@@ -4,10 +4,12 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
     $scope.issues = [];
     $scope.selectedIssue = false;
     $scope.issuesLimit = 10;
+    $scope.loadingIssues = true;
     function getIssues () {
         $http.get('/issues').
             success(function (data) {
                 $scope.issues = data;
+                $scope.loadingIssues = false;
                 $scope.addNewIssue = false;
             });
     }

@@ -17,6 +17,9 @@
         <input class="button" type="submit">
         <a class="button" ng-click="addNewIssue = false">Annuler</a>
     </form>
+    <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loadingIssues">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
     <ul class="column large-12" ng-show="selectedIssue == false">
         <ul ng-repeat="issue in issues | limitTo: issuesLimit | filter: newIssue.title">
             <h1 ng-click="$parent.selectedIssue = issue"><a>{{issue.title}}</a></h1>
