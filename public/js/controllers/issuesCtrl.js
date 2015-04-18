@@ -14,7 +14,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
                 $scope.addNewIssue = false;
             });
     }
-    getIssues()
+    getIssues();
     $scope.getIssueComments = function (id) {
         $http.get('/issues/'+ id + '/comments ').
             success(function (data) {
@@ -64,9 +64,9 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
         $http.post('/issues', {content: $scope.newIssue.content, title: $scope.newIssue.title}).
             success(function(data) {
                 console.log(data)
-                $scope.issues.push($scope.newIssue);
                 $scope.newIssue= [];
                 $scope.addNewIssue = false;
+                getIssues();
             }).
             error(function (data) {
                 if (data.error == 'Credentials required') {

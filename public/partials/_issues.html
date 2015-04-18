@@ -34,6 +34,7 @@
          ng-if="selectedIssue != false">
         <a class="button" ng-click="$parent.selectedIssue = false">Retour</a>
         <div class="collumn large-12">
+            <h1>{{selectedIssue.title}}</h1>
             <p>{{selectedIssue.content}}</p>
             <div ng-show="viewComments" class="column large-12">
                 <h2>Commentaires</h2>
