@@ -44,7 +44,7 @@
                     <hr>
                 </div>
             </div>
-            <form ng-show="addNewComment" name="commentForm" ng-submit="addComment(selectedIssue.index)">
+            <form ng-show="$parent.addNewComment" name="commentForm" ng-submit="addComment(selectedIssue.index)">
                 <md-input-container flex>
                     <textarea ng-minlength="8" required name="commentContent"
                               ng-model="newComment.content"></textarea>
@@ -54,7 +54,7 @@
                     </div>
                 </md-input-container>
                 <input class="button" type="submit">
-                <a class="button" ng-click="addNewComment = !addNewComment">Annuler</a>
+                <a class="button" ng-click="$parent.addNewComment = !$parent.addNewComment">Annuler</a>
             </form>
             <a class="button"
                ng-show="viewComments == false"
@@ -66,7 +66,7 @@
                ng-click="viewComments = false">
                 HideComments
             </a>
-            <a class="button" ng-show="!addNewComment" ng-click="addNewComment = !addNewComment">AddComment</a>
+            <a class="button" ng-show="!$parent.addNewComment" ng-click="$parent.addNewComment = !$parent.addNewComment">AddComment</a>
         </div>
     </div>
 </div>

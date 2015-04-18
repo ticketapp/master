@@ -25,12 +25,9 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
             })
     }
     $scope.addComment = function (i) {
-        if ($scope.issues[i].comments == undefined) {
-            $scope.issues[i].comments = [];
-        }
         $http.post('/issues/' + $scope.issues[i].issueId + '/comments', {content: $scope.newComment.content}).
             success(function (data) {
-                $scope.issues[i].comments.push($scope.newComment);
+                $scope.getIssueComments($scope.issues[i].issueId)
                 $scope.addNewComment = false;
             }).error(function (data) {
                 if (data.error == 'Credentials required') {
