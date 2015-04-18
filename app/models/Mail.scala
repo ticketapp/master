@@ -37,8 +37,8 @@ object Mail {
         """INSERT INTO receivedMails(subject, message)
           | VALUES ({subject}, {message})""".stripMargin)
         .on(
-          'title -> mail.subject,
-          'content -> mail.message)
+          'subject -> mail.subject,
+          'message -> mail.message)
         .executeInsert()
     }
   } catch {
