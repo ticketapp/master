@@ -44,21 +44,23 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         }, 500);
     };
     function refactorWebsites () {
-        $scope.organizer.websites = $scope.organizer.websites.split(',');
-        for (var i = 0; i < $scope.organizer.websites.length; i++) {
-            console.log($scope.organizer.websites[i])
-            $scope.organizer.websites[i] = {url: $scope.organizer.websites[i]};
-            if ($scope.organizer.websites[i].url.indexOf('facebook') > -1) {
-                $scope.organizer.websites[i].name = 'facebook';
-            } else if ($scope.organizer.websites[i].url.indexOf('twitter') > -1) {
-                $scope.organizer.websites[i].name = 'twitter';
-            } else if ($scope.organizer.websites[i].url.indexOf('soundcloud') > -1) {
-                $scope.organizer.websites[i].name = 'soundcloud';
-            } else if ($scope.organizer.websites[i].url.indexOf('mixcloud') > -1) {
-                $scope.organizer.websites[i].name = 'mixcloud';
-            } else {
-                $scope.organizer.websites[i].name = 'website';
-                $scope.otherWebsite = true;
+        if ($scope.organizer.websites != undefined) {
+            $scope.organizer.websites = $scope.organizer.websites.split(',');
+            for (var i = 0; i < $scope.organizer.websites.length; i++) {
+                console.log($scope.organizer.websites[i])
+                $scope.organizer.websites[i] = {url: $scope.organizer.websites[i]};
+                if ($scope.organizer.websites[i].url.indexOf('facebook') > -1) {
+                    $scope.organizer.websites[i].name = 'facebook';
+                } else if ($scope.organizer.websites[i].url.indexOf('twitter') > -1) {
+                    $scope.organizer.websites[i].name = 'twitter';
+                } else if ($scope.organizer.websites[i].url.indexOf('soundcloud') > -1) {
+                    $scope.organizer.websites[i].name = 'soundcloud';
+                } else if ($scope.organizer.websites[i].url.indexOf('mixcloud') > -1) {
+                    $scope.organizer.websites[i].name = 'mixcloud';
+                } else {
+                    $scope.organizer.websites[i].name = 'website';
+                    $scope.otherWebsite = true;
+                }
             }
         }
     }
