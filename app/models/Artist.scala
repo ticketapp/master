@@ -91,10 +91,10 @@ object Artist {
 
   def findAllByEvent(event: Event): List[Artist] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM eventsArtists eA
-             INNER JOIN artists a ON a.artistId = eA.artistId
-             WHERE eA.eventId = {eventId}""")
+      SQL(
+        """SELECT * FROM eventsArtists eA
+          | INNER JOIN artists a ON a.artistId = eA.artistId
+          | WHERE eA.eventId = {eventId}""".stripMargin)
         .on('eventId -> event.eventId)
         .as(ArtistParser.*)
         .map(getArtistProperties)
@@ -240,15 +240,16 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.deleteArtist : " + e.getMessage)
   }
 
-  def followArtist(userId : Long, artistId : Long): Option[Long] = try {
+  def followArtist(userId : String, artistId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("INSERT INTO artistsFollowed(userId, artistId) VALUES ({userId}, {artistId})").on(
-        'userId -> userId,
-        'artistId -> artistId
-      ).executeInsert()
+      SQL("""INSERT INTO artistsFollowed(userId, artistId) VALUES ({userId}, {artistId})""")
+        .on(
+          'userId -> userId,
+          'artistId -> artistId)
+        .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot follow artist: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.followArtist: " + e.getMessage)
   }
 
   def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {

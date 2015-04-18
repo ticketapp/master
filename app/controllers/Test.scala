@@ -5,6 +5,8 @@ import java.math.MathContext
 import java.text.Normalizer
 import java.util.Date
 import java.util.regex.Pattern
+import anorm._
+import play.api.db.DB
 import play.api.libs.iteratee.{Concurrent, Iteratee, Enumerator}
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
@@ -19,6 +21,7 @@ import play.api.mvc.Results._
 import scala.util.{Success, Failure}
 import services.Utilities._
 import play.api.libs.functional.syntax._
+import play.api.Play.current
 
 object Test extends Controller {
   /*def test1 = WebSocket.using[String] { request =>
@@ -62,6 +65,28 @@ object Test extends Controller {
       case alreadyNormalized: String => alreadyNormalized
     }
 
+    val lines = Source.fromFile("/home/sim/Downloads/villes_france.sql").getLines()
+    while (lines.hasNext) {
+      val line = lines.next()
+      if (line != "" && line.take(1) == "(") {
+        val splittedLine = line.split(",")
+        try {
+          val cityName = splittedLine(4)
+          val geographicPoint = "(" + splittedLine(19).trim + "," + splittedLine(20).trim + ")"
+          DB.withConnection { implicit connection =>
+            SQL(
+              """INSERT INTO frenchCities(name, geographicPoint)
+                | VALUES ({cityName}, {geographicPoint})""".stripMargin)
+              .on(
+                'cityName -> cityName,
+                'geographicPoint -> geographicPoint)
+              .executeInsert()
+          }
+        } catch {
+          case e: Exception => println(e + "--->" + line)
+        }
+      }
+    }
     Ok
   }
 }

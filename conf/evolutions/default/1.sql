@@ -1,16 +1,37 @@
 # --- !Ups
+CREATE TABLE frenchCities (
+  cityId                    SERIAL PRIMARY KEY,
+  name                      VARCHAR(255) NOT NULL,
+  geographicPoint           POINT NOT NULL
+);
+CREATE INDEX frenchCityGeographicPoints ON frenchCities USING GIST (geographicPoint);
+CREATE INDEX frenchCityNames ON frenchCities (name);
+
 CREATE TABLE addresses (
   addressId                 SERIAL PRIMARY KEY,
-  geographicPoint           point,
+  geographicPoint           POINT,
   city                      VARCHAR(127),
   zip                       VARCHAR(15),
-  street                    VARCHAR(255)
+  street                    VARCHAR
 );
-CREATE INDEX geographicPoint ON addresses USING GIST (geographicPoint);
-INSERT INTO addresses (geographicPoint) VALUES ('(44.1761, 4.974)');
-INSERT INTO addresses (geographicPoint) VALUES ('(45.47157, 4.134)');
-INSERT INTO addresses (geographicPoint) VALUES ('(43.53187, 4.83724)');
-INSERT INTO addresses (geographicPoint) VALUES ('(41.4678, 5.915134)');
+CREATE INDEX geographicPointAdresses ON addresses USING GIST (geographicPoint);
+
+CREATE OR REPLACE FUNCTION insertAddress(
+  geographicPointValue           VARCHAR(63),
+  cityValue                      VARCHAR(127),
+  zipValue                       VARCHAR(15),
+  streetValue                    VARCHAR)
+  RETURNS INT AS
+  $$
+  DECLARE addressIdToReturn int;;
+  BEGIN
+    INSERT INTO addresses (geographicPoint, city, zip, street)
+      VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
+    RETURNING addressId INTO addressIdToReturn;;
+    RETURN addressIdToReturn;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
@@ -117,6 +138,7 @@ LANGUAGE plpgsql;;
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
   name                    CITEXT NOT NULL,
+  icon                    CHAR,
   UNIQUE(name)
 );
 
@@ -616,7 +638,7 @@ CREATE TABLE eventsArtists (
 );
 CREATE OR REPLACE FUNCTION insertEventArtistRelation(
   eventIdValue            BIGINT,
-  artistIdValue        BIGINT)
+  artistIdValue           BIGINT)
   RETURNS VOID AS
   $$
   BEGIN
@@ -723,5 +745,6 @@ DROP TABLE IF EXISTS users_login, users_token;
 DROP TABLE IF EXISTS artists;
 DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS addresses;
+DROP TABLE IF EXISTS frenchCities;
 
 

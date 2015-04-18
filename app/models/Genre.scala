@@ -10,7 +10,7 @@ import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
-case class Genre (genreId: Long, name: String)
+case class Genre (genreId: Long, name: String, icon: Option[String] = None)
 
 object Genre {
   def formApply(name: String) = new Genre(-1L, name)
@@ -166,5 +166,4 @@ object Genre {
   } catch {
     case e: Exception => throw new DAOException("Cannot follow genre: " + e.getMessage)
   }
-
 }

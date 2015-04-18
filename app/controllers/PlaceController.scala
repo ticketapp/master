@@ -12,12 +12,12 @@ import json.JsonHelper.placeWrites
 
 import scala.util.matching.Regex
 
-object PlaceController extends Controller {
+object PlaceController extends Controller with securesocial.core.SecureSocial {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
-  def places(offset: Int, geographicPoint: String) = Action {
+  def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action {
     geographicPoint match {
-      case geographicPointPattern(_) => Ok(Json.toJson(Place.find20Since(offset, geographicPoint)))
+      case geographicPointPattern(_) => Ok(Json.toJson(Place.findNear(geographicPoint, numberToReturn, offset)))
       case _ => Ok(Json.toJson("Invalid geographicPoint"))
     }
   }
@@ -30,6 +30,10 @@ object PlaceController extends Controller {
     Ok(Json.toJson(Place.findAllContaining(pattern)))
   }
 
+  def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Place.findNearCity(city, numberToReturn, offset)))
+  }
+
   def deletePlace(placeId: Long): Int = {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM places WHERE placeId={placeId}").on(
@@ -38,9 +42,9 @@ object PlaceController extends Controller {
     }
   }
 
-  def followPlace(placeId : Long) = Action {
-    Place.followPlace(placeId)
-    Redirect(routes.Admin.indexAdmin())
+  def followPlace(placeId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Place.followPlace(request.user.identityId.userId, placeId)
+    Ok
   }
 
   val placeBindingForm = Form(mapping(

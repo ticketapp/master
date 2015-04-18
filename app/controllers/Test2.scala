@@ -60,6 +60,8 @@ object Test2 extends Controller {
             'ageRestriction -> event.ageRestriction)
           .executeInsert()
     }*/
+
+
     Ok("Okay\n")
   }
 }

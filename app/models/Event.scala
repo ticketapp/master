@@ -86,26 +86,34 @@ object Event {
     case e: Exception => throw new DAOException("Event.eventId: " + e.getMessage)
   }
 
-  def find20Since(start: Int, center: String): Seq[Event] = try {
+  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT *
-           |FROM events
-           |ORDER BY geographicPoint <-> point '$center'
-           |LIMIT 20 OFFSET $start""".stripMargin)
+        s"""SELECT * FROM events
+           |  ORDER BY geographicPoint <-> point '$geographicPoint'
+           |LIMIT $numberToReturn
+           |OFFSET $offset""".stripMargin)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
   } catch {
-    case e: Exception => throw new DAOException("Event.find20Since: " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.findNear: " + e.getMessage)
+  }
+
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
+    Address.findGeographicPointOfCity(city) match {
+      case None => Seq.empty
+      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findNearCity: " + e.getMessage)
   }
 
   def find20InHourIntervalWithOffsetNearCenterPoint(start: Int, center: String, hourInterval: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT *
-           |FROM events
-           |WHERE startTime < (CURRENT_TIMESTAMP + interval '$hourInterval hours')
+        s"""SELECT * FROM events
+           |  WHERE startTime < (CURRENT_TIMESTAMP + interval '$hourInterval hours')
            |ORDER BY geographicPoint <-> point '$center'
            |LIMIT 20 OFFSET $start""".stripMargin)
         .as(EventParser.*)
@@ -118,8 +126,8 @@ object Event {
   def findAllByPlace(placeId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT event.*
-          |FROM eventsPlaces eP INNER JOIN events event ON event.eventId = eP.eventId
+        """SELECT event.* FROM eventsPlaces eP
+          | INNER JOIN events event ON event.eventId = eP.eventId
           |WHERE eP.placeId = {placeId} 
           |ORDER BY event.creationDateTime DESC LIMIT 20""".stripMargin)
         .on('placeId -> placeId)
@@ -130,23 +138,6 @@ object Event {
     case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
 
-  def findAllByGenreId(genreId: Long): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT e.*
-          |FROM eventsGenres eG
-          |INNER JOIN events e ON e.eventId = eG.eventId
-          |WHERE eG.genreId = {genreId}
-          |ORDER BY e.creationDateTime DESC
-          |LIMIT 20""".stripMargin)
-        .on('genreId -> genreId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot get events by genre: " + e.getMessage)
-  }
-
   def findAllByGenre(genre: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -154,7 +145,7 @@ object Event {
            |FROM eventsGenres eG
            |  INNER JOIN events e ON e.eventId = eG.eventId
            |  INNER JOIN genres g ON g.genreId = eG.genreId
-           |WHERE g.name = {genre}
+           |    WHERE g.name = {genre}
            |ORDER BY e.creationDateTime DESC
            |LIMIT $numberToReturn
            |OFFSET $offset""".stripMargin)
@@ -169,10 +160,11 @@ object Event {
   def findAllByOrganizer(organizerId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.*
-          |FROM eventsOrganizers eO INNER JOIN events e ON e.eventId = eO.eventId
+        """SELECT e.* FROM eventsOrganizers eO
+          | INNER JOIN events e ON e.eventId = eO.eventId
           |WHERE eO.organizerId = {organizerId} 
-          |ORDER BY e.creationDateTime DESC LIMIT 20""".stripMargin)
+          |ORDER BY e.creationDateTime DESC
+          |LIMIT 20""".stripMargin)
         .on('organizerId -> organizerId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
@@ -188,7 +180,7 @@ object Event {
           |FROM eventsArtists eA
           | INNER JOIN events e ON e.eventId = eA.eventId
           | INNER JOIN artists a ON a.artistId = eA.artistId
-          |WHERE a.facebookUrl = {facebookUrl}
+          |   WHERE a.facebookUrl = {facebookUrl}
           |ORDER BY e.creationDateTime DESC
           |LIMIT 20""".stripMargin)
         .on('facebookUrl -> facebookUrl)
@@ -204,8 +196,8 @@ object Event {
       try {
         DB.withConnection { implicit connection =>
           SQL(
-            s"""SELECT * FROM events WHERE LOWER(name)
-               |LIKE '%'||{patternLowCase}||'%'
+            s"""SELECT * FROM events
+               |  WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
                |ORDER BY geographicPoint <-> point '$center'
                |LIMIT 20""".stripMargin)
             .on('patternLowCase -> pattern.toLowerCase)
@@ -221,25 +213,24 @@ object Event {
   def findAllByCityPattern(cityPattern: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.* FROM events e
-          |JOIN eventsAddresses eA on e.eventId = eA.eventId
-          |JOIN addresses a ON a.addressId = eA.eventId
-          |WHERE a.isEvent = TRUE AND LOWER(name)
-          |LIKE '%'||{patternLowCase}||'%'
+        """SELECT e.* FROM eventsAddresses eA
+          | INNER JOIN events e on e.eventId = eA.eventId
+          | INNER JOIN addresses a ON a.addressId = eA.addressId
+          |   WHERE a.city LIKE '%'||{patternLowCase}||'%'
           |LIMIT 50""".stripMargin)
         .on('patternLowCase -> cityPattern.toLowerCase)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.findAllContaining: " + e.getMessage)
   }
 
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint}, {description}, {startTime},
-           |{endTime}, {imagePath}, {ageRestriction}, {tariffRange}, {ticketSellers})""".stripMargin)
+        s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint}, {description},
+           |{startTime}, {endTime}, {imagePath}, {ageRestriction}, {tariffRange}, {ticketSellers})""".stripMargin)
         .on(
           'facebookId -> event.facebookId,
           'isPublic -> event.isPublic,
@@ -271,8 +262,8 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """UPDATE events
-          | SET name={name}, description={description}, startTime={startTime}, endTime={endTime}
-          | WHERE facebookId={facebookId}""".stripMargin)
+          | SET name = {name}, description = {description}, startTime = {startTime}, endTime = {endTime}
+          | WHERE facebookId = {facebookId}""".stripMargin)
         .on(
           'facebookId -> event.facebookId,
           'name -> event.name,
@@ -290,7 +281,7 @@ object Event {
       SQL("""SELECT id FROM users_login WHERE userId = {userId}""")
         .on('userId -> userId)
         .as(scalar[Option[Long]].single) match {
-        case None => throw new DAOException("Cannot follow event: didn't find id with this userId")
+        case None => throw new DAOException("Event.followEvent")
         case Some(id) => SQL(
           """INSERT INTO eventsFollowed(userId, eventId)
             |VALUES ({userId}, {eventId})""".stripMargin)
@@ -306,8 +297,8 @@ object Event {
 
   def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
     DB.withConnection { implicit connection =>
-      SQL("""select e.* from events e
-            |  INNER JOIN eventsfollowed ef ON e.eventid = ef.eventid
+      SQL("""SELECT e.* FROM events e
+            |  INNER JOIN eventsFollowed ef ON e.eventId = ef.eventId
             |WHERE ef.userid = {userId}""".stripMargin)
         .on('userId -> userId.userId)
         .as(EventParser.*)
@@ -328,26 +319,6 @@ object Event {
     }
   } catch {
     case e: Exception => throw new DAOException("Event.isEventFollowed: " + e.getMessage)
-  }
-
-  def findAllInCircle(center: String): List[Event] = center match {
-    case geographicPointPattern(_) =>
-      try {
-        DB.withConnection { implicit connection =>
-          SQL(
-            s"""SELECT * FROM events e
-               |  JOIN eventsAddresses eA on e.eventId = eA.eventId
-               |  JOIN addresses a ON a.addressId = eA.eventId
-               |    WHERE a.isEvent = TRUE
-               |  ORDER BY a.geographicPoint <-> point '$center'
-               |  LIMIT 50""".stripMargin)
-            .as(EventParser.*)
-            .map(getPropertiesOfEvent)
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Event.findAllInCircle: " + e.getMessage)
-      }
-    case _ => List.empty
   }
 }
 

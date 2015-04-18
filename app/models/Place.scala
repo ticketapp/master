@@ -78,21 +78,29 @@ object Place {
   } catch {
     case e: Exception => throw new DAOException("Place.save: " + e.getMessage)
   }
-  
-  def find20Since(start: Int, center: String): Seq[Place] = try {
+
+  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Place] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT *
-           |FROM places
-           |ORDER BY geographicPoint <-> point '$center'
-           |LIMIT 20 OFFSET $start""".stripMargin)
+        s"""SELECT * FROM places
+           |  ORDER BY geographicPoint <-> point '$geographicPoint'
+           |LIMIT $numberToReturn
+           |OFFSET $offset""".stripMargin)
         .as(PlaceParser.*)
     }
   } catch {
-    case e: Exception => throw new DAOException("Place.find20Since: " + e.getMessage)
+    case e: Exception => throw new DAOException("Place.findNear: " + e.getMessage)
   }
 
-
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Place] = try {
+    Address.findGeographicPointOfCity(city) match {
+      case None => Seq.empty
+      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.findNearCity: " + e.getMessage)
+  }
+  
   def findAll: Seq[Place] = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM places")
@@ -154,17 +162,16 @@ object Place {
     case e: Exception => throw new DAOException("Place.find: " + e.getMessage)
   }
 
-  def followPlace(placeId : Long)={//: Option[Long] = {
-    /*try {
-      DB.withConnection { implicit connection =>
-        SQL("insert into placesFollowed(userId, placeId) values ({userId}, {placeId})").on(
+  def followPlace(userId: String, placeId : Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("insert into placesFollowed(userId, placeId) values ({userId}, {placeId})")
+        .on(
           'userId -> userId,
-          'placeId -> placeId
-        ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot follow place: " + e.getMessage)
-    }*/
+          'placeId -> placeId)
+        .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.followPlace: " + e.getMessage)
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Boolean = try {

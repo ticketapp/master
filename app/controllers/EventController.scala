@@ -7,16 +7,17 @@ import play.api.libs.json.Json
 import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
 import securesocial.core.Identity
-
 import scala.util.matching.Regex
 
 object EventController extends Controller with securesocial.core.SecureSocial {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
-  def events(offset: Int, geographicPoint: String) = Action {
+  def events(offset: Int, numberToReturn: Int, geographicPoint: String) = Action {
     geographicPoint match {
-      case geographicPointPattern(_) => Ok(Json.toJson(Event.find20Since(offset, geographicPoint)))
-      case _ => Ok(Json.toJson("Invalid geographicPoint"))
+      case geographicPointPattern(_) =>
+        Ok(Json.toJson(Event.findNear(geographicPoint, numberToReturn: Int, offset: Int)))
+      case _ =>
+        Ok(Json.toJson("Invalid geographicPoint"))
     }
   }
 
@@ -52,8 +53,12 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Event.findAllContaining(pattern, center)))
   }
 
-  def findEventsByCity(pattern: String) = Action {
+  def findEventsByCityPattern(pattern: String) = Action {
     Ok(Json.toJson(Event.findAllByCityPattern(pattern)))
+  }
+
+  def findEventsNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Event.findNearCity(city, numberToReturn, offset)))
   }
 
   val eventBindingForm = Form(
@@ -98,7 +103,6 @@ object EventController extends Controller with securesocial.core.SecureSocial {
 
   def followEvent(eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
     Event.followEvent(request.user.identityId.userId, eventId)
-    //Redirect(request.getHeader("referer"))
     Ok
   }
 
@@ -114,9 +118,5 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       case None => Ok(Json.toJson("User not connected"))
       case Some(identity: Identity) => Ok(Json.toJson(Event.isEventFollowed(identity.identityId, eventId)))
     }
-  }
-
-  def findEventsInCircle(peripheral: String) = Action {
-    Ok(Json.toJson(Event.findAllInCircle(peripheral)))
   }
 }
