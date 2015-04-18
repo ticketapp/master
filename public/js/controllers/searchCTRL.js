@@ -177,7 +177,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         eventsLenght = eventsLenght - 1;
                     }
                 }
-                $http.get('/events/offsetAndMaxStartTime/'+ offset+ '/' + $rootScope.geoLoc + '/' + _selStart).
+                $http.get('/events/inInterval/' + _selStart + '/' + $rootScope.geoLoc + '/12/' + offset).
                     success(function (data, status, headers, config) {
                         var scopeIdList = [];
                         function getEventId(el, index, array) {
