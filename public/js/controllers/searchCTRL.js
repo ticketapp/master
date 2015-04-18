@@ -170,7 +170,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 var eventsLenght = $scope.events.length;
                 var maxStartTime =  _selStart*3600000 + new Date().getTime();
                 for (var e = 0; e < eventsLenght; e++) {
-                    console.log(maxStartTime)
                     if ($scope.events[e].startTime > maxStartTime) {
                         $scope.events.splice(e, 1)
                         $scope.$apply();
@@ -512,6 +511,28 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     if (_selArtist == true && _research.length > 2) {
         searchArtistFb ();
     }
+    $scope.initializeTime = function () {
+        var newName = $rootScope.maxStart;
+        if (newName > 23 && newName <= 38) {
+            newName = (newName - 23) * 24
+        } else if (newName > 38 && newName <= 40) {
+            newName = (newName - 36) * 168;
+        } else if (newName > 40) {
+            newName = (newName - 39) * 720;
+        }
+        var textSlider = document.getElementsByClassName('md-thumb');
+        var waitForSearchBar = setInterval(function () {
+            if ($rootScope.path == 'search' || textSlider.length >= 2) {
+                clearInterval(waitForSearchBar);
+                for (var i = 0; i < textSlider.length; i++) {
+                    textSlider[i].innerHTML = '';
+                    textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
+                        $filter('millSecondsToTimeString')(newName) + '</b>';
+                }
+            }
+        }, 100);
+    }
+    $scope.initializeTime();
     console.log($rootScope.geoLoc);
     $scope.moreLimit = function () {
         offset = offset + 20;
@@ -556,6 +577,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
+                $scope.initializeTime()
             }
         }
         return _selEvent;
@@ -586,46 +608,28 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     };
     var StartTimer;
     var doneStartInterval = 600;
-    $scope.selStart = function() {
-        newName = $rootScope.maxStart;
-        if (newName > 23 && newName <= 38) {
-            newName = (newName-23)*24
-        } else if (newName > 38 && newName <= 40) {
-            newName = (newName-36)*168;
-        } else if (newName > 40) {
-            newName = (newName-39)*720;
-        }
-        var textSlider = document.getElementsByClassName('md-thumb');
-        for (var i = 0; i < textSlider.length; i++) {
-            textSlider[i].innerHTML = '';
-            textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
-                $filter('millSecondsToTimeString')(newName) + '</b>';
-        }
-        _selStart = newName;
-        clearTimeout(StartTimer);
-        StartTimer = setTimeout(search, doneStartInterval);
-        $scope.limit = 20;
-        offset = 0;
-        $scope.loadingMore = true;
-        return _selStart;
-    };
-    var newName = $rootScope.maxStart;
-    if (newName > 23 && newName <= 38) {
-        newName = (newName-23)*24
-    } else if (newName > 38 && newName <= 40) {
-        newName = (newName-36)*168;
-    } else if (newName > 40) {
-        newName = (newName-39)*720;
-    }
-    var textSlider = document.getElementsByClassName('md-thumb');
-    var waitForSearchBar = setInterval(function () {
-        if ($rootScope.path == 'search' || textSlider.length >= 2) {
-            clearInterval(waitForSearchBar);
+    $scope.selStart = function(newName) {
+        if (angular.isDefined(newName)) {
+            if (newName > 23 && newName <= 38) {
+                newName = (newName - 23) * 24
+            } else if (newName > 38 && newName <= 40) {
+                newName = (newName - 36) * 168;
+            } else if (newName > 40) {
+                newName = (newName - 39) * 720;
+            }
+            var textSlider = document.getElementsByClassName('md-thumb');
             for (var i = 0; i < textSlider.length; i++) {
                 textSlider[i].innerHTML = '';
                 textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
                     $filter('millSecondsToTimeString')(newName) + '</b>';
             }
+            _selStart = newName;
+            clearTimeout(StartTimer);
+            StartTimer = setTimeout(search, doneStartInterval);
+            $scope.limit = 20;
+            offset = 0;
+            $scope.loadingMore = true;
+            return _selStart;
         }
-    }, 100);
+    };
 }]);
