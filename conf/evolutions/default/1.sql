@@ -17,10 +17,10 @@ CREATE TABLE addresses (
 CREATE INDEX geographicPointAdresses ON addresses USING GIST (geographicPoint);
 
 CREATE OR REPLACE FUNCTION insertAddress(
-  geographicPointValue           VARCHAR(63),
-  cityValue                      VARCHAR(127),
-  zipValue                       VARCHAR(15),
-  streetValue                    VARCHAR)
+  geographicPointValue      VARCHAR(63),
+  cityValue                 VARCHAR(127),
+  zipValue                  VARCHAR(15),
+  streetValue               VARCHAR)
   RETURNS INT AS
   $$
   DECLARE addressIdToReturn int;;
@@ -50,7 +50,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 12 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 10 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -226,6 +226,14 @@ CREATE TABLE users_token (
   creationTime              TIMESTAMP NOT NULL,
   expirationTime            TIMESTAMP NOT NULL,
   isSignUp                  BOOLEAN NOT NULL
+);
+
+CREATE TABLE receivedMails (
+  id                        SERIAL PRIMARY KEY,
+  subject                   VARCHAR NOT NULL,
+  message                   VARCHAR NOT NULL,
+  read                      BOOLEAN NOT NULL DEFAULT FALSE,
+  userId                    VARCHAR(255) REFERENCES users_login(userId)
 );
 
 CREATE TABLE events (

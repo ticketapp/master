@@ -12,6 +12,7 @@ import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.mvc._
 import play.libs.F.Promise
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -39,54 +40,8 @@ object Test extends Controller {
   }*/
 
   def test1 = Action  {
-    val a = Seq("0231862915", "04 72 76 89 09", "00336504154", "033746464",
-      "33654654546", "01.40.20.40.25 (Billetterie)", "+33299673212")
-
-    for (b <- a) {
-      val c = b.replaceAll("[^0-9+]", "")
-      val d = normalizePhoneNumberPrefix(c).take(10)
-      if (d.length > 10) {
-        val e = normalizePhoneNumberPrefix(d.drop(10))
-        if (e.length > 10) {
-          val f = normalizePhoneNumberPrefix(e.drop(10))
-        }
-      }
-
-    }
 
 
-    def normalizePhoneNumberPrefix(phoneNumber: String): String = phoneNumber match {
-      case phoneNumberStartsWith0033 if phoneNumberStartsWith0033.startsWith("0033") =>
-        "0" + phoneNumber.drop(4)
-      case phoneNumberStartsWith33 if phoneNumberStartsWith33.startsWith("33") =>
-        "0" + phoneNumber.drop(2)
-      case phoneNumberStartsWithPlus33 if phoneNumberStartsWithPlus33.startsWith("+33") =>
-        "0" + phoneNumber.drop(3)
-      case alreadyNormalized: String => alreadyNormalized
-    }
-
-    val lines = Source.fromFile("/home/sim/Downloads/villes_france.sql").getLines()
-    while (lines.hasNext) {
-      val line = lines.next()
-      if (line != "" && line.take(1) == "(") {
-        val splittedLine = line.split(",")
-        try {
-          val cityName = splittedLine(4)
-          val geographicPoint = "(" + splittedLine(19).trim + "," + splittedLine(20).trim + ")"
-          DB.withConnection { implicit connection =>
-            SQL(
-              """INSERT INTO frenchCities(name, geographicPoint)
-                | VALUES ({cityName}, {geographicPoint})""".stripMargin)
-              .on(
-                'cityName -> cityName,
-                'geographicPoint -> geographicPoint)
-              .executeInsert()
-          }
-        } catch {
-          case e: Exception => println(e + "--->" + line)
-        }
-      }
-    }
     Ok
   }
 }
