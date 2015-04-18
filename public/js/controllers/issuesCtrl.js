@@ -28,7 +28,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
             $scope.issues[i].comments = [];
         }
         $scope.issues[i].comments.push($scope.newComment);
-        $http.post('/issues/' + $scope.issues[i].issueId + '/comments', $scope.newComment).
+        $http.post('/issues/' + $scope.issues[i].issueId + '/comments', {content: $scope.newComment.content}).
             success(function (data) {
                 console.log(data)
             }).error(function (data) {
