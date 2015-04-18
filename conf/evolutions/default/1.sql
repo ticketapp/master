@@ -38,11 +38,6 @@ CREATE TABLE orders ( --account701
   totalPrice                INT NOT NULL
 );
 
-CREATE TABLE comments (
-  commentId                 SERIAL PRIMARY KEY,
-  text                      VARCHAR(255) NOT NULL
-);
-
 CREATE TABLE infos (
   infoId                    SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
@@ -382,7 +377,6 @@ CREATE TABLE issues (
 );
 
 CREATE TABLE issuesComments (
-  title                     VARCHAR,
   content                   VARCHAR,
   userId                    VARCHAR(255) REFERENCES users_login (userId),
   issueId                   BIGINT REFERENCES issues(issueId)

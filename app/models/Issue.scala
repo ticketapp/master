@@ -9,7 +9,7 @@ import services.Utilities.geographicPointToString
 
 case class Issue(issueId: Option[Long], title: String, content: String, userId: String, fixed: Boolean)
 
-case class IssueComment(title: String, content: String, userId: String, issueId: Long)
+case class IssueComment(content: String, userId: String, issueId: Long)
 
 object Issue {
   private val issueParser = {
@@ -24,17 +24,19 @@ object Issue {
   }
 
   private val issueCommentParser = {
-    get[String]("title") ~
       get[String]("content") ~
       get[String]("userId") ~
       get[Long]("issueId") map {
-      case title ~ content ~ userId ~ issueId => IssueComment(title, content, userId, issueId)
+      case content ~ userId ~ issueId => IssueComment(content, userId, issueId)
     }
   }
 
   case class PartialIssue(title: String, content: String)
-  def issueFormApply(title: String, content: String) = new PartialIssue(title, content)
-  def issueFormUnapply(partialIssue: PartialIssue) = Some((partialIssue.title, partialIssue.content))
+  def issueFormApply(title: String, content: String) =
+    new PartialIssue(title, content)
+  def issueFormUnapply(partialIssue: PartialIssue) =
+    Some((partialIssue.title, partialIssue.content))
+
 
   def findAll: List[Issue] = try {
     DB.withConnection { implicit connection =>
@@ -44,11 +46,8 @@ object Issue {
     case e: Exception => throw new DAOException("Issue.findAll: " + e.getMessage)
   }
 
-  case class PartialIssueComment(title: String, content: String)
-  def issueCommentFormApply(title: String, content: String) =
-    new PartialIssueComment(title, content)
-  def issueCommentFormUnapply(partialIssueComment: PartialIssueComment) =
-    Some((partialIssueComment.title, partialIssueComment.content))
+  def issueCommentFormApply(content: String) = content
+  def issueCommentFormUnapply(content: String) = Option(content)
 
   def findAllCommentsForIssueId(issueId: Option[Long]): Seq[IssueComment] = try {
     DB.withConnection { implicit connection =>
@@ -78,10 +77,9 @@ object Issue {
   def saveComment(comment: IssueComment): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """INSERT INTO comments(title, content, userId, issueId)
-          | VALUES ({title}, {content}, {userId}, {issueId})""".stripMargin)
+        """INSERT INTO comments(content, userId, issueId)
+          | VALUES ({content}, {userId}, {issueId})""".stripMargin)
         .on(
-          'title -> comment.title,
           'content -> comment.content,
           'userId -> comment.userId,
           'issueId -> comment.issueId)
