@@ -48,12 +48,13 @@
                     </div>
                 </md-input-container>
                 <input class="button" type="submit">
+                <a class="button" ng-click="addNewComment = !addNewComment">Annuler</a>
             </form>
             <a class="button" ng-if="selectedIssue.comments.length > 0"
                ng-click="getIssueComments(selectedIssue.issueId, selectedIssue.index); $parent.viewComments = !$parent.viewComments">
                 ViewComments
             </a>
-            <a class="button" ng-click="addNewComment = !addNewComment">AddComment</a>
+            <a class="button" ng-show="!addNewComment" ng-click="addNewComment = !addNewComment">AddComment</a>
         </div>
     </div>
 </div>

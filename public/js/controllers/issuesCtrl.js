@@ -27,12 +27,35 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
         if ($scope.issues[i].comments == undefined) {
             $scope.issues[i].comments = [];
         }
-        $scope.issues[i].comments.push($scope.newComment);
         $http.post('/issues/' + $scope.issues[i].issueId + '/comments', {content: $scope.newComment.content}).
             success(function (data) {
-                console.log(data)
+                $scope.issues[i].comments.push($scope.newComment);
+                $scope.addNewComment = false;
             }).error(function (data) {
-                console.log(data)
+                if (data.error == 'Credentials required') {
+                    var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
+                    $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
+                    $rootScope.$watch('lastReq', function (newVal) {
+                        console.log(newVal)
+                        if (JSON.stringify(newVal) === '{}') {
+                            getIssues()
+                        }
+                    })
+                } else {
+                    $scope.info = 'Désolé une erreur s\'est produite';
+                    var modalInstance = $modal.open({
+                        templateUrl: 'assets/partials/_infoModal.html',
+                        controller: 'infoModalCtrl',
+                        resolve: {
+                            info: function () {
+                                return $scope.info;
+                            }
+                        }
+                    });
+                    modalInstance.result.then(function () {
+                        $log.info('Modal dismissed at: ' + new Date());
+                    });
+                }
             });
         $scope.newComment= [];
     };
