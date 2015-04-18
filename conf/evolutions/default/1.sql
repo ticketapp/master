@@ -137,12 +137,12 @@ CREATE TABLE genres (
   UNIQUE(name)
 );
 
-CREATE OR REPLACE FUNCTION insertGenre(nameValue VARCHAR(255)) RETURNS INT AS
+CREATE OR REPLACE FUNCTION insertGenre(nameValue VARCHAR(255), iconValue VARCHAR) RETURNS INT AS
   $$
   DECLARE genreIdToReturn int;;
 
   BEGIN
-    INSERT INTO genres (NAME) VALUES (nameValue) RETURNING genreId INTO genreIdToReturn;;
+    INSERT INTO genres (NAME, icon) VALUES (nameValue, iconValue::CHAR) RETURNING genreId INTO genreIdToReturn;;
       RETURN genreIdToReturn;;
       EXCEPTION WHEN unique_violation
     THEN

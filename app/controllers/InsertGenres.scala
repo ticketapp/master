@@ -29,8 +29,6 @@ object InsertGenres extends Controller {
     while (lines.hasNext) {
       val line = lines.next()
       try {
-        println(line.split("  ")(0))
-        println(line.split("  ")(1))
         Genre.save(new Genre(-1L, line.split("  ")(0), Option(line.split("  ")(1))))
       } catch {
         case e: Exception => println(line + e)
