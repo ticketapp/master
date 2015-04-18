@@ -139,6 +139,13 @@ md-tabs-ink-bar {background: #a0d3e8!important;}
 md-slider#timeSearchSlider > .md-thumb-container > .md-thumb {
     width: 100px!important;
     left: -28px!important;
+    top:5px;
+}
+md-slider#timeSearchSlider > .md-thumb-container {
+    width: 100px!important;
+}
+md-slider#timeSearchSlider > .md-focus-thumb {
+    width: 100px!important;
 }
 md-slider#timeSearchSlider > .md-thumb-container > .md-thumb:after {
     width: 100px!important;
@@ -151,7 +158,8 @@ md-slider#timeSearchSlider > .md-thumb-container > .md-thumb > b {
     width: 100%;
     left: 0;
     font-size: 20px;
-    margin-left: 10px;
+    text-align: center;
+    width: 100%;
     cursor: pointer;
 }
 /* @font-face {
