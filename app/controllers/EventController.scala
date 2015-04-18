@@ -13,10 +13,12 @@ import scala.util.matching.Regex
 object EventController extends Controller with securesocial.core.SecureSocial {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
-  def events(offset: Int, geographicPoint: String) = Action {
+  def events(offset: Int, numberToReturn: Int, geographicPoint: String) = Action {
     geographicPoint match {
-      case geographicPointPattern(_) => Ok(Json.toJson(Event.find20Since(offset, geographicPoint)))
-      case _ => Ok(Json.toJson("Invalid geographicPoint"))
+      case geographicPointPattern(_) =>
+        Ok(Json.toJson(Event.findNear(geographicPoint, numberToReturn: Int, offset: Int)))
+      case _ =>
+        Ok(Json.toJson("Invalid geographicPoint"))
     }
   }
 

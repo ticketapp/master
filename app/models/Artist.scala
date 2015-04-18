@@ -91,10 +91,10 @@ object Artist {
 
   def findAllByEvent(event: Event): List[Artist] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM eventsArtists eA
-             INNER JOIN artists a ON a.artistId = eA.artistId
-             WHERE eA.eventId = {eventId}""")
+      SQL(
+        """SELECT * FROM eventsArtists eA
+          | INNER JOIN artists a ON a.artistId = eA.artistId
+          | WHERE eA.eventId = {eventId}""".stripMargin)
         .on('eventId -> event.eventId)
         .as(ArtistParser.*)
         .map(getArtistProperties)

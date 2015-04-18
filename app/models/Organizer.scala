@@ -96,7 +96,6 @@ object Organizer {
   }
 
   def save(organizer: Organizer): Option[Long] = try {
-    println(organizer.phone)
     DB.withConnection { implicit connection =>
       val placeIdWithSameFacebookId = SQL(
         """SELECT organizerId FROM organizers

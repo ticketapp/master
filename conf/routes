@@ -1,24 +1,25 @@
 # Home page
-GET           /                                                                           controllers.Application.index
+GET         /                               controllers.Application.index
 
-GET           /test                                                                       controllers.Test.test1
+GET         /test                           controllers.Test.test1
+GET         /insertFrenchCities             controllers.InsertFrenchCities.insertFrenchCities
 
 ################################## Admin ################################################
 GET           /admin                                                                      controllers.Admin.indexAdmin
 #POST    /admin/createTariff            controllers.Admin.createTariff
 
 ################################## Events ###############################################
-GET           /events/offset/:offset/:geographicPoint                                     controllers.EventController.events(offset: Int, geographicPoint: String)
-GET           /events/offsetAndMaxStartTime/:offset/:geographicPoint/:hourInterval        controllers.EventController.eventsWithMaxStartTime(offset: Int, geographicPoint: String, hourInterval: Int)
-GET           /events/:id                                                                 controllers.EventController.event(id: Long)
-POST          /events/create                                                              controllers.EventController.createEvent
-POST          /events/:eventId/follow                                                     controllers.EventController.followEvent(eventId: Long)
-GET           /events/followed/                                                           controllers.EventController.getFollowedEvents
-GET           /events/:eventId/isEventFollowed                                            controllers.EventController.isEventFollowed(eventId: Long)
-GET           /events/containing/:pattern/:center                                         controllers.EventController.findEventsContaining(pattern: String, center:String)
-#GET     /events/circle/                controllers.EventController.findEventsInCircle(center = "")
-GET           /events/circle/:center                                                      controllers.EventController.findEventsInCircle(center: String)
-GET           /events/city/:pattern                                                       controllers.EventController.findEventsByCity(pattern: String)
+GET       /events/offset/:offset/:geographicPoint                               controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
+GET       /events/offsetAndMaxStartTime/:offset/:geographicPoint/:hourInterval  controllers.EventController.eventsWithMaxStartTime(offset: Int, geographicPoint: String, hourInterval: Int)
+GET       /events/:id                                                           controllers.EventController.event(id: Long)
+POST      /events/create                                                        controllers.EventController.createEvent
+POST      /events/:eventId/follow                                               controllers.EventController.followEvent(eventId: Long)
+GET       /events/followed/                                                     controllers.EventController.getFollowedEvents
+GET       /events/:eventId/isEventFollowed                                      controllers.EventController.isEventFollowed(eventId: Long)
+GET       /events/containing/:pattern/:center                                   controllers.EventController.findEventsContaining(pattern: String, center:String)
+#GET       /events/circle/                                                      controllers.EventController.findEventsInCircle(center = "")
+GET       /events/circle/:center                                                controllers.EventController.findEventsInCircle(center: String)
+GET       /events/city/:pattern                                                 controllers.EventController.findEventsByCity(pattern: String)
 
 ################################## Artists ##############################################
 GET           /artists                                      controllers.ArtistController.artists
@@ -43,34 +44,34 @@ POST          /places/create                                controllers.PlaceCon
 GET           /places/:placeId/events                       controllers.EventController.eventsByPlace(placeId: Long)
 
 ################################## Organizers ###############################################
-GET           /organizers                                   controllers.OrganizerController.organizers
-GET           /organizers/:id                               controllers.OrganizerController.organizer(id: Long)
-POST          /organizers/:organizerId/follow               controllers.OrganizerController.followOrganizer(organizerId: Long)
-GET           /organizers/containing/:pattern               controllers.OrganizerController.findOrganizersContaining(pattern: String)
-POST          /organizers/create                            controllers.OrganizerController.createOrganizer
-GET           /organizers/:organizerId/events               controllers.EventController.eventsByOrganizer(organizerId: Long)
+GET       /organizers                                   controllers.OrganizerController.organizers
+GET       /organizers/:id                               controllers.OrganizerController.organizer(id: Long)
+POST      /organizers/:organizerId/follow               controllers.OrganizerController.followOrganizer(organizerId: Long)
+GET       /organizers/containing/:pattern               controllers.OrganizerController.findOrganizersContaining(pattern: String)
+POST      /organizers/create                            controllers.OrganizerController.createOrganizer
+GET       /organizers/:organizerId/events               controllers.EventController.eventsByOrganizer(organizerId: Long)
 
 ################################# Playlists ############################################
-GET         /playlists                    controllers.PlaylistController.findByUser
-POST        /playlists                    controllers.PlaylistController.create
-PUT         /playlists                    controllers.PlaylistController.update
-DELETE      /playlists/:playlistId        controllers.PlaylistController.delete(playlistId: Long)
+GET       /playlists                    controllers.PlaylistController.findByUser
+POST      /playlists                    controllers.PlaylistController.create
+PUT       /playlists                    controllers.PlaylistController.update
+DELETE    /playlists/:playlistId        controllers.PlaylistController.delete(playlistId: Long)
 
 ################################# Genres ############################################
-GET     /genres/:genre/:numberToReturn/:offset/artists      controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
-GET     /genres/:genre/:numberToReturn/:offset/events       controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET       /genres/:genre/:numberToReturn/:offset/artists      controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET       /genres/:genre/:numberToReturn/:offset/events       controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
 
 ################################# Tracks ############################################
-POST        /tracks/create                                                              controllers.TrackController.createTrack
-GET         /tracks/:artistName/:artistFacebookUrl/:trackTitle                          controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
-GET         /tracks/youtubeTrackInfo/:youtubeId                                         controllers.SearchTracksController.getYoutubeTrackInfos(youtubeId: String)
+POST      /tracks/create                                                              controllers.TrackController.createTrack
+GET       /tracks/:artistName/:artistFacebookUrl/:trackTitle                          controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
+GET       /tracks/youtubeTrackInfo/:youtubeId                                         controllers.SearchTracksController.getYoutubeTrackInfos(youtubeId: String)
 
 ################################## Infos ################################################
-GET         /infos                     controllers.Application.infos
+GET       /infos                     controllers.Application.infos
 
 ################################# Issues ################################################
-GET         /issues                    controllers.IssueController.issues
-POST        /issues                    controllers.IssueController.create
+GET       /issues                    controllers.IssueController.issues
+POST      /issues                    controllers.IssueController.create
 
 ################################## Users ################################################
 GET           /users                                                                      controllers.UserController.users

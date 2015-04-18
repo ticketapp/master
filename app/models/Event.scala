@@ -86,13 +86,13 @@ object Event {
     case e: Exception => throw new DAOException("Event.eventId: " + e.getMessage)
   }
 
-  def find20Since(start: Int, center: String): Seq[Event] = try {
+  def findNear(center: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT *
-           |FROM events
-           |ORDER BY geographicPoint <-> point '$center'
-           |LIMIT 20 OFFSET $start""".stripMargin)
+        s"""SELECT * FROM events
+           |  ORDER BY geographicPoint <-> point '$center'
+           |LIMIT $numberToReturn
+           |OFFSET $offset""".stripMargin)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
@@ -103,9 +103,8 @@ object Event {
   def find20InHourIntervalWithOffsetNearCenterPoint(start: Int, center: String, hourInterval: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT *
-           |FROM events
-           |WHERE startTime < (CURRENT_TIMESTAMP + interval '$hourInterval hours')
+        s"""SELECT * FROM events
+           |  WHERE startTime < (CURRENT_TIMESTAMP + interval '$hourInterval hours')
            |ORDER BY geographicPoint <-> point '$center'
            |LIMIT 20 OFFSET $start""".stripMargin)
         .as(EventParser.*)
@@ -118,8 +117,8 @@ object Event {
   def findAllByPlace(placeId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT event.*
-          |FROM eventsPlaces eP INNER JOIN events event ON event.eventId = eP.eventId
+        """SELECT event.* FROM eventsPlaces eP
+          | INNER JOIN events event ON event.eventId = eP.eventId
           |WHERE eP.placeId = {placeId} 
           |ORDER BY event.creationDateTime DESC LIMIT 20""".stripMargin)
         .on('placeId -> placeId)
@@ -130,23 +129,6 @@ object Event {
     case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
 
-  def findAllByGenreId(genreId: Long): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT e.*
-          |FROM eventsGenres eG
-          |INNER JOIN events e ON e.eventId = eG.eventId
-          |WHERE eG.genreId = {genreId}
-          |ORDER BY e.creationDateTime DESC
-          |LIMIT 20""".stripMargin)
-        .on('genreId -> genreId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot get events by genre: " + e.getMessage)
-  }
-
   def findAllByGenre(genre: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -154,7 +136,7 @@ object Event {
            |FROM eventsGenres eG
            |  INNER JOIN events e ON e.eventId = eG.eventId
            |  INNER JOIN genres g ON g.genreId = eG.genreId
-           |WHERE g.name = {genre}
+           |    WHERE g.name = {genre}
            |ORDER BY e.creationDateTime DESC
            |LIMIT $numberToReturn
            |OFFSET $offset""".stripMargin)
@@ -169,10 +151,11 @@ object Event {
   def findAllByOrganizer(organizerId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.*
-          |FROM eventsOrganizers eO INNER JOIN events e ON e.eventId = eO.eventId
+        """SELECT e.* FROM eventsOrganizers eO
+          | INNER JOIN events e ON e.eventId = eO.eventId
           |WHERE eO.organizerId = {organizerId} 
-          |ORDER BY e.creationDateTime DESC LIMIT 20""".stripMargin)
+          |ORDER BY e.creationDateTime DESC
+          |LIMIT 20""".stripMargin)
         .on('organizerId -> organizerId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
@@ -188,7 +171,7 @@ object Event {
           |FROM eventsArtists eA
           | INNER JOIN events e ON e.eventId = eA.eventId
           | INNER JOIN artists a ON a.artistId = eA.artistId
-          |WHERE a.facebookUrl = {facebookUrl}
+          |   WHERE a.facebookUrl = {facebookUrl}
           |ORDER BY e.creationDateTime DESC
           |LIMIT 20""".stripMargin)
         .on('facebookUrl -> facebookUrl)
@@ -204,8 +187,8 @@ object Event {
       try {
         DB.withConnection { implicit connection =>
           SQL(
-            s"""SELECT * FROM events WHERE LOWER(name)
-               |LIKE '%'||{patternLowCase}||'%'
+            s"""SELECT * FROM events
+               |  WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
                |ORDER BY geographicPoint <-> point '$center'
                |LIMIT 20""".stripMargin)
             .on('patternLowCase -> pattern.toLowerCase)
@@ -221,18 +204,17 @@ object Event {
   def findAllByCityPattern(cityPattern: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.* FROM events e
-          |JOIN eventsAddresses eA on e.eventId = eA.eventId
-          |JOIN addresses a ON a.addressId = eA.eventId
-          |WHERE a.isEvent = TRUE AND LOWER(name)
-          |LIKE '%'||{patternLowCase}||'%'
+        """SELECT e.* FROM eventsAddresses eA
+          | INNER JOIN events e on e.eventId = eA.eventId
+          | INNER JOIN addresses a ON a.addressId = eA.addressId
+          |   WHERE a.city LIKE '%'||{patternLowCase}||'%'
           |LIMIT 50""".stripMargin)
         .on('patternLowCase -> cityPattern.toLowerCase)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with the method Event.findAllContaining: " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.findAllContaining: " + e.getMessage)
   }
 
   def save(event: Event): Option[Long] = try {
