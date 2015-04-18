@@ -144,7 +144,15 @@ md-slider#timeSearchSlider > .md-thumb-container > .md-thumb:after {
     width: 100px!important;
 }
 md-slider#timeSearchSlider > .md-thumb-container > .md-thumb > b {
-    color: #ffffff;position: absolute;top: 0;z-index: 10;width: 100%;left: 0;font-size: 20px;
+    color: #ffffff;
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    width: 100%;
+    left: 0;
+    font-size: 20px;
+    margin-left: 10px;
+    cursor: pointer;
 }
 /* @font-face {
    font-family: 'Blanch-CapsInline';
