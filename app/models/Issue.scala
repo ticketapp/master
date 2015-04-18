@@ -77,7 +77,7 @@ object Issue {
   def saveComment(comment: IssueComment): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """INSERT INTO comments(content, userId, issueId)
+        """INSERT INTO issuesComments(content, userId, issueId)
           | VALUES ({content}, {userId}, {issueId})""".stripMargin)
         .on(
           'content -> comment.content,
