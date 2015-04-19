@@ -81,7 +81,7 @@
                     ({{event.addresses[0].city}})
                 </i>
             </div>
-            <div class="infos_event float-left">
+            <div class="infos_event" ng-class="{'float-left': $root.window == 'small'}">
                 <span class="dropDown" ng-show="organizer.name != event.places[0].name"
                       data-ng-repeat="organizer in event.organizers">
                     <i class="fa fa-user" style="font-size: 30px; color: {{event.priceColor}};"></i>

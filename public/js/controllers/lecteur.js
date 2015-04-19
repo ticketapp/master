@@ -61,7 +61,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     }
     function pushTrack (track, art) {
         $scope.newTrack = {};
-        if (track.platform == 'Soundcloud') {
+        if (track.platform == 's') {
             $scope.newTrack.redirectUrl = track.redirectUrl;
         }
         if (track.nextShow != undefined) {
@@ -353,11 +353,11 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
         document.getElementById('musicPlayer').removeEventListener('error', error);
         $scope.trackActive = $rootScope.playlist.tracks[i];
-        if ($rootScope.playlist.tracks[i].platform == 'Soundcloud' || $rootScope.window == 'small' || $rootScope.window == 'medium') {
+        if ($rootScope.playlist.tracks[i].platform == 's' || $rootScope.window == 'small' || $rootScope.window == 'medium') {
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
             /*document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';*/
             if ($rootScope.playlist.tracks[i].url != undefined) {
-                if ($rootScope.playlist.tracks[i].platform == 'Soundcloud') {
+                if ($rootScope.playlist.tracks[i].platform == 's') {
                     document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist.tracks[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
                 } else {
                     var youtubeId = $rootScope.playlist.tracks[i].url;
@@ -466,7 +466,7 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                 goToTrackActive ()
             }
             document.getElementById('musicPlayer').play();
-        } else if ($rootScope.playlist.tracks[i].platform == 'Youtube') {
+        } else if ($rootScope.playlist.tracks[i].platform == 'y') {
             document.getElementById('musicPlayer').pause();
             //document.getElementById('musicPlayer').classList.add('ng-hide');
             document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
