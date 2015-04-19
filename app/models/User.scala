@@ -2,7 +2,7 @@ package models
 
 import anorm.SqlParser._
 import anorm._
-import controllers.DAOException
+import controllers.{UserOAuth2InfoWronglyFormatted, DAOException}
 import play.api.db.DB
 import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
@@ -73,21 +73,48 @@ object User {
     Some((user.email, user.nickname, user.password, user.profile))
 
 
-  def saveUser(user: User): Option[Long] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL(
-          """INSERT INTO users(email, nickname, password, profile)
-              VALUES({email}, {nickname}, {password}, {profile})"""
-        ).on(
-            'email -> user.email,
-            'nickname -> user.nickname,
-            'password -> user.password,
-            'profile -> user.profile
-        ).executeInsert()
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot save user: " + e.getMessage)
+  def save(user: User): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """INSERT INTO users(email, nickname, password, profile)
+            VALUES({email}, {nickname}, {password}, {profile})"""
+      ).on(
+          'email -> user.email,
+          'nickname -> user.nickname,
+          'password -> user.password,
+          'profile -> user.profile
+      ).executeInsert()
     }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot save user: " + e.getMessage)
+  }
+
+
+  def delete(userId: Long): Int = {
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM users WHERE userId = {userId}")
+        .on('userId -> userId)
+        .executeUpdate()
+    }
+  }
+
+  def findFacebookAccessToken(userId: String): Option[String] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT oAuth2Info FROM users_login
+          | WHERE userId = {userId} """.stripMargin)
+        .on('userId -> userId )
+        .as(scalar[String].singleOpt) match {
+        case None => None
+        case Some(oAuth2info) =>
+          try {
+            Option(oAuth2info.split("\"")(3))
+          } catch {
+            case e:Exception => throw new UserOAuth2InfoWronglyFormatted("User.findFacebookAccessToken")
+          }
+      }
+    }
+  } catch {
+    case e: Exception => throw new DAOException("User.findFacebookAccessToken: " + e.getMessage)
   }
 }

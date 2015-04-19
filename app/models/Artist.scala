@@ -232,9 +232,9 @@ object Artist {
 
   def deleteArtist(artistId: Long): Long = try {
     DB.withConnection { implicit connection =>
-      SQL("DELETE FROM artists WHERE artistId={artistId}").on(
-        'artistId -> artistId
-      ).executeUpdate()
+      SQL("DELETE FROM artists WHERE artistId = {artistId}")
+        .on('artistId -> artistId)
+        .executeUpdate()
     }
   } catch {
     case e: Exception => throw new DAOException("Artist.deleteArtist : " + e.getMessage)
@@ -255,8 +255,8 @@ object Artist {
   def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL("""select a.* from artists a
-            |  INNER JOIN artistsfollowed af ON a.artistid = af.artistid
-            |WHERE af.userid = {userId}""".stripMargin)
+            |  INNER JOIN artistsFollowed af ON a.artistId = af.artistId
+            |WHERE af.userId = {userId}""".stripMargin)
         .on('userId -> userId.userId)
         .as(ArtistParser.*)
         .map(getArtistProperties)

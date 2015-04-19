@@ -5,12 +5,13 @@ import play.api.data.Forms._
 import play.api.db._
 import play.api.Play.current
 import anorm._
+import play.api.libs.ws.WS
 import play.api.mvc._
 import play.api.libs.json.Json
 import models.{Tool, User}
-//import java.util.Date
+import play.api.libs.concurrent.Execution.Implicits._
 
-object UserController extends Controller {
+object UserController extends Controller with securesocial.core.SecureSocial {
   def users = Action {
     Ok(Json.toJson(User.findAll()))
   }
@@ -36,7 +37,7 @@ object UserController extends Controller {
     userBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       user => {
-        User.saveUser(user)
+        User.save(user)
         Redirect(routes.UserController.user(1))
       }
     )
@@ -54,23 +55,21 @@ object UserController extends Controller {
     userBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       user => {
-        User.saveUser(user)
+        User.save(user)
         Redirect(routes.UserController.user(1))
       }
     )
   }
-  
-  def deleteUser(userId: Long): Int = {
-    DB.withConnection { implicit connection =>
-      SQL("DELETE FROM users WHERE userId={userId}").on(
-        'userId -> userId
-      ).executeUpdate()
-    }
+
+  def findFacebookAccessToken = SecuredAction(ajaxCall = true) { implicit request =>
+    Ok(Json.toJson(User.findFacebookAccessToken(request.user.identityId.userId)))
   }
 
-
-  def findFacebookAccessToken = Action {
-//    InMemoryUserService
-    Ok
+  def getUserGeographicPoint = Action.async { request =>
+    WS.url("http://ip-api.com/json/" + request.remoteAddress)
+      .get()
+      .map { response =>
+      Ok(Json.toJson(response.json))
+    }
   }
 }

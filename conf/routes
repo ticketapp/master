@@ -86,7 +86,8 @@ GET           /users                                                controllers.
 GET           /users/:id                                            controllers.UserController.user(id: Long)
 GET           /users/containing/:pattern                            controllers.UserController.findUsersContaining(pattern: String)
 GET           /users/:userId/tools                                  controllers.UserController.findToolsByUserId(userId: Long)
-GET           /users/geographicPoint/                               controllers.Application.getUserGeographicPoint
+GET           /users/geographicPoint/                               controllers.UserController.getUserGeographicPoint
+GET           /users/facebookAccessToken/                           controllers.UserController.findFacebookAccessToken
 
 ################################## Buy ticket ###########################################
 GET           /buyTicket                                            controllers.TicketController.buyTicket

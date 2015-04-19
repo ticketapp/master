@@ -23,3 +23,7 @@ case class PlaylistUpdateTrackWithoutRankException(message: String) extends Exce
 case class ArtistContainsEmptyWebsiteException(message: String) extends Exception(message) {
   println("ArtistContainsEmptyWebsiteException: " + message)
 }
+
+case class UserOAuth2InfoWronglyFormatted(message: String) extends Exception(message) {
+  println("UserOAuth2InfoWronglyFormatted: " + message)
+}

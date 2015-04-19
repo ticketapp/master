@@ -14,7 +14,6 @@ import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
 import scala.concurrent.Future
 
-
 object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action { Ok(Json.toJson(Artist.findAll)) }
 
