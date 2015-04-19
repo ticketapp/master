@@ -55,8 +55,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         "facebookId" -> optional(nonEmptyText(2)),
         "artistName" -> nonEmptyText(2),
         "imagePath" -> optional(nonEmptyText(2)),
-        "description"  -> optional(nonEmptyText),
-        "facebookUrl"  -> nonEmptyText,
+        "description" -> optional(nonEmptyText),
+        "facebookUrl" -> nonEmptyText,
         "websites" -> seq(nonEmptyText(4)),
         "genres" -> seq(
           mapping(
@@ -88,7 +88,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           val artistId = Artist.save(patternAndArtist.artist)
           val artistWithArtistId = patternAndArtist.artist.copy(artistId = artistId)
           val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
-          val tracksEnumerator = getArtistTracks(patternAndArtistWithArtistId).map { tracks => Json.toJson(tracks) }
+          val tracksEnumerator = getArtistTracks(patternAndArtistWithArtistId).map { tracks =>
+            Json.toJson(tracks)
+          }
           Ok.chunked(tracksEnumerator)
         }
       )
@@ -100,6 +102,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def getArtistTracks(patternAndArtist: PatternAndArtist) = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
+        /*soundCloudTracks.headOption match {
+          case None =>
+          case Some(soundcloudTrack: Track) => if soundcloudTrack.
+        }*/
         Enumerator(soundCloudTracks.toSet)
       }
     )

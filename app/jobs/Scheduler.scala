@@ -162,12 +162,18 @@ object Scheduler {
     case None =>
       None
     case Some(desc) =>
-      def stringToLinks(matcher: Regex.Match) =
-        if (matcher.toString contains "@")
-          "<i>" + matcher + "</i>"
-        else
-          """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) +
-            """</a>"""
+      def stringToLinks(matcher: Regex.Match) = {
+        val phoneNumberPattern = """[\d\.]+""".r
+        matcher.toString() match {
+          case phoneNumberPattern(link) => matcher.toString()
+          case _ =>
+            if (matcher.toString contains "@")
+              "<i>" + matcher + "</i>"
+            else
+              """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) +
+                """</a>"""
+        }
+      }
       Option("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m => stringToLinks(m))
           .replaceAll( """<""", "&lt;")
