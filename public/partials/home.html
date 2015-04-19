@@ -1,8 +1,5 @@
 <div ng-if="$root.window == 'medium' || $root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
     <div ng-controller="CarouselCtrl" class="parallax-background top0">
-        <!--<video width="100%" id="videobg" autoplay>
-            <source src="https://www.youtube.com/embed/rDlXXWuK-So">
-        </video>-->
         <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-show="elementEnCours == info">
             <h4 ng-if="info.title.length > 0" ng-bind-html="info.title"></h4>
             <div ng-bind-html="info.content"></div>
@@ -18,7 +15,7 @@
            data-ng-controller="toolsCtrl" ng-click="open()">
             <i class="fi-thumbnails"></i>
         </a>
-        <md-slider flex ng-change="updateMarkers()"
+        <md-slider flex ng-change="timeChange()"
                    ng-model="time" min="1" max="51" step="1"
                    aria-label="timeSlider"
                    id="timeSearchSliderPhone"
