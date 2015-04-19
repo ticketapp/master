@@ -54,22 +54,22 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Event.findAllByGenre(genre: String, numberToReturn: Int, offset: Int)))
   }
 
-  def event(id: Long) = Action {
+  def findAll(id: Long) = Action {
     Event.find(id) match {
       case Some(event) => Ok(Json.toJson(event))
       case None => NotFound
     }
   }
 
-  def findEventsContaining(pattern: String, center: String) = Action {
+  def findAllContaining(pattern: String, center: String) = Action {
     Ok(Json.toJson(Event.findAllContaining(pattern, center)))
   }
 
-  def findEventsByCityPattern(pattern: String) = Action {
+  def findByCityPattern(pattern: String) = Action {
     Ok(Json.toJson(Event.findAllByCityPattern(pattern)))
   }
 
-  def findEventsNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
+  def findNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
     Ok(Json.toJson(Event.findNearCity(city, numberToReturn, offset)))
   }
 

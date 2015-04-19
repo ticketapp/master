@@ -47,5 +47,9 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
       }
     )
   }
+
+  def findNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Organizer.findNearCity(city, numberToReturn, offset)))
+  }
 }
 

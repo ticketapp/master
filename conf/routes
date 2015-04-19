@@ -13,14 +13,14 @@ GET       /admin                                controllers.Admin.indexAdmin
 GET       /events/nearGeoPoint/:geographicPoint/:numberToReturn/:offset               controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
 GET       /events/inInterval/:hourInterval/:geographicPoint/:numberToReturn/:offset  controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET       /events/passedInInterval/:hourInterval/:geographicPoint/:numberToReturn/:offset  controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET       /events/:id                                                                 controllers.EventController.event(id: Long)
+GET       /events/:id                                                                 controllers.EventController.findAll(id: Long)
 POST      /events/create                                                              controllers.EventController.createEvent
 POST      /events/:eventId/follow                                                     controllers.EventController.followEvent(eventId: Long)
 GET       /events/followed/                                                           controllers.EventController.getFollowedEvents
 GET       /events/:eventId/isEventFollowed                                            controllers.EventController.isEventFollowed(eventId: Long)
-GET       /events/containing/:pattern/:geographicPoint                                controllers.EventController.findEventsContaining(pattern: String, geographicPoint:String)
-GET       /events/city/:pattern                                                       controllers.EventController.findEventsByCityPattern(pattern: String)
-GET       /events/nearCity/:city/:numberToReturn/:offset                              controllers.EventController.findEventsNearCity(city: String, numberToReturn: Int, offset: Int)
+GET       /events/containing/:pattern/:geographicPoint                                controllers.EventController.findAllContaining(pattern: String, geographicPoint:String)
+GET       /events/city/:pattern                                                       controllers.EventController.findByCityPattern(pattern: String)
+GET       /events/nearCity/:city/:numberToReturn/:offset                              controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################## Artists ##############################################
 GET       /artists                                                  controllers.ArtistController.artists
@@ -52,6 +52,7 @@ POST      /organizers/:organizerId/follow                           controllers.
 GET       /organizers/containing/:pattern                           controllers.OrganizerController.findOrganizersContaining(pattern: String)
 POST      /organizers/create                                        controllers.OrganizerController.createOrganizer
 GET       /organizers/:organizerId/events                           controllers.EventController.eventsByOrganizer(organizerId: Long)
+GET       /organizers/findNearCity/:city/:numberToReturn/:offset    controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################# Playlists ############################################
 GET       /playlists                                                controllers.PlaylistController.findByUser

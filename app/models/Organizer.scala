@@ -184,4 +184,27 @@ object Organizer {
   } catch {
     case e: Exception => throw new DAOException("Organizer.delete : " + e.getMessage)
   }
+
+  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT * FROM organizers
+           |ORDER BY geographicPoint <-> point '$geographicPoint'
+           |LIMIT $numberToReturn
+           |OFFSET $offset""".stripMargin)
+        .as(OrganizerParser.*)
+        .map(getOrganizerProperties)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.findNear: " + e.getMessage)
+  }
+
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
+    Address.findGeographicPointOfCity(city) match {
+      case None => Seq.empty
+      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.findNearCity: " + e.getMessage)
+  }
 }
