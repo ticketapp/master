@@ -186,6 +186,7 @@ object SearchYoutubeTracks {
     def getEchonestSongs(start: Long, echonestArtistId: String): Enumerator[Set[String]] = {
       Enumerator.flatten(getEchonestSongsWSCall(start: Long, echonestArtistId: String)
         .map { echonestResponse =>
+//        println(echonestResponse)
         val total = (echonestResponse \ "response" \ "total").asOpt[Int]
         val songs = readEchonestSongs(echonestResponse)
         total.exists(_ > start + 100) match {
@@ -213,12 +214,12 @@ object SearchYoutubeTracks {
 
   def readEchonestSongs(result: JsValue): Set[String] = {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
-    val a = (result \ "response" \ "songs")
+    (result \ "response" \ "songs")
       .asOpt[Set[Option[String]]](Reads.set(titleReads))
       .getOrElse(Set.empty)
       .flatten
-    println(a)
-    a
+    //println(a)
+    //a
   }
 
   def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {

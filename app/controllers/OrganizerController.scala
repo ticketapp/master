@@ -23,16 +23,6 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
     Ok(Json.toJson(Organizer.findAllContaining(pattern)))
   }
 
-  def deleteOrganizer(organizerId: Long): Int = try {
-    DB.withConnection { implicit connection =>
-      SQL("DELETE FROM organizers WHERE organizerId = {organizerId}")
-        .on('organizerId -> organizerId)
-        .executeUpdate()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot delete Organizer: " + e.getMessage)
-  }
-
   def followOrganizer(organizerId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
     Organizer.followOrganizer(request.user.identityId.userId, organizerId)
     Ok

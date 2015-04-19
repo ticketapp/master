@@ -18,6 +18,7 @@ case class Organizer (organizerId: Option[Long],
                       websites: Option[String] = None,
                       verified: Boolean = false,
                       imagePath: Option[String] = None,
+                      geographicPoint: Option[String] = None,
                       address: Option[Address] = None)
 
 object Organizer {
@@ -38,11 +39,12 @@ object Organizer {
       get[Option[String]]("publicTransit") ~
       get[Option[String]]("websites") ~
       get[Boolean]("verified") ~
-      get[Option[String]]("imagePath") map {
+      get[Option[String]]("imagePath") ~
+      get[Option[String]]("geographicPoint") map {
       case organizerId ~ facebookId ~ name ~ description ~ addressId ~ phone ~ publicTransit ~ websites ~ verified ~
-        imagePath =>
+        imagePath ~ geographicPoint =>
         Organizer(Option(organizerId), facebookId, name, description, addressId, phone, publicTransit, websites,
-          verified, imagePath)
+          verified, imagePath, geographicPoint)
     }
   }
 
@@ -97,22 +99,28 @@ object Organizer {
 
   def save(organizer: Organizer): Option[Long] = try {
     DB.withConnection { implicit connection =>
+      val addressId = organizer.address match {
+        case None =>
+        case Some(address) => Address.save(address)
+      }
       val placeIdWithSameFacebookId = SQL(
         """SELECT organizerId FROM organizers
           | WHERE facebookId = {facebookId}""".stripMargin)
         .on("facebookId" -> organizer.facebookId)
         .as(scalar[Long].singleOpt)
       SQL(
-        """SELECT insertOrganizer({facebookId}, {name}, {description}, {phone}, {publicTransit}, {websites},
-          |{imagePath}, {placeId})""".stripMargin)
+        """SELECT insertOrganizer({facebookId}, {name}, {description}, {addressId}, {phone}, {publicTransit},
+          |{websites}, {imagePath}, {geographicPoint}, {placeId})""".stripMargin)
         .on(
           'facebookId -> organizer.facebookId,
           'name -> organizer.name,
           'description -> organizer.description,
+          'addressId -> addressId,
           'phone -> Utilities.phoneNumbersStringToSet(organizer.phone).mkString(","),
           'publicTransit -> organizer.publicTransit,
           'websites -> organizer.websites,
           'imagePath -> organizer.imagePath,
+          'geographicPoint -> organizer.geographicPoint,
           'placeId -> placeIdWithSameFacebookId)
         .as(scalar[Option[Long]].single)
     }
@@ -149,16 +157,6 @@ object Organizer {
     case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)
   }
 
-  def deleteOrganizer(organizerId: Long): Long = try {
-    DB.withConnection { implicit connection =>
-      SQL("DELETE FROM organizers WHERE organizerId={organizerId}")
-        .on('organizerId -> organizerId)
-        .executeUpdate()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot save in delete Organizer: " + e.getMessage)
-  }
-
   def followOrganizer(userId: String, organizerId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -171,5 +169,15 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Organizer.followOrganizer: " + e.getMessage)
+  }
+
+  def delete(organizerId: Long): Int = try {
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM organizers WHERE organizerId = {organizerId}")
+        .on('organizerId -> organizerId)
+        .executeUpdate()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.delete : " + e.getMessage)
   }
 }

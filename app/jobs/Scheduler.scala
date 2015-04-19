@@ -36,10 +36,10 @@ object Scheduler {
           .get()
           .map {
           readFacebookEvent(_) match {
-            case Some(eventuallyFacebookEvent) => eventuallyFacebookEvent map {
-              saveEvent(_, placeId, placeGeographicPoint)
-            }
-            case None => println("Empty event read by Scheduler.readFacebookEvent")
+            case Some(eventuallyFacebookEvent) =>
+              eventuallyFacebookEvent map { saveEvent(_, placeId, placeGeographicPoint) }
+            case None =>
+              println("Empty event read by Scheduler.readFacebookEvent")
           }
         }
       }
@@ -55,13 +55,20 @@ object Scheduler {
   }
 
   def saveEvent(facebookEvent: Event, placeId: Long, placeGeographicPoint: Option[String]) = {
-    Event.save(facebookEvent.copy(geographicPoint = placeGeographicPoint)) match {
-      case None => Event.update(facebookEvent) //delete old images and insert news
-      case Some(eventId) =>
-        Place.saveEventPlaceRelation(eventId, placeId)
-        facebookEvent.addresses.map { address =>
-          Address.saveAddressAndEventRelation(address, eventId)
-        }
+    val organizerAddressWithGeographicPoint = getGeographicPoint(facebookEvent.organizers.head.address.get)
+    organizerAddressWithGeographicPoint.map { organizerAddress =>
+      val organizerWithGeographicPoint = facebookEvent.organizers.head.copy(address = Option(organizerAddress),
+          geographicPoint = organizerAddress.geographicPoint)
+
+      Event.save(facebookEvent.copy(geographicPoint = placeGeographicPoint,
+        organizers = List(organizerWithGeographicPoint))) match {
+        case None => Event.update(facebookEvent) //delete old images and insert news
+        case Some(eventId) =>
+          Place.saveEventPlaceRelation(eventId, placeId)
+          facebookEvent.addresses.map { address =>
+            Address.saveAddressAndEventRelation(address, eventId)
+          }
+      }
     }
   }
 
@@ -159,14 +166,14 @@ object Scheduler {
         if (matcher.toString contains "@")
           "<i>" + matcher + "</i>"
         else
-          """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) + """</a>"""
+          """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) +
+            """</a>"""
       Option("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m => stringToLinks(m))
-              .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
-              .replaceAll( """\n""", "<br/>")
-              .replaceAll( """\t""", "    ") +
-              //.replaceAll( """</a>/""", "</a> ") +
-              "</div>")
+          .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
+          .replaceAll( """\n""", "<br/>")
+          .replaceAll( """\t""", "    ") +
+        "</div>")
   }
 
   def findPrices(description: Option[String]): Option[String] = description match {
@@ -202,13 +209,19 @@ object Scheduler {
       (__ \ "name").read[String] and
         (__ \ "description").readNullable[String] and
         (__ \ "cover" \ "source").readNullable[String] and
+        (__ \ "location" \ "street").readNullable[String] and
+        (__ \ "location" \ "zip").readNullable[String] and
+        (__ \ "location" \ "city").readNullable[String] and
         (__ \ "phone").readNullable[String] and
         (__ \ "public_transit").readNullable[String] and
         (__ \ "website").readNullable[String])
-      .apply((name: String, description: Option[String], source: Option[String], phone: Option[String],
-              public_transit: Option[String], website: Option[String]) =>
-      Organizer(None, Some(organizerId), name, formatDescription(description), None, phone, public_transit,
-        website, verified = false, source, None))
+      .apply((name: String, description: Option[String], source: Option[String], street: Option[String],
+              zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
+              website: Option[String]) =>
+        Organizer(None, Some(organizerId), name, formatDescription(description), None, phone, public_transit,
+          website, verified = false, source, None,
+          Option(Address(None, None, city, zip, street)))
+      )
     organizer.json.asOpt[Organizer](readOrganizer)
   }
 
@@ -223,7 +236,7 @@ object Scheduler {
         .map { response => readOrganizer(response, organizerId) }
   }
 
-  def readFacebookGeographicPoint = {
+  def readFacebookGeographicPoint() = {
     /*val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
       case Some(latitude) =>
         (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
@@ -232,6 +245,23 @@ object Scheduler {
         }
       case _ => None
     }*/
+  }
+
+  def getGeographicPoint(address: Address): Future[Address] = {
+    if (Vector(address.street, address.zip, address.city).flatten.length > 1) {
+      WS.url("https://maps.googleapis.com/maps/api/geocode/json")
+        .withQueryString(
+          "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
+          "key" -> youtubeKey)
+        .get()
+        .map { response =>
+        readGoogleGeographicPoint(response)  match {
+          case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
+          case None => address
+        }
+      }
+    } else
+      Future { address }
   }
 
   def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {
@@ -245,23 +275,6 @@ object Scheduler {
         case Some(lng) => Option("(" + lat + "," + lng + ")")
       }
     }
-  }
-
-  def getGeographicPoint(address: Address): Future[Address] = {
-    if (Vector(address.street, address.zip, address.city).flatten.length > 1) {
-      WS.url("https://maps.googleapis.com/maps/api/geocode/json")
-        .withQueryString( //replaceAll(" ", "+")) ??
-          "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
-          "key" -> youtubeKey)
-        .get()
-        .map { response =>
-        readGoogleGeographicPoint(response)  match {
-          case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
-          case None => address
-        }
-      }
-    } else
-      Future { address }
   }
 
   def normalizeArtistName(artistName: String): String = normalizeString(artistName)

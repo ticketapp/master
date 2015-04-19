@@ -77,20 +77,24 @@ object Address {
   } catch {
     case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
   }
-
-  def saveAddressAndEventRelation(address: Address, id: Long): Option[Long] = try {
+  
+  def save(address: Address): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      val addressId = SQL("""SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
+      SQL( """SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
         .on(
           'geographicPoint -> address.geographicPoint,
           'city -> address.city,
           'zip -> address.zip,
           'street -> address.street)
-        .as(scalar[Long].single)
-      saveEventAddressRelation(id, addressId)
+        .as(scalar[Long].singleOpt)
     }
   } catch {
     case e: Exception => throw new DAOException("Address.saveAddressAndEventRelation: " + e.getMessage)
+  }
+
+  def saveAddressAndEventRelation(address: Address, eventId: Long): Option[Long] = save(address) match {
+    case None => throw new DAOException("Address.saveAddressAndEventRelation: Address.save returned None")
+    case Some(addressId) => saveEventAddressRelation(eventId, addressId)
   }
 
   def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = try {

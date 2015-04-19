@@ -45,7 +45,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 7 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 6 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -95,6 +95,7 @@ CREATE TABLE organizers (
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   imagePath               VARCHAR,
+  geographicPoint         POINT,
   placeId                 BIGINT,
   UNIQUE(facebookId),
   UNIQUE(name),
@@ -102,20 +103,24 @@ CREATE TABLE organizers (
 );
 
 CREATE OR REPLACE FUNCTION insertOrganizer(
-  facebookIdValue    VARCHAR(63),
-  nameValue          VARCHAR(255),
-  descriptionValue   VARCHAR,
-  phoneValue         VARCHAR(255),
-  publicTransitValue VARCHAR,
-  websitesValue      VARCHAR,
-  imagePathValue     VARCHAR,
-  placeIdValue       BIGINT)
+  facebookIdValue       VARCHAR(63),
+  nameValue             VARCHAR(255),
+  descriptionValue      VARCHAR,
+  addressIdValue        BIGINT,
+  phoneValue            VARCHAR(255),
+  publicTransitValue    VARCHAR,
+  websitesValue         VARCHAR,
+  imagePathValue        VARCHAR,
+  geographicPointValue  VARCHAR(63),
+  placeIdValue          BIGINT)
   RETURNS INT AS
   $$
   DECLARE organizerIdToReturn int;;
   BEGIN
-    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites, imagePath, placeId)
-    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue, imagePathValue, placeIdValue)
+    INSERT INTO organizers (facebookId, name, description, addressId, phone, publicTransit, websites, imagePath,
+                            geographicPoint, placeId)
+    VALUES (facebookIdValue, nameValue, descriptionValue, addressIdValue, phoneValue, publicTransitValue,
+            websitesValue, imagePathValue, POINT(geographicPointValue), placeIdValue)
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
