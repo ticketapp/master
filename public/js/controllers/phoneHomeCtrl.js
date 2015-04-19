@@ -31,11 +31,18 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     }
                     if (i == $scope.events.length -1) {
                         if (eventInBounce == false) {
-                            console.log('erreur')
-                            if (time < 200) {
-                                time = time+6
-                                getEvents()
+                            $scope.time = $scope.time + 1;
+                            if ($scope.time > 23 && $scope.time <= 38) {
+                                $scope.selectedTime = ($scope.time-23)*24
+                            } else if ($scope.time > 38 && $scope.time <= 40) {
+                                $scope.selectedTime = ($scope.time-36)*168;
+                            } else if ($scope.time > 40) {
+                                $scope.selectedTime = ($scope.time-39)*720;
+                            } else {
+                                $scope.selectedTime = $scope.time;
                             }
+                            time = $scope.selectedTime;
+                            getEvents()
 
                         } else {
                             $scope.updateMarkers()
@@ -108,7 +115,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                                 $scope.events[i].genres[g].name == 'drum' ||
                                 $scope.events[i].genres[g].name == 'dubstep' ||
                                 $scope.events[i].genres[g].name == 'trance' && foundMarkerGenre == false) {
-                                console.log('yryr')
                                 markerGenre = 'music200.png';
                                 foundMarkerGenre = true;
                             } else if ($scope.events[i].genres[g].name.indexOf('rock') > -1 && foundMarkerGenre == false) {
@@ -125,7 +131,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                             markerGenre = 'music187.png';
                         }
                     }
-                    console.log(markerGenre)
                     pushMarker(markerGenre, geoPoint);
                 }
             }
