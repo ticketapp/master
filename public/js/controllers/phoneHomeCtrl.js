@@ -95,7 +95,8 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 var markerGenre;
                 function pushMarker (markerGenre, geoPoint) {
                     var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
-                    $scope.dynMarkers.push(new google.maps.Marker({position: latLng, icon: '../assets/img/' + markerGenre}));
+                    $scope.dynMarkers.push(new google.maps.Marker({position: latLng, icon: {url: '../assets/img/' + markerGenre, scaledSize: new google.maps.Size(50, 50)}}));
+                    console.log($scope.dynMarkers)
                 }
                 if ($scope.events[i].genres.length == 0) {
                     markerGenre = 'autres.png';
@@ -231,6 +232,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     };
     function getBounds () {
         $scope.initializeTime();
+        console.log(map)
         var waitForMap = setInterval(function () {
             if (document.getElementsByTagName('map').length > 0) {
                 clearInterval(waitForMap)
