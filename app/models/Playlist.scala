@@ -4,7 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
-import controllers.{PlaylistUpdateTrackWithoutRank, PlaylistDoesNotExistException, DAOException}
+import controllers.{PlaylistUpdateTrackWithoutRankException, PlaylistDoesNotExistException, DAOException}
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -136,7 +136,7 @@ object Playlist {
         Track.savePlaylistTrackRelation(playlistId,
           TrackIdAndRank(trackToAdd.trackId, trackToAdd.trackRank.get))
       } catch {
-        case e: NoSuchElementException => PlaylistUpdateTrackWithoutRank("Playlist.update")
+        case e: NoSuchElementException => PlaylistUpdateTrackWithoutRankException("Playlist.update")
       }
   }
 
