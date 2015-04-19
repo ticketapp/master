@@ -5,7 +5,6 @@
 <div class="modal-body column large-12">
     <ng-connect ng-if="$root.connected == false">
     </ng-connect>
-    <a  ng-if="$root.connected == true" href="#/createEvent" ng-click="cancel()" class="button">Créer un évènement</a>
     <a class="button" ng-click="viewIssues = !viewIssues; viewPlaylists = false"> Issues </a>
     <a class="button" ng-click="getPlaylists(); viewIssues = false; viewPlaylists = !viewPlaylists"> playlists </a>
     <a  ng-if="$root.connected == true" class="button" ng-click="logout()">Logout</a>
