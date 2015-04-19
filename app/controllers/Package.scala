@@ -16,6 +16,10 @@ case class PlaylistDoesNotExistException(message: String) extends Exception(mess
   println("PlaylistDoesNotExistException: " + message)
 }
 
-case class PlaylistUpdateTrackWithoutRank(message: String) extends Exception(message) {
-  println("PlaylistUpdateTrackWithoutRank: " + message)
+case class PlaylistUpdateTrackWithoutRankException(message: String) extends Exception(message) {
+  println("PlaylistUpdateTrackWithoutRankException: " + message)
+}
+
+case class ArtistContainsEmptyWebsiteException(message: String) extends Exception(message) {
+  println("ArtistContainsEmptyWebsiteException: " + message)
 }

@@ -53,14 +53,17 @@ object Organizer {
     address = Address.find(organizer.addressId)
   )
 
-  def findAll: List[Organizer] = try {
+  def findAll(numberToReturn: Int, offset: Int): List[Organizer] = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM organizers")
+      SQL(
+        s"""SELECT * FROM organizers
+          |LIMIT $numberToReturn
+          |OFFSET $offset""".stripMargin)
         .as(OrganizerParser.*)
         .map(getOrganizerProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Method organizer.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Organizer.findAll: " + e.getMessage)
   }
 
   def findAllByEvent(event: Event): List[Organizer] = try {

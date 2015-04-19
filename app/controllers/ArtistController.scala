@@ -102,17 +102,25 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def getArtistTracks(patternAndArtist: PatternAndArtist) = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        /*soundCloudTracks.headOption match {
-          case None =>
-          case Some(soundcloudTrack: Track) => if soundcloudTrack.
-        }*/
+        addSoundcloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
         Enumerator(soundCloudTracks.toSet)
-      }
-    )
+      })
+
     val youtubeTracksEnumerator =
       getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
 
     Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator).andThen(Enumerator.eof)
+  }
+
+  def addSoundcloudWebsiteIfMissing(soundCloudTrack: Option[Track], artist: Artist): Unit = soundCloudTrack match {
+    case None =>
+    case Some(soundcloudTrack: Track) =>
+      soundcloudTrack.redirectUrl match {
+        case None =>
+        case Some(redirectUrl) =>
+          if (!artist.websites.contains(redirectUrl))
+            Artist.addWebsite(artist.artistId, redirectUrl)
+      }
   }
 
   def deleteArtist(artistId: Long) = Action {

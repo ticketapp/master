@@ -11,8 +11,8 @@ import play.api.libs.json.Json
 import json.JsonHelper.organizerWrites
 
 object OrganizerController extends Controller with securesocial.core.SecureSocial {
-  def organizers = Action {
-    Ok(Json.toJson(Organizer.findAll))
+  def organizers(numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Organizer.findAll(numberToReturn: Int, offset: Int)))
   }
 
   def organizer(id: Long) = Action {
