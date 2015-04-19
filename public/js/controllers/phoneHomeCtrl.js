@@ -32,8 +32,10 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                         if (eventInBounce == false && firstShow == true) {
                             if ($scope.time < 24) {
                                 $scope.time = $scope.time + 6;
-                            } else {
+                            } else if ($scope.time < 30) {
                                 $scope.time = $scope.time + 1;
+                            } else {
+                                $scope.zoom --
                             }
                             $scope.timeChange();
 
@@ -64,7 +66,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             }
         }, 100);
     }
-    $scope.initializeTime();
     $scope.updateMarkers = function () {
         $scope.dynMarkers = [];
         if ($scope.markerClusterer != undefined) {
@@ -208,6 +209,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         window.location.href =('#/' + redirectPath);
     };
     function getBounds () {
+        $scope.initializeTime();
         var waitForMap = setInterval(function () {
             if (document.getElementsByTagName('map').length > 0) {
                 clearInterval(waitForMap)
@@ -233,9 +235,10 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
                 $scope.mapCenter = $scope.mapCenter.replace(')', '');
                 $scope.mapCenter = $scope.mapCenter.replace(",", ", ");
-                $scope.map = true;
             })
+            $scope.map = true;
             $scope.$on('mapInitialized', function(event, evmap) {
+                console.log('yo')
                 map = evmap;
                 getBounds(evmap)
             })
