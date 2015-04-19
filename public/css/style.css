@@ -645,7 +645,7 @@ top: 0;
     text-decoration: underline;
     cursor: pointer;
 }
-#events_contener{margin-top: 60px; margin-left: 0; margin-right: 0;}
+#events_contener{margin-left: 0; margin-right: 0;}
 #events_contener>li{display:block;}
 /*#events_contener:hover>li{opacity:0.5;}*/
 .toGrow{-webkit-transition: all 1s ease;
