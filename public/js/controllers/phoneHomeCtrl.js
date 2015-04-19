@@ -11,10 +11,38 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     var map;
     var firstShow = true;
     $scope.getEvents = function () {
+        var eventsLenghtForTime = $scope.events.length;
+        var maxStartTime =  time*3600000 + new Date().getTime();
+        for (var e = 0; e < eventsLenghtForTime; e++) {
+            if ($scope.events[e].startTime > maxStartTime) {
+                $scope.events.splice(e, 1)
+                $scope.$apply();
+                e = e -1;
+                eventsLenghtForTime = eventsLenghtForTime - 1;
+            }
+        }
         $http.get('/events/inInterval/' + time + '/(' + $scope.mapCenter.replace(/^.+, /,'') + ',' +
             $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')/20/'+ offset).
             success(function (data, status, headers, config) {
-                $scope.events = data;
+                var scopeIdList = [];
+                function getEventId(el, index, array) {
+                    scopeIdList.push(el.eventId);
+                }
+                $scope.events.forEach(getEventId);
+                function uploadEvents(el, index, array) {
+                    if (scopeIdList.indexOf(el.eventId) == -1) {
+                        var placeLenght = el.places.length
+                        for (var i = 0; i < placeLenght; i++) {
+                            if (el.places[i].geographicPoint != undefined) {
+                                el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
+                                el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
+                                el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
+                            }
+                        }
+                        $scope.events.push(el);
+                    }
+                }
+                data.forEach(uploadEvents)
                 var eventsLength = $scope.events.length;
                 for (var i = 0; i < eventsLength; i++) {
                     if ( $scope.events[i].places[0] != undefined) {
@@ -28,24 +56,22 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                             eventInBounce = true;
                         }
                     }
-                    if (i == $scope.events.length -1 ) {
-                        if (eventInBounce == false && firstShow == true) {
-                            $scope.searchEventFirst = true;
-                            if ($scope.time < 24) {
-                                $scope.time = $scope.time + 6;
-                            } else if ($scope.time < 30) {
-                                $scope.time = $scope.time + 1;
-                            } else {
-                                $scope.zoom --
-                            }
-                            $scope.timeChange();
-
-                        } else {
-                            firstShow = false;
-                            $scope.searchEventFirst = false;
-                            $scope.updateMarkers()
-                        }
+                }
+                if (eventInBounce == false && firstShow == true) {
+                    $scope.searchEventFirst = true;
+                    if ($scope.time < 24) {
+                        $scope.time = $scope.time + 6;
+                    } else if ($scope.time < 30) {
+                        $scope.time = $scope.time + 1;
+                    } else {
+                        $scope.zoom --
                     }
+                    $scope.timeChange();
+
+                } else {
+                    firstShow = false;
+                    $scope.searchEventFirst = false;
+                    $scope.updateMarkers()
                 }
             })
     }
@@ -219,7 +245,8 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     $scope.mapBounces = map.getBounds()
                     if (map.zoom < $scope.zoom) {
                         $scope.zoom = map.zoom;
-                        /*more*/
+                        offset = offset + 20;
+                        $scope.getEvents();
                     }
                 });
                 google.maps.event.addListener(map, 'center_changed', function() {
@@ -240,7 +267,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             })
             $scope.map = true;
             $scope.$on('mapInitialized', function(event, evmap) {
-                console.log('yo')
                 map = evmap;
                 getBounds(evmap)
             })

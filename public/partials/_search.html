@@ -1,11 +1,6 @@
 <div id="searchBlock" class="right left absolute" ng-if="$root.path != 'search'">
     <ng-search-bar class="column large-8 medium-10 medium-offset-1 large-offset-2"></ng-search-bar>
 </div>
-<a class="button"
-   ng-if="$root.activPlace && searchPat.length > 3"
-        ng-click="searchNewPlace(searchPat)">
-    SuggestPlace {{searchPat}}
-</a>
 <div>
     <ul id="events_contener" ng-class="{'paddingTop50 marginTop50': $root.path == 'search'}"
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-3">
