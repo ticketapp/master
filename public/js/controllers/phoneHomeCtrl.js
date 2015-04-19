@@ -98,31 +98,34 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     $scope.dynMarkers.push(new google.maps.Marker({position: latLng, icon: '../assets/img/' + markerGenre}));
                 }
                 if ($scope.events[i].genres.length == 0) {
-                    markerGenre = 'music187.png';
+                    markerGenre = 'autres.png';
                 } else {
                     var foundMarkerGenre = false;
                     for (var g = 0; g < $scope.events[i].genres.length; g++) {
                         console.log($scope.events[i].genres[g])
-                        if ($scope.events[i].genres[g].name == 'electro' ||
-                            $scope.events[i].genres[g].name == 'techno' ||
-                            $scope.events[i].genres[g].name == 'd&b' ||
-                            $scope.events[i].genres[g].name == 'drum' ||
-                            $scope.events[i].genres[g].name == 'dubstep' ||
-                            $scope.events[i].genres[g].name == 'trance' && foundMarkerGenre == false) {
-                            markerGenre = 'music200.png';
+                        if ($scope.events[i].genres[g].name == 'electro' && foundMarkerGenre == false) {
+                            markerGenre = 'electro.png';
                             foundMarkerGenre = true;
-                        } else if ($scope.events[i].genres[g].name.indexOf('rock') > -1 && foundMarkerGenre == false) {
-                            markerGenre = 'rock3.png';
+                        } else if ($scope.events[i].genres[g].name == 'rock' && foundMarkerGenre == false) {
+                            markerGenre = 'rock.png';
                             foundMarkerGenre = true;
-                        } else if ($scope.events[i].genres[g].name.indexOf('reggae') > -1 ||
-                            $scope.events[i].genres[g].name == 'dub' && foundMarkerGenre == false) {
-                            markerGenre = 'jamaica_640.png';
+                        } else if ($scope.events[i].genres[g].name == 'reggae' && foundMarkerGenre == false) {
+                            markerGenre = 'rasta.png';
+                            foundMarkerGenre = true;
+                        }  else if ($scope.events[i].genres[g].name == 'hip-hop' && foundMarkerGenre == false) {
+                            markerGenre = 'rap.png';
+                            foundMarkerGenre = true;
+                        } else if ($scope.events[i].genres[g].name == 'jazz' && foundMarkerGenre == false) {
+                            markerGenre = 'jazz.png';
+                            foundMarkerGenre = true;
+                        } else if ($scope.events[i].genres[g].name == 'chanson' && foundMarkerGenre == false) {
+                            markerGenre = 'accoustique.png';
                             foundMarkerGenre = true;
                         }
                         
                     }
                     if (foundMarkerGenre == false) {
-                        markerGenre = 'music187.png';
+                        markerGenre = 'autres.png';
                     }
                 }
                 pushMarker(markerGenre, geoPoint);
