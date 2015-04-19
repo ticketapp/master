@@ -165,7 +165,7 @@ object SearchYoutubeTracks {
 
   def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[String]] = {
     //faire une inner foncion pour start à 0
-    WS.url("http://developer.echonest.com/api/v4/artist/songs")
+   val a = WS.url("http://developer.echonest.com/api/v4/artist/songs")
       .withQueryString(
         "api_key" -> echonestApiKey,
         "id" -> echonestArtistId,
@@ -174,11 +174,11 @@ object SearchYoutubeTracks {
         "results" -> "100")
       .get()
       .map (_.json)
-      .flatMap { result =>
+      a.flatMap { result =>
         val total = (result \ "response" \ "total").asOpt[Int]
         val songs = readEchonestSongs(result)
-        println(songs)
-        println(start)
+        /*println(songs)
+        println(start)*/
         total.exists(_ > start + 100) && start < 300 match {
           case false => Future.successful(songs)
           case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)

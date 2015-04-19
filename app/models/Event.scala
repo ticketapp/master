@@ -117,6 +117,8 @@ object Event {
       SQL(
         s"""SELECT * FROM events
            |  WHERE startTime < (CURRENT_TIMESTAMP + interval '$hourInterval hours')
+           |    AND (endTime IS NOT NULL AND endTime > CURRENT_TIMESTAMP
+           |        OR endTime IS NULL AND startTime > CURRENT_TIMESTAMP - interval '12 hour')
            |ORDER BY geographicPoint <-> point '$geographicPoint'
            |LIMIT $numberToReturn OFFSET $offset""".stripMargin)
         .as(EventParser.*)
