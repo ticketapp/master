@@ -311,14 +311,14 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
     $scope.winHeight = window.innerHeight - 49 + "px";
     function wysinit () {
         //var document = document.getElementsByTagName('iframe')[0].contentDocument;
-        //console.log(document)
+        //
         $scope.template = [
             {'name': '1', 'code': '<div class="row"><div class="large-12 columns"><img class="width100p" src="http://placehold.it/1000x400&text=[img]"><hr></div></div><div class="row"><div class="large-4 columns"><img src="http://placehold.it/400x300&text=[img]"></div><div class="large-8 columns"><h4>This is a content section.</h4><div class="row"><div class="large-6 columns"><p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod commodo, chuck duis velit. Aute in reprehenderit, dolore aliqua non est magna in labore pig pork biltong. Eiusmod swine spare ribs reprehenderit culpa. Boudin aliqua adipisicing rump corned beef.</p></div><div class="large-6 columns"><p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p></div></div></div></div><div class="row"><div class="large-8 columns"><h4>This is a content section.</h4><p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod commodo, chuck duis velit. Aute in reprehenderit, dolore aliqua non est magna in labore pig pork biltong. Eiusmod swine spare ribs reprehenderit culpa. Boudin aliqua adipisicing rump corned beef.</p><p>Pork drumstick turkey fugiat. Tri-tip elit turducken pork chop in. Swine short ribs meatball irure bacon nulla pork belly cupidatat meatloaf cow. Nulla corned beef sunt ball tip, qui bresaola enim jowl. Capicola short ribs minim salami nulla nostrud pastrami.</p></div><div class="large-4 columns"><img src="http://placehold.it/400x300&text=[img]"></div></div>'},
             {'name': '2', 'code': '<div class="parallax-background" contenteditable="true">  <div class="intro-text" contenteditable="true" >    scroll for parallax!    <p><i class="fi-arrow-down"></i></p>  </div></div><div class="parallax-content" contenteditable="true">  <div contenteditable="true"><p>Bacon ipsum dolor sit amet chicken pork loin hamburger ball tip, swine tenderloin salami meatball boudin tri-tip fatback shank bacon. Pork salami kevin, brisket spare ribs strip steak ham hock porchetta. Pork belly short loin tail porchetta. Pork pig meatball, beef ribs doner jerky tri-tip hamburger filet mignon strip steak ball tip ham tail tongue corned beef.</p></div>  <div contenteditable="true"><p>Flank spare ribs capicola, strip steak biltong pancetta bresaola tri-tip cow landjaeger. Short ribs sirloin beef ribs, flank capicola ribeye turducken. Sirloin boudin andouille tail. Ham flank tail sausage t-bone, jerky landjaeger kevin porchetta ground round pork belly.</p></div>  <div contenteditable="true"><p>Pork loin doner biltong shoulder meatball flank. Sirloin shankle ground round tail, short loin prosciutto beef ribs salami pork pancetta kielbasa. Brisket spare ribs jerky filet mignon flank. Turducken ham sausage pork loin salami. Ball tip meatloaf shank pancetta hamburger meatball. Jowl beef pork loin tenderloin turducken, pastrami capicola filet mignon ham hock pork belly t-bone jerky ball tip kevin.</p></div>  <div contenteditable="true"><p>Filet mignon shank pastrami pork loin ham jerky corned beef chuck drumstick ribeye prosciutto pork belly tail. Beef leberkas brisket ham hock tenderloin tail tri-tip pork chop. Corned beef boudin andouille tail fatback chicken strip steak biltong pancetta pork loin tri-tip landjaeger pastrami kevin. Tongue spare ribs kevin ribeye shoulder swine.</p></div>  <div contenteditable="true"><p>Chicken kielbasa swine ham hock filet mignon strip steak bacon fatback pork t-bone. Ground round shankle tongue, jowl flank spare ribs beef leberkas ham boudin shank capicola short ribs. Drumstick pork loin turkey pork chop salami andouille pork belly. Short loin tongue tri-tip, hamburger filet mignon pastrami doner shoulder turkey ball tip t-bone jerky ham chicken.</p></div>  <div contenteditable="true"><p>Ground round flank pork loin salami, cow biltong hamburger swine brisket tongue tenderloin drumstick meatball. Biltong tongue salami ham shankle, leberkas meatloaf sirloin ball tip. Pork loin pastrami spare ribs beef capicola sausage kevin filet mignon pork chop. Bacon jerky turkey shoulder cow capicola ball tip shank. Ham tongue tail tri-tip kielbasa ham hock frankfurter meatball cow brisket. Shankle sausage filet mignon biltong pork loin. Short ribs spare ribs chuck pig meatloaf shoulder cow tail brisket biltong ball tip ham hock.</p></div></div>'}
         ];
         $scope.useTemps = function (name) {
             for (var i = 0; i < $scope.template.length; i++) {
-                console.log(name);
+                
                 if (name == $scope.template[i].name) {
                     document.getElementById("content").innerHTML = $scope.template[i].code;
                 }
@@ -352,7 +352,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
         $scope.addImage = function (img) {
             document.execCommand("InsertImage", false, img);
             var last = document.getElementById("content").getElementsByTagName('img').length;
-            console.log(document.getElementById("content").getElementsByTagName('img')[last - 1]);
+            
             document.getElementById("content").getElementsByTagName('img')[last - 1].classList.add("width100p");
         };
         function ActiveElement(event) {
@@ -401,7 +401,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                         searchM = document.getSelection().anchorNode.parentElement;
                     } else {
                         searchM = document.getElementById('content');
-                    console.log(searchM)
+                    
                     }
                 }
                 while (searchParent == true) {
@@ -448,11 +448,11 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                 if (sidePoint > rect.right || sidePoint < rect.left || sidePointY < rect.top || sidePointY > rect.bottom) {
                     m = m.parentElement;
                     rect = m.getBoundingClientRect();
-                    console.log(m);
+                    
                 }
 
                 $scope.background = function (bc) {
-                    console.log(bc);
+                    
                     m.style.backgroundColor = bc;
                 };
                 $scope.ElementSize = function (a, b) {
@@ -582,7 +582,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                     }
 
                     function createNewColumn() {
-                        console.log(range);
+                        
                         document.execCommand("insertHTML", false, "<div  class='column float-left " + a + b + "'>" + range + "</div>");
                     }
                     initControl();
@@ -649,15 +649,15 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                         var gridClass = range.className;
                         var css = a + b;
                         var del = gridClass.indexOf(css);
-                        console.log(del);
+                        
                         var change = gridClass.indexOf(a);
                         if (del >= 0) {
                             range.classList.remove(css);
                         } else if (change >= 0) {
                             var pattern = new RegExp(a + "\\w*");
-                            console.log(a);
-                            console.log(gridClass);
-                            console.log(gridClass.match(pattern));
+                            
+                            
+                            
                             if (matched = gridClass.match(pattern)) {
                                 range.classList.remove(matched[0]);
                                 range.classList.add(css);
@@ -675,18 +675,18 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                 };
                 if (m.id == "content") {
                     if (document.getElementById('content').innerHTML.length == 0) {
-                        console.log(1)
+                        
                         var inner = m.innerHTML;
                         document.getElementById('content').innerHTML = "<div  class='column large-12' contenteditable='true'>Ecrire ici</div>";
                     }
                 } else if (m.tagName == "WYSIWYG" || m.tagName == "BODY") {
-                    console.log(2)
+                    
                     var contentElement = document.getElementById('content').innerHTML;
                     if (document.getElementById('content').innerHTML.length == 0) {
                         document.getElementById('content').innerHTMLL = "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
                     }
                 } else if (document.getElementById('content').innerHTML.indexOf(m.outerHTML) == -1) {
-                    console.log(3)
+                    
                     var contentElement = document.getElementById('content').innerHTML;
                     if (document.getElementById('content').innerHTML.length == 0) {
                         document.getElementById('content').innerHTML = "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
@@ -863,7 +863,7 @@ app.controller('wysiwygCtrl', function($scope, $timeout, $location){
                                     numberLarge = Number(matchedLarge[0].match(/\d+/)) - 1;
                                     if (numberLarge > 0) {
                                         css = respClass + numberLarge;
-                                        console.log(css + "remove");
+                                        
                                         m.classList.remove(matchedLarge[0]);
                                         m.classList.add(css);
                                         $scope.sizeEl = numberLarge +"/12";

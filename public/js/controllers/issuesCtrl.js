@@ -21,7 +21,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
                 $scope.selectedIssue.comments = data
             }).
             error(function (data) {
-                console.log(data)
+                
             })
     }
     $scope.addComment = function (i) {
@@ -34,7 +34,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
                     var object = {content: $scope.newComment.content};
                     $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
                     $rootScope.$watch('lastReq', function (newVal) {
-                        console.log(newVal)
+                        
                         if (JSON.stringify(newVal) === '{}') {
                             getIssues()
                         }
@@ -60,7 +60,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
     $scope.addIssue = function () {
         $http.post('/issues', {content: $scope.newIssue.content, title: $scope.newIssue.title}).
             success(function(data) {
-                console.log(data)
+                
                 $scope.newIssue= [];
                 $scope.addNewIssue = false;
                 getIssues();
@@ -70,7 +70,7 @@ app.controller('issuesCtrl', function ($scope, $http, $rootScope, $modal) {
                     var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
                     $rootScope.storeLastReq('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
                     $rootScope.$watch('lastReq', function (newVal) {
-                        console.log(newVal)
+                        
                         if (JSON.stringify(newVal) === '{}') {
                             getIssues()
                         }

@@ -33,7 +33,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 		window.innerWidth = 950;
 	}
 	function imagePlace () {
-		console.log(parseInt(document.getElementById('eventImg').style.left.match(/-?\d+/)[0]))
+
 	}
 	document.getElementById('eventImg').onmousedown = function (){
 		document.addEventListener('mouseup', function () {
@@ -61,7 +61,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 		}
 	};
 	$scope.remArt = function (i) {
-		console.log(i);
+
 		console.log($scope.newEvent.artists[i]);
 		$scope.newEvent.artists.splice(i, 1);
 		console.log($scope.newEvent.artists);
@@ -72,7 +72,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 		angular.element.ready(function () {
 			var eventInfoConteners = document.getElementsByClassName('eventInfo');
 			for (var i = 0; i < eventInfoConteners.length; i++) {
-				console.log(eventInfoConteners[i].offsetLeft)
+
 				if (eventInfoConteners[i].offsetLeft < 30) {
 					eventInfoConteners[i].classList.remove('large-4');
 					eventInfoConteners[i].classList.add('large-12');
@@ -83,7 +83,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 	$scope.searchEvent = function(){
 		$http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAAUY6TFIL18BAP1ir9hDkv5EqRZCMJ1hAZA1niWapeCQUNTUXQHNF0ofKPyGN2QZBQiHwMCQOaYzMPB0KD9oGRyrdL7T0gfz6dYM5xDQ9ZC2R4aPRvE1ZBKGYozfDhGRj7Vxb2ToeZAFXBYm7ZCPaCP96aIirwpEiyWjtAJJnjnj7WY5ymc25xt0ZBYaYIs73wab1YIpCtSy8KcB8WTlmHrxv0tS6wEgyzIZD').
 			success(function(data, status, headers, config) {
-				console.log(data.data);
+
 				$scope.searchEvents = data.data;
 			}).
 			error(function(data, status, headers, config) {
@@ -98,7 +98,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 		var cover = false;
 		$http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=ticket_uri,id,name,start_time,owner,end_time,description,admins,venue,location&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
 			success(function(data, status, headers, config) {
-				console.log(data);
+
 				//$scope.newEvent = data;
 				var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
 				$scope.content = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
@@ -110,7 +110,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 						var current = m[ii];
 						if (unique.indexOf(current) < 0) unique.push(current);
 					}
-					console.log(unique);
+
 					for (var i=0; i < unique.length; i++) {
 						$scope.content = $scope.content.replace(new RegExp(unique[i],"g"),
 								"<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
@@ -158,7 +158,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 				function searchArtist (artist) {
 					$http.get('/artists/contaning/'+ artist).
 						success(function(data, status, headers, config) {
-							//console.log(data);
+							//
 							$scope.artists.push(data);
 							console.log($scope.artists)
 						}).
@@ -257,7 +257,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 				$scope.newEvent.description = $scope.content;
 				$scope.eventFb = true;
 				var searchArtists = $scope.newEvent.name.replace(/@.*/, "").split(/[^\S].?\W/g);
-				console.log(searchArtists);
+
 				$scope.artists = [];
 				for (var i = 0; i<searchArtists.length; i++) {
 					if (searchArtists[i].indexOf(' ') == 0) {

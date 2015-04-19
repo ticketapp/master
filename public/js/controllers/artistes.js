@@ -6,7 +6,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $scope.showDesc = false;
     $scope.selectedTab = 0;
     $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
-        console.log(trackTitle, artistName);
+        
         $scope.suggest = false;
         if (trackTitle.length > 2) {
             artistName = artistName.toLowerCase().replace('officiel', '');
@@ -16,10 +16,10 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
             artistName = artistName.toLowerCase().replace('musik', '');
             artistName = artistName.toLowerCase().replace('fanpage', '');
             artistName = artistName.toLowerCase().replace(/[^\w\s].*/, '');
-            console.log(artistName)
+            
             $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
                 success(function (data) {
-                    console.log(data)
+                    
                     for (var i = 0; i < data.length; i++) {
                         $scope.artiste.tracks.push(data[i]);
                         $scope.tracks.push(data[i])
@@ -41,7 +41,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                     }
                 }).
                 error(function (data) {
-                    console.log(data)
+                    
                 })
         } else {
             $scope.info = 'le nom de la track doit faire plus de deux lettres';
@@ -103,7 +103,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                 if ($scope.artiste.websites != undefined) {
                     refactorWebsites();
                 }
-                console.log(data)
+                
                 $rootScope.loadingTracks = false;
                 $http.get('/artists/'+ $routeParams.facebookUrl + '/events ').
                     success(function(data){

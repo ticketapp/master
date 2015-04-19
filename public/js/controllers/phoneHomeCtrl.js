@@ -31,32 +31,21 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 $scope.events.forEach(getEventId);
                 function uploadEvents(el, index, array) {
                     if (scopeIdList.indexOf(el.eventId) == -1) {
-                        var placeLenght = el.places.length
-                        for (var i = 0; i < placeLenght; i++) {
-                            if (el.places[i].geographicPoint != undefined) {
-                                el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
-                                el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
-                                el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
+                        if ( el.places[0] != undefined) {
+                            el.addresses[0].geographicPoint = el.places[0].geographicPoint.replace('(', '').replace(')', '');
+                            var geoPoint = el.addresses[0].geographicPoint;
+                            console.log($scope.mapBounces)
+                            if ($scope.mapBounces != undefined && geoPoint.substring(0, geoPoint.indexOf(',')) <= $scope.mapBounces.Da.j &&
+                                geoPoint.substring(0, geoPoint.indexOf(',')) >= $scope.mapBounces.Da.k &&
+                                geoPoint.replace(/^.+,/,'') <= $scope.mapBounces.va.k &&
+                                geoPoint.replace(/^.+,/,'') >= $scope.mapBounces.va.j) {
+                                eventInBounce = true;
                             }
                         }
                         $scope.events.push(el);
                     }
                 }
                 data.forEach(uploadEvents)
-                var eventsLength = $scope.events.length;
-                for (var i = 0; i < eventsLength; i++) {
-                    if ( $scope.events[i].places[0] != undefined) {
-                        $scope.events[i].addresses[0].geographicPoint = $scope.events[i].places[0].geographicPoint.replace('(', '').replace(')', '');
-                        var geoPoint = $scope.events[i].addresses[0].geographicPoint;
-                        console.log($scope.mapBounces)
-                        if ($scope.mapBounces != undefined && geoPoint.substring(0, geoPoint.indexOf(',')) <= $scope.mapBounces.Da.j &&
-                            geoPoint.substring(0, geoPoint.indexOf(',')) >= $scope.mapBounces.Da.k &&
-                            geoPoint.replace(/^.+,/,'') <= $scope.mapBounces.va.k &&
-                            geoPoint.replace(/^.+,/,'') >= $scope.mapBounces.va.j) {
-                            eventInBounce = true;
-                        }
-                    }
-                }
                 if (eventInBounce == false && firstShow == true) {
                     $scope.searchEventFirst = true;
                     if ($scope.time < 24) {
@@ -130,7 +119,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                             markerGenre = 'jamaica_640.png';
                             foundMarkerGenre = true;
                         }
-                        console.log(markerGenre)
+                        
                     }
                     if (foundMarkerGenre == false) {
                         markerGenre = 'music187.png';
@@ -150,7 +139,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 for (var i = 0; i < eventsLength; i++) {
                     if ($scope.events[i].addresses[0] != undefined) {
                         var geopoint = $scope.events[i].addresses[0].geographicPoint
-                        console.log(geopoint)
+                        
                         if (geopoint.substring(0, geopoint.indexOf(',')) < marker.latLng.k + 0.000001 &&
                             geopoint.substring(0, geopoint.indexOf(',')) > marker.latLng.k - 0.000001 &&
                             geopoint.replace(/^.+,/,'') < marker.latLng.D + 0.000001 &&
@@ -163,7 +152,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             });
         }
         google.maps.event.addListener($scope.markerClusterer, 'clusterclick', function(cluster) {
-            console.log(cluster)
+            
             var eventsLength = $scope.events.length;
             var redirectPath = '';
             var count =0;
@@ -201,6 +190,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     var StartTimer;
     var doneStartInterval = 600;
     $scope.timeChange = function () {
+        offset = 0;
         if ($scope.time > 23 && $scope.time <= 38) {
             $scope.selectedTime = ($scope.time-23)*24
         } else if ($scope.time > 38 && $scope.time <= 40) {
@@ -251,7 +241,9 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 });
                 google.maps.event.addListener(map, 'center_changed', function() {
                     $scope.mapBounces = map.getBounds()
-                    $scope.mapCenter = map.center;
+                    console.log(map)
+                    console.log($scope.mapCenter)
+                    $scope.mapCenter = map.center.k + ', ' + map.center.D;
                 })
                 $scope.mapBounces = map.getBounds()
                 $scope.getEvents()

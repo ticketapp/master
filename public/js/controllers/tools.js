@@ -1,7 +1,6 @@
 app.controller('toolsCtrl', function ($scope, $modal, $log, $rootScope) {
     //$scope.items = [];
     $scope.connected = $rootScope.connected;
-    console.log($scope.connected)
     $scope.open = function () {
         var modalInstance = $modal.open({
             templateUrl: 'assets/partials/_tools.html',

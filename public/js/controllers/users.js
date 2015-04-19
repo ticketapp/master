@@ -5,6 +5,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
     $scope.travelMode = 'DRIVE';
     $scope.directionInfos ='';
     $scope.showDesc = false;
+    $scope.loadEvents = true;
     $scope.moreZoom = function() {
         $scope.zoom = $scope.zoom + 1;
     };
@@ -47,7 +48,6 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         if ($scope.organizer.websites != undefined) {
             $scope.organizer.websites = $scope.organizer.websites.split(',');
             for (var i = 0; i < $scope.organizer.websites.length; i++) {
-                console.log($scope.organizer.websites[i])
                 $scope.organizer.websites[i] = {url: $scope.organizer.websites[i]};
                 if ($scope.organizer.websites[i].url.indexOf('facebook') > -1) {
                     $scope.organizer.websites[i].name = 'facebook';
@@ -73,7 +73,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         .success(function(data, status){
             $scope.organizer = data;
             $rootScope.marginContent();
-            console.log(data);
+
             if ($scope.organizer.geographicPoint != undefined) {
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace("(", "");
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(")", "");
@@ -83,6 +83,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
             refactorWebsites();
             $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
                 .success(function(data, status){
+                    $scope.loadEvents = false;
                     $scope.orgaEvents = [];
                     function pushEvent (el) {
                         el.priceColor = 'rgb(0, 140, 186)';
@@ -101,6 +102,8 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                     }
                     data.forEach(pushEvent)
                     $rootScope.resizeImgHeight();
+                }).error(function () {
+                    $scope.loadEvents = false;
                 });
         }).error(function(data, status){
         });

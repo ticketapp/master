@@ -2,10 +2,10 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
     $scope.connectByMail = function () {
         $http.post('/authenticate/userpass', {username: $scope.username, password: $scope.password}).
             success(function (data) {
-                console.log(data)
+
             }).
             error(function (data) {
-                console.log(data)
+
             })
     };
     $scope.connectLink = function (url) {
@@ -33,7 +33,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
                                                 if (data.error == 'Credentials required') {
                                                     $rootScope.storeLastReq('post', $rootScope.lastReq.path, $rootScope.lastReq.object, $rootScope.lastReq.success)
                                                 } else {
-                                                    console.log(data)
+
                                                     $scope.info = 'Désolé une erreur s\'est produite';
                                                 }
                                             })
@@ -47,7 +47,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
                                                 if (data.error == 'Credentials required') {
                                                     $rootScope.storeLastReq('post', $rootScope.lastReq.path, $rootScope.lastReq.object, $rootScope.lastReq.success)
                                                 } else {
-                                                    console.log(data)
+
                                                     $scope.info = 'Désolé une erreur s\'est produite';
                                                 }
                                             })

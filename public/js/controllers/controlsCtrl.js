@@ -61,7 +61,7 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                 place.location.city + '+' +
                                 place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
                                 success(function (data) {
-                                    console.log(data)
+
                                     var loc = '(' + data.results[0].geometry.location.lat +
                                         ',' + data.results[0].geometry.location.lng + ')';
                                     if (place.cover != undefined) {
@@ -74,15 +74,15 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                             webSite: place.website,
                                             imagePath : place.cover.source
                                         }).success(function(data){
-                                            console.log(data)
+
                                         }).error(function(data){
-                                            console.log(data)
+
                                         })
                                         $rootScope.resizeImgHeight();
                                     } else {
                                         $http.get('https://graph.facebook.com/v2.2/' + searchPlaces.id + '/?fields=cover, picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
                                             success(function (data) {
-                                                console.log(data)
+
                                                 $http.post('/places/create', {
                                                     name: place.name,
                                                     facebookId: place.id,
@@ -92,9 +92,9 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                                     webSite: place.website,
                                                     imagePath: data.source
                                                 }).success(function (data) {
-                                                    console.log(data)
+
                                                 }).error(function (data) {
-                                                    console.log(data)
+
                                                 })
                                                 $rootScope.resizeImgHeight();
                                             }).
@@ -107,9 +107,9 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                                     description: place.description,
                                                     webSite: place.website
                                                 }).success(function (data) {
-                                                    console.log(data)
+
                                                 }).error(function (data) {
-                                                    console.log(data)
+
                                                 })
                                                 $rootScope.resizeImgHeight();
                                             })
@@ -121,7 +121,7 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                     }
                 }).
                 error(function(data, status, headers, config) {
-                    console.log(data);
+
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
                 });
@@ -137,7 +137,7 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                             data[iv].category == 'Arts/entertainment/nightlife') {
                             getPlacesById(data[iv]);
                             //count = count + 1;
-                            //console.log(count)
+                            //
                         } else if (data[iv].category_list != undefined) {
                             for (var ii = 0; ii < data[iv].category_list.length; ii++) {
                                 if (data[iv].category_list[ii].name == 'Concert Venue' ||
@@ -146,14 +146,14 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                     data[iv].category_list[ii].name == "Nightlife") {
                                     getPlacesById(data[iv]);
                                     //count = count + 1;
-                                    //console.log(count)
+                                    //
                                 }
                             }
                         }
                     }
                 }).
                 error(function (data, status, headers, config) {
-                    console.log(data)
+
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
                 });

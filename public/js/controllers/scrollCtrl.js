@@ -5,7 +5,7 @@ app.filter('millSecondsToTimeString', function() {
         var hours = Math.floor((seconds % 86400) / 3600);
         var months = Math.floor(days / 30);
         var timeString = '';
-        console.log(months)
+        
         if(months > 0) timeString += (months > 1) ? (months + " mois ") : (months + " mois ");
         if(days > 0 && months == 0) timeString += (days > 1) ? (days + " jours ") : (days + " jours ");
         if(hours > 0) timeString += (hours > 1) ? (hours + " heures ") : (hours + " heure ");
@@ -19,7 +19,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             navigator.geolocation.getCurrentPosition(function (position) {
                     $rootScope.geoLoc = "(" + position.coords.latitude + "," + position.coords.longitude + ")";
                     $rootScope.$apply();
-                    console.log($rootScope.geoLoc)
                 }, function erreurPosition(error) {
                 }
             );
@@ -28,7 +27,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
          }*/
         /*$http.get('http://www.corsproxy.com/youtube.com/get_video_info?video_id=X8pBHM9u4ko').
          success(function (data) {
-         console.log(data)
+         
          })*/
         $scope.needConnect = false;
         $rootScope.lastReq = {};
@@ -105,7 +104,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.lastReq = {
                 'method': method, 'path': path, 'object':object, 'success':success, 'error': error
             };
-            console.log($rootScope.lastReq)
+
         };
         $rootScope.passArtisteToCreateToFalse();
         $rootScope.createArtist = function (artist) {

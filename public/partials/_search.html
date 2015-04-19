@@ -106,7 +106,8 @@
                 </div>
             </div>
         </div>
-        <li class="min_contener margin0" ng-if="$root.activUsr && organizers.length > 0"
+        <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
+             ng-if="$root.activUsr && organizers.length > 0"
             data-ng-repeat="organizer in organizers | filter: searchPat">
             <div class="block_event_min">
                 <div class="img_min_evnt">
@@ -118,7 +119,7 @@
                     <a href="#/user/{{organizer.organizerId}}"><h3 class="minTitle">{{organizer.name}}</h3></a>
                 </div>
             </div>
-        </li>
+        </div>
     </ul>
     <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
         <md-progress-circular md-mode="indeterminate"></md-progress-circular>

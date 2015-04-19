@@ -572,7 +572,7 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
         for (var i=0; i < playlist.tracks.length; i++) {
             tracksToSave.push({trackId: playlist.tracks[i].trackId, trackRank: i})
         }
-        console.log(tracksToSave)
+
         $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
             success(function (data) {
                 $modalInstance.dismiss('cancel');

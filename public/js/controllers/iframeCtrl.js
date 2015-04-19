@@ -81,7 +81,7 @@ app.controller('iframeCtrl', function ($http, $scope, $rootScope, $timeout, $fil
                                 $scope.events.push(el);
                                 $scope.scopeIdList.push(el.eventId);
                                 console.log($scope.scopeIdList)
-                                console.log(el.eventId)
+
                             }
                         },0);
                     }
@@ -113,7 +113,7 @@ app.controller('iframeCtrl', function ($http, $scope, $rootScope, $timeout, $fil
                             function getPlaceEvents (place) {
                                 $http.get('/places/'+ place.placeId + '/events ').
                                     success(function(data){
-                                        console.log(data)
+
                                         data.forEach(uploadEvents);
                                         $rootScope.resizeImgHeight()
                                     })
@@ -122,7 +122,7 @@ app.controller('iframeCtrl', function ($http, $scope, $rootScope, $timeout, $fil
                         });
                     $http.get('/events/nearCity/' + $scope.search + '/12/' + offset ).
                         success(function (data) {
-                            console.log(data)
+
                             data.forEach(uploadEvents);
                             $rootScope.resizeImgHeight()
                         });
@@ -142,7 +142,7 @@ app.controller('iframeCtrl', function ($http, $scope, $rootScope, $timeout, $fil
     };
     $scope.getEvents();
     $rootScope.$watch('geoLoc', function (newval) {
-        console.log(newval)
+
         $scope.getEvents();
     })
 });
