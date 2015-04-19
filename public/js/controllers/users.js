@@ -5,6 +5,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
     $scope.travelMode = 'DRIVE';
     $scope.directionInfos ='';
     $scope.showDesc = false;
+    $scope.loadEvents = true;
     $scope.moreZoom = function() {
         $scope.zoom = $scope.zoom + 1;
     };
@@ -82,6 +83,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
             refactorWebsites();
             $http.get('/' + $scope.getUrl + '/' + $routeParams.id +'/events')
                 .success(function(data, status){
+                    $scope.loadEvents = false;
                     $scope.orgaEvents = [];
                     function pushEvent (el) {
                         el.priceColor = 'rgb(0, 140, 186)';
@@ -100,6 +102,8 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
                     }
                     data.forEach(pushEvent)
                     $rootScope.resizeImgHeight();
+                }).error(function () {
+                    $scope.loadEvents = false;
                 });
         }).error(function(data, status){
         });
