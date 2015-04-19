@@ -64,9 +64,9 @@ object Place {
            |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
         .on(
           'name -> place.name,
+          'geographicPoint -> place.geographicPoint,
           'addressId -> addressId,
           'facebookId -> place.facebookId,
-          'geographicPoint -> place.geographicPoint,
           'description -> place.description,
           'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
           'capacity -> place.capacity,

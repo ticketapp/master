@@ -37,27 +37,27 @@ GET       /artists/containing/:pattern                                          
 GET       /artists/facebookContaining/:pattern                                        controllers.SearchArtistsController.getFacebookArtistsContaining(pattern: String)
 
 ################################## Places ###############################################
-GET           /places/:geographicPoint/:numberToReturn/:offset                            controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
-GET           /places/:id                                                                 controllers.PlaceController.place(id: Long)
-POST          /places/:placeId/follow                                                     controllers.PlaceController.followPlace(placeId: Long)
-GET           /places/containing/:pattern                                                 controllers.PlaceController.findPlacesContaining(pattern: String)
-POST          /places/create                                                              controllers.PlaceController.createPlace
-GET           /places/:placeId/events                                                     controllers.EventController.eventsByPlace(placeId: Long)
-GET           /places/nearCity/:city/:numberToReturn/:offset                              controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
+GET       /places/:geographicPoint/:numberToReturn/:offset                            controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
+GET       /places/:id                                                                 controllers.PlaceController.place(id: Long)
+POST      /places/:placeId/follow                                                     controllers.PlaceController.followPlace(placeId: Long)
+GET       /places/containing/:pattern                                                 controllers.PlaceController.findPlacesContaining(pattern: String)
+POST      /places/create                                                              controllers.PlaceController.createPlace
+GET       /places/:placeId/events                                                     controllers.EventController.eventsByPlace(placeId: Long)
+GET       /places/nearCity/:city/:numberToReturn/:offset                              controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################## Organizers ###############################################
-GET           /organizers                                                                 controllers.OrganizerController.organizers
-GET           /organizers/:id                                                             controllers.OrganizerController.organizer(id: Long)
-POST          /organizers/:organizerId/follow                                             controllers.OrganizerController.followOrganizer(organizerId: Long)
-GET           /organizers/containing/:pattern                                             controllers.OrganizerController.findOrganizersContaining(pattern: String)
-POST          /organizers/create                                                          controllers.OrganizerController.createOrganizer
-GET           /organizers/:organizerId/events                                             controllers.EventController.eventsByOrganizer(organizerId: Long)
+GET       /organizers                                                                 controllers.OrganizerController.organizers
+GET       /organizers/:id                                                             controllers.OrganizerController.organizer(id: Long)
+POST      /organizers/:organizerId/follow                                             controllers.OrganizerController.followOrganizer(organizerId: Long)
+GET       /organizers/containing/:pattern                                             controllers.OrganizerController.findOrganizersContaining(pattern: String)
+POST      /organizers/create                                                          controllers.OrganizerController.createOrganizer
+GET       /organizers/:organizerId/events                                             controllers.EventController.eventsByOrganizer(organizerId: Long)
 
 ################################# Playlists ############################################
-GET           /playlists                                                                  controllers.PlaylistController.findByUser
-POST          /playlists                                                                  controllers.PlaylistController.create
-PUT           /playlists                                                                  controllers.PlaylistController.update
-DELETE        /playlists/:playlistId                                                      controllers.PlaylistController.delete(playlistId: Long)
+GET       /playlists                                                                  controllers.PlaylistController.findByUser
+POST      /playlists                                                                  controllers.PlaylistController.create
+PUT       /playlists                                                                  controllers.PlaylistController.update
+DELETE    /playlists/:playlistId                                                      controllers.PlaylistController.delete(playlistId: Long)
 
 ################################# Genres ############################################
 GET           /genres/:genre/:numberToReturn/:offset/artists        controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
