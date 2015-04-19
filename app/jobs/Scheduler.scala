@@ -175,9 +175,8 @@ object Scheduler {
         }
       }
       Option("<div class='column large-12'>" +
-        linkPattern.replaceAllIn(desc, m => stringToLinks(m))
-          .replaceAll( """<""", "&lt;")
-          .replaceAll( """>""", "&gt;")
+        linkPattern.replaceAllIn(desc.replaceAll( """<""", "&lt;").replaceAll( """>""", "&gt;"),
+          m => stringToLinks(m))
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
           .replaceAll( """\t""", "    ") +
@@ -202,8 +201,13 @@ object Scheduler {
 
   def findTicketSellers(normalizedWebsites: Set[String]): Option[String] = {
     normalizedWebsites.filter(website =>
-      website.contains("digitick") | website.contains("weezevent") | website.contains("yurplan") |
-        website.contains("eventbrite") | website.contains("ticketmaster")| website.contains("ticketnet")) match {
+      website.contains("digitick") && website != "digitick.com" ||
+        website.contains("weezevent") && website != "weezevent.com" ||
+        website.contains("yurplan") && website != "yurplan.com" ||
+        website.contains("eventbrite") && website != "eventbrite.fr" ||
+        website.contains("ticketmaster") && website != "ticketmaster.fr" ||
+        website.contains("ticketnet") && website != "ticketnet.fr")
+    match {
       case set: Set[String] if set.isEmpty => None
       case websites: Set[String] => Option(websites.mkString(","))
     }
