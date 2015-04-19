@@ -28,24 +28,22 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                             eventInBounce = true;
                         }
                     }
-                    if (i == $scope.events.length -1 ) {
-                        if (eventInBounce == false && firstShow == true) {
-                            $scope.searchEventFirst = true;
-                            if ($scope.time < 24) {
-                                $scope.time = $scope.time + 6;
-                            } else if ($scope.time < 30) {
-                                $scope.time = $scope.time + 1;
-                            } else {
-                                $scope.zoom --
-                            }
-                            $scope.timeChange();
-
-                        } else {
-                            firstShow = false;
-                            $scope.searchEventFirst = false;
-                            $scope.updateMarkers()
-                        }
+                }
+                if (eventInBounce == false && firstShow == true) {
+                    $scope.searchEventFirst = true;
+                    if ($scope.time < 24) {
+                        $scope.time = $scope.time + 6;
+                    } else if ($scope.time < 30) {
+                        $scope.time = $scope.time + 1;
+                    } else {
+                        $scope.zoom --
                     }
+                    $scope.timeChange();
+
+                } else {
+                    firstShow = false;
+                    $scope.searchEventFirst = false;
+                    $scope.updateMarkers()
                 }
             })
     }
@@ -240,7 +238,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             })
             $scope.map = true;
             $scope.$on('mapInitialized', function(event, evmap) {
-                console.log('yo')
                 map = evmap;
                 getBounds(evmap)
             })
