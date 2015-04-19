@@ -170,6 +170,8 @@ object Scheduler {
             """</a>"""
       Option("<div class='column large-12'>" +
         linkPattern.replaceAllIn(desc, m => stringToLinks(m))
+          .replaceAll( """<""", "&lt;")
+          .replaceAll( """>""", "&gt;")
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
           .replaceAll( """\t""", "    ") +
