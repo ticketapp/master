@@ -26,6 +26,15 @@ object Utilities {
     }
   }
 
+  implicit def columnToChar: Column[Char] = Column[Char](transformer = { (value, meta) =>
+    val MetaDataItem(qualified, nullable, clazz) = meta
+    value match {
+      case ch: String => Right(ch.head)
+      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + " to Char for column " + qualified))
+    }
+  })
+
+
   def normalizeString(string: String): String =
     Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
 

@@ -10,7 +10,7 @@ object TrackController extends Controller {
   val trackBindingForm = Form(mapping(
     "title" -> nonEmptyText(2),
     "url" -> nonEmptyText(3),
-    "platform" -> nonEmptyText(3),
+    "platform" -> nonEmptyText,
     "thumbnailUrl" -> nonEmptyText(2),
     "artistFacebookUrl" -> nonEmptyText(2),
     "redirectUrl" -> optional(nonEmptyText(2))

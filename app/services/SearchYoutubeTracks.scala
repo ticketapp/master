@@ -95,9 +95,7 @@ object SearchYoutubeTracks {
         "videoCategoryId" -> "10",
         "key" -> youtubeKey)
       .get()
-      .map {
-      readYoutubeTracks(_, artist)
-    }
+      .map { readYoutubeTracks(_, artist) }
   }
 
   def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
@@ -111,7 +109,7 @@ object SearchYoutubeTracks {
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
           if isArtistNameInTrackTitle(title, artist.name) =>
-          Track(None, normalizeTrackTitle(title, artist.name), url, "Youtube", thumbnailUrl, artist.facebookUrl)
+          Track(None, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl)
       }
     }
     (youtubeResponse.json \ "items")

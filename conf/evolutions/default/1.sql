@@ -161,7 +161,7 @@ CREATE TABLE tracks (
   trackId                 SERIAL PRIMARY KEY,
   title                   VARCHAR(255) NOT NULL,
   url                     VARCHAR NOT NULL,
-  platform                VARCHAR(255) NOT NULL,
+  platform                CHAR NOT NULL,
   thumbnailUrl            VARCHAR NOT NULL,
   artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
   redirectUrl             VARCHAR(255),
@@ -171,7 +171,7 @@ CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 CREATE OR REPLACE FUNCTION insertTrack(titleValue VARCHAR(255),
                                        urlValue VARCHAR,
-                                       platformValue VARCHAR(255),
+                                       platformValue CHAR,
                                        thumbnailUrlValue VARCHAR,
                                        artistFacebookUrlValue VARCHAR(255),
                                        redirectUrlValue VARCHAR(255))

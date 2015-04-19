@@ -7,11 +7,13 @@ import models.Playlist.TrackIdAndRank
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
+import services.Utilities.columnToChar
+import json.JsonHelper._
 
 case class Track (trackId: Option[Long],
                   title: String, 
                   url: String, 
-                  platform: String, 
+                  platform: Char,
                   thumbnailUrl: String,
                   artistFacebookUrl: String,
                   redirectUrl: Option[String] = None,
@@ -23,29 +25,29 @@ object Track {
   def formApplyForTrackCreatedWithArtist(title: String, url: String, platform: String, thumbnailUrl: Option[String],
   userThumbnailUrl: Option[String], artistFacebookUrl: String, redirectUrl: Option[String]): Track = {
     thumbnailUrl match {
-      case Some(thumbnail: String) => new Track(None, title, url, platform, thumbnail, artistFacebookUrl, redirectUrl)
+      case Some(thumbnail: String) => new Track(None, title, url, platform(0), thumbnail, artistFacebookUrl, redirectUrl)
       case None => userThumbnailUrl match {
         case Some(userThumbnail: String) =>
-          new Track(None, title, url, platform, userThumbnail, artistFacebookUrl, redirectUrl)
+          new Track(None, title, url, platform(0), userThumbnail, artistFacebookUrl, redirectUrl)
         case None =>
           throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
       }
     }
   }
-  def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.title, track.url, track.platform,
+  def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.title, track.url, track.platform.toString,
     Some(track.thumbnailUrl), None, track.artistFacebookUrl, track.redirectUrl))
 
   def formApply(title: String, url: String, platform: String, thumbnailUrl: String, artistFacebookUrl: String,
                 redirectUrl: Option[String]): Track =
-   new Track(None, title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
+   new Track(None, title, url, platform(0), thumbnailUrl, artistFacebookUrl, redirectUrl)
   def formUnapply(track: Track) =
-    Some((track.title, track.url, track.platform, track.thumbnailUrl, track.artistFacebookUrl, track.redirectUrl))
+    Some((track.title, track.url, track.platform.toString, track.thumbnailUrl, track.artistFacebookUrl, track.redirectUrl))
 
   private val trackParser: RowParser[Track] = {
     get[Long]("trackId") ~
       get[String]("title") ~
       get[String]("url") ~
-      get[String]("platform") ~
+      get[Char]("platform") ~
       get[String]("thumbnailUrl") ~
       get[String]("artistFacebookUrl") ~
       get[Option[String]]("redirectUrl")  map {

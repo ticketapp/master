@@ -7,6 +7,7 @@ import services.Utilities
 import play.api.db.DB
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
+import services.Utilities.geographicPointToString
 
 case class Organizer (organizerId: Option[Long],
                       facebookId: Option[String] = None,

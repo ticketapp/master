@@ -7,7 +7,7 @@ import anorm._
 import anorm.SqlParser._
 import java.util.Date
 import securesocial.core.IdentityId
-import services.Utilities.{testIfExist, geographicPointToString}
+import services.Utilities.geographicPointToString
 
 case class Event(eventId: Option[Long],
                  facebookId: Option[String],
