@@ -530,7 +530,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     textSlider.push(slider[ii].getElementsByClassName('md-thumb')[0]);
                 }
             }
-            console.log(textSlider)
             if ($rootScope.path == 'search' || textSlider.length >= 2) {
                 clearInterval(waitForSearchBar);
                 for (var i = 0; i < textSlider.length; i++) {
@@ -538,6 +537,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
                         $filter('millSecondsToTimeString')(newName) + '</b>';
                 }
+            } else if (_selEvent == false || _research.length > 0) {
+                clearInterval(waitForSearchBar);
             }
         }, 100);
     }
