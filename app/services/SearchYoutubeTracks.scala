@@ -213,10 +213,12 @@ object SearchYoutubeTracks {
 
   def readEchonestSongs(result: JsValue): Set[String] = {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
-    (result \ "response" \ "songs")
+    val a = (result \ "response" \ "songs")
       .asOpt[Set[Option[String]]](Reads.set(titleReads))
       .getOrElse(Set.empty)
       .flatten
+    println(a)
+    a
   }
 
   def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {

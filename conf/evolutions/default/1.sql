@@ -544,27 +544,27 @@ CREATE TABLE account623 (
 );
 
 CREATE TABLE eventsFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  eventId                  BIGINT REFERENCES events(eventId),
-  PRIMARY KEY (userId, eventId)
+  eventId                  BIGINT REFERENCES events(eventId)
 );
 
 CREATE TABLE artistsFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  artistId                 INT REFERENCES artists(artistId),
-  PRIMARY KEY (userId, artistId)
+  artistId                 INT REFERENCES artists(artistId)
 );
 
 CREATE TABLE placesFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  placeId                  INT REFERENCES places(placeId),
-  PRIMARY KEY (userId, placeId)
+  placeId                  INT REFERENCES places(placeId)
 );
 
 CREATE TABLE usersFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userIdFollower          VARCHAR REFERENCES users_login(userId),
-  userIdFollowed          VARCHAR REFERENCES users_login(userId),
-  PRIMARY KEY (userIdFollower, userIdFollowed)
+  userIdFollowed          VARCHAR REFERENCES users_login(userId)
 );
 
 CREATE TABLE eventsPlaces (

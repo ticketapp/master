@@ -297,22 +297,12 @@ object Event {
   def followEvent(userId: String, eventId: Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT id FROM users_login
-          | WHERE userId = {userId}""".stripMargin)
-        .on('userId -> userId)
-        .as(scalar[Option[Long]].single)
-      match {
-        case None =>
-          throw new DAOException("Event.followEvent")
-        case Some(id) =>
-          SQL(
-            """INSERT INTO eventsFollowed(userId, eventId)
-              | VALUES ({userId}, {eventId})""".stripMargin)
-            .on(
-              'userId -> id,
-              'eventId -> eventId)
-            .executeInsert()
-      }
+        """INSERT INTO eventsFollowed(userId, eventId)
+          | VALUES ({userId}, {eventId})""".stripMargin)
+        .on(
+          'userId -> userId,
+          'eventId -> eventId)
+        .executeInsert()
     }
   } catch {
     case e: Exception => throw new DAOException("Event.follow: " + e.getMessage)
