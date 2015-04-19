@@ -22,13 +22,13 @@ object Place {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
-                imagePath: Option[String]): Place =
-    new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath)
+                imagePath: Option[String], street: Option[String], zip: Option[String], city: Option[String]): Place =
+    new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath,
+      Option(Address(None, None, city, zip, street)))
 
-  def formUnapply(place: Place): Option[(String, Option[String], Option[String], Option[String], Option[String],
-    Option[Int], Option[String], Option[String])] =
+  def formUnapply(place: Place) =
     Some((place.name, place.facebookId, place.geographicPoint, place.description, place.webSites, place.capacity,
-      place.openingHours, place.imagePath))
+      place.openingHours, place.imagePath, place.address.get.city, place.address.get.zip, place.address.get.street))
 
   private val PlaceParser: RowParser[Place] = {
     get[Long]("placeId") ~
@@ -43,8 +43,8 @@ object Place {
       get[Option[String]]("imagePath") map {
       case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
         addressId  ~ imagePath =>
-          Place(Option(placeId), name, facebookId, geographicPoint, description, webSites, capacity, openingHours, imagePath,
-            Address.find(addressId))
+          Place(Option(placeId), name, facebookId, geographicPoint, description, webSites, capacity, openingHours,
+            imagePath, Address.find(addressId))
     }
   }
 

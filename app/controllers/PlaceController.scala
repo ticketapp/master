@@ -55,7 +55,10 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
     "webSite" -> optional(nonEmptyText(4)),
     "capacity" -> optional(number),
     "openingHours" -> optional(nonEmptyText(4)),
-    "imagePath" -> optional(nonEmptyText(2))
+    "imagePath" -> optional(nonEmptyText(2)),
+    "street" -> optional(nonEmptyText(2)),
+    "city" -> optional(nonEmptyText(2)),
+    "zip" -> optional(nonEmptyText(3))
   )(Place.formApply)(Place.formUnapply))
   
   def createPlace = Action { implicit request =>
