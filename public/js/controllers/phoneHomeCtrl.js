@@ -241,8 +241,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 });
                 google.maps.event.addListener(map, 'center_changed', function() {
                     $scope.mapBounces = map.getBounds()
-                    console.log(map)
-                    console.log($scope.mapCenter)
                     $scope.mapCenter = map.center.k + ', ' + map.center.D;
                 })
                 $scope.mapBounces = map.getBounds()

@@ -196,6 +196,71 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     background-repeat: no-repeat;
     background-position: center;
 }
+.fi-reggae {
+    background-image: url('../img/rasta.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}
+.fi-hip-hop{
+    background-image: url('../img/rap.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}
+.fi-jazz{
+    background-image: url('../img/jazz.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}
+/*.fi-latin{
+    background-image: url('../img/);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}*/
+.fi-electro{
+    background-image: url('../img/electro.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}
+.fi-world{}
+.fi-classique{}
+.fi-rock{
+    background-image: url('../img/rock.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}
+.fi-chanson{
+    background-image: url('../img/accoustique.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}
 .fi-mixcloud {
     background-image: url('../img/mixcloud-logo.png');
     width: 44px;
@@ -654,8 +719,8 @@ top: 0;
 
 /*Events*/
 .eventMinFilter:hover {
-    text-decoration: underline;
     cursor: pointer;
+    text-decoration: underline;
 }
 #events_contener{margin-left: 0; margin-right: 0;}
 #events_contener>li{display:block;}
