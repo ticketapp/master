@@ -4,38 +4,44 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     $scope.time = 6;
     $scope.selectedTime = 6;
     $scope.zoom = 12;
-    var mapBouces;
+    $scope.mapBounces;
     var eventInBounce = false;
     var time = 6;
-    var changeTime = true;
     var offset = 0;
     var map;
     function getEvents () {
-        $http.get('/events/inInterval/'+ + time + '/(' + $scope.mapCenter.replace(/^.+,/,'') + ',' +
+        $http.get('/events/inInterval/' + time + '/(' + $scope.mapCenter.replace(/^.+,/,'') + ',' +
             $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')/20/'+ offset).
             success(function (data, status, headers, config) {
+                $scope.map = true;
                 $scope.events = data;
                 var eventsLength = $scope.events.length;
                 for (var i = 0; i < eventsLength; i++) {
                     if ( $scope.events[i].places[0] != undefined) {
                         $scope.events[i].addresses[0].geographicPoint = $scope.events[i].places[0].geographicPoint.replace('(', '').replace(')', '');
+                        var geoPoint = $scope.events[i].addresses[0].geographicPoint;
+                        console.log($scope.mapBounces)
+                        if ($scope.mapBounces != undefined && geoPoint.substring(0, geoPoint.indexOf(',')) <= $scope.mapBounces.Da.j &&
+                            geoPoint.substring(0, geoPoint.indexOf(',')) >= $scope.mapBounces.Da.k &&
+                            geoPoint.replace(/^.+,/,'') <= $scope.mapBounces.va.k &&
+                            geoPoint.replace(/^.+,/,'') >= $scope.mapBounces.va.j) {
+                            console.log('youpi')
+                            eventInBounce = true;
+                        }
                     }
-                    if ($scope.events[i].startTime != undefined) {
-                        $scope.events[i].countdown = Math.round(($scope.events[i].startTime - new Date()) / 3600000);
-                        if (changeTime == true && $scope.events[i].addresses[0] != undefined && time == 168) {
-                            if ($scope.selectedTime == 6 && $scope.events[i].countdown > $scope.selectedTime) {
-                                $scope.selectedTime = $scope.events[i].countdown;
-                            } else if ($scope.selectedTime != 6 && $scope.events[i].countdown < $scope.selectedTime && $scope.events[i].countdown > 6) {
-                                $scope.selectedTime = $scope.events[i].countdown;
-                            } else if ($scope.selectedTime != 6 && $scope.events[i].countdown < 6 && $scope.events[i].countdown > 0) {
-                                $scope.selectedTime = 6;
-                                changeTime = false;
+                    if (i == $scope.events.length -1) {
+                        if (eventInBounce == false) {
+                            console.log('erreur')
+                            if (time < 200) {
+                                time = time+6
+                                getEvents()
                             }
+
+                        } else {
+                            $scope.updateMarkers()
                         }
                     }
                 }
-                $scope.map = true;
-                $scope.updateMarkers()
             })
     }
     $scope.initializeTime = function () {
@@ -83,14 +89,8 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             }
             var eventsLength = $scope.events.length;
             for (var i=0; i<eventsLength; i++) {
-                if ($scope.events[i].countdown <= $scope.selectedTime && $scope.events[i].addresses[0] != undefined) {
+                if ($scope.events[i].addresses[0] != undefined) {
                     var geoPoint = $scope.events[i].addresses[0].geographicPoint;
-                    if (mapBouces != undefined && geoPoint.substring(0, geoPoint.indexOf(',')) <= mapBouces.Da.j &&
-                        geoPoint.substring(0, geoPoint.indexOf(',')) >= mapBouces.Da.k &&
-                        geoPoint.replace(/^.+,/,'') <= mapBouces.va.k &&
-                        geoPoint.replace(/^.+,/,'') >= mapBouces.va.j) {
-                        eventInBounce = true;
-                    }
                     var markerGenre;
                     function pushMarker (markerGenre, geoPoint) {
                         var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
@@ -138,8 +138,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     var redirectPath = ''
                     var eventsLength = $scope.events.length;
                     for (var i = 0; i < eventsLength; i++) {
-                        if ($scope.events[i].countdown <= $scope.selectedTime &&
-                            $scope.events[i].addresses[0] != undefined) {
+                        if ($scope.events[i].addresses[0] != undefined) {
                             var geopoint = $scope.events[i].addresses[0].geographicPoint
                             console.log(geopoint)
                             if (geopoint.substring(0, geopoint.indexOf(',')) < marker.latLng.k + 0.000001 &&
@@ -160,8 +159,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 var count =0;
                 var places = '';
                 for (var i = 0; i < eventsLength; i++) {
-                    if ($scope.events[i].addresses[0] != undefined &&
-                        $scope.events[i].countdown <= $scope.selectedTime ) {
+                    if ($scope.events[i].addresses[0] != undefined) {
                         var geopoints = $scope.events[i].addresses[0].geographicPoint
                         var markerLength = cluster.markers_.length;
                         for (var m = 0; m < markerLength; m++) {
@@ -195,17 +193,11 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             }
         }, doneStartInterval);
     };
-    $scope.$on('mapInitialized', function(event, evtMap) {
-        map = evtMap;
-        $scope.updateMarkers()
-    });
     $scope.goTo = function (e, id) {
         var redirectPath = 'event/' + $scope.events[id].eventId;
         var eventsLength = $scope.events.length;
         for (var i = 0; i < eventsLength; i++) {
-            if ($scope.events[i].countdown < $scope.selectedTime &&
-                $scope.events[i].countdown > 0 &&
-                i != id &&
+            if (i != id &&
                 $scope.events[id].places[0] != undefined &&
                 $scope.events[i].addresses[0] != undefined) {
                 if ($scope.events[i].addresses[0].geographicPoint == $scope.events[id].addresses[0].geographicPoint) {
@@ -217,39 +209,42 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         }
         window.location.href =('#/' + redirectPath);
     };
-    $http.get('/infos').success(function (data, status, headers, config) {
-        $scope.infos = data;
-    });
+    function getBounds (map) {
+        var waitForMap = setInterval(function () {
+            if (document.getElementsByTagName('map').length > 0) {
+                clearInterval(waitForMap)
+                google.maps.event.addListener(map, 'zoom_changed', function() {
+                    $scope.mapBounces = map.getBounds()
+                    if (map.zoom < $scope.zoom) {
+                        $scope.zoom = map.zoom;
+                        /*more*/
+                    }
+                });
+                google.maps.event.addListener(map, 'center_changed', function() {
+                    $scope.mapBounces = map.getBounds()
+                    $scope.mapCenter = map.center;
+                    getEvents()
+                })
+                $scope.mapBounces = map.getBounds()
+                getEvents()
+            }
+        }, 500)
+    }
     if ($rootScope.geoLoc.length > 0) {
         $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
         $scope.mapCenter = $scope.mapCenter.replace(')', '');
-        getEvents ();
+        $scope.map = true;
+        $scope.$on('mapInitialized', function(event, map) {
+            getBounds(map)
+        })
     } else {
         $rootScope.$watch('geoLoc', function () {
             $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
             $scope.mapCenter = $scope.mapCenter.replace(')', '');
-            getEvents ();
+            $scope.map = true;
+            $scope.$on('mapInitialized', function(event, map) {
+                getBounds(map)
+            })
         })
     }
-    var waitForMap = setInterval(function () {
-        if (document.getElementsByTagName('map').length > 0) {
-            clearInterval(waitForMap)
-            google.maps.event.addListener(map, 'zoom_changed', function() {
-                mapBouces = map.getBounds()
-                if (map.zoom < $scope.zoom) {
-                    $scope.zoom = map.zoom;
-                    /*more*/
-                }
-            });
-            google.maps.event.addListener(map, 'idle', function() {
-                mapBouces = map.getBounds()
-                getEvents()
-            })
-            google.maps.event.addListener(map, 'center_changed', function() {
-                mapBouces = map.getBounds()
-                $scope.mapCenter = map.center;
-                getEvents()
-            })
-        }
-    })
 });
