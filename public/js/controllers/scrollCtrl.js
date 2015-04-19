@@ -19,7 +19,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             navigator.geolocation.getCurrentPosition(function (position) {
                     $rootScope.geoLoc = "(" + position.coords.latitude + "," + position.coords.longitude + ")";
                     $rootScope.$apply();
-                    console.log($rootScope.geoLoc)
                 }, function erreurPosition(error) {
                 }
             );
@@ -105,7 +104,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.lastReq = {
                 'method': method, 'path': path, 'object':object, 'success':success, 'error': error
             };
-            console.log($rootScope.lastReq)
+
         };
         $rootScope.passArtisteToCreateToFalse();
         $rootScope.createArtist = function (artist) {

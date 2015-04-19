@@ -47,7 +47,6 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         if ($scope.organizer.websites != undefined) {
             $scope.organizer.websites = $scope.organizer.websites.split(',');
             for (var i = 0; i < $scope.organizer.websites.length; i++) {
-                console.log($scope.organizer.websites[i])
                 $scope.organizer.websites[i] = {url: $scope.organizer.websites[i]};
                 if ($scope.organizer.websites[i].url.indexOf('facebook') > -1) {
                     $scope.organizer.websites[i].name = 'facebook';

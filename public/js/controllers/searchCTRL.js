@@ -71,7 +71,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             }
                         }
                         data.forEach(uploadEvents)
-                        console.log($scope.events)
                         $rootScope.resizeImgHeight();
                         $scope.loadingMore = false;
                     }).
@@ -135,7 +134,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             }
                         }
                         data.forEach(uploadPlaces)
-                        console.log($scope.places)
                         $rootScope.resizeImgHeight();
                         $scope.loadingMore = false;
                     }).
@@ -272,7 +270,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                     }
                                     $scope.events.push(el);
                                     $scope.scopeIdList.push(el.eventId);
-                                    console.log($scope.scopeIdList)
                                     
                                 }
                             },0);
@@ -335,7 +332,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             $scope.loadingFbArt = true;
             $http.get('/artists/facebookContaining/'+_research)
                 /*.start(function (data, etc) {
-                    console.log("Dude! We're goin'!", data, etc);
                 })
                 /*.node('champ.*', function (value) {
                     $scope.items.push(value);
@@ -356,7 +352,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             artistFbIdList.push(artistInfo.facebookId);
                             $scope.artistsFb.push(artistInfo);
                             $rootScope.resizeImgHeight();
-                            console.log($scope.artistsFb)
+
                         } else {
                         }
                     }
@@ -364,7 +360,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 })
                 .error(function (error) {
                     $scope.loadingFbArt = false;
-                    console.log("Error: ", error);
+
                 });
         }
     }
@@ -404,7 +400,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }, 100);
     }
     $scope.initializeTime();
-    console.log($rootScope.geoLoc);
     $scope.moreLimit = function () {
         offset = offset + 12;
         $scope.loadingMore = true;

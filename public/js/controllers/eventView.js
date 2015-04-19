@@ -50,7 +50,6 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                 data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(")", "");
                 data.addresses[0].geographicPoint = data.addresses[0].geographicPoint.replace(",", ", ");
                 $scope.adresses = true;
-                console.log($scope.adresses);
             }
             if (data.tariffRange != undefined) {
                 var tariffs = data.tariffRange.split('-');
@@ -82,7 +81,6 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                 }
             }
             $scope.event = data;
-            console.log($scope.event);
             if ( $rootScope.window != 'small' && $rootScope.window != 'medium') {
                 var waitForBinding = setInterval(function () {
                     if (document.getElementById('eventDescBind').innerHTML.length > 0) {
