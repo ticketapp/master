@@ -4,6 +4,8 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     $scope.time = 6;
     $scope.selectedTime = 6;
     $scope.zoom = 12;
+    var mapBouces;
+    var eventInBounce = false;
     var time = 6;
     var changeTime = true;
     var offset = 0;
@@ -85,8 +87,12 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             for (var i=0; i<eventsLength; i++) {
                 if ($scope.events[i].countdown <= $scope.selectedTime && $scope.events[i].addresses[0] != undefined) {
                     var geoPoint = $scope.events[i].addresses[0].geographicPoint;
-                    console.log(geoPoint.substring(0, geoPoint.indexOf(',')));
-                    console.log(geoPoint.replace(/^.+,/,''));
+                    if (mapBouces != undefined && geoPoint.substring(0, geoPoint.indexOf(',')) <= mapBouces.Da.j &&
+                        geoPoint.substring(0, geoPoint.indexOf(',')) >= mapBouces.Da.k &&
+                        geoPoint.replace(/^.+,/,'') <= mapBouces.va.k &&
+                        geoPoint.replace(/^.+,/,'') >= mapBouces.va.j) {
+                        eventInBounce = true;
+                    }
                     var markerGenre;
                     function pushMarker (markerGenre, geoPoint) {
                         var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
@@ -132,7 +138,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             for (i = 0; i < markersLength; i++) {
                 var marker = $scope.markerClusterer.markers_[i]
                 google.maps.event.addListener(marker, 'click', function(marker) {
-                    console.log(marker)
                     var redirectPath = ''
                     var eventsLength = $scope.events.length;
                     for (var i = 0; i < eventsLength; i++) {
@@ -187,18 +192,12 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 }
                 window.location.href =('#/' + redirectPath);
             })
-            google.maps.event.addListener(map, 'zoom_changed', function() {
-                // 3 seconds after the center of the map has changed, pan back to the
-                // marker.
-                if (map.zoom < $scope.zoom) {
-                    $scope.zoom = map.zoom;
-                    console.log($scope.zoom)
-                }
-            });
             if ($scope.selectedTime > time) {
                 time = $scope.selectedTime;
                 getEvents()
             }
+
+            console.log(eventInBounce)
         }, doneStartInterval);
     };
     $scope.$on('mapInitialized', function(event, evtMap) {
@@ -226,8 +225,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     $http.get('/infos').success(function (data, status, headers, config) {
         $scope.infos = data;
     });
-
-    console.log($rootScope.geoLoc);
     if ($rootScope.geoLoc.length > 0) {
         getEvents ();
         $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
@@ -239,4 +236,23 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             $scope.mapCenter = $scope.mapCenter.replace(')', '');
         })
     }
+    var waitForMap = setInterval(function () {
+        if (document.getElementsByTagName('map').length > 0) {
+            clearInterval(waitForMap)
+            google.maps.event.addListener(map, 'zoom_changed', function() {
+                mapBouces = map.getBounds()
+                if (map.zoom < $scope.zoom) {
+                    $scope.zoom = map.zoom;
+                    console.log($scope.zoom)
+                }
+            });
+            google.maps.event.addListener(map, 'idle', function() {
+                mapBouces = map.getBounds()
+                $scope.updateMarkers()
+            })
+            google.maps.event.addListener(map, 'center_changed', function() {
+                mapBouces = map.getBounds()
+            })
+        }
+    })
 });
