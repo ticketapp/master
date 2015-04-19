@@ -47,7 +47,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         } else if (newName > 40) {
             newName = (newName - 39) * 720;
         }
-        var textSlider = document.getElementsByClassName('md-thumb');
+        var textSlider = document.getElementById('timeSearchSliderPhone').getElementsByClassName('md-thumb');
         var waitForSearchBar = setInterval(function () {
             clearInterval(waitForSearchBar);
             for (var i = 0; i < textSlider.length; i++) {

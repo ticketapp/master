@@ -144,7 +144,7 @@ md-slider#timeSearchSlider > .md-thumb-container > .md-thumb {
 md-slider#timeSearchSlider > .md-thumb-container {
     width: 100px!important;
 }
-md-slider#timeSearchSlider > .md-focus-thumb {
+md-slider#timeSearchSlider                                                                                                                                                                                                                                                                                                                                                                                                                                                       .md-focus-thumb {
     width: 100px!important;
 }
 md-slider#timeSearchSlider > .md-thumb-container > .md-thumb:after {
@@ -161,6 +161,14 @@ md-slider#timeSearchSlider > .md-thumb-container > .md-thumb > b {
     text-align: center;
     width: 100%;
     cursor: pointer;
+}
+md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
+    position: absolute;
+    bottom: -20px;
+    left: -28px;
+    width: 100px;
+    color: #ffffff;
+    text-align: center;
 }
 /* @font-face {
    font-family: 'Blanch-CapsInline';
