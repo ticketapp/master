@@ -11,10 +11,9 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     var map;
     var firstShow = true;
     $scope.getEvents = function () {
-        $http.get('/events/inInterval/' + time + '/(' + $scope.mapCenter.replace(/^.+,/,'') + ',' +
+        $http.get('/events/inInterval/' + time + '/(' + $scope.mapCenter.replace(/^.+, /,'') + ',' +
             $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')/20/'+ offset).
             success(function (data, status, headers, config) {
-                $scope.map = true;
                 $scope.events = data;
                 var eventsLength = $scope.events.length;
                 for (var i = 0; i < eventsLength; i++) {
@@ -31,7 +30,11 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     }
                     if (i == $scope.events.length -1 ) {
                         if (eventInBounce == false && firstShow == true) {
-                            $scope.time = $scope.time + 1;
+                            if ($scope.time < 24) {
+                                $scope.time = $scope.time + 6;
+                            } else {
+                                $scope.time = $scope.time + 1;
+                            }
                             $scope.timeChange();
 
                         } else {
@@ -225,22 +228,34 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         }, 500)
     }
     if ($rootScope.geoLoc.length > 0) {
-        $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
-        $scope.mapCenter = $scope.mapCenter.replace(')', '');
-        $scope.map = true;
-        $scope.$on('mapInitialized', function(event, evmap) {
-            map = evmap;
-            getBounds(evmap)
-        })
-    } else {
-        $rootScope.$watch('geoLoc', function () {
-            $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
-            $scope.mapCenter = $scope.mapCenter.replace(')', '');
-            $scope.map = true;
+        $timeout(function () {
+            $scope.$apply(function() {
+                $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
+                $scope.mapCenter = $scope.mapCenter.replace(')', '');
+                $scope.mapCenter = $scope.mapCenter.replace(",", ", ");
+                $scope.map = true;
+            })
             $scope.$on('mapInitialized', function(event, evmap) {
                 map = evmap;
                 getBounds(evmap)
             })
+        },0)
+    } else {
+        $rootScope.$watch('geoLoc', function (newVal) {
+            if (newVal.length > 0) {
+                $timeout(function () {
+                    $scope.$apply(function () {
+                        $scope.mapCenter = newVal.replace('(', '');
+                        $scope.mapCenter = $scope.mapCenter.replace(')', '');
+                        $scope.mapCenter = $scope.mapCenter.replace(",", ", ");
+                    })
+                    $scope.map = true;
+                    $scope.$on('mapInitialized', function (event, evmap) {
+                        map = evmap;
+                        getBounds(evmap)
+                    })
+                }, 0)
+            }
         })
     }
 });
