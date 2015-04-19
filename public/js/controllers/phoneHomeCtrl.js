@@ -30,6 +30,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     }
                     if (i == $scope.events.length -1 ) {
                         if (eventInBounce == false && firstShow == true) {
+                            $scope.searchEventFirst = true;
                             if ($scope.time < 24) {
                                 $scope.time = $scope.time + 6;
                             } else if ($scope.time < 30) {
@@ -41,6 +42,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
 
                         } else {
                             firstShow = false;
+                            $scope.searchEventFirst = false;
                             $scope.updateMarkers()
                         }
                     }
