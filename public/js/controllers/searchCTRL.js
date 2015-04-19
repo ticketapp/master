@@ -520,8 +520,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         } else if (newName > 40) {
             newName = (newName - 39) * 720;
         }
-        var textSlider = document.getElementsByClassName('md-thumb');
         var waitForSearchBar = setInterval(function () {
+            if ($rootScope.window == 'small' || $rootScope.window == 'medium') {
+                var textSlider = document.getElementById('timeSearchSliderPhone').getElementsByClassName('md-thumb');
+            } else {
+                var slider = document.getElementsByClassName('bigSlider');
+                var textSlider = [];
+                for (var ii =0; ii < slider.length; ii++) {
+                    textSlider.push(slider[ii].getElementsByClassName('md-thumb')[0]);
+                }
+            }
+            console.log(textSlider)
             if ($rootScope.path == 'search' || textSlider.length >= 2) {
                 clearInterval(waitForSearchBar);
                 for (var i = 0; i < textSlider.length; i++) {
@@ -620,7 +629,15 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             } else if (newName > 40) {
                 newName = (newName - 39) * 720;
             }
-            var textSlider = document.getElementsByClassName('md-thumb');
+            if ($rootScope.window == 'small' || $rootScope.window == 'medium') {
+                var textSlider = document.getElementById('timeSearchSliderPhone').getElementsByClassName('md-thumb');
+            } else {
+                var slider = document.getElementsByClassName('bigSlider');
+                var textSlider = [];
+                    for (var ii =0; ii < slider.length; ii++) {
+                        textSlider.push(slider[ii].getElementsByClassName('md-thumb')[0]);
+                    }
+            }
             for (var i = 0; i < textSlider.length; i++) {
                 textSlider[i].innerHTML = '';
                 textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +

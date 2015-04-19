@@ -34,7 +34,7 @@
         </i>
         <i ng-if="$root.window == 'small'" style="color: {{event.priceColor}}; font-size: 30px;"
            class="float-right fa "
-           ng-class="{'fa-chevron-down': !showEventDetail, 'fa-chevron-up': showEventDetail}"
+           ng-class="{'fa-chevron-down': !$parent.showEventDetail, 'fa-chevron-up': $parent.showEventDetail}"
            ng-click="$parent.showEventDetail = !$parent.showEventDetail">
        </i>
         <span ng-show="$root.window != 'small' || showEventDetail">
@@ -72,12 +72,13 @@
                 <i
                   style="vertical-align: text-bottom;"
                   class="eventMinFilter"
+                  ng-class="{'float-right': $root.window == 'small'}"
                   ng-if="event.addresses[0].city.length > 0"
                   ng-click="$root.research(event.addresses[0].city); $root.redirectToSearch(event.addresses[0].city)">
                     ({{event.addresses[0].city}})
                 </i>
             </div>
-            <div class="infos_event">
+            <div class="infos_event float-left">
                 <span class="dropDown" ng-show="organizer.name != event.places[0].name"
                       data-ng-repeat="organizer in event.organizers">
                     <i class="fa fa-user" style="font-size: 30px; color: {{event.priceColor}};"></i>
