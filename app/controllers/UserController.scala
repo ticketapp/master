@@ -30,8 +30,7 @@ object UserController extends Controller {
   val toolsBindingForm = Form(mapping(
     "tools" -> nonEmptyText(2),
     "userId" -> longNumber()
-  )(Tool.formApply)(Tool.formUnapply)
-  )
+  )(Tool.formApply)(Tool.formUnapply))
 
   def createTools = Action { implicit request =>
     userBindingForm.bindFromRequest().fold(
