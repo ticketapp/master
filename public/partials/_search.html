@@ -9,7 +9,8 @@
 <div>
     <ul id="events_contener" ng-class="{'paddingTop50 marginTop50': $root.path == 'search'}"
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-3">
-        <div ng-if="$root.activEvent && events.length > 0" class="float-left column small-12 medium-6 large-4 min_contener data-ng-event margin0"
+        <div ng-if="$root.activEvent && events.length > 0"
+             class="float-left column small-12 medium-6 large-4 min_contener data-ng-event margin0"
             data-ng-repeat="event in events">
         </div>
         <div ng-if="$root.activArtist && artists.length > 0"
@@ -129,7 +130,7 @@
     </div>
     <div ng-if="events.length >= limit || artists.length >= limit || artistsFb.length >= limit || places.length >= limit || users.length >= limit"
          layout="row" layout-align="center center">
-        <button ng-click="moreLimit(); $parent.limit = $parent.limit + 20" class="column large-5">More</button>
+        <button ng-click="moreLimit(); $parent.limit = $parent.limit + 20" class="column large-5">Voir plus</button>
     </div>
 </div>
 
