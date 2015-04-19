@@ -102,7 +102,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selUsr == true) {
-                $http.get('/places/' + $rootScope.geoLoc + '/12/' + offset).
+                $http.get('/organizers/all/12/' + offset).
                     success(function(data, status, headers, config) {
                         if (data != $scope.organizers) {
                             $scope.organizers = data;
