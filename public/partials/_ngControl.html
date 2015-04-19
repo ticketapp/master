@@ -17,7 +17,7 @@
         </li>
     </ul>
 </div>
-<div ng-if="$root.window == 'small' && $root.path != 'home'" class="fixed">
+<div ng-if="$root.window == 'small' && $root.path != 'home' && $root.path != 'iframe'" class="fixed">
     <a class="button column small-4 margin0" href="#/"><i class="fi-map"></i></a>
     <a class="button column small-4 margin0" href="#/search"><i class="fi-magnifying-glass"></i></a>
     <a ng-if="$root.path != 'iframe'" class="button column small-4 margin0"
