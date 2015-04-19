@@ -11,10 +11,8 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
     var offset = 0;
     var map;
     function getEvents () {
-        if (time == 168) {
-            $scope.map = false;
-        }
-        $http.get('/events/inInterval/'+ + time + '/' + $rootScope.geoLoc + '/20/'+ offset).
+        $http.get('/events/inInterval/'+ + time + '/(' + $scope.mapCenter.replace(/^.+,/,'') + ',' +
+            $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')/20/'+ offset).
             success(function (data, status, headers, config) {
                 $scope.events = data;
                 var eventsLength = $scope.events.length;
@@ -133,7 +131,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             }
             $scope.markerClusterer = new MarkerClusterer(map, $scope.dynMarkers, {});
             $scope.markerClusterer.zoomOnClick_ = false;
-            console.log($scope.markerClusterer)
             var markersLength = $scope.markerClusterer.markers_.length
             for (i = 0; i < markersLength; i++) {
                 var marker = $scope.markerClusterer.markers_[i]
@@ -196,8 +193,6 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 time = $scope.selectedTime;
                 getEvents()
             }
-
-            console.log(eventInBounce)
         }, doneStartInterval);
     };
     $scope.$on('mapInitialized', function(event, evtMap) {
@@ -226,14 +221,14 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         $scope.infos = data;
     });
     if ($rootScope.geoLoc.length > 0) {
-        getEvents ();
         $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
         $scope.mapCenter = $scope.mapCenter.replace(')', '');
+        getEvents ();
     } else {
         $rootScope.$watch('geoLoc', function () {
-            getEvents ();
             $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
             $scope.mapCenter = $scope.mapCenter.replace(')', '');
+            getEvents ();
         })
     }
     var waitForMap = setInterval(function () {
@@ -243,15 +238,17 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 mapBouces = map.getBounds()
                 if (map.zoom < $scope.zoom) {
                     $scope.zoom = map.zoom;
-                    console.log($scope.zoom)
+                    /*more*/
                 }
             });
             google.maps.event.addListener(map, 'idle', function() {
                 mapBouces = map.getBounds()
-                $scope.updateMarkers()
+                getEvents()
             })
             google.maps.event.addListener(map, 'center_changed', function() {
                 mapBouces = map.getBounds()
+                $scope.mapCenter = map.center;
+                getEvents()
             })
         }
     })
