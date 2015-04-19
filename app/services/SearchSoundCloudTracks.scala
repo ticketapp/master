@@ -120,11 +120,11 @@ object SearchSoundCloudTracks {
     tracks.collect {
       case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl, genre) =>
         saveGenreForArtistInFuture(genre, artist.artistId.getOrElse(-1L).toInt)
-        Track(None, normalizeTrackTitle(title, artist.name), url, "Soundcloud", thumbnailUrl, artist.facebookUrl,
+        Track(None, normalizeTrackTitle(title, artist.name), url, 's', thumbnailUrl, artist.facebookUrl,
           redirectUrl)
       case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String), genre) =>
         saveGenreForArtistInFuture(genre, artist.artistId.getOrElse(-1L).toInt)
-        Track(None, normalizeTrackTitle(title, artist.name), url, "Soundcloud", avatarUrl, artist.facebookUrl,
+        Track(None, normalizeTrackTitle(title, artist.name), url, 's', avatarUrl, artist.facebookUrl,
           redirectUrl)
     }
   }

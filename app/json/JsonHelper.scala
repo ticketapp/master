@@ -12,6 +12,10 @@ object JsonHelper {
     def writes(o : java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(o))
   }
 
+  implicit object CharWrites extends AnyRef with Writes[Char] {
+    def writes(char : Char): JsString = JsString(char.toString)
+  }
+
   implicit val oAuth1InfoWrites = Json.writes[OAuth1Info]
   implicit val oAuth2InfoWrites = Json.writes[OAuth2Info]
   implicit val passwordInfoWrites = Json.writes[PasswordInfo]

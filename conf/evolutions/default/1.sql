@@ -45,7 +45,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 7 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'm - 6 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -95,6 +95,7 @@ CREATE TABLE organizers (
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   imagePath               VARCHAR,
+  geographicPoint         POINT,
   placeId                 BIGINT,
   UNIQUE(facebookId),
   UNIQUE(name),
@@ -102,20 +103,24 @@ CREATE TABLE organizers (
 );
 
 CREATE OR REPLACE FUNCTION insertOrganizer(
-  facebookIdValue    VARCHAR(63),
-  nameValue          VARCHAR(255),
-  descriptionValue   VARCHAR,
-  phoneValue         VARCHAR(255),
-  publicTransitValue VARCHAR,
-  websitesValue      VARCHAR,
-  imagePathValue     VARCHAR,
-  placeIdValue       BIGINT)
+  facebookIdValue       VARCHAR(63),
+  nameValue             VARCHAR(255),
+  descriptionValue      VARCHAR,
+  addressIdValue        BIGINT,
+  phoneValue            VARCHAR(255),
+  publicTransitValue    VARCHAR,
+  websitesValue         VARCHAR,
+  imagePathValue        VARCHAR,
+  geographicPointValue  VARCHAR(63),
+  placeIdValue          BIGINT)
   RETURNS INT AS
   $$
   DECLARE organizerIdToReturn int;;
   BEGIN
-    INSERT INTO organizers (facebookId, name, description, phone, publicTransit, websites, imagePath, placeId)
-    VALUES (facebookIdValue, nameValue, descriptionValue, phoneValue, publicTransitValue, websitesValue, imagePathValue, placeIdValue)
+    INSERT INTO organizers (facebookId, name, description, addressId, phone, publicTransit, websites, imagePath,
+                            geographicPoint, placeId)
+    VALUES (facebookIdValue, nameValue, descriptionValue, addressIdValue, phoneValue, publicTransitValue,
+            websitesValue, imagePathValue, POINT(geographicPointValue), placeIdValue)
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
@@ -156,7 +161,7 @@ CREATE TABLE tracks (
   trackId                 SERIAL PRIMARY KEY,
   title                   VARCHAR(255) NOT NULL,
   url                     VARCHAR NOT NULL,
-  platform                VARCHAR(255) NOT NULL,
+  platform                CHAR NOT NULL,
   thumbnailUrl            VARCHAR NOT NULL,
   artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
   redirectUrl             VARCHAR(255),
@@ -166,7 +171,7 @@ CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 CREATE OR REPLACE FUNCTION insertTrack(titleValue VARCHAR(255),
                                        urlValue VARCHAR,
-                                       platformValue VARCHAR(255),
+                                       platformValue CHAR,
                                        thumbnailUrlValue VARCHAR,
                                        artistFacebookUrlValue VARCHAR(255),
                                        redirectUrlValue VARCHAR(255))
@@ -544,27 +549,27 @@ CREATE TABLE account623 (
 );
 
 CREATE TABLE eventsFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  eventId                  BIGINT REFERENCES events(eventId),
-  PRIMARY KEY (userId, eventId)
+  eventId                  BIGINT REFERENCES events(eventId)
 );
 
 CREATE TABLE artistsFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  artistId                 INT REFERENCES artists(artistId),
-  PRIMARY KEY (userId, artistId)
+  artistId                 INT REFERENCES artists(artistId)
 );
 
 CREATE TABLE placesFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  placeId                  INT REFERENCES places(placeId),
-  PRIMARY KEY (userId, placeId)
+  placeId                  INT REFERENCES places(placeId)
 );
 
 CREATE TABLE usersFollowed (
+  tableId                  SERIAL PRIMARY KEY,
   userIdFollower          VARCHAR REFERENCES users_login(userId),
-  userIdFollowed          VARCHAR REFERENCES users_login(userId),
-  PRIMARY KEY (userIdFollower, userIdFollowed)
+  userIdFollowed          VARCHAR REFERENCES users_login(userId)
 );
 
 CREATE TABLE eventsPlaces (
