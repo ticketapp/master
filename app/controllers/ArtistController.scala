@@ -85,8 +85,10 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {
-          Artist.save(patternAndArtist.artist)
-          Ok.chunked(getArtistTracks(patternAndArtist))
+          val artistId = Artist.save(patternAndArtist.artist)
+          val artistWithArtistId = patternAndArtist.artist.copy(artistId = artistId)
+          val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
+          Ok.chunked(getArtistTracks(patternAndArtistWithArtistId))
         }
       )
     } catch {
