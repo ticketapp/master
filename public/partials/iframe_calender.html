@@ -1,41 +1,15 @@
 <div class="fixed">
-    <input ng-if="$parent.filter && $root.order != 'startTime'" id="searchBar" placeholder="Filter by {{$root.filterType}}"
-           ng-change="$root.resizeImgHeight()"
-           ng-model="$root.filterQuery"
-           class="column small-10 zIndex5">
-    <ul class="column padding0 zIndex5 white" ng-class="{'small-2': filter && $root.order != 'startTime', 'small-12': !filter || $root.order == 'startTime'}">
-        <a target="_blank"ng-if="$parent.filter == true" ng-click="$parent.$parent.filter = false; $root.filterQuery = ''; $root.order = ''"><i class="fi-x"></i>Remove filter</a>
-        <li style="display: block" class="primCol pointer" ng-click="selectFilter = !selectFilter">
-            <a>Filters <i class="fi-arrow-down"></i></a>
-        </li>
-        <ul ng-if="selectFilter" class="absolute white zIndex5 column large-12">
-            <li style="display:block;" class="column large-12 pointer"
-                ng-click="$parent.$parent.filter = true; $root.filterType = 'genre'; $parent.selectFilter = false">
-                <a target="_blank"target="_blank" >
-                    Genre
-                </a>
-            </li>
-            <li ng-click="$parent.$parent.filter = true; $root.filterType = 'ville'; $parent.selectFilter = false"
-                style="display:block;" class="column large-12 pointer" ng-show="$root.activEvent">
-                <a>
-                    Ville
-                </a>
-            </li>
-            <li ng-click="$root.order = 'startTime'; $parent.$parent.filter = true; $parent.selectFilter = false"
-                style="display:block;" class="column large-12 pointer"
-                ng-show="$root.activEvent"
-                ng-class="{'primCol': $root.order == 'startTime'}"
-                    >
-                <a>
-                    Date
-                </a>
-            </li>
-        </ul>
-    </ul>
+    <form ng-submit="getEvents()">
+        <input id="searchBar"
+               placeholder="Rechercher par ville, artiste, genre, salle"
+               ng-model="search"
+               class="column small-10 zIndex5 height50">
+        <input type="submit" class="button column small-2">
+    </form>
 </div>
 <div style="padding-top: 70px;">
     <div class="column large-4 float-left margin0"
-         data-ng-repeat="event in events | orderBy: $root.order">
+         data-ng-repeat="event in events">
         <div class="block_event_min">
             <div class="img_min_evnt" style="height: 100px">
                 <div class="toGrow">

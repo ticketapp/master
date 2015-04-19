@@ -548,6 +548,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             $scope.searchPat = newName;
             $scope.limit = 20;
             offset = 0;
+            if (_research.length == 0) {
+                $scope.initializeTime()
+            }
             if (_selArtist == true && _research.length > 2) {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(searchArtistFb, doneTypingInterval);
