@@ -13,23 +13,17 @@
 </div>
 <div ng-if="$root.window == 'small'" ng-controller="phoneHomeCtrl" class="absolute top0 bottom0 right left" style="z-index: 11">
     <div class="absolute zIndex5 column">
+        <a class="button column small-6 margin0 float-left" href="#/search"><i class="fi-magnifying-glass"></i></a>
+        <a ng-if="$root.path != 'iframe'" class="button column small-6 float-left margin0"
+           data-ng-controller="toolsCtrl" ng-click="open()">
+            <i class="fi-thumbnails"></i>
+        </a>
         <md-slider flex ng-change="updateMarkers()"
                    ng-model="time" min="1" max="51" step="1"
                    aria-label="timeSlider"
                    id="timeSearchSliderPhone"
-                   class="md-primary column small-11 padding0 margin0">
+                   class="md-primary column small-11 float-left padding0 margin0">
         </md-slider>
-        <a class="button column small-4" ng-click="info = !info">Infos</a>
-        <ul class="white" ng-if="info">
-            <li ng-repeat="info in infos">
-                <a>{{info.title}}</a>
-            </li>
-        </ul>
-        <a class="button column small-4 margin0" href="#/search"><i class="fi-magnifying-glass"></i></a>
-        <a ng-if="$root.path != 'iframe'" class="button column small-4 margin0"
-           data-ng-controller="toolsCtrl" ng-click="open()">
-            <i class="fi-thumbnails"></i>
-        </a>
     </div>
     <map ng-if="map"
          zoom="{{zoom}}"
