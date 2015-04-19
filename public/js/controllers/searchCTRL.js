@@ -273,7 +273,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                     $scope.events.push(el);
                                     $scope.scopeIdList.push(el.eventId);
                                     console.log($scope.scopeIdList)
-                                    console.log(el.eventId)
+                                    
                                 }
                             },0);
                         }
@@ -305,7 +305,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 function getPlaceEvents (place) {
                                     $http.get('/places/'+ place.placeId + '/events ').
                                         success(function(data){
-                                            console.log(data)
+                                            
                                             data.forEach(uploadEvents);
                                             $rootScope.resizeImgHeight()
                                         })
@@ -314,7 +314,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             });
                         $http.get('/events/nearCity/' + _research + '/12/' + offset ).
                             success(function (data) {
-                                console.log(data)
+                                
                                 data.forEach(uploadEvents);
                                 $rootScope.resizeImgHeight()
                             });
@@ -330,7 +330,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     function searchArtistFb () {
         $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
-        console.log(_research.length)
+        
         if ($scope.artistsFb.length < $scope.limit && _selArtist == true && _research.length > 1) {
             $scope.loadingFbArt = true;
             $http.get('/artists/facebookContaining/'+_research)
@@ -342,7 +342,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 })*/
                 .success(function (value) {
                     $scope.loadingFbArt = false;
-                    console.log(value)
+                    
                     var artistFbIdList = [];
                     function updateArtistFb (artistInfo) {
                         function getArtistFbIdInArtists (el) {
@@ -351,7 +351,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         $scope.artists.forEach(getArtistFbIdInArtists);
                         $scope.artistsFb.forEach(getArtistFbIdInArtists);
                         if (artistFbIdList.indexOf(artistInfo.facebookId) < 0) {
-                            console.log(artistInfo);
+                            
                             artistInfo.tracks = [];
                             artistFbIdList.push(artistInfo.facebookId);
                             $scope.artistsFb.push(artistInfo);

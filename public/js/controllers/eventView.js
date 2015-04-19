@@ -54,7 +54,7 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
             }
             if (data.tariffRange != undefined) {
                 var tariffs = data.tariffRange.split('-');
-                console.log(tariffs)
+
                 if (tariffs[1] > tariffs[0]) {
                     data.tariffRange = tariffs[0] + '€ - ' + tariffs[1] + '€';
                 } else {
@@ -111,6 +111,6 @@ app.controller ('EventViewCtrl',['$scope', '$routeParams', '$http', '$rootScope'
                 $scope.map = true;
             }
         }).error(function(data, status){
-            console.log(data);
+
         });
 }]);

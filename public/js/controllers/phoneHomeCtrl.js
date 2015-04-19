@@ -130,7 +130,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                             markerGenre = 'jamaica_640.png';
                             foundMarkerGenre = true;
                         }
-                        console.log(markerGenre)
+                        
                     }
                     if (foundMarkerGenre == false) {
                         markerGenre = 'music187.png';
@@ -150,7 +150,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 for (var i = 0; i < eventsLength; i++) {
                     if ($scope.events[i].addresses[0] != undefined) {
                         var geopoint = $scope.events[i].addresses[0].geographicPoint
-                        console.log(geopoint)
+                        
                         if (geopoint.substring(0, geopoint.indexOf(',')) < marker.latLng.k + 0.000001 &&
                             geopoint.substring(0, geopoint.indexOf(',')) > marker.latLng.k - 0.000001 &&
                             geopoint.replace(/^.+,/,'') < marker.latLng.D + 0.000001 &&
@@ -163,7 +163,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
             });
         }
         google.maps.event.addListener($scope.markerClusterer, 'clusterclick', function(cluster) {
-            console.log(cluster)
+            
             var eventsLength = $scope.events.length;
             var redirectPath = '';
             var count =0;
