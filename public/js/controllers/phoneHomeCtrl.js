@@ -214,7 +214,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         }
         window.location.href =('#/' + redirectPath);
     };
-    function getBounds (map) {
+    function getBounds () {
         var waitForMap = setInterval(function () {
             if (document.getElementsByTagName('map').length > 0) {
                 clearInterval(waitForMap)
@@ -226,9 +226,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     }
                 });
                 google.maps.event.addListener(map, 'center_changed', function() {
-                    $scope.mapBounces = map.getBounds()
-                    $scope.mapCenter = map.center;
-                    getEvents()
+                    console.log('yo')
                 })
                 $scope.mapBounces = map.getBounds()
                 getEvents()
@@ -239,16 +237,18 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
         $scope.mapCenter = $scope.mapCenter.replace(')', '');
         $scope.map = true;
-        $scope.$on('mapInitialized', function(event, map) {
-            getBounds(map)
+        $scope.$on('mapInitialized', function(event, evmap) {
+            map = evmap;
+            getBounds(evmap)
         })
     } else {
         $rootScope.$watch('geoLoc', function () {
             $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
             $scope.mapCenter = $scope.mapCenter.replace(')', '');
             $scope.map = true;
-            $scope.$on('mapInitialized', function(event, map) {
-                getBounds(map)
+            $scope.$on('mapInitialized', function(event, evmap) {
+                map = evmap;
+                getBounds(evmap)
             })
         })
     }
