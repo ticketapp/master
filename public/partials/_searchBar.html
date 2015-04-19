@@ -34,8 +34,8 @@
     <md-slider flex ng-change="$root.selStart($root.maxStart)"
                ng-model="$root.maxStart" min="1" max="51" step="1"
                aria-label="timeSlider"
-               ng-if="$root.window == 'small' || $root.window == 'medium'"
+               ng-if="$root.activEvent && (searchPat == undefined || searchPat.length == 0) && ($root.window == 'small' || $root.window == 'medium')"
                id="timeSearchSliderPhone"
-               class="md-primary column small-11 padding0 margin0">
+               class="md-primary column small-12 padding0 margin0">
     </md-slider>
 </div>
