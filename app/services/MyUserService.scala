@@ -8,6 +8,7 @@ import controllers.DAOException
 import org.joda.time.DateTime
 import play.api.db.DB
 import play.api.Play.current
+import play.api.mvc.Action
 import play.api.{Logger, Application}
 import securesocial.core._
 import securesocial.core.providers.Token
@@ -19,12 +20,7 @@ import json.JsonHelper._
 import scala.language.postfixOps
 
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
-/*
 
-faire en sorte que ca find si luser est déjà enregistré au save
-
-
- */
   def find(id: IdentityId): Option[Identity] = {
     if (Logger.isDebugEnabled)
       Logger.debug(s"Find identity by IdentityId: $id")

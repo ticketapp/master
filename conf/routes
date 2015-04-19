@@ -46,7 +46,7 @@ GET       /places/:placeId/events                                   controllers.
 GET       /places/nearCity/:city/:numberToReturn/:offset            controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################## Organizers ###############################################
-GET       /organizers/:numberToReturn/:offset                       controllers.OrganizerController.organizers(numberToReturn: Int, offset: Int)
+GET       /organizers/all/:numberToReturn/:offset                   controllers.OrganizerController.organizers(numberToReturn: Int, offset: Int)
 GET       /organizers/:id                                           controllers.OrganizerController.organizer(id: Long)
 POST      /organizers/:organizerId/follow                           controllers.OrganizerController.followOrganizer(organizerId: Long)
 GET       /organizers/containing/:pattern                           controllers.OrganizerController.findOrganizersContaining(pattern: String)
