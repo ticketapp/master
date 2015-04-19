@@ -135,10 +135,13 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                  $scope.items.push(value);
                  })*/
                 .done(function (value) {
-                    $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
-                    $rootScope.tracks = $rootScope.artiste.tracks;
-                    $rootScope.$apply();
-                    $rootScope.loadingTracks = false;
+                    $timeout(function () {
+                        $rootScope.$apply(function () {
+                            $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
+                            $rootScope.tracks = $rootScope.artiste.tracks;
+                        })
+                        $rootScope.loadingTracks = false;
+                    })
                     function saveTrack (track) {
                         if (track.redirectUrl == undefined) {
                             track.redirectUrl = track.url;
