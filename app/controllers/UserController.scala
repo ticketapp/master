@@ -67,4 +67,10 @@ object UserController extends Controller {
       ).executeUpdate()
     }
   }
+
+
+  def findFacebookAccessToken = Action {
+//    InMemoryUserService
+    Ok
+  }
 }
