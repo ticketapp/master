@@ -116,7 +116,7 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
                             if (el.tariffRange != undefined) {
                                 var tariffs = el.tariffRange.split('-');
                                 if (tariffs[1] > tariffs[0]) {
-                                    el.tariffRange = tariffs[0].replace('.0', '') + '€ - ' +
+                                    el.tariffRange = tariffs[0].replace('.0', '') + ' - ' +
                                         tariffs[1].replace('.0', '') + '€';
                                 } else {
                                     el.tariffRange = tariffs[0].replace('.0', '') + '€';

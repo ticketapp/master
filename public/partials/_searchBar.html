@@ -1,9 +1,6 @@
-<input ng-if="!filter" id="searchBar" placeholder="Search" ng-model="$root.research"
+<input ng-if="!filter" id="searchBar" placeholder="Rechercher" ng-model="$root.research"
        ng-model-options="{ getterSetter: true }"
-       class="column small-10 medium-3">
-<input ng-if="filter" id="searchBar" placeholder="Filter by {{$root.filterType}}"
-       ng-change="$root.resizeImgHeight()"
-       ng-model="$root.filterQuery"
+       style="border-radius: 0px;"
        class="column small-10 medium-3">
 <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
        ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)"

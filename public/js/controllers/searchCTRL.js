@@ -1,5 +1,5 @@
 app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout', function($rootScope, $http, $scope, $filter, oboe, $timeout){
-    $scope.limit = 20;
+    $scope.limit = 12;
     $scope.artists = [];
     $scope.artistsFb = [];
     $scope.organizers = [];
@@ -198,7 +198,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                 if (el.tariffRange != undefined) {
                                     var tariffs = el.tariffRange.split('-');
                                     if (tariffs[1] > tariffs[0]) {
-                                        el.tariffRange = tariffs[0].replace('.0', '') + '€ - ' +
+                                        el.tariffRange = tariffs[0].replace('.0', '') + ' - ' +
                                             tariffs[1].replace('.0', '') + '€';
                                     } else {
                                         el.tariffRange = tariffs[0].replace('.0', '') + '€';
@@ -401,7 +401,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                                     if (el.tariffRange != undefined) {
                                         var tariffs = el.tariffRange.split('-');
                                         if (tariffs[1] > tariffs[0]) {
-                                            el.tariffRange = tariffs[0].replace('.0', '') + '€ - ' +
+                                            el.tariffRange = tariffs[0].replace('.0', '') + ' - ' +
                                                 tariffs[1].replace('.0', '') + '€';
                                         } else {
                                             el.tariffRange = tariffs[0].replace('.0', '') + '€';
@@ -530,7 +530,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     textSlider.push(slider[ii].getElementsByClassName('md-thumb')[0]);
                 }
             }
-            console.log(textSlider)
             if ($rootScope.path == 'search' || textSlider.length >= 2) {
                 clearInterval(waitForSearchBar);
                 for (var i = 0; i < textSlider.length; i++) {
@@ -538,13 +537,15 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
                         $filter('millSecondsToTimeString')(newName) + '</b>';
                 }
+            } else if (_selEvent == false || _research.length > 0) {
+                clearInterval(waitForSearchBar);
             }
         }, 100);
     }
     $scope.initializeTime();
     console.log($rootScope.geoLoc);
     $scope.moreLimit = function () {
-        offset = offset + 20;
+        offset = offset + 12;
         $scope.loadingMore = true;
         $rootScope.resizeImgHeight();
         search();
@@ -555,7 +556,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _research = newName;
             $scope.searchPat = newName;
-            $scope.limit = 20;
+            $scope.limit = 12;
             offset = 0;
             if (_research.length == 0) {
                 $scope.initializeTime()
@@ -573,7 +574,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             _selArtist = newName;
             search();
             searchArtistFb();
-            $scope.limit = 20;
+            $scope.limit = 12;
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
@@ -585,7 +586,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _selEvent = newName;
             search();
-            $scope.limit = 20;
+            $scope.limit = 12;
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
@@ -598,7 +599,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _selPlace = newName;
             search();
-            $scope.limit = 20;
+            $scope.limit = 12;
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
@@ -610,7 +611,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         if (angular.isDefined(newName)) {
             _selUsr = newName;
             search();
-            $scope.limit = 20;
+            $scope.limit = 12;
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
@@ -646,7 +647,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             _selStart = newName;
             clearTimeout(StartTimer);
             StartTimer = setTimeout(search, doneStartInterval);
-            $scope.limit = 20;
+            $scope.limit = 12;
             offset = 0;
             $scope.loadingMore = true;
             return _selStart;

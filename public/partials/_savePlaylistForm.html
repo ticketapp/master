@@ -1,6 +1,6 @@
 <form ng-submit="createNewPlaylist(playlist)">
-    <input type="text" ng-model="$root.playlist.name" placeholder="PlaylistName">
-    <a class="button" ng-click="cancel()">cancel</a>
+    <input type="text" ng-model="$root.playlist.name" placeholder="Nom de la playlist">
+    <a class="button" ng-click="cancel()">Annuler</a>
     <input type="submit" value="créer une nouvelle playlist" class="button"/>
     <a class="button" ng-if="newPlaylist == false" ng-click="cancel()">
         Mettre à jours

@@ -3,8 +3,20 @@
 </div>
 <div class="parallax-content column" style="background: #ffffff">
     <div class="columns large-12">
-        <p class="column large-10 padding0">le {{ event.startTime | date:'dd/MM - HH:mm'}} @ <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places"> {{ place.name }}</a></p>
-        <button class="float-right" ng-click="$root.follow('events', event.eventId, event.name)">Suivre</button>
+        <p class="column medium-10 padding0">
+            <i  style="font-size: 30px; color: #008CBA;"
+                class="fi-calendar"></i>
+            <b style="line-height: 24px; vertical-align: text-bottom;">
+                {{ event.startTime | date:'dd/MM - HH:mm'}}
+            </b>
+            <a href="#/lieu/{{ place.placeId }}"
+               ng-class="{'column padding0': $root.window == 'small'}"
+               data-ng-repeat="place in event.places">
+                <i class="fa fa-map-marker" style="font-size: 30px;"></i>
+                <b style="line-height: 24px; vertical-align: text-bottom;">{{ place.name }}</b>
+            </a>
+        </p>
+        <button class="float-right column medium-2" ng-click="$root.follow('events', event.eventId, event.name)">Suivre</button>
         <h2 id="eventTitle" class="column padding0" style="margin-top:0">{{event.name}}</h2>
     </div>
     <div ng-if="$root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'"

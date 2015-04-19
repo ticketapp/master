@@ -40,7 +40,10 @@
         <span ng-show="$root.window != 'small' || showEventDetail">
             <div class="img-circularPlayer float-right"
                  ng-if="event.tariffRange != undefined"
-                 style="background: {{event.priceColor}}; padding-top: 26px; color: #ffffff; text-align: center;">
+                 style="background: {{event.priceColor}};
+                  height: 70px;
+                  width: 70px;
+                 padding-top: 21px; color: #ffffff; text-align: center;">
                 <b>{{event.tariffRange}}</b>
             </div>
             <br/>

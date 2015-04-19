@@ -1,7 +1,7 @@
 <div class="column large-12" ng-if="$root.connected == false">
     <a ng-click="connectLink('http://localhost:9000/authenticate/facebook')"> <img src="/assets/securesocial/images/providers/facebook.png"></a>
     <a ng-click="connectLink('http://localhost:9000/authenticate/google')"> <img src="/assets/securesocial/images/providers/google.png"></a>
-    <a ng-click="authMail = !authMail">Auth by mail</a>
+    <a ng-click="$parent.authMail = !$parent.authMail">Auth by mail</a>
 </div>
 <form ng-if="!signUp && authMail" ng-submit="connectByMail()" class="column large-12" autocomplete="off">
     <fieldset>

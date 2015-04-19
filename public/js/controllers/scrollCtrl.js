@@ -27,9 +27,9 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         /*else {
          }*/
         /*$http.get('http://www.corsproxy.com/youtube.com/get_video_info?video_id=X8pBHM9u4ko').
-            success(function (data) {
-                console.log(data)
-            })*/
+         success(function (data) {
+         console.log(data)
+         })*/
         $scope.needConnect = false;
         $rootScope.lastReq = {};
         $rootScope.follow = function (route, id, name) {
@@ -129,8 +129,8 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                     genre: artist.genre
                 }
             }).start(function (data, etc) {
-                    $rootScope.loadingTracks = true;
-                })
+                $rootScope.loadingTracks = true;
+            })
                 /*.node('champ.*', function (value) {
                  $scope.items.push(value);
                  })*/
@@ -188,7 +188,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             }, 100)
         };
         $rootScope.window = 'large';
-         $rootScope.marginContent = function() {
+        $rootScope.marginContent = function() {
             if ($rootScope.path != 'home') {
                 var waitForContentParallax = setTimeout(function () {
                     var content = document.getElementsByClassName('parallax-content');
