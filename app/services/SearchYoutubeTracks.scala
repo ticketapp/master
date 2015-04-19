@@ -2,6 +2,7 @@ package services
 
 import models.{Artist, Track}
 import play.api.libs.iteratee.Enumerator
+import play.api.libs.iteratee.Input.EOF
 import play.api.libs.ws.{WS, Response}
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -16,38 +17,45 @@ object SearchYoutubeTracks {
   val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
-  def getYoutubeTracksForArtist(artist: Artist, pattern: String): Future[Set[Track]] =
-    getMaybeEchonestIdByFacebookId(artist) flatMap {
-      case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
-      case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern) }
+  def getYoutubeTracksForArtist(artist: Artist, pattern: String): Enumerator[Set[Track]] = Enumerator.flatten(
+    getMaybeEchonestIdByFacebookId(artist) map {
+    case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
+    case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
+    }
+  )
 
-  def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Future[Set[Track]] = {
+  def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Enumerator[Set[Track]] = {
     val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksForArtist
-    getMaybeEchonestArtistUrlsByFacebookId(facebookId) flatMap {
+
+    val toBeReturned = getMaybeEchonestArtistUrlsByFacebookId(facebookId).map {
       case Some(idUrls: (String, Set[String])) =>
         val echonestId = idUrls._1
         val echonestWebsites = idUrls._2
         if ((echonestWebsites intersect artist.websites).nonEmpty)
           getYoutubeTracksByEchonestId(artist, echonestId)
         else
-          Future { Set.empty }
+          Enumerator.eof[Set[Track]]
       case None => getYoutubeTracksIfNotFoundDirectlyByEchonest(artist, pattern)
     }
+    Enumerator.flatten(toBeReturned)
   }
 
-  def getYoutubeTracksIfNotFoundDirectlyByEchonest(artist: Artist, pattern: String): Future[Set[Track]] = {
+  def getYoutubeTracksIfNotFoundDirectlyByEchonest(artist: Artist, pattern: String): Enumerator[Set[Track]] = {
     val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksIfEchonestIdNotFoundByFacebookId
-    getEchonestIdCorrespondingToFacebookId(
-      getSeqTupleEchonestIdFacebookId(artist.name), facebookId
-    ) flatMap {
-      case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
-      case None => getEchonestIdCorrespondingToFacebookId(
-        getSeqTupleEchonestIdFacebookId(pattern), facebookId
-      ) flatMap {
-        case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
-        case None => Future { Set.empty }
-      }
+    val toBeReturned = getEchonestIdCorrespondingToFacebookId(getSeqTupleEchonestIdFacebookId(artist.name), facebookId)
+    .map {
+      case Some(echonestId) =>
+        getYoutubeTracksByEchonestId(artist, echonestId)
+      case None =>
+        Enumerator.flatten(
+          getEchonestIdCorrespondingToFacebookId(getSeqTupleEchonestIdFacebookId(pattern), facebookId)
+            .map {
+            case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
+            case None => Enumerator.eof[Set[Track]]
+          }
+        )
     }
+    Enumerator.flatten(toBeReturned)
   }
 
   def getEchonestIdCorrespondingToFacebookId(eventuallyTuplesEchonestIdFacebookId: Future[Seq[(String, String)]],
@@ -62,16 +70,21 @@ object SearchYoutubeTracks {
     }
   }
 
-  def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Future[Set[Track]] = {
-    Future { saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId.getOrElse(-1L))) }
-    getEchonestSongs(0, echonestId).flatMap { echonestSongsTitle: Set[String] =>
+  def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Enumerator[Set[Track]] = {
+    Future {
+      saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId.getOrElse(-1L)))
+    }
+    getEchonestSongFrom0(echonestId).flatMap { echonestSongsTitle: Set[String] =>
       getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
     }
   }
 
-  def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Future[Set[Track]] =
-    Future.sequence(tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) })
-      .map { _.flatten }
+  def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Enumerator[Set[Track]] =
+    Enumerator.flatten(
+      Future.sequence(
+        tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) }
+      ).map { nestedTracks => Enumerator(nestedTracks.flatten) }
+    )
 
   def getYoutubeTracksByTitleAndArtistName(artist: Artist, trackTitle: String): Future[Seq[Track]] = {
     WS.url("https://www.googleapis.com/youtube/v3/search")
@@ -82,7 +95,9 @@ object SearchYoutubeTracks {
         "videoCategoryId" -> "10",
         "key" -> youtubeKey)
       .get()
-      .map { readYoutubeTracks(_, artist) }
+      .map {
+      readYoutubeTracks(_, artist)
+    }
   }
 
   def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
@@ -105,7 +120,7 @@ object SearchYoutubeTracks {
   }
 
   def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean = {
-  //val ArtistNameRegex = artist.name.toLowerCase.r
+    //val ArtistNameRegex = artist.name.toLowerCase.r
     trackTitle.toLowerCase contains artistName.toLowerCase
     /*match {
       case ArtistNameRegex(title) => true
@@ -120,7 +135,9 @@ object SearchYoutubeTracks {
         "id" -> s"facebook:artist:$facebookArtistId",
         "format" -> "json")
       .get()
-      .map { readMaybeEchonestArtistIdAndUrls }
+      .map {
+      readMaybeEchonestArtistIdAndUrls
+    }
   }
 
   def readMaybeEchonestArtistIdAndUrls(echonestResponse: Response): Option[(String, Set[String])] = {
@@ -148,7 +165,9 @@ object SearchYoutubeTracks {
         "id" -> ("facebook:artist:" + artist.facebookId),
         "format" -> "json")
       .get()
-      .map { getEchonestIdIfEqualNames(_, artist.name) }
+      .map {
+      getEchonestIdIfEqualNames(_, artist.name)
+    }
   }
 
   def getEchonestIdIfEqualNames(echonestResponse: Response, artistName: String): Option[String] = {
@@ -163,9 +182,25 @@ object SearchYoutubeTracks {
       None
   }
 
-  def getEchonestSongs(start: Long, echonestArtistId: String): Future[Set[String]] = {
-    //faire une inner foncion pour start à 0
-   val a = WS.url("http://developer.echonest.com/api/v4/artist/songs")
+  def getEchonestSongFrom0(echonestArtistId: String): Enumerator[Set[String]] = {
+    def getEchonestSongs(start: Long, echonestArtistId: String): Enumerator[Set[String]] = {
+      Enumerator.flatten(getEchonestSongsWSCall(start: Long, echonestArtistId: String)
+        .map { echonestResponse =>
+        val total = (echonestResponse \ "response" \ "total").asOpt[Int]
+        val songs = readEchonestSongs(echonestResponse)
+        total.exists(_ > start + 100) match {
+          case false =>
+            Enumerator.eof
+          case true =>
+            Enumerator.interleave(Enumerator(songs), getEchonestSongs(start + 100, echonestArtistId))
+        }
+      })
+    }
+    getEchonestSongs(0, echonestArtistId)
+  }
+
+  def getEchonestSongsWSCall(start: Long, echonestArtistId: String): Future[JsValue] = {
+    WS.url("http://developer.echonest.com/api/v4/artist/songs")
       .withQueryString(
         "api_key" -> echonestApiKey,
         "id" -> echonestArtistId,
@@ -174,16 +209,6 @@ object SearchYoutubeTracks {
         "results" -> "100")
       .get()
       .map (_.json)
-      a.flatMap { result =>
-        val total = (result \ "response" \ "total").asOpt[Int]
-        val songs = readEchonestSongs(result)
-        /*println(songs)
-        println(start)*/
-        total.exists(_ > start + 100) && start < 300 match {
-          case false => Future.successful(songs)
-          case true => getEchonestSongs(start + 100, echonestArtistId) map (songs ++ _)
-        }
-      }
   }
 
   def readEchonestSongs(result: JsValue): Set[String] = {
