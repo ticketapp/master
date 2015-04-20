@@ -103,6 +103,51 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
         }
 
+        function getEventsByContaining() {
+            EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
+                events.forEach(refactorGeopoint);
+                events.forEach(colorEvent);
+                updateScope(events, $scope.events, 'eventId');
+                $scope.loadingMore = false;
+            });
+        }
+
+        function getEventsArtistByContaining() {
+            EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
+                events.forEach(refactorGeopoint);
+                events.forEach(colorEvent);
+                updateScope(events, $scope.events, 'eventId');
+                $scope.loadingMore = false;
+            });
+        }
+
+        function getEventsByGenre() {
+            EventsFactory.getEventsByGenre(_research, offset).then(function (events) {
+                events.forEach(refactorGeopoint);
+                events.forEach(colorEvent);
+                updateScope(events, $scope.events, 'eventId');
+                $scope.loadingMore = false;
+            });
+        }
+
+        function getPlacesEventsByContaining() {
+            EventsFactory.getPlacesEventsByContaining(_research).then(function (events) {
+                events.forEach(refactorGeopoint);
+                events.forEach(colorEvent);
+                updateScope(events, $scope.events, 'eventId');
+                $scope.loadingMore = false;
+            });
+        }
+
+        function getEventsByCity() {
+            EventsFactory.getEventsByCity(_research, offset).then(function (events) {
+                events.forEach(refactorGeopoint);
+                events.forEach(colorEvent);
+                updateScope(events, $scope.events, 'eventId');
+                $scope.loadingMore = false;
+            });
+        }
+
         function search () {
             if (_research.length == 0) {
                 if (_selEvent == true) {
@@ -244,59 +289,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         })
                     }, 0);
                 }
-                EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
-                    events.forEach(refactorGeopoint);
-                    events.forEach(colorEvent);
-                    updateScope(events, $scope.events, 'eventId');
-                    $scope.loadingMore = false;
-                });
-                EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
-                    events.forEach(refactorGeopoint);
-                    events.forEach(colorEvent);
-                    updateScope(events, $scope.events, 'eventId');
-                    $scope.loadingMore = false;
-                });
-                EventsFactory.getEventsByGenre(_research, offset).then(function (events) {
-                    events.forEach(refactorGeopoint);
-                    events.forEach(colorEvent);
-                    updateScope(events, $scope.events, 'eventId');
-                    $scope.loadingMore = false;
-                });                                                                         
-                /*$http.get('/events/containing/' + _research + '/' + $rootScope.geoLoc).
-                    success(function (data, status, headers, config) {
-                        for (var i = 0; i < data.length; i++) {
-                            if (data[i].name.toLowerCase().indexOf(_research.toLowerCase()) > -1) {
-                                uploadEvents(data[i]);
-                            }
-                        }
-                        $scope.loadingMore = false;
-
-
-                        $http.get('/places/containing/'+_research).
-                            success(function(data, status, headers, config) {
-                                function getPlaceEvents (place) {
-                                    $http.get('/places/'+ place.placeId + '/events ').
-                                        success(function(data){
-                                            
-                                            data.forEach(uploadEvents);
-                                            $rootScope.resizeImgHeight()
-                                        })
-                                }
-                                data.forEach(getPlaceEvents)
-                            });
-                        $http.get('/events/nearCity/' + _research + '/12/' + offset ).
-                            success(function (data) {
-                                
-                                data.forEach(uploadEvents);
-                                $rootScope.resizeImgHeight()
-                            });
-                        $rootScope.resizeImgHeight()
-                        $scope.loadingMore = false;
-                    }).
-                    error(function (data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                    });*/
+                getEventsByContaining();
+                getEventsArtistByContaining();
+                getEventsByGenre();
+                getPlacesEventsByContaining();
+                getEventsByCity();
             }
         }
     }

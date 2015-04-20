@@ -55,6 +55,30 @@ app.factory ('EventsFactory', function ($http, $q){
             }
             return deferred.promise;
         },
+        getPlacesEventsByContaining : function (pattern) {
+            var deferred = $q.defer();
+            if(factory.events == true){
+                deferred.resolve(factory.events);
+            } else {
+                var placesEvents = [];
+                $http.get('/places/containing/'+ pattern).
+                    success(function(data, status, headers, config) {
+                        function getPlaceEvents (place) {
+                            $http.get('/places/'+ place.placeId + '/events ').
+                                success(function(data){
+                                    function pushEvents (event) {
+                                        placesEvents.push(event)
+                                    }
+                                    data.forEach(pushEvents)
+                                    factory.events = placesEvents;
+                                    deferred.resolve(factory.events);
+                                })
+                        }
+                        data.forEach(getPlaceEvents)
+                    });
+            }
+            return deferred.promise;
+        },
         getEventsByGenre : function (pattern, offset) {
             var deferred = $q.defer();
             if(factory.events == true){
@@ -62,6 +86,19 @@ app.factory ('EventsFactory', function ($http, $q){
             } else {
                 $http.get('/genres/'+ pattern +'/12/' + offset + '/events ').
                     success(function(data, status, headers, config) {
+                        factory.events = data;
+                        deferred.resolve(factory.events);
+                    });
+            }
+            return deferred.promise;
+        },
+        getEventsByCity : function (pattern, offset) {
+            var deferred = $q.defer();
+            if(factory.events == true){
+                deferred.resolve(factory.events);
+            } else {
+                $http.get('/events/nearCity/' + pattern + '/12/' + offset ).
+                    success(function (data) {
                         factory.events = data;
                         deferred.resolve(factory.events);
                     });
