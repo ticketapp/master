@@ -159,7 +159,9 @@
     <div ng-show="events.length >= $parent.$parent.limit || artists.length >= $parent.$parent.limit ||
     places.length >= $parent.$parent.limit || users.length >= $parent.$parent.limit"
          layout="row" layout-align="center center">
-        <button ng-click="moreLimit(); $parent.$parent.limit = $parent.$parent.limit + 12" class="column large-5">Voir plus</button>
+        <button ng-click="moreLimit(); $parent.$parent.limit = $parent.$parent.limit + 12" class="column large-5">
+            Voir plus
+        </button>
     </div>
 </div>
 

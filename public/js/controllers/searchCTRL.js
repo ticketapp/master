@@ -145,8 +145,18 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             $scope.artistsFb = [];
         } else {
             if (_selArtist == true) {
-                $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
-                $scope.artists = $filter('filter')($scope.artists, {name :  _research});
+                if (_research != 'electro' &&
+                    _research != 'reggae' &&
+                    _research != 'rock' &&
+                    _research != 'jazz' &&
+                    _research != 'musique du monde' &&
+                    _research != 'musique latine' &&
+                    _research != 'classique' &&
+                    _research != 'hip-hop' &&
+                    _research != 'chanson' || offset == 0) {
+                    $scope.artistsFb = $filter('filter')($scope.artistsFb, {name: _research});
+                    $scope.artists = $filter('filter')($scope.artists, {name: _research});
+                }
                 $http.get('/artists/containing/'+_research).
                     success(function(data, status, headers, config) {
                         var scopeIdList = [];
@@ -154,17 +164,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             scopeIdList.push(el.artistId);
                         }
                         $scope.artists.forEach(getArtistId);
-                        if ($scope.artists.length == 0) {
-                            $scope.artists = data;
-                        } else {
-                            function uploadArtists(el, index, array) {
-                                if (scopeIdList.indexOf(el.artistId) == -1) {
-                                    $scope.artists.push(el);
-                                    $rootScope.resizeImgHeight();
-                                }
+                        function uploadArtists(el, index, array) {
+                            if (scopeIdList.indexOf(el.artistId) == -1) {
+                                $scope.artists.push(el);
+                                $rootScope.resizeImgHeight();
                             }
-                            data.forEach(uploadArtists)
                         }
+                        data.forEach(uploadArtists)
                         $rootScope.resizeImgHeight();
                         $scope.loadingMore = false;
                         $http.get('/genres/' +_research + '/12/' + offset + '/artists').
@@ -241,15 +247,25 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selEvent == true) {
-                $timeout(function() {
-                    $scope.$apply(function () {
-                        $scope.events = $filter('filter')($scope.events, {name: _research})
-                        $scope.scopeIdList = [];
-                    })
-                },0);
+                if (_research != 'electro' &&
+                    _research != 'reggae' &&
+                    _research != 'rock' &&
+                    _research != 'jazz' &&
+                    _research != 'musique du monde' &&
+                    _research != 'musique latine' &&
+                    _research != 'classique' &&
+                    _research != 'hip-hop' &&
+                    _research != 'chanson' || offset == 0) {
+                    $timeout(function () {
+                        $scope.$apply(function () {
+                            $scope.events = $filter('filter')($scope.events, {name: _research})
+                        })
+                    }, 0);
+                }
                 $http.get('/events/containing/' + _research + '/' + $rootScope.geoLoc).
                     success(function (data, status, headers, config) {
                         function uploadEvents(el, index, array) {
+                            $scope.scopeIdList = [];
                             $timeout(function() {
                                 $scope.$apply(function () {
                                     function getEventsId(el, index, array) {
@@ -417,7 +433,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             if (_research.length == 0) {
                 $scope.initializeTime()
             }
-            if (_selArtist == true && _research.length > 2) {
+            if (_selArtist == true && _research.length > 2 &&
+                _research != 'electro' &&
+                _research != 'reggae' &&
+                _research != 'rock' &&
+                _research != 'jazz' &&
+                _research != 'musique du monde' &&
+                _research != 'musique latine' &&
+                _research != 'classique' &&
+                _research != 'hip-hop' &&
+                _research != 'chanson'
+                ) {
                 $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(searchArtistFb, doneTypingInterval);
