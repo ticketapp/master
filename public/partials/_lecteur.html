@@ -39,7 +39,11 @@
         <i ng-click="savePlaylist()" ng-show="showLecteur"
            class="fi-save lecteurControls float-left"
                 ng-class="{'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
-        <i class="fi-volume float-left lecteurControls" ng-show="showLecteur"
+        <i class="fa float-left lecteurControls"
+           ng-class="{'fa-volume-down': $parent.levelVol <= 50 && $parent.levelVol > 0 ,
+           'fa-volume-up': $parent.levelVol > 50, 'fa-volume-off': $parent.levelVol == 0}"
+           style="line-height: 20px;"
+           ng-show="showLecteur"
            ng-if="$root.window != 'small' && $root.window != 'medium'"
            ng-mouseover="$parent.showVol = true"></i>
         <div style="padding-left: 50px; margin-left: 150px;" class="absolute" ng-if="showVol"
@@ -98,7 +102,7 @@ margin-left: 5px;"
         <a target="_blank" href="{{trackActive.redirectUrl}}"
            style="font-size: 24px; height: 20px; padding-left: 5px; color: white"
            class="float-left"
-           ng-if="trackActive.platform == 'y'">
+           ng-if="trackActive.platform == 's'">
             <i style="display: block; height:20px; width:35px;" class="fi-soundcloud float-left"></i>
         </a>
         <a href="https://youtube.com/watch?v={{trackActive.url}}"

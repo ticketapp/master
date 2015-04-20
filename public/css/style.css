@@ -261,6 +261,24 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     height: 50px;
     width: 50px;
 }
+.fi-claude {
+    background-image: url('../img/logo.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    height: 50px;
+    width: 50px;
+}
+.fi-claude-min {
+    background-image: url('../img/claude%20icone%203.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    height: 50px;
+    width: 50px;
+}
 .fi-mixcloud {
     background-image: url('../img/mixcloud-logo.png');
     width: 44px;
