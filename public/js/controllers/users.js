@@ -1,4 +1,4 @@
-app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http, $rootScope, $location, $timeout){
+app.controller ('UsersCtrl', function ($scope, $routeParams, $http, $rootScope, $location, $timeout){
     $scope.map = false;
     $scope.zoom = 13;
     $scope.heightMap = '300px';
