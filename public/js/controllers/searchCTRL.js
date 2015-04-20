@@ -337,18 +337,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     }
     function searchArtistFb () {
         $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
-        
         if ($scope.artistsFb.length < $scope.limit && _selArtist == true && _research.length > 1) {
             $scope.loadingFbArt = true;
             $http.get('/artists/facebookContaining/'+_research)
-                /*.start(function (data, etc) {
-                })
-                /*.node('champ.*', function (value) {
-                    $scope.items.push(value);
-                })*/
                 .success(function (value) {
                     $scope.loadingFbArt = false;
-                    
                     var artistFbIdList = [];
                     function updateArtistFb (artistInfo) {
                         function getArtistFbIdInArtists (el) {
@@ -357,13 +350,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         $scope.artists.forEach(getArtistFbIdInArtists);
                         $scope.artistsFb.forEach(getArtistFbIdInArtists);
                         if (artistFbIdList.indexOf(artistInfo.facebookId) < 0) {
-                            
                             artistInfo.tracks = [];
                             artistFbIdList.push(artistInfo.facebookId);
                             $scope.artistsFb.push(artistInfo);
                             $rootScope.resizeImgHeight();
-
-                        } else {
                         }
                     }
                     value.forEach(updateArtistFb);
@@ -428,6 +418,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 $scope.initializeTime()
             }
             if (_selArtist == true && _research.length > 2) {
+                $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(searchArtistFb, doneTypingInterval);
             }

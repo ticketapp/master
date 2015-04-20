@@ -6,7 +6,7 @@
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-3">
         <div ng-if="$root.activEvent && events.length > 0"
              class="float-left column small-12 medium-6 large-4 min_contener data-ng-event margin0"
-            data-ng-repeat="event in events | filter: searchPat">
+            data-ng-repeat="event in events">
         </div>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
@@ -45,7 +45,7 @@
         </div>
         <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
              ng-if="$root.activArtist && artistsFb.length > 0"
-            data-ng-repeat="artist in artistsFb | filter: searchPat"
+            data-ng-repeat="artist in artistsFb"
             style="padding-bottom: 10px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
