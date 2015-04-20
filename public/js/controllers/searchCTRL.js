@@ -1,160 +1,158 @@
-app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout', 'ArtistsFactory',
-    function($rootScope, $http, $scope, $filter, oboe, $timeout, ArtistsFactory){
-    $scope.limit = 12;
-    $scope.artists = [];
-    $scope.artistsFb = [];
-    $scope.organizers = [];
-    $scope.places = [];
-    $scope.events = [];
-    $scope.loadingMore = true;
-    var offset = 0;
-    var _selArtist = $rootScope.activArtist;
-    var _selEvent = $rootScope.activEvent;
-    var _selUsr = $rootScope.activUsr;
-    var _selPlace = $rootScope.activPlace;
-    var _selStart = ($rootScope.maxStart-23)*24;
-    if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
-        var _research = $rootScope.storeSearch;
-        $rootScope.remStoreSearch();
-    } else if (document.getElementById('searchBar') != null) {
-        var _research = document.getElementById('searchBar').value.trim();
-    } else {
-        var _research = '';
-    }
-    function updateScope (data, scope, idName) {
-        var scopeIdList = [];
-        function getId(el, index, array) {
-            var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
-            scopeIdList.push(idDictionnary[idName]);
+app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout', 'ArtistsFactory', 'EventsFactory',
+    function($rootScope, $http, $scope, $filter, oboe, $timeout, ArtistsFactory, EventsFactory){
+        $scope.limit = 12;
+        $scope.artists = [];
+        $scope.artistsFb = [];
+        $scope.organizers = [];
+        $scope.places = [];
+        $scope.events = [];
+        $scope.loadingMore = true;
+        var offset = 0;
+        var _selArtist = $rootScope.activArtist;
+        var _selEvent = $rootScope.activEvent;
+        var _selUsr = $rootScope.activUsr;
+        var _selPlace = $rootScope.activPlace;
+        var _selStart = ($rootScope.maxStart-23)*24;
+        if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
+            var _research = $rootScope.storeSearch;
+            $rootScope.remStoreSearch();
+        } else if (document.getElementById('searchBar') != null) {
+            var _research = document.getElementById('searchBar').value.trim();
+        } else {
+            var _research = '';
         }
-        scope.forEach(getId);
-        function pushEl (el, index, array) {
-            var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
-            if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
-                $scope.artists.push(el);
+        function updateScope (data, scope, idName) {
+            var scopeIdList = [];
+            function getId(el, index, array) {
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
+                scopeIdList.push(idDictionnary[idName]);
             }
-        }
-        data.forEach(pushEl);
-        $rootScope.resizeImgHeight();
-    }
-    function getArtists () {
-        ArtistsFactory.getArtists(offset).then(function (artists) {
-            updateScope(artists, $scope.artists, 'artistId');
-            $scope.loadingMore = false;
-        });
-    }
-    function getArtistsByGenre () {
-        ArtistsFactory.getArtistsByGenre(offset, _research).then(function (artists) {
-            updateScope(artists, $scope.artists, 'artistId');
-        })
-    }
-    function getArtistsByContaining () {
-        ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
-            updateScope(artists, $scope.artists, 'artistId');
-            $scope.loadingMore = false;
-            getArtistsByGenre()
-        });
-    }
-
-    function search () {
-        if (_research.length == 0) {
-            if (_selEvent == true) {
-                var eventsLenght = $scope.events.length;
-                var maxStartTime =  _selStart*3600000 + new Date().getTime();
-                for (var e = 0; e < eventsLenght; e++) {
-                    if ($scope.events[e].startTime > maxStartTime) {
-                        $scope.events.splice(e, 1)
-                        $scope.$apply();
-                        e = e -1;
-                        eventsLenght = eventsLenght - 1;
-                    }
+            scope.forEach(getId);
+            function pushEl (el, index, array) {
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
+                if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
+                    scope.push(el);
                 }
-                $http.get('/events/inInterval/' + _selStart + '/' + $rootScope.geoLoc + '/12/' + offset).
-                    success(function (data, status, headers, config) {
-                        var scopeIdList = [];
-                        function getEventId(el, index, array) {
-                            scopeIdList.push(el.eventId);
-                        }
-                        $scope.events.forEach(getEventId);
-                        function uploadEvents(el, index, array) {
-                            if (scopeIdList.indexOf(el.eventId) == -1) {
-                                el.priceColor = 'rgb(0, 140, 186)';
-                                var placeLenght = el.places.length
-                                for (var i = 0; i < placeLenght; i++) {
-                                    if (el.places[i].geographicPoint != undefined) {
-                                        el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
-                                        el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
-                                        el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
-                                    }
-                                }
-                                if (el.tariffRange != undefined) {
-                                    var tariffs = el.tariffRange.split('-');
-                                    if (tariffs[1] > tariffs[0]) {
-                                        el.tariffRange = tariffs[0].replace('.0', '') + ' - ' +
-                                            tariffs[1].replace('.0', '') + '€';
-                                    } else {
-                                        el.tariffRange = tariffs[0].replace('.0', '') + '€';
-                                    }
-                                    el.priceColor = 'rgb(' + tariffs[0]*2 + ',' + (200 - (tariffs[0]*4 ) )+
-                                        ',' + tariffs[0]*4 + ')'
-                                }
-                                $scope.events.push(el);
+            }
+            data.forEach(pushEl);
+            $rootScope.resizeImgHeight();
+        }
+        function colorEvent(el) {
+            el.priceColor = 'rgb(0, 140, 186)';
+            if (el.tariffRange != undefined) {
+                var tariffs = el.tariffRange.split('-');
+                if (tariffs[1] > tariffs[0]) {
+                    el.tariffRange = tariffs[0].replace('.0', '') + ' - ' +
+                        tariffs[1].replace('.0', '') + '€';
+                } else {
+                    el.tariffRange = tariffs[0].replace('.0', '') + '€';
+                }
+                el.priceColor = 'rgb(' + tariffs[0] * 2 + ',' + (200 - (tariffs[0] * 4 ) ) +
+                    ',' + tariffs[0] * 4 + ')'
+            }
+        }
+
+        function refactorGeopoint(el) {
+            var placeLenght = el.places.length
+            for (var i = 0; i < placeLenght; i++) {
+                if (el.places[i].geographicPoint != undefined) {
+                    el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
+                    el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
+                    el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
+                }
+            }
+        }
+
+        function filterEventsByTime() {
+            var eventsLenght = $scope.events.length;
+            var maxStartTime = _selStart * 3600000 + new Date().getTime();
+            for (var e = 0; e < eventsLenght; e++) {
+                if ($scope.events[e].startTime > maxStartTime) {
+                    $scope.events.splice(e, 1)
+                    $scope.$apply();
+                    e = e - 1;
+                    eventsLenght = eventsLenght - 1;
+                }
+            }
+        }
+        function getArtists () {
+            ArtistsFactory.getArtists(offset).then(function (artists) {
+                updateScope(artists, $scope.artists, 'artistId');
+                $scope.loadingMore = false;
+            });
+        }
+        function getArtistsByGenre () {
+            ArtistsFactory.getArtistsByGenre(offset, _research).then(function (artists) {
+                updateScope(artists, $scope.artists, 'artistId');
+            })
+        }
+        function getArtistsByContaining () {
+            ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
+                updateScope(artists, $scope.artists, 'artistId');
+                $scope.loadingMore = false;
+                getArtistsByGenre()
+            });
+        }
+
+        function getEvents() {
+            EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
+                events.forEach(refactorGeopoint)
+                events.forEach(colorEvent)
+                updateScope(events, $scope.events, 'eventId');
+                $scope.loadingMore = false;
+            });
+        }
+
+        function search () {
+            if (_research.length == 0) {
+                if (_selEvent == true) {
+                    getEvents();
+                }
+                if (_selArtist == true) {
+                    getArtists()
+                }
+                if (_selUsr == true) {
+                    $http.get('/organizers/all/12/' + offset).
+                        success(function(data, status, headers, config) {
+                            if (data != $scope.organizers) {
+                                $scope.organizers = data;
                             }
-                        }
-                        data.forEach(uploadEvents)
-                        $rootScope.resizeImgHeight();
-                        $scope.loadingMore = false;
-                    }).
-                    error(function (data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                    });
-            }
-            if (_selArtist == true) {
-                getArtists()
-            }
-            if (_selUsr == true) {
-                $http.get('/organizers/all/12/' + offset).
-                    success(function(data, status, headers, config) {
-                        if (data != $scope.organizers) {
-                            $scope.organizers = data;
-                        }
-                        $rootScope.resizeImgHeight()
-                        $scope.loadingMore = false;
-                    }).
-                    error(function(data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                    });
-            }
-            if (_selPlace == true) {
-                $http.get('/places/' + $rootScope.geoLoc + '/12/' + offset).
-                    success(function(data, status, headers, config) {
-                        var scopeIdList = [];
-                        function getPlaceId(el, index, array) {
-                            scopeIdList.push(el.placeId);
-                        }
-                        $scope.places.forEach(getPlaceId);
-                        function uploadPlaces(el, index, array) {
-                            if (scopeIdList.indexOf(el.placeId) == -1) {
-                                if (el.geographicPoint != undefined) {
-                                    el.geographicPoint = el.geographicPoint.replace("(", "");
-                                    el.geographicPoint = el.geographicPoint.replace(")", "");
-                                    el.geographicPoint = el.geographicPoint.replace(",", ", ");
-                                }
-                                $scope.places.push(el);
+                            $rootScope.resizeImgHeight()
+                            $scope.loadingMore = false;
+                        }).
+                        error(function(data, status, headers, config) {
+                            // called asynchronously if an error occurs
+                            // or server returns response with an error status.
+                        });
+                }
+                if (_selPlace == true) {
+                    $http.get('/places/' + $rootScope.geoLoc + '/12/' + offset).
+                        success(function(data, status, headers, config) {
+                            var scopeIdList = [];
+                            function getPlaceId(el, index, array) {
+                                scopeIdList.push(el.placeId);
                             }
-                        }
-                        data.forEach(uploadPlaces)
-                        $rootScope.resizeImgHeight();
-                        $scope.loadingMore = false;
-                    }).
-                    error(function(data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                    });
-            }
-            $scope.artistsFb = [];
+                            $scope.places.forEach(getPlaceId);
+                            function uploadPlaces(el, index, array) {
+                                if (scopeIdList.indexOf(el.placeId) == -1) {
+                                    if (el.geographicPoint != undefined) {
+                                        el.geographicPoint = el.geographicPoint.replace("(", "");
+                                        el.geographicPoint = el.geographicPoint.replace(")", "");
+                                        el.geographicPoint = el.geographicPoint.replace(",", ", ");
+                                    }
+                                    $scope.places.push(el);
+                                }
+                            }
+                            data.forEach(uploadPlaces)
+                            $rootScope.resizeImgHeight();
+                            $scope.loadingMore = false;
+                        }).
+                        error(function(data, status, headers, config) {
+                            // called asynchronously if an error occurs
+                            // or server returns response with an error status.
+                        });
+                }
+                $scope.artistsFb = [];
         } else {
             if (_selArtist == true) {
                 if (_research != 'electro' &&
@@ -246,44 +244,20 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         })
                     }, 0);
                 }
-                $http.get('/events/containing/' + _research + '/' + $rootScope.geoLoc).
+                EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
+                    events.forEach(refactorGeopoint);
+                    events.forEach(colorEvent);
+                    updateScope(events, $scope.events, 'eventId');
+                    $scope.loadingMore = false;
+                });
+                EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
+                    events.forEach(refactorGeopoint);
+                    events.forEach(colorEvent);
+                    updateScope(events, $scope.events, 'eventId');
+                    $scope.loadingMore = false;
+                });
+                /*$http.get('/events/containing/' + _research + '/' + $rootScope.geoLoc).
                     success(function (data, status, headers, config) {
-                        function uploadEvents(el, index, array) {
-                            $scope.scopeIdList = [];
-                            $timeout(function() {
-                                $scope.$apply(function () {
-                                    function getEventsId(el, index, array) {
-                                        $scope.scopeIdList.push(el.eventId);
-                                    }
-                                    $scope.events.forEach(getEventsId);
-                                });
-                                if ($scope.scopeIdList.indexOf(el.eventId) == -1) {
-                                    el.priceColor = 'rgb(0, 140, 186)';
-                                    var placeLenght = el.places.length
-                                    for (var i = 0; i < placeLenght; i++) {
-                                        if (el.places[i].geographicPoint != undefined) {
-                                            el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
-                                            el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
-                                            el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
-                                        }
-                                    }
-                                    if (el.tariffRange != undefined) {
-                                        var tariffs = el.tariffRange.split('-');
-                                        if (tariffs[1] > tariffs[0]) {
-                                            el.tariffRange = tariffs[0].replace('.0', '') + ' - ' +
-                                                tariffs[1].replace('.0', '') + '€';
-                                        } else {
-                                            el.tariffRange = tariffs[0].replace('.0', '') + '€';
-                                        }
-                                        el.priceColor = 'rgb(' + tariffs[0]*2 + ',' + (200 - (tariffs[0]*4 ) )+
-                                            ',' + tariffs[0]*4 + ')'
-                                    }
-                                    $scope.events.push(el);
-                                    $scope.scopeIdList.push(el.eventId);
-                                    
-                                }
-                            },0);
-                        }
                         for (var i = 0; i < data.length; i++) {
                             if (data[i].name.toLowerCase().indexOf(_research.toLowerCase()) > -1) {
                                 uploadEvents(data[i]);
@@ -331,7 +305,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     error(function (data, status, headers, config) {
                         // called asynchronously if an error occurs
                         // or server returns response with an error status.
-                    });
+                    });*/
             }
         }
     }
@@ -523,7 +497,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             }
             _selStart = newName;
             clearTimeout(StartTimer);
-            StartTimer = setTimeout(search, doneStartInterval);
+            StartTimer = setTimeout(function () {
+                search();
+                filterEventsByTime();
+            }, doneStartInterval);
             $scope.loadingMore = true;
             return _selStart;
         }
