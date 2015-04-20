@@ -45,7 +45,7 @@
         </div>
         <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
              ng-if="$root.activArtist && artistsFb.length > 0"
-            data-ng-repeat="artist in artistsFb"
+            data-ng-repeat="artist in artistsFb | filter: searchPat"
             style="padding-bottom: 10px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
@@ -84,7 +84,7 @@
         <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
             ng-if="$root.activPlace && places.length > 0"
             style="padding-bottom: 10px;"
-            data-ng-repeat="place in places" >
+            data-ng-repeat="place in places | filter: searchPat" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow" ng-if="place.placeId != -1">
@@ -140,7 +140,7 @@
         </div>
         <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
              ng-if="$root.activUsr && organizers.length > 0"
-            data-ng-repeat="organizer in organizers">
+            data-ng-repeat="organizer in organizers | filter: searchPat">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">

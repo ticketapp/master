@@ -73,7 +73,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             for (var e = 0; e < eventsLenght; e++) {
                 if ($scope.events[e].startTime > maxStartTime) {
                     $scope.events.splice(e, 1)
-                    $scope.$apply();
                     e = e - 1;
                     eventsLenght = eventsLenght - 1;
                 }
@@ -99,6 +98,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
 
         function getEvents() {
+            filterEventsByTime();
             EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
                 events.forEach(colorEvent)
                 updateScope(events, $scope.events, 'eventId');
@@ -108,6 +108,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getEventsByContaining() {
             EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
+                $scope.events = $filter('filter')(events, {name: _research})
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -232,17 +233,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 getOrganizersByContaining();
             }
             if (_selEvent == true) {
-                if (_research != 'electro' &&
-                    _research != 'reggae' &&
-                    _research != 'rock' &&
-                    _research != 'jazz' &&
-                    _research != 'musique du monde' &&
-                    _research != 'musique latine' &&
-                    _research != 'classique' &&
-                    _research != 'hip-hop' &&
-                    _research != 'chanson' || offset == 0) {
-                    $scope.events = $filter('filter')($scope.events, {name: _research})
-                }
                 getEventsByContaining();
                 getEventsArtistByContaining();
                 getEventsByGenre();
@@ -301,10 +291,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         $rootScope.resizeImgHeight();
         search();
     };
-    var typingTimer;
-    var doneTypingInterval = 600;
+    var facebookSearch;
+    var facebookSearchInterval = 600;
+    var otherSearch;
+    var otherSearchInterval = 300;
     $scope.research = function(newName) {
         if (angular.isDefined(newName)) {
+            $scope.loadingMore = true;
             _research = newName;
             $scope.searchPat = newName;
             $scope.limit = 12;
@@ -324,10 +317,11 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 _research != 'chanson'
                 ) {
                 $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(searchArtistFb, doneTypingInterval);
+                clearTimeout(facebookSearch);
+                facebookSearch = setTimeout(searchArtistFb, facebookSearchInterval);
             }
-            search();
+            clearTimeout(otherSearch);
+            otherSearch = setTimeout(search, otherSearchInterval);
         }
         return _research;
     };
