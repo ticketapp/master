@@ -61,7 +61,15 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                 place.location.city + '+' +
                                 place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
                                 success(function (data) {
-
+                                    if (place.location.street == undefined) {
+                                        place.location.street = '';
+                                    }
+                                    if (place.location.zip == undefined) {
+                                        place.location.zip = '';
+                                    }
+                                    if (place.location.city == undefined) {
+                                        place.location.city = '';
+                                    }
                                     var loc = '(' + data.results[0].geometry.location.lat +
                                         ',' + data.results[0].geometry.location.lng + ')';
                                     if (place.cover != undefined) {
@@ -72,7 +80,13 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                             capacity: place.checkins,
                                             description: place.description,
                                             webSite: place.website,
-                                            imagePath : place.cover.source
+                                            imagePath : place.cover.source,
+                                            address : {
+                                                geographicPoint: loc,
+                                                city: place.location.city,
+                                                zip: place.location.zip,
+                                                street: place.location.street
+                                            }
                                         }).success(function(data){
 
                                         }).error(function(data){
@@ -111,7 +125,6 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                                 }).error(function (data) {
 
                                                 })
-                                                $rootScope.resizeImgHeight();
                                             })
                                     }
                                 });

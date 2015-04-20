@@ -188,6 +188,10 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
  h1, h2, h3, h4, h5 {
       font-family: "Blanch-CapsInline";
  }*/
+/*.carousel {
+    background-image: url('../img/caroussel1.png');
+    background-size: 100%;
+}*/
 .fi-soundcloud {
     background-image: url('../img/logoBlackSoundcloud.png');
     width: 44px;
@@ -489,8 +493,10 @@ md-toast{position: fixed!important;}
     width: 100%;
     background: #ffffff;
 }
-.mapControls{padding: 5px;
+.mapControls{
+    padding: 5px;
     color: white;
+    float: right;
     background: rgb(0, 140, 186);
 }
 /*tools*/

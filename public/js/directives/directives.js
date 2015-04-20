@@ -16,6 +16,12 @@ app.directive('ngSearchBar', function(){
       templateUrl:'assets/partials/_searchBar.html'
     }
 });
+app.directive('mapControls', function(){
+    return{
+      restrict : 'E',
+      templateUrl:'assets/partials/_mapControls.html'
+    }
+});
 app.directive('ngSearch', function(){
     return{
         restrict : 'C',

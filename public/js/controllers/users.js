@@ -73,7 +73,7 @@ app.controller ('UsersCtrl', function ($scope, UserFactory, $routeParams, $http,
         .success(function(data, status){
             $scope.organizer = data;
             $rootScope.marginContent();
-
+            console.log(data)
             if ($scope.organizer.geographicPoint != undefined) {
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace("(", "");
                 $scope.organizer.geographicPoint = $scope.organizer.geographicPoint.replace(")", "");
