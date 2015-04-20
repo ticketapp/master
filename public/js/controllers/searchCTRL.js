@@ -461,6 +461,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
+            } else {
+                $scope.artists = []
             }
         }
         return _selArtist;
@@ -474,6 +476,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             if (newName == true) {
                 $scope.loadingMore = true;
                 $scope.initializeTime()
+            } else {
+                $scope.events = []
             }
         }
         return _selEvent;
@@ -486,6 +490,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
+            } else {
+                $scope.places = []
             }
         }
         return _selPlace;
@@ -498,6 +504,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             offset = 0;
             if (newName == true) {
                 $scope.loadingMore = true;
+            } else {
+                $scope.organizers = []
             }
         }
         return _selUsr;
