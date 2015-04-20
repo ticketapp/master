@@ -108,7 +108,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getEventsByContaining() {
             EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
-                $scope.events = $filter('filter')(events, {name: _research})
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -233,6 +232,17 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 getOrganizersByContaining();
             }
             if (_selEvent == true) {
+                if (_research != 'electro' &&
+                    _research != 'reggae' &&
+                    _research != 'rock' &&
+                    _research != 'jazz' &&
+                    _research != 'musique du monde' &&
+                    _research != 'musique latine' &&
+                    _research != 'classique' &&
+                    _research != 'hip-hop' &&
+                    _research != 'chanson' || offset == 0) {
+                    $scope.events = $filter('filter')($scope.events, {name: _research})
+                }
                 getEventsByContaining();
                 getEventsArtistByContaining();
                 getEventsByGenre();
