@@ -45,6 +45,21 @@ app.factory('ArtistsFactory', function ($http, $q) {
                     });
             }
             return deferred.promise;
+        },
+        getArtistsFacebookByContaining : function (pattern) {
+            var deferred = $q.defer();
+            if(factory.artists == true){
+                deferred.resolve(factory.artists);
+            } else {
+                $http.get('/artists/facebookContaining/'+pattern)
+                    .success(function(data, status){
+                        factory.artists = data;
+                        deferred.resolve(factory.artists);
+                    }).error(function(data, status){
+                        deferred.reject('erreur');
+                    });
+            }
+            return deferred.promise;
         }
     };
     return factory;

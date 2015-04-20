@@ -23,15 +23,20 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         } else {
             var _research = '';
         }
-        function updateScope (data, scope, idName) {
+        function updateScope (data, scope, idName, otherScopeToCheck) {
             var scopeIdList = [];
             function getId(el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId, 'placeId': el.placeId};
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
+                    'placeId': el.placeId, 'facebookId': el.facebookId};
                 scopeIdList.push(idDictionnary[idName]);
+            }
+            if (otherScopeToCheck != undefined) {
+                otherScopeToCheck.forEach(getId);
             }
             scope.forEach(getId);
             function pushEl (el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId, 'placeId': el.placeId};
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
+                    'placeId': el.placeId, 'facebookId': el.facebookId};
                 if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
                     scope.push(el);
                 }
@@ -179,6 +184,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
         }
 
+        function getArtistsFacebook() {
+            ArtistsFactory.getArtistsFacebookByContaining(_research).then(function (artists) {
+                console.log(artists)
+                updateScope(artists, $scope.artistsFb, 'facebookId', $scope.artists);
+                $scope.loadingFbArt = false;
+            });
+        }
         function search () {
             if (_research.length == 0) {
                 if (_selEvent == true) {
@@ -229,11 +241,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     _research != 'classique' &&
                     _research != 'hip-hop' &&
                     _research != 'chanson' || offset == 0) {
-                    $timeout(function () {
-                        $scope.$apply(function () {
-                            $scope.events = $filter('filter')($scope.events, {name: _research})
-                        })
-                    }, 0);
+                    $scope.events = $filter('filter')($scope.events, {name: _research})
                 }
                 getEventsByContaining();
                 getEventsArtistByContaining();
@@ -243,33 +251,12 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             }
         }
     }
+
     function searchArtistFb () {
         $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
         if ($scope.artistsFb.length < $scope.limit && _selArtist == true && _research.length > 1) {
             $scope.loadingFbArt = true;
-            $http.get('/artists/facebookContaining/'+_research)
-                .success(function (value) {
-                    $scope.loadingFbArt = false;
-                    var artistFbIdList = [];
-                    function updateArtistFb (artistInfo) {
-                        function getArtistFbIdInArtists (el) {
-                            artistFbIdList.push(el.facebookId);
-                        }
-                        $scope.artists.forEach(getArtistFbIdInArtists);
-                        $scope.artistsFb.forEach(getArtistFbIdInArtists);
-                        if (artistFbIdList.indexOf(artistInfo.facebookId) < 0) {
-                            artistInfo.tracks = [];
-                            artistFbIdList.push(artistInfo.facebookId);
-                            $scope.artistsFb.push(artistInfo);
-                            $rootScope.resizeImgHeight();
-                        }
-                    }
-                    value.forEach(updateArtistFb);
-                })
-                .error(function (error) {
-                    $scope.loadingFbArt = false;
-
-                });
+            getArtistsFacebook();
         }
     }
     search();
