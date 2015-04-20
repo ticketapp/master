@@ -15,6 +15,21 @@ app.factory ('PlaceFactory', function ($http, $q){
                     });
                 }
                 return deferred.promise;
+            },
+            getPlacesByContaining : function (pattern) {
+                var deferred = $q.defer();
+                if(factory.places == true) {
+                    deferred.resolve(factory.places);
+                } else {
+                    $http.get('/places/containing/'+ pattern)
+                        .success(function(data, status) {
+                            factory.places = data;
+                            deferred.resolve(factory.places);
+                    }).error(function(data, status) {
+                        deferred.reject('erreur');
+                    });
+                }
+                return deferred.promise;
             }
 		};
 		return factory;

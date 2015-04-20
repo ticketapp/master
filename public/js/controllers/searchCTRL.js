@@ -163,6 +163,14 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
         }
 
+        function getPlacesByContaining() {
+            PlaceFactory.getPlacesByContaining(_research).then(function (places) {
+                places.forEach(refactorGeopoint);
+                updateScope(places, $scope.places, 'placeId');
+                $scope.loadingMore = false;
+            });
+        }
+
         function search () {
             if (_research.length == 0) {
                 if (_selEvent == true) {
@@ -196,35 +204,12 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             }
             if (_selPlace == true) {
                 $scope.places = $filter('filter')($scope.places, {name :  _research});
-                $http.get('/places/containing/'+_research).
-                    success(function(data, status, headers, config) {
-                        var scopeIdList = [];
-                        function getPlaceId(el, index, array) {
-                            scopeIdList.push(el.placeId);
-                        }
-                        $scope.places.forEach(getPlaceId);
-                            function uploadPlaces(el, index, array) {
-                                if (scopeIdList.indexOf(el.placeId) == -1) {
-                                    if (el.geographicPoint != undefined) {
-                                        el.geographicPoint = el.geographicPoint.replace("(", "");
-                                        el.geographicPoint = el.geographicPoint.replace(")", "");
-                                        el.geographicPoint = el.geographicPoint.replace(",", ", ");
-                                    }
-                                    $scope.places.push(el);
-                                }
-                            }
-                            data.forEach(uploadPlaces)
-                        $http.get('/places/nearCity/' +  _research + '/12/' + offset).
-                            success(function (data) {
-                                data.forEach(uploadPlaces)
-                            });
-                        $rootScope.resizeImgHeight()
-                        $scope.loadingMore = false;
-                    }).
-                    error(function(data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
+                getPlacesByContaining();
+                $http.get('/places/nearCity/' +  _research + '/12/' + offset).
+                    success(function (data) {
+                        data.forEach(uploadPlaces)
                     });
+
             }
             if (_selOrganizer == true) {
                 $scope.organizers = $filter('filter')($scope.organizers, {nickname :  _research});
