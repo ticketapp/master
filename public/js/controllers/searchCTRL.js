@@ -1,4 +1,5 @@
-app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout', function($rootScope, $http, $scope, $filter, oboe, $timeout){
+app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout', 'ArtistsFactory',
+    function($rootScope, $http, $scope, $filter, oboe, $timeout, ArtistsFactory){
     $scope.limit = 12;
     $scope.artists = [];
     $scope.artistsFb = [];
@@ -20,12 +21,42 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     } else {
         var _research = '';
     }
+    function updateScope (data, scope, idName) {
+        var scopeIdList = [];
+        function getId(el, index, array) {
+            var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
+            scopeIdList.push(idDictionnary[idName]);
+        }
+        scope.forEach(getId);
+        function pushEl (el, index, array) {
+            var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
+            if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
+                $scope.artists.push(el);
+            }
+        }
+        data.forEach(pushEl);
+        $rootScope.resizeImgHeight();
+    }
+    function getArtists () {
+        ArtistsFactory.getArtists(offset).then(function (artists) {
+            updateScope(artists, $scope.artists, 'artistId');
+            $scope.loadingMore = false;
+        });
+    }
+    function getArtistsByGenre () {
+        ArtistsFactory.getArtistsByGenre(offset, _research).then(function (artists) {
+            updateScope(artists, $scope.artists, 'artistId');
+        })
+    }
+    function getArtistsByContaining () {
+        ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
+            updateScope(artists, $scope.artists, 'artistId');
+            $scope.loadingMore = false;
+            getArtistsByGenre()
+        });
+    }
+
     function search () {
-        $rootScope.activArtist = _selArtist;
-        $rootScope.activEvent = _selEvent;
-        $rootScope.activPlace = _selPlace;
-        $rootScope.activUsr = _selUsr;
-        $scope.filterSearch = _research;
         if (_research.length == 0) {
             if (_selEvent == true) {
                 var eventsLenght = $scope.events.length;
@@ -80,26 +111,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     });
             }
             if (_selArtist == true) {
-                $http.get('/artists/since/' + offset + '/12').
-                    success(function (data, status, headers, config) {
-                        var scopeIdList = [];
-                        function getArtistId(el, index, array) {
-                            scopeIdList.push(el.artistId);
-                        }
-                        $scope.artists.forEach(getArtistId);
-                        function uploadArtists(el, index, array) {
-                            if (scopeIdList.indexOf(el.artistId) == -1) {
-                                $scope.artists.push(el);
-                            }
-                        }
-                        data.forEach(uploadArtists)
-                        $rootScope.resizeImgHeight();
-                        $scope.loadingMore = false;
-                    }).
-                    error(function (data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                    });
+                getArtists()
             }
             if (_selUsr == true) {
                 $http.get('/organizers/all/12/' + offset).
@@ -157,35 +169,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     $scope.artistsFb = $filter('filter')($scope.artistsFb, {name: _research});
                     $scope.artists = $filter('filter')($scope.artists, {name: _research});
                 }
-                $http.get('/artists/containing/'+_research).
-                    success(function(data, status, headers, config) {
-                        var scopeIdList = [];
-                        function getArtistId(el, index, array) {
-                            scopeIdList.push(el.artistId);
-                        }
-                        $scope.artists.forEach(getArtistId);
-                        function uploadArtists(el, index, array) {
-                            if (scopeIdList.indexOf(el.artistId) == -1) {
-                                $scope.artists.push(el);
-                                $rootScope.resizeImgHeight();
-                            }
-                        }
-                        data.forEach(uploadArtists)
-                        $rootScope.resizeImgHeight();
-                        $scope.loadingMore = false;
-                        $http.get('/genres/' +_research + '/12/' + offset + '/artists').
-                            success(function(data, status, headers, config) {
-                                data.forEach(uploadArtists)
-                            }).
-                            error(function(data, status, headers, config) {
-                                // called asynchronously if an error occurs
-                                // or server returns response with an error status.
-                            });
-                    }).
-                    error(function(data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                    });
+                getArtistsByContaining();
             }
             if (_selPlace == true) {
                 $scope.places = $filter('filter')($scope.places, {name :  _research});

@@ -1,4 +1,4 @@
-app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, $http, $rootScope, $websocket, $timeout, $filter, $modal){
+app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScope, $websocket, $timeout, $filter, $modal){
     $scope.bigTracks = true;
     $scope.trackLimit = 12;
     $scope.heightDesc = '147px';
@@ -6,7 +6,6 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
     $scope.showDesc = false;
     $scope.selectedTab = 0;
     $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
-        
         $scope.suggest = false;
         if (trackTitle.length > 2) {
             artistName = artistName.toLowerCase().replace('officiel', '');
