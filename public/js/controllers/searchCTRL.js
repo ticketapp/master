@@ -297,6 +297,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     $scope.initializeTime();
     $scope.moreLimit = function () {
         offset = offset + 12;
+        $scope.limit = $scope.limit + 12;
         $scope.loadingMore = true;
         $rootScope.resizeImgHeight();
         search();
