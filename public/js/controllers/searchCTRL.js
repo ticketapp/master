@@ -1,5 +1,6 @@
-app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout', 'ArtistsFactory', 'EventsFactory',
-    function($rootScope, $http, $scope, $filter, oboe, $timeout, ArtistsFactory, EventsFactory){
+app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout',
+    'ArtistsFactory', 'EventsFactory', 'OrganizerFactory',
+    function($rootScope, $http, $scope, $filter, oboe, $timeout, ArtistsFactory, EventsFactory, OrganizerFactory){
         $scope.limit = 12;
         $scope.artists = [];
         $scope.artistsFb = [];
@@ -10,7 +11,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         var offset = 0;
         var _selArtist = $rootScope.activArtist;
         var _selEvent = $rootScope.activEvent;
-        var _selUsr = $rootScope.activUsr;
+        var _selOrganizer = $rootScope.activUsr;
         var _selPlace = $rootScope.activPlace;
         var _selStart = ($rootScope.maxStart-23)*24;
         if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
@@ -24,12 +25,12 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         function updateScope (data, scope, idName) {
             var scopeIdList = [];
             function getId(el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId};
                 scopeIdList.push(idDictionnary[idName]);
             }
             scope.forEach(getId);
             function pushEl (el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId};
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId};
                 if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
                     scope.push(el);
                 }
@@ -148,6 +149,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
         }
 
+        function getOrganizersByContaining() {
+            OrganizerFactory.getOrganizersByContaining(_research).then(function (organizers) {
+                updateScope(organizers, $scope.organizers, 'organizerId');
+                $scope.loadingMore = false;
+            });
+        }
+
         function search () {
             if (_research.length == 0) {
                 if (_selEvent == true) {
@@ -156,7 +164,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 if (_selArtist == true) {
                     getArtists()
                 }
-                if (_selUsr == true) {
+                if (_selOrganizer == true) {
                     $http.get('/organizers/all/12/' + offset).
                         success(function(data, status, headers, config) {
                             if (data != $scope.organizers) {
@@ -246,32 +254,9 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                         // or server returns response with an error status.
                     });
             }
-            if (_selUsr == true) {
+            if (_selOrganizer == true) {
                 $scope.organizers = $filter('filter')($scope.organizers, {nickname :  _research});
-                $http.get('/organizers/containing/'+_research).
-                    success(function(data, status, headers, config) {
-                        var scopeIdList = [];
-                        function getOrganizerId(el, index, array) {
-                            scopeIdList.push(el.organizerId);
-                        }
-                        $scope.organizers.forEach(getOrganizerId);
-                        if ($scope.organizers.length == 0) {
-                            $scope.organizers = data;
-                        } else {
-                            function uploadUsers(el, index, array) {
-                                if ($scope.organizers.indexOf(el) < -1) {
-                                    $scope.organizers.push(el);
-                                }
-                            }
-                            data.forEach(uploadUsers);
-                        }
-                        $rootScope.resizeImgHeight()
-                        $scope.loadingMore = false;
-                    }).
-                    error(function(data, status, headers, config) {
-                        // called asynchronously if an error occurs
-                        // or server returns response with an error status.
-                    });
+                getOrganizersByContaining();
             }
             if (_selEvent == true) {
                 if (_research != 'electro' &&
@@ -444,7 +429,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     };
     $scope.selUsr = function(newName) {
         if (angular.isDefined(newName)) {
-            _selUsr = newName;
+            _selOrganizer = newName;
             search();
             $scope.limit = 12;
             offset = 0;
@@ -454,7 +439,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                 $scope.organizers = []
             }
         }
-        return _selUsr;
+        return _selOrganizer;
     };
     var StartTimer;
     var doneStartInterval = 600;
