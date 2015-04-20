@@ -48,10 +48,22 @@ app.factory ('EventsFactory', function ($http, $q){
                                     data.forEach(pushEvents)
                                     factory.events = artistsEvents;
                                     deferred.resolve(factory.events);
-                                    console.log(artistsEvents)
                                 })
                         }
                         data.forEach(getArtistEvents);
+                    });
+            }
+            return deferred.promise;
+        },
+        getEventsByGenre : function (pattern, offset) {
+            var deferred = $q.defer();
+            if(factory.events == true){
+                deferred.resolve(factory.events);
+            } else {
+                $http.get('/genres/'+ pattern +'/12/' + offset + '/events ').
+                    success(function(data, status, headers, config) {
+                        factory.events = data;
+                        deferred.resolve(factory.events);
                     });
             }
             return deferred.promise;

@@ -256,6 +256,12 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     updateScope(events, $scope.events, 'eventId');
                     $scope.loadingMore = false;
                 });
+                EventsFactory.getEventsByGenre(_research, offset).then(function (events) {
+                    events.forEach(refactorGeopoint);
+                    events.forEach(colorEvent);
+                    updateScope(events, $scope.events, 'eventId');
+                    $scope.loadingMore = false;
+                });                                                                         
                 /*$http.get('/events/containing/' + _research + '/' + $rootScope.geoLoc).
                     success(function (data, status, headers, config) {
                         for (var i = 0; i < data.length; i++) {
@@ -264,23 +270,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             }
                         }
                         $scope.loadingMore = false;
-                        $http.get('/artists/containing/'+_research).
-                            success(function(data, status, headers, config) {
-                                function getArtistEvents (art) {
-                                    $http.get('/artists/'+ art.facebookUrl + '/events ').
-                                        success(function(data){
-                                            data.forEach(uploadEvents);
-                                            $rootScope.resizeImgHeight()
-                                        })
-                                }
-                                data.forEach(getArtistEvents)
-                                $scope.loadingMore = false;
-                            });
-                        $http.get('/genres/'+ _research +'/20/' + offset + '/events ').
-                            success(function(data, status, headers, config) {
-                                data.forEach(uploadEvents);
-                                $rootScope.resizeImgHeight()
-                            });
+
+
                         $http.get('/places/containing/'+_research).
                             success(function(data, status, headers, config) {
                                 function getPlaceEvents (place) {
