@@ -156,6 +156,13 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
         }
 
+        function getOrganizers() {
+            OrganizerFactory.getOrganizers(offset).then(function (organizers) {
+                updateScope(organizers, $scope.organizers, 'organizerId');
+                $scope.loadingMore = false;
+            });
+        }
+
         function search () {
             if (_research.length == 0) {
                 if (_selEvent == true) {
@@ -165,18 +172,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     getArtists()
                 }
                 if (_selOrganizer == true) {
-                    $http.get('/organizers/all/12/' + offset).
-                        success(function(data, status, headers, config) {
-                            if (data != $scope.organizers) {
-                                $scope.organizers = data;
-                            }
-                            $rootScope.resizeImgHeight()
-                            $scope.loadingMore = false;
-                        }).
-                        error(function(data, status, headers, config) {
-                            // called asynchronously if an error occurs
-                            // or server returns response with an error status.
-                        });
+                    getOrganizers();
                 }
                 if (_selPlace == true) {
                     $http.get('/places/' + $rootScope.geoLoc + '/12/' + offset).
