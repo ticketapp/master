@@ -146,6 +146,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         } else {
             if (_selArtist == true) {
                 $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
+                $scope.artists = $filter('filter')($scope.artists, {name :  _research});
                 $http.get('/artists/containing/'+_research).
                     success(function(data, status, headers, config) {
                         var scopeIdList = [];
@@ -159,12 +160,21 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                             function uploadArtists(el, index, array) {
                                 if (scopeIdList.indexOf(el.artistId) == -1) {
                                     $scope.artists.push(el);
+                                    $rootScope.resizeImgHeight();
                                 }
                             }
                             data.forEach(uploadArtists)
                         }
                         $rootScope.resizeImgHeight();
                         $scope.loadingMore = false;
+                        $http.get('/genres/' +_research + '/12/' + offset + '/artists').
+                            success(function(data, status, headers, config) {
+                                data.forEach(uploadArtists)
+                            }).
+                            error(function(data, status, headers, config) {
+                                // called asynchronously if an error occurs
+                                // or server returns response with an error status.
+                            });
                     }).
                     error(function(data, status, headers, config) {
                         // called asynchronously if an error occurs

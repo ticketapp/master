@@ -6,11 +6,11 @@
         class="small-block-grid-1 medium-block-grid-2 large-block-grid-3">
         <div ng-if="$root.activEvent && events.length > 0"
              class="float-left column small-12 medium-6 large-4 min_contener data-ng-event margin0"
-            data-ng-repeat="event in events">
+            data-ng-repeat="event in events | filter: searchPat">
         </div>
         <div ng-if="$root.activArtist && artists.length > 0"
              class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
-            data-ng-repeat="artist in artists | filter: searchPat"
+            data-ng-repeat="artist in artists"
             style="padding-bottom: 10px;">
             <div class="block_event_min">
                 <div class="img_min_evnt">
@@ -84,7 +84,7 @@
         <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
             ng-if="$root.activPlace && places.length > 0"
             style="padding-bottom: 10px;"
-            data-ng-repeat="place in places | filter: searchPat" >
+            data-ng-repeat="place in places" >
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow" ng-if="place.placeId != -1">
@@ -140,7 +140,7 @@
         </div>
         <div class="column large-4 medium-6 float-left marginBottom20 marginLeft0 marginRight0 minNoText"
              ng-if="$root.activUsr && organizers.length > 0"
-            data-ng-repeat="organizer in organizers | filter: searchPat">
+            data-ng-repeat="organizer in organizers">
             <div class="block_event_min">
                 <div class="img_min_evnt">
                     <div class="toGrow">
@@ -156,9 +156,9 @@
     <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
         <md-progress-circular md-mode="indeterminate"></md-progress-circular>
     </div>
-    <div ng-if="events.length >= limit || artists.length >= limit || artistsFb.length >= limit || places.length >= limit || users.length >= limit"
+    <div ng-if="events.length >= limit || artists.length >= limit || places.length >= limit || users.length >= limit"
          layout="row" layout-align="center center">
-        <button ng-click="moreLimit(); $parent.limit = $parent.limit + 20" class="column large-5">Voir plus</button>
+        <button ng-click="moreLimit(); $parent.limit = $parent.limit + 12" class="column large-5">Voir plus</button>
     </div>
 </div>
 

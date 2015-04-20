@@ -201,7 +201,7 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
+    float: left;
     height: 50px;
     width: 50px;
 }
@@ -210,7 +210,7 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
+    float: left;
     height: 50px;
     width: 50px;
 }
@@ -219,7 +219,7 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
+    float: left;
     height: 50px;
     width: 50px;
 }
@@ -237,7 +237,7 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
+    float: left;
     height: 50px;
     width: 50px;
 }
@@ -248,7 +248,7 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
+    float: left;
     height: 50px;
     width: 50px;
 }
@@ -257,7 +257,7 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
+    float: left;
     height: 50px;
     width: 50px;
 }
