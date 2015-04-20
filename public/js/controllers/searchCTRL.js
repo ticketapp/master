@@ -480,6 +480,8 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
     var doneStartInterval = 600;
     $scope.selStart = function(newName) {
         if (angular.isDefined(newName)) {
+            $scope.limit = 12;
+            offset = 0;
             if (newName > 23 && newName <= 38) {
                 newName = (newName - 23) * 24
             } else if (newName > 38 && newName <= 40) {
@@ -504,8 +506,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             _selStart = newName;
             clearTimeout(StartTimer);
             StartTimer = setTimeout(search, doneStartInterval);
-            $scope.limit = 12;
-            offset = 0;
             $scope.loadingMore = true;
             return _selStart;
         }

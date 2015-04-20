@@ -104,7 +104,13 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                                     capacity: place.checkins,
                                                     description: place.description,
                                                     webSite: place.website,
-                                                    imagePath: data.source
+                                                    imagePath: data.source,
+                                                    address : {
+                                                        geographicPoint: loc,
+                                                        city: place.location.city,
+                                                        zip: place.location.zip,
+                                                        street: place.location.street
+                                                    }
                                                 }).success(function (data) {
 
                                                 }).error(function (data) {
@@ -119,7 +125,13 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
                                                     geographicPoint: loc,
                                                     capacity: place.checkins,
                                                     description: place.description,
-                                                    webSite: place.website
+                                                    webSite: place.website,
+                                                    address : {
+                                                        geographicPoint: loc,
+                                                        city: place.location.city,
+                                                        zip: place.location.zip,
+                                                        street: place.location.street
+                                                    }
                                                 }).success(function (data) {
 
                                                 }).error(function (data) {

@@ -37,10 +37,13 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
                                         for (var i = 0; i < pagesLength; i++) {
                                             if (pages[i].category == 'Concert tour') {
                                                 //folow organizer
+                                                //post if not exist
                                             } else if (pages[i].category == "Musician/band") {
                                                 //folowArtist
+                                                // post if not exist
                                             } else if (pages[i].category == "concert venue") {
                                                 //folowPlace
+                                                // post if not exist
                                             }
                                         }
                                         getFbPages(next)

@@ -51,6 +51,7 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope
         $http.get('/playlists').
             success(function(data) {
                 $scope.playlists = data;
+                console.log(data)
             })
     };
     $scope.deletePlaylist = function (playlistId) {
