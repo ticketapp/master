@@ -171,6 +171,14 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
         }
 
+        function getPlacesByCity() {
+            PlaceFactory.getPlacesByCity(_research, offset).then(function (places) {
+                places.forEach(refactorGeopoint);
+                updateScope(places, $scope.places, 'placeId');
+                $scope.loadingMore = false;
+            });
+        }
+
         function search () {
             if (_research.length == 0) {
                 if (_selEvent == true) {
@@ -205,11 +213,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             if (_selPlace == true) {
                 $scope.places = $filter('filter')($scope.places, {name :  _research});
                 getPlacesByContaining();
-                $http.get('/places/nearCity/' +  _research + '/12/' + offset).
-                    success(function (data) {
-                        data.forEach(uploadPlaces)
-                    });
-
+                getPlacesByCity();
             }
             if (_selOrganizer == true) {
                 $scope.organizers = $filter('filter')($scope.organizers, {nickname :  _research});
