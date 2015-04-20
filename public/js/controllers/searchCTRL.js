@@ -1,6 +1,7 @@
 app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe', '$timeout',
-    'ArtistsFactory', 'EventsFactory', 'OrganizerFactory',
-    function($rootScope, $http, $scope, $filter, oboe, $timeout, ArtistsFactory, EventsFactory, OrganizerFactory){
+    'ArtistsFactory', 'EventsFactory', 'OrganizerFactory', 'PlaceFactory',
+    function($rootScope, $http, $scope, $filter, oboe, $timeout, ArtistsFactory, EventsFactory, OrganizerFactory,
+             PlaceFactory){
         $scope.limit = 12;
         $scope.artists = [];
         $scope.artistsFb = [];
@@ -25,12 +26,12 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         function updateScope (data, scope, idName) {
             var scopeIdList = [];
             function getId(el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId};
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId, 'placeId': el.placeId};
                 scopeIdList.push(idDictionnary[idName]);
             }
             scope.forEach(getId);
             function pushEl (el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId};
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId, 'placeId': el.placeId};
                 if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
                     scope.push(el);
                 }
@@ -54,13 +55,10 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
         }
 
         function refactorGeopoint(el) {
-            var placeLenght = el.places.length
-            for (var i = 0; i < placeLenght; i++) {
-                if (el.places[i].geographicPoint != undefined) {
-                    el.places[i].geographicPoint = el.geographicPoint.replace("(", "");
-                    el.places[i].geographicPoint = el.geographicPoint.replace(")", "");
-                    el.places[i].geographicPoint = el.geographicPoint.replace(",", ", ");
-                }
+            if (el.geographicPoint != undefined) {
+                el.geographicPoint = el.geographicPoint.replace("(", "");
+                el.geographicPoint = el.geographicPoint.replace(")", "");
+                el.geographicPoint = el.geographicPoint.replace(",", ", ");
             }
         }
 
@@ -97,7 +95,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getEvents() {
             EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
-                events.forEach(refactorGeopoint)
                 events.forEach(colorEvent)
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -106,7 +103,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getEventsByContaining() {
             EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
-                events.forEach(refactorGeopoint);
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -115,7 +111,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getEventsArtistByContaining() {
             EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
-                events.forEach(refactorGeopoint);
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -124,7 +119,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getEventsByGenre() {
             EventsFactory.getEventsByGenre(_research, offset).then(function (events) {
-                events.forEach(refactorGeopoint);
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -133,7 +127,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getPlacesEventsByContaining() {
             EventsFactory.getPlacesEventsByContaining(_research).then(function (events) {
-                events.forEach(refactorGeopoint);
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -142,7 +135,6 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
 
         function getEventsByCity() {
             EventsFactory.getEventsByCity(_research, offset).then(function (events) {
-                events.forEach(refactorGeopoint);
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
                 $scope.loadingMore = false;
@@ -163,6 +155,14 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
             });
         }
 
+        function getPlaces() {
+            PlaceFactory.getPlaces(offset, $rootScope.geoLoc).then(function (places) {
+                places.forEach(refactorGeopoint)
+                updateScope(places, $scope.places, 'placeId');
+                $scope.loadingMore = false;
+            });
+        }
+
         function search () {
             if (_research.length == 0) {
                 if (_selEvent == true) {
@@ -175,31 +175,7 @@ app.controller('searchCtrl', ['$scope', '$http', '$rootScope', '$filter', 'oboe'
                     getOrganizers();
                 }
                 if (_selPlace == true) {
-                    $http.get('/places/' + $rootScope.geoLoc + '/12/' + offset).
-                        success(function(data, status, headers, config) {
-                            var scopeIdList = [];
-                            function getPlaceId(el, index, array) {
-                                scopeIdList.push(el.placeId);
-                            }
-                            $scope.places.forEach(getPlaceId);
-                            function uploadPlaces(el, index, array) {
-                                if (scopeIdList.indexOf(el.placeId) == -1) {
-                                    if (el.geographicPoint != undefined) {
-                                        el.geographicPoint = el.geographicPoint.replace("(", "");
-                                        el.geographicPoint = el.geographicPoint.replace(")", "");
-                                        el.geographicPoint = el.geographicPoint.replace(",", ", ");
-                                    }
-                                    $scope.places.push(el);
-                                }
-                            }
-                            data.forEach(uploadPlaces)
-                            $rootScope.resizeImgHeight();
-                            $scope.loadingMore = false;
-                        }).
-                        error(function(data, status, headers, config) {
-                            // called asynchronously if an error occurs
-                            // or server returns response with an error status.
-                        });
+                    getPlaces();
                 }
                 $scope.artistsFb = [];
         } else {
