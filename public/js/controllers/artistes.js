@@ -16,33 +16,51 @@ app.controller ('ArtistesCtrl', function ($scope, ArtisteFactory, $routeParams, 
             artistName = artistName.toLowerCase().replace('musik', '');
             artistName = artistName.toLowerCase().replace('fanpage', '');
             artistName = artistName.toLowerCase().replace(/[^\w\s].*/, '');
-            
-            $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
-                success(function (data) {
-                    
-                    for (var i = 0; i < data.length; i++) {
-                        $scope.artiste.tracks.push(data[i]);
-                        $scope.tracks.push(data[i])
-                    }
-                    if (data.length == 0) {
-                        $scope.info = 'Nous n\'avons pas trouvé "' + trackTitle + '"';
-                        var modalInstance = $modal.open({
-                            templateUrl: 'assets/partials/_infoModal.html',
-                            controller: 'infoModalCtrl',
-                            resolve: {
-                                info: function () {
-                                    return $scope.info;
+            if (trackTitle.toLowerCase() != 'album' && trackTitle.toLowerCase() != 'albums' &&
+                trackTitle.toLowerCase() != 'track' && trackTitle.toLowerCase() != 'tune' &&
+                trackTitle.toLowerCase() != 'tunes' && trackTitle.toLowerCase() != 'song' &&
+                trackTitle.toLowerCase() != 'audio' && trackTitle.toLowerCase() != 'tracks') {
+                $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
+                    success(function (data) {
+
+                        for (var i = 0; i < data.length; i++) {
+                            $scope.artiste.tracks.push(data[i]);
+                            $scope.tracks.push(data[i])
+                        }
+                        if (data.length == 0) {
+                            $scope.info = 'Nous n\'avons pas trouvé "' + trackTitle + '"';
+                            var modalInstance = $modal.open({
+                                templateUrl: 'assets/partials/_infoModal.html',
+                                controller: 'infoModalCtrl',
+                                resolve: {
+                                    info: function () {
+                                        return $scope.info;
+                                    }
                                 }
-                            }
-                        });
-                        modalInstance.result.then(function () {
-                            $log.info('Modal dismissed at: ' + new Date());
-                        });
+                            });
+                            modalInstance.result.then(function () {
+                                $log.info('Modal dismissed at: ' + new Date());
+                            });
+                        }
+                    }).
+                    error(function (data) {
+
+                    })
+            } else {
+                $scope.info = 'Requête "' + trackTitle + '" intérdite';
+                var modalInstance = $modal.open({
+                    templateUrl: 'assets/partials/_infoModal.html',
+                    controller: 'infoModalCtrl',
+                    resolve: {
+                        info: function () {
+                            return $scope.info;
+                        }
                     }
-                }).
-                error(function (data) {
-                    
-                })
+                });
+                modalInstance.result.then(function () {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
+            }
         } else {
             $scope.info = 'le nom de la track doit faire plus de deux lettres';
             var modalInstance = $modal.open({
