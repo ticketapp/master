@@ -1,7 +1,7 @@
 <div class="fixed right zIndex1 generalControlsContener" id="generalControlsContener" ng-if="$root.window != 'small'">
     <ul class="float-right">
         <li ng-if="$root.path != 'iframe'" class="generalControls float-right" >
-            <a href="#/" class="button"><i class="fi-claude"></i></a>
+            <a href="#/" class="fi-claude"></a>
         </li><!--
         <li ng-if="!$root.home" class="generalControls float-right">
             <button ng-click="back()" class="alert"><i class="fi-x"></i></button>
@@ -18,7 +18,7 @@
     </ul>
 </div>
 <div ng-if="$root.window == 'small' && $root.path != 'home' && $root.path != 'iframe'" class="fixed">
-    <a class="button column small-4 margin0 float-left" href="#/"><i class="fi-claude-min"></i></a>
+    <a class="button column small-4 margin0 float-left" href="#/"><i class="fi-map"></i></a>
     <a class="button column small-4 margin0 float-left" href="#/search"><i class="fi-magnifying-glass"></i></a>
     <a ng-if="$root.path != 'iframe'" class="button column small-4 margin0 float-left"
        data-ng-controller="toolsCtrl" ng-click="open()">

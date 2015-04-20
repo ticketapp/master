@@ -13,16 +13,21 @@
 <div ng-if="error.length > 0" class="lecteurError animated fadeIn">
     <h3>{{error}}</h3>
 </div>
-<div ng-show="showInfo" class="EventinfoTrack">
-    <a href="#/artiste/{{trackActive.artist.facebookUrl}}"><h3>{{trackActive.artist.name}}</h3></a>
-    Prochain concert prez de chez vous : <br/>
-    <a href="#/event/{{trackActive.nextShow.eventId}}">
-        {{trackActive.nextShow.name}}
-    </a><br/>
-    Le {{trackActive.nextShow.startTime | date:'dd/MM' }} @
-    <a href="#/lieu/{{trackActive.nextShow.places[0].placeId }}">
-    {{trackActive.nextShow.places[0].name}}
-    </a>
+<div ng-show="showInfo" class="BlackTrans float-left width100p">
+    <div class="column large-12">
+        <h3><a href="#/artiste/{{trackActive.artist.facebookUrl}}">{{trackActive.artist.name}}</a></h3>
+        <h3 style="color: #ffffff">Prochain concert prez de chez vous :</h3>
+        <a href="#/event/{{trackActive.nextShow.eventId}}">
+            {{trackActive.nextShow.name}}
+        </a>
+        <div class="column large-12 padding0">
+            <i class="fa fa-calendar" style="color: #ffffff"></i>{{trackActive.nextShow.startTime | date:'dd/MM' }}
+            <i class="fa fa-map-marker" style="color: #ffffff"></i>
+            <a href="#/lieu/{{trackActive.nextShow.places[0].placeId }}">
+            {{trackActive.nextShow.places[0].name}}
+            </a>
+        </div>
+    </div>
 </div>
 <div class="zIndex1" ng-class="{'column large-12 padding0': $root.window != 'small' && $root.window != 'medium'}">
     <!--<a class="close float-right">X</a>-->

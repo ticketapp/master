@@ -130,36 +130,40 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             }).start(function (data, etc) {
                 $rootScope.loadingTracks = true;
             })
-                /*.node('champ.*', function (value) {
-                 $scope.items.push(value);
-                 })*/
-                .done(function (value) {
-                    $timeout(function () {
-                        $rootScope.$apply(function () {
-                            $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
-                            $rootScope.tracks = $rootScope.artiste.tracks;
-                        })
+            .done(function (value) {
+                $timeout(function () {
+                    $rootScope.$apply(function () {
+                        $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
+                        $rootScope.tracks = $rootScope.artiste.tracks;
+                    });
+                    if (value.length > 0) {
                         $rootScope.loadingTracks = false;
-                    })
-                    function saveTrack (track) {
-                        if (track.redirectUrl == undefined) {
-                            track.redirectUrl = track.url;
-                        }
-                        $http.post('/tracks/create', {
-                            artistFacebookUrl: artist.facebookUrl,
-                            redirectUrl : track.redirectUrl,
-                            title: track.title,
-                            url: track.url,
-                            platform: track.platform,
-                            thumbnailUrl: track.thumbnailUrl
-                        }).error(function (data) {
-                        })
+                    } else {
+                        $timeout(function () {
+                          $rootScope.loadingTracks = false;
+                        }, 2000)
                     }
-                    value.forEach(saveTrack)
-
-                })
-                .fail(function (error) {
                 });
+                function saveTrack (track) {
+                    if (track.redirectUrl == undefined) {
+                        track.redirectUrl = track.url;
+                    }
+                    $http.post('/tracks/create', {
+                        artistFacebookUrl: artist.facebookUrl,
+                        redirectUrl : track.redirectUrl,
+                        title: track.title,
+                        url: track.url,
+                        platform: track.platform,
+                        thumbnailUrl: track.thumbnailUrl
+                    }).error(function (data) {
+                    })
+                }
+                value.forEach(saveTrack)
+
+            })
+            .fail(function (error) {
+                    console.log(error)
+            });
         };
         $rootScope.resizePageElementsWithEvents = function() {
 
