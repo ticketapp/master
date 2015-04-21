@@ -21,7 +21,6 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
                 trackTitle.toLowerCase() != 'audio' && trackTitle.toLowerCase() != 'tracks') {
                 $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
                     success(function (data) {
-
                         for (var i = 0; i < data.length; i++) {
                             $scope.artiste.tracks.push(data[i]);
                             $scope.tracks.push(data[i])
@@ -86,7 +85,7 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
     function refactorWebsites () {
         for (var i = 0; i < $scope.artiste.websites.length; i++) {
             $scope.artiste.websites[i] = {url: $scope.artiste.websites[i]};
-            if ($scope.artiste.websites[i].length > 0) {
+            if ($scope.artiste.websites[i].url.length > 0) {
                 if ($scope.artiste.websites[i].url.indexOf('facebook') > -1) {
                     $scope.artiste.websites[i].name = 'facebook';
                 } else if ($scope.artiste.websites[i].url.indexOf('twitter') > -1) {
