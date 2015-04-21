@@ -6,9 +6,10 @@
                class="column small-10 zIndex5 height50">
         <input type="submit" class="button column small-2 margin0">
         <div class="column large-12 padding0 BlackTrans"
-             style="height: 48px">
+             style="height: 48px"
+             ng-if="search.length == 0">
             <md-slider flex ng-change="initializeTime()"
-                       ng-if="$root.window != 'small' && $root.window != 'medium' && search.length == 0"
+                       ng-if="$root.window != 'small' && $root.window != 'medium'"
                        ng-model="$parent.time" min="1" max="51" step="1"
                        aria-label="timeSlider"
                        id="timeSearchSlider"
@@ -17,7 +18,7 @@
             <md-slider flex ng-change="initializeTime()"
                        ng-model="$parent.time" min="1" max="51" step="1"
                        aria-label="timeSlider"
-                       ng-if="search.length == 0 && ($root.window == 'small' || $root.window == 'medium')"
+                       ng-if="$root.window == 'small' || $root.window == 'medium'"
                        id="timeSearchSliderPhone"
                        class="md-primary column small-12 padding0 margin0">
             </md-slider>
@@ -36,7 +37,7 @@
                 </div>
                 <div class="absolute top0">
                     <i ng-repeat="genre in event.genres"
-                       ng-click="search = genre; updateEvents()"
+                       ng-click="$parent.$parent.search = genre.name; research()"
                        class="eventMinFilter"
                        ng-class="{'fi-reggae': genre.name == 'reggae',
                        'fi-hip-hop': genre.name == 'hip-hop',
