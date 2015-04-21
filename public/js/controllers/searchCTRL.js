@@ -37,11 +37,16 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
                 var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
                     'placeId': el.placeId, 'facebookId': el.facebookId};
                 if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
-                    scope.push(el);
+                    $timeout(function () {
+                        $scope.$apply(function () {
+                            scope.push(el);
+                        })
+                    }, 0);
                 }
             }
             data.forEach(pushEl);
             $rootScope.resizeImgHeight();
+            $scope.loadingMore = false;
         }
         function colorEvent(el) {
             el.priceColor = 'rgb(0, 140, 186)';
@@ -80,7 +85,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         function getArtists () {
             ArtistsFactory.getArtists(offset).then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
-                $scope.loadingMore = false;
             });
         }
         function getArtistsByGenre () {
@@ -91,7 +95,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         function getArtistsByContaining () {
             ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
-                $scope.loadingMore = false;
                 getArtistsByGenre()
             });
         }
@@ -99,9 +102,8 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         function getEvents() {
             filterEventsByTime();
             EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
-                events.forEach(colorEvent)
+                events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -109,7 +111,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -117,7 +118,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -125,7 +125,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             EventsFactory.getEventsByGenre(_research, offset).then(function (events) {
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -133,7 +132,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             EventsFactory.getPlacesEventsByContaining(_research).then(function (events) {
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -141,21 +139,18 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             EventsFactory.getEventsByCity(_research, offset).then(function (events) {
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
-                $scope.loadingMore = false;
             });
         }
 
         function getOrganizersByContaining() {
             OrganizerFactory.getOrganizersByContaining(_research).then(function (organizers) {
                 updateScope(organizers, $scope.organizers, 'organizerId');
-                $scope.loadingMore = false;
             });
         }
 
         function getOrganizers() {
             OrganizerFactory.getOrganizers(offset).then(function (organizers) {
                 updateScope(organizers, $scope.organizers, 'organizerId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -163,7 +158,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             PlaceFactory.getPlaces(offset, $rootScope.geoLoc).then(function (places) {
                 places.forEach(refactorGeopoint)
                 updateScope(places, $scope.places, 'placeId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -171,7 +165,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             PlaceFactory.getPlacesByContaining(_research).then(function (places) {
                 places.forEach(refactorGeopoint);
                 updateScope(places, $scope.places, 'placeId');
-                $scope.loadingMore = false;
             });
         }
 
@@ -179,14 +172,12 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             PlaceFactory.getPlacesByCity(_research, offset).then(function (places) {
                 places.forEach(refactorGeopoint);
                 updateScope(places, $scope.places, 'placeId');
-                $scope.loadingMore = false;
             });
         }
 
         function getArtistsFacebook() {
             ArtistsFactory.getArtistsFacebookByContaining(_research).then(function (artists) {
                 updateScope(artists, $scope.artistsFb, 'facebookId', $scope.artists);
-                $scope.loadingFbArt = false;
             });
         }
         function search () {
