@@ -40,12 +40,12 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
                     $timeout(function () {
                         $scope.$apply(function () {
                             scope.push(el);
-                            $rootScope.resizeImgHeight();
                         })
                     }, 0);
                 }
             }
             data.forEach(pushEl);
+            $rootScope.resizeImgHeight();
             $scope.loadingMore = false;
         }
         function colorEvent(el) {
