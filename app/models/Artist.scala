@@ -4,8 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
-import controllers.DAOException
-import controllers.WebServiceException
+import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, WebServiceException}
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
@@ -240,7 +239,7 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.deleteArtist : " + e.getMessage)
   }
 
-  def followArtist(userId : String, artistId : Long): Option[Long] = try {
+  def followArtistByArtistId(userId : String, artistId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO artistsFollowed(userId, artistId) VALUES ({userId}, {artistId})""")
         .on(
@@ -249,7 +248,21 @@ object Artist {
         .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("Artist.followArtist: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.followArtistByArtistId: " + e.getMessage)
+  }
+  
+  def followArtistByFacebookId(userId : String, facebookId: String): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
+        .on('facebookId -> facebookId)
+        .as(scalar[Long].singleOpt) match {
+        case None => throw new ThereIsNoArtistForThisFacebookIdException("Artist.followArtistIdByFacebookId")
+        case Some(artistId) => followArtistByArtistId(userId, artistId)
+      }
+      
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Artist.followArtistIdByFacebookId: " + e.getMessage)
   }
 
   def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {

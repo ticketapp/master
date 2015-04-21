@@ -158,15 +158,16 @@ object Event {
     case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
 
-  def findAllByGenre(genre: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
+  def findAllByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT e.*
-           |FROM eventsGenres eG
-           |  INNER JOIN events e ON e.eventId = eG.eventId
+        s"""SELECT e.* FROM eventsGenres eG
+           |  INNER JOIN events e ON e.eventId = eG.eventId AND
+           |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
+           |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
            |  INNER JOIN genres g ON g.genreId = eG.genreId
            |    WHERE g.name = {genre}
-           |ORDER BY e.creationDateTime DESC
+           |  ORDER BY geographicPoint <-> point '$geographicPoint'
            |LIMIT $numberToReturn
            |OFFSET $offset""".stripMargin)
         .on('genre -> genre)
@@ -215,7 +216,9 @@ object Event {
         DB.withConnection { implicit connection =>
           SQL(
             s"""SELECT * FROM events
-               |  WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
+               |  WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' AND
+               |  (endTime IS NOT NULL AND endTime > CURRENT_TIMESTAMP
+               |    OR endTime IS NULL AND startTime > CURRENT_TIMESTAMP - interval '12 hour')
                |ORDER BY geographicPoint <-> point '$geographicPoint'
                |LIMIT 20""".stripMargin)
             .on('patternLowCase -> pattern.toLowerCase)
@@ -232,7 +235,9 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT e.* FROM eventsAddresses eA
-          | INNER JOIN events e on e.eventId = eA.eventId
+          | INNER JOIN events e ON e.eventId = eA.eventId AND
+          |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
+          |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
           | INNER JOIN addresses a ON a.addressId = eA.addressId
           |   WHERE a.city LIKE '%'||{patternLowCase}||'%'
           |LIMIT 50""".stripMargin)
@@ -307,6 +312,21 @@ object Event {
   } catch {
     case e: Exception => throw new DAOException("Event.follow: " + e.getMessage)
   }
+
+
+  /*def followArtistByFacebookId(userId : String, facebookId: String): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
+        .on('facebookId -> facebookId)
+        .as(scalar[Long].singleOpt) match {
+        case None => throw new ThereIsNoArtistForThisFacebookIdException("Artist.followArtistIdByFacebookId")
+        case Some(artistId) => followArtistByArtistId(userId, artistId)
+      }
+
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Artist.followArtistIdByFacebookId: " + e.getMessage)
+  }*/
 
   def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
     DB.withConnection { implicit connection =>

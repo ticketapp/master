@@ -28,7 +28,8 @@ GET       /artists/since/:offset/:number                            controllers.
 GET       /artists/:facebookUrl                                     controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
 GET       /artists/byId/:id                                         controllers.ArtistController.artist(id: Long)
 POST      /artists/createArtist                                     controllers.ArtistController.createArtist
-POST      /artists/:artistId/follow                                 controllers.ArtistController.followArtist(artistId: Long)
+POST      /artists/:artistId/followByArtistId                       controllers.ArtistController.followArtistByArtistId(artistId: Long)
+POST      /artists/:facebookId/followByFacebookId                   controllers.ArtistController.followArtistByFacebookId(facebookId: String)
 GET       /artists/followed/                                        controllers.ArtistController.getFollowedArtists
 GET       /artists/:artistId/isArtistFollowed                       controllers.ArtistController.isArtistFollowed(artistId: Long)
 DELETE    /artists/:artistId                                        controllers.ArtistController.deleteArtist(artistId: Long)
@@ -62,7 +63,7 @@ DELETE    /playlists/:playlistId                                    controllers.
 
 ################################# Genres ############################################
 GET           /genres/:genre/:numberToReturn/:offset/artists        controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
-GET           /genres/:genre/:numberToReturn/:offset/events         controllers.EventController.eventsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET           /genres/:genre/:numberToReturn/:offset/events/:geographicPoint     controllers.EventController.eventsByGenre(genre: String, geographicPoint: String, numberToReturn: Int, offset: Int)
 
 ################################# Tracks ############################################
 POST          /tracks/create                                        controllers.TrackController.createTrack

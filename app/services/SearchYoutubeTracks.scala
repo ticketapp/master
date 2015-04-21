@@ -90,7 +90,7 @@ object SearchYoutubeTracks {
     WS.url("https://www.googleapis.com/youtube/v3/search")
       .withQueryString(
         "part" -> "snippet",
-        "q" -> (trackTitle + artist.name),
+        "q" -> (artist.name + " " + trackTitle),
         "type" -> "video",
         "videoCategoryId" -> "10",
         "key" -> youtubeKey)
@@ -112,6 +112,7 @@ object SearchYoutubeTracks {
           Track(None, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl)
       }
     }
+    println(youtubeResponse.json)
     (youtubeResponse.json \ "items")
       .asOpt[Seq[Track]](collectOnlyValidTracks)
       .getOrElse(Seq.empty)

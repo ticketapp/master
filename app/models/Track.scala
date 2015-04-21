@@ -34,6 +34,7 @@ object Track {
       }
     }
   }
+
   def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.title, track.url, track.platform.toString,
     Some(track.thumbnailUrl), None, track.artistFacebookUrl, track.redirectUrl))
 

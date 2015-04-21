@@ -34,7 +34,6 @@ object Utilities {
     }
   })
 
-
   def normalizeString(string: String): String =
     Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
 
@@ -42,6 +41,8 @@ object Utilities {
 
   def normalizeUrl(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
+
+  def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
 
   def testIfExist(table: String, fieldName: String, valueAnyType: Any)(implicit connection: Connection): Boolean = {
     val value = valueAnyType match {

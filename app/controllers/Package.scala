@@ -27,3 +27,7 @@ case class ArtistContainsEmptyWebsiteException(message: String) extends Exceptio
 case class UserOAuth2InfoWronglyFormatted(message: String) extends Exception(message) {
   println("UserOAuth2InfoWronglyFormatted: " + message)
 }
+
+case class ThereIsNoArtistForThisFacebookIdException(message: String) extends Exception(message) {
+  println("ThereIsNoArtistForThisFacebookIdException: " + message)
+}
