@@ -55,7 +55,7 @@
     <div class="column large-4 float-left eventInfo" ng-if="event.artists.length > 0">
         <h2>Programmation</h2>
         <li ng-repeat="artist in event.artists"
-            style="display: block;"
+            style="display: block; min-height: 125px;"
             class="float-left width100p paddingTop10 paddingBottom10 paddingRight10 marginBottom10 relative">
             <a href="#/artiste/{{artist.facebookUrl}}" class="absolute width100p height100p imgBlur"
                   style="display: block;
@@ -67,7 +67,8 @@
                     style="text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5); color: white;">{{artist.name}}</h2>
             </a>
             <div class="img-circularPlayer float-right marginTop20 relative"
-                 style="background: rgba(0, 0, 0, 0.42);">
+                 style="background: rgba(0, 0, 0, 0.42);"
+                 ng-show="artist.tracks.length > 0">
                 <i class="pauseInImg ng-scope fi-play"
                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
             </div>
@@ -95,7 +96,7 @@
         </div>
     </div>
     <div class="column large-4 float-left eventInfo padding0">
-        <div class="column large-12 zIndex1 absolute" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4)" ng-if="adresses">
+        <div class="column large-12 zIndex1 absolute" ng-if="adresses">
             <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places" class="column large-12">
                 <b>{{place.name}}</b>
             </a>
