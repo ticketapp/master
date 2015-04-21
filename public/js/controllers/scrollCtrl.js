@@ -186,7 +186,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
                             newImgHeight = content[i].clientWidth * 0.376;
                         }
                         content[i].style.height = newImgHeight + 'px';
-                        if (i == content.length - 1) {
+                        if (i == content.length - 1 && $rootScope.window != 'small') {
                             resizeArtistsText(newImgHeight)
                         }
                     }
