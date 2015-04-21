@@ -1,21 +1,54 @@
 <div class="fixed">
-    <form ng-submit="getEvents()">
+    <form ng-submit="research()">
         <input id="searchBar"
                placeholder="Rechercher par ville, artiste, genre, salle"
                ng-model="search"
                class="column small-10 zIndex5 height50">
-        <input type="submit" class="button column small-2">
+        <input type="submit" class="button column small-2 margin0">
+        <div class="column large-12 padding0 BlackTrans"
+             style="height: 48px">
+            <md-slider flex ng-change="initializeTime()"
+                       ng-if="$root.window != 'small' && $root.window != 'medium' && search.length == 0"
+                       ng-model="$parent.time" min="1" max="51" step="1"
+                       aria-label="timeSlider"
+                       id="timeSearchSlider"
+                       class="md-primary column small-11 padding0 bigSlider">
+            </md-slider>
+            <md-slider flex ng-change="initializeTime()"
+                       ng-model="$parent.time" min="1" max="51" step="1"
+                       aria-label="timeSlider"
+                       ng-if="search.length == 0 && ($root.window == 'small' || $root.window == 'medium')"
+                       id="timeSearchSliderPhone"
+                       class="md-primary column small-12 padding0 margin0">
+            </md-slider>
+        </div>
     </form>
 </div>
-<div style="padding-top: 70px;">
-    <div class="column large-4 float-left margin0"
+<div style="padding-top: 100px;">
+    <div class="column large-4 fade float-left margin0"
          data-ng-repeat="event in events">
         <div class="block_event_min">
-            <div class="img_min_evnt" style="height: 100px">
+            <div class="img_min_evnt">
                 <div class="toGrow">
                     <a target="_blank" href="#/event/{{event.eventId}}">
                         <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
                     </a>
+                </div>
+                <div class="absolute top0">
+                    <i ng-repeat="genre in event.genres"
+                       ng-click="search = genre; updateEvents()"
+                       class="eventMinFilter"
+                       ng-class="{'fi-reggae': genre.name == 'reggae',
+                       'fi-hip-hop': genre.name == 'hip-hop',
+                       'fi-jazz': genre.name == 'jazz',
+                       'fi-latin': genre.name == 'musiques latines',
+                       'fi-electro': genre.name == 'electro',
+                       'fi-world': genre.name == 'musiques du monde',
+                       'fi-classique': genre.name == 'classique',
+                       'fi-rock': genre.name == 'rock',
+                       'fi-chanson': genre.name == 'chanson',
+                       }">
+                    </i>
                 </div>
                 <a target="_blank" href="#/event/{{event.eventId}}">
                     <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
@@ -84,7 +117,13 @@
                             </a>
                         </span>
                     </div>
+                </div>
             </div>
         </div>
+    </div>
+    <div ng-show="events.length >= limit">
+        <button ng-click="moreLimit()" class="column large-6 large-offset-3">
+            Voir plus
+        </button>
     </div>
 </div>
