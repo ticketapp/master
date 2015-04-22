@@ -34,7 +34,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $scope.needConnect = false;
         $rootScope.lastReq = {};
         $rootScope.follow = function (route, id, name) {
-            $http.post('/'+ route +'/'+ id + '/followByArtistId').
+            $http.post('/'+ route +'/'+ id + '/follow').
                 success(function (data) {
                     $scope.info = 'vous suivez maintenant ' + name;
                     var modalInstance = $modal.open({
