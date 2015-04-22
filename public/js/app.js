@@ -11,7 +11,9 @@ var app = angular.module('MonApp',['ngAnimate',
     'ng-oboe',
     'angularytics',
     'ngWebsocket',
-    'ui.sortable']);
+    'ui.sortable',
+    'ngStorage'
+]);
 
 app.config(function($routeProvider, $locationProvider, AngularyticsProvider, $httpProvider){
     AngularyticsProvider.setEventHandlers(['Console', 'GoogleUniversal']);

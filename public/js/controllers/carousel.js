@@ -1,8 +1,9 @@
-app.controller("CarouselCtrl",function($scope, $timeout, $http, $sce, $compile){
+app.controller("CarouselCtrl",function($scope, $timeout, $http, $sce, $localStorage){
    $scope.infos=[];
    $http.get('/infos').success(function (data, status, headers, config) {
        //$scope.infos = data;
        $scope.infos.push({
+           id: 2,
            animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">vous pouvez ' +
                'trouver la rubrique FAQ/rapporter un bug ici.' +
                    '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
@@ -23,6 +24,7 @@ app.controller("CarouselCtrl",function($scope, $timeout, $http, $sce, $compile){
                 '</p>')
        });
        $scope.infos.push({
+           id: 1,
            animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
                'Connectez-vous en un clique via Facebook' +
                    '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
@@ -44,9 +46,18 @@ app.controller("CarouselCtrl",function($scope, $timeout, $http, $sce, $compile){
        updateInfo();
    }).error(function (data, status, headers, config) {
    });
+   for (var j = 0; j < $scope.infos.length; j++) {
+       for (var k = 0; k < $localStorage.removedInfosMsg.length; k++) {
+           if ($scope.infos[j].id == $localStorage.removedInfosMsg[k]) {
+               $scope.infos[j].animation = '';
+           }
+       }
+   }
    var i = -1 ;
     var changeInf;
     function removeAnimation (i) {
+        $localStorage.removedInfosMsg.push($scope.infos[i].id);
+        console.log($localStorage.removedInfosMsg)
         $scope.infos[i].animation = '';
         $scope.elementEnCours.animation = '';
     }

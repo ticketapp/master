@@ -7,7 +7,7 @@
     </div>
     <div class="parallax-content ng-search">
     </div>
-    <div ng-if="elementEnCours.animation" id="infosTooltip"
+    <div ng-if="elementEnCours.animation && $root.connected == false" id="infosTooltip"
          class="animate-show animated">
         <div style="{{elementEnCours.animation.style}}">
         <i ng-click="removeAnimation()" class="fi-x pointer" style="
