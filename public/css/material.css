@@ -6767,7 +6767,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 .haskell .hljs-type,
 .vhdl .hljs-literal,
 .tex .hljs-command {
-    color: #008CBA;
+    color: #2DAAE1;
     font-weight: bold
 }
 
@@ -6775,7 +6775,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 .hljs-tag .hljs-title,
 .hljs-rules .hljs-property,
 .django .hljs-tag .hljs-keyword {
-    color: #008CBA;
+    color: #2DAAE1;
     font-weight: normal
 }
 
@@ -6840,7 +6840,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
     background-color: #009688;
 }
 .layout-content demo-include [layout] > div:nth-child(2) {
-    background-color: #008CBA;
+    background-color: #2DAAE1;
 }
 .layout-content demo-include [layout] > div:nth-child(3) {
     background-color: #9c27b0;
