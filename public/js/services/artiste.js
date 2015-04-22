@@ -1,4 +1,4 @@
-app.factory('ArtistsFactory', function ($http, $q) {
+app.factory('ArtistsFactory', function ($http, $q, oboe) {
     var factory = {
         artists : false,
         getArtists : function (offset) {
@@ -57,6 +57,47 @@ app.factory('ArtistsFactory', function ($http, $q) {
                         deferred.resolve(factory.artists);
                     }).error(function(data, status){
                         deferred.reject('erreur');
+                    });
+            }
+            return deferred.promise;
+        },
+        postArtist : function (searchPattern, artist) {
+            var deferred = $q.defer();
+            if(factory.artists == true){
+                deferred.resolve(factory.artists);
+            } else {
+                oboe.post('artists/createArtist', {
+                    searchPattern: searchPattern,
+                    artist: {
+                        facebookUrl: artist.facebookUrl,
+                        artistName: artist.name,
+                        facebookId: artist.facebookId,
+                        imagePath: artist.imagePath,
+                        websites: artist.websites,
+                        description: artist.description,
+                        genre: artist.genre
+                    }
+                }).start(function (data, etc) {
+                })
+                    .done(function (value) {
+                        function saveTrack (track) {
+                            if (track.redirectUrl == undefined) {
+                                track.redirectUrl = track.url;
+                            }
+                            $http.post('/tracks/create', {
+                                artistFacebookUrl: artist.facebookUrl,
+                                redirectUrl : track.redirectUrl,
+                                title: track.title,
+                                url: track.url,
+                                platform: track.platform,
+                                thumbnailUrl: track.thumbnailUrl
+                            }).error(function (data) {
+                            })
+                        }
+                        value.forEach(saveTrack);
+                        deferred.resolve(value);
+                    })
+                    .fail(function (error) {
                     });
             }
             return deferred.promise;

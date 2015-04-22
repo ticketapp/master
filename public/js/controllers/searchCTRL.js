@@ -178,6 +178,7 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         function getArtistsFacebook() {
             ArtistsFactory.getArtistsFacebookByContaining(_research).then(function (artists) {
                 updateScope(artists, $scope.artistsFb, 'facebookId', $scope.artists);
+                $scope.loadingFbArt = false;
             });
         }
         function search () {

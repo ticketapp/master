@@ -57,7 +57,7 @@
                 <md-content>
                     <ul id="events_contener"
                         class="descriptionContent width100p float-left marginTop10">
-                        <div class="min_contener data-ng-event margin0 column large-4 medium-6 float-left"
+                        <div class="min_contener data-ng-event fade margin0 column large-4 medium-6 float-left"
                              data-ng-repeat="event in artiste.events"
                                 ng-class="{'padding0': $root.window == 'small'}"></div>
                         <h3 ng-show="artiste.events.length == 0">Pas d'événements pour cet artisite pour le moments</h3>
@@ -121,7 +121,7 @@
                         <a class="button" ng-click="suggestQuery(trackTitle, artiste.name, artiste.facebookUrl)">Suggérer la track {{trackTitle}}</a>
                     </div>
                     <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit) track by $index"
-                         class="column paddingBottom10 medium-6 large-4 float-left"
+                         class="column fade paddingBottom10 medium-6 large-4 float-left"
                             ng-class="{'paddingRight0 paddingLeft0': $root.window == 'small'}">
                         <div class="column large-12 arTrack">
                             <div ng-if="track.thumbnailUrl != undefined"

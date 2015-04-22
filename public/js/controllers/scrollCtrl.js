@@ -12,8 +12,10 @@ app.filter('millSecondsToTimeString', function() {
         return timeString;
     }
 });
-app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http', 'Angularytics', '$websocket', 'oboe', '$modal', '$log', '$filter',
-    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe, $modal, $log, $filter) {
+app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$anchorScroll', '$http',
+    'Angularytics', '$websocket', 'oboe', '$modal', '$log', 'ArtistsFactory',
+    function ($scope, $rootScope, $location, $timeout, $anchorScroll, $http, Angularytics, $websocket, oboe,
+              $modal, $log, ArtistsFactory) {
         $rootScope.geoLoc = '';
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
@@ -113,60 +115,25 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.artiste = artist;
             $rootScope.artiste.events = [];
             $rootScope.tracks = [];
+            $rootScope.tracks = [];
+            $rootScope.loadingTracks = true;
             window.location.href =('#/artiste/' + artist.facebookUrl);
-            $rootScope.$apply;
             var searchPattern  = document.getElementById('searchBar').value.trim();
-            oboe.post('artists/createArtist', {
-                searchPattern: searchPattern,
-                artist: {
-                    facebookUrl: artist.facebookUrl,
-                    artistName: artist.name,
-                    facebookId: artist.facebookId,
-                    imagePath: artist.imagePath,
-                    websites: artist.websites,
-                    description: artist.description,
-                    genre: artist.genre
-                }
-            }).start(function (data, etc) {
-                $rootScope.loadingTracks = true;
-            })
-            .done(function (value) {
+            ArtistsFactory.postArtist(searchPattern, artist).then(function (tracks) {
                 $timeout(function () {
                     $rootScope.$apply(function () {
-                        $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(value);
+                        $rootScope.artiste.tracks = $rootScope.artiste.tracks.concat(tracks);
                         $rootScope.tracks = $rootScope.artiste.tracks;
                     });
-                    if (value.length > 0) {
+                    if (tracks.length > 0) {
                         $rootScope.loadingTracks = false;
                     } else {
                         $timeout(function () {
-                          $rootScope.loadingTracks = false;
+                            $rootScope.loadingTracks = false;
                         }, 2000)
                     }
                 });
-                function saveTrack (track) {
-                    if (track.redirectUrl == undefined) {
-                        track.redirectUrl = track.url;
-                    }
-                    $http.post('/tracks/create', {
-                        artistFacebookUrl: artist.facebookUrl,
-                        redirectUrl : track.redirectUrl,
-                        title: track.title,
-                        url: track.url,
-                        platform: track.platform,
-                        thumbnailUrl: track.thumbnailUrl
-                    }).error(function (data) {
-                    })
-                }
-                value.forEach(saveTrack)
-
-            })
-            .fail(function (error) {
-                    console.log(error)
             });
-        };
-        $rootScope.resizePageElementsWithEvents = function() {
-
         };
         function resizeArtistsText (ImgHeight) {
             var artists = document.getElementsByClassName('minNoText');

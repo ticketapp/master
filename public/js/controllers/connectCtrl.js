@@ -1,4 +1,4 @@
-app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
+app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, ArtistsFactory) {
     $scope.connectByMail = function () {
         $http.post('/authenticate/userpass', {username: $scope.username, password: $scope.password}).
             success(function (data) {
@@ -8,6 +8,32 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
 
             })
     };
+    function followArtist (id, token) {
+        $http.post('/artists/' + id +'/followByFacebookId').
+            success(function () {
+                console.log(data)
+            }).error(function (data) {
+                if (token != false) {
+                    getArtistPage(id, token)
+                }
+            })
+    }
+    function postArtist (artist) {
+        ArtistsFactory.postArtist(artist.name, artist).then(function (tracks) {
+            $http.post('/artists/' + artist.id +'/followByFacebookId').
+                success(function (data) {
+                    console.log(data);
+                    followArtist(artist.id, false)
+                })
+        });
+    }
+    function getArtistPage (id, token) {
+        $http.get('https://graph.facebook.com/v2.3/' + id + '?access_token=' + token).
+            success(function (data) {
+                console.log(data);
+                postArtist(data)
+            })
+    }
     $scope.connectLink = function (url) {
         var connectWin = window.open(url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
         var changePath = setInterval(function() {
@@ -21,8 +47,8 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
                         if (connectWin.document.getElementById('top').getAttribute("ng-init") == '$root.connected = true') {
                             $rootScope.passConnectedToTrue();
                             connectWin.close();
-                            function getFbPages (route) {
-                                $http.get(route).
+                            function getFbPages (route, token) {
+                                $http.get(route + token).
                                     success(function (data) {
                                         console.log(data)
                                         if (data.likes != undefined) {
@@ -39,7 +65,9 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
                                                 //folow organizer
                                                 //post if not exist
                                             } else if (pages[i].category == "Musician/band") {
-                                                //folowArtist
+                                                //followArtist
+                                                var pageId = pages[i].id;
+                                                followArtist(pageId, token);
                                                 // post if not exist
                                             } else if (pages[i].category == "concert venue") {
                                                 //folowPlace
@@ -52,12 +80,13 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal) {
                             $http.get('/users/facebookAccessToken/').
                                 success(function (data) {
                                     console.log(data)
-                                    getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=CAACEdEose0cBAABPUdlSmjwteEoQYLwNoFvGOAOGpozBkuRbERMDZB92FTuMTeTvNTLX9ZBGPRAVIvdssK8ntDcAe3cXqKsZBfQZC1dQmEZABIwKnhoT8uiNJZCCU6WrjZC3VLRFoX4KJXEwwo0tLa4Sqa5ajpVxLhFRkRZBS5KYf2NFbnHHgk0JkcZAqNk9knPCwSohvvO6iM25kjljedltPiDgGXAaNp3sZD')
+                                    var token = 'CAACEdEose0cBAB2QWdAlF1PeOxPCHGXrg7X1SYrQaqOaClyZB6DVH9mYBVYSyBFjmq1Xf3paRIO0wmCsBPzP56lwSoQGFwm9BSmY8lI3PREoz2kmuBchT0h8RKXNg6x3qEsfZC5wwtWXDYWuq72e5JDJP9PRqCcnkY5nJvu3E3ZA9IXgaiGiBgNAuwylZC2cBgxf3c3gUPmLMkRUYzs6DKiMc5fflZBMZD'
+                                    getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=', token);
 
-                                    $http.get('https://graph.facebook.com/v2.3/me/accounts?access_token=CAACEdEose0cBAABPUdlSmjwteEoQYLwNoFvGOAOGpozBkuRbERMDZB92FTuMTeTvNTLX9ZBGPRAVIvdssK8ntDcAe3cXqKsZBfQZC1dQmEZABIwKnhoT8uiNJZCCU6WrjZC3VLRFoX4KJXEwwo0tLa4Sqa5ajpVxLhFRkRZBS5KYf2NFbnHHgk0JkcZAqNk9knPCwSohvvO6iM25kjljedltPiDgGXAaNp3sZD').
+                                    /*$http.get('https://graph.facebook.com/v2.3/me/accounts?access_token=CAACEdEose0cBAABPUdlSmjwteEoQYLwNoFvGOAOGpozBkuRbERMDZB92FTuMTeTvNTLX9ZBGPRAVIvdssK8ntDcAe3cXqKsZBfQZC1dQmEZABIwKnhoT8uiNJZCCU6WrjZC3VLRFoX4KJXEwwo0tLa4Sqa5ajpVxLhFRkRZBS5KYf2NFbnHHgk0JkcZAqNk9knPCwSohvvO6iM25kjljedltPiDgGXAaNp3sZD').
                                         success(function (data) {
                                             console.log(data)
-                                        })
+                                        })*/
 
                                 }).
                                 error(function (data) {
