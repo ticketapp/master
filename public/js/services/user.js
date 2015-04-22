@@ -1,15 +1,15 @@
-app.factory ('InfoFactory', function ($http, $q){
+app.factory ('UserFactory', function ($http, $q){
     var factory = {
-        infos : false,
-        getInfos : function(){
+        user : false,
+        getToken : function(){
             var deferred = $q.defer();
-            if(factory.infos == true){
-                deferred.resolve(factory.infos);
+            if(factory.user == true){
+                deferred.resolve(factory.user);
             } else {
                 $http.get('/infos')
                 .success(function(data, status){
-                    factory.infos = data;
-                    deferred.resolve(factory.infos);
+                    factory.user = data;
+                    deferred.resolve(factory.user);
                 }).error(function(data, status){
                     deferred.reject('erreur');
                 });

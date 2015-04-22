@@ -114,7 +114,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
     function getUserToken() {
         $http.get('/users/facebookAccessToken/').
             success(function (data) {
-                var token = 'CAACEdEose0cBABaJ7nteVIDdcFMm7ZAnVEYEZBgnLZA5cxgZCLZAcHlZA8U4gonBynFwe5eZCIBgRcWbAKIbgGjh00hQhZCo0Xu8xMSmCXFns10N8KXdiUccxIJZC27GfuvZAFikv84BgmKSVytbovGKxI3T4Ou5y5bZCmX45MMp29pkzywEq8bIp4XlZBxUKBHTZCEZBZBIfRVikP1htQw2FtKXUBGFNTjvHiBKTAZD'
+                var token = data;
                 getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=' + token, token);
             }).
             error(function (data) {

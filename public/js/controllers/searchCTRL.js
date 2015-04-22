@@ -83,10 +83,18 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             }
         }
         function getArtists () {
+            if ($rootScope.connected == 'true') {
+                offset = offset - 1;
+            }
             ArtistsFactory.getArtists(offset).then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
             });
         }
+
+        function getArtistsFolowed () {
+
+        }
+
         function getArtistsByGenre () {
             ArtistsFactory.getArtistsByGenre(offset, _research).then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
@@ -303,6 +311,9 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             if (newName == true) {
                 $scope.loadingMore = true;
                 if (_research.length == 0) {
+                    if ($rootScope.connected == true && offset == 0) {
+                        getArtistsFolowed();
+                    }
                     getArtists()
                 } else {
                     getArtistsByContaining();
