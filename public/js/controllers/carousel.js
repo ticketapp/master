@@ -14,7 +14,6 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
     var i = -1 ;
     var changeInf;
     function removeAnimation (i) {
-        $localStorage.a = 'lkk';
         $localStorage.removedInfosMsg.push($scope.infos[i].id);
         $scope.infos[i].animation = '';
         $scope.elementEnCours.animation = '';
@@ -87,43 +86,61 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
     });
     removeAnimations();
     updateInfo();
-    if ($rootScope.connected == true) {
-        function pushInfo (info, artist) {
-            $scope.infos.push({content: $sce.trustAsHtml(info), artist : artist})
-        }
-        function getEventsArtist (artist) {
-            ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
-                var info;
-                if (events.length > 0) {
-                    info = '<h2 class="text-center textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
-                    for (var e = 0; 0 < 2; e++) {
-                        info = info + '<a href="#/event/'+ events[e].eventId + '" class="textColorWhite">'+
-                            events[e].places[0].name + '</a>'
-                    }
-                    if (events.length > 2) {
-                        info = info + '<a href="#/artist.facebookUrl" class="textColorWhite">' +
-                            'Voir tous les événements</a>'
+    function getConnectedInfos () {
+        if ($rootScope.connected == true) {
+            $scope.infos = [
+                {content: $sce.trustAsHtml('<h2 class="text-center textColorWhite margin10">Bienvenue</h2><p>' +
+                    '<b class="column large-6 large-offset-3 text-center textColorWhite medium-11">' +
+                    'Claude est en version beta, aidez le à s\'ammélliorez en rapportant vos bug ou en ' +
+                    'partageant vos suggestions.' +
+                    '</b>' +
+                    '</p>')}
+            ]
+            function pushInfo(info, artist) {
+                $scope.infos.push({content: $sce.trustAsHtml(info), artist: artist})
+            }
 
+            function getEventsArtist(artist) {
+                ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
+                    var info;
+                    if (events.length > 0) {
+                        var eventsLength;
+                        if (events.length > 2) {
+                            eventsLength = 2;
+                        } else {
+                            eventsLength = events.length;
+                        }
+                        info = '<h2 class="text-center textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
+                        for (var e = 0; 0 < eventsLength; e++) {
+                            info = info + '<a href="#/event/' + events[e].eventId + '" class="textColorWhite">' +
+                                events[e].places[0].name + '</a>'
+                        }
+                        if (events.length > 2) {
+                            info = info + '<a href="#/artist.facebookUrl" class="textColorWhite">' +
+                                'Voir tous les événements</a>'
+
+                        }
+                        pushInfo(info, artist);
+                    } else if (artist.tracks.length > 0) {
+                        info = '<h2 class="text-center textColorWhite margin10"> Ecoutez vos musiques favorites et ' +
+                            'enregistrer vos playlists avec Claude</h2>';
+                        pushInfo(info, artist);
                     }
-                    pushInfo(info,artist);
-                } else if (artist.tracks.length > 0) {
-                    info = '<h2 class="text-center textColorWhite margin10"> Ecoutez vos musiques favorites et ' +
-                        'enregistrer vos playlists avec Claude</h2>';
-                    pushInfo(info,artist);
-                }
-            });
+                });
+            }
+
+            ArtistsFactory.getFollowArtists().then(function (artists) {
+                artists.forEach(getEventsArtist)
+            })
         }
-        ArtistsFactory.getFollowArtists().then(function (artists) {
-            artists.forEach(getEventsArtist)
+    }
+    if ($rootScope.connected == true) {
+        getConnectedInfos()
+    } else {
+        $rootScope.$watch('connected', function (newVal) {
+            if (newVal == true) {
+                getConnectedInfos();
+            }
         })
     }
-    /*
-   document.getElementsByClassName('parallax-background')[0].onmouseover = function(){
-        done = true;
-       console.log('yo')
-     };
-   document.getElementsByClassName('parallax-background')[0].onmouseleave = function(){
-       done = false;
-       console.log('yoyo')
-   };*/
 });

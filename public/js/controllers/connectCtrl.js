@@ -57,6 +57,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                 var pages;
                 var next;
                 var pagesLength;
+                console.log(data)
                 if (data.likes != undefined) {
                     pages = data.likes.data;
                     if (data.likes.paging.next != undefined) {
@@ -65,7 +66,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                     pagesLength = data.likes.data.length;
                 } else {
                     pages = data.data;
-                    if (data.paging.next != undefined) {
+                    if (data.paging != undefined) {
                         next = data.paging.next;
                     }
                     pagesLength = data.data.length;
