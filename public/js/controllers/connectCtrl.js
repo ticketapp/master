@@ -10,6 +10,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
     };
     var followErrorCount = 0;
     var nbAskToFollow = 0;
+    var nbFollowed = 0;
     function followArtist (id, token) {
         nbAskToFollow++;
         console.log('nbAskToFollow:' + nbAskToFollow);
@@ -18,6 +19,9 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                 followErrorCount++;
                 console.log('followErrors:' + followErrorCount);
                 getArtistPage(id, token);
+            } else {
+                nbFollowed++
+                console.log('nbFollowed:'+ nbFollowed);
             }
 
         });
@@ -44,7 +48,6 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
             if (artist.genre == undefined) {
                 artist.genre = "";
             }
-            artist.name = artist.username;
             ArtistsFactory.postArtist(artist.name, artist).then(function (isCreated) {
                 console.log(isCreated);
                 if (isCreated != 'error') {
@@ -94,7 +97,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                     } else if (pages[i].category == "Musician/band") {
                         //followArtist
                         nbArtFbPagesFollowedOnFb++;
-                        console.log('nbArtFbPagesFollowedOnFb:' + nbArtFbPagesFollowedOnFb)
+                        console.log('nbArtFbPagesFollowedOnFb:' + nbArtFbPagesFollowedOnFb);
                         followArtist(pages[i].id, token);
                         // post if not exist
                     } else if (pages[i].category == "concert venue") {
@@ -102,7 +105,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                         // post if not exist
                     }
                 }
-                if (next == undefined) {
+                if (next != undefined) {
                     getFbPages(next, token)
                 }
             })
@@ -111,7 +114,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
     function getUserToken() {
         $http.get('/users/facebookAccessToken/').
             success(function (data) {
-                var token = 'CAACEdEose0cBAIyQ2vi7viKASjMb8KoK8PuKs3OdpVWxvVW4oaZAHmkWlsBBkEZBGgclZCXVhh5PfNMxDtIOcjONV0RyNXnRSQPV4hG70VoNeBortntC8wKbTio5bF3aazZC8ummsHPKDGjO5872F3qc2ph9mFg8kWedyj92ZCIwAzpZAP05ZBZAwqZBe458ZC6DpjYHMVIycwcireCZAETsMevOdrJLc9N5moZD'
+                var token = 'CAACEdEose0cBABaJ7nteVIDdcFMm7ZAnVEYEZBgnLZA5cxgZCLZAcHlZA8U4gonBynFwe5eZCIBgRcWbAKIbgGjh00hQhZCo0Xu8xMSmCXFns10N8KXdiUccxIJZC27GfuvZAFikv84BgmKSVytbovGKxI3T4Ou5y5bZCmX45MMp29pkzywEq8bIp4XlZBxUKBHTZCEZBZBIfRVikP1htQw2FtKXUBGFNTjvHiBKTAZD'
                 getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=' + token, token);
             }).
             error(function (data) {
