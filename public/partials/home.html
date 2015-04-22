@@ -7,13 +7,15 @@
     </div>
     <div class="parallax-content ng-search">
     </div>
-    <div ng-if="elementEnCours.animation" id="infosTooltip" style="{{elementEnCours.animation.style}}"
+    <div ng-if="elementEnCours.animation" id="infosTooltip"
          class="animate-show animated">
+        <div style="{{elementEnCours.animation.style}}">
         <i ng-click="removeAnimation()" class="fi-x pointer" style="
     float: right;
     color: rgba(0, 0, 0, 0.3);
 "></i>
         <div ng-bind-html="elementEnCours.animation.content"></div>
+        </div>
     </div>
 </div>
 <div ng-if="$root.window == 'small'" ng-controller="phoneHomeCtrl" class="absolute top0 bottom0 right left" style="z-index: 11">
