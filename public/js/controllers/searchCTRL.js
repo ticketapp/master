@@ -92,7 +92,9 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         }
 
         function getArtistsFolowed () {
-
+            ArtistsFactory.getFollowArtists().then(function (artists) {
+                updateScope(artists, $scope.artists, 'artistId');
+            })
         }
 
         function getArtistsByGenre () {
@@ -192,7 +194,11 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         function search () {
             if (_selArtist == true) {
                 if (_research.length == 0) {
-                    getArtists()
+                    if (offset == 0 && $rootScope.connected == true) {
+                        getArtistsFolowed()
+                    } else {
+                        getArtists()
+                    }
                 } else {
                     getArtistsByContaining();
                 }

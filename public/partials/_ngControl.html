@@ -6,13 +6,19 @@
         <li ng-if="!$root.home" class="generalControls float-right">
             <button ng-click="back()" class="alert"><i class="fi-x"></i></button>
         </li>-->
-        <li ng-if="$root.path != 'iframe'" class="generalControls float-right" data-ng-controller="toolsCtrl" ng-click="open()">
+        <li ng-if="$root.path != 'iframe'" class="generalControls float-right"
+            data-ng-controller="toolsCtrl" ng-click="open()">
             <button><i class="fi-thumbnails"></i></button>
         </li>
         <li ng-if="$root.path != 'home' && $root.path != 'search' && $root.path != 'iframe'" class="generalControls float-right">
             <a href="#/search" class="button"><i class="fi-magnifying-glass"></i></a>
         </li>
-        <li class="generalControls float-right" ng-if="$root.path != 'iframe'">
+        <li ng-if="$root.connected == false" ng-controller="connectCtrl" class="generalControls float-right">
+            <a ng-click="connectLink('http://localhost:9000/authenticate/facebook')" class="button">
+                <i class="fi-social-facebook"></i>
+            </a>
+        </li>
+        <li class="generalControls float-right ng-hide" ng-if="$root.path != 'iframe'">
             <button ng-click="createPlaces()"><i class="fi-plus"></i></button>
         </li>
     </ul>

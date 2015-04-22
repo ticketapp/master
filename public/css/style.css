@@ -403,6 +403,11 @@ md-toast{position: fixed!important;}
     width: 70px;
     height: 55px;
 }
+.generalControls i{
+    color: #ffffff;
+    font-size: 25px;
+    line-height: 25px;
+}
 .generalControlsContener {
     width: 70px!important;
 }
@@ -467,12 +472,15 @@ md-toast{position: fixed!important;}
     background-color: #0078A0;
     height: 100%;
     background-repeat: no-repeat;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    -webkit-background-size: 120%;
+    -moz-background-size: 120%;
+    -o-background-size: 120%;
+    background-size: 120%;
     position: fixed;
     width: 100%;
+    background-position-x: 20%;
+    background-position-y: -4em;
+    background-image: url('../img/caroussel1.png');
 }
 
 .intro-text {
@@ -572,9 +580,12 @@ top: 0;
 }
 .animate-show {padding-left : 50px; color : white; position:absolute; top:0;}
 
-.animate.ng-leave, .animate-show.ng-hide-add, .animate-show.ng-hide-add-active, .animate-show.ng-hide-add, .animate-show.ng-hide-add-active, .animate-show.ng-hide-add.ng-hide-add-active, .animate-show.ng-hide-remove, .animate-show.ng-hide-remove-active, .animate-show.ng-hide-remove.ng-hide-remove-active {
+.animate-show.ng-leave, .animate-show.ng-enter {
 
-    -webkit-animation-duration:.8s; -moz-animation-duration:.8s; -ms-animation-duration:.8s; -o-animation-duration:.8s;
+    -webkit-animation-duration:.8s;
+    -moz-animation-duration:.8s;
+    -ms-animation-duration:.8s;
+    -o-animation-duration:.8s;
     -webkit-animation-fill-mode:both;
     -moz-animation-fill-mode:both;
     -ms-animation-fill-mode:both;
@@ -592,12 +603,21 @@ top: 0;
 
 }
 
-.animate-show.ng-hide-add, .animate.ng-leave {display:block!important;
-
-    -webkit-animation-name: bounceOutLeft; -moz-animation-name: bounceOutLeft; -ms-animation-name: bounceOutLeft; -o-animation-name: bounceOutLeft;
+ .animate-show.ng-leave {
+    -webkit-animation-name: fadeOut;
+    -moz-animation-name: fadeOut;
+    -ms-animation-name: fadeOut;
+    -o-animation-name: fadeOut;
 }
-.animate-show.ng-hide-remove, .animate-show.active-add {position:absolute!important; top:0!important;
-    -webkit-animation-name: bounceInRight; -moz-animation-name: bounceInRight; -ms-animation-name: bounceInRight; -o-animation-name: bounceInRight;
+.animate-show.ng-enter {position:absolute!important; top:0!important;
+    -webkit-animation-delay: 0.8s;
+    -moz-animation-delay: 0.8s;
+    -ms-animation-delay: 0.8s;
+    -o-animation-delay: 0.8s;
+    -webkit-animation-name: fadeIn;
+    -moz-animation-name: fadeIn;
+    -ms-animation-name: fadeIn;
+    -o-animation-name: fadeIn;
 }
 
 /*Menu*/

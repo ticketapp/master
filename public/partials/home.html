@@ -1,11 +1,19 @@
-<div ng-if="$root.window == 'medium' || $root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
-    <div ng-controller="CarouselCtrl" class="parallax-background top0 carousel">
-        <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-show="elementEnCours == info">
+<div ng-controller="CarouselCtrl" ng-if="$root.window == 'medium' || $root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
+    <div  class="parallax-background top0 carousel">
+        <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-if="elementEnCours == info">
             <h4 ng-if="info.title.length > 0" ng-bind-html="info.title"></h4>
             <div ng-bind-html="info.content"></div>
         </div>
     </div>
     <div class="parallax-content ng-search">
+    </div>
+    <div ng-if="elementEnCours.animation" id="infosTooltip" style="{{elementEnCours.animation.style}}"
+         class="animate-show animated">
+        <i ng-click="removeAnimation()" class="fi-x pointer" style="
+    float: right;
+    color: rgba(0, 0, 0, 0.3);
+"></i>
+        <div ng-bind-html="elementEnCours.animation.content"></div>
     </div>
 </div>
 <div ng-if="$root.window == 'small'" ng-controller="phoneHomeCtrl" class="absolute top0 bottom0 right left" style="z-index: 11">

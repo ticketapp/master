@@ -1,4 +1,4 @@
-app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, ArtistsFactory) {
+app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, ArtistsFactory, UserFactory) {
     $scope.connectByMail = function () {
         $http.post('/authenticate/userpass', {username: $scope.username, password: $scope.password}).
             success(function (data) {
@@ -8,30 +8,17 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
 
             })
     };
-    var followErrorCount = 0;
-    var nbAskToFollow = 0;
-    var nbFollowed = 0;
+
     function followArtist (id, token) {
-        nbAskToFollow++;
-        console.log('nbAskToFollow:' + nbAskToFollow);
         ArtistsFactory.followArtistByFacebookId(id).then(function (isFollowed) {
             if (isFollowed == 'error') {
-                followErrorCount++;
-                console.log('followErrors:' + followErrorCount);
                 getArtistPage(id, token);
-            } else {
-                nbFollowed++
-                console.log('nbFollowed:'+ nbFollowed);
             }
 
         });
     }
-    var nbArtPost = 0;
-    var nbErrorPost = 0;
     function postArtist (artist) {
         if (artist.cover != undefined) {
-            nbArtPost++;
-            console.log('nbArtPost:' + nbArtPost);
             artist.facebookUrl = artist.link.replace('https://www.facebook.com/', '').replace('pages').replace(/[/]/g, '');
             artist.facebookId = artist.id;
             artist.imagePath = artist.cover.source;
@@ -49,28 +36,21 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                 artist.genre = "";
             }
             ArtistsFactory.postArtist(artist.name, artist).then(function (isCreated) {
-                console.log(isCreated);
                 if (isCreated != 'error') {
                     followArtist(artist.id, false)
                 } else {
-                    nbErrorPost++;
-                    console.log('nbErrorPost:' + nbErrorPost)
                 }
             });
         }
     }
 
-    var nbFbPagesGet = 0;
     function getArtistPage (id, token) {
         $http.get('https://graph.facebook.com/v2.3/' + id + '?access_token=' + token).
             success(function (data) {
-                console.log(data);
-                nbFbPagesGet++;
-                console.log('nbFbPagesGet:' + nbFbPagesGet);
                 postArtist(data)
             })
     }
-    var nbArtFbPagesFollowedOnFb = 0;
+
     function getFbPages (route, token) {
         $http.get(route).
             success(function (data) {
@@ -96,8 +76,6 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                         //post if not exist
                     } else if (pages[i].category == "Musician/band") {
                         //followArtist
-                        nbArtFbPagesFollowedOnFb++;
-                        console.log('nbArtFbPagesFollowedOnFb:' + nbArtFbPagesFollowedOnFb);
                         followArtist(pages[i].id, token);
                         // post if not exist
                     } else if (pages[i].category == "concert venue") {
@@ -112,13 +90,9 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
     }
 
     function getUserToken() {
-        $http.get('/users/facebookAccessToken/').
-            success(function (data) {
-                var token = data;
-                getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=' + token, token);
-            }).
-            error(function (data) {
-            })
+        UserFactory.getToken().then(function (token) {
+            getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=' + token, token);
+        });
     }
 
     function applyLastRequest() {

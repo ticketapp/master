@@ -16,6 +16,21 @@ app.factory('ArtistsFactory', function ($http, $q, oboe) {
             }
             return deferred.promise;
         },
+        getFollowArtists : function () {
+            var deferred = $q.defer();
+            if(factory.artists ==true){
+                deferred.resolve(factory.artists);
+            } else {
+                $http.get('/artists/followed/')
+                    .success(function(data, status){
+                        factory.artists = data;
+                        deferred.resolve(factory.artists);
+                    }).error(function(data, status){
+                        deferred.reject('erreur');
+                    });
+            }
+            return deferred.promise;
+        },
         getArtistsByGenre : function (offset, genre) {
             var deferred = $q.defer();
             if(factory.artists ==true){
@@ -95,6 +110,7 @@ app.factory('ArtistsFactory', function ($http, $q, oboe) {
                             platform: track.platform,
                             thumbnailUrl: track.thumbnailUrl
                         }).error(function (data) {
+                            console.log(data)
                         })
                     }
                     value.forEach(saveTrack);

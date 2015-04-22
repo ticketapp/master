@@ -6,7 +6,7 @@ app.factory ('UserFactory', function ($http, $q){
             if(factory.user == true){
                 deferred.resolve(factory.user);
             } else {
-                $http.get('/infos')
+                $http.get('/users/facebookAccessToken/')
                 .success(function(data, status){
                     factory.user = data;
                     deferred.resolve(factory.user);

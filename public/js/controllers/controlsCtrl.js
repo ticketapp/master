@@ -2,11 +2,28 @@ app.controller ('controlsCtrl', ['$scope', '$location', '$http', '$timeout', '$r
     function ($scope, $location, $http, $timeout, $rootScope ){
     $scope.buy = false;
     if ($rootScope.window != 'small') {
+        var visible = true;
         function otherListener() {
-            if (window.pageYOffset < 50) {
+            if (window.pageYOffset < 50 && visible == false) {
+                visible = true;
                 document.getElementById('generalControlsContener').style.marginRight = '0';
-            } else {
+                if ( document.getElementById('infosTooltip') != undefined) {
+                    var infosTooltip = document.getElementById('infosTooltip')
+                    infosTooltip.classList.remove('ng-hide');
+                    infosTooltip.classList.remove('fadeOut');
+                    infosTooltip.classList.add('fadeIn')
+                }
+            } else if (window.pageYOffset > 50 && visible == true) {
+                visible = false;
                 document.getElementById('generalControlsContener').style.marginRight = '-60px';
+                if ( document.getElementById('infosTooltip') != undefined) {
+                    var infosTooltip = document.getElementById('infosTooltip')
+                    infosTooltip.classList.remove('fadeIn');
+                    infosTooltip.classList.add('fadeOut')
+                    $timeout(function () {
+                        infosTooltip.classList.add('ng-hide')
+                    }, 500)
+                }
             }
         }
 

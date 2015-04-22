@@ -30,6 +30,7 @@
     .justify{text-align:justify!important;}
     .textLeft{text-align:left!important;}
     .textRight{text-align:right!important;}
+    .textColorWhite{color: white}
 
 /*effects*/
     .pointer {cursor:pointer;}
