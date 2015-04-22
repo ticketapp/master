@@ -128,7 +128,7 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
                             $scope.selectedTab = 1;
                         }
                         function pushEvent (el) {
-                            el.priceColor = 'rgb(0, 140, 186)';
+                            el.priceColor = '#2DAAE1';
                             if (el.tariffRange != undefined) {
                                 var tariffs = el.tariffRange.split('-');
                                 if (tariffs[1] > tariffs[0]) {

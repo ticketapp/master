@@ -49,7 +49,7 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             $scope.loadingMore = false;
         }
         function colorEvent(el) {
-            el.priceColor = 'rgb(0, 140, 186)';
+            el.priceColor = '#2DAAE1';
             if (el.tariffRange != undefined) {
                 var tariffs = el.tariffRange.split('-');
                 if (tariffs[1] > tariffs[0]) {

@@ -86,7 +86,7 @@ app.controller ('UsersCtrl', function ($scope, $routeParams, $http, $rootScope, 
                     $scope.loadEvents = false;
                     $scope.orgaEvents = [];
                     function pushEvent (el) {
-                        el.priceColor = 'rgb(0, 140, 186)';
+                        el.priceColor = '#2DAAE1';
                         if (el.tariffRange != undefined) {
                             var tariffs = el.tariffRange.split('-');
                             if (tariffs[1] > tariffs[0]) {
