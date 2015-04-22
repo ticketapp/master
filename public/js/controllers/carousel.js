@@ -44,6 +44,7 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
     });
     $scope.infos.push({
         id: 2,
+        displayIfConnected: true,
         animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">vous pouvez ' +
             'trouver la rubrique FAQ/rapporter un bug ici.' +
             '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
@@ -65,6 +66,7 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
     });
     $scope.infos.push({
         id: 1,
+        displayIfConnected: false,
         animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
             'Connectez-vous en un clique via Facebook' +
             '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
@@ -86,21 +88,23 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
     removeAnimations();
     updateInfo();
     if ($rootScope.connected == true) {
-        $scope.infos = [];
         function pushInfo (info, artist) {
             $scope.infos.push({content: $sce.trustAsHtml(info), artist : artist})
         }
         function getEventsArtist (artist) {
             ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
-                var info
+                var info;
                 if (events.length > 0) {
                     info = '<h2 class="text-center textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
-                    function refactorEventsToInfo (el) {
-                        info = info + '<a href="#/event/'+ el.eventId + '" class="textColorWhite">'+
-                            el.places[0].name + '</a>'
-                        console.log(el)
+                    for (var e = 0; 0 < 2; e++) {
+                        info = info + '<a href="#/event/'+ events[e].eventId + '" class="textColorWhite">'+
+                            events[e].places[0].name + '</a>'
                     }
-                    events.forEach(refactorEventsToInfo)
+                    if (events.length > 2) {
+                        info = info + '<a href="#/artist.facebookUrl" class="textColorWhite">' +
+                            'Voir tous les événements</a>'
+
+                    }
                     pushInfo(info,artist);
                 } else if (artist.tracks.length > 0) {
                     info = '<h2 class="text-center textColorWhite margin10"> Ecoutez vos musiques favorites et ' +
