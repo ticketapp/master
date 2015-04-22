@@ -1,4 +1,4 @@
-app.controller("CarouselCtrl",function($scope, $timeout, $http, $sce, $localStorage){
+app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localStorage){
    $scope.infos=[];
    $http.get('/infos').success(function (data, status, headers, config) {
        //$scope.infos = data;
@@ -43,23 +43,29 @@ app.controller("CarouselCtrl",function($scope, $timeout, $http, $sce, $localStor
                 '</b>' +
                 '</p>')
        });
+       removeAnimations();
        updateInfo();
    }).error(function (data, status, headers, config) {
    });
-   for (var j = 0; j < $scope.infos.length; j++) {
-       for (var k = 0; k < $localStorage.removedInfosMsg.length; k++) {
-           if ($scope.infos[j].id == $localStorage.removedInfosMsg[k]) {
-               $scope.infos[j].animation = '';
-           }
-       }
-   }
+    function removeAnimations() {
+        for (var j = 0; j < $scope.infos.length; j++) {
+            console.log($scope.infos[j])
+            for (var k = 0; k < $localStorage.removedInfosMsg.length; k++) {
+                if ($scope.infos[j].id == $localStorage.removedInfosMsg[k]) {
+                    $scope.infos[j].animation = '';
+                    console.log($localStorage.removedInfosMsg[k])
+                }
+            }
+        }
+    }
    var i = -1 ;
     var changeInf;
     function removeAnimation (i) {
+        $localStorage.a = 'lkk';
         $localStorage.removedInfosMsg.push($scope.infos[i].id);
-        console.log($localStorage.removedInfosMsg)
         $scope.infos[i].animation = '';
         $scope.elementEnCours.animation = '';
+        console.log($localStorage.removedInfosMsg)
     }
    function updateInfo(){
        if(i === $scope.infos.length - 1){
