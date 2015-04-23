@@ -274,7 +274,8 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
     var otherSearch;
     var otherSearchInterval = 600;
     $scope.research = function(newName) {
-        if (angular.isDefined(newName)) {
+        if (angular.isDefined(newName) && (_selArtist == true || _selEvent == true || _selOrganizer == true ||
+            _selPlace == true)) {
             $scope.loadingMore = true;
             _research = newName;
             $scope.searchPat = newName;

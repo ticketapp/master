@@ -1,5 +1,5 @@
-<div ng-controller="CarouselCtrl" ng-if="$root.window == 'medium' || $root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
-    <div  class="parallax-background top0 carousel">
+<div ng-if="$root.window == 'medium' || $root.window == 'large' || $root.window == 'xlarge' || $root.window == 'xxlarge'">
+    <div  class="parallax-background top0 carousel" ng-controller="CarouselCtrl">
         <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-if="elementEnCours == info">
             <h4 ng-if="info.title.length > 0" ng-bind-html="info.title"></h4>
             <div ng-bind-html="info.content"></div>
