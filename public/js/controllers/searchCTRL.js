@@ -104,7 +104,6 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         function getArtistsByContaining () {
             ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
-                getArtistsByGenre()
             });
         }
 
