@@ -83,9 +83,7 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             }
         }
         function getArtists () {
-            if ($rootScope.connected == 'true') {
-                offset = offset - 1;
-            }
+            console.log(offset)
             ArtistsFactory.getArtists(offset).then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
             });
