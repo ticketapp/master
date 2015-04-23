@@ -34,8 +34,8 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
             }
             scope.forEach(getId);
             function pushEl (el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
-                    'placeId': el.placeId, 'facebookId': el.facebookId};
+                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId,
+                    'organizerId': el.organizerId, 'placeId': el.placeId, 'facebookId': el.facebookId};
                 if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
                     $timeout(function () {
                         $scope.$apply(function () {
@@ -96,6 +96,7 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         }
 
         function getArtistsByGenre () {
+            console.log('yoyo')
             ArtistsFactory.getArtistsByGenre(offset, _research).then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
             })
@@ -190,7 +191,10 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
                 $scope.loadingFbArt = false;
             });
         }
+        var searchNb = 0;
         function search () {
+            searchNb++
+            console.log(searchNb)
             if (_selArtist == true) {
                 if (_research.length == 0) {
                     if (offset == 0 && $rootScope.connected == true) {
@@ -273,9 +277,12 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
     var facebookSearchInterval = 600;
     var otherSearch;
     var otherSearchInterval = 600;
+    var reseachNb = 0;
     $scope.research = function(newName) {
         if (angular.isDefined(newName) && (_selArtist == true || _selEvent == true || _selOrganizer == true ||
             _selPlace == true)) {
+            reseachNb++
+            console.log(reseachNb)
             $scope.loadingMore = true;
             _research = newName;
             $scope.searchPat = newName;
