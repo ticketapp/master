@@ -25,7 +25,7 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
         } else {
             i++;
         }
-        $scope.elementEnCours = {};
+        //$scope.elementEnCours = {};
         $timeout(function () {
             $scope.$apply(function () {
                 $scope.elementEnCours = $scope.infos[i];
@@ -58,7 +58,7 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
         },
         content: $sce.trustAsHtml('<h2 class="text-center textColorWhite margin10">Bienvenue</h2><p>' +
             '<b class="column large-6 large-offset-3 text-center textColorWhite medium-11">' +
-            'Claude est en version beta, aidez le à s\'ammélliorez en rapportant vos bug ou en ' +
+            'Claude est en version beta, aidez le à s\'améliorer en rapportant vos bug ou en ' +
             'partageant vos suggestions.' +
             '</b>' +
             '</p>')
@@ -91,7 +91,7 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
             $scope.infos = [
                 {content: $sce.trustAsHtml('<h2 class="text-center textColorWhite margin10">Bienvenue</h2><p>' +
                     '<b class="column large-6 large-offset-3 text-center textColorWhite medium-11">' +
-                    'Claude est en version beta, aidez le à s\'ammélliorez en rapportant vos bug ou en ' +
+                    'Claude est en version beta, aidez le à s\'améliorer en rapportant vos bug ou en ' +
                     'partageant vos suggestions.' +
                     '</b>' +
                     '</p>')}
@@ -110,7 +110,7 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                         } else {
                             eventsLength = events.length;
                         }
-                        info = '<h2 class="text-center textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
+                        info = '<h2 class="text-center column medium-11 textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
                         for (var e = 0; 0 < eventsLength; e++) {
                             info = info + '<a href="#/event/' + events[e].eventId + '" class="textColorWhite">' +
                                 events[e].places[0].name + '</a>'
@@ -122,8 +122,8 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                         }
                         pushInfo(info, artist);
                     } else if (artist.tracks.length > 0) {
-                        info = '<h2 class="text-center textColorWhite margin10"> Ecoutez vos musiques favorites et ' +
-                            'enregistrer vos playlists avec Claude</h2>';
+                        info = '<h4 class="text-center textColorWhite margin10"> Ecoutez vos musiques favorites et ' +
+                            'enregistrez vos playlists avec Claude</h4>';
                         pushInfo(info, artist);
                     }
                 });
@@ -136,11 +136,11 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
     }
     if ($rootScope.connected == true) {
         getConnectedInfos()
-    } else {
-        $rootScope.$watch('connected', function (newVal) {
-            if (newVal == true) {
-                getConnectedInfos();
-            }
-        })
     }
+    $rootScope.$watch('connected', function (newVal) {
+        if (newVal == true) {
+            getConnectedInfos();
+        }
+    })
+
 });

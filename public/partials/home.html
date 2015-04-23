@@ -3,17 +3,19 @@
         <div ng-repeat="info in infos" class="animate-show column large-12 intro-text" ng-if="elementEnCours == info">
             <h4 ng-if="info.title.length > 0" ng-bind-html="info.title"></h4>
             <div ng-bind-html="info.content"></div>
-            <div class=" float-right marginTop20 relative"
+            <div class=" marginTop20 column medium-11"
                  ng-if="info.artist.tracks.length > 0">
-                Ecoutez {{info.artist.name}}
-                <div class="img-circularPlayer BlackTrans">
-                    <i class="pauseInImg ng-scope fi-play font-size: 80px;"
-                       ng-click="$root.addAndPlay(info.artist.tracks, info.artist)"></i>
+                <div class="float-right">
+                    Ecouter {{info.artist.name}}
+                    <div class="img-circularPlayer BlackTrans">
+                        <i class="pauseInImg ng-scope fi-play font-size: 80px;"
+                           ng-click="$root.addAndPlay(info.artist.tracks, info.artist)"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="parallax-content ng-search">
+    <div class="parallax-content ng-search padding0">
     </div>
     <div ng-if="elementEnCours.animation && $root.connected == false" id="infosTooltip"
          class="animate-show animated">

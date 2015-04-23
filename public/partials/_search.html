@@ -3,7 +3,9 @@
 </div>
 <div>
     <ul id="events_contener" ng-class="{'paddingTop50 marginTop50': $root.path == 'search'}"
-        class="small-block-grid-1 medium-block-grid-2 large-block-grid-3">
+        class="paddingTop20"
+        ng-show="events.length > 0 || artists.length > 0 ||
+    places.length > 0 || organizers.length > 0 || artistsFb.length > 0">
         <div ng-if="$root.activEvent && events.length > 0"
              class="float-left column small-12 medium-6 large-4 fade min_contener data-ng-event margin0"
             data-ng-repeat="event in events">
