@@ -96,13 +96,14 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                     '</b>' +
                     '</p>')}
             ]
-            function pushInfo(info, artist) {
-                $scope.infos.push({content: $sce.trustAsHtml(info), artist: artist})
+            function pushInfo(info, artist, fixedTitle) {
+                $scope.infos.push({content: $sce.trustAsHtml(info), artist: artist, fixedTitle: fixedTitle})
             }
 
             function getEventsArtist(artist) {
                 ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
                     var info;
+                    console.log(events);
                     if (events.length > 0) {
                         var eventsLength;
                         if (events.length > 2) {
@@ -111,8 +112,8 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                             eventsLength = events.length;
                         }
                         info = '<h2 class="text-center column medium-11 textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
-                        for (var e = 0; 0 < eventsLength; e++) {
-                            info = info + '<a href="#/event/' + events[e].eventId + '" class="textColorWhite">' +
+                        for (var e = 0; e < eventsLength; e++) {
+                            info = info + '<a href="#/event/' + events[e].eventId + ' class="column large-12" class="textColorWhite">' +
                                 events[e].places[0].name + '</a>'
                         }
                         if (events.length > 2) {
@@ -120,11 +121,10 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                                 'Voir tous les événements</a>'
 
                         }
-                        pushInfo(info, artist);
+                        pushInfo(info, artist, false);
                     } else if (artist.tracks.length > 0) {
-                        info = '<h4 class="text-center textColorWhite margin10"> Ecoutez vos musiques favorites et ' +
-                            'enregistrez vos playlists avec Claude</h4>';
-                        pushInfo(info, artist);
+                        info = '';
+                        pushInfo(info, artist, true);
                     }
                 });
             }

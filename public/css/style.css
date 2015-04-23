@@ -578,7 +578,7 @@ top: 0;
     background-color: rgba(71, 150, 221, 1);
     background-attachment: fixed;
 }
-.animate-show {padding-left : 50px; color : white; position:absolute; top:0;}
+.animate-show {padding-left : 50px; color : white; position: absolute}
 
 .animate-show.ng-leave, .animate-show.ng-enter {
 
@@ -592,24 +592,13 @@ top: 0;
     -o-animation-fill-mode:both;
 }
 
-.animate-show.ng-hide-remove,
-.animate-show.ng-hide.ng-hide-active {
-    opacity:0;
-}
-
-.animate-show.ng-hide,
-.animate-show.ng-hide-remove {
-    opacity:1;
-
-}
-
  .animate-show.ng-leave {
     -webkit-animation-name: fadeOut;
     -moz-animation-name: fadeOut;
     -ms-animation-name: fadeOut;
     -o-animation-name: fadeOut;
 }
-.animate-show.ng-enter {position:absolute!important; top:0!important;
+.animate-show.ng-enter {
     -webkit-animation-delay: 0.8s;
     -moz-animation-delay: 0.8s;
     -ms-animation-delay: 0.8s;
