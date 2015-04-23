@@ -96,13 +96,14 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                     '</b>' +
                     '</p>')}
             ]
-            function pushInfo(info, artist, fixedTitle) {
-                $scope.infos.push({content: $sce.trustAsHtml(info), artist: artist, fixedTitle: fixedTitle})
+            function pushInfo(info, title, artist, fixedTitle) {
+                $scope.infos.push({content: $sce.trustAsHtml(info), title: title, artist: artist, fixedTitle: fixedTitle})
             }
 
             function getEventsArtist(artist) {
                 ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
-                    var info;
+                    var info = '';
+                    var title;
                     console.log(events);
                     if (events.length > 0) {
                         var eventsLength;
@@ -111,20 +112,20 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                         } else {
                             eventsLength = events.length;
                         }
-                        info = '<h2 class="text-center column medium-11 textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
+                        title = '<h2 class="text-center column medium-11 textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
                         for (var e = 0; e < eventsLength; e++) {
-                            info = info + '<a href="#/event/' + events[e].eventId + ' class="column large-12" class="textColorWhite">' +
-                                events[e].places[0].name + '</a>'
+                            info = info + '<div class="column large-12"><a href="#/event/' + events[e].eventId + '" class="textColorWhite">' +
+                                events[e].places[0].name + '</a></div>'
                         }
                         if (events.length > 2) {
                             info = info + '<a href="#/artist.facebookUrl" class="textColorWhite">' +
                                 'Voir tous les événements</a>'
 
                         }
-                        pushInfo(info, artist, false);
+                        pushInfo(info, title, artist, false);
                     } else if (artist.tracks.length > 0) {
-                        info = '';
-                        pushInfo(info, artist, true);
+                        title = 'Ecoutez vos musiques favorites et enregistrez vos playlists avec Claude';
+                        pushInfo(info, title, artist, true);
                     }
                 });
             }

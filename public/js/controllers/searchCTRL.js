@@ -132,7 +132,8 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
         }
 
         function getEventsByGenre() {
-            EventsFactory.getEventsByGenre(_research, offset).then(function (events) {
+            EventsFactory.getEventsByGenre(_research, offset, $rootScope.geoLoc).then(function (events) {
+                console.log(events)
                 events.forEach(colorEvent);
                 updateScope(events, $scope.events, 'eventId');
             });
@@ -201,6 +202,7 @@ app.controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout', 'Ar
                     }
                 } else {
                     getArtistsByContaining();
+                    getArtistsByGenre()
                 }
             }
             if (_selPlace == true) {

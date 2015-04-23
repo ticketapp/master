@@ -79,12 +79,12 @@ app.factory ('EventsFactory', function ($http, $q){
             }
             return deferred.promise;
         },
-        getEventsByGenre : function (pattern, offset) {
+        getEventsByGenre : function (pattern, offset, geoloc) {
             var deferred = $q.defer();
             if(factory.events == true){
                 deferred.resolve(factory.events);
             } else {
-                $http.get('/genres/'+ pattern +'/12/' + offset + '/events ').
+                $http.get('/genres/'+ pattern +'/12/' + offset + '/events/' + geoloc).
                     success(function(data, status, headers, config) {
                         factory.events = data;
                         deferred.resolve(factory.events);

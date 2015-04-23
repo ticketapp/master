@@ -261,7 +261,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.maxStart = 30;
         $rootScope.maxStartView = 168;
         $rootScope.redirectToSearch = function (research) {
-            $rootScope.storeSearch = research
+            $rootScope.storeSearch = research;
             if ($location.path() != '/') {
                 $location.path('/search')
             }
