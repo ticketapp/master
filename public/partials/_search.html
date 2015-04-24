@@ -4,7 +4,7 @@
 <div class="paddingTop20"
      ng-show="(events.length > 0 && $root.activEvent ) || (artists.length > 0 && $root.activArtist)||
     (places.length > 0 && $root.activPlace) || (organizers.length > 0 && $root.activUsr) ||
-     (artistsFb.length > 0 && $root.activArtist) || loadingMore">
+     (artistsFb.length > 0 && $root.activArtist) || loadingMore || loadingFbArt">
     <ul id="events_contener" ng-class="{'paddingTop50 marginTop50': $root.path == 'search'}">
         <div ng-if="$root.activEvent && events.length > 0"
              class="float-left column small-12 medium-6 large-4 fade min_contener data-ng-event margin0"

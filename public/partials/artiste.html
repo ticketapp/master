@@ -124,28 +124,24 @@
                          class="column fade paddingBottom10 medium-6 large-4 float-left"
                             ng-class="{'paddingRight0 paddingLeft0': $root.window == 'small'}">
                         <div class="column large-12 arTrack">
+                            <div class="column small-1 padding0 text-center float-right"
+                                 ng-class="{'marginTop10': $root.window != 'small'}"
+                                    style="border-left:solid 1px rgba(0, 0, 0, 0.45) ">
+                                <i class="fi-x column medium-12 padding0 pointer"></i>
+                                <i class="fi-play column medium-12 padding0 pointer"
+                                   ng-click="$root.addAndPlay([track], artiste)"></i>
+                                <i class="fi-plus column medium-12 padding0 pointer"
+                                   ng-click="$root.addToPlaylist([track], artiste)"></i>
+                            </div>
                             <div ng-if="track.thumbnailUrl != undefined"
                                  class="img-circularPlayer"
                                  style="background-image: url('{{track.thumbnailUrl}}');"
-                                 ng-mouseover="showPlayNow = true"
-                                 ng-mouseleave="showPlayNow = false"
                                  ng-class="{'padding0 margin0': $root.window == 'small'}">
-                                <i class="fi-play pauseInImg"
+                                <i class="fi-play playInImg"
                                    ng-click="$root.addToPlaylist([track], artiste)">
                                    </i>
-                                <a class="button absolute paddingTop20"
-                                   style="z-index: 12;
-                                              margin-bottom: 10px;
-                                              left: 20px;
-                                            }"
-                                   ng-if="showPlayNow && $root.window != 'small' && $root.window != 'medium'"
-                                   ng-mouseover="$parent.showPlayNow = true"
-                                   ng-mouseleave="$parent.showPlayNow = false"
-                                   ng-click="$root.addAndPlay([track], artiste)">
-                                    <i class="fi-play"></i> Jouer maintenant
-                                </a>
                             </div>
-                            <div ng-class="{'column large-8': $root.window != 'small'}"
+                            <div ng-class="{'column medium-7': $root.window != 'small'}"
                                  style="overflow: hidden; height: 48px;"><h3>{{track.title}}</h3></div>
                             <a target="_blank"
                                href="{{track.redirectUrl}}"
