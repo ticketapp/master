@@ -1,12 +1,14 @@
 app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localStorage, $rootScope, ArtistsFactory){
    $scope.infos=[];
     function removeAnimations() {
-        for (var j = 0; j < $scope.infos.length; j++) {
-            console.log($scope.infos[j])
-            for (var k = 0; k < $localStorage.removedInfosMsg.length; k++) {
-                if ($scope.infos[j].id == $localStorage.removedInfosMsg[k]) {
-                    $scope.infos[j].animation = '';
-                    console.log($localStorage.removedInfosMsg[k])
+        if ($localStorage.removedInfosMsg != undefined) {
+            for (var j = 0; j < $scope.infos.length; j++) {
+                console.log($scope.infos[j])
+                for (var k = 0; k < $localStorage.removedInfosMsg.length; k++) {
+                    if ($scope.infos[j].id == $localStorage.removedInfosMsg[k]) {
+                        $scope.infos[j].animation = '';
+                        console.log($localStorage.removedInfosMsg[k])
+                    }
                 }
             }
         }

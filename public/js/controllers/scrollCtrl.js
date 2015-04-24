@@ -145,7 +145,7 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
         $rootScope.resizeImgHeight = function () {
             var waitForContentMin = setTimeout(function () {
                 var content = document.getElementsByClassName('img_min_evnt');
-                if (content.length > 0) {
+                if (content.length > 0 && content[0].clientWidth > 20) {
                     clearInterval(waitForContentMin);
                     var newImgHeight = content[0].clientWidth * 0.376;
                     for (var i = 0; i < content.length; i++) {
