@@ -11,6 +11,8 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
                     }
                 }
             }
+        } else {
+            $localStorage.removedInfosMsg = [];
         }
     }
     var i = -1 ;

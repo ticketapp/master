@@ -593,6 +593,7 @@ top: 0;
 }
 
  .animate-show.ng-leave {
+     position: absolute;
     -webkit-animation-name: fadeOut;
     -moz-animation-name: fadeOut;
     -ms-animation-name: fadeOut;

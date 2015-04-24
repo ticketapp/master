@@ -30,6 +30,9 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                 }
                 $scope.events.forEach(getEventId);
                 function uploadEvents(el, index, array) {
+                    if ($scope.mapBounces == undefined) {
+                        $scope.mapBounces = map.getBounds()
+                    }
                     if (scopeIdList.indexOf(el.eventId) == -1) {
                         if ( el.places[0] != undefined) {
                             el.addresses[0].geographicPoint = el.places[0].geographicPoint.replace('(', '').replace(')', '');
@@ -63,7 +66,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     $scope.updateMarkers()
                 }
             })
-    }
+    };
     $scope.initializeTime = function () {
         var newName = $scope.time;
         if (newName > 23 && newName <= 38) {
@@ -73,13 +76,15 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
         } else if (newName > 40) {
             newName = (newName - 39) * 720;
         }
-        var textSlider = document.getElementById('timeSearchSliderPhone').getElementsByClassName('md-thumb');
         var waitForSearchBar = setInterval(function () {
-            clearInterval(waitForSearchBar);
-            for (var i = 0; i < textSlider.length; i++) {
-                textSlider[i].innerHTML = '';
-                textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
-                    $filter('millSecondsToTimeString')(newName) + '</b>';
+            var textSlider = document.getElementsByClassName('md-thumb');;
+            if (textSlider != undefined) {
+                clearInterval(waitForSearchBar);
+                for (var i = 0; i < textSlider.length; i++) {
+                    textSlider[i].innerHTML = '';
+                    textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
+                        $filter('millSecondsToTimeString')(newName) + '</b>';
+                }
             }
         }, 100);
     }
@@ -249,7 +254,7 @@ app.controller('phoneHomeCtrl', function ($scope, $rootScope, $http, $timeout, $
                     $scope.mapCenter = map.center.k + ', ' + map.center.D;
                 })
                 $scope.mapBounces = map.getBounds()
-                $scope.getEvents()
+                $scope.getEvents();
             }
         }, 500)
     }
