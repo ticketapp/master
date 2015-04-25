@@ -1,0 +1,41 @@
+<input ng-if="!filter" id="searchBar" placeholder="Rechercher" ng-model="$root.research"
+       ng-model-options="{ getterSetter: true }"
+       style="border-radius: 0px;"
+       class="column small-10 medium-3">
+<label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
+       ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)"
+       ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">
+    Evenements
+</label>
+<label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox"
+       ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)"
+       ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">
+    Artistes
+</label>
+<label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox"
+       ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)"
+       ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">
+    Lieux
+</label>
+<label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox"
+       ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)"
+       ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">
+    Organisateurs
+</label>
+<div class="column large-12 padding0"
+     style="height: 48px">
+    <md-slider flex ng-change="$root.selStart($root.maxStart)"
+               ng-if="$root.activEvent && (searchPat == undefined || searchPat.length == 0) && $root.window != 'small' && $root.window != 'medium'"
+               ng-model="$root.maxStart" min="1" max="51" step="1"
+               aria-label="timeSlider"
+               id="timeSearchSlider"
+               class="md-primary column small-11 padding0 bigSlider">
+    </md-slider>
+    <md-slider flex ng-change="$root.selStart($root.maxStart)"
+               ng-model="$root.maxStart" min="1" max="51" step="1"
+               aria-label="timeSlider"
+               ng-if="$root.activEvent && (searchPat == undefined || searchPat.length == 0) && ($root.window == 'small' || $root.window == 'medium')"
+               id="timeSearchSliderPhone"
+               class="md-primary column small-12 padding0 margin0">
+    </md-slider>
+</div>

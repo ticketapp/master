@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+      <link href="../css/style.css" rel="stylesheet" type="text/css">
+      <link href="../css/animate.min.css" rel="stylesheet" type="text/css">
+      <link href="../css/foundation.css" rel="stylesheet" type="text/css">
+      <link href="../css/normalize.css" rel="stylesheet" type="text/css">
+      <link href="../css/colorpicker.css" rel="stylesheet" type="text/css">
+      <link href="../css/tools.css" rel="stylesheet" type="text/css">
+      <link href="../css/foundation-icons.css" rel="stylesheet" type="text/css">
+      <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/0.6.1/angular-material.min.css">
+  </head>
+  <body ng-app="MonApp">
+
+        <div ng-controller="CreateEventCtrl" id="content" class="row minHeight450"><div ng-init="event.description = 'ecrire ici'" contenteditable="true" class="column padding0">{{event.description}}</div></div>
+
+    <script src="../js/jquery-1.11.0.js"></script>
+        <script src="../js/hammerjs/hammer.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-route.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-aria.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular-messages.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angular_material/0.6.1/angular-material.min.js"></script>
+    <script src="../js/mm-foundation.min.js"></script>
+    <script src="../js/modules/foundation-colorpicker-module.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/services/artiste.js"></script>
+    <script src="../js/services/event.js"></script>
+    <script src="../js/services/organizer.js"></script>
+    <script src="../js/services/lieu.js"></script>
+    <script src="../js/services/user.js"></script>
+    <script src="../js/directives/directives.js"></script>
+    <script src="../js/directives/wysiwyg.js"></script>
+    <script src="../js/controllers/artistes.js"></script>
+    <script src="../js/controllers/events.js"></script>
+    <script src="../js/controllers/eventView.js"></script>
+    <script src="../js/controllers/users.js"></script>
+    <script src="../js/controllers/tabs.js"></script>
+    <script src="../js/controllers/slide.js"></script>
+    <script src="../js/controllers/lieu.js"></script>
+    <script src="../js/controllers/scrollCtrl.js"></script>
+    <script src="../js/controllers/carousel.js"></script>
+    <script src="../js/controllers/tools.js"></script>
+    <script src="../js/controllers/CreateEvent.js"></script>
+  </body>
+</html>

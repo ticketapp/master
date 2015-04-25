@@ -1,0 +1,169 @@
+<div id="searchBlock" class="right left absolute" ng-if="$root.path != 'search'">
+    <ng-search-bar class="column large-8 medium-10 medium-offset-1 large-offset-2"></ng-search-bar>
+</div>
+<div class="paddingTop20"
+     ng-show="(events.length > 0 && $root.activEvent ) || (artists.length > 0 && $root.activArtist)||
+    (places.length > 0 && $root.activPlace) || (organizers.length > 0 && $root.activUsr) ||
+     (artistsFb.length > 0 && $root.activArtist) || loadingMore || loadingFbArt">
+    <ul id="events_contener" ng-class="{'paddingTop50 marginTop50': $root.path == 'search'}">
+        <div ng-if="$root.activEvent && events.length > 0"
+             class="float-left column small-12 medium-6 large-4 fade min_contener data-ng-event margin0"
+            data-ng-repeat="event in events">
+        </div>
+        <div ng-if="$root.activArtist && artists.length > 0"
+             class="column large-4 medium-6 float-left marginBottom20 fade marginLeft0 marginRight0 minNoText"
+            data-ng-repeat="artist in artists | limitTo: limit"
+            style="padding-bottom: 10px;">
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <div class="toGrow">
+                        <a href="#/artiste/{{artist.facebookUrl}}">
+                            <img src="{{artist.imagePath}}" alt="une belle image" class="min"/>
+                        </a>
+                    </div>
+                    <div class="absolute top0">
+                        <i ng-repeat="genre in artist.genres"
+                           ng-click="$root.research(genre.name); $root.redirectToSearch(genre.name)"
+                           class="eventMinFilter"
+                           ng-class="{'fi-reggae': genre.name == 'reggae',
+                           'fi-hip-hop': genre.name == 'hip-hop',
+                           'fi-jazz': genre.name == 'jazz',
+                           'fi-latin': genre.name == 'musiques latines',
+                           'fi-electro': genre.name == 'electro',
+                           'fi-world': genre.name == 'musiques du monde',
+                           'fi-classique': genre.name == 'classique',
+                           'fi-rock': genre.name == 'rock',
+                           'fi-chanson': genre.name == 'chanson',
+                           }">
+                        </i>
+                    </div>
+                    <a href="#/artiste/{{artist.facebookUrl}}">
+                        <h3 style="margin-bottom: 0;" class="minTitle">
+                            {{ artist.name }}
+                        </h3>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0 minNoText"
+             ng-if="$root.activArtist && artistsFb.length > 0"
+            data-ng-repeat="artist in artistsFb | filter: searchPat"
+            style="padding-bottom: 10px;">
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <div class="toGrow">
+                        <img ng-click="createArtist(artist)"
+                             src="{{ artist.imagePath }}"
+                             alt="une belle image" class="min pointer"/>
+                    </div>
+                    <div class="absolute top0">
+                        <i ng-repeat="genre in artist.genres"
+                           ng-click="$root.research(genre.name); $root.redirectToSearch(genre.name)"
+                           class="eventMinFilter"
+                           ng-class="{'fi-reggae': genre.name == 'reggae',
+                           'fi-hip-hop': genre.name == 'hip-hop',
+                           'fi-jazz': genre.name == 'jazz',
+                           'fi-latin': genre.name == 'musiques latines',
+                           'fi-electro': genre.name == 'electro',
+                           'fi-world': genre.name == 'musiques du monde',
+                           'fi-classique': genre.name == 'classique',
+                           'fi-rock': genre.name == 'rock',
+                           'fi-chanson': genre.name == 'chanson',
+                           }">
+                        </i>
+                    </div>
+                    <a ng-click="createArtist(artist)">
+                        <h3 style="margin-bottom: 0;" class="minTitle">
+                            {{ artist.name }}
+                        </h3>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div layout="row" layout-sm="column" layout-align="space-around" class="float-left" ng-if="loadingFbArt && !loadingMore">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+        </div>
+        <div class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0 minNoText"
+            ng-if="$root.activPlace && places.length > 0"
+            style="padding-bottom: 10px;"
+            data-ng-repeat="place in places | filter: searchPat" >
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <div class="toGrow" ng-if="place.placeId != -1">
+                        <a href="#/lieu/{{place.placeId}}">
+                            <img src="{{ place.imagePath }}" ng-if="place.imagePath.length > 0" alt="une belle image" class="min"/>
+                            <map ng-if="place.imagePath.length == 0 || place.imagePath == undefined"
+                                 zoom="14"
+                                 center="[{{place.geographicPoint}}]"
+                                 scrollwheel="false"
+                                 disable-default-u-i="true"
+                                 styles="[
+                                     {
+                                         stylers:[
+                                             {hue:'#00654C'},
+                                             {visibility:'simplified'},
+                                             {gamma:0.5},
+                                             {weight:0.5}
+                                         ]
+                                     },
+                                     {
+                                        elementType:'labels',
+                                        stylers:[
+                                            {visibility:'off'}
+                                        ]
+                                    },
+                                    {featureType:'water',
+                                        stylers:[
+                                            {color:'#008CBA'}
+                                        ]
+                                    }
+                                ]"
+                                 class="width100p img_min_evnt">
+                                <marker visible="true" position="{{place.geographicPoint}}">
+                                </marker>
+                            </map>
+                        </a>
+                    </div>
+                    <div class="toGrow" ng-if="place.placeId == -1">
+                        <a ng-click="createNewPlace(place)">
+                            <img src="{{ place.imagePath }}" alt="une belle image" class="min"/>
+                        </a>
+                    </div>
+                    <a ng-if="place.placeId != -1" href="#/lieu/{{place.placeId}}">
+                        <h3 class="minTitle">{{ place.name }}
+                        </h3>
+                    </a>
+                    <a ng-if="place.placeId == -1" ng-click="createNewPlace(place)">
+                        <h3 class="minTitle">{{ place.name }}
+                        </h3>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0 minNoText"
+             ng-if="$root.activUsr && organizers.length > 0"
+            data-ng-repeat="organizer in organizers | filter: searchPat">
+            <div class="block_event_min">
+                <div class="img_min_evnt">
+                    <div class="toGrow">
+                        <a href="#/user/{{organizer.organizerId}}">
+                            <img src="{{ organizer.imagePath }}" alt="une belle image" class="min"/>
+                        </a>
+                    </div>
+                    <a href="#/user/{{organizer.organizerId}}"><h3 class="minTitle">{{organizer.name}}</h3></a>
+                </div>
+            </div>
+        </div>
+    </ul>
+    <div layout="row" lass="column large-12" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
+    <div class="column large-12" ng-show="events.length >= limit || artists.length >= limit ||
+    places.length >= limit || organizers.length >= limit"
+         layout="row" layout-align="center center">
+        <button ng-click="moreLimit()" class="column large-5">
+            Voir plus
+        </button>
+    </div>
+</div>
+

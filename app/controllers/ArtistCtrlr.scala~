@@ -1,0 +1,22 @@
+package controllers
+
+import org.joda.time.DateTime
+import play.api.db._
+import play.api.Play.current
+import anorm._
+import play.api.mvc._
+import play.api.libs.json.Json
+//import models.Artist
+//java.util.Date
+
+object ArtistController extends Controller {
+
+
+  def deleteArtist(artistId: Long): Int = {
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM artists WHERE artistId={artistId}").on(
+        'artistId -> artistId
+      ).executeUpdate()
+    }
+  }
+}

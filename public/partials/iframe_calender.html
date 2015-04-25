@@ -1,0 +1,130 @@
+<div class="fixed">
+    <form ng-submit="research()">
+        <input id="searchBar"
+               placeholder="Rechercher par ville, artiste, genre, salle"
+               ng-model="search"
+               class="column small-10 zIndex5 height50">
+        <input type="submit" class="button column small-2 margin0">
+        <div class="column large-12 padding0 BlackTrans"
+             style="height: 48px"
+             ng-if="search.length == 0">
+            <md-slider flex ng-change="initializeTime()"
+                       ng-if="$root.window != 'small' && $root.window != 'medium'"
+                       ng-model="$parent.time" min="1" max="51" step="1"
+                       aria-label="timeSlider"
+                       id="timeSearchSlider"
+                       class="md-primary column small-11 padding0 bigSlider">
+            </md-slider>
+            <md-slider flex ng-change="initializeTime()"
+                       ng-model="$parent.time" min="1" max="51" step="1"
+                       aria-label="timeSlider"
+                       ng-if="$root.window == 'small' || $root.window == 'medium'"
+                       id="timeSearchSliderPhone"
+                       class="md-primary column small-12 padding0 margin0">
+            </md-slider>
+        </div>
+    </form>
+</div>
+<div style="padding-top: 100px;">
+    <div class="column large-4 fade float-left margin0"
+         data-ng-repeat="event in events">
+        <div class="block_event_min">
+            <div class="img_min_evnt">
+                <div class="toGrow">
+                    <a target="_blank" href="#/event/{{event.eventId}}">
+                        <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
+                    </a>
+                </div>
+                <div class="absolute top0">
+                    <i ng-repeat="genre in event.genres"
+                       ng-click="$parent.$parent.search = genre.name; research()"
+                       class="eventMinFilter"
+                       ng-class="{'fi-reggae': genre.name == 'reggae',
+                       'fi-hip-hop': genre.name == 'hip-hop',
+                       'fi-jazz': genre.name == 'jazz',
+                       'fi-latin': genre.name == 'musiques latines',
+                       'fi-electro': genre.name == 'electro',
+                       'fi-world': genre.name == 'musiques du monde',
+                       'fi-classique': genre.name == 'classique',
+                       'fi-rock': genre.name == 'rock',
+                       'fi-chanson': genre.name == 'chanson',
+                       }">
+                    </i>
+                </div>
+                <a target="_blank" href="#/event/{{event.eventId}}">
+                    <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
+                        {{ event.name }}
+                    </h3>
+                </a>
+            </div>
+            <div class=" text_evnt_min" >
+                <i  style="font-size: 30px; color: {{event.priceColor}};"
+                    class="fi-calendar">
+                </i>
+                <b style="vertical-align: text-bottom;">
+                    {{ event.startTime | date:'dd/MM' }}
+                    <i>à</i>
+                    {{ event.startTime | date:'HH:mm' }}
+                </b>
+                <i ng-show="event.endTime">au
+                    <b> {{ event.endTime | date:'dd/MM' }} </b>
+                    à
+                    <b> {{ event.endTime | date:'HH:mm' }} </b>
+                </i>
+                <i ng-if="!showDetails"
+                   style="color: {{event.priceColor}}; font-size: 30px;"
+                   class="float-right  fa fa-chevron-down pointer "
+                   ng-click="$parent.showDetails = !$parent.showDetails">
+                </i>
+                <i ng-if="showDetails"
+                   style="color: {{event.priceColor}}; font-size: 30px;"
+                   class="float-right fa fa-chevron-up pointer"
+                   ng-click="$parent.showDetails = !$parent.showDetails">
+                </i>
+                <div ng-if="showDetails">
+                    <div class="img-circularPlayer float-right"
+                         ng-if="event.tariffRange != undefined"
+                         style="background: {{event.priceColor}}; padding-top: 26px; color: #ffffff; text-align: center;">
+                        <b>{{event.tariffRange}}</b>
+                    </div>
+                    <br/>
+                    <div class="infos_event">
+                        <span  data-ng-repeat="place in event.places">
+                            <i class="fa fa-map-marker" style="font-size: 30px; color: {{event.priceColor}};"></i>
+                            <b style="vertical-align: text-bottom;">
+                                <a target="_blank"href="#/lieu/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+                            </b>                    
+                        </span>
+                    </div>
+                    <div class="infos_event">
+                        <span  ng-show="organizer.name != event.places[0].name"
+                              data-ng-repeat="organizer in event.organizers">
+                            <i class="fa fa-user" style="font-size: 30px; color: {{event.priceColor}};"></i>
+                            <b style="vertical-align: text-bottom;">
+                                <a target="_blank"href="#/user/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}} </a>
+                            </b>                    
+                        </span>
+                    </div>
+                    <div class="description_event_min" style="height: 60px;">
+                        <a target="_blank"ng-repeat="genre in filteredGenres = (event.genres | filter: filterQuery)" class="ng-hide">{{genre.name}}</a>
+                        <span class="float-left"
+                              data-ng-repeat="artist in event.artists">
+                            <a target="_blank"href="#/artiste/{{artist.facebookUrl}}">
+                                <h3 style="color: {{event.priceColor}};" class="float-left margin0"
+                                    ng-mouseover="showDrop = true;">
+                                    {{ artist.name }}
+                                    <b ng-show="$index != event.artists.length - 1"> -&nbsp;</b>
+                                </h3>
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="events.length >= limit">
+        <button ng-click="moreLimit()" class="column large-6 large-offset-3">
+            Voir plus
+        </button>
+    </div>
+</div>
