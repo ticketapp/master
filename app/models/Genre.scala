@@ -159,7 +159,6 @@ object Genre {
     case e: Exception => throw new DAOException("Cannot delete genre: " + e.getMessage)
   }
 
-
   def followGenre(userId : Long, genreId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL("INSERT INTO genreFollowed(userId, genreId) VALUES ({userId}, {genreId})")
@@ -170,5 +169,26 @@ object Genre {
     }
   } catch {
     case e: Exception => throw new DAOException("Genre.followGenre: " + e.getMessage)
+  }
+
+  def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
+    case None => Set.empty
+    case Some(genres: String) =>
+      """([%/+,;]| | & )""".r.split(genres.toLowerCase)
+        .map { _.trim } match {
+        case list if list.length != 1 => list.map { genreName =>
+          new Genre(-1L, genreName.stripSuffix("."))
+        }.toSet
+        case listOfOneItem => listOfOneItem(0) match {
+          case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
+            genre.contains("musik") || genre.contains("music") =>
+            Set(new Genre(-1L, genre.stripSuffix(".")))
+          case genreWithoutForbiddenChars =>
+            genreWithoutForbiddenChars
+              .split("\\s+")
+              .map { genreName => new Genre(-1L, genreName.stripSuffix(".")) }
+              .toSet
+        }
+      }
   }
 }

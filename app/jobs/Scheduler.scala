@@ -26,25 +26,25 @@ object Scheduler {
       saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2, placeIdAndFacebookId._3)
   }
 
-  def saveEventsOfPlace(placeId: Long, placeFacebookId: String, placeGeographicPoint: Option[String]) = {
-    getEventsIdsByPlace(placeFacebookId).map {
-      _.map { eventId =>
-        WS.url("https://graph.facebook.com/v2.2/" + eventId)
-          .withQueryString(
-            "fields" -> "cover,description,name,start_time,end_time,owner,venue",
-            "access_token" -> token)
-          .get()
-          .map {
-          readFacebookEvent(_) match {
-            case Some(eventuallyFacebookEvent) =>
-              eventuallyFacebookEvent map { saveEvent(_, placeId, placeGeographicPoint) }
-            case None =>
-              println("Empty event read by Scheduler.readFacebookEvent")
-          }
+  def saveEventsOfPlace(placeId: Long, placeFacebookId: String, placeGeographicPoint: Option[String])
+  = getEventsIdsByPlace(placeFacebookId).map {
+    _.map { eventId =>
+      WS.url("https://graph.facebook.com/v2.2/" + eventId)
+        .withQueryString(
+          "fields" -> "cover,description,name,start_time,end_time,owner,venue",
+          "access_token" -> token)
+        .get()
+        .map {
+        readFacebookEvent(_) match {
+          case Some(eventuallyFacebookEvent) =>
+            eventuallyFacebookEvent map { saveEvent(_, placeId, placeGeographicPoint) }
+          case None =>
+            println("Empty event read by Scheduler.readFacebookEvent")
         }
       }
     }
   }
+
 
   def getEventsIdsByPlace(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")

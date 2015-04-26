@@ -31,3 +31,11 @@ case class UserOAuth2InfoWronglyFormatted(message: String) extends Exception(mes
 case class ThereIsNoArtistForThisFacebookIdException(message: String) extends Exception(message) {
   println("ThereIsNoArtistForThisFacebookIdException: " + message)
 }
+
+case class ThereIsNoPlaceForThisFacebookIdException(message: String) extends Exception(message) {
+  println("ThereIsNoPlaceForThisFacebookIdException: " + message)
+}
+
+case class ThereIsNoOrganizerForThisFacebookIdException(message: String) extends Exception(message) {
+  println("ThereIsNoOrganizerForThisFacebookIdException: " + message)
+}

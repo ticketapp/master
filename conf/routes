@@ -40,7 +40,8 @@ GET       /artists/facebookContaining/:pattern                      controllers.
 ################################## Places ###############################################
 GET       /places/:geographicPoint/:numberToReturn/:offset          controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET       /places/:id                                               controllers.PlaceController.place(id: Long)
-POST      /places/:placeId/follow                                   controllers.PlaceController.followPlace(placeId: Long)
+POST      /places/:placeId/followByPlaceId                          controllers.PlaceController.followPlaceByPlaceId(placeId: Long)
+POST      /places/:facebookId/followByFacebookId                    controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
 GET       /places/containing/:pattern                               controllers.PlaceController.findPlacesContaining(pattern: String)
 POST      /places/create                                            controllers.PlaceController.createPlace
 GET       /places/:placeId/events                                   controllers.EventController.eventsByPlace(placeId: Long)
@@ -49,7 +50,8 @@ GET       /places/nearCity/:city/:numberToReturn/:offset            controllers.
 ################################## Organizers ###############################################
 GET       /organizers/all/:numberToReturn/:offset                   controllers.OrganizerController.organizers(numberToReturn: Int, offset: Int)
 GET       /organizers/:id                                           controllers.OrganizerController.organizer(id: Long)
-POST      /organizers/:organizerId/follow                           controllers.OrganizerController.followOrganizer(organizerId: Long)
+POST      /organizers/:organizerId/followByOrganizerId              controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
+POST      /organizers/:facebookId/followByFacebookId                controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
 GET       /organizers/containing/:pattern                           controllers.OrganizerController.findOrganizersContaining(pattern: String)
 POST      /organizers/create                                        controllers.OrganizerController.createOrganizer
 GET       /organizers/:organizerId/events                           controllers.EventController.eventsByOrganizer(organizerId: Long)

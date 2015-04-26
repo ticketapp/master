@@ -196,9 +196,10 @@ object Event {
   def findAllByArtist(facebookUrl: String): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT e.*
-          |FROM eventsArtists eA
-          | INNER JOIN events e ON e.eventId = eA.eventId
+        """SELECT e.* FROM eventsArtists eA
+          | INNER JOIN events e ON e.eventId = eA.eventId AND
+          |   (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
+          |     OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
           | INNER JOIN artists a ON a.artistId = eA.artistId
           |   WHERE a.facebookUrl = {facebookUrl}
           |ORDER BY e.creationDateTime DESC""".stripMargin)

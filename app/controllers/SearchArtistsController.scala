@@ -11,6 +11,7 @@ import play.api.libs.functional.syntax._
 import jobs.Scheduler.formatDescription
 import models.Artist
 import models.Genre
+import models.Genre.genresStringToGenresSet
 import play.api.libs.json.Reads._
 import services.Utilities.{ normalizeUrl, getNormalizedWebsitesInText }
 
@@ -163,26 +164,5 @@ object SearchArtistsController extends Controller {
     val description = formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
     Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq, Seq.empty)
-  }
-
-  def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
-    case None => Set.empty
-    case Some(genres: String) =>
-      """([%/+,;]| - | & )""".r.split(genres.toLowerCase)
-        .map { _.trim } match {
-        case list if list.length != 1 => list.map { genreName =>
-          new Genre(-1L, genreName.stripSuffix("."))
-        }.toSet
-        case listOfOneItem => listOfOneItem(0) match {
-          case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
-            genre.contains("musik") || genre.contains("music") =>
-            Set(new Genre(-1L, genre.stripSuffix(".")))
-          case genreWithoutForbiddenChars =>
-            genreWithoutForbiddenChars
-              .split("\\s+")
-              .map { genreName => new Genre(-1L, genreName.stripSuffix(".")) }
-              .toSet
-        }
-      }
   }
 }

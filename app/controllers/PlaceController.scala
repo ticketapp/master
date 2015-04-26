@@ -42,9 +42,12 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def followPlace(placeId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Place.followPlace(request.user.identityId.userId, placeId)
-    Ok
+  def followPlaceByPlaceId(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Ok(Json.toJson(Place.followPlaceByPlaceId(request.user.identityId.userId, artistId)))
+  }
+
+  def followPlaceByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
+    Ok(Json.toJson(Place.followPlaceByFacebookId(request.user.identityId.userId, facebookId)))
   }
 
   val placeBindingForm = Form(mapping(

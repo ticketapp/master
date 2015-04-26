@@ -23,9 +23,12 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
     Ok(Json.toJson(Organizer.findAllContaining(pattern)))
   }
 
-  def followOrganizer(organizerId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Organizer.followOrganizer(request.user.identityId.userId, organizerId)
-    Ok
+  def followOrganizerByOrganizerId(organizerId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Ok(Json.toJson(Organizer.followOrganizerByOrganizerId(request.user.identityId.userId, organizerId)))
+  }
+
+  def followOrganizerByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
+    Ok(Json.toJson(Organizer.followOrganizerByFacebookId(request.user.identityId.userId, facebookId)))
   }
 
   val organizerBindingForm = Form(

@@ -2,7 +2,7 @@ package models
 
 import anorm.SqlParser._
 import anorm._
-import controllers.DAOException
+import controllers.{ThereIsNoOrganizerForThisFacebookIdException, DAOException}
 import services.Utilities
 import play.api.db.DB
 import play.api.Play.current
@@ -68,9 +68,10 @@ object Organizer {
 
   def findAllByEvent(event: Event): List[Organizer] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT *
-             FROM eventsOrganizers eA
-             INNER JOIN organizers a ON a.organizerId = eA.organizerId where eA.eventId = {eventId}""")
+      SQL(
+        """SELECT * FROM eventsOrganizers eA
+          | INNER JOIN organizers a ON a.organizerId = eA.organizerId
+          | WHERE eA.eventId = {eventId}""".stripMargin)
         .on('eventId -> event.eventId)
         .as(OrganizerParser.*)
         .map(getOrganizerProperties)
@@ -173,6 +174,31 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Organizer.followOrganizer: " + e.getMessage)
+  }
+
+  def followOrganizerByOrganizerId(userId : String, organizerId : Long): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""INSERT INTO organizersFollowed(userId, organizerId) VALUES ({userId}, {organizerId})""")
+        .on(
+          'userId -> userId,
+          'organizerId -> organizerId)
+        .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.followOrganizerByOrganizerId: " + e.getMessage)
+  }
+
+  def followOrganizerByFacebookId(userId : String, facebookId: String): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT organizerId FROM organizers WHERE facebookId = {facebookId}""")
+        .on('facebookId -> facebookId)
+        .as(scalar[Long].singleOpt) match {
+        case None => throw new ThereIsNoOrganizerForThisFacebookIdException("Organizer.followOrganizerIdByFacebookId")
+        case Some(organizerId) => followOrganizerByOrganizerId(userId, organizerId)
+      }
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.followOrganizerIdByFacebookId: " + e.getMessage)
   }
 
   def delete(organizerId: Long): Int = try {
