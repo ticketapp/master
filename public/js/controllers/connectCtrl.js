@@ -14,7 +14,6 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
             if (isFollowed == 'error') {
                 getArtistPage(id, token);
             }
-
         });
     }
     function postArtist (artist) {
@@ -131,6 +130,7 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
 
     function getConnected (connectWin) {
         if (connectWin.document.getElementById('top') != undefined || connectWin.document.getElementById('top') != 'null') {
+            console.log(connectWin.document.getElementById('top'))
             if (connectWin.document.getElementById('top').getAttribute("ng-init") == '$root.connected = true') {
                 $rootScope.passConnectedToTrue();
                 connectWin.close();

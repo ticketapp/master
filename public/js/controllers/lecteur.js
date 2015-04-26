@@ -611,13 +611,14 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
                 }
             })
     };
+
     $scope.updatePlaylist = function (playlist) {
         var tracksToUpdate = [];
         for (var i=0; i < playlist.tracks.length; i++) {
-
             tracksToUpdate.push({trackId: playlist.tracks[i].trackId, trackRank: i})
         }
-    }
+    };
+
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
