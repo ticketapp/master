@@ -26,6 +26,37 @@ app.factory ('OrganizerFactory', function ($http, $q){
                     })
             }
             return deferred.promise;
+        },
+        followOrganizerByFacebookId : function(id) {
+            var deferred = $q.defer();
+            if(factory.organizers ==true) {
+                deferred.resolve(factory.organizers);
+            } else {
+                $http.post('/organizers/' + id + '/followByFacebookId ').
+                    success(function(data, status, headers, config) {
+                        deferred.resolve(data);
+                    }).
+                    error(function (data) {
+                        deferred.resolve('error');
+                    })
+            }
+            return deferred.promise;
+        },
+        createOrganizer : function(organizer) {
+            var deferred = $q.defer();
+            if(factory.organizers ==true) {
+                deferred.resolve(factory.organizers);
+            } else {
+                console.log(organizer)
+                $http.post('/organizers/create', organizer).
+                    success(function(data, status, headers, config) {
+                        deferred.resolve(data);
+                    }).error(function (data) {
+                        console.log(data)
+                        deferred.resolve('error');
+                    })
+            }
+            return deferred.promise;
         }
     };
     return factory;

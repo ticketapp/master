@@ -75,13 +75,15 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
             });
         }
     };
+
     $scope.filterTracks = function () {
         $timeout(function () {
             $scope.$apply(function(){
                 $scope.artiste.tracks = $filter('filter')($scope.tracks, {title: $scope.trackTitle})
             })
-        },0)
+        }, 0)
     };
+
     function refactorWebsites () {
         for (var i = 0; i < $scope.artiste.websites.length; i++) {
             $scope.artiste.websites[i] = {url: $scope.artiste.websites[i]};
@@ -101,12 +103,14 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
             }
         }
     }
+
     $scope.calcResize = function () {
         var trackContener = document.getElementsByClassName('tracksContener')[0];
         trackContener.classList.remove('large-12');
         trackContener.classList.remove('large-8');
         trackContener.classList.add('large-4');
     };
+
     if ($rootScope.artisteToCreate == false) {
         $scope.artiste = [];
         $scope.artiste.events = [];

@@ -1,5 +1,5 @@
 app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', '$modal',
-    function ($scope, $rootScope, $timeout, $http, Angularytics, $modal){
+    function ($scope, $rootScope, $timeout, $http, Angularytics, $modal) {
     $rootScope.playlist = [];
     $rootScope.playlist.name = "";
     $rootScope.playlist.genres = [];
