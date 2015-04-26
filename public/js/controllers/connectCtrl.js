@@ -1,5 +1,6 @@
 app.controller('connectCtrl',
-    function ($scope, $rootScope, $http, $modal, ArtistsFactory, UserFactory, OrganizerFactory, EventsFactory) {
+    function ($scope, $rootScope, $http, $modal, ArtistsFactory, UserFactory, OrganizerFactory,
+              EventsFactory, PlaceFactory) {
 
     var token = '';
 
@@ -24,8 +25,17 @@ app.controller('connectCtrl',
     function followOrganizer (id, toCreate) {
         OrganizerFactory.followOrganizerByFacebookId(id).then(function (isFollowed) {
             if (isFollowed == 'error' && toCreate == true) {
-                getOrganizerPage(id);
-                getOrganizerEvents(id);
+                //getOrganizerPage(id);
+                //getOrganizerEvents(id);
+            }
+        });
+    }
+
+    function followPlace (id, toCreate) {
+        PlaceFactory.followPlaceByFacebookId(id).then(function (isFollowed) {
+            console.log(isFollowed)
+            if (isFollowed == 'error' && toCreate == true) {
+                getPlacePage(id);
             }
         });
     }
@@ -78,47 +88,12 @@ app.controller('connectCtrl',
             });
         }
     }
-    function postEvent (event) {
-        if (event.end_time != 'Invalid Date') {
-            event.endTime = new Date(event.end_time)
-            event.endTime = $filter('date')(event.endTime, "yyyy-MM-dd HH:mm")
-        }
-        event.startTime = new Date(event.start_time);
-        event.adresses = [{
-            cities: event.venue.city,
-            geographicPoints: event.venue.latitude + ', ' + event.venue.longitude,
-            streets: event.venue.street,
-            zips: event.venue.zip
-        }];
-        var newEvent = {
-            name: event.name,
-            description: event.description,
-            startTime: $filter('date')(event.startTime, "yyyy-MM-dd HH:mm"),
-            endTime: event.endTime,
-            images: event.cover.source,
-            places: event.location,
-            facebookId: event.id,
-            isPublic: true,
-            addresses: event.adresses
-        }
-        EventsFactory.postEvent(newEvent).then(function (eventPosted) {
-            console.log(eventPosted)
-        })
-    }
-    function getEventInfosAndPostIt (event) {
-        $http.get('https://graph.facebook.com/v2.3/' + event.id + '?fields=cover,description,name,start_time,end_time,owner,venue&access_token=' + token).
-            success(function (event) {
-                console.log(event)
-                postEvent(event)
-            })
-    }
 
     function getOrganizerEvents (id) {
         $http.get('https://graph.facebook.com/v2.3/' + id + '?fields=events&access_token=' + token).
             success(function (events) {
                 if (events.events != undefined) {
-                    console.log(events)
-                    events.events.data.forEach(getEventInfosAndPostIt)
+                    //events.events.data.forEach(postEventId)
                 }
             })
     }
@@ -126,6 +101,151 @@ app.controller('connectCtrl',
         $http.get('https://graph.facebook.com/v2.3/' + id + '?access_token=' + token).
             success(function (data) {
                 postOrganizer(data)
+            })
+    }
+
+
+    function getCoverPlace(place, loc) {
+        $http.get('https://graph.facebook.com/v2.2/' + searchPlaces.id + '/?fields=cover, picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+            success(function (data) {
+                var newPlace = {
+                    name: place.name,
+                    facebookId: place.id,
+                    geographicPoint: loc,
+                    capacity: place.checkins,
+                    description: place.description,
+                    webSite: place.website,
+                    imagePath: data.source,
+                    address: {
+                        geographicPoint: loc,
+                        city: place.location.city,
+                        zip: place.location.zip,
+                        street: place.location.street
+                    }
+                };
+                PlaceFactory.postPlace(newPlace).then(function (isCreated) {
+                    if (isCreated != 'error') {
+                        followPlace(newPlace.id, false)
+                    }
+                })
+            }).
+            error(function () {
+                var newPlace = {
+                    name: place.name,
+                    facebookId: place.id,
+                    geographicPoint: loc,
+                    capacity: place.checkins,
+                    description: place.description,
+                    webSite: place.website,
+                    address: {
+                        geographicPoint: loc,
+                        city: place.location.city,
+                        zip: place.location.zip,
+                        street: place.location.street
+                    }
+                };
+                PlaceFactory.postPlace(newPlace).then(function (isCreated) {
+                    if (isCreated != 'error') {
+                        followPlace(newPlace.id, false)
+                    }
+                })
+            })
+    }
+
+    function getPositionAndCreate (place) {
+        console.log(place)
+        $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' +
+            place.location.street + '+' +
+            place.location.zip + '+' +
+            place.location.city + '+' +
+            place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
+            success(function (data) {
+                if (place.location.street == undefined) {
+                    place.location.street = '';
+                }
+                if (place.location.zip == undefined) {
+                    place.location.zip = '';
+                }
+                if (place.location.city == undefined) {
+                    place.location.city = '';
+                }
+                var loc = '(' + data.results[0].geometry.location.lat +
+                    ',' + data.results[0].geometry.location.lng + ')';
+                if (place.cover != undefined) {
+                    var newPlace = {
+                        name: place.name,
+                        facebookId: place.id,
+                        geographicPoint: loc,
+                        capacity: place.checkins,
+                        description: place.description,
+                        webSite: place.website,
+                        imagePath : place.cover.source,
+                        address : {
+                            geographicPoint: loc,
+                            city: place.location.city,
+                            zip: place.location.zip,
+                            street: place.location.street
+                        }
+                    };
+                    PlaceFactory.postPlace(newPlace).then(function (isCreated) {
+                        if (isCreated != 'error') {
+                            followPlace(newPlace.id, false)
+                        }
+                    })
+                } else {
+                    getCoverPlace(place, loc);
+                }
+            });
+        }
+
+        function getInfoPlace (place) {
+            $http.get('https://graph.facebook.com/v2.2/'+ place.id +'/?fields=checkins,cover,description,' +
+                'hours,id,likes,link,location,name,phone,website,picture&access_token=' + token).
+                success(function(data, status, headers, config) {
+                    var flag = 0;
+                    if (data.location != undefined) {
+                        if (data.location.country == undefined || data.location.country != 'France') {
+                            flag = 1;
+                        }
+                    } else {
+                        flag = 1;
+                    }
+                    console.log(data)
+                    if (flag == 0) {
+                        var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
+                        if (data.description == undefined) {
+                            data.description = "";
+                        }
+                        data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
+                        data.description = data.description.replace(/(\n)/g, " <br/>");
+                        if (matchedLinks = data.description.match(links)) {
+                            var m = matchedLinks;
+                            var unique = [];
+                            for (var ii = 0; ii < m.length; ii++) {
+                                var current = m[ii];
+                                if (unique.indexOf(current) < 0) unique.push(current);
+                            }
+                            for (var i=0; i < unique.length; i++) {
+                                data.description = data.description.replace(new RegExp(unique[i],"g"),
+                                        "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
+                            }
+                        }
+                        console.log(data)
+                        getPositionAndCreate(data);
+                    }
+                }).
+                error(function(data, status, headers, config) {
+
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                });
+    }
+
+    function getPlacePage (id) {
+        $http.get('https://graph.facebook.com/v2.3/' + id + '?access_token=' + token).
+            success(function (data) {
+                console.log(data)
+                getInfoPlace(data)
             })
     }
 
@@ -152,15 +272,27 @@ app.controller('connectCtrl',
                     if (pages[i].category == 'Concert tour') {
                         //follow organizer
                         //post if not exist
-                        console.log(pages[i])
-                        followOrganizer(pages[i].id, true);
+                        //followOrganizer(pages[i].id, true);
                     } else if (pages[i].category == "Musician/band") {
                         //followArtist
-                        //followArtist(pages[i].id, true);
                         // post if not exist
-                    } else if (pages[i].category == "concert venue") {
+                        //followArtist(pages[i].id, true);
+                    } else if (pages[i].category == "concert venue" ||
+                        pages[i].category == 'Club' ||
+                        pages[i].category == 'Bar' ||
+                        pages[i].category == 'Arts/entertainment/nightlife') {
                         //followPlace
                         // post if not exist
+                        followPlace(pages[i].id, true);
+                    } else if (pages[i].category_list != undefined) {
+                        for (var ii = 0; ii < pages[i].category_list.length; ii++) {
+                            if (pages[i].category_list[ii].name == 'Concert Venue' ||
+                                pages[i].category_list[ii].name == 'Club' ||
+                                pages[i].category_list[ii].name == 'Bar' ||
+                                pages[i].category_list[ii].name == "Nightlife") {
+                                followPlace(pages[i].id, true);
+                            }
+                        }
                     }
                 }
                 if (next != undefined) {
