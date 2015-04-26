@@ -54,9 +54,10 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope
                 console.log(data)
             })
     };
-    $scope.deletePlaylist = function (playlistId) {
+    $scope.deletePlaylist = function (playlistId, index) {
         $http.delete('/playlists/' + playlistId).
             success(function (data) {
+                $scope.playlists.splice(index, 1)
             }).
             error (function (data) {
         })
