@@ -4,7 +4,7 @@ import anorm.SqlParser._
 import anorm._
 import play.api.db.DB
 import play.api.Play.current
-import controllers.DAOException
+import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 
 case class Place (placeId: Option[Long],
@@ -162,16 +162,29 @@ object Place {
     case e: Exception => throw new DAOException("Place.find: " + e.getMessage)
   }
 
-  def followPlace(userId: String, placeId : Long): Option[Long] = try {
+  def followPlaceByPlaceId(userId : String, placeId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("insert into placesFollowed(userId, placeId) values ({userId}, {placeId})")
+      SQL("""INSERT INTO placesFollowed(userId, placeId) VALUES ({userId}, {placeId})""")
         .on(
           'userId -> userId,
           'placeId -> placeId)
         .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("Place.followPlace: " + e.getMessage)
+    case e: Exception => throw new DAOException("Place.followPlaceByPlaceId: " + e.getMessage)
+  }
+
+  def followPlaceByFacebookId(userId : String, facebookId: String): Option[Long] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT placeId FROM places WHERE facebookId = {facebookId}""")
+        .on('facebookId -> facebookId)
+        .as(scalar[Long].singleOpt) match {
+        case None => throw new ThereIsNoPlaceForThisFacebookIdException("Place.followPlaceIdByFacebookId")
+        case Some(placeId) => followPlaceByPlaceId(userId, placeId)
+      }
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.followPlaceIdByFacebookId: " + e.getMessage)
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Boolean = try {

@@ -34,6 +34,14 @@ object Utilities {
     }
   })
 
+  implicit def columnTkoChar: Column[Char] = Column[Char](transformer = { (value, meta) =>
+    val MetaDataItem(qualified, nullable, clazz) = meta
+    value match {
+      case ch: String => Right(ch.head)
+      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + " to Char for column " + qualified))
+    }
+  })
+
   def normalizeString(string: String): String =
     Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
 
@@ -54,13 +62,12 @@ object Utilities {
     }
     try {
       DB.withConnection { implicit connection =>
-        SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName={value} LIMIT 1)""")
+        SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName = {value} LIMIT 1)""")
           .on("value" -> value)
           .as(scalar[Boolean].single)
       }
     } catch {
-      case e: Exception => throw new DAOException("Cannot select in database with method Utilities.testIfExistById: " +
-        e.getMessage)
+      case e: Exception => throw new DAOException("Utilities.testIfExistById: " + e.getMessage)
     }
   }
 

@@ -9,6 +9,16 @@ import play.api.libs.json.Json
 import play.api.Play.current
 import services.Utilities.columnToChar
 import json.JsonHelper._
+import play.api.libs.json.DefaultWrites
+import scala.BigDecimal.javaBigDecimal2bigDecimal
+import anorm.SqlParser._
+import anorm._
+import controllers.DAOException
+import play.api.db.DB
+import play.api.libs.json.{Json, JsNull, Writes}
+import play.api.Play.current
+import java.util.Date
+import java.math.BigDecimal
 
 case class Track (trackId: Option[Long],
                   title: String, 
@@ -77,17 +87,24 @@ object Track {
   def findTracksByPlaylistId(playlistId: Option[Long]): Seq[Track] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT tracks.*, playlistTracks.rank FROM playlistsTracks playlistsTracks
-          | INNER JOIN tracks tracks
-          |   ON tracks.trackId = playlistsTracks.trackId
-          | INNER JOIN playlists playlists
-          |   ON playlists.playlistId = playlistsTracks.playlistId
-          |WHERE playlists.playlistId = {playlistId}""".stripMargin)
+        """SELECT tracks.*, playlistsTracks.trackRank FROM tracks tracks
+          |  INNER JOIN playlistsTracks playlistsTracks
+          |    ON tracks.trackId = playlistsTracks.trackId
+          |  INNER JOIN playlists playlists
+          |    ON playlists.playlistId = playlistsTracks.playlistId
+          |  WHERE playlists.playlistId = {playlistId}""".stripMargin)
         .on('playlistId -> playlistId)
         .as(trackParser.*)
     }
   } catch {
     case e: Exception => throw new DAOException("Track.findTracksIdByPlaylistId: " + e.getMessage)
+  }
+
+  private val trackIdAndRankParser: RowParser[(Long, BigDecimal)] = {
+    get[Long]("trackId") ~
+      get[BigDecimal]("trackRank") map {
+      case trackId ~ trackRank => (trackId, trackRank)
+    }
   }
 
   def find(trackId: Long): Option[Track] = {
@@ -98,16 +115,14 @@ object Track {
     }
   }
 
-  def findAllContaining(pattern: String): Seq[Track] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM tracks WHERE LOWER(title) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
-          .on('patternLowCase -> pattern.toLowerCase)
-          .as(trackParser.*)
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
+  def findAllContaining(pattern: String): Seq[Track] = try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT * FROM tracks WHERE LOWER(title) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
+        .on('patternLowCase -> pattern.toLowerCase)
+        .as(trackParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
   }
 
   def save(track: Track): Option[Long] = try {
@@ -134,11 +149,11 @@ object Track {
         .on(
           'playlistId -> playlistId,
           'trackId -> trackIdAndRank.id,
-          'trackId -> trackIdAndRank.rank)
+          'rank -> trackIdAndRank.rank)
         .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
+    case e: Exception => throw new DAOException("Track.savePlaylistTrackRelation: " + e.getMessage)
   }
 
   def deletePlaylistTrackRelation(playlistId: Long, trackId: Long): Long = try {

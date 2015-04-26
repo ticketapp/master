@@ -78,9 +78,9 @@ object Artist {
   def findSinceOffset(numberOfArtistsToReturn: Int, offset: Int): Seq[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT *
-           |FROM artists
-           |LIMIT $numberOfArtistsToReturn OFFSET $offset""".stripMargin)
+        s"""SELECT * FROM artists
+           |  LIMIT $numberOfArtistsToReturn
+           |  OFFSET $offset""".stripMargin)
         .as(ArtistParser.*)
         .map(getArtistProperties)
     }
@@ -216,7 +216,6 @@ object Artist {
     case e: Exception => throw new DAOException("Cannot returnArtistIdByFacebookUrl: " + e.getMessage)
   }
 
-
   def saveEventArtistRelation(eventId: Long, artistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertEventArtistRelation({eventId}, {artistId})""")
@@ -259,7 +258,6 @@ object Artist {
         case None => throw new ThereIsNoArtistForThisFacebookIdException("Artist.followArtistIdByFacebookId")
         case Some(artistId) => followArtistByArtistId(userId, artistId)
       }
-      
     }
   } catch {
     case e: Exception => throw new DAOException("Artist.followArtistIdByFacebookId: " + e.getMessage)

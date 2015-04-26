@@ -12,6 +12,7 @@ class TestSearchSoundCloudTracks extends PlaySpec {
       stack.pop() mustBe 2
       stack.pop() mustBe 1
     }
+
     "throw NoSuchElementException if an empty stack is popped" in {
       val emptyStack = new mutable.Stack[Int]
       a [NoSuchElementException] must be thrownBy {

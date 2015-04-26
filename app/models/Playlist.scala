@@ -60,7 +60,7 @@ object Playlist {
       }
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot save playlist: " + e.getMessage)
+    case e: Exception => throw new DAOException("Playlist.save: " + e.getMessage)
   }
 
   def delete(userId: String, playlistId: Long): Boolean = try {
@@ -77,7 +77,7 @@ object Playlist {
             'playlistId -> playlistId)
           .execute()
       } else {
-        throw new PlaylistDoesNotExistException("There is no playlist for this user Id and this playlist Id.")
+        throw new PlaylistDoesNotExistException("Playlist.delete: there is no playlist for this user Id and this playlist Id.")
       }
     }
   } catch {
