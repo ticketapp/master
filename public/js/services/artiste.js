@@ -81,8 +81,6 @@ app.factory('ArtistsFactory', function ($http, $q, oboe) {
             if(factory.artists == true){
                 deferred.resolve(factory.artists);
             } else {
-                console.log(artist)
-                console.log(searchPattern)
                 oboe.post('artists/createArtist', {
                     searchPattern: searchPattern,
                     artist: {
@@ -97,7 +95,6 @@ app.factory('ArtistsFactory', function ($http, $q, oboe) {
                 }).start(function (data, etc) {
                 })
                 .done(function (value) {
-                    console.log('posted')
                     function saveTrack (track) {
                         if (track.redirectUrl == undefined) {
                             track.redirectUrl = track.url;

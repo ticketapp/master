@@ -1,5 +1,5 @@
 app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', '$modal',
-    function ($scope, $rootScope, $timeout, $http, Angularytics, $modal){
+    function ($scope, $rootScope, $timeout, $http, Angularytics, $modal) {
     $rootScope.playlist = [];
     $rootScope.playlist.name = "";
     $rootScope.playlist.genres = [];
@@ -611,13 +611,14 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
                 }
             })
     };
+
     $scope.updatePlaylist = function (playlist) {
         var tracksToUpdate = [];
         for (var i=0; i < playlist.tracks.length; i++) {
-
             tracksToUpdate.push({trackId: playlist.tracks[i].trackId, trackRank: i})
         }
-    }
+    };
+
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };

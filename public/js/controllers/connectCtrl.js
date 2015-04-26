@@ -1,4 +1,4 @@
-app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, ArtistsFactory, UserFactory) {
+app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, ArtistsFactory, UserFactory, OrganizerFactory) {
     $scope.connectByMail = function () {
         $http.post('/authenticate/userpass', {username: $scope.username, password: $scope.password}).
             success(function (data) {
@@ -11,10 +11,18 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
 
     function followArtist (id, token) {
         ArtistsFactory.followArtistByFacebookId(id).then(function (isFollowed) {
-            if (isFollowed == 'error') {
+            if (isFollowed == 'error' && token != false) {
                 getArtistPage(id, token);
             }
+        })
+    }
 
+    function followOrganizer (id, token) {
+        OrganizerFactory.followOrganizerByFacebookId(id).then(function (isFollowed) {
+            console.log(isFollowed);
+            if (isFollowed == 'error' && token != false) {
+                getOrganizerPage(id, token);
+            }
         });
     }
     function postArtist (artist) {
@@ -51,6 +59,31 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
             })
     }
 
+    function postOrganizer (organizer) {
+        if (organizer.cover != undefined) {
+            var newOrganizer = {};
+            newOrganizer.facebookId = organizer.id;
+            newOrganizer.name = organizer.name;
+            newOrganizer.description = organizer.about;
+            newOrganizer.websites = organizer.website;
+            newOrganizer.imagePath = organizer.cover.source;
+            OrganizerFactory.createOrganizer(newOrganizer).then(function (isCreated) {
+                if (isCreated != 'error') {
+                    followOrganizer(organizer.id, false)
+                } else {
+                }
+            });
+        }
+    }
+
+
+    function getOrganizerPage (id, token) {
+        $http.get('https://graph.facebook.com/v2.3/' + id + '?access_token=' + token).
+            success(function (data) {
+                postOrganizer(data)
+            })
+    }
+
     function getFbPages (route, token) {
         $http.get(route).
             success(function (data) {
@@ -73,14 +106,16 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
                 }
                 for (var i = 0; i < pagesLength; i++) {
                     if (pages[i].category == 'Concert tour') {
-                        //folow organizer
+                        //follow organizer
                         //post if not exist
+                        console.log(pages[i])
+                        followOrganizer(pages[i].id, token);
                     } else if (pages[i].category == "Musician/band") {
                         //followArtist
-                        followArtist(pages[i].id, token);
+                        //followArtist(pages[i].id, token);
                         // post if not exist
                     } else if (pages[i].category == "concert venue") {
-                        //folowPlace
+                        //followPlace
                         // post if not exist
                     }
                 }
@@ -130,7 +165,8 @@ app.controller('connectCtrl', function ($scope, $rootScope, $http, $modal, Artis
     }
 
     function getConnected (connectWin) {
-        if (connectWin.document.getElementById('top') != undefined || connectWin.document.getElementById('top') != 'null') {
+        if (connectWin.document.getElementById('top') != undefined || connectWin.document.getElementById('top') != null) {
+            console.log(connectWin.document.getElementById('top'))
             if (connectWin.document.getElementById('top').getAttribute("ng-init") == '$root.connected = true') {
                 $rootScope.passConnectedToTrue();
                 connectWin.close();
