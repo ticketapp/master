@@ -1,5 +1,5 @@
-app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', '$modal',
-    function ($scope, $rootScope, $timeout, $http, Angularytics, $modal) {
+app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'Angularytics', '$modal', '$filter',
+    function ($scope, $rootScope, $timeout, $http, Angularytics, $modal, $filter) {
     $rootScope.playlist = [];
     $rootScope.playlist.name = "";
     $rootScope.playlist.genres = [];
@@ -77,10 +77,14 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
     }
     $rootScope.loadPlaylist = function (playlist) {
         $rootScope.playlist.name = playlist.name;
+        $rootScope.playlist.playlistId = playlist.playlistId;
         $rootScope.playlist.tracks = [];
         $rootScope.playlist.genres = [];
         var tracksLenght = playlist.tracks.length;
         var tr = 0;
+        console.log(playlist.tracks);
+        playlist.tracks = $filter('orderBy')(playlist.tracks, 'rank', false);
+        console.log(playlist.tracks);
         function addtr (tr) {
             $http.get('/artists/' + playlist.tracks[tr].artistFacebookUrl).
                 success(function (data) {
@@ -562,13 +566,13 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         }
     };
 }]);
-app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance, $http, $modal) {
+app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance, $http, $modal, UserFactory) {
+    if ($rootScope.playlist.name.length > 0) {
+        $scope.newPlaylist = false;
+    }
     $scope.createNewPlaylist = function (playlist) {
         var tracksToSave = [];
         $scope.newPlaylist = true;
-        if ($rootScope.playlist.name.length > 0) {
-            $scope.newPlaylist = false;
-        }
         for (var i=0; i < playlist.tracks.length; i++) {
             tracksToSave.push({trackId: playlist.tracks[i].trackId, trackRank: i})
         }
@@ -613,10 +617,11 @@ app.controller('savePlaylistCtrl', function ($scope, $rootScope, $modalInstance,
     };
 
     $scope.updatePlaylist = function (playlist) {
-        var tracksToUpdate = [];
-        for (var i=0; i < playlist.tracks.length; i++) {
-            tracksToUpdate.push({trackId: playlist.tracks[i].trackId, trackRank: i})
-        }
+        console.log(playlist)
+        UserFactory.deletePlaylist(playlist.playlistId).then(function (del) {
+            console.log(del);
+            $scope.createNewPlaylist(playlist)
+        })
     };
 
     $scope.cancel = function () {

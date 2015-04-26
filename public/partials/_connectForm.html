@@ -1,9 +1,11 @@
-<div class="column large-12" ng-if="$root.connected == false">
-    <a ng-click="connectLink('http://localhost:9000/authenticate/facebook')"> <img src="/assets/securesocial/images/providers/facebook.png"></a>
+<div class="column large-12 padding0" ng-if="$root.connected == false">
+    <a ng-click="connectLink('http://localhost:9000/authenticate/facebook')" class="button">
+        <i class="fi fi-social-facebook" style="font-size: 26px"></i>
+        <b style="line-height: 26px">Connectez-vous via Facebook</b>
+    </a>
     <a ng-click="connectLink('http://localhost:9000/authenticate/google')"> <img src="/assets/securesocial/images/providers/google.png"></a>
-    <a ng-click="$parent.authMail = !$parent.authMail">Auth by mail</a>
 </div>
-<form ng-if="!signUp && authMail" ng-submit="connectByMail()" class="column large-12" autocomplete="off">
+<!--<form ng-if="!signUp && authMail" ng-submit="connectByMail()" class="column large-12" autocomplete="off">
     <fieldset>
         <div class="column large-12" id="username_field">
             <label class="control-label" for="username">Email</label>
@@ -44,5 +46,5 @@
             <a class="btn" ng-click="$parent.signUp = !$parent.signUp">Cancel</a>
         </div>
     </fieldset>
-</form>
+</form>-->
 <h2  ng-if="$root.connected == true">Vous êtes connecté</h2>

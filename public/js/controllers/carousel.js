@@ -91,53 +91,51 @@ app.controller("CarouselCtrl", function($scope, $timeout, $http, $sce, $localSto
     removeAnimations();
     updateInfo();
     function getConnectedInfos () {
-        if ($rootScope.connected == true) {
-            $scope.infos = [
-                {content: $sce.trustAsHtml('<h2 class="text-center textColorWhite margin10">Bienvenue</h2><p>' +
-                    '<b class="column large-6 large-offset-3 text-center textColorWhite medium-11">' +
-                    'Claude est en version beta, aidez le à s\'améliorer en rapportant vos bug ou en ' +
-                    'partageant vos suggestions.' +
-                    '</b>' +
-                    '</p>')}
-            ]
-            function pushInfo(info, title, artist, fixedTitle) {
-                $scope.infos.push({content: $sce.trustAsHtml(info), title: title, artist: artist, fixedTitle: fixedTitle})
-            }
-
-            function getEventsArtist(artist) {
-                ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
-                    var info = '';
-                    var title;
-                    console.log(events);
-                    if (events.length > 0) {
-                        var eventsLength;
-                        if (events.length > 2) {
-                            eventsLength = 2;
-                        } else {
-                            eventsLength = events.length;
-                        }
-                        title = '<h2 class="text-center column medium-11 textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
-                        for (var e = 0; e < eventsLength; e++) {
-                            info = info + '<div class="column large-12"><a href="#/event/' + events[e].eventId + '" class="textColorWhite">' +
-                                events[e].places[0].name + '</a></div>'
-                        }
-                        if (events.length > 2) {
-                            info = info + '<a href="#/artist.facebookUrl" class="textColorWhite">' +
-                                'Voir tous les événements</a>'
-
-                        }
-                        pushInfo(info, title, artist, false);
-                    } else if (artist.tracks.length > 0) {
-                        title = 'Ecoutez vos musiques favorites et enregistrez vos playlists avec Claude';
-                        pushInfo(info, title, artist, true);
-                    }
-                });
-            }
-
-            ArtistsFactory.getFollowArtists().then(function (artists) {
-                artists.forEach(getEventsArtist)
-            })
+        $scope.infos = [
+            {content: $sce.trustAsHtml('<h2 class="text-center textColorWhite margin10">Bienvenue</h2><p>' +
+                '<b class="column large-6 large-offset-3 text-center textColorWhite medium-11">' +
+                'Claude est en version beta, aidez le à s\'améliorer en rapportant vos bug ou en ' +
+                'partageant vos suggestions.' +
+                '</b>' +
+                '</p>')}
+        ]
+        function pushInfo(info, title, artist, fixedTitle) {
+            $scope.infos.push({content: $sce.trustAsHtml(info), title: title, artist: artist, fixedTitle: fixedTitle})
         }
+
+        function getEventsArtist(artist) {
+            ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
+                var info = '';
+                var title;
+                console.log(events);
+                if (events.length > 0) {
+                    var eventsLength;
+                    if (events.length > 2) {
+                        eventsLength = 2;
+                    } else {
+                        eventsLength = events.length;
+                    }
+                    title = '<h2 class="text-center column medium-11 textColorWhite margin10">' + artist.name + ' bientôt à :</h2>';
+                    for (var e = 0; e < eventsLength; e++) {
+                        info = info + '<div class="column large-12"><a href="#/event/' + events[e].eventId + '" class="textColorWhite">' +
+                            events[e].places[0].name + '</a></div>'
+                    }
+                    if (events.length > 2) {
+                        info = info + '<a href="#/artist.facebookUrl" class="textColorWhite">' +
+                            'Voir tous les événements</a>'
+
+                    }
+                    pushInfo(info, title, artist, false);
+                } else if (artist.tracks.length > 0) {
+                    title = 'Ecoutez vos musiques favorites et enregistrez vos playlists avec Claude';
+                    pushInfo(info, title, artist, true);
+                }
+            });
+        }
+
+        ArtistsFactory.getFollowArtists().then(function (artists) {
+            artists.forEach(getEventsArtist)
+        })
     }
     if ($rootScope.connected == true) {
         getConnectedInfos()

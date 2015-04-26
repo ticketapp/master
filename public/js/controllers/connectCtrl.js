@@ -272,7 +272,7 @@ app.controller('connectCtrl',
                     } else if (pages[i].category == "Musician/band") {
                         //followArtist
                         // post if not exist
-                        //followArtist(pages[i].id, true);
+                        followArtist(pages[i].id, true);
                     } else if (pages[i].category == "concert venue" ||
                         pages[i].category == 'Club' ||
                         pages[i].category == 'Bar' ||
