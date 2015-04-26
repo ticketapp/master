@@ -10,6 +10,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import models._
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
+import services.Utilities
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import scala.util.matching.Regex
@@ -19,7 +20,6 @@ import controllers.SearchArtistsController.{ getEventuallyArtistsInEventTitle, g
 object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-  val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
 
   def start = Place.findAllAsTupleIdFacebookIdAndGeographicPoint.map {
     placeIdAndFacebookId: (Long, String, Option[String]) =>
@@ -44,7 +44,6 @@ object Scheduler {
       }
     }
   }
-
 
   def getEventsIdsByPlace(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
@@ -108,8 +107,10 @@ object Scheduler {
 
         val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
 
+        println(description)
+        println(Utilities.formatDescription(description))
         new Event(None, facebookId, true, true, name, None,
-          formatDescription(description), formatDate(startTime).getOrElse(new Date()),
+          Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
           formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
           nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
       }
@@ -155,32 +156,6 @@ object Scheduler {
         case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
       }
     case _ => None
-  }
-
-  def formatDescription(description: Option[String]): Option[String] = description match {
-  //see if not faster to useGetWebsitesInDescription and after replace all matched ?
-    case None =>
-      None
-    case Some(desc) =>
-      def stringToLinks(matcher: Regex.Match) = {
-        val phoneNumberPattern = """[\d\.]+""".r
-        matcher.toString() match {
-          case phoneNumberPattern(link) => matcher.toString()
-          case _ =>
-            if (matcher.toString contains "@")
-              "<i>" + matcher + "</i>"
-            else
-              """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) +
-                """</a>"""
-        }
-      }
-      Option("<div class='column large-12'>" +
-        linkPattern.replaceAllIn(desc.replaceAll( """<""", "&lt;").replaceAll( """>""", "&gt;"),
-          m => stringToLinks(m))
-          .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
-          .replaceAll( """\n""", "<br/>")
-          .replaceAll( """\t""", "    ") +
-        "</div>")
   }
 
   def findPrices(description: Option[String]): Option[String] = description match {
@@ -230,7 +205,7 @@ object Scheduler {
       .apply((name: String, description: Option[String], source: Option[String], street: Option[String],
               zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
               website: Option[String]) =>
-        Organizer(None, Some(organizerId), name, formatDescription(description), None, phone, public_transit,
+        Organizer(None, Some(organizerId), name, Utilities.formatDescription(description), None, phone, public_transit,
           website, verified = false, source, None,
           Option(Address(None, None, city, zip, street)))
       )

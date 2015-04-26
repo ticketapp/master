@@ -7,7 +7,9 @@ import anorm._
 import anorm.SqlParser._
 import java.util.Date
 import securesocial.core.IdentityId
-import services.Utilities.geographicPointToString
+import services.Utilities._
+
+import scala.util.matching.Regex
 
 case class Event(eventId: Option[Long],
                  facebookId: Option[String],
@@ -31,6 +33,7 @@ case class Event(eventId: Option[Long],
 
 object Event {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
+
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
                 endTime: Option[Date], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
                 imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event = {
@@ -313,21 +316,6 @@ object Event {
   } catch {
     case e: Exception => throw new DAOException("Event.follow: " + e.getMessage)
   }
-
-
-  /*def followArtistByFacebookId(userId : String, facebookId: String): Option[Long] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
-        .on('facebookId -> facebookId)
-        .as(scalar[Long].singleOpt) match {
-        case None => throw new ThereIsNoArtistForThisFacebookIdException("Artist.followArtistIdByFacebookId")
-        case Some(artistId) => followArtistByArtistId(userId, artistId)
-      }
-
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Artist.followArtistIdByFacebookId: " + e.getMessage)
-  }*/
 
   def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
     DB.withConnection { implicit connection =>

@@ -8,7 +8,7 @@ import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
-import jobs.Scheduler.formatDescription
+import services.Utilities
 import models.Artist
 import models.Genre
 import models.Genre.genresStringToGenresSet
@@ -161,7 +161,7 @@ object SearchArtistsController extends Controller {
                  maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val websitesSet = getNormalizedWebsitesInText(maybeWebsites).filterNot(_.contains("facebook.com")).filterNot(_ == "")
-    val description = formatDescription(maybeDescription)
+    val description = Utilities.formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
     Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq, Seq.empty)
   }

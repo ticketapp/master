@@ -15,8 +15,11 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 
 import scala.collection.mutable.ListBuffer
+import scala.util.matching.Regex
 
 object Utilities {
+  val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
+
   implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
     val MetaDataItem(qualified, nullable, clazz) = meta
     value match {
@@ -103,5 +106,31 @@ object Utilities {
         numberWithoutLetters = withNormalizedPrefix.drop(10)
       }
       normalizedNumbers.toSet
+  }
+
+  def formatDescription(description: Option[String]): Option[String] = description match {
+    //see if not faster to useGetWebsitesInDescription and after replace all matched ?
+    case None =>
+      None
+    case Some(desc) =>
+      def stringToLinks(matcher: Regex.Match) = {
+        val phoneNumberPattern = """[\d\.]+""".r
+        matcher.toString() match {
+          case phoneNumberPattern(link) => matcher.toString()
+          case _ =>
+            if (matcher.toString contains "@")
+              "<i>" + matcher + "</i>"
+            else
+              """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) +
+                """</a>"""
+        }
+      }
+      Option("<div class='column large-12'>" +
+        linkPattern.replaceAllIn(desc.replaceAll( """<""", "&lt;").replaceAll( """>""", "&gt;"),
+          m => stringToLinks(m))
+          .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
+          .replaceAll( """\n""", "<br/>")
+          .replaceAll( """\t""", "    ") +
+        "</div>")
   }
 }
