@@ -60,10 +60,11 @@ GET       /organizers/:organizerId/events                           controllers.
 GET       /organizers/findNearCity/:city/:numberToReturn/:offset    controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################# Playlists ############################################
-GET       /playlists                                                controllers.PlaylistController.findByUser
-POST      /playlists                                                controllers.PlaylistController.create
-PUT       /playlists                                                controllers.PlaylistController.update
-DELETE    /playlists/:playlistId                                    controllers.PlaylistController.delete(playlistId: Long)
+GET       /playlists                                        controllers.PlaylistController.findByUser
+POST      /playlists                                        controllers.PlaylistController.create
+PUT       /playlists                                        controllers.PlaylistController.update
+GET       /playlists/:playlistId                            controllers.PlaylistController.find(playlistId: Long)
+DELETE    /playlists/:playlistId                            controllers.PlaylistController.delete(playlistId: Long)
 
 ################################# Genres ############################################
 GET           /genres/:genre/:numberToReturn/:offset/artists        controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
