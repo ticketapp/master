@@ -20,16 +20,14 @@ class NormalizeArtistNameTest extends PlaySpec {
       normalizedArtistsName mustBe expectedResult
     }
 
-    /*"return artists name without fanpage, official, officiel, fb, facebook, page" in {
-      val artistsName = List("", None)
+    "return artists name without fanpage, official, officiel, fb, facebook, page" in {
+      val artistsName = List("Bukowski Street Team Officiel -  France", "Cookie Monsta Official")
 
-      val genresSets: List[Set[Genre]] = genres.map {
-        genresStringToGenresSet
-      }
+      val normalizedArtistsName: List[String] = artistsName.map { normalizeArtistName }
 
-      val expectedResult = List(Set.empty, Set.empty)
+      val expectedResult = List("bukowski street team -  france", "cookie monsta")
 
-      genresSets mustBe expectedResult
-    }*/
+      normalizedArtistsName mustBe expectedResult
+    }
   }
 }

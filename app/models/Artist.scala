@@ -293,5 +293,14 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.isArtistFollowed: " + e.getMessage)
   }
 
-  def normalizeArtistName(artistName: String): String = normalizeString(artistName)
+  def normalizeArtistName(artistName: String): String = {
+    normalizeString(artistName)
+      .replaceAll("officiel", "")
+      .replaceAll("fanpage", "")
+      .replaceAll("official", "")
+      .replaceAll("fb", "")
+      .replaceAll("facebook", "")
+      .replaceAll("page", "")
+      .trim
+  }
 }
