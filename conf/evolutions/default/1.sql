@@ -571,7 +571,7 @@ CREATE TABLE placesFollowed (
 CREATE UNIQUE INDEX placesFollowedIndex ON placesFollowed (userId, placeId);
 
 CREATE TABLE usersFollowed (
-  tableId                  SERIAL PRIMARY KEY,
+  tableId                 SERIAL PRIMARY KEY,
   userIdFollower          VARCHAR REFERENCES users_login(userId),
   userIdFollowed          VARCHAR REFERENCES users_login(userId)
 );
@@ -637,19 +637,32 @@ CREATE TABLE eventsAddresses (
   addressId               INT REFERENCES addresses(addressId),
   PRIMARY KEY (eventId, addressId)
 );
----INSERT INTO eventsAddresses VALUES(1, 2);
 
 CREATE TABLE usersOrganizers (
-  userId                  INT REFERENCES users (userId),
-  organizerId             INT REFERENCES organizers(organizerId),
-  PRIMARY KEY (userId, organizerId)
+  tableId                 SERIAL PRIMARY KEY,
+  userId                  VARCHAR(255) REFERENCES users_login (userId),
+  organizerId             INT REFERENCES organizers(organizerId)
 );
+CREATE UNIQUE INDEX usersOrganizersIndex ON usersOrganizers (userId, organizerId);
+CREATE OR REPLACE FUNCTION insertUserOrganizerRelation(
+  userIdValue             VARCHAR(255),
+  organizerIdValue        BIGINT)
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO usersOrganizers (userId, organizerId)
+    VALUES (userIdValue, organizerIdValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE eventsArtists (
   eventId                 INT REFERENCES events (eventId),
   artistId                INT REFERENCES artists (artistId),
   PRIMARY KEY (eventId, artistId)
 );
+
 CREATE OR REPLACE FUNCTION insertEventArtistRelation(
   eventIdValue            BIGINT,
   artistIdValue           BIGINT)
@@ -664,10 +677,23 @@ CREATE OR REPLACE FUNCTION insertEventArtistRelation(
 LANGUAGE plpgsql;
 
 CREATE TABLE usersArtists (
-  userId                  INT REFERENCES users (userId),
-  artistId                INT REFERENCES artists (artistId),
-  PRIMARY KEY (userId, artistId)
+  tableId                 SERIAL PRIMARY KEY,
+  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
+  artistId                BIGINT REFERENCES artists (artistId) NOT NULL
 );
+CREATE UNIQUE INDEX usersArtistsIndex ON usersArtists (userId, artistId);
+CREATE OR REPLACE FUNCTION insertUserArtistRelation(
+  userIdValue             VARCHAR(255),
+  artistIdValue           BIGINT)
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO usersArtists (userId, artistId)
+      VALUES (userIdValue, artistIdValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE artistsGenres (
   artistId                INT REFERENCES artists (artistId),
@@ -675,7 +701,6 @@ CREATE TABLE artistsGenres (
   counter                 INT NOT NULL,
   PRIMARY KEY (artistId, genreId)
 );
-
 CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(artistIdValue INT, genreIdValue INT) RETURNS VOID AS
   $$
     BEGIN

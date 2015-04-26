@@ -44,7 +44,7 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       organizer => {
         Organizer.save(organizer) match {
-          case Some(eventId) => Ok(Json.toJson(Organizer.find(eventId)))
+          case Some(organizerId) => Ok(Json.toJson(Organizer.find(organizerId)))
           case None => Ok(Json.toJson("The organizer couldn't be saved"))
         }
       }
