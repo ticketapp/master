@@ -177,7 +177,7 @@ object Genre {
     case Some(genres: String) =>
       val lowercaseGenres = genres.toLowerCase
       val genresSplitByCommas = lowercaseGenres.split(",")
-      println(genresSplitByCommas.toSeq)
+//      println(genresSplitByCommas.toSeq)
       if (genresSplitByCommas.length > 1) {
         genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim, None) }.toSet
       } else {

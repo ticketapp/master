@@ -10,7 +10,6 @@ import play.api.Play.current
 import services.Utilities.columnToChar
 import json.JsonHelper._
 import play.api.libs.json.DefaultWrites
-import scala.BigDecimal.javaBigDecimal2bigDecimal
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
@@ -19,6 +18,7 @@ import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
 import java.util.Date
 import java.math.BigDecimal
+import anorm.Column.rowToBigDecimal
 
 case class Track (trackId: Option[Long],
                   title: String, 
