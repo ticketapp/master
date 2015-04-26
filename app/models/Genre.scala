@@ -175,20 +175,31 @@ object Genre {
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
     case None => Set.empty
     case Some(genres: String) =>
-      """([%/+,;]| | & )""".r.split(genres.toLowerCase)
-        .map { _.trim } match {
-        case list if list.length != 1 => list.map { genreName =>
-          new Genre(None, genreName.stripSuffix("."))
-        }.toSet
-        case listOfOneItem => listOfOneItem(0) match {
-          case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
-            genre.contains("musik") || genre.contains("music") =>
-            Set(new Genre(None, genre.stripSuffix(".")))
-          case genreWithoutForbiddenChars =>
-            genreWithoutForbiddenChars
-              .split("\\s+")
-              .map { genreName => new Genre(None, genreName.stripSuffix(".")) }
-              .toSet
+      val lowercaseGenres = genres.toLowerCase
+      val genresSplitByCommas = lowercaseGenres.split(",")
+      println(genresSplitByCommas.toSeq)
+      if (genresSplitByCommas.length > 1) {
+        genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim, None) }.toSet
+      } else {
+        """([%/+\.;]|& )""".r
+          .split(lowercaseGenres)
+          .map { _.trim }
+          .filterNot(_ == "")
+        match {
+          case list if list.length != 1 =>
+            list.map { genreName => new Genre(None, genreName) }.toSet
+          case listOfOneItem =>
+            listOfOneItem(0) match {
+              case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
+                genre.contains("musik") || genre.contains("music") =>
+                Set(new Genre(None, genre))
+              case genreWithoutForbiddenChars =>
+                genreWithoutForbiddenChars
+                  .split("\\s+")
+                  .map { genreName => new Genre(None, genreName.stripSuffix(".")) }
+                  .filterNot(_.name == "")
+                  .toSet
+            }
         }
       }
   }
