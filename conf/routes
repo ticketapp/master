@@ -31,7 +31,7 @@ POST      /artists/createArtist                                     controllers.
 POST      /artists/:artistId/followByArtistId                       controllers.ArtistController.followArtistByArtistId(artistId: Long)
 POST      /artists/:facebookId/followByFacebookId                   controllers.ArtistController.followArtistByFacebookId(facebookId: String)
 GET       /artists/followed/                                        controllers.ArtistController.getFollowedArtists
-GET       /artists/:artistId/isArtistFollowed                       controllers.ArtistController.isArtistFollowed(artistId: Long)
+GET       /artists/:artistId/isFollowed                             controllers.ArtistController.isArtistFollowed(artistId: Long)
 DELETE    /artists/:artistId                                        controllers.ArtistController.deleteArtist(artistId: Long)
 GET       /artists/:facebookUrl/events                              controllers.ArtistController.eventsByArtist(facebookUrl: String)
 GET       /artists/containing/:pattern                              controllers.ArtistController.findArtistsContaining(pattern: String)
@@ -42,6 +42,7 @@ GET       /places/:geographicPoint/:numberToReturn/:offset          controllers.
 GET       /places/:id                                               controllers.PlaceController.place(id: Long)
 POST      /places/:placeId/followByPlaceId                          controllers.PlaceController.followPlaceByPlaceId(placeId: Long)
 POST      /places/:facebookId/followByFacebookId                    controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
+GET       /places/:placeId/isFollowed                               controllers.PlaceController.isPlaceFollowed(placeId: Long)
 GET       /places/containing/:pattern                               controllers.PlaceController.findPlacesContaining(pattern: String)
 POST      /places/create                                            controllers.PlaceController.createPlace
 GET       /places/:placeId/events                                   controllers.EventController.eventsByPlace(placeId: Long)
@@ -52,16 +53,18 @@ GET       /organizers/all/:numberToReturn/:offset                   controllers.
 GET       /organizers/:id                                           controllers.OrganizerController.organizer(id: Long)
 POST      /organizers/:organizerId/followByOrganizerId              controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
 POST      /organizers/:facebookId/followByFacebookId                controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
+GET       /organizers/:organizerId/isFollowed                       controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
 GET       /organizers/containing/:pattern                           controllers.OrganizerController.findOrganizersContaining(pattern: String)
 POST      /organizers/create                                        controllers.OrganizerController.createOrganizer
 GET       /organizers/:organizerId/events                           controllers.EventController.eventsByOrganizer(organizerId: Long)
 GET       /organizers/findNearCity/:city/:numberToReturn/:offset    controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################# Playlists ############################################
-GET       /playlists                                                controllers.PlaylistController.findByUser
-POST      /playlists                                                controllers.PlaylistController.create
-PUT       /playlists                                                controllers.PlaylistController.update
-DELETE    /playlists/:playlistId                                    controllers.PlaylistController.delete(playlistId: Long)
+GET       /playlists                                        controllers.PlaylistController.findByUser
+POST      /playlists                                        controllers.PlaylistController.create
+PUT       /playlists                                        controllers.PlaylistController.update
+GET       /playlists/:playlistId                            controllers.PlaylistController.find(playlistId: Long)
+DELETE    /playlists/:playlistId                            controllers.PlaylistController.delete(playlistId: Long)
 
 ################################# Genres ############################################
 GET           /genres/:genre/:numberToReturn/:offset/artists        controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)

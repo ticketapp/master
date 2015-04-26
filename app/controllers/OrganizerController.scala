@@ -9,6 +9,7 @@ import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
 import json.JsonHelper.organizerWrites
+import securesocial.core.Identity
 
 object OrganizerController extends Controller with securesocial.core.SecureSocial {
   def organizers(numberToReturn: Int, offset: Int) = Action {
@@ -29,6 +30,13 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
 
   def followOrganizerByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
     Ok(Json.toJson(Organizer.followOrganizerByFacebookId(request.user.identityId.userId, facebookId)))
+  }
+
+  def isOrganizerFollowed(organizerId: Long) = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Organizer.isFollowed(identity.identityId, organizerId)))
+    }
   }
 
   val organizerBindingForm = Form(

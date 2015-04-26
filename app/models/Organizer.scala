@@ -3,6 +3,7 @@ package models
 import anorm.SqlParser._
 import anorm._
 import controllers.{ThereIsNoOrganizerForThisFacebookIdException, DAOException}
+import securesocial.core.IdentityId
 import services.Utilities
 import play.api.db.DB
 import play.api.Play.current
@@ -231,5 +232,18 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Organizer.findNearCity: " + e.getMessage)
+  }
+
+  def isFollowed(userId: IdentityId, organizerId: Long): Boolean = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT exists(SELECT 1 FROM organizersFollowed
+          |  WHERE userId = {userId} AND organizerId = {organizerId})""".stripMargin)
+        .on("userId" -> userId.userId,
+          "organizerId" -> organizerId)
+        .as(scalar[Boolean].single)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.isOrganizerFollowed: " + e.getMessage)
   }
 }

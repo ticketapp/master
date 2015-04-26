@@ -12,6 +12,8 @@ import scala.concurrent.Future
 
 object PlaylistController extends Controller with securesocial.core.SecureSocial {
 
+  def find(playlistId: Long) = Action { Ok(Json.toJson(Playlist.find(playlistId))) }
+
   def findByUser = SecuredAction(ajaxCall = true) { implicit request =>
     Ok(Json.toJson(Playlist.findByUserId(request.user.identityId.userId)))
   }

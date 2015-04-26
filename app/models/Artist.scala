@@ -280,7 +280,7 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.getFollowedArtists: " + e.getMessage)
   }
 
-  def isArtistFollowed(userId: IdentityId, artistId: Long): Boolean = try {
+  def isFollowed(userId: IdentityId, artistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM artistsFollowed
@@ -293,5 +293,14 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.isArtistFollowed: " + e.getMessage)
   }
 
-  def normalizeArtistName(artistName: String): String = normalizeString(artistName)
+  def normalizeArtistName(artistName: String): String = {
+    normalizeString(artistName)
+      .replaceAll("officiel", "")
+      .replaceAll("fanpage", "")
+      .replaceAll("official", "")
+      .replaceAll("fb", "")
+      .replaceAll("facebook", "")
+      .replaceAll("page", "")
+      .trim
+  }
 }

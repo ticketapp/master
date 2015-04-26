@@ -32,6 +32,19 @@ object Playlist {
     }
   }
 
+  def find(playlistId: Long): Seq[Playlist] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT * FROM playlists
+          | WHERE playlistId = {playlistId}""".stripMargin)
+        .on('playlistId -> playlistId)
+        .as(playlistParser.*)
+        .map(playlist => playlist.copy(tracks = Track.findTracksByPlaylistId(playlist.playlistId)))
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
+  }
+
   def findByUserId(userId: String): Seq[Playlist] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -83,13 +96,7 @@ object Playlist {
   } catch {
     case e: Exception => throw new DAOException("Playlist.delete: " + e.getMessage)
   }
-/*
-  case class PlaylistIdAndTracksId(id: Long, tracksId: Seq[Long])
-  def addOrRemoveTracksFormApply(id: Long, tracksId: Seq[Long]) =
-    PlaylistIdAndTracksId(id, tracksId)
-  def addOrRemoveTracksFormUnapply(playlistIdAndTracksId: PlaylistIdAndTracksId) =
-    Option((playlistIdAndTracksId.id, playlistIdAndTracksId.tracksId))
-*/
+
   case class TrackInfo(trackId: Long, action: String, trackRank: Option[BigDecimal])
   def trackInfoFormApply(trackId: Long, action: String, trackRank: Option[BigDecimal]) =
     TrackInfo(trackId, action, trackRank)

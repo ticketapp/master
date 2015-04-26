@@ -5,6 +5,7 @@ import anorm._
 import play.api.db.DB
 import play.api.Play.current
 import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
+import securesocial.core.IdentityId
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 
 case class Place (placeId: Option[Long],
@@ -185,6 +186,19 @@ object Place {
     }
   } catch {
     case e: Exception => throw new DAOException("Place.followPlaceIdByFacebookId: " + e.getMessage)
+  }
+
+  def isFollowed(userId: IdentityId, placeId: Long): Boolean = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT exists(SELECT 1 FROM placesFollowed
+          |  WHERE userId = {userId} AND placeId = {placeId})""".stripMargin)
+        .on("userId" -> userId.userId,
+          "placeId" -> placeId)
+        .as(scalar[Boolean].single)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.isPlaceFollowed: " + e.getMessage)
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Boolean = try {
