@@ -88,7 +88,7 @@ object Scheduler {
        startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
        city: Option[String], maybeOwnerId: Option[String]) => {
 
-      val eventuallyOrganizer = getOrganizerInfos(maybeOwnerId)
+      val eventuallyOrganizer = getOrganizerInfo(maybeOwnerId)
       val address = new Address(None, None, city, zip, street)
 
       val normalizedWebsites: Set[String] = getNormalizedWebsitesInText(description)
@@ -237,7 +237,7 @@ object Scheduler {
     organizer.json.asOpt[Organizer](readOrganizer)
   }
 
-  def getOrganizerInfos(maybeOrganizerId: Option[String]): Future[Option[Organizer]] = maybeOrganizerId match {
+  def getOrganizerInfo(maybeOrganizerId: Option[String]): Future[Option[Organizer]] = maybeOrganizerId match {
     case None => Future { None }
     case Some(organizerId) =>
       WS.url("https://graph.facebook.com/v2.2/" + organizerId)

@@ -112,7 +112,7 @@ object SearchYoutubeTracks {
           Track(None, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl)
       }
     }
-    println(youtubeResponse.json)
+//    println(youtubeResponse.json)
     (youtubeResponse.json \ "items")
       .asOpt[Seq[Track]](collectOnlyValidTracks)
       .getOrElse(Seq.empty)

@@ -240,11 +240,12 @@ object Artist {
 
   def followArtistByArtistId(userId : String, artistId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO artistsFollowed(userId, artistId) VALUES ({userId}, {artistId})""")
+      SQL("""SELECT insertUserArtistRelation({userId}, {artistId})""")
         .on(
           'userId -> userId,
           'artistId -> artistId)
-        .executeInsert()
+        .execute()
+      None
     }
   } catch {
     case e: Exception => throw new DAOException("Artist.followArtistByArtistId: " + e.getMessage)
@@ -255,12 +256,15 @@ object Artist {
       SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
         .on('facebookId -> facebookId)
         .as(scalar[Long].singleOpt) match {
-        case None => throw new ThereIsNoArtistForThisFacebookIdException("Artist.followArtistIdByFacebookId")
+        case None => throw ThereIsNoArtistForThisFacebookIdException("Artist.followArtistByFacebookId")
         case Some(artistId) => followArtistByArtistId(userId, artistId)
       }
     }
   } catch {
-    case e: Exception => throw new DAOException("Artist.followArtistIdByFacebookId: " + e.getMessage)
+    case thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException =>
+      throw ThereIsNoArtistForThisFacebookIdException("Artist.followArtistByFacebookId")
+    case e: Exception =>
+      throw DAOException("Artist.followArtistByFacebookId: " + e.getMessage)
   }
 
   def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {

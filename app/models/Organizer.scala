@@ -165,8 +165,7 @@ object Organizer {
   def followOrganizer(userId: String, organizerId : Long): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """INSERT INTO organizersFollowed(userId, organizerId)
-          | VALUES ({userId}, {organizerId})""".stripMargin)
+        """SELECT insertUserOrganizerRelation({userId}, {organizerId})""")
         .on(
           'userId -> userId,
           'organizerId -> organizerId)

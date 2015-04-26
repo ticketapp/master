@@ -10,23 +10,24 @@ import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
-case class Genre (genreId: Long, name: String, icon: Option[String] = None)
+case class Genre (genreId: Option[Long], name: String, icon: Option[String] = None)
 
 object Genre {
-  def formApply(name: String) = new Genre(-1L, name)
+  def formApply(name: String) = new Genre(None, name)
   def formUnapply(genre: Genre) = Some(genre.name)
 
   private val GenreParser: RowParser[Genre] = {
     get[Long]("genreId") ~
       get[String]("name") ~
       get[Option[String]]("icon") map {
-      case genreId ~ name ~ icon => Genre(genreId, name, icon)
+      case genreId ~ name ~ icon => Genre(Option(genreId), name, icon)
     }
   }
 
   def findAll: Seq[Genre] = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM genres").as(GenreParser.*)
+      SQL("SELECT * FROM genres")
+        .as(GenreParser.*)
     }
   } catch {
     case e: Exception => throw new DAOException("Genre.findAll: " + e.getMessage)
@@ -144,7 +145,7 @@ object Genre {
     Future {
       genreName match {
         case Some(genreFound) if genreFound.nonEmpty =>
-          saveWithArtistRelation(new Genre(-1, genreFound), artistId)
+          saveWithArtistRelation(new Genre(None, genreFound), artistId)
       }
     }
   }
@@ -174,20 +175,31 @@ object Genre {
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
     case None => Set.empty
     case Some(genres: String) =>
-      """([%/+,;]| | & )""".r.split(genres.toLowerCase)
-        .map { _.trim } match {
-        case list if list.length != 1 => list.map { genreName =>
-          new Genre(-1L, genreName.stripSuffix("."))
-        }.toSet
-        case listOfOneItem => listOfOneItem(0) match {
-          case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
-            genre.contains("musik") || genre.contains("music") =>
-            Set(new Genre(-1L, genre.stripSuffix(".")))
-          case genreWithoutForbiddenChars =>
-            genreWithoutForbiddenChars
-              .split("\\s+")
-              .map { genreName => new Genre(-1L, genreName.stripSuffix(".")) }
-              .toSet
+      val lowercaseGenres = genres.toLowerCase
+      val genresSplitByCommas = lowercaseGenres.split(",")
+      println(genresSplitByCommas.toSeq)
+      if (genresSplitByCommas.length > 1) {
+        genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim, None) }.toSet
+      } else {
+        """([%/+\.;]|& )""".r
+          .split(lowercaseGenres)
+          .map { _.trim }
+          .filterNot(_ == "")
+        match {
+          case list if list.length != 1 =>
+            list.map { genreName => new Genre(None, genreName) }.toSet
+          case listOfOneItem =>
+            listOfOneItem(0) match {
+              case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
+                genre.contains("musik") || genre.contains("music") =>
+                Set(new Genre(None, genre))
+              case genreWithoutForbiddenChars =>
+                genreWithoutForbiddenChars
+                  .split("\\s+")
+                  .map { genreName => new Genre(None, genreName.stripSuffix(".")) }
+                  .filterNot(_.name == "")
+                  .toSet
+            }
         }
       }
   }
