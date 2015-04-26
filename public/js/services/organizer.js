@@ -47,12 +47,10 @@ app.factory ('OrganizerFactory', function ($http, $q){
             if(factory.organizers ==true) {
                 deferred.resolve(factory.organizers);
             } else {
-                console.log(organizer)
                 $http.post('/organizers/create', organizer).
                     success(function(data, status, headers, config) {
                         deferred.resolve(data);
                     }).error(function (data) {
-                        console.log(data)
                         deferred.resolve('error');
                     })
             }
