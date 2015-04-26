@@ -45,7 +45,7 @@ CREATE TABLE infos (
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 55 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 54 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -577,6 +577,13 @@ CREATE TABLE usersFollowed (
 );
 CREATE UNIQUE INDEX usersFollowedIndex ON usersFollowed (userIdFollower, userIdFollowed);
 
+CREATE TABLE organizersFollowed (
+  tableId                 SERIAL PRIMARY KEY,
+  userId                  VARCHAR REFERENCES users_login(userId),
+  organizerId             INT REFERENCES organizers(organizerId)
+);
+CREATE UNIQUE INDEX organizersFollowedIndex ON organizersFollowed (userId, organizerId);
+
 CREATE TABLE eventsPlaces (
   eventId                 INT REFERENCES events (eventId),
   placeId                 INT REFERENCES places (placeId),
@@ -747,6 +754,7 @@ DROP TABLE IF EXISTS eventsFollowed;
 DROP TABLE IF EXISTS artistsFollowed;
 DROP TABLE IF EXISTS placesFollowed;
 DROP TABLE IF EXISTS usersFollowed;
+DROP TABLE IF EXISTS organizersFollowed;
 DROP TABLE IF EXISTS usersTools;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS tariffsBlocked;

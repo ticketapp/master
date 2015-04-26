@@ -145,7 +145,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def isArtistFollowed(artistId: Long) = UserAwareAction { implicit request =>
     request.user match {
       case None => Ok(Json.toJson("User not connected"))
-      case Some(identity: Identity) => Ok(Json.toJson(Artist.isArtistFollowed(identity.identityId, artistId)))
+      case Some(identity: Identity) => Ok(Json.toJson(Artist.isFollowed(identity.identityId, artistId)))
     }
   }
 }

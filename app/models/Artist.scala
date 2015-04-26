@@ -280,7 +280,7 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.getFollowedArtists: " + e.getMessage)
   }
 
-  def isArtistFollowed(userId: IdentityId, artistId: Long): Boolean = try {
+  def isFollowed(userId: IdentityId, artistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM artistsFollowed

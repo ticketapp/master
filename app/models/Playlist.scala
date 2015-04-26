@@ -83,13 +83,7 @@ object Playlist {
   } catch {
     case e: Exception => throw new DAOException("Playlist.delete: " + e.getMessage)
   }
-/*
-  case class PlaylistIdAndTracksId(id: Long, tracksId: Seq[Long])
-  def addOrRemoveTracksFormApply(id: Long, tracksId: Seq[Long]) =
-    PlaylistIdAndTracksId(id, tracksId)
-  def addOrRemoveTracksFormUnapply(playlistIdAndTracksId: PlaylistIdAndTracksId) =
-    Option((playlistIdAndTracksId.id, playlistIdAndTracksId.tracksId))
-*/
+
   case class TrackInfo(trackId: Long, action: String, trackRank: Option[BigDecimal])
   def trackInfoFormApply(trackId: Long, action: String, trackRank: Option[BigDecimal]) =
     TrackInfo(trackId, action, trackRank)

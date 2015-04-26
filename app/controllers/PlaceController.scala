@@ -9,6 +9,7 @@ import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
 import json.JsonHelper.placeWrites
+import securesocial.core.Identity
 
 import scala.util.matching.Regex
 
@@ -48,6 +49,13 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
 
   def followPlaceByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
     Ok(Json.toJson(Place.followPlaceByFacebookId(request.user.identityId.userId, facebookId)))
+  }
+  
+  def isPlaceFollowed(placeId: Long) = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Place.isFollowed(identity.identityId, placeId)))
+    }
   }
 
   val placeBindingForm = Form(mapping(
