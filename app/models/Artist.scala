@@ -292,4 +292,6 @@ object Artist {
   } catch {
     case e: Exception => throw new DAOException("Artist.isArtistFollowed: " + e.getMessage)
   }
+
+  def normalizeArtistName(artistName: String): String = normalizeString(artistName)
 }

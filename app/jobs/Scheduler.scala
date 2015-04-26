@@ -124,7 +124,7 @@ object Scheduler {
         addSoundCloudWebsiteIfNotInWebsites(tracks.headOption, artistWithId)
         tracks.map { Track.save }
       }
-      getYoutubeTracksForArtist(artistWithId, normalizeArtistName(artistWithId.name)).map {
+      getYoutubeTracksForArtist(artistWithId, Artist.normalizeArtistName(artistWithId.name)).map {
         _.map(Track.save)
       }
     }
@@ -288,8 +288,6 @@ object Scheduler {
       }
     }
   }
-
-  def normalizeArtistName(artistName: String): String = normalizeString(artistName)
 
   def getArtistsFromTitle(title: String): Set[String] = {
     /*val artistsFromTitle: List[String] = splitArtistNamesInTitle(name)
