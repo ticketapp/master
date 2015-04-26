@@ -104,6 +104,22 @@ app.factory ('EventsFactory', function ($http, $q){
                     });
             }
             return deferred.promise;
+        },
+        postEvent : function (event) {
+            var deferred = $q.defer();
+            if(factory.events == true){
+                deferred.resolve(factory.events);
+            } else {
+                $http.post('/events/create' + event).
+                    success(function (data) {
+                        factory.events = data;
+                        deferred.resolve(factory.events);
+                    }).error(function (data) {
+                        factory.events = data;
+                        deferred.resolve(factory.events);
+                    });
+            }
+            return deferred.promise;
         }
     };
     return factory;

@@ -119,7 +119,7 @@ app.controller('CreateEventCtrl',['$scope', '$http', '$filter', '$tour', functio
 				$scope.newEvent.name = data.name;
 				$scope.newEvent.facebookId = data.id;
 				$scope.newEvent.place = data.location;
-				$scope.newEvent.startTime = new Date(data.start_time);
+                    $scope.newEvent.startTime = new Date(data.start_time);
 				$scope.newEvent.endTime = new Date(data.end_time);
 				$scope.newEvent.user = data.owner;
 				$scope.newEvent.adresses.push({
