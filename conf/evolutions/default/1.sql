@@ -553,24 +553,29 @@ CREATE TABLE eventsFollowed (
   userId                   VARCHAR REFERENCES users_login(userId),
   eventId                  BIGINT REFERENCES events(eventId)
 );
+CREATE UNIQUE INDEX eventsFollowedIndex ON eventsFollowed (userId, eventId);
 
 CREATE TABLE artistsFollowed (
   tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  artistId                 INT REFERENCES artists(artistId)
+  artistId                 INT REFERENCES artists(artistId),
+  UNIQUE(userId, artistId)
 );
+CREATE UNIQUE INDEX artistsFollowedIndex ON artistsFollowed (userId, artistId);
 
 CREATE TABLE placesFollowed (
   tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
   placeId                  INT REFERENCES places(placeId)
 );
+CREATE UNIQUE INDEX placesFollowedIndex ON placesFollowed (userId, placeId);
 
 CREATE TABLE usersFollowed (
   tableId                  SERIAL PRIMARY KEY,
   userIdFollower          VARCHAR REFERENCES users_login(userId),
   userIdFollowed          VARCHAR REFERENCES users_login(userId)
 );
+CREATE UNIQUE INDEX usersFollowedIndex ON usersFollowed (userIdFollower, userIdFollowed);
 
 CREATE TABLE eventsPlaces (
   eventId                 INT REFERENCES events (eventId),
