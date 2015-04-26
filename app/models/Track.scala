@@ -100,9 +100,9 @@ object Track {
     case e: Exception => throw new DAOException("Track.findTracksIdByPlaylistId: " + e.getMessage)
   }
 
-  private val trackIdAndRankParser: RowParser[(Long, BigDecimal)] = {
+  private val trackIdAndRankParser: RowParser[(Long, java.math.BigDecimal)] = {
     get[Long]("trackId") ~
-      get[BigDecimal]("trackRank") map {
+      get[java.math.BigDecimal]("trackRank") map {
       case trackId ~ trackRank => (trackId, trackRank)
     }
   }
@@ -144,12 +144,12 @@ object Track {
   def savePlaylistTrackRelation(playlistId: Long, trackIdAndRank: TrackIdAndRank): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """INSERT INTO playlistsTracks (playlistId, trackId, rank)
-          | VALUES ({playlistId}, {trackId}, {rank})""".stripMargin)
+        """INSERT INTO playlistsTracks (playlistId, trackId, trackRank)
+          | VALUES ({playlistId}, {trackId}, {trackRank})""".stripMargin)
         .on(
           'playlistId -> playlistId,
           'trackId -> trackIdAndRank.id,
-          'rank -> trackIdAndRank.rank)
+          'trackRank -> trackIdAndRank.rank.bigDecimal)
         .executeInsert()
     }
   } catch {
