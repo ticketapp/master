@@ -33,7 +33,6 @@ app.controller('connectCtrl',
 
     function followPlace (id, toCreate) {
         PlaceFactory.followPlaceByFacebookId(id).then(function (isFollowed) {
-            console.log(isFollowed)
             if (isFollowed == 'error' && toCreate == true) {
                 getPlacePage(id);
             }
@@ -125,7 +124,7 @@ app.controller('connectCtrl',
                 };
                 PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                     if (isCreated != 'error') {
-                        followPlace(newPlace.id, false)
+                        followPlace(newPlace.facebookId, false)
                     }
                 })
             }).
@@ -146,14 +145,13 @@ app.controller('connectCtrl',
                 };
                 PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                     if (isCreated != 'error') {
-                        followPlace(newPlace.id, false)
+                        followPlace(newPlace.facebookId, false)
                     }
                 })
             })
     }
 
     function getPositionAndCreate (place) {
-        console.log(place)
         $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' +
             place.location.street + '+' +
             place.location.zip + '+' +
@@ -189,7 +187,7 @@ app.controller('connectCtrl',
                     };
                     PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                         if (isCreated != 'error') {
-                            followPlace(newPlace.id, false)
+                            followPlace(newPlace.facebookId, false)
                         }
                     })
                 } else {
@@ -230,7 +228,6 @@ app.controller('connectCtrl',
                                         "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
                             }
                         }
-                        console.log(data)
                         getPositionAndCreate(data);
                     }
                 }).
@@ -244,7 +241,6 @@ app.controller('connectCtrl',
     function getPlacePage (id) {
         $http.get('https://graph.facebook.com/v2.3/' + id + '?access_token=' + token).
             success(function (data) {
-                console.log(data)
                 getInfoPlace(data)
             })
     }

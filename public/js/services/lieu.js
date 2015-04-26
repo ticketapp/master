@@ -56,7 +56,7 @@ app.factory ('PlaceFactory', function ($http, $q){
                             factory.places = data;
                             deferred.resolve(factory.places);
                     }).error(function(data, status) {
-                        deferred.reject('erreur');
+                        deferred.resolve('error');
                     });
                 }
                 return deferred.promise;
@@ -66,12 +66,13 @@ app.factory ('PlaceFactory', function ($http, $q){
                 if(factory.places == true) {
                     deferred.resolve(factory.places);
                 } else {
-                    $http.post('/places/create' +  place )
+                    console.log(place)
+                    $http.post('/places/create', place )
                         .success(function(data, status) {
                             factory.places = data;
                             deferred.resolve(factory.places);
                     }).error(function(data, status) {
-                        deferred.reject('erreur');
+                        deferred.resolve('error');
                     });
                 }
                 return deferred.promise;
