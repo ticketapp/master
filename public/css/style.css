@@ -5,8 +5,6 @@ html, body, #contener { height: 100%;}
 html {overflow-x: hidden;}
 body > #contener { height: auto; min-height: 100%; overflow: hidden;}
 body {padding-bottom: 0; color: #5a5a5a;}
-a{color:#2A69A2;}
-a:hover{color:#faa732; text-decoration:none;}
 .comment{padding:0 10px;}
 a>h4{color:#2A69A2; background-color:transparent; }
 a>h4:hover{color:#3790E0;}
