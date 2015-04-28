@@ -6,7 +6,7 @@ class TestFormatEventDescription extends PlaySpec {
 
   "A formatted description" must {
 
-    "should not have formatted mail as a url" in {
+    "should not have formatted mail as a url" in new App() {
       val description = Option("roman.trystram@caa.com")
 
       val formattedDescription = formatDescription(description)

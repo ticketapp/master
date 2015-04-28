@@ -1,5 +1,7 @@
 package models
 
+import java.sql.Connection
+
 import anorm.SqlParser._
 import anorm._
 import play.api.db.DB
@@ -7,6 +9,8 @@ import play.api.Play.current
 import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
 import securesocial.core.IdentityId
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
+import play.api.libs.concurrent.Execution.Implicits._
+import scala.concurrent.Future
 
 case class Place (placeId: Option[Long],
                   name: String,
@@ -49,35 +53,48 @@ object Place {
     }
   }
 
-  def save(place: Place): Option[Long] = try {
+  def save(place: Place): Future[Option[Long]] = try {
     DB.withConnection { implicit connection =>
-      val addressId = place.address match {
-        case None => None
-        case Some(address: Address) => Some(address.addressId)
+      val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
+      eventuallyAddressId map { addressId =>
+        SQL(
+          s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
+             |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
+          .on(
+            'name -> place.name,
+            'geographicPoint -> place.geographicPoint,
+            'addressId -> addressId,
+            'facebookId -> place.facebookId,
+            'description -> place.description,
+            'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
+            'capacity -> place.capacity,
+            'openingHours -> place.openingHours,
+            'imagePath -> place.imagePath,
+            'organizerId -> findOrganizerIdWithSameFacebookId(place.facebookId))
+          .as(scalar[Option[Long]].single)
       }
-      val organizerIdWithSameFacebookId = SQL(
-        """SELECT placeId FROM places
-          | WHERE facebookId = {facebookId}""".stripMargin)
-        .on("facebookId" -> place.facebookId)
-        .as(scalar[Long].singleOpt)
-      SQL(
-        s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
-           |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
-        .on(
-          'name -> place.name,
-          'geographicPoint -> place.geographicPoint,
-          'addressId -> addressId,
-          'facebookId -> place.facebookId,
-          'description -> place.description,
-          'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
-          'capacity -> place.capacity,
-          'openingHours -> place.openingHours,
-          'imagePath -> place.imagePath,
-          'organizerId -> organizerIdWithSameFacebookId)
-        .as(scalar[Option[Long]].single)
     }
   } catch {
     case e: Exception => throw new DAOException("Place.save: " + e.getMessage)
+  }
+
+  def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Option[Long]] = {
+    placeAddress match {
+      case None =>
+        Future {
+          None
+        }
+      case Some(address) =>
+        Address.getGeographicPoint(address) map { addressWithGeoPoint => Address.save(Option(addressWithGeoPoint)) }
+    }
+  }
+
+  def findOrganizerIdWithSameFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
+    SQL(
+      """SELECT placeId FROM places
+        | WHERE facebookId = {facebookId}""".stripMargin)
+      .on("facebookId" -> placeFacebookId)
+      .as(scalar[Long].singleOpt)
   }
 
   def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Place] = try {

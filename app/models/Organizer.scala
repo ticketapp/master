@@ -107,7 +107,7 @@ object Organizer {
     DB.withConnection { implicit connection =>
       val addressId = organizer.address match {
         case None =>
-        case Some(address) => Address.save(address)
+        case Some(address) => Address.save(Option(address))
       }
       val placeIdWithSameFacebookId = SQL(
         """SELECT organizerId FROM organizers

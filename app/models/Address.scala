@@ -5,8 +5,11 @@ import anorm._
 import controllers._
 import play.api.db.DB
 import play.api.Play.current
+import play.api.libs.ws.{Response, WS}
 import services.Utilities.geographicPointToString
 
+import scala.concurrent.Future
+import play.api.libs.concurrent.Execution.Implicits._
 
 case class Address (addressId: Option[Long],
                     geographicPoint: Option[String],
@@ -15,6 +18,8 @@ case class Address (addressId: Option[Long],
                     street: Option[String])
 
 object Address {
+  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
+
   private val AddressParser: RowParser[Address] = {
     get[Long]("addressId") ~
       get[Option[String]]("geographicPoint") ~
@@ -78,21 +83,26 @@ object Address {
     case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
   }
   
-  def save(address: Address): Option[Long] = try {
-    DB.withConnection { implicit connection =>
-      SQL( """SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
-        .on(
-          'geographicPoint -> address.geographicPoint,
-          'city -> address.city,
-          'zip -> address.zip,
-          'street -> address.street)
-        .as(scalar[Long].singleOpt)
+  def save(maybeAddress: Option[Address]): Option[Long] = maybeAddress match {
+    case None =>
+      None
+    case Some(address) =>
+      try {
+        DB.withConnection { implicit connection =>
+          SQL( """SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
+            .on(
+              'geographicPoint -> address.geographicPoint,
+              'city -> address.city,
+              'zip -> address.zip,
+              'street -> address.street)
+            .as(scalar[Long].singleOpt)
+        }
+    } catch {
+      case e: Exception => throw new DAOException("Address.saveAddressAndEventRelation: " + e.getMessage)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Address.saveAddressAndEventRelation: " + e.getMessage)
   }
 
-  def saveAddressAndEventRelation(address: Address, eventId: Long): Option[Long] = save(address) match {
+  def saveAddressAndEventRelation(address: Address, eventId: Long): Option[Long] = save(Option(address)) match {
     case None => throw new DAOException("Address.saveAddressAndEventRelation: Address.save returned None")
     case Some(addressId) => saveEventAddressRelation(eventId, addressId)
   }
@@ -129,5 +139,35 @@ object Address {
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
+  }
+
+  def getGeographicPoint(address: Address): Future[Address] = {
+    if (Vector(address.street, address.zip, address.city).flatten.length > 1) {
+      WS.url("https://maps.googleapis.com/maps/api/geocode/json")
+        .withQueryString(
+          "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
+          "key" -> youtubeKey)
+        .get()
+        .map { response =>
+        readGoogleGeographicPoint(response)  match {
+          case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
+          case None => address
+        }
+      }
+    } else
+      Future { address }
+  }
+
+  def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {
+    val googleGeoCodeJson = googleGeoCodeResponse.json
+    val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
+    val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
+    latitude match {
+      case None => None
+      case Some(lat) => longitude match {
+        case None => None
+        case Some(lng) => Option("(" + lat + "," + lng + ")")
+      }
+    }
   }
 }

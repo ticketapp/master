@@ -61,7 +61,6 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
       case _ => None
     }
 
-
     def stringifyPasswordInfo(passwordInfo: Option[PasswordInfo]) = passwordInfo match {
       case Some(passwordInfoFound) => Json.stringify(Json.toJson(passwordInfoFound))
       case _ => None

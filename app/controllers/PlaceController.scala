@@ -11,7 +11,9 @@ import play.api.libs.json.Json
 import json.JsonHelper.placeWrites
 import securesocial.core.Identity
 
+import scala.concurrent.Future
 import scala.util.matching.Regex
+import play.api.libs.concurrent.Execution.Implicits._
 
 object PlaceController extends Controller with securesocial.core.SecureSocial {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
@@ -72,12 +74,12 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
     "zip" -> optional(nonEmptyText(3))
   )(Place.formApply)(Place.formUnapply))
   
-  def createPlace = Action { implicit request =>
+  def createPlace = Action.async { implicit request =>
     placeBindingForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
+      formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       place => {
-        Place.save(place) match {
-          case Some(eventId) => Ok(Json.toJson(Place.find(eventId)))
+        Place.save(place) map {
+          case Some(placeId) => Ok(Json.toJson(Place.find(placeId)))
           case None => Ok(Json.toJson("The place couldn't be saved"))
         }
       }

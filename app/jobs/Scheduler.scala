@@ -66,7 +66,7 @@ object Scheduler {
   }
 
   def saveEvent(facebookEvent: Event, placeId: Long, placeGeographicPoint: Option[String]) = {
-    val organizerAddressWithGeographicPoint = getGeographicPoint(facebookEvent.organizers.head.address.get)
+    val organizerAddressWithGeographicPoint = Address.getGeographicPoint(facebookEvent.organizers.head.address.get)
     organizerAddressWithGeographicPoint.map { organizerAddress =>
       val organizerWithGeographicPoint = facebookEvent.organizers.head.copy(address = Option(organizerAddress),
           geographicPoint = organizerAddress.geographicPoint)
@@ -244,36 +244,6 @@ object Scheduler {
         }
       case _ => None
     }*/
-  }
-
-  def getGeographicPoint(address: Address): Future[Address] = {
-    if (Vector(address.street, address.zip, address.city).flatten.length > 1) {
-      WS.url("https://maps.googleapis.com/maps/api/geocode/json")
-        .withQueryString(
-          "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
-          "key" -> youtubeKey)
-        .get()
-        .map { response =>
-        readGoogleGeographicPoint(response)  match {
-          case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
-          case None => address
-        }
-      }
-    } else
-      Future { address }
-  }
-
-  def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {
-    val googleGeoCodeJson = googleGeoCodeResponse.json
-    val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
-    val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
-    latitude match {
-      case None => None
-      case Some(lat) => longitude match {
-        case None => None
-        case Some(lng) => Option("(" + lat + "," + lng + ")")
-      }
-    }
   }
 
   def getArtistsFromTitle(title: String): Set[String] = {

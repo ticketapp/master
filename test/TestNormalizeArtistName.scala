@@ -10,7 +10,7 @@ class TestNormalizeArtistName extends PlaySpec {
 
   "A sequence of artists names (string)" must {
 
-    "return artists name lowercase" in {
+    "return artists name lowercase" in new App() {
       val artistsName = List("Brassens", "BREL", "Serge gainsbourg", "dutronc")
 
       val normalizedArtistsName: List[String] = artistsName.map { normalizeArtistName }
@@ -20,7 +20,7 @@ class TestNormalizeArtistName extends PlaySpec {
       normalizedArtistsName mustBe expectedResult
     }
 
-    "return artists name without fanpage, official, officiel, fb, facebook, page" in {
+    "return artists name without fanpage, official, officiel, fb, facebook, page" in new App() {
       val artistsName = List("Bukowski Street Team Officiel -  France", "Cookie Monsta Official")
 
       val normalizedArtistsName: List[String] = artistsName.map { normalizeArtistName }
