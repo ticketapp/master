@@ -113,7 +113,7 @@ object Utilities {
     case None =>
       None
     case Some(desc) =>
-      def stringToLinks(matcher: Regex.Match) = {
+      def stringToLinks(matcher: Regex.Match): String = {
         val phoneNumberPattern = """[\d\.]+""".r
         matcher.toString() match {
           case phoneNumberPattern(link) => matcher.toString()

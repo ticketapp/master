@@ -57,6 +57,7 @@ object Place {
     DB.withConnection { implicit connection =>
       val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
       eventuallyAddressId map { addressId =>
+        val organizerId = findOrganizerIdWithSameFacebookId(place.facebookId)
         SQL(
           s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
              |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
@@ -70,7 +71,7 @@ object Place {
             'capacity -> place.capacity,
             'openingHours -> place.openingHours,
             'imagePath -> place.imagePath,
-            'organizerId -> findOrganizerIdWithSameFacebookId(place.facebookId))
+            'organizerId -> organizerId)
           .as(scalar[Option[Long]].single)
       }
     }

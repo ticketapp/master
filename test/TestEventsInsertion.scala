@@ -22,7 +22,9 @@ class TestEventsInsertion extends PlaySpec {
         case Some(eventId: Long) =>
           Event.find(eventId) mustEqual event.copy(eventId = Some(eventId))
       }*/
-      1 mustEqual 1
+      val a = List(1)
+      val b = List(2)
+      a should contain b
     }
   }
 }

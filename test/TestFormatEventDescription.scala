@@ -10,8 +10,9 @@ class TestFormatEventDescription extends PlaySpec {
       val description = Option("roman.trystram@caa.com")
 
       val formattedDescription = formatDescription(description)
+      println(formattedDescription)
 
-      val expectedResult = "<i>roman.trystram@caa.com</i>"
+      val expectedResult = Option("<i>roman.trystram@caa.com</i>")
 
       formattedDescription mustBe expectedResult
     }
