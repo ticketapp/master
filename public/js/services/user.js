@@ -8,7 +8,7 @@ app.factory ('UserFactory', function ($http, $q){
             } else {
                 $http.get('/users/facebookAccessToken/')
                 .success(function(data, status){
-                    factory.user = data;
+                    factory.user = 'CAACEdEose0cBANmuxzMMlph7s4DOlKf6SMqUuG0t5nfz3kTlfSviYJm1PonKQ5RgsdJRksvhwXmClUyseo0IK7DWlZALh6Swbx6N4ZBzfkmyPSZBitqNCZCQe1qmJJSi6wv2Q1XZAuIiXbnFzNWUjyWZBBMoi6QQHS2Y50t8aTZCG6lFYgjbl3AAJSK4wTJOEelPbaJuIKek31jLjoBKGAms2MBbbc9MTsZD';
                     deferred.resolve(factory.user);
                 }).error(function(data, status){
                     deferred.reject('erreur');
