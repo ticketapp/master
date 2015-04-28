@@ -26,9 +26,9 @@ object Scheduler {
       saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2, placeIdAndFacebookId._3)
   }
 
-  def saveEventsOfPlace(placeId: Long, placeFacebookId: String, placeGeographicPoint: Option[String])
+  def saveEventsOfPlace(placeId: Long, placeFacebookId: String, placeGeographicPoint: Option[String]): Unit
   = getEventsIdsByPlace(placeFacebookId).map {
-    _.map { eventId =>
+    _.map { eventId => //findEventByEventFacebookId(eventId)
       WS.url("https://graph.facebook.com/v2.2/" + eventId)
         .withQueryString(
           "fields" -> "cover,description,name,start_time,end_time,owner,venue",
@@ -44,6 +44,18 @@ object Scheduler {
       }
     }
   }
+
+  /*
+  http://stackoverflow.com/questions/16291506/futureoptionfutureoptionboolean-simplifying-futures-and-options
+
+  def findEventByEventFacebookId(eventFacebookId: String): Future[Event] = {
+    WS.url("https://graph.facebook.com/v2.2/" + eventFacebookId)
+      .withQueryString(
+        "fields" -> "cover,description,name,start_time,end_time,owner,venue",
+        "access_token" -> token)
+      .get()
+      .flatMap { readFacebookEvent(_) }
+  }*/
 
   def getEventsIdsByPlace(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")

@@ -6,7 +6,7 @@ import Matchers._
 import play.api.libs.json.{JsValue, Json}
 import models.Artist._
 
-class NormalizeArtistNameTest extends PlaySpec {
+class TestNormalizeArtistName extends PlaySpec {
 
   "A sequence of artists names (string)" must {
 

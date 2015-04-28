@@ -83,5 +83,4 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
       }
     )
   }
-
 }

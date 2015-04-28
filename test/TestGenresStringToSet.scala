@@ -5,12 +5,13 @@ import org.scalatest._
 import Matchers._
 import play.api.libs.json.{JsValue, Json}
 import models.Genre.genresStringToGenresSet
+import play.api.test.FakeApplication
 
-class GenresStringToSetTest extends PlaySpec {
+class TestGenresStringToSet extends PlaySpec {
 
   "A sequence of genres as a string" must {
 
-    "return an empty set for None" in {
+    "return an empty set for None" in new App()  {
       val genres = List(None, None)
 
       val genresSets: List[Set[Genre]] = genres.map { genresStringToGenresSet }
@@ -20,7 +21,7 @@ class GenresStringToSetTest extends PlaySpec {
       genresSets mustBe expectedResult
     }
 
-    "return a unique low case genre for a single word without punctuation" in {
+    "return a unique low case genre for a single word without punctuation" in new App() {
       val genres = List(Some("rock"), Some("Rap"))
 
       val genresSets: List[Set[Genre]] = genres.map { genresStringToGenresSet }
@@ -30,7 +31,7 @@ class GenresStringToSetTest extends PlaySpec {
       genresSets mustBe expectedResult
     }
 
-    "return genres split by comas in the string given" in {
+    "return genres split by comas in the string given" in new App() {
       val genres = List(Some("Rock, rockstep"), Some("Hi-tech soul, Cosmic jazz-funk, Riot disco, Timeless electro"))
 
       val genresSets: List[Set[Genre]] = genres.map { genresStringToGenresSet }
@@ -42,7 +43,7 @@ class GenresStringToSetTest extends PlaySpec {
       genresSets should contain theSameElementsAs expectedResult
     }
 
-    "return genres split by spaces in the string given" in {
+    "return genres split by spaces in the string given" in new App() {
       val genres = List(Some("Rock Pop Covers"), Some("Hi-tech soul jazz-funk"))
 
       val genresSets: List[Set[Genre]] = genres.map { genresStringToGenresSet }
@@ -54,7 +55,7 @@ class GenresStringToSetTest extends PlaySpec {
       genresSets should contain theSameElementsAs expectedResult
     }
 
-    "return return hip-hop" in {
+    "return return hip-hop" in new App() {
       val genres = List(Some("Hip-Hop"), Some("Indie Pop-Folk"))
 
       val genresSets: List[Set[Genre]] = genres.map { genresStringToGenresSet }

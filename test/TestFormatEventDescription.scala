@@ -2,7 +2,7 @@ import org.scalatestplus.play._
 import org.scalatest._
 import services.Utilities.formatDescription
 
-class FormatEventDescriptionTest extends PlaySpec {
+class TestFormatEventDescription extends PlaySpec {
 
   "A formatted description" must {
 
