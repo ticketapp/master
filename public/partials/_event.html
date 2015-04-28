@@ -70,12 +70,7 @@
                                background-color: {{event.priceColor}}">
                                 <img class="width100p " src="{{place.imagePath}}" ng-if="place.imagePath != undefined">
                             </a>
-                            <a class="float-left" href="#/user/{{place.placeId}}">
-                                <h1 class="margin0">
-                                    {{place.name}}
-                                </h1>
-                            </a>
-                            <button style='height:55px; float:right' ng-click="$root.follow('places', place.placeId, place.name)">
+                            <button style='height:55px; float:right' class="absolute right bottom0" ng-click="$root.follow('places', place.placeId, place.name)">
                                 Suivre
                             </button>
                         </li>
@@ -103,13 +98,9 @@
                             <a href="#/user/{{organizer.organizerId}}"
                                class="width100p padding0" style="height: 150px; overflow: hidden">
                                 <img class="width100p " src="{{organizer.imagePath}}">
-                                    </a>
-                            <a class="float-left" href="#/user/{{organizer.organizerId}}">
-                                <h1 class="margin0">
-                                    {{organizer.name}}
-                                </h1>
-                            </a>
+                                </a>
                             <button style='height:55px; float:right'
+                                    class="absolute right bottom0"
                                     ng-click="$root.follow('organizers', organizer.organizerId, organizer.name)">
                                 Suivre
                             </button>

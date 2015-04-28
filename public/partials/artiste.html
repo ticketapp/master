@@ -142,7 +142,12 @@
                                    </i>
                             </div>
                             <div ng-class="{'column medium-7': $root.window != 'small'}"
-                                 style="overflow: hidden; height: 48px;"><h3>{{track.title}}</h3></div>
+                                 style="overflow: hidden; height: 48px;">
+                                    <h3>{{track.title}}</h3>
+                                    <md-tooltip>
+                                        {{track.title}}
+                                    </md-tooltip>
+                            </div>
                             <a target="_blank"
                                href="{{track.redirectUrl}}"
                                class="column small-7"
