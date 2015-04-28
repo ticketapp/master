@@ -1,10 +1,15 @@
-app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScope, $websocket, $timeout, $filter, $modal){
+app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScope, $websocket, $timeout,
+                                          $filter, $modal, $localStorage){
     $scope.bigTracks = true;
     $scope.trackLimit = 12;
     $scope.heightDesc = '147px';
     $scope.trackTitle = '';
     $scope.showDesc = false;
     $scope.selectedTab = 0;
+    console.log($localStorage.tracksSignaled)
+    if ($localStorage.tracksSignaled == undefined) {
+        $localStorage.tracksSignaled = [];
+    }
     $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
         $scope.suggest = false;
         if (trackTitle.length > 2) {
@@ -118,6 +123,13 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
         $http.get('/artists/' + $routeParams.facebookUrl)
             .success(function (data, status) {
                 $rootScope.marginContent();
+                for (var i = 0; i < data.tracks.length; i++) {
+                    console.log($localStorage.tracksSignaled.indexOf(data.tracks[i].trackId))
+                    if ($localStorage.tracksSignaled.indexOf(data.tracks[i].trackId) > -1) {
+                        data.tracks.splice(i, 1);
+                        i--;
+                    }
+                }
                 $scope.artiste = data;
                 $scope.tracks = $scope.artiste.tracks;
                 if ($scope.artiste.websites != undefined) {
@@ -146,7 +158,7 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
                             }
                             $scope.artiste.events.push(el);
                         }
-                        data.forEach(pushEvent)
+                        data.forEach(pushEvent);
                         $rootScope.resizeImgHeight();
                     }).
                     error(function(data) {
@@ -160,4 +172,52 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
         $rootScope.passArtisteToCreateToFalse();
     }
     $rootScope.resizeImgHeight();
+    $scope.signalTrack = function (index) {
+        var modalInstance = $modal.open({
+            template: '<form ng-submit="ok(reason)">' +
+                        '<b class="column large-12 center">Pour quelle raison souhaitez-vous signaler ' +
+                        'ce morceau ? <br/>'+
+                        'Attention, en signalant ce morceau il sera supprimé des morceaux que Claude ' +
+                        'vous proppose</b>' +
+                        '<select ng-model="reason">'+
+                            '<option value="B">Mauvais Artist</option>'+
+                            '<option value="Q">Mauvaise qualité</option>'+
+                        '</select><b class="column large-12">{{error}}</b>'+
+                        '<input type="submit" class="button">'+
+                        '<a class="button float-right" ng-click="cancel()">Annuler</a>'+
+                        '</form>',
+            controller: 'SignalTrackCtrl',
+            resolve: {
+                index: function () {
+                    return index;
+                }
+            }
+        });
+        modalInstance.result.then(function () {
+            var tracksLength = $scope.tracks.length;
+            for (var i = 0; i < tracksLength; i++) {
+                if ($scope.tracks[i].trackId == $scope.artiste.tracks[index].trackId) {
+                    $localStorage.tracksSignaled.push($scope.tracks[i].trackId);
+                    $scope.tracks.splice(i, 1);
+                    tracksLength --;
+                }
+            }
+        }, function () {
+        });
+
+    }
+});
+app.controller('SignalTrackCtrl', function ($scope, $modalInstance, index) {
+
+    $scope.ok = function (reason) {
+        if (reason != undefined) {
+            console.log(reason);
+            $modalInstance.close();
+        } else {
+            $scope.error = 'veuyez renseigner ce champs'
+        }
+    };
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
 });

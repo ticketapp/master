@@ -276,5 +276,8 @@ app.controller('infoModalCtrl', function ($scope, $rootScope, $modalInstance, $h
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
+    $scope.ok = function () {
+        $modalInstance.close();
+    };
 });
 
