@@ -104,19 +104,17 @@ app.controller('connectCtrl',
     }
 
 
-    function getCoverPlace(place, loc) {
+    function getCoverPlace(place) {
         $http.get('https://graph.facebook.com/v2.2/' + searchPlaces.id + '/?fields=cover, picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
             success(function (data) {
                 var newPlace = {
                     name: place.name,
                     facebookId: place.id,
-                    geographicPoint: loc,
                     capacity: place.checkins,
                     description: place.description,
                     webSite: place.website,
                     imagePath: data.source,
                     address: {
-                        geographicPoint: loc,
                         city: place.location.city,
                         zip: place.location.zip,
                         street: place.location.street
@@ -132,12 +130,10 @@ app.controller('connectCtrl',
                 var newPlace = {
                     name: place.name,
                     facebookId: place.id,
-                    geographicPoint: loc,
                     capacity: place.checkins,
                     description: place.description,
                     webSite: place.website,
                     address: {
-                        geographicPoint: loc,
                         city: place.location.city,
                         zip: place.location.zip,
                         street: place.location.street
@@ -152,90 +148,79 @@ app.controller('connectCtrl',
     }
 
     function getPositionAndCreate (place) {
-        $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' +
-            place.location.street + '+' +
-            place.location.zip + '+' +
-            place.location.city + '+' +
-            place.location.country + '&key=AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc').
-            success(function (data) {
-                if (place.location.street == undefined) {
-                    place.location.street = '';
-                }
-                if (place.location.zip == undefined) {
-                    place.location.zip = '';
-                }
-                if (place.location.city == undefined) {
-                    place.location.city = '';
-                }
-                var loc = '(' + data.results[0].geometry.location.lat +
-                    ',' + data.results[0].geometry.location.lng + ')';
-                if (place.cover != undefined) {
-                    var newPlace = {
-                        name: place.name,
-                        facebookId: place.id,
-                        geographicPoint: loc,
-                        capacity: place.checkins,
-                        description: place.description,
-                        webSite: place.website,
-                        imagePath : place.cover.source,
-                        address : {
-                            geographicPoint: loc,
-                            city: place.location.city,
-                            zip: place.location.zip,
-                            street: place.location.street
-                        }
-                    };
-                    PlaceFactory.postPlace(newPlace).then(function (isCreated) {
-                        if (isCreated != 'error') {
-                            followPlace(newPlace.facebookId, false)
-                        }
-                    })
-                } else {
-                    getCoverPlace(place, loc);
-                }
-            });
+        if (place.location.street == undefined) {
+            place.location.street = '';
         }
+        if (place.location.zip == undefined) {
+            place.location.zip = '';
+        }
+        if (place.location.city == undefined) {
+            place.location.city = '';
+        }
+        if (place.cover != undefined) {
+            var newPlace = {
+                name: place.name,
+                facebookId: place.id,
+                capacity: place.checkins,
+                description: place.description,
+                webSite: place.website,
+                imagePath : place.cover.source,
+                address : {
+                    city: place.location.city,
+                    zip: place.location.zip,
+                    street: place.location.street
+                }
+            };
+            PlaceFactory.postPlace(newPlace).then(function (isCreated) {
+                if (isCreated != 'error') {
+                    followPlace(newPlace.facebookId, false)
+                }
+            })
+        } else {
+            getCoverPlace(place);
+        }
+    }
 
-        function getInfoPlace (place) {
-            $http.get('https://graph.facebook.com/v2.2/'+ place.id +'/?fields=checkins,cover,description,' +
-                'hours,id,likes,link,location,name,phone,website,picture&access_token=' + token).
-                success(function(data, status, headers, config) {
-                    var flag = 0;
-                    if (data.location != undefined) {
-                        if (data.location.country == undefined || data.location.country != 'France') {
-                            flag = 1;
-                        }
-                    } else {
+    function getInfoPlace (place) {
+        $http.get('https://graph.facebook.com/v2.2/'+ place.id +'/?fields=checkins,cover,description,' +
+            'hours,id,likes,link,location,name,phone,website,picture&access_token=' + token).
+            success(function(data, status, headers, config) {
+                var flag = 0;
+                if (data.location != undefined) {
+                    if (data.location.country == undefined || data.location.country != 'France') {
                         flag = 1;
                     }
-                    console.log(data)
-                    if (flag == 0) {
-                        var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
-                        if (data.description == undefined) {
-                            data.description = "";
-                        }
-                        data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
-                        data.description = data.description.replace(/(\n)/g, " <br/>");
-                        if (matchedLinks = data.description.match(links)) {
-                            var m = matchedLinks;
-                            var unique = [];
-                            for (var ii = 0; ii < m.length; ii++) {
-                                var current = m[ii];
-                                if (unique.indexOf(current) < 0) unique.push(current);
-                            }
-                            for (var i=0; i < unique.length; i++) {
-                                data.description = data.description.replace(new RegExp(unique[i],"g"),
-                                        "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
-                            }
-                        }
-                        getPositionAndCreate(data);
+                } else {
+                    flag = 1;
+                }
+                console.log(data)
+                if (flag == 0) {
+                    var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
+                    if (data.description == undefined) {
+                        data.description = "";
                     }
-                }).
-                error(function(data, status, headers, config) {
+                    data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
+                    data.description = data.description.replace(/(\n)/g, " <br/>");
+                    if (matchedLinks = data.description.match(links)) {
+                        var m = matchedLinks;
+                        var unique = [];
+                        for (var ii = 0; ii < m.length; ii++) {
+                            var current = m[ii];
+                            if (unique.indexOf(current) < 0) unique.push(current);
+                        }
+                        for (var i=0; i < unique.length; i++) {
+                            data.description = data.description.replace(new RegExp(unique[i],"g"),
+                                    "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
+                        }
+                    }
+                    getPositionAndCreate(data);
+                }
+            }).
+            error(function(data, status, headers, config) {
 
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                });
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
     }
 
     function getPlacePage (id) {

@@ -1,5 +1,5 @@
-app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScope, $websocket, $timeout,
-                                          $filter, $modal, $localStorage){
+app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScope, $timeout,
+                                          $filter, $modal, $localStorage, UserFactory, ArtistsFactory){
     $scope.bigTracks = true;
     $scope.trackLimit = 12;
     $scope.heightDesc = '147px';
@@ -10,6 +10,12 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
     if ($localStorage.tracksSignaled == undefined) {
         $localStorage.tracksSignaled = [];
     }
+
+    $scope.follow = function () {
+        ArtistsFactory.followArtistByArtistId($scope.artiste.artistId).then(function (followed) {
+            console.log(followed)
+        })
+    };
     $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
         $scope.suggest = false;
         if (trackTitle.length > 2) {
@@ -80,7 +86,6 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
             });
         }
     };
-
     $scope.filterTracks = function () {
         $timeout(function () {
             $scope.$apply(function(){
@@ -123,6 +128,11 @@ app.controller ('ArtistesCtrl', function ($scope, $routeParams, $http, $rootScop
         $http.get('/artists/' + $routeParams.facebookUrl)
             .success(function (data, status) {
                 $rootScope.marginContent();
+                if ($rootScope.connected == true) {
+                    UserFactory.ArtistIsFollowed(data.artistId).then(function (isFollowed) {
+                        console.log(isFollowed)
+                    });
+                }
                 for (var i = 0; i < data.tracks.length; i++) {
                     console.log($localStorage.tracksSignaled.indexOf(data.tracks[i].trackId))
                     if ($localStorage.tracksSignaled.indexOf(data.tracks[i].trackId) > -1) {

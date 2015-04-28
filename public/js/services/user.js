@@ -30,6 +30,22 @@ app.factory ('UserFactory', function ($http, $q){
                 })
             }
         return deferred.promise;
+        },
+        ArtistIsFollowed : function(id) {
+            var deferred = $q.defer();
+            if(factory.user == true){
+                deferred.resolve(factory.user);
+            } else {
+                $http.get('/artists/' + id + '/isFollowed').
+                    success(function (data) {
+                        factory.user = data;
+                        deferred.resolve(factory.user);
+                    }).
+                    error (function (data) {
+                    deferred.resolve(data)
+                })
+            }
+        return deferred.promise;
         }
     };
     return factory;

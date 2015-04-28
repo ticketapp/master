@@ -134,6 +134,20 @@ app.factory('ArtistsFactory', function ($http, $q, oboe) {
             }
             return deferred.promise;
         },
+        followArtistByArtistId : function (id) {
+            var deferred = $q.defer();
+            if(factory.artists == true){
+                deferred.resolve(factory.artists);
+            } else {
+                $http.post('/artists/' + id +'/followByArtistId').
+                    success(function (data) {
+                        deferred.resolve(data);
+                    }).error(function (data) {
+                        deferred.resolve('error');
+                    })
+            }
+            return deferred.promise;
+        },
         getArtistEvents : function (id) {
             var deferred = $q.defer();
             if(factory.artists == true){
