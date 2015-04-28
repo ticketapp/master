@@ -33,6 +33,24 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
          })*/
         $scope.needConnect = false;
         $rootScope.lastReq = {};
+        $rootScope.followArtist = function (id, name) {
+            console.log(name)
+            ArtistsFactory.followArtistByArtistId(id).then(function (follow) {
+                $scope.info = 'vous suivez maintenant ' + name;
+                var modalInstance = $modal.open({
+                    templateUrl: 'assets/partials/_infoModal.html',
+                    controller: 'infoModalCtrl',
+                    resolve: {
+                        info: function () {
+                            return $scope.info;
+                        }
+                    }
+                });
+                modalInstance.result.then(function () {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
+            })
+        };
         $rootScope.follow = function (route, id, name) {
             $http.post('/'+ route +'/'+ id + '/follow').
                 success(function (data) {
@@ -275,6 +293,9 @@ app.controller('infoModalCtrl', function ($scope, $rootScope, $modalInstance, $h
     $scope.info = info;
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
+    };
+    $scope.ok = function () {
+        $modalInstance.close();
     };
 });
 
