@@ -11,8 +11,8 @@ class TestEventsInsertion extends PlaySpec {
 
   "An event" must {
 
-    "be inserted in database correctly" in new App() {
-      models.Genre.genresStringToGenresSets(Option("jkl"))
+    "be inserted in database correctly" in {//new App() {
+//      models.Genre.genresStringToGenresSets(Option("jkl"))
     /*  val event = new Event(None, None, isPublic = true, isActive = true, "event name", Option("(5.4,5.6)"),
         Option("description"), new Date(), Option(new Date()), 16, None, List.empty, List.empty,
         List.empty, List.empty, List.empty, List.empty)
@@ -24,7 +24,7 @@ class TestEventsInsertion extends PlaySpec {
       }*/
       val a = List(1)
       val b = List(2)
-      a should contain b
+      a should contain theSameElementsAs b
     }
   }
 }

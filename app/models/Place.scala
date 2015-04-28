@@ -54,9 +54,9 @@ object Place {
   }
 
   def save(place: Place): Future[Option[Long]] = try {
-    DB.withConnection { implicit connection =>
       val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
       eventuallyAddressId map { addressId =>
+        DB.withConnection { implicit connection =>
         val organizerId = findOrganizerIdWithSameFacebookId(place.facebookId)
         SQL(
           s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
