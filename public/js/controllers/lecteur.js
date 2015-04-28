@@ -42,10 +42,12 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
                             if ($rootScope.playlist.genres.toString().toLowerCase().indexOf(event.artists[a].genres[g].name.toLowerCase()) > -1 && artNames.toString().indexOf(event.artists[a].name) == -1) {
                                 artNames.push(event.artists[a].name);
                                 for (var t = 0; t < 4; t++) {
-                                    if (played.indexOf(event.artists[a].tracks[t].title) == -1) {
-                                        event.artists[a].tracks[t].art = event.artists[a];
-                                        event.artists[a].tracks[t].nextShow = event;
-                                        playlistEvents.push(event.artists[a].tracks[t]);
+                                    if (event.artists[a].tracks[t] != undefined) {
+                                        if (played.indexOf(event.artists[a].tracks[t].title) == -1) {
+                                            event.artists[a].tracks[t].art = event.artists[a];
+                                            event.artists[a].tracks[t].nextShow = event;
+                                            playlistEvents.push(event.artists[a].tracks[t]);
+                                        }
                                     }
                                 }
                             }
