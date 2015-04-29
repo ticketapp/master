@@ -21,3 +21,4 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
   }//List("éh'=)àç_è-(aék", "abc de
   // List("éh'=)àç_è-(aék", "abc de#f") (TestUtilities.scala:20)
 }
+

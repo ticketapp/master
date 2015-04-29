@@ -55,7 +55,6 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
       case _ => None
     }
 
-
     def stringifyAuth2Info(oAuth2Info: Option[OAuth2Info]) = oAuth2Info match {
       case Some(oAuth) => Json.stringify(Json.toJson(oAuth))
       case _ => None

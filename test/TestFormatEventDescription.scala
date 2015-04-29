@@ -6,13 +6,30 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
 
   "Format a description" must {
 
+    "should format links" in {
+      val descriptions = List(Option("Hello, I'm a www.link.com, au revoir."), Option("Hello, I'm a link.fr, au revoir."),
+        Option("Hello, I'm a http://www.link.com, au revoir."), Option("Hello, I'm a https://www.link.com, au revoir."),
+        Option("Hello, I'm a http://link.org, au revoir."), Option("Hello, I'm a https://link.org"))
+
+      val formattedDescriptions = descriptions.map { formatDescription }
+
+      val expectedResult = List(
+        Option("<div class='column large-12'>Hello, I'm a <a href='http://link.com'>link.com</a>, au revoir.</div>"),
+        Option("<div class='column large-12'>Hello, I'm a <a href='http://link.fr'>link.fr</a>, au revoir.</div>"),
+        Option("<div class='column large-12'>Hello, I'm a <a href='http://link.com'>link.com</a>, au revoir.</div>"),
+        Option("<div class='column large-12'>Hello, I'm a <a href='http://link.com'>link.com</a>, au revoir.</div>"),
+        Option("<div class='column large-12'>Hello, I'm a <a href='http://link.org'>link.org</a>, au revoir.</div>"),
+        Option("<div class='column large-12'>Hello, I'm a <a href='http://link.org'>link.org</a></div>"))
+
+      formattedDescriptions mustBe expectedResult
+    }
+
     "should not format mail addresses as a link" in {
       val description = Option("roman.trystram@caa.com")
 
       val formattedDescription = formatDescription(description)
-      println(formattedDescription)
 
-      val expectedResult = Option("<div class='column large-12'><i>roman.trystram@caa.com</i></div>")
+      val expectedResult = Option("<div class='column large-12'>roman.trystram@caa.com</div>")
 
       formattedDescription mustBe expectedResult
     }
@@ -29,6 +46,3 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
     }
   }
 }
-/*
-Some("<div class='column large-12'>roman.trystram@<a href='http://caa.com'>caa.com</a></div>") was not equal to Some("<i>roman.trystram@caa.com</i>")
- */

@@ -113,16 +113,15 @@ object Utilities {
     case Some(desc) =>
       def stringToLinks(matcher: Regex.Match): String = {
         val phoneNumberPattern = """([\d\.]+)""".r
-        println(matcher.toString())
-        matcher.toString() match {
-          case phoneNumberPattern(link) => matcher.toString()
+        val matcherString = matcher.toString()
+        matcherString match {
+          case phoneNumberPattern(link) =>
+            matcherString
           case _ =>
-            println(matcher.toString)
-            if (matcher.toString contains "@")
-              "<i>" + matcher + "</i>"
+            if (matcherString contains "@")
+              matcherString
             else
-              """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) +
-                """</a>"""
+              """<a href='http://""" + normalizeUrl(matcherString) + """'>""" + normalizeUrl(matcherString) + """</a>"""
         }
       }
       Option("<div class='column large-12'>" +
