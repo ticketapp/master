@@ -2,7 +2,6 @@ package services
 
 import java.sql.Connection
 import java.text.Normalizer
-
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
@@ -45,8 +44,7 @@ object Utilities {
     }
   })
 
-  def normalizeString(string: String): String =
-    Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
+  def normalizeString(string: String): String = string //Should be replace accentued letters for example?
 
   def stripChars(s:String, ch:String)= s filterNot (ch contains _)
 
@@ -114,10 +112,12 @@ object Utilities {
       None
     case Some(desc) =>
       def stringToLinks(matcher: Regex.Match): String = {
-        val phoneNumberPattern = """[\d\.]+""".r
+        val phoneNumberPattern = """([\d\.]+)""".r
+        println(matcher.toString())
         matcher.toString() match {
           case phoneNumberPattern(link) => matcher.toString()
           case _ =>
+            println(matcher.toString)
             if (matcher.toString contains "@")
               "<i>" + matcher + "</i>"
             else
@@ -126,8 +126,7 @@ object Utilities {
         }
       }
       Option("<div class='column large-12'>" +
-        linkPattern.replaceAllIn(desc.replaceAll( """<""", "&lt;").replaceAll( """>""", "&gt;"),
-          m => stringToLinks(m))
+        linkPattern.replaceAllIn(desc.replaceAll("""<""", "&lt;").replaceAll( """>""", "&gt;"), m => stringToLinks(m))
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
           .replaceAll( """\t""", "    ") +

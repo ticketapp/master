@@ -295,6 +295,7 @@ object Artist {
 
   def normalizeArtistName(artistName: String): String = {
     normalizeString(artistName)
+      .toLowerCase
       .replaceAll("officiel", "")
       .replaceAll("fanpage", "")
       .replaceAll("official", "")
@@ -302,5 +303,6 @@ object Artist {
       .replaceAll("facebook", "")
       .replaceAll("page", "")
       .trim
+      .replaceAll("""\s+""", " ")
   }
 }
