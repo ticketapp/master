@@ -72,6 +72,7 @@ app.factory ('PlaceFactory', function ($http, $q){
                             factory.places = data;
                             deferred.resolve(factory.places);
                     }).error(function(data, status) {
+                            console.log(data)
                         deferred.resolve('error');
                     });
                 }

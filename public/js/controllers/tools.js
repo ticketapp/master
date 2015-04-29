@@ -43,7 +43,6 @@ app.controller('ModalInstanceCtrl', function ($scope, $modalInstance, $rootScope
                     }
                 });
                 modalInstance.result.then(function () {
-                    $log.info('Modal dismissed at: ' + new Date());
                 });
             })
     };
