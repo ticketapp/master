@@ -1,13 +1,17 @@
 package controllers
 
+import org.postgresql.util.PSQLException
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.Logger
 import play.api.mvc._
 import play.api.libs.json.Json
 import models.{Image, Tariff, Event, Address}
 import json.JsonHelper._
 import securesocial.core.Identity
 import scala.util.matching.Regex
+import scala.util.{Success, Failure}
+import services.Utilities._
 
 object EventController extends Controller with securesocial.core.SecureSocial {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
@@ -114,8 +118,16 @@ object EventController extends Controller with securesocial.core.SecureSocial {
   }
 
   def followEvent(eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Event.followEvent(request.user.identityId.userId, eventId)
-    Ok
+    Event.follow(request.user.identityId.userId, eventId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("EventController.followEvent", psqlException)
+        Status(CONFLICT)("This user already follow this event.")
+      case Failure(unknownException) =>
+        Logger.error("EventController.followEvent", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
+    }
   }
 
   def getFollowedEvents = UserAwareAction { implicit request =>
@@ -128,7 +140,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
   def isEventFollowed(eventId: Long) = UserAwareAction { implicit request =>
     request.user match {
       case None => Ok(Json.toJson("User not connected"))
-      case Some(identity: Identity) => Ok(Json.toJson(Event.isEventFollowed(identity.identityId, eventId)))
+      case Some(identity: Identity) => Ok(Json.toJson(Event.isFollowed(identity.identityId, eventId)))
     }
   }
 }

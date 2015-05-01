@@ -10,6 +10,8 @@ import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
 import services.Utilities.geographicPointToString
 
+import scala.util.Try
+
 case class Organizer (organizerId: Option[Long],
                       facebookId: Option[String] = None,
                       name: String,
@@ -163,42 +165,40 @@ object Organizer {
     case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)
   }
 
-  def followOrganizer(userId: String, organizerId : Long): Option[Long] = try {
+  def followByOrganizerId(userId : String, organizerId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT insertUserOrganizerRelation({userId}, {organizerId})""")
+        """INSERT INTO organizersFollowed(userId, organizerId)
+          |VALUES({userId}, {organizerId})""".stripMargin)
         .on(
           'userId -> userId,
           'organizerId -> organizerId)
         .executeInsert()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.followOrganizer: " + e.getMessage)
   }
 
-  def followOrganizerByOrganizerId(userId : String, organizerId : Long): Option[Long] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO organizersFollowed(userId, organizerId) VALUES ({userId}, {organizerId})""")
-        .on(
-          'userId -> userId,
-          'organizerId -> organizerId)
-        .executeInsert()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.followOrganizerByOrganizerId: " + e.getMessage)
-  }
-
-  def followOrganizerByFacebookId(userId : String, facebookId: String): Option[Long] = try {
+  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] = {
     DB.withConnection { implicit connection =>
       SQL("""SELECT organizerId FROM organizers WHERE facebookId = {facebookId}""")
         .on('facebookId -> facebookId)
         .as(scalar[Long].singleOpt) match {
         case None => throw new ThereIsNoOrganizerForThisFacebookIdException("Organizer.followOrganizerIdByFacebookId")
-        case Some(organizerId) => followOrganizerByOrganizerId(userId, organizerId)
+        case Some(organizerId) => followByOrganizerId(userId, organizerId)
       }
     }
+  }
+
+  def unfollowByOrganizerId(userId: String, organizerId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM organizersFollowed
+          | WHERE userId = {userId} AND organizerId = {organizerId}""".stripMargin)
+        .on('userId -> userId,
+          'organizerId -> organizerId)
+        .executeUpdate()
+    }
   } catch {
-    case e: Exception => throw new DAOException("Organizer.followOrganizerIdByFacebookId: " + e.getMessage)
+    case e: Exception => throw new DAOException("Organizer.unFollow: " + e.getMessage)
   }
 
   def delete(organizerId: Long): Int = try {

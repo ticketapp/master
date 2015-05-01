@@ -1,6 +1,8 @@
 package controllers
 
 import models.Organizer
+import org.postgresql.util.PSQLException
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db._
@@ -10,6 +12,9 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import json.JsonHelper.organizerWrites
 import securesocial.core.Identity
+
+import scala.util.{Failure, Success}
+import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 
 object OrganizerController extends Controller with securesocial.core.SecureSocial {
   def organizers(numberToReturn: Int, offset: Int) = Action {
@@ -25,12 +30,37 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
   }
 
   def followOrganizerByOrganizerId(organizerId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Organizer.followOrganizerByOrganizerId(request.user.identityId.userId, organizerId)))
+    Organizer.followByOrganizerId(request.user.identityId.userId, organizerId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
+        Status(CONFLICT)("This user already follow this organizer.")
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
+        Status(CONFLICT)("There is no organizer with this id.")
+      case Failure(unknownException) =>
+        Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
+    }
   }
 
   def followOrganizerByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Organizer.followOrganizerByFacebookId(request.user.identityId.userId, facebookId)))
+    Organizer.followByFacebookId(request.user.identityId.userId, facebookId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("OrganizerController.followOrganizerByFacebookId", psqlException)
+        Status(CONFLICT)("This user already follow this organizer.")
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error("OrganizerController.followOrganizerByFacebookId", psqlException)
+        Status(CONFLICT)("There is no organizer with this id.")
+      case Failure(unknownException) =>
+        Logger.error("OrganizerController.followOrganizerByFacebookId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
+    }
   }
+  
 
   def isOrganizerFollowed(organizerId: Long) = UserAwareAction { implicit request =>
     request.user match {

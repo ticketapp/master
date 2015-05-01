@@ -30,13 +30,15 @@ object User {
     }
   }
 
-  def findAll(): Seq[User] = {
+  def findAll(): Seq[User] = try {
     DB.withConnection { implicit connection =>
-      SQL("select * from users").as(UserParser.*)
+      SQL("select * from users_login").as(UserParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("User.findAll: " + e.getMessage)
   }
 
-  def findAllByEvent(event: Event): Seq[User] = {
+  def findAllByEvent(event: Event): Seq[User] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM eventsUsers eU
@@ -44,26 +46,32 @@ object User {
         .on('eventId -> event.eventId)
         .as(UserParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("User.findAllByEvent: " + e.getMessage)
   }
 
-  def findAllContaining(pattern: String): Seq[User] = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM users WHERE LOWER(nickname) LIKE '%'||{patternLowCase}||'%' LIMIT 3")
-          .on('patternLowCase -> pattern.toLowerCase)
-          .as(UserParser.*)
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Problem with the method User.findAllContaining: " + e.getMessage)
-    }
-  }
-
-  def find(userId: Long): Option[User] = {
+  def findAllContaining(pattern: String): Seq[User] = try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from users WHERE userId = {userId}")
+      SQL(
+        """SELECT * FROM users_login
+          | WHERE LOWER(nickname)
+          |   LIKE '%'||{patternLowCase}||'%'
+          | LIMIT 3""".stripMargin)
+        .on('patternLowCase -> pattern.toLowerCase)
+        .as(UserParser.*)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("User.findAllContaining: " + e.getMessage)
+  }
+
+  def find(userId: Long): Option[User] = try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT * from users_login WHERE userId = {userId}")
         .on('userId -> userId)
         .as(UserParser.singleOpt)
     }
+  } catch {
+    case e: Exception => throw new DAOException("User.find: " + e.getMessage)
   }
 
   def formApply(email: String, nickname: String, password: String, profile: String): User =
@@ -72,30 +80,25 @@ object User {
   def formUnapply(user: User): Option[(String, String, String, String)] =
     Some((user.email, user.nickname, user.password, user.profile))
 
-
-  def save(user: User): Option[Long] = try {
+  def save: Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        """INSERT INTO users(email, nickname, password, profile)
-            VALUES({email}, {nickname}, {password}, {profile})"""
-      ).on(
-          'email -> user.email,
-          'nickname -> user.nickname,
-          'password -> user.password,
-          'profile -> user.profile
-      ).executeInsert()
+        """INSERT INTO users_login(userId, providerId, firstName, lastName, fullName, authMethod)
+          | VALUES ('userId', 'providerId', 'firstName', 'lastName', 'fullName', 'oauth2')""".stripMargin)
+        .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot save user: " + e.getMessage)
+    case e: Exception => throw new DAOException("TestEvents, error while saving user: " + e.getMessage)
   }
 
-
-  def delete(userId: Long): Int = {
+  def delete(userId: String): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL("DELETE FROM users WHERE userId = {userId}")
+      SQL("DELETE FROM users_login WHERE userId = {userId}")
         .on('userId -> userId)
-        .executeUpdate()
+        .execute()
     }
+  } catch {
+    case e: Exception => throw new DAOException("User.delete: " + e.getMessage)
   }
 
   def findFacebookAccessToken(userId: String): Option[String] = try {

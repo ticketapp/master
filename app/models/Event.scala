@@ -9,6 +9,7 @@ import java.util.Date
 import securesocial.core.IdentityId
 import services.Utilities._
 
+import scala.util.Try
 import scala.util.matching.Regex
 
 case class Event(eventId: Option[Long],
@@ -285,6 +286,16 @@ object Event {
     case e: Exception => throw new DAOException("Event.save: " + e.getMessage)
   }
 
+  def delete(eventId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM events WHERE eventId = {eventId}")
+        .on('eventId -> eventId)
+        .executeUpdate()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.delete : " + e.getMessage)
+  }
+
   def update(event: Event): Unit = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -303,7 +314,7 @@ object Event {
     case e: Exception => throw new DAOException("Event.update: " + e.getMessage)
   }
 
-  def followEvent(userId: String, eventId: Long): Option[Long] = try {
+  def follow(userId: String, eventId: Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO eventsFollowed(userId, eventId)
@@ -313,8 +324,19 @@ object Event {
           'eventId -> eventId)
         .executeInsert()
     }
+  }
+
+  def unfollow(userId: String, eventId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM eventsFollowed
+          | WHERE userId = {userId} AND eventId = {eventId}""".stripMargin)
+        .on('userId -> userId,
+            'eventId -> eventId)
+        .executeUpdate()
+    }
   } catch {
-    case e: Exception => throw new DAOException("Event.follow: " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.unFollow: " + e.getMessage)
   }
 
   def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
@@ -330,7 +352,7 @@ object Event {
     case e: Exception => throw new DAOException("Event.getFollowedEvents: " + e.getMessage)
   }
 
-  def isEventFollowed(userId: IdentityId, eventId: Long): Boolean = try {
+  def isFollowed(userId: IdentityId, eventId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM eventsFollowed

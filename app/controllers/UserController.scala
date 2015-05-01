@@ -33,16 +33,6 @@ object UserController extends Controller with securesocial.core.SecureSocial {
     "userId" -> longNumber()
   )(Tool.formApply)(Tool.formUnapply))
 
-  def createTools = Action { implicit request =>
-    userBindingForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
-      user => {
-        User.save(user)
-        Redirect(routes.UserController.user(1))
-      }
-    )
-  }
-
   val userBindingForm = Form(mapping(
     "email" -> email,
     "nickname" -> nonEmptyText(2),
@@ -50,16 +40,16 @@ object UserController extends Controller with securesocial.core.SecureSocial {
     "profile" -> nonEmptyText(2)
   )(User.formApply)(User.formUnapply)
   )
-
+/*
   def createUser = Action { implicit request =>
     userBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       user => {
-        User.save(user)
+        User.save
         Redirect(routes.UserController.user(1))
       }
     )
-  }
+  }*/
 
   def findFacebookAccessToken = SecuredAction(ajaxCall = true) { implicit request =>
     Ok(Json.toJson(User.findFacebookAccessToken(request.user.identityId.userId)))
