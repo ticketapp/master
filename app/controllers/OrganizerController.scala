@@ -82,8 +82,16 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
       organizer => {
         Organizer.save(organizer) match {
-          case Some(organizerId) => Ok(Json.toJson(Organizer.find(organizerId)))
-          case None => Ok(Json.toJson("The organizer couldn't be saved"))
+          case Success(maybeOrganizerId) => maybeOrganizerId match {
+            case None => Status(INTERNAL_SERVER_ERROR)
+            case Some(organizerId) => Ok(Json.toJson(Organizer.find(organizerId)))
+          }
+          case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+            Logger.error("OrganizerController.createOrganizer: Duplicate organizer", psqlException)
+            Status(CONFLICT)("OrganizerController.createOrganizer: Duplicate organizer")
+          case Failure(unknownException) =>
+            Logger.error("OrganizerController.createOrganizer: INTERNAL_SERVER_ERROR", unknownException)
+            Status(INTERNAL_SERVER_ERROR)
         }
       }
     )

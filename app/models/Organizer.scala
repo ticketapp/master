@@ -8,8 +8,8 @@ import services.Utilities
 import play.api.db.DB
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
-import services.Utilities.geographicPointToString
-
+import services.Utilities.{geographicPointToString, facebookToken}
+import scala.util.{Failure, Success}
 import scala.util.Try
 
 case class Organizer (organizerId: Option[Long],
@@ -26,7 +26,6 @@ case class Organizer (organizerId: Option[Long],
                       address: Option[Address] = None)
 
 object Organizer {
-  val token = play.Play.application.configuration.getString("facebook.token")
 
   def formApply(facebookId: Option[String], name: String, imagePath: Option[String]): Organizer =
     new Organizer(None, facebookId, name, imagePath)
@@ -105,10 +104,10 @@ object Organizer {
     case e: Exception => throw new DAOException("Organizer.findAllContaining: " + e.getMessage)
   }
 
-  def save(organizer: Organizer): Option[Long] = try {
+  def save(organizer: Organizer): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       val addressId = organizer.address match {
-        case None =>
+        case None => None
         case Some(address) => Address.save(Option(address))
       }
       val placeIdWithSameFacebookId = SQL(
@@ -116,6 +115,10 @@ object Organizer {
           | WHERE facebookId = {facebookId}""".stripMargin)
         .on("facebookId" -> organizer.facebookId)
         .as(scalar[Long].singleOpt)
+      val phoneNumbers = Utilities.phoneNumbersStringToSet(organizer.phone) match {
+        case emptySet: Set[String] if emptySet.isEmpty => None
+        case phoneNumbersFound => Option(phoneNumbersFound.mkString(","))
+      }
       SQL(
         """SELECT insertOrganizer({facebookId}, {name}, {description}, {addressId}, {phone}, {publicTransit},
           |{websites}, {imagePath}, {geographicPoint}, {placeId})""".stripMargin)
@@ -124,7 +127,7 @@ object Organizer {
           'name -> organizer.name,
           'description -> organizer.description,
           'addressId -> addressId,
-          'phone -> Utilities.phoneNumbersStringToSet(organizer.phone).mkString(","),
+          'phone -> phoneNumbers,
           'publicTransit -> organizer.publicTransit,
           'websites -> organizer.websites,
           'imagePath -> organizer.imagePath,
@@ -132,8 +135,6 @@ object Organizer {
           'placeId -> placeIdWithSameFacebookId)
         .as(scalar[Option[Long]].single)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.save: " + e.getMessage)
   }
 
   def returnOrganizerId(name: String): Long = try {
@@ -148,8 +149,9 @@ object Organizer {
 
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Boolean = {
     save(organizer) match {
-      case Some(i) => saveEventOrganizerRelation(eventId, i)
-      case None => false
+      case Success(Some(organizerId)) => saveEventOrganizerRelation(eventId, organizerId)
+      case Success(None) => false
+      case Failure(_) => false
     }
   }
 
@@ -164,6 +166,10 @@ object Organizer {
   } catch {
     case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)
   }
+
+  val organizer = new Organizer(None, Option("facebookId1"), "organizerTest", Option("description"), None, Option("phone"),
+    Option("publicTransit"), Option("websites"), verified = true, imagePath = Option("imagePath"),
+    geographicPoint = Option("(5.4,5.6)"))
 
   def followByOrganizerId(userId : String, organizerId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>

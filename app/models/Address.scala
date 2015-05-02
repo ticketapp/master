@@ -6,7 +6,7 @@ import controllers._
 import play.api.db.DB
 import play.api.Play.current
 import play.api.libs.ws.{Response, WS}
-import services.Utilities.geographicPointToString
+import services.Utilities.{geographicPointToString, googleKey}
 
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
@@ -18,7 +18,6 @@ case class Address (addressId: Option[Long],
                     street: Option[String])
 
 object Address {
-  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
   private val AddressParser: RowParser[Address] = {
     get[Long]("addressId") ~
@@ -146,7 +145,7 @@ object Address {
       WS.url("https://maps.googleapis.com/maps/api/geocode/json")
         .withQueryString(
           "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
-          "key" -> youtubeKey)
+          "key" -> googleKey)
         .get()
         .map { response =>
         readGoogleGeographicPoint(response)  match {

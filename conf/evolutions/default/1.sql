@@ -40,12 +40,15 @@ CREATE TABLE orders ( --account701
 
 CREATE TABLE infos (
   infoId                    SERIAL PRIMARY KEY,
+  displayIfConnected        BOOLEAN NOT NULL DEFAULT TRUE,
   title                     VARCHAR NOT NULL,
-  content                   VARCHAR
+  content                   VARCHAR,
+  animationContent          VARCHAR,
+  animationStyle            VARCHAR
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 50 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 49 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -126,16 +129,11 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
-    EXCEPTION WHEN unique_violation
-    THEN
-      SELECT organizerId
-      INTO organizerIdToReturn
-      FROM organizers
-      WHERE facebookId = facebookIdValue;;
-      RETURN organizerIdToReturn;;
   END;;
   $$
 LANGUAGE plpgsql;;
+SELECT insertOrganizer('facebookId1', 'organizerTest1', 'description', NULL, 'phone', 'publicTransit',
+                       'websites', 'imagePath', '(0,0)', NULL);
 
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,

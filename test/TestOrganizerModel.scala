@@ -14,21 +14,50 @@ import play.api.Play.current
 import securesocial.core.IdentityId
 import scala.util.Success
 import scala.util.Failure
+import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
+import scala.util.{Failure, Success}
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 
   "An Organizer" must {
 
-    val organizer = Organizer(None, Option("facebookId1"), "organizerTest", Option("description"))
+    val organizer = new Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
+      None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+      geographicPoint = Option("(5.4,5.6)"))
 
-    "be able to be saved and deleted in database and return the new id" in {
-      save(organizer) match {
-        case None =>
-          throw new DAOException("TestOrganizers, error while saving organizer ")
-        case Some(organizerId: Long) =>
-          find(organizerId) mustEqual Option(organizer.copy(organizerId = Some(organizerId)))
-          delete(organizerId) mustBe 1
+    "be able to be saved and deleted in database" in {
+      val organizerId = save(organizer).get.get
+      find(organizerId) mustEqual Option(organizer.copy(organizerId = Some(organizerId)))
+
+      delete(organizerId) mustBe 1
+    }
+/*
+ Organizer.followByOrganizerId(request.user.identityId.userId, organizerId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
+        Status(CONFLICT)("This user already follow this organizer.")
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
+        Status(CONFLICT)("There is no organizer with this id.")
+      case Failure(unknownException) =>
+        Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
+    }
+ */
+    "not be able to be saves twice" in {
+      val organizerId = save(organizer).get.get
+      val saveStatus = save(organizer)
+
+      saveStatus shouldBe a [Failure[PSQLException]]
+
+      saveStatus match {
+        case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        case _ => throw new Exception("save an organizer twice didn't throw a PSQL UNIQUE_VIOLATION")
       }
+
+      delete(organizerId)
     }
 
     "be able to be followed and unfollowed by a user" in {
