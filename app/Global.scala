@@ -12,7 +12,7 @@ object Global extends GlobalSettings {
       case play.api.Mode.Test => // do not schedule anything for Test
       case _ =>
         Akka.system.scheduler.schedule(2228.seconds, 12.hours) {
-          println("Scheduler started")
+          Logger.info("Scheduler started")
           Scheduler.start
       }
     }

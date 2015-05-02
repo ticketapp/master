@@ -1,6 +1,7 @@
 package controllers
 
 import models.Track
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
@@ -19,7 +20,7 @@ object TrackController extends Controller {
   def createTrack = Action { implicit request =>
     trackBindingForm.bindFromRequest().fold(
       formWithErrors => {
-        println(formWithErrors.errorsAsJson)
+        Logger.error(formWithErrors.errorsAsJson.toString())
         BadRequest(formWithErrors.errorsAsJson)
       },
       track => {

@@ -1,6 +1,7 @@
 package controllers
 
 import models.{IssueComment, Issue}
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -27,7 +28,7 @@ object IssueController extends Controller with securesocial.core.SecureSocial {
   def create = SecuredAction(ajaxCall = true) { implicit request =>
     issueBindingForm.bindFromRequest().fold(
       formWithErrors => {
-        println(formWithErrors.errorsAsJson)
+        Logger.error(formWithErrors.errorsAsJson.toString())
         BadRequest(formWithErrors.errorsAsJson)
       },
       partialIssue => {
@@ -40,7 +41,7 @@ object IssueController extends Controller with securesocial.core.SecureSocial {
   def createComment(issueId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
     issueCommentBindingForm.bindFromRequest().fold(
       formWithErrors => {
-        println(formWithErrors.errorsAsJson)
+        Logger.error(formWithErrors.errorsAsJson.toString())
         BadRequest(formWithErrors.errorsAsJson)
       },
       commentContent => {

@@ -3,6 +3,7 @@ package jobs
 import java.util.Date
 import controllers.SchedulerException
 import models.Genre._
+import play.api.Logger
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.libs.json._
@@ -39,7 +40,7 @@ object Scheduler {
           case Some(eventuallyFacebookEvent) =>
             eventuallyFacebookEvent map { saveEvent(_, placeId, placeGeographicPoint) }
           case None =>
-            println("Empty event read by Scheduler.readFacebookEvent")
+            Logger.warn("Empty event read by Scheduler.readFacebookEvent")
         }
       }
     }
