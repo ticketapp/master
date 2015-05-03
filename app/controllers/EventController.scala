@@ -111,7 +111,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       event => {
         Event.save(event) match {
           case Some(eventId) => Ok(Json.toJson(Event.find(eventId)))
-          case None => Ok(Json.toJson("The event couldn't be saved"))
+          case None => Status(INTERNAL_SERVER_ERROR)
         }
       }
     )
@@ -141,6 +141,14 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     request.user match {
       case None => Ok(Json.toJson("User not connected"))
       case Some(identity: Identity) => Ok(Json.toJson(Event.isFollowed(identity.identityId, eventId)))
+    }
+  }
+
+  def findEventOnFacebookByFacebookId(facebookId: String) = Action { try {
+      Event.saveFacebookEventByFacebookId(facebookId)
+      Ok
+    } catch {
+      case e: Exception => Status(INTERNAL_SERVER_ERROR)
     }
   }
 }

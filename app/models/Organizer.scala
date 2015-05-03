@@ -3,14 +3,18 @@ package models
 import anorm.SqlParser._
 import anorm._
 import controllers.{ThereIsNoOrganizerForThisFacebookIdException, DAOException}
+import play.api.libs.json._
+import play.api.libs.ws.{WS, Response}
 import securesocial.core.IdentityId
 import services.Utilities
 import play.api.db.DB
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
-import services.Utilities.{geographicPointToString, facebookToken}
+import services.Utilities._
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import scala.util.Try
+import play.api.libs.functional.syntax._
 
 case class Organizer (organizerId: Option[Long],
                       facebookId: Option[String] = None,
@@ -251,5 +255,37 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Organizer.isOrganizerFollowed: " + e.getMessage)
+  }
+
+  def readOrganizer(organizer: Response, organizerId: String): Option[Organizer] = {
+    val readOrganizer = (
+      (__ \ "name").read[String] and
+        (__ \ "description").readNullable[String] and
+        (__ \ "cover" \ "source").readNullable[String] and
+        (__ \ "location" \ "street").readNullable[String] and
+        (__ \ "location" \ "zip").readNullable[String] and
+        (__ \ "location" \ "city").readNullable[String] and
+        (__ \ "phone").readNullable[String] and
+        (__ \ "public_transit").readNullable[String] and
+        (__ \ "website").readNullable[String])
+      .apply((name: String, description: Option[String], source: Option[String], street: Option[String],
+              zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
+              website: Option[String]) =>
+      Organizer(None, Some(organizerId), name, Utilities.formatDescription(description), None, phone, public_transit,
+        website, verified = false, source, None,
+        Option(Address(None, None, city, zip, street)))
+      )
+    organizer.json.asOpt[Organizer](readOrganizer)
+  }
+
+  def getOrganizerInfo(maybeOrganizerId: Option[String]): Future[Option[Organizer]] = maybeOrganizerId match {
+    case None => Future { None }
+    case Some(organizerId) =>
+      WS.url("https://graph.facebook.com/v2.2/" + organizerId)
+        .withQueryString(
+          "fields" -> "name,description,cover{source},location,phone,public_transit,website",
+          "access_token" -> facebookToken)
+        .get()
+        .map { response => readOrganizer(response, organizerId) }
   }
 }

@@ -9,6 +9,7 @@ import play.api.libs.ws.Response
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
+import models.Event.findEventOnFacebookByFacebookId
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import services.Utilities
@@ -22,41 +23,17 @@ object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
-  def start = Place.findAllAsTupleIdFacebookIdAndGeographicPoint.map {
+  def start(): Unit = Place.findAllAsTupleIdFacebookIdAndGeographicPoint.map {
     placeIdAndFacebookId: (Long, String, Option[String]) =>
       saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2, placeIdAndFacebookId._3)
   }
 
   def saveEventsOfPlace(placeId: Long, placeFacebookId: String, placeGeographicPoint: Option[String]): Unit
   = getEventsIdsByPlace(placeFacebookId).map {
-    _.map { eventId => //findEventByEventFacebookId(eventId)
-      WS.url("https://graph.facebook.com/v2.2/" + eventId)
-        .withQueryString(
-          "fields" -> "cover,description,name,start_time,end_time,owner,venue",
-          "access_token" -> token)
-        .get()
-        .map {
-        readFacebookEvent(_) match {
-          case Some(eventuallyFacebookEvent) =>
-            eventuallyFacebookEvent map { saveEvent(_, placeId, placeGeographicPoint) }
-          case None =>
-            Logger.warn("Empty event read by Scheduler.readFacebookEvent")
-        }
-      }
+    _.map { eventId =>
+      findEventOnFacebookByFacebookId(eventId) map { saveEvent(_, placeId, placeGeographicPoint) }
     }
   }
-
-  /*
-  http://stackoverflow.com/questions/16291506/futureoptionfutureoptionboolean-simplifying-futures-and-options
-
-  def findEventByEventFacebookId(eventFacebookId: String): Future[Event] = {
-    WS.url("https://graph.facebook.com/v2.2/" + eventFacebookId)
-      .withQueryString(
-        "fields" -> "cover,description,name,start_time,end_time,owner,venue",
-        "access_token" -> token)
-      .get()
-      .flatMap { readFacebookEvent(_) }
-  }*/
 
   def getEventsIdsByPlace(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
@@ -84,168 +61,13 @@ object Scheduler {
     }
   }
 
-  def readFacebookEvent(eventFacebookResponse: Response): Option[Future[Event]] = {
-    val eventRead = (
-      (__ \ "description").readNullable[String] and
-      (__ \ "cover" \ "source").read[String] and
-      (__ \ "name").read[String] and
-      (__ \ "id").readNullable[String] and
-      (__ \ "start_time").readNullable[String] and
-      (__ \ "endTime").readNullable[String] and
-      (__ \ "venue" \ "street").readNullable[String] and
-      (__ \ "venue" \ "zip").readNullable[String] and
-      (__ \ "venue" \ "city").readNullable[String] and
-      (__ \ "owner" \ "id").readNullable[String]
-    )((description: Option[String], source: String, name: String, facebookId: Option[String],
-       startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
-       city: Option[String], maybeOwnerId: Option[String]) => {
-
-      val eventuallyOrganizer = getOrganizerInfo(maybeOwnerId)
-      val address = new Address(None, None, city, zip, street)
-
-      val normalizedWebsites: Set[String] = getNormalizedWebsitesInText(description)
-      val ticketSellers = findTicketSellers(normalizedWebsites)
-      val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(normalizedWebsites)
-      val eventuallyMaybeArtistsFromTitle =
-        getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), normalizedWebsites)
-
-      for {
-        organizer <- eventuallyOrganizer
-        artistsFromDescription <- eventuallyMaybeArtistsFromDescription
-        artistsFromTitle <- eventuallyMaybeArtistsFromTitle
-      } yield {
-
-        val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
-        saveArtistsAndTheirTracks(nonEmptyArtists)
-
-        val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
-
-        println(description)
-        println(Utilities.formatDescription(description))
-        new Event(None, facebookId, true, true, name, None,
-          Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
-          formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
-          nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
-      }
-    })
-    eventFacebookResponse.json.asOpt[Future[Event]](eventRead)
-  }
-
-  def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
-    artists.map { artist =>
-      val artistWithId = artist.copy(artistId = Artist.save(artist))
-      getSoundCloudTracksForArtist(artistWithId).map { tracks =>
-        addSoundCloudWebsiteIfNotInWebsites(tracks.headOption, artistWithId)
-        tracks.map { Track.save }
-      }
-      getYoutubeTracksForArtist(artistWithId, Artist.normalizeArtistName(artistWithId.name)).map {
-        _.map(Track.save)
-      }
-    }
-  }
-
-  def addSoundCloudWebsiteIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Unit = maybeTrack match {
-    case None =>
-    case Some(track: Track) => track.redirectUrl match {
-      case None =>
-      case Some(redirectUrl) => val normalizedUrl = normalizeUrl(redirectUrl)
-        if (!artist.websites.contains(
-          normalizeUrl(normalizedUrl).dropRight(normalizedUrl.length - normalizedUrl.lastIndexOf("/")))) {
-            Artist.addWebsite(artist.artistId, normalizedUrl)
-        }
-    }
-  }
-
   def readEventsIdsFromResponse(resp: Response): Seq[String] = {
     val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
     (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
   }
 
-  def formatDate(date: Option[String]): Option[Date] = date match {
-    case Some(dateFound: String) => val date = dateFound.replace("T", " ")
-      date.length match {
-        case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
-        case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
-        case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
-      }
-    case _ => None
-  }
-
-  def findPrices(description: Option[String]): Option[String] = description match {
-    case None =>
-      None
-    case Some(desc) =>
-      try {
-        """(\d+[,.]?\d+)\s*€""".r.findAllIn(desc).matchData.map { priceMatcher =>
-          priceMatcher.group(1).replace(",", ".").toFloat
-        }.toList match {
-          case list: List[Float] if list.isEmpty => None
-          case prices => Option(prices.min.toString + "-" + prices.max.toString)
-        }
-      } catch {
-        case e: Exception => throw new SchedulerException("findPrices: " + e.getMessage)
-      }
-  }
-
-  def findTicketSellers(normalizedWebsites: Set[String]): Option[String] = {
-    normalizedWebsites.filter(website =>
-      website.contains("digitick") && website != "digitick.com" ||
-        website.contains("weezevent") && website != "weezevent.com" ||
-        website.contains("yurplan") && website != "yurplan.com" ||
-        website.contains("eventbrite") && website != "eventbrite.fr" ||
-        website.contains("ticketmaster") && website != "ticketmaster.fr" ||
-        website.contains("ticketnet") && website != "ticketnet.fr")
-    match {
-      case set: Set[String] if set.isEmpty => None
-      case websites: Set[String] => Option(websites.mkString(","))
-    }
-  }
-
   def splitArtistNamesInTitle(title: String): List[String] =
     "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
-
-  def readOrganizer(organizer: Response, organizerId: String): Option[Organizer] = {
-    val readOrganizer = (
-      (__ \ "name").read[String] and
-        (__ \ "description").readNullable[String] and
-        (__ \ "cover" \ "source").readNullable[String] and
-        (__ \ "location" \ "street").readNullable[String] and
-        (__ \ "location" \ "zip").readNullable[String] and
-        (__ \ "location" \ "city").readNullable[String] and
-        (__ \ "phone").readNullable[String] and
-        (__ \ "public_transit").readNullable[String] and
-        (__ \ "website").readNullable[String])
-      .apply((name: String, description: Option[String], source: Option[String], street: Option[String],
-              zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
-              website: Option[String]) =>
-        Organizer(None, Some(organizerId), name, Utilities.formatDescription(description), None, phone, public_transit,
-          website, verified = false, source, None,
-          Option(Address(None, None, city, zip, street)))
-      )
-    organizer.json.asOpt[Organizer](readOrganizer)
-  }
-
-  def getOrganizerInfo(maybeOrganizerId: Option[String]): Future[Option[Organizer]] = maybeOrganizerId match {
-    case None => Future { None }
-    case Some(organizerId) =>
-      WS.url("https://graph.facebook.com/v2.2/" + organizerId)
-        .withQueryString(
-          "fields" -> "name,description,cover{source},location,phone,public_transit,website",
-          "access_token" -> token)
-        .get()
-        .map { response => readOrganizer(response, organizerId) }
-  }
-
-  def readFacebookGeographicPoint() = {
-    /*val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
-      case Some(latitude) =>
-        (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
-          case Some(longitude) => Some(s"($latitude,$longitude)")
-          case _ => None
-        }
-      case _ => None
-    }*/
-  }
 
   def getArtistsFromTitle(title: String): Set[String] = {
     /*val artistsFromTitle: List[String] = splitArtistNamesInTitle(name)

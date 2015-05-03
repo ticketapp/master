@@ -2,6 +2,7 @@ package services
 
 import java.sql.Connection
 import java.text.Normalizer
+import java.util.Date
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
@@ -137,5 +138,15 @@ object Utilities {
           .replaceAll( """\n""", "<br/>")
           .replaceAll( """\t""", "    ") +
         "</div>")
+  }
+
+  def formatDate(date: Option[String]): Option[Date] = date match {
+    case Some(dateFound: String) => val date = dateFound.replace("T", " ")
+      date.length match {
+        case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
+        case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
+        case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
+      }
+    case _ => None
   }
 }

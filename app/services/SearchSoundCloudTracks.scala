@@ -134,4 +134,16 @@ object SearchSoundCloudTracks {
       """(?i)(\.wm[a|v]|\.ogc|\.amr|\.wav|\.flv|\.mov|\.ram|\.mp[3-5]|\.pcm|\.alac|\.eac-3|\.flac|\.vmd)\s*$""".r
         .replaceFirstIn(title, ""),
       "")
+
+  def addSoundCloudWebsiteIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Unit = maybeTrack match {
+    case None =>
+    case Some(track: Track) => track.redirectUrl match {
+      case None =>
+      case Some(redirectUrl) => val normalizedUrl = normalizeUrl(redirectUrl)
+        if (!artist.websites.contains(
+          normalizeUrl(normalizedUrl).dropRight(normalizedUrl.length - normalizedUrl.lastIndexOf("/")))) {
+          Artist.addWebsite(artist.artistId, normalizedUrl)
+        }
+    }
+  }
 }

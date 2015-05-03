@@ -8,7 +8,7 @@ import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, Web
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
-import services.Utilities
+import services.{SearchSoundCloudTracks, Utilities}
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -175,6 +175,19 @@ object Artist {
     }
   } catch {
     case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
+  }
+
+  def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
+    artists.map { artist =>
+      val artistWithId = artist.copy(artistId = Artist.save(artist))
+      getSoundCloudTracksForArtist(artistWithId).map { tracks =>
+        SearchSoundCloudTracks.addSoundCloudWebsiteIfNotInWebsites(tracks.headOption, artistWithId)
+        tracks.map { Track.save }
+      }
+      getYoutubeTracksForArtist(artistWithId, Artist.normalizeArtistName(artistWithId.name)).map {
+        _.map(Track.save)
+      }
+    }
   }
 
   def addWebsite(artistId: Option[Long], normalizedUrl: String): Int = {
