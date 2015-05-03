@@ -154,8 +154,8 @@ object Artist {
   }
 
   def save(artist: Artist): Option[Long] = try {
+    val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
     DB.withConnection { implicit connection =>
-      val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
       SQL(
         """SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
         .on(
@@ -175,6 +175,28 @@ object Artist {
     }
   } catch {
     case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
+  }
+
+  def update(artist: Artist): Int = try {
+    val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
+    DB.withConnection { implicit connection =>
+      SQL(
+        """UPDATE artists
+          | SET facebookId = {facebookId}, name = {name}, imagePath = {imagePath}, facebookUrl = {facebookUrl},
+          |   description = {description}, websites = {websites}
+          | WHERE artistId = {artistId}""".stripMargin)
+        .on(
+          'artistId -> artist.artistId,
+          'facebookId -> artist.facebookId,
+          'name -> artist.name,
+          'imagePath -> artist.imagePath,
+          'facebookUrl -> artist.facebookUrl,
+          'description -> artist.description,
+          'websites -> websites)
+        .executeUpdate()
+      }
+  } catch {
+    case e: Exception => throw new DAOException("Artist.update: " + e.getMessage)
   }
 
   def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
@@ -203,6 +225,17 @@ object Artist {
             'normalizedUrl -> normalizedUrl)
         .executeUpdate()
     }
+  }
+
+  def addSoundCloudWebsiteIfMissing(soundCloudTrack: Option[Track], artist: Artist): Unit = soundCloudTrack match {
+    case None =>
+    case Some(soundCloudTrack: Track) =>
+      soundCloudTrack.redirectUrl match {
+        case None =>
+        case Some(redirectUrl) =>
+          if (!artist.websites.contains(redirectUrl))
+            Artist.addWebsite(artist.artistId, redirectUrl)
+      }
   }
 
   def saveWithEventRelation(artist: Artist, eventId: Long): Boolean = save(artist) match {

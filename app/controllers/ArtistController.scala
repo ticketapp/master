@@ -42,13 +42,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Artist.findByGenre(genre, numberToReturn, offset)))
   }
 
-  def findArtistsContaining(pattern: String) = Action {
-    Ok(Json.toJson(Artist.findAllContaining(pattern)))
-  }
+  def findArtistsContaining(pattern: String) = Action { Ok(Json.toJson(Artist.findAllContaining(pattern))) }
 
-  def eventsByArtist(facebookUrl: String) = Action {
-    Ok(Json.toJson(Event.findAllByArtist(facebookUrl)))
-  }
+  def eventsByArtist(facebookUrl: String) = Action { Ok(Json.toJson(Event.findAllByArtist(facebookUrl))) }
 
   val artistBindingForm = Form(
     mapping(
@@ -104,7 +100,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def getArtistTracks(patternAndArtist: PatternAndArtist) = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
+        Artist.addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
         Enumerator(soundCloudTracks.toSet)
       })
 
@@ -112,17 +108,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
       getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
 
     Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator).andThen(Enumerator.eof)
-  }
-
-  def addSoundCloudWebsiteIfMissing(soundCloudTrack: Option[Track], artist: Artist): Unit = soundCloudTrack match {
-    case None =>
-    case Some(soundCloudTrack: Track) =>
-      soundCloudTrack.redirectUrl match {
-        case None =>
-        case Some(redirectUrl) =>
-          if (!artist.websites.contains(redirectUrl))
-            Artist.addWebsite(artist.artistId, redirectUrl)
-      }
   }
 
   def deleteArtist(artistId: Long) = Action {

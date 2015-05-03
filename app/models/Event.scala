@@ -385,7 +385,7 @@ object Event {
         "fields" -> "cover,description,name,start_time,end_time,owner,venue",
         "access_token" -> facebookToken)
       .get()
-      .flatMap { a => println(a.json); readFacebookEvent(a) }
+      .flatMap { readFacebookEvent }
   }
 
   def readFacebookEvent(eventFacebookResponse: Response): Future[Event] = {

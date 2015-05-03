@@ -1,6 +1,6 @@
 import java.util.Date
 import controllers.DAOException
-import models.Artist
+import models.{Track, Artist}
 import models.Artist._
 import org.postgresql.util.PSQLException
 import org.scalatestplus.play._
@@ -22,7 +22,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     val artist = Artist(None, Option("facebookId3"), "artistTest", Option("imagePath"), Option("description"),
       "facebookUrl3", Set("website"))
 
-    "be able to be saved and deleted in database and return the new id" in {
+    "be saved and deleted in database and return the new id" in {
       save(artist) match {
         case None =>
           throw new DAOException("TestArtists, error while saving artist ")
@@ -32,16 +32,41 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "be able to be followed and unfollowed by a user" in {
+    "be followed and unfollowed by a user" in {
       followByArtistId("userTestId", 1) shouldBe a [Success[Option[Long]]]
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
       unfollowByArtistId("userTestId", 1) mustBe 1
     }
 
-    "not be able to be followed twice" in {
+    "not be followed twice" in {
       followByArtistId("userTestId", 1) shouldBe a [Success[Option[Long]]]
       followByArtistId("userTestId", 1) shouldBe a [Failure[PSQLException]]
       unfollowByArtistId("userTestId", 1) mustBe 1
     }
+
+    "be updated" in {
+      val artistInDatabase = find(1)
+      val updatedArtist = artistInDatabase.get.copy(name="updatedName")
+      update(updatedArtist)
+
+      find(1) mustBe Option(updatedArtist)
+
+      find(update(artistInDatabase.get)) mustBe artistInDatabase
+    }
+}
+
+  "be updated to add this other website" in {
+    val maybeTrack = Option(Track(None, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl",
+      Option("redirectUrl")))
+    val artist = Artist(Option(2), Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),
+      "facebookUrl2", Set("website1","website2"))
+
+    addSoundCloudWebsiteIfMissing(maybeTrack, artist)
+
+    val expectedArtist = artist.copy(websites = Set("website1", "website2", "redirectUrl"))
+
+    find(artist.artistId.get) mustBe Option(expectedArtist)
+
+    update(artist.copy(websites = Set("website1", "website2")))
   }
 }

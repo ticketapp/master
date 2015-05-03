@@ -85,9 +85,8 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
   END;;
   $$
 LANGUAGE plpgsql;
-
 SELECT insertArtist('facebookId', 'artistTest', 'imagePath', 'description', 'facebookUrl', 'website1,website2');
-SELECT insertArtist('facebookId2', 'artistTestToBeDeleted', 'imagePath', 'description', 'facebookUrl2', 'website1,website2');
+SELECT insertArtist('facebookId2', 'artistTest2', 'imagePath', 'description', 'facebookUrl2', 'website1,website2');
 
 CREATE TABLE organizers (
   organizerId             SERIAL PRIMARY KEY,
