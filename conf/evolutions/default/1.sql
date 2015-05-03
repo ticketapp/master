@@ -15,6 +15,7 @@ CREATE TABLE addresses (
   street                    VARCHAR
 );
 CREATE INDEX geographicPointAdresses ON addresses USING GIST (geographicPoint);
+CREATE UNIQUE INDEX addressesIndex ON addresses (city, zip, street);
 
 CREATE OR REPLACE FUNCTION insertAddress(
   geographicPointValue      VARCHAR(63),
@@ -29,6 +30,11 @@ CREATE OR REPLACE FUNCTION insertAddress(
       VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
     RETURNING addressId INTO addressIdToReturn;;
     RETURN addressIdToReturn;;
+    EXCEPTION WHEN unique_violation
+      THEN
+        SELECT addressId INTO addressIdToReturn FROM addresses
+          WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+        RETURN addressIdToReturn;;
   END;;
   $$
 LANGUAGE plpgsql;

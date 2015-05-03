@@ -120,7 +120,7 @@ object Address {
    case e: Exception => throw new DAOException("Address.saveEventAddressRelation: " + e.getMessage)
   }
 
-  def deleteAddress(addressId: Long): Long = try {
+  def delete(addressId: Long): Long = try {
     DB.withConnection { implicit connection =>
       SQL("""DELETE FROM addresses WHERE addressId = {addressId}""")
         .on('addressId -> addressId)

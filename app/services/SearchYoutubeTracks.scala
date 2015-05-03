@@ -1,7 +1,7 @@
 package services
 
 import models.{Artist, Track}
-import play.api.libs.iteratee.Enumerator
+import play.api.libs.iteratee.{Enumeratee, Iteratee, Enumerator}
 import play.api.libs.iteratee.Input.EOF
 import play.api.libs.ws.{WS, Response}
 import play.api.libs.json._
@@ -72,12 +72,30 @@ object SearchYoutubeTracks {
 
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Enumerator[Set[Track]] = {
     Future {
-      saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId.getOrElse(-1L)))
+      saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId
+        .getOrElse(throw new Exception("SearchYoutubeTracks.getYoutubeTracksByEchonestId: artist without id found"))))
     }
+
     getEchonestSongFrom0(echonestId).flatMap { echonestSongsTitle: Set[String] =>
       getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
     }
+
+   /* val enumerateSongs = getEchonestSongFrom0(echonestId)
+
+    val iteratee = Iteratee.foreach[Set[String]](getYoutubeTracksByTitlesAndArtistName(artist, _))
+
+    val toTracks: Enumeratee[Set[String], Seq[Track]] =
+      Enumeratee.map[Set[String]]{ setTitles => Iteratee.flatten(getYoutubeTracksByTitlesAndArtistName(artist, setTitles)) }
+
+    enumerateSongs |>> iteratee*/
   }
+  /*
+  val enumerateSongs = getEchonestSongFrom0("ARNJ7441187B999AFD")
+
+      val iteratee = Iteratee.foreach[Set[String]](_ should not be empty)
+
+      enumerateSongs |>> iteratee
+   */
 
   def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Enumerator[Set[Track]] =
     Enumerator.flatten(
@@ -152,10 +170,9 @@ object SearchYoutubeTracks {
     }
   }
 
-  def readUrlsFromJsObject(urlsJsObject: JsObject): Set[String] =
-    urlsJsObject.values.map { url =>
-      normalizeUrl(url.as[String])
-    }.toSet
+  def readUrlsFromJsObject(urlsJsObject: JsObject): Set[String] = urlsJsObject.values.map { url =>
+    normalizeUrl(url.as[String])
+  }.toSet
 
   def getMaybeEchonestIdByFacebookId(artist: Artist): Future[Option[String]] = artist.facebookId match {
     case None => Future { None }
@@ -166,12 +183,10 @@ object SearchYoutubeTracks {
         "id" -> ("facebook:artist:" +facebookId),
         "format" -> "json")
       .get()
-      .map { echonestResponse =>
-        getEchonestIdIfEqualNames(echonestResponse.json, artist.name)
-    }
+      .map { echonestResponse => getEchonestIdIfSameName(echonestResponse.json, artist.name) }
   }
 
-  def getEchonestIdIfEqualNames(echonestResponse: JsValue, artistName: String): Option[String] = {
+  def getEchonestIdIfSameName(echonestResponse: JsValue, artistName: String): Option[String] = {
     val echonestName = (echonestResponse \ "response" \ "artist" \ "name")
       .asOpt[String]
       .getOrElse("")
@@ -184,16 +199,13 @@ object SearchYoutubeTracks {
 
   def getEchonestSongFrom0(echonestArtistId: String): Enumerator[Set[String]] = {
     def getEchonestSongs(start: Long, echonestArtistId: String): Enumerator[Set[String]] = {
-      Enumerator.flatten(getEchonestSongsWSCall(start: Long, echonestArtistId: String)
-        .map { echonestResponse =>
-//        println(echonestResponse)
+      Enumerator.flatten(getEchonestSongsWSCall(start: Long, echonestArtistId: String).map { echonestResponse =>
         val total = (echonestResponse \ "response" \ "total").asOpt[Int]
-        val songs = readEchonestSongs(echonestResponse)
         total.exists(_ > start + 100) match {
           case false =>
             Enumerator.eof
           case true =>
-            Enumerator.interleave(Enumerator(songs), getEchonestSongs(start + 100, echonestArtistId))
+            Enumerator(readEchonestSongs(echonestResponse)) >>> getEchonestSongs(start + 100, echonestArtistId)
         }
       })
     }
@@ -215,11 +227,11 @@ object SearchYoutubeTracks {
   def readEchonestSongs(result: JsValue): Set[String] = {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     (result \ "response" \ "songs")
-      .asOpt[Set[Option[String]]](Reads.set(titleReads))
-      .getOrElse(Set.empty)
+      .as[Set[Option[String]]](Reads.set(titleReads))
+      //asOpt
+//      .as[Enumerator[Option[String]]](Reads.set(titleReads))
+      //.getOrElse(Set.empty)
       .flatten
-    //println(a)
-    //a
   }
 
   def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {

@@ -8,6 +8,7 @@ import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
+import play.api.libs.iteratee.{Enumeratee, Enumerator, Iteratee}
 import play.api.libs.json.{Json, JsValue}
 import securesocial.core.Identity
 import anorm._
@@ -15,10 +16,11 @@ import anorm.SqlParser._
 import play.api.db.DB
 import play.api.Play.current
 import securesocial.core.IdentityId
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 import scala.util.Success
 import scala.util.Failure
 import services.SearchYoutubeTracks._
+import play.api.libs.concurrent.Execution.Implicits._
 
 class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
@@ -43,20 +45,60 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
         """{"response":{"status":{"version":"4.2","code":0,"message":"Success"},
           |"artist":{"id":"ARNJ7441187B999AFD","name":"Serge Gainsbourg"}}}""".stripMargin)
 
-      getEchonestIdIfEqualNames(echonestResponse, "serge gainsbourg") mustBe Option("ARNJ7441187B999AFD")
+      getEchonestIdIfSameName(echonestResponse, "serge gainsbourg") mustBe Option("ARNJ7441187B999AFD")
     }
 
     "return echonestId" in {
-      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"), Option("description"),
-        "facebookUrl3", Set("website"))
+      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
+        Option("description"), "facebookUrl3", Set("website"))
 
       whenReady (getMaybeEchonestIdByFacebookId(artist), timeout(Span(2, Seconds))) { maybeEchonestId =>
         maybeEchonestId mustBe Option("ARNJ7441187B999AFD")
       }
     }
 
-    "return songs as JsValue" in {
-      getEchonestSongsWSCall(0, "echonestArtistId")
+    "return songs" in {
+      whenReady (getEchonestSongsWSCall(0, "ARNJ7441187B999AFD"), timeout(Span(2, Seconds))) { echonestSongs: JsValue =>
+        val songs = readEchonestSongs(echonestSongs)
+
+        songs should not be empty
+      }
+    }
+
+    "return an Enumerator of Set[String]" in {
+      val enumerateSongs = getEchonestSongFrom0("ARNJ7441187B999AFD")
+
+      val iteratee = Iteratee.foreach[Set[String]](_ should not be empty)
+
+      whenReady(enumerateSongs |>> iteratee, timeout(Span(2, Seconds))) { any => any }
+    }
+
+    "test" in {
+      def testt(): Future[Iteratee[String, Int]] = {
+        val strings: Enumerator[String] = Enumerator("1","2","3","4")
+
+        val sum: Iteratee[Int,Int] = Iteratee.fold[Int,Int](0){ (s,e) => s + e }
+
+        val toInt: Enumeratee[String,Int] = Enumeratee.map[String]{ s => s.toInt }
+
+        strings |>> toInt &>> sum
+      }
+
+      val ii = testt() onSuccess {
+        case s => println(s)
+      }
+
+    }
+
+    "return an enumerator of tracks" in {
+      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
+        Option("description"), "facebookUrl3", Set("website"))
+
+      val enumerateYoutubeTracks = getYoutubeTracksByEchonestId(artist, "ARNJ7441187B999AFD")
+
+      val iteratee = Iteratee.foreach[Set[Track]](_ should not be empty)
+
+      whenReady(enumerateYoutubeTracks |>> iteratee, timeout(Span(5, Seconds))) { any => any }
     }
   }
 }
