@@ -12,9 +12,9 @@ import scala.concurrent.Future
 import services.SearchSoundCloudTracks.normalizeTrackTitle
 import models.Genre.saveGenreForArtistInFuture
 import scala.language.postfixOps
+import services.Utilities._
 
 object SearchYoutubeTracks {
-  val echonestApiKey = play.Play.application.configuration.getString("echonest.apiKey")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Enumerator[Set[Track]] = Enumerator.flatten(
@@ -157,26 +157,27 @@ object SearchYoutubeTracks {
       normalizeUrl(url.as[String])
     }.toSet
 
-  def getMaybeEchonestIdByFacebookId(artist: Artist): Future[Option[String]] = {
+  def getMaybeEchonestIdByFacebookId(artist: Artist): Future[Option[String]] = artist.facebookId match {
+    case None => Future { None }
+    case Some(facebookId) =>
     WS.url("http://developer.echonest.com/api/v4/artist/profile")
       .withQueryString(
         "api_key" -> echonestApiKey,
-        "id" -> ("facebook:artist:" + artist.facebookId),
+        "id" -> ("facebook:artist:" +facebookId),
         "format" -> "json")
       .get()
-      .map {
-      getEchonestIdIfEqualNames(_, artist.name)
+      .map { echonestResponse =>
+        getEchonestIdIfEqualNames(echonestResponse.json, artist.name)
     }
   }
 
-  def getEchonestIdIfEqualNames(echonestResponse: Response, artistName: String): Option[String] = {
-    val echonestName = (echonestResponse.json \ "response" \ "artist" \ "name")
+  def getEchonestIdIfEqualNames(echonestResponse: JsValue, artistName: String): Option[String] = {
+    val echonestName = (echonestResponse \ "response" \ "artist" \ "name")
       .asOpt[String]
       .getOrElse("")
       .toLowerCase
-    if (echonestName == artistName.toLowerCase) {
-      (echonestResponse.json \ "response" \ "artist" \ "id").asOpt[String]
-    }
+    if (echonestName == artistName.toLowerCase)
+      (echonestResponse \ "response" \ "artist" \ "id").asOpt[String]
     else
       None
   }
