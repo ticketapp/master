@@ -1,0 +1,33 @@
+<div class="modal-header">
+    <h3 class="modal-title column small-9">Tools</h3>
+    <a ng-click="cancel()" class="float-right close">&times;</a>
+</div>
+<div class="modal-body column large-12">
+    <ng-connect ng-if="$root.connected == false">
+    </ng-connect>
+    <a class="button" ng-click="viewIssues = !viewIssues; viewPlaylists = false"> Issues </a>
+    <a class="button" ng-click="getPlaylists(); viewIssues = false; viewPlaylists = !viewPlaylists"> playlists </a>
+    <a  ng-if="$root.connected == true" class="button" ng-click="logout()">Logout</a>
+    <div ng-if="viewPlaylists">
+        <ul ng-repeat="playlist in playlists">
+            <a ng-click="$root.loadPlaylist(playlist)">{{playlist.name}}</a>
+            <a ng-click="confirmDelete = !confirmDelete" class="float-right">supprimer la playlist</a>
+            <div class="column large-12" ng-show="confirmDelete">
+                Etes vous sur de vouloir supprimer la playlist "{{playlist.name}}" ?
+                <a class="button"
+                   ng-click="deletePlaylist(playlist.playlistId, $index); confirmDelete = false">
+                    Supprimer
+                </a>
+                <a class="button"
+                   ng-click="confirmDelete = false">
+                    Annuler
+                </a>
+            </div>
+        </ul>
+        <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
+        <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>
+    </div>
+    <div ng-if="viewIssues" ng-issues></div>
+</div>
+<div class="modal-footer">
+</div>

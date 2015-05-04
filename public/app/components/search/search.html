@@ -1,0 +1,52 @@
+<div id="searchBlock" class="right left absolute" ng-if="$root.path != 'search'">
+    <ng-search-bar class="column large-8 medium-10 medium-offset-1 large-offset-2"></ng-search-bar>
+</div>
+<div class="paddingTop20"
+     ng-show="(events.length > 0 && $root.activEvent ) || (artists.length > 0 && $root.activArtist)||
+    (places.length > 0 && $root.activPlace) || (organizers.length > 0 && $root.activUsr) ||
+     (artistsFb.length > 0 && $root.activArtist) || loadingMore || loadingFbArt">
+    <ul id="events_contener" ng-class="{'paddingTop50 marginTop50': $root.path == 'search'}">
+        <div ng-if="$root.activEvent && events.length > 0"
+             class="float-left column small-12 medium-6 large-4 fade min_contener data-ng-event margin0"
+             data-ng-repeat="event in events">
+        </div>
+        <div ng-if="$root.activArtist && artists.length > 0"
+             class="column large-4 medium-6 float-left marginBottom20 fade marginLeft0
+             marginRight0 minNoText artist-min"
+             data-ng-repeat="artist in artists | limitTo: limit"
+             style="padding-bottom: 10px;">
+        </div>
+        <div class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0
+        minNoText artist-facebook-min"
+             ng-if="$root.activArtist && artistsFb.length > 0"
+             data-ng-repeat="artist in artistsFb | filter: searchPat"
+             style="padding-bottom: 10px;">
+        </div>
+        <div layout="row" layout-sm="column" layout-align="space-around" class="float-left"
+             ng-if="loadingFbArt && !loadingMore">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+        </div>
+        <div class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0
+        minNoText place-min"
+             ng-if="$root.activPlace && places.length > 0"
+             style="padding-bottom: 10px;"
+             data-ng-repeat="place in places | filter: searchPat" >
+        </div>
+        <div class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0
+        minNoText organizer-min"
+             ng-if="$root.activUsr && organizers.length > 0"
+             data-ng-repeat="organizer in organizers | filter: searchPat">
+        </div>
+    </ul>
+    <div layout="row" lass="column large-12" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
+    <div class="column large-12" ng-show="events.length >= limit || artists.length >= limit ||
+    places.length >= limit || organizers.length >= limit"
+         layout="row" layout-align="center center">
+        <button ng-click="moreLimit()" class="column large-5">
+            Voir plus
+        </button>
+    </div>
+</div>
+

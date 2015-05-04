@@ -1,0 +1,42 @@
+<map ng-if="map && adresses"
+     zoom="{{zoom}}"
+     center="[{{geographicPoint}}]"
+     scrollwheel="false"
+     navigationControl="false"
+     disable-default-u-i="true"
+     mapTypeControl="false"
+     scaleControl="false"
+     styles="[
+                 {
+                     stylers:[
+                         {hue:'#00654C'},
+                         {visibility:'simplified'},
+                         {gamma:0.5},
+                         {weight:0.5}
+                     ]
+                 },
+                 {
+                    elementType:'labels',
+                    stylers:[
+                        {visibility:'off'}
+                    ]
+                },
+                {featureType:'water',
+                    stylers:[
+                        {color:'#008CBA'}
+                    ]
+                }
+            ]"
+     style="{{mapHeight}}"
+     class="width100p">
+    <directions
+            draggable="true"
+            panel="directions-panel"
+            travel-mode="{{travelMode}}"
+            origin="{{start}}"
+            destination="{{geographicPoint}}">
+    </directions>
+    <marker visible="true" position="{{geographicPoint}}" >
+    </marker>
+    <transit-layer></transit-layer>
+</map>

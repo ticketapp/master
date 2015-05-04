@@ -1,0 +1,20 @@
+<i ng-if="websites.otherWebsites.length > 0" class="float-right fa fa-chevron-down openWebsitesContainer"
+   ng-click="$parent.showUrls = !$parent.showUrls"></i>
+<ul class="absolute zIndex4 right websitesContainer"
+    ng-if="showUrls">
+    <li ng-repeat="website in websites.otherWebsites"
+        class="otherWebsite">
+        <a href="http://www.{{website.url}}" target="_blank">{{website.url}}</a>
+    </li>
+</ul>
+<a ng-repeat="website in websites.iconWebsites"
+   href="http://www.{{website.url}}" target="_blank">
+    <i ng-class="{'fi-social-facebook' : website.name == 'facebook',
+                   'fi-social-twitter' : website.name == 'twitter',
+                   'fi-soundcloud' : website.name == 'soundcloud',
+                   'fi-mixcloud' : website.name == 'mixcloud'}"
+       class="float-right iconWebsites" style="margin-right: 5px;"></i>
+</a>
+<a href="http://www.facebook.com/{{websites.facebookUrl}}" target="_blank">
+    <i class="float-right fi-social-facebook" style="margin-right: 5px;"></i>
+</a>

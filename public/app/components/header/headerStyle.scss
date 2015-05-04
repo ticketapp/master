@@ -1,0 +1,20 @@
+@import "../../modules/foundation/scss/foundation/settings";
+top-search-block {
+  left : 0;
+  width : 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  background: transparentBlack;
+  transform: translate3d(0, -1px, 0);
+  box-shadow: baseShadow;
+  max-width: 100%;
+}
+
+top-search-block > search-bar-contener {
+  width: 100%;
+  float: left;
+  padding: 0;
+  margin: 0;
+  height: inherit;
+}

@@ -1,0 +1,37 @@
+
+.intro-text {
+  font-size: 50px;
+  color: #fff;
+  text-align: center;
+}
+.animate-show {padding-left : 50px; color : white; position: absolute}
+
+.animate-show.ng-leave, .animate-show.ng-enter {
+
+  -webkit-animation-duration:.8s;
+  -moz-animation-duration:.8s;
+  -ms-animation-duration:.8s;
+  -o-animation-duration:.8s;
+  -webkit-animation-fill-mode:both;
+  -moz-animation-fill-mode:both;
+  -ms-animation-fill-mode:both;
+  -o-animation-fill-mode:both;
+}
+
+.animate-show.ng-leave {
+  position: absolute;
+  -webkit-animation-name: fadeOut;
+  -moz-animation-name: fadeOut;
+  -ms-animation-name: fadeOut;
+  -o-animation-name: fadeOut;
+}
+.animate-show.ng-enter {
+  -webkit-animation-delay: 0.8s;
+  -moz-animation-delay: 0.8s;
+  -ms-animation-delay: 0.8s;
+  -o-animation-delay: 0.8s;
+  -webkit-animation-name: fadeIn;
+  -moz-animation-name: fadeIn;
+  -ms-animation-name: fadeIn;
+  -o-animation-name: fadeIn;
+}

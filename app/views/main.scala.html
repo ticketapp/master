@@ -1,93 +1,188 @@
 @(title: String)(content: Html)
-<!DOCTYPE html>
-<html lang="fr">
+<!doctype html>
+<html class="no-js">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>@title</title>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
-
-    <!-- Le style -->
-    <link href="@routes.Assets.at("css/animate.min.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/foundation.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/normalize.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/colorpicker.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/tools.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/foundation-icons.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/material.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/angular-slider.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/font-awesome.css")" rel="stylesheet" type="text/css">
-    <link href="@routes.Assets.at("css/style.css")" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=RobotoDraft:400,500,700,400italic">
-    </head>
-    <body data-ng-app="MonApp">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="@routes.Assets.at("app/styles/main.css")">
+    <!-- endbuild -->
+</head>
+<body ng-app="claudeApp">
+<!--[if lt IE 7]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+<![endif]-->
         @content
     </body>
-    <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-        ga('create', 'UA-60282251-1', 'auto');
-        ga('send', 'pageview');
+    ga('create', 'UA-60282251-1', 'auto');
+    ga('send', 'pageview');
+</script>
+<!-- build:js(.) scripts/oldieshim.js") -->
+<!--[if lt IE 9]>
+<script src="@routes.Assets.at("bower_components/es5-shim/es5-shim.js")"></script>
+<script src="@routes.Assets.at("bower_components/json3/lib/json3.js")"></script>
+<![endif]-->
+<!-- endbuild -->
 
-    </script>
-    <script src="@routes.Assets.at("js/jquery-1.11.0.js")"></script>
-    <script src="@routes.Assets.at("js/youtube_mp4.js")"></script>
-    <script src="@routes.Assets.at("js/youtubeapi.js")">></script>
-    <script src="@routes.Assets.at("js/qrcode.js")"></script>
-    <script src="@routes.Assets.at("js/swfobject.js")"></script>
-    <script src="@routes.Assets.at("js/hammerjs/hammer.js")"></script>
-    <script src="@routes.Assets.at("js/oboe-browser.min.js")"></script>
-<script src="@routes.Assets.at("js/foundationCustom.js")"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-route.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-aria.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular-messages.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angular_material/0.7.0/angular-material.min.js"></script>
-    <script src="https://rawgithub.com/a5hik/ng-sortable/master/dist/ng-sortable.js"></script>
-    <script src="https://rawgit.com/allenhwkim/angularjs-google-maps/master/testapp/scripts/markers.js"></script>
-    <script src="https://rawgit.com/allenhwkim/angularjs-google-maps/master/testapp/scripts/markerclusterer.js"></script>
-    <script src="@routes.Assets.at("js/angular-slider.js")"></script>
-    <script src="@routes.Assets.at("js/modules/ngStorage.min.js")"></script>
-    <script src="@routes.Assets.at("js/websocket.js")"></script>
-    <script src="@routes.Assets.at("js/angular-hammer.js")"></script>
-    <script src="@routes.Assets.at("js/reorder.js")"></script>
-    <script src="@routes.Assets.at("js/mm-foundation.min.js")"></script>
-    <script src="@routes.Assets.at("js/modules/foundation-colorpicker-module.js")"></script>
-    <script src="@routes.Assets.at("js/modules/angularAnalytics.js")"></script>
-    <script src="@routes.Assets.at("js/modules/ng-map.js")"></script>
-    <script src="@routes.Assets.at("js/modules/gmap.js")"></script>
-    <script src="@routes.Assets.at("js/modules/directions.js")"></script>
-    <script src="@routes.Assets.at("js/modules/angular-oboe.js")"></script>
-    <script src="@routes.Assets.at("js/app.js")"></script>
-    <script src="@routes.Assets.at("js/services/artiste.js")"></script>
-    <script src="@routes.Assets.at("js/services/event.js")"></script>
-    <script src="@routes.Assets.at("js/services/organizer.js")"></script>
-    <script src="@routes.Assets.at("js/services/lieu.js")"></script>
-    <script src="@routes.Assets.at("js/services/user.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/artistes.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/eventView.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/users.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/lieu.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/issuesCtrl.js")"></script>
-    <script src="@routes.Assets.at("js/directives/wysiwyg.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/scrollCtrl.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/carousel.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/tools.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/CreateEvent.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/lecteur.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/searchCTRL.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/ticketCtrl.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/controlsCtrl.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/iframeCtrl.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/phoneHomeCtrl.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/connectCtrl.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/footer.js")"></script>
-    <script src="@routes.Assets.at("js/controllers/contact.js")"></script>
-    <script src="@routes.Assets.at("js/directives/directives.js")"></script>
+<!-- build:js(.) scripts/vendor.js") -->
+<!-- bower:js -->
+<script src="@routes.Assets.at("bower_components/angular/angular.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-animate/angular-animate.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-aria/angular-aria.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-cookies/angular-cookies.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-messages/angular-messages.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-resource/angular-resource.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-route/angular-route.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-sanitize/angular-sanitize.js")"></script>
+<script src="@routes.Assets.at("bower_components/angular-touch/angular-touch.js")"></script>
+<!-- endbower -->
+<!-- endbuild -->
+
+<!-- build:js({.tmp,app}) scripts/scripts.js -->
+<!--Modules-->
+<script src="@routes.Assets.at("modules/foundation/mm-foundation.min.js")"></script>
+<script src="@routes.Assets.at("modules/hammerjs/hammer.min.js")"></script>
+<script src="@routes.Assets.at("modules/hammerjs/angular-hammer.js")"></script>
+<script src="@routes.Assets.at("modules/ngStorage.min.js")"></script>
+<script src="@routes.Assets.at("modules/angular-component/angular-material.min.js")"></script>
+<script src="@routes.Assets.at("modules/map/ng-map.min.js")"></script>
+<script src="@routes.Assets.at("modules/map/gmap.js")"></script>
+<script src="@routes.Assets.at("modules/oboe/oboe-browser.min.js")"></script>
+<script src="@routes.Assets.at("modules/oboe/oboe.js")"></script>
+<script src="@routes.Assets.at("modules/ui-sortable/uiSortable.js")"></script>
+<script src="@routes.Assets.at("scripts/libreries/jquery-1.11.0.js")"></script>
+<script src="@routes.Assets.at("scripts/libreries/youtubeApi.js")"></script>
+<script src="@routes.Assets.at("scripts/libreries/youtubeToMp4.js")"></script>
+<script src="@routes.Assets.at("scripts/app.js")"></script>
+<!--filters-->
+<script src="@routes.Assets.at("scripts/filters/millisecondsToTimeString.js")"></script>
+<!--services-->
+<script src="@routes.Assets.at("scripts/services/detectPath.js")"></script>
+<script src="@routes.Assets.at("scripts/services/detectSize.js")"></script>
+<script src="@routes.Assets.at("scripts/services/refactorGeopoint.js")"></script>
+<script src="@routes.Assets.at("scripts/services/geoloc.js")"></script>
+<!--directives-->
+<script src="@routes.Assets.at("scripts/directives/draggable.js")"></script>
+
+<!-- Components -->
+<!--parallax-->
+<script src="@routes.Assets.at("components/parallax/parallaxDirective.js")"></script>
+
+<!--storeRquest-->
+<script src="@routes.Assets.at("components/storeRequest/storeRequestFactory.js")"></script>
+
+<!--websites-->
+<script src="@routes.Assets.at("components/websites/websitesFactory.js")"></script>
+<script src="@routes.Assets.at("components/websites/websitesDirective.js")"></script>
+
+<!--map-->
+<script src="@routes.Assets.at("components/map/mapCtrl.js")"></script>
+<script src="@routes.Assets.at("components/map/mapDirective.js")"></script>
+
+<!--footer-->
+<script src="@routes.Assets.at("components/footer/footerCtrl.js")"></script>
+<script src="@routes.Assets.at("components/footer/footerDirective.js")"></script>
+
+<!--infoModal-->
+<script src="@routes.Assets.at("components/infoModal/infoModalCtrl.js")"></script>
+<script src="@routes.Assets.at("components/infoModal/infoModalFactory.js")"></script>
+
+<!--event-->
+<!--require map-->
+<script src="@routes.Assets.at("components/events/eventsFactory.js")"></script>
+<script src="@routes.Assets.at("components/events/eventDirectives.js")"></script>
+<script src="@routes.Assets.at("components/events/eventCtrl.js")"></script>
+
+<!--artist-->
+<!--require websites & event-->
+<script src="@routes.Assets.at("components/artist/artistsFactory.js")"></script>
+<script src="@routes.Assets.at("components/artist/artistCtrl.js")"></script>
+<script src="@routes.Assets.at("components/artist/artistFacebookMinCtrl.js")"></script>
+<script src="@routes.Assets.at("components/artist/artistDirective.js")"></script>
+
+<!--organizer-->
+<!--require websites, map & event-->
+<script src="@routes.Assets.at("components/organizers/organizerFactory.js")"></script>
+<script src="@routes.Assets.at("components/organizers/organiserCtrl.js")"></script>
+<script src="@routes.Assets.at("components/organizers/organizerDirective.js")"></script>
+
+
+<!--place-->
+<!--require websites, map & event-->
+<script src="@routes.Assets.at("components/places/placeFactory.js")"></script>
+<script src="@routes.Assets.at("components/places/placeCtrl.js")"></script>
+<script src="@routes.Assets.at("components/places/placeDirective.js")"></script>
+
+
+
+<!--user-->
+<script src="@routes.Assets.at("components/user/userFactory.js")"></script>
+
+
+<!--player-->
+<script src="@routes.Assets.at("components/player/savePlaylistCtrl.js")"></script>
+<script src="@routes.Assets.at("components/player/playerCtrl.js")"></script>
+<script src="@routes.Assets.at("components/player/playerDirective.js")"></script>
+
+
+<!--search-->
+<!--require artist, places, organizers, user map & event-->
+<script src="@routes.Assets.at("components/search/searchFactory.js")"></script>
+<script src="@routes.Assets.at("components/search/searchCtrl.js")"></script>
+<script src="@routes.Assets.at("components/search/searchDirectives.js")"></script>
+
+<!--header-->
+<!--require search component-->
+<script src="@routes.Assets.at("components/header/headerCtrl.js")"></script>
+<script src="@routes.Assets.at("components/header/headerDirective.js")"></script>
+
+<!--large-home-->
+<!--require artist component-->
+<script src="@routes.Assets.at("components/large-home/largeHomeFactory.js")"></script>
+<script src="@routes.Assets.at("components/large-home/LargeHomeCtrl.js")"></script>
+<script src="@routes.Assets.at("components/large-home/LargeHomeDirective.js")"></script>
+
+<!--issues-->
+<!--require infoModal component-->
+<script src="@routes.Assets.at("components/issues/issuesFactory.js")"></script>
+<script src="@routes.Assets.at("components/issues/issuesCtrl.js")"></script>
+<script src="@routes.Assets.at("components/issues/issuesDirective.js")"></script>
+
+
+<!--tools-->
+<!--require issues component-->
+<script src="@routes.Assets.at("components/tools/toolsCtrl.js")"></script>
+
+<!--connect-->
+<!--require artist, user, events, places, organizers component-->
+<script src="@routes.Assets.at("components/connect/connectCtrl.js")"></script>
+<script src="@routes.Assets.at("components/connect/connectDirective.js")"></script>
+<script src="@routes.Assets.at("components/connect/ConnectionModalCtrl.js")"></script>
+
+<!--buttons controls-->
+<!--require tools and connect-->
+<script src="@routes.Assets.at("components/buttonsControls/controlsDirective.js")"></script>
+
+<!--iframe-->
+<!--artist, user, events, places, organizers component-->
+<script src="@routes.Assets.at("components/iframe/iframeCtrl.js")"></script>
+
+<!--create event-->
+<!--wysiwyg-->
+<script src="@routes.Assets.at("components/createEvent/createEventCtrl.js")"></script>
+<!-- endbuild -->
+</body>
 </html>

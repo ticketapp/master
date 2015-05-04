@@ -1,0 +1,65 @@
+<div class="parallax-background">
+    <img class="width100p" src="{{ place.imagePath }}" ng-if="place.imagePath != undefined"/>
+    <div style="height: 100%;" ng-if="place.imagePath == undefined">
+        <div class="column large-12 zIndex1 absolute paddingRight30 map-container">
+            <div style="font-size: 12px;" class="column large-5">
+                {{place.addresses[0].street}}<br/>
+                {{place.addresses[0].zip}}
+                {{place.addresses[0].city}}
+            </div>
+            <map-controls class="column"></map-controls>
+        </div>
+        <stylized-map></stylized-map>
+    </div>
+</div>
+<div class="parallax-content">
+    <h2 class="column">{{place.name}}
+        <websites></websites>
+    </h2>
+    <div class="column large-12" ng-if="place.description.length > 0">
+        <div class="column large-12 float-left marginBottom10"
+             style="background-color: #e7e7e7">
+            <h2 class="float-left"
+                style="line-height: 50px;
+                  margin: 5px;
+                  color: rgb(105, 181, 205);
+                ">Présentation
+            </h2>
+            <div class="img-circularPlayer float-right"
+                 style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px">
+                <i class="pauseInImg ng-scope fa fa-chevron-down pointer"
+                   style="font-size: 50px;"
+                   ng-if="showDesc == false"
+                   ng-click="$parent.showDesc = true"></i>
+                <i class="pauseInImg ng-scope fa fa-chevron-up pointer"
+                   style="font-size: 50px;"
+                   ng-if="showDesc == true"
+                   ng-click="$parent.showDesc = false"></i>
+            </div>
+            <div ng-if="showDesc == true" class="float-left width100p"
+                 data-ng-bind-html="place.description">
+            </div>
+        </div>
+    </div>
+    <div ng-if="place.imagePath != undefined && map == true"
+         style="height: 300px;" class="column large-12 marginBottom20 map-container">
+        <div class="column large-12 zIndex1 absolute paddingRight30">
+            <div style="font-size: 12px;" class="column large-5">
+                {{place.addresses[0].street}}<br/>
+                {{place.addresses[0].zip}}
+                {{place.addresses[0].city}}
+            </div>
+            <map-controls></map-controls>
+        </div>
+        <stylized-map></stylized-map>
+    </div>
+    <h2 class="column" ng-show="place.events.length > 0">Evenements</h2>
+    <div class="column large-4 medium-6 float-left fade margin0 data-ng-event"
+         data-ng-repeat="event in place.events">
+    </div>
+    <div layout="row"
+         class="column large-12" layout-sm="column" layout-align="space-around"
+         ng-if="loadEvents">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
+</div>

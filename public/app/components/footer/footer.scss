@@ -1,0 +1,11 @@
+.footer{background-color:black;
+  clear: both;
+  position: relative;
+  z-index: 10;
+  float: left;
+  min-height: 200px;
+  margin-top: -200px;
+  width: 100%;}
+.footer_inner{width:95%; margin:auto; color: #ffffff}
+.footer_inner > div > a {line-height: 30px}
+.footer_inner > div > h1 {text-align: center}

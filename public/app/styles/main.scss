@@ -1,0 +1,260 @@
+// bower:scss
+// endbower
+@import "../modules/foundation/scss/foundation";
+@import "animate.min";
+@import "font-awesome";
+@import "foundation-icons";
+@import "tools";
+@import "../components/parallax/parallax";
+@import "../modules/angular-component/angular-material";
+@import "../modules/ui-sortable/uiSortable";
+@import "../components/header/headerStyle";
+@import "../components/player/player";
+@import "../components/large-home/largeHome";
+@import "../components/events/events";
+@import "../components/footer/footer";
+@import "../components/search/search";
+@import "../components/buttonsControls/controls";
+
+.browsehappy {
+  margin: 0.2em 0;
+  background: #ccc;
+  color: #000;
+  padding: 0.2em 0;
+}
+
+//miniatures//
+.block_min:hover>.images_min>div.toGrow{
+  -webkit-transform: scale(1.2);
+  -moz-transform: scale(1.2);
+  -o-transform: scale(1.2);
+  -ms-transform: scale(1.2);
+  transform: scale(1.2);
+}
+.block_min{
+  margin:0 auto;
+  box-shadow: 1px 1px 12px -5px rgba(85, 85, 85, 0.59);
+  width:100%;
+  border-radius: 0 0 3px 3px;
+  color: black;
+  max-height:100%;
+  -webkit-transition: 0.4s, -webkit-transform 0.4s ease-in-out;
+  -moz-transition: 0.4s, -moz-transform 0.4s ease-in-out;
+  -o-transition: 0.4s, -o-transform 0.4s ease-in-out;
+  -ms-transition: 0.4s, -ms-transform 0.4s ease-in-out;
+  transition: 0.4s, transform 0.4s ease-in-out;
+}
+
+.block_min:hover{
+  box-shadow: 1px 1px 12px -1px rgba(85, 85, 85, 0.59);
+}
+
+.images_min{
+  width:100%;
+  overflow: hidden;
+  position: relative;
+  height: 160px;
+}
+
+.minTitle {
+  height: 1.4em;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+  margin: auto auto;
+  position: absolute;
+  right: 0;
+  color: white;
+  width: 100%;
+  padding-left: 5px;
+  padding-right: 5px;                                                                                                                                                                                                                                                                                                                                                                                                                        border-bottom: solid 4px rgb(0, 140, 186);
+  text-align: left;
+  left: 0;
+  margin-top: -26px;
+}
+
+.minFilter:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.images-circularPlayer:hover > .playInimages {
+  display: block;
+}
+.images-circularPlayer{
+  width: 80px;
+  height: 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: block;
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  margin: 5px;
+  float: left;
+}
+
+/* Space out content a bit */
+html, body, #contener { height: 100%;}
+html {overflow-x: hidden;}
+body > #contener { height: auto; min-height: 100%; overflow: hidden;}
+body {padding-bottom: 0; color: #5a5a5a;}
+.wrapper-outer {width: 100%; padding-bottom: 200px; float: left;}
+/* Everything but the jumbotron gets side spacing for mobile first views */
+
+
+.fi-soundcloud {
+  background-image: url('../images/logoBlackSoundcloud.png');
+  width: 44px;
+  height: 31px;
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.fi-reggae {
+  background-image: url('../images/rasta.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+.fi-hip-hop{
+  background-image: url('../images/rap.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+.fi-jazz{
+  background-image: url('../images/jazz.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+/*.fi-latin{
+    background-image: url('../images/);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    height: 50px;
+    width: 50px;
+}*/
+.fi-electro{
+  background-image: url('../images/electro.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+.fi-world{}
+.fi-classique{}
+.fi-rock{
+  background-image: url('../images/rock.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+.fi-chanson{
+  background-image: url('../images/accoustique.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+.fi-claude {
+  background-image: url('../images/logo.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 60px;
+  width: 50px;
+}
+.fi-claude-min {
+  background-image: url('../images/claude%20icone%203.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+.fi-mixcloud {
+  background-image: url('../images/mixcloud-logo.png');
+  width: 44px;
+  height: 31px;
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/*pages*/
+.dropDown {
+  padding-bottom: 5px;
+  margin: 0;
+}
+.f-dropdown:before, .f-dropdown:after {
+  display:none!important;
+}
+md-toast{position: fixed!important;}
+.f-dropdown{opacity: 0;}
+@keyframes drop {
+  from {left: -99999px; opacity: 0}
+  to {left: 0; opacity: 1}
+}
+.dropDown:hover > .f-dropdown {
+  position: absolute;
+  float: left;
+  left: 20px;
+  max-width: 90%;
+  -webkit-animation-delay: .5s;
+  -moz-animation-delay: .5s;
+  -ms-animation-delay: .5s;
+  -o-animation-delay: .5s;
+  -webkit-transition-delay: .5s;
+  -moz-transition-delay: .5s;
+  -ms-transition-delay: .5s;
+  -o-transition-delay: .5s;
+  -webkit-animation-duration: .8s;
+  -moz-animation-duration:.8s;
+  -ms-animation-duration:.8s;
+  -o-animation-duration:.8s;
+  -webkit-animation-name: drop;
+  -moz-animation-name: drop;
+  -ms-animation-name: drop;
+  -o-animation-name: drop;
+  opacity: 1;
+}
+.f-dropdown:hover {
+  opacity: 1;
+}
+.f-dropdown > li:hover {
+  background: white!important;
+}
+.imagesBlur {
+  -webkit-filter: sepia(0.5) blur(2px);
+  -moz-filter: sepia(0.5) blur(2px);
+  -ms-filter: sepia(0.5) blur(2px);
+  -o-filter: sepia(0.5) blur(2px);
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+  .iClose, .images-circularPlayer, .playInimages {
+    display: block;
+  }
+}

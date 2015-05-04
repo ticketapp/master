@@ -1,0 +1,207 @@
+<!doctype html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="public/app/styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body ng-app="claudeApp">
+    <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <!-- Add your site or application content here -->
+    <!-- ng-init="$root.connected = @connected"-->
+    <header ng-init="$root.connected = false"></header>
+    <div id="contener">
+        <ng-controls class="ng-controls"></ng-controls>
+        <div data-ng-view
+             class="wrapper-outer"
+             autoscroll="true"
+             ng-class="{'paddingTop50': $root.window == 'small'}">
+        </div>
+        <div ng-show="$root.playlist.tracks.length > 0" class="ng-player"></div>
+    </div>
+    <div ng-if="$root.path != 'iframe'"
+         ng-class="{'ng-hide': $root.window == 'small' && $root.path == 'home'}"
+         class="footer row-fluid">
+    </div>
+
+
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+     <script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-60282251-1', 'auto');
+       ga('send', 'pageview');
+    </script>
+
+    <!-- build:js(.) scripts/oldieshim.js -->
+    <!--[if lt IE 9]>
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <script src="bower_components/json3/lib/json3.js"></script>
+    <![endif]-->
+    <!-- endbuild -->
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.js"></script>
+    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+    <script src="bower_components/angular-messages/angular-messages.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angular-touch/angular-touch.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+        <!-- build:js({.tmp,app}) scripts/scripts.js -->
+        <!--Modules-->
+        <script src="public/app/modules/foundation/mm-foundation.min.js"></script>
+        <script src="public/app/modules/hammerjs/hammer.min.js"></script>
+        <script src="public/app/modules/hammerjs/angular-hammer.js"></script>
+        <script src="public/app/modules/ngStorage.min.js"></script>
+        <script src="public/app/modules/angular-component/angular-material.min.js"></script>
+        <script src="public/app/modules/map/ng-map.min.js"></script>
+        <script src="public/app/modules/map/gmap.js"></script>
+        <script src="public/app/modules/oboe/oboe-browser.min.js"></script>
+        <script src="public/app/modules/oboe/oboe.js"></script>
+        <script src="public/app/modules/ui-sortable/uiSortable.js"></script>
+        <script src="public/app/scripts/libreries/jquery-1.11.0.js"></script>
+        <script src="public/app/scripts/libreries/youtubeApi.js"></script>
+        <script src="public/app/scripts/libreries/youtubeToMp4.js"></script>
+        <script src="public/app/scripts/app.js"></script>
+        <!--filters-->
+        <script src="public/app/scripts/filters/millisecondsToTimeString.js"></script>
+        <!--services-->
+        <script src="public/app/scripts/services/detectPath.js"></script>
+        <script src="public/app/scripts/services/detectSize.js"></script>
+        <script src="public/app/scripts/services/refactorGeopoint.js"></script>
+        <script src="public/app/scripts/services/geoloc.js"></script>
+        <!--directives-->
+        <script src="public/app/scripts/directives/draggable.js"></script>
+
+        <!-- Components -->
+                            <!--parallax-->
+        <script src="public/app/components/parallax/parallaxDirective.js"></script>
+
+                            <!--storeRquest-->
+        <script src="public/app/components/storeRequest/storeRequestFactory.js"></script>
+
+                            <!--websites-->
+        <script src="public/app/components/websites/websitesFactory.js"></script>
+        <script src="public/app/components/websites/websitesDirective.js"></script>
+
+                              <!--map-->
+        <script src="public/app/components/map/mapCtrl.js"></script>
+        <script src="public/app/components/map/mapDirective.js"></script>
+
+                              <!--footer-->
+        <script src="public/app/components/footer/footerCtrl.js"></script>
+        <script src="public/app/components/footer/footerDirective.js"></script>
+
+                              <!--infoModal-->
+        <script src="public/app/components/infoModal/infoModalCtrl.js"></script>
+        <script src="public/app/components/infoModal/infoModalFactory.js"></script>
+
+                            <!--event-->
+                          <!--require map-->
+        <script src="public/app/components/events/eventsFactory.js"></script>
+        <script src="public/app/components/events/eventDirectives.js"></script>
+        <script src="public/app/components/events/eventCtrl.js"></script>
+
+                            <!--artist-->
+                     <!--require websites & event-->
+        <script src="public/app/components/artist/artistsFactory.js"></script>
+        <script src="public/app/components/artist/artistCtrl.js"></script>
+        <script src="public/app/components/artist/artistFacebookMinCtrl.js"></script>
+        <script src="public/app/components/artist/artistDirective.js"></script>
+
+                            <!--organizer-->
+                     <!--require websites, map & event-->
+        <script src="public/app/components/organizers/organizerFactory.js"></script>
+        <script src="public/app/components/organizers/organiserCtrl.js"></script>
+        <script src="public/app/components/organizers/organizerDirective.js"></script>
+
+
+                               <!--place-->
+                     <!--require websites, map & event-->
+        <script src="public/app/components/places/placeFactory.js"></script>
+        <script src="public/app/components/places/placeCtrl.js"></script>
+        <script src="public/app/components/places/placeDirective.js"></script>
+
+
+
+                               <!--user-->
+        <script src="public/app/components/user/userFactory.js"></script>
+
+
+                               <!--player-->
+        <script src="public/app/components/player/savePlaylistCtrl.js"></script>
+        <script src="public/app/components/player/playerCtrl.js"></script>
+        <script src="public/app/components/player/playerDirective.js"></script>
+
+
+                           <!--search-->
+         <!--require artist, places, organizers, user map & event-->
+        <script src="public/app/components/search/searchFactory.js"></script>
+        <script src="public/app/components/search/searchCtrl.js"></script>
+        <script src="public/app/components/search/searchDirectives.js"></script>
+
+                              <!--header-->
+                      <!--require search component-->
+        <script src="public/app/components/header/headerCtrl.js"></script>
+        <script src="public/app/components/header/headerDirective.js"></script>
+
+                             <!--large-home-->
+                     <!--require artist component-->
+        <script src="public/app/components/large-home/largeHomeFactory.js"></script>
+        <script src="public/app/components/large-home/LargeHomeCtrl.js"></script>
+        <script src="public/app/components/large-home/LargeHomeDirective.js"></script>
+
+                            <!--issues-->
+                    <!--require infoModal component-->
+        <script src="public/app/components/issues/issuesFactory.js"></script>
+        <script src="public/app/components/issues/issuesCtrl.js"></script>
+        <script src="public/app/components/issues/issuesDirective.js"></script>
+
+
+                            <!--tools-->
+                    <!--require issues component-->
+        <script src="public/app/components/tools/toolsCtrl.js"></script>
+
+                            <!--connect-->
+            <!--require artist, user, events, places, organizers component-->
+        <script src="public/app/components/connect/connectCtrl.js"></script>
+        <script src="public/app/components/connect/connectDirective.js"></script>
+        <script src="public/app/components/connect/ConnectionModalCtrl.js"></script>
+
+                            <!--buttons controls-->
+                        <!--require tools and connect-->
+        <script src="public/app/components/buttonsControls/controlsDirective.js"></script>
+
+                            <!--iframe-->
+            <!--artist, user, events, places, organizers component-->
+        <script src="public/app/components/iframe/iframeCtrl.js"></script>
+
+                            <!--create event-->
+                              <!--wysiwyg-->
+        <script src="public/app/components/createEvent/createEventCtrl.js"></script>
+        <!-- endbuild -->
+</body>
+</html>

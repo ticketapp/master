@@ -1,0 +1,65 @@
+.generalControls {
+  display: block;
+  margin-top: 5px;
+  width: 70px;
+  height: 55px;
+}
+.generalControls i{
+  color: #ffffff;
+  font-size: 25px;
+  line-height: 25px;
+}
+.ng-controls {
+  right: 0;
+  z-index: 11!important;
+  width: 70px!important;
+  margin-top: 100px;
+  position: fixed;
+}
+.ng-controls:hover {
+  margin-right: 0!important;
+}
+
+.generalControls > button, .generalControls > .button {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  color:black;
+  line-height: 25px;
+}
+.generalControls:hover {
+  opacity: 1!important;
+  -webkit-animation-duration: .8s;
+  -moz-animation-duration:.8s;
+  -ms-animation-duration:.8s;
+  -o-animation-duration:.8s;
+  -webkit-animation-name: rubberBand;
+  -moz-animation-name: rubberBand;
+  -ms-animation-name: rubberBand;
+  -o-animation-name: rubberBand;
+}
+.generalControls.ng-enter, .generalControls.ng-leave {
+  -webkit-animation-duration: .8s;
+  -moz-animation-duration:.8s;
+  -ms-animation-duration:.8s;
+  -o-animation-duration:.8s;
+  -webkit-animation-fill-mode:both;
+  -moz-animation-fill-mode:both;
+  -ms-animation-fill-mode:both;
+  -o-animation-fill-mode:both;
+  -animation-fill-mode:both;
+  -webkit-transition:0.5s linear all;
+  transition:0.5s linear all;
+}
+.generalControls.ng-enter {
+  -webkit-animation-name: bounceInRight;
+  -moz-animation-name: bounceInRight;
+  -ms-animation-name: bounceInRight;
+  -o-animation-name: bounceInRight;
+}
+.generalControls.ng-leave {
+  -webkit-animation-name: bounceOutRight;
+  -moz-animation-name: bounceOutRight;
+  -ms-animation-name: bounceOutRight;
+  -o-animation-name: bounceOutRight;
+}
