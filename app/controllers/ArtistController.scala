@@ -3,6 +3,8 @@ package controllers
 import json.JsonHelper._
 import models.Artist.PatternAndArtist
 import models._
+import org.postgresql.util.PSQLException
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.iteratee.Enumerator
@@ -12,7 +14,8 @@ import play.api.libs.concurrent.Execution.Implicits._
 import securesocial.core.Identity
 import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
-import scala.concurrent.Future
+import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
+import scala.util.{Failure, Success}
 
 object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action { Ok(Json.toJson(Artist.findAll)) }
@@ -39,13 +42,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Artist.findByGenre(genre, numberToReturn, offset)))
   }
 
-  def findArtistsContaining(pattern: String) = Action {
-    Ok(Json.toJson(Artist.findAllContaining(pattern)))
-  }
+  def findArtistsContaining(pattern: String) = Action { Ok(Json.toJson(Artist.findAllContaining(pattern))) }
 
-  def eventsByArtist(facebookUrl: String) = Action {
-    Ok(Json.toJson(Event.findAllByArtist(facebookUrl)))
-  }
+  def eventsByArtist(facebookUrl: String) = Action { Ok(Json.toJson(Event.findAllByArtist(facebookUrl))) }
 
   val artistBindingForm = Form(
     mapping(
@@ -80,7 +79,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     try {
       artistBindingForm.bindFromRequest().fold(
         formWithErrors => {
-          println(formWithErrors.errorsAsJson)
+          Logger.warn(formWithErrors.errorsAsJson.toString())
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {
@@ -101,7 +100,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   def getArtistTracks(patternAndArtist: PatternAndArtist) = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        addSoundcloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
+        Artist.addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
         Enumerator(soundCloudTracks.toSet)
       })
 
@@ -111,28 +110,41 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator).andThen(Enumerator.eof)
   }
 
-  def addSoundcloudWebsiteIfMissing(soundCloudTrack: Option[Track], artist: Artist): Unit = soundCloudTrack match {
-    case None =>
-    case Some(soundcloudTrack: Track) =>
-      soundcloudTrack.redirectUrl match {
-        case None =>
-        case Some(redirectUrl) =>
-          if (!artist.websites.contains(redirectUrl))
-            Artist.addWebsite(artist.artistId, redirectUrl)
-      }
-  }
-
   def deleteArtist(artistId: Long) = Action {
-    Artist.deleteArtist(artistId)
+    Artist.delete(artistId)
     Redirect(routes.Admin.indexAdmin())
   }
 
   def followArtistByArtistId(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Artist.followArtistByArtistId(request.user.identityId.userId, artistId)))
+    Artist.followByArtistId(request.user.identityId.userId, artistId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("ArtistController.followArtistByArtistId", psqlException)
+        Status(CONFLICT)("This user already follow this artist.")
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error("ArtistController.followArtistByArtistId", psqlException)
+        Status(CONFLICT)("There is no artist with this id.")
+      case Failure(unknownException) =>
+        Logger.error("ArtistController.followArtistByArtistId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
+    }
   } 
   
   def followArtistByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Artist.followArtistByFacebookId(request.user.identityId.userId, facebookId)))
+    Artist.followByFacebookId(request.user.identityId.userId, facebookId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("ArtistController.followArtistByFacebookId", psqlException)
+        Status(CONFLICT)("This user already follow this artist.")
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error("ArtistController.followArtistByFacebookId", psqlException)
+        Status(CONFLICT)("There is no artist with this id.")
+      case Failure(unknownException) =>
+        Logger.error("ArtistController.followArtistByFacebookId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
+    }
   }
 
   def getFollowedArtists = UserAwareAction { implicit request =>

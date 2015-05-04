@@ -6,6 +6,7 @@ import java.text.Normalizer
 import java.util.Date
 import java.util.regex.Pattern
 import anorm._
+import play.api.Logger
 import play.api.db.DB
 import play.api.libs.iteratee.{Concurrent, Iteratee, Enumerator}
 import play.api.libs.ws.WS
@@ -31,7 +32,7 @@ object InsertGenres extends Controller {
       try {
         Genre.save(new Genre(None, line.split("  ")(0), Option(line.split("  ")(1))))
       } catch {
-        case e: Exception => println(line + e)
+        case e: Exception =>  Logger.warn(line + e)
       }
     }
     Ok

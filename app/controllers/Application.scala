@@ -17,11 +17,7 @@ object Application extends Controller with securesocial.core.SecureSocial {
   }
 
   /*#################### CAROUSEL ########################*/
-  def infos = Action {
-    Ok(Json.toJson(Info.findAll()))
-  }
+  def infos = Action { Ok(Json.toJson(Info.findAll())) }
 
-  def info(id: Long) = Action {
-    Ok(Json.toJson(Info.find(id)))
-  }
+  def info(id: Long) = Action { Ok(Json.toJson(Info.find(id))) }
 }

@@ -15,6 +15,7 @@ CREATE TABLE addresses (
   street                    VARCHAR
 );
 CREATE INDEX geographicPointAdresses ON addresses USING GIST (geographicPoint);
+CREATE UNIQUE INDEX addressesIndex ON addresses (city, zip, street);
 
 CREATE OR REPLACE FUNCTION insertAddress(
   geographicPointValue      VARCHAR(63),
@@ -29,6 +30,11 @@ CREATE OR REPLACE FUNCTION insertAddress(
       VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
     RETURNING addressId INTO addressIdToReturn;;
     RETURN addressIdToReturn;;
+    EXCEPTION WHEN unique_violation
+      THEN
+        SELECT addressId INTO addressIdToReturn FROM addresses
+          WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+        RETURN addressIdToReturn;;
   END;;
   $$
 LANGUAGE plpgsql;
@@ -40,12 +46,16 @@ CREATE TABLE orders ( --account701
 
 CREATE TABLE infos (
   infoId                    SERIAL PRIMARY KEY,
+  displayIfConnected        BOOLEAN NOT NULL DEFAULT TRUE,
   title                     VARCHAR NOT NULL,
-  content                   VARCHAR
+  content                   VARCHAR,
+  animationContent          VARCHAR,
+  animationStyle            VARCHAR
 );
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 54 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 46
+ avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -60,7 +70,6 @@ CREATE TABLE artists (
   UNIQUE(facebookId),
   UNIQUE(facebookUrl)
 );
-
 CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
                                         nameValue VARCHAR(255),
                                         imagePathValue VARCHAR,
@@ -83,6 +92,8 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
   END;;
   $$
 LANGUAGE plpgsql;
+SELECT insertArtist('facebookId', 'artistTest', 'imagePath', 'description', 'facebookUrl', 'website1,website2');
+SELECT insertArtist('facebookId2', 'artistTest2', 'imagePath', 'description', 'facebookUrl2', 'website1,website2');
 
 CREATE TABLE organizers (
   organizerId             SERIAL PRIMARY KEY,
@@ -124,16 +135,11 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
-    EXCEPTION WHEN unique_violation
-    THEN
-      SELECT organizerId
-      INTO organizerIdToReturn
-      FROM organizers
-      WHERE facebookId = facebookIdValue;;
-      RETURN organizerIdToReturn;;
   END;;
   $$
 LANGUAGE plpgsql;;
+SELECT insertOrganizer('facebookId1', 'organizerTest1', 'description', NULL, 'phone', 'publicTransit',
+                       'websites', 'imagePath', '(0,0)', NULL);
 
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
@@ -190,20 +196,6 @@ CREATE OR REPLACE FUNCTION insertTrack(titleValue VARCHAR(255),
   $$
 LANGUAGE plpgsql;
 
-CREATE TABLE users (
-  userId                    SERIAL PRIMARY KEY,
-  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
-  email                     VARCHAR(255) NOT NULL,
-  nickname                  VARCHAR(255) NOT NULL,
-  password                  VARCHAR(255) NOT NULL,
-  profile                   VARCHAR(255) NOT NULL,
-  UNIQUE(email)
-);
-INSERT INTO users (email, nickname, password, profile)
-VALUES ('admin@global.local', 'admin', '$2a$12$L/rFVHZonEAmydEfZyYR.exvJuDdMY6kX7BIdXcam.voTxeBc7YwK', 'Admin');
-INSERT INTO users (email, nickname, password, profile)
-VALUES ('user@global.local', 'user', '$2a$12$3.UvEUatM.2VbYEI2Y.YKeqn3QNc/k0h9S0Vde2vqvzScKt74ofaS', 'User');
-
 CREATE TABLE users_login (
   id                        SERIAL PRIMARY KEY,
   userId                    VARCHAR(255) NOT NULL,
@@ -219,6 +211,8 @@ CREATE TABLE users_login (
   passwordInfo              VARCHAR(255),
   UNIQUE(userId)
 );
+INSERT INTO users_login(userId, providerId, firstName, lastName, fullName, authMethod)
+VALUES ('userTestId', 'providerId', 'firstName', 'lastName', 'fullName', 'oauth2');
 
 CREATE TABLE users_token (
   id                        VARCHAR(36) NOT NULL,
@@ -285,6 +279,8 @@ CREATE OR REPLACE FUNCTION insertEvent(
   END;;
   $$
 LANGUAGE plpgsql;
+SELECT insertEvent('facebookId', true, true, 'name', '(0,0)', 'description', current_timestamp,
+                   current_timestamp, 'imagePath', 16, '5-10', 'ticketSeller');
 
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
@@ -338,7 +334,6 @@ CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
   path                      VARCHAR NOT NULL,
   category                  VARCHAR(31),
-  userId                    BIGINT references users(userId),
   organizerId               BIGINT references organizers(organizerId),
   infoId                    BIGINT references infos(infoId),
   trackId                   BIGINT references tracks(trackId),
@@ -389,11 +384,10 @@ CREATE TABLE issuesComments (
 );
 
 CREATE TABLE usersTools (
+  tableId                   SERIAL PRIMARY KEY,
   tools                     VARCHAR(255) NOT NULL,
-  userId                    BIGINT REFERENCES users(userId),
-  PRIMARY KEY (userId)
+  userId                    VARCHAR(255) REFERENCES users_login (userId)
 );
-INSERT INTO usersTools (tools, userId) VALUES ('tool1, tool2, tool3', 1);
 
 ---############################## ACCOUNTING ###################################
 
@@ -483,7 +477,7 @@ CREATE TABLE account4686 (
   date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255),
   amount                  NUMERIC NOT NULL,
-  debit                   Boolean NOT NULL,
+  debit                   BOOLEAN NOT NULL,
   account63Id             BIGINT references account63(id)
 );
 
@@ -503,8 +497,8 @@ CREATE TABLE account403 (
   id                      SERIAL PRIMARY KEY,
   date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
   amount                  NUMERIC NOT NULL,
-  debit                   Boolean NOT NULL, --#sinon debit
-  userId                  BIGINT REFERENCES users(userId),
+  debit                   BOOLEAN NOT NULL, --#sinon debit
+  userId                  VARCHAR(255) REFERENCES users_login(userId),
   account60Id             BIGINT REFERENCES account60(id)
 );
 
@@ -558,10 +552,21 @@ CREATE UNIQUE INDEX eventsFollowedIndex ON eventsFollowed (userId, eventId);
 CREATE TABLE artistsFollowed (
   tableId                  SERIAL PRIMARY KEY,
   userId                   VARCHAR REFERENCES users_login(userId),
-  artistId                 INT REFERENCES artists(artistId),
-  UNIQUE(userId, artistId)
+  artistId                 INT REFERENCES artists(artistId)
 );
 CREATE UNIQUE INDEX artistsFollowedIndex ON artistsFollowed (userId, artistId);
+CREATE OR REPLACE FUNCTION insertUserArtistRelation(
+  userIdValue             VARCHAR(255),
+  artistIdValue           BIGINT)
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO artistsFollowed (userId, artistId)
+      VALUES (userIdValue, artistIdValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
 
 CREATE TABLE placesFollowed (
   tableId                  SERIAL PRIMARY KEY,
@@ -683,25 +688,6 @@ CREATE OR REPLACE FUNCTION insertEventArtistRelation(
   $$
 LANGUAGE plpgsql;
 
-CREATE TABLE usersArtists (
-  tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
-  artistId                BIGINT REFERENCES artists (artistId) NOT NULL
-);
-CREATE UNIQUE INDEX usersArtistsIndex ON usersArtists (userId, artistId);
-CREATE OR REPLACE FUNCTION insertUserArtistRelation(
-  userIdValue             VARCHAR(255),
-  artistIdValue           BIGINT)
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO usersArtists (userId, artistId)
-      VALUES (userIdValue, artistIdValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
-
 CREATE TABLE artistsGenres (
   artistId                INT REFERENCES artists (artistId),
   genreId                 INT REFERENCES genres (genreId),
@@ -748,7 +734,6 @@ DROP TABLE IF EXISTS eventsOrganizers;
 DROP TABLE IF EXISTS eventsAddresses;
 DROP TABLE IF EXISTS usersOrganizers;
 DROP TABLE IF EXISTS eventsArtists;
-DROP TABLE IF EXISTS usersArtists;
 DROP TABLE IF EXISTS artistsGenres;
 DROP TABLE IF EXISTS eventsFollowed;
 DROP TABLE IF EXISTS artistsFollowed;

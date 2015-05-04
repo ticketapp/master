@@ -11,6 +11,8 @@ import securesocial.core.IdentityId
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
+import scala.util.Try
+import services.Utilities.geographicPointPattern
 
 case class Place (placeId: Option[Long],
                   name: String,
@@ -24,7 +26,6 @@ case class Place (placeId: Option[Long],
                   address : Option[Address] = None)
 
 object Place {
-  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
                 imagePath: Option[String], street: Option[String], zip: Option[String], city: Option[String]): Place =
@@ -50,6 +51,14 @@ object Place {
         addressId  ~ imagePath =>
           Place(Option(placeId), name, facebookId, geographicPoint, description, webSites, capacity, openingHours,
             imagePath, Address.find(addressId))
+    }
+  }
+
+  def delete(placeId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM places WHERE placeId = {placeId}")
+        .on('placeId -> placeId)
+        .executeUpdate()
     }
   }
 
@@ -181,25 +190,36 @@ object Place {
     case e: Exception => throw new DAOException("Place.find: " + e.getMessage)
   }
 
-  def followPlaceByPlaceId(userId : String, placeId : Long): Option[Long] = try {
+  def followByPlaceId(userId : String, placeId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO placesFollowed(userId, placeId) VALUES ({userId}, {placeId})""")
+      SQL("""INSERT INTO placesFollowed(userId, placeId) VALUES({userId}, {placeId})""")
         .on(
           'userId -> userId,
           'placeId -> placeId)
         .executeInsert()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Place.followPlaceByPlaceId: " + e.getMessage)
   }
 
-  def followPlaceByFacebookId(userId : String, facebookId: String): Option[Long] = try {
+  def unfollowByPlaceId(userId: String, placeId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM placesFollowed
+          | WHERE userId = {userId} AND placeId = {placeId}""".stripMargin)
+        .on('userId -> userId,
+          'placeId -> placeId)
+        .executeUpdate()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.unFollow: " + e.getMessage)
+  }
+
+  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT placeId FROM places WHERE facebookId = {facebookId}""")
         .on('facebookId -> facebookId)
         .as(scalar[Long].singleOpt) match {
         case None => throw new ThereIsNoPlaceForThisFacebookIdException("Place.followPlaceIdByFacebookId")
-        case Some(placeId) => followPlaceByPlaceId(userId, placeId)
+        case Some(placeId) => followByPlaceId(userId, placeId)
       }
     }
   } catch {

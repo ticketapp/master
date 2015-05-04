@@ -1,6 +1,8 @@
 package controllers
 
 import models.Place
+import org.postgresql.util.PSQLException
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db._
@@ -10,13 +12,13 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import json.JsonHelper.placeWrites
 import securesocial.core.Identity
-
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 import scala.util.matching.Regex
 import play.api.libs.concurrent.Execution.Implicits._
+import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION, geographicPointPattern}
 
 object PlaceController extends Controller with securesocial.core.SecureSocial {
-  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action {
     geographicPoint match {
@@ -25,32 +27,44 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def place(id: Long) = Action {
-    Ok(Json.toJson(Place.find(id)))
-  }
+  def place(id: Long) = Action { Ok(Json.toJson(Place.find(id))) }
 
-  def findPlacesContaining(pattern: String) = Action {
-    Ok(Json.toJson(Place.findAllContaining(pattern)))
-  }
+  def findPlacesContaining(pattern: String) = Action { Ok(Json.toJson(Place.findAllContaining(pattern))) }
 
   def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
     Ok(Json.toJson(Place.findNearCity(city, numberToReturn, offset)))
   }
 
-  def deletePlace(placeId: Long): Int = {
-    DB.withConnection { implicit connection =>
-      SQL("DELETE FROM places WHERE placeId={placeId}").on(
-        'placeId -> placeId
-      ).executeUpdate()
+  def followPlaceByPlaceId(placeId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Place.followByPlaceId(request.user.identityId.userId, placeId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("PlaceController.followPlaceByPlaceId", psqlException)
+        Status(CONFLICT)("This user already follow this place.")
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error("PlaceController.followPlaceByPlaceId", psqlException)
+        Status(CONFLICT)("There is no place with this id.")
+      case Failure(unknownException) =>
+        Logger.error("PlaceController.followPlaceByPlaceId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
     }
   }
 
-  def followPlaceByPlaceId(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Place.followPlaceByPlaceId(request.user.identityId.userId, artistId)))
-  }
-
   def followPlaceByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Place.followPlaceByFacebookId(request.user.identityId.userId, facebookId)))
+    Place.followByFacebookId(request.user.identityId.userId, facebookId) match {
+      case Success(_) =>
+        Created
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Logger.error("PlaceController.followPlaceByFacebookId", psqlException)
+        Status(CONFLICT)("This user already follow this place.")
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error("PlaceController.followPlaceByFacebookId", psqlException)
+        Status(CONFLICT)("There is no place with this id.")
+      case Failure(unknownException) =>
+        Logger.error("PlaceController.followPlaceByFacebookId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
+    }
   }
   
   def isPlaceFollowed(placeId: Long) = UserAwareAction { implicit request =>

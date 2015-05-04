@@ -2,6 +2,7 @@ package controllers
 
 import models.Playlist
 import models.Playlist.existsPlaylistForUser
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
@@ -29,7 +30,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
   def create = SecuredAction(ajaxCall = true) { implicit request =>
     playlistBindingForm.bindFromRequest().fold(
       formWithErrors => {
-        println(formWithErrors.errorsAsJson)
+        Logger.error(formWithErrors.errorsAsJson.toString())
         BadRequest(formWithErrors.errorsAsJson)
       },
       playlistNameAndTracksId => {

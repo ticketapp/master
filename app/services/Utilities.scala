@@ -2,7 +2,7 @@ package services
 
 import java.sql.Connection
 import java.text.Normalizer
-
+import java.util.Date
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
@@ -18,7 +18,15 @@ import scala.collection.mutable.ListBuffer
 import scala.util.matching.Regex
 
 object Utilities {
-  val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
+  val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
+  val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBY"
+  val echonestApiKey = "3ZYZKU3H3MKR2M59Z"
+
+  val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-z@A-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
+  val geographicPointPattern = """(-?\(\d+\.?\d*,-?\d+\.?\d*\))""".r
+
+  val UNIQUE_VIOLATION = "23505"
+  val FOREIGN_KEY_VIOLATION = "23503"
 
   implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
     val MetaDataItem(qualified, nullable, clazz) = meta
@@ -45,8 +53,7 @@ object Utilities {
     }
   })
 
-  def normalizeString(string: String): String =
-    Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[^\\x28-\\x5A\\x61-\\x7A]", "")
+  def normalizeString(string: String): String = string //Should be replace accentued letters for example?
 
   def stripChars(s:String, ch:String)= s filterNot (ch contains _)
 
@@ -114,23 +121,33 @@ object Utilities {
       None
     case Some(desc) =>
       def stringToLinks(matcher: Regex.Match): String = {
-        val phoneNumberPattern = """[\d\.]+""".r
-        matcher.toString() match {
-          case phoneNumberPattern(link) => matcher.toString()
+        val phoneNumberPattern = """([\d\.]+)""".r
+        val matcherString = matcher.toString()
+        matcherString match {
+          case phoneNumberPattern(link) =>
+            matcherString
           case _ =>
-            if (matcher.toString contains "@")
-              "<i>" + matcher + "</i>"
+            if (matcherString contains "@")
+              matcherString
             else
-              """<a href='http://""" + normalizeUrl(matcher.toString()) + """'>""" + normalizeUrl(matcher.toString()) +
-                """</a>"""
+              """<a href='http://""" + normalizeUrl(matcherString) + """'>""" + normalizeUrl(matcherString) + """</a>"""
         }
       }
       Option("<div class='column large-12'>" +
-        linkPattern.replaceAllIn(desc.replaceAll( """<""", "&lt;").replaceAll( """>""", "&gt;"),
-          m => stringToLinks(m))
+        linkPattern.replaceAllIn(desc.replaceAll("""<""", "&lt;").replaceAll( """>""", "&gt;"), m => stringToLinks(m))
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
           .replaceAll( """\t""", "    ") +
         "</div>")
+  }
+
+  def formatDate(date: Option[String]): Option[Date] = date match {
+    case Some(dateFound: String) => val date = dateFound.replace("T", " ")
+      date.length match {
+        case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
+        case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
+        case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
+      }
+    case _ => None
   }
 }

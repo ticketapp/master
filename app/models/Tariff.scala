@@ -4,7 +4,7 @@ import anorm.SqlParser._
 import anorm._
 import play.api.db.DB
 import play.api.Play.current
-import controllers.DAOException
+import controllers.{SchedulerException, DAOException}
 import java.util.Date
 import java.math.BigDecimal
 
@@ -53,7 +53,7 @@ object Tariff {
     }
   }
 
-  def findAllByEvent(event: Event): List[Tariff] = {
+  def findAllByEvent(event: Event): List[Tariff] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT *
              FROM Tariffs
@@ -61,23 +61,54 @@ object Tariff {
         .on('eventId -> event.eventId)
         .as(TariffParser.*)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Tariff.findAllByEvent: " + e.getMessage)
   }
 
-  def save(tariff: Tariff) = {
-    try {
-      DB.withConnection { implicit connection =>
-        SQL( """INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)
-            VALUES ({denomination}, {nbTicketToSell}, {price}, {startTime}, {endTime}, {eventId})""").on(
-            'denomination -> tariff.denomination,
-            'nbTicketToSell -> tariff.nbTicketToSell,
-            'price -> tariff.price,
-            'startTime -> tariff.startTime,
-            'endTime -> tariff.endTime,
-            'eventId -> tariff.eventId
-          ).executeInsert()
+  def save(tariff: Tariff) = try {
+    DB.withConnection { implicit connection =>
+      SQL( """INSERT INTO tariffs (denomination, nbTicketToSell, price, startTime, endTime, eventId)
+          VALUES ({denomination}, {nbTicketToSell}, {price}, {startTime}, {endTime}, {eventId})""")
+        .on(
+          'denomination -> tariff.denomination,
+          'nbTicketToSell -> tariff.nbTicketToSell,
+          'price -> tariff.price,
+          'startTime -> tariff.startTime,
+          'endTime -> tariff.endTime,
+          'eventId -> tariff.eventId)
+        .executeInsert()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Tariff.save: " + e.getMessage)
+  }
+
+  def findPrices(description: Option[String]): Option[String] = description match {
+    case None =>
+      None
+    case Some(desc) =>
+      try {
+        """(\d+[,.]?\d+)\s*€""".r.findAllIn(desc).matchData.map { priceMatcher =>
+          priceMatcher.group(1).replace(",", ".").toFloat
+        }.toList match {
+          case list: List[Float] if list.isEmpty => None
+          case prices => Option(prices.min.toString + "-" + prices.max.toString)
+        }
+      } catch {
+        case e: Exception => throw new Exception("Tarrif.findPrices: " + e.getMessage)
       }
-    } catch {
-      case e: Exception => throw new DAOException("Cannot save tariff: " + e.getMessage)
+  }
+
+  def findTicketSellers(normalizedWebsites: Set[String]): Option[String] = {
+    normalizedWebsites.filter(website =>
+      website.contains("digitick") && website != "digitick.com" ||
+        website.contains("weezevent") && website != "weezevent.com" ||
+        website.contains("yurplan") && website != "yurplan.com" ||
+        website.contains("eventbrite") && website != "eventbrite.fr" ||
+        website.contains("ticketmaster") && website != "ticketmaster.fr" ||
+        website.contains("ticketnet") && website != "ticketnet.fr")
+    match {
+      case set: Set[String] if set.isEmpty => None
+      case websites: Set[String] => Option(websites.mkString(","))
     }
   }
 }

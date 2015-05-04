@@ -1,15 +1,24 @@
 package models
 
 import controllers.DAOException
+import controllers.SearchArtistsController._
 import play.api.db._
 import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
 import java.util.Date
+import play.api.libs.json._
+import play.api.libs.ws.{Response, WS}
 import securesocial.core.IdentityId
+import services.Utilities
 import services.Utilities._
-
+import jobs.Scheduler._
+import models.Tariff.{findPrices, findTicketSellers}
+import scala.concurrent.Future
+import scala.util.Try
 import scala.util.matching.Regex
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.functional.syntax._
 
 case class Event(eventId: Option[Long],
                  facebookId: Option[String],
@@ -285,6 +294,16 @@ object Event {
     case e: Exception => throw new DAOException("Event.save: " + e.getMessage)
   }
 
+  def delete(eventId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM events WHERE eventId = {eventId}")
+        .on('eventId -> eventId)
+        .executeUpdate()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.delete : " + e.getMessage)
+  }
+
   def update(event: Event): Unit = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -303,7 +322,7 @@ object Event {
     case e: Exception => throw new DAOException("Event.update: " + e.getMessage)
   }
 
-  def followEvent(userId: String, eventId: Long): Option[Long] = try {
+  def follow(userId: String, eventId: Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO eventsFollowed(userId, eventId)
@@ -313,8 +332,19 @@ object Event {
           'eventId -> eventId)
         .executeInsert()
     }
+  }
+
+  def unfollow(userId: String, eventId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM eventsFollowed
+          | WHERE userId = {userId} AND eventId = {eventId}""".stripMargin)
+        .on('userId -> userId,
+            'eventId -> eventId)
+        .executeUpdate()
+    }
   } catch {
-    case e: Exception => throw new DAOException("Event.follow: " + e.getMessage)
+    case e: Exception => throw new DAOException("Event.unFollow: " + e.getMessage)
   }
 
   def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
@@ -330,7 +360,7 @@ object Event {
     case e: Exception => throw new DAOException("Event.getFollowedEvents: " + e.getMessage)
   }
 
-  def isEventFollowed(userId: IdentityId, eventId: Long): Boolean = try {
+  def isFollowed(userId: IdentityId, eventId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM eventsFollowed
@@ -341,5 +371,70 @@ object Event {
     }
   } catch {
     case e: Exception => throw new DAOException("Event.isEventFollowed: " + e.getMessage)
+  }
+
+  def saveFacebookEventByFacebookId(eventFacebookId: String): Unit = try {
+    findEventOnFacebookByFacebookId(eventFacebookId).map { save }
+  } catch {
+    case e: Exception => throw new Exception("Event.saveFacebookEventByFacebookId")
+  }
+
+  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Event] = {
+    WS.url("https://graph.facebook.com/v2.2/" + eventFacebookId)
+      .withQueryString(
+        "fields" -> "cover,description,name,start_time,end_time,owner,venue",
+        "access_token" -> facebookToken)
+      .get()
+      .flatMap { readFacebookEvent }
+  }
+
+  def readFacebookEvent(eventFacebookResponse: Response): Future[Event] = {
+    val eventRead = (
+      (__ \ "description").readNullable[String] and
+        (__ \ "cover" \ "source").read[String] and
+        (__ \ "name").read[String] and
+        (__ \ "id").readNullable[String] and
+        (__ \ "start_time").readNullable[String] and
+        (__ \ "endTime").readNullable[String] and
+        (__ \ "venue" \ "street").readNullable[String] and
+        (__ \ "venue" \ "zip").readNullable[String] and
+        (__ \ "venue" \ "city").readNullable[String] and
+        (__ \ "owner" \ "id").readNullable[String]
+      )((description: Option[String], source: String, name: String, facebookId: Option[String],
+         startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
+         city: Option[String], maybeOwnerId: Option[String]) => {
+
+      val eventuallyOrganizer = Organizer.getOrganizerInfo(maybeOwnerId)
+      val address = new Address(None, None, city, zip, street)
+
+      val normalizedWebsites: Set[String] = getNormalizedWebsitesInText(description)
+      val ticketSellers = Tariff.findTicketSellers(normalizedWebsites)
+      val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(normalizedWebsites)
+      val eventuallyMaybeArtistsFromTitle =
+        getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), normalizedWebsites)
+
+      for {
+        organizer <- eventuallyOrganizer
+        artistsFromDescription <- eventuallyMaybeArtistsFromDescription
+        artistsFromTitle <- eventuallyMaybeArtistsFromTitle
+      } yield {
+
+        val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
+        Artist.saveArtistsAndTheirTracks(nonEmptyArtists)
+
+        val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
+
+        new Event(None, facebookId, true, true, name, None,
+          Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
+          formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
+          nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
+      }
+    })
+    try {
+      eventFacebookResponse.json.as[Future[Event]](eventRead)
+    } catch {
+      case e: Exception =>
+        throw new Exception("Empty event read by Event.readFacebookEvent")
+    }
   }
 }

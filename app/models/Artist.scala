@@ -8,7 +8,7 @@ import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, Web
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
-import services.Utilities
+import services.{SearchSoundCloudTracks, Utilities}
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -18,7 +18,8 @@ import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WS
-import scala.util.{Failure, Success}
+import scala.util.{Try, Failure, Success}
+import services.Utilities.facebookToken
 
 case class Artist (artistId: Option[Long],
                    facebookId: Option[String],
@@ -31,8 +32,6 @@ case class Artist (artistId: Option[Long],
                    tracks: Seq[Track] = Seq.empty)
 
 object Artist {
-  val token = play.Play.application.configuration.getString("facebook.token")
-
   private val ArtistParser: RowParser[Artist] = {
     get[Long]("artistId") ~
       get[Option[String]]("facebookId") ~
@@ -155,8 +154,8 @@ object Artist {
   }
 
   def save(artist: Artist): Option[Long] = try {
+    val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
     DB.withConnection { implicit connection =>
-      val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
       SQL(
         """SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
         .on(
@@ -178,6 +177,41 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
   }
 
+  def update(artist: Artist): Int = try {
+    val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
+    DB.withConnection { implicit connection =>
+      SQL(
+        """UPDATE artists
+          | SET facebookId = {facebookId}, name = {name}, imagePath = {imagePath}, facebookUrl = {facebookUrl},
+          |   description = {description}, websites = {websites}
+          | WHERE artistId = {artistId}""".stripMargin)
+        .on(
+          'artistId -> artist.artistId,
+          'facebookId -> artist.facebookId,
+          'name -> artist.name,
+          'imagePath -> artist.imagePath,
+          'facebookUrl -> artist.facebookUrl,
+          'description -> artist.description,
+          'websites -> websites)
+        .executeUpdate()
+      }
+  } catch {
+    case e: Exception => throw new DAOException("Artist.update: " + e.getMessage)
+  }
+
+  def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
+    artists.map { artist =>
+      val artistWithId = artist.copy(artistId = Artist.save(artist))
+      getSoundCloudTracksForArtist(artistWithId).map { tracks =>
+        SearchSoundCloudTracks.addSoundCloudWebsiteIfNotInWebsites(tracks.headOption, artistWithId)
+        tracks.map { Track.save }
+      }
+      getYoutubeTracksForArtist(artistWithId, Artist.normalizeArtistName(artistWithId.name)).map {
+        _.map(Track.save)
+      }
+    }
+  }
+
   def addWebsite(artistId: Option[Long], normalizedUrl: String): Int = {
     DB.withConnection { implicit connection =>
       SQL(
@@ -191,6 +225,17 @@ object Artist {
             'normalizedUrl -> normalizedUrl)
         .executeUpdate()
     }
+  }
+
+  def addSoundCloudWebsiteIfMissing(soundCloudTrack: Option[Track], artist: Artist): Unit = soundCloudTrack match {
+    case None =>
+    case Some(soundCloudTrack: Track) =>
+      soundCloudTrack.redirectUrl match {
+        case None =>
+        case Some(redirectUrl) =>
+          if (!artist.websites.contains(redirectUrl))
+            Artist.addWebsite(artist.artistId, redirectUrl)
+      }
   }
 
   def saveWithEventRelation(artist: Artist, eventId: Long): Boolean = save(artist) match {
@@ -228,43 +273,53 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.saveEventArtistRelation: " + e.getMessage)
   }
 
-  def deleteArtist(artistId: Long): Long = try {
+  def delete(artistId: Long): Int = try {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM artists WHERE artistId = {artistId}")
         .on('artistId -> artistId)
         .executeUpdate()
     }
   } catch {
-    case e: Exception => throw new DAOException("Artist.deleteArtist : " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.delete : " + e.getMessage)
   }
 
-  def followArtistByArtistId(userId : String, artistId : Long): Option[Long] = try {
+  def followByArtistId(userId : String, artistId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT insertUserArtistRelation({userId}, {artistId})""")
+      SQL("""INSERT INTO artistsFollowed(userId, artistId) VALUES({userId}, {artistId})""")
         .on(
           'userId -> userId,
           'artistId -> artistId)
-        .execute()
-      None
+        .executeInsert()
+    }
+  }
+
+  def unfollowByArtistId(userId: String, artistId: Long): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM artistsFollowed
+          | WHERE userId = {userId} AND artistId = {artistId}""".stripMargin)
+        .on('userId -> userId,
+            'artistId -> artistId)
+        .executeUpdate()
     }
   } catch {
-    case e: Exception => throw new DAOException("Artist.followArtistByArtistId: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.unFollow: " + e.getMessage)
   }
-  
-  def followArtistByFacebookId(userId : String, facebookId: String): Option[Long] = try {
+
+  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
         .on('facebookId -> facebookId)
         .as(scalar[Long].singleOpt) match {
         case None => throw ThereIsNoArtistForThisFacebookIdException("Artist.followArtistByFacebookId")
-        case Some(artistId) => followArtistByArtistId(userId, artistId)
+        case Some(artistId) => followByArtistId(userId, artistId)
       }
     }
   } catch {
     case thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException =>
-      throw ThereIsNoArtistForThisFacebookIdException("Artist.followArtistByFacebookId")
+      throw ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId")
     case e: Exception =>
-      throw DAOException("Artist.followArtistByFacebookId: " + e.getMessage)
+      throw DAOException("Artist.followByFacebookId: " + e.getMessage)
   }
 
   def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {
@@ -295,6 +350,7 @@ object Artist {
 
   def normalizeArtistName(artistName: String): String = {
     normalizeString(artistName)
+      .toLowerCase
       .replaceAll("officiel", "")
       .replaceAll("fanpage", "")
       .replaceAll("official", "")
@@ -302,5 +358,6 @@ object Artist {
       .replaceAll("facebook", "")
       .replaceAll("page", "")
       .trim
+      .replaceAll("""\s+""", " ")
   }
 }
