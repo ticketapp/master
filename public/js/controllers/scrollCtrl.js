@@ -133,7 +133,6 @@ app.controller('scrollCtrl', ['$scope','$rootScope', '$location', '$timeout', '$
             $rootScope.artiste = artist;
             $rootScope.artiste.events = [];
             $rootScope.tracks = [];
-            $rootScope.tracks = [];
             $rootScope.loadingTracks = true;
             window.location.href =('#/artiste/' + artist.facebookUrl);
             var searchPattern  = document.getElementById('searchBar').value.trim();

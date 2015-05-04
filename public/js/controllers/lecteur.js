@@ -86,7 +86,6 @@ app.controller ('lecteurCtrl', ['$scope', '$rootScope', '$timeout', '$http', 'An
         var tr = 0;
         console.log(playlist.tracks);
         playlist.tracks = $filter('orderBy')(playlist.tracks, 'rank', false);
-        console.log(playlist.tracks);
         function addtr (tr) {
             $http.get('/artists/' + playlist.tracks[tr].artistFacebookUrl).
                 success(function (data) {
