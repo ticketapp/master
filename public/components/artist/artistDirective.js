@@ -7,8 +7,9 @@ angular.module('claudeApp').
             scope : true,
             link : function (scope, element) {
                 function resizeElem () {
+                    $(element).find('.img_min').css('height', Math.ceil($(element).innerWidth() * 0.376));
                     if ($rootScope.window != 'small') {
-                        $(element).Height = 94 + (($(element).clientWidth * 0.376) / 2);
+                        $(element).css('height', 94 + Math.ceil(($(element).innerWidth() * 0.376) / 2));
                     }
                 }
                 resizeElem();
@@ -30,8 +31,9 @@ angular.module('claudeApp').
             scope : true,
             link : function (scope, element) {
                 function resizeElem () {
+                    $(element).find('.img_min').css('height', Math.ceil($(element).innerWidth() * 0.376));
                     if ($rootScope.window != 'small') {
-                        $(element).Height = 94 + (($(element).clientWidth * 0.376) / 2);
+                        $(element).css('height', 94 + Math.ceil(($(element).innerWidth() * 0.376) / 2));
                     }
                 }
                 resizeElem();

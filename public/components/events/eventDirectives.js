@@ -6,7 +6,13 @@ angular.module('claudeApp').
             scope : true,
             link : function (scope, element) {
                 function resizeElem () {
-                    $(element).find('.img_min').css('height', ($(element).clientWidth * 0.376) / 2);
+                    var waitForElem = setInterval(function () {
+                        if ($(element).innerWidth() > 50) {
+                            clearInterval(waitForElem)
+                            $(element).find('.img_min').css('height', Math.ceil($(element).innerWidth() * 0.376));
+                        }
+                    }, 100);
+                    waitForElem;
                 }
                 resizeElem();
                 $window.addEventListener('resize', resizeElem);
@@ -24,8 +30,8 @@ angular.module('claudeApp').
             link : function (element) {
                 if ( $rootScope.window != 'small' && $rootScope.window != 'medium') {
                     if ($(element).offsetLeft < 30) {
-                        $(element).classList.remove('large-4');
-                        $(element).classList.add('large-12');
+                        $(element).removeClass('large-4');
+                        $(element).addClass('large-12');
                     }
                 }
             }

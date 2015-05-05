@@ -19059,6 +19059,9 @@ md-tabs > .md-header {
 md-tabs-ink-bar {
   background: #a0d3e8 !important; }
 
+artist-min, artist-facebook-min {
+  overflow: hidden; }
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;

@@ -6,6 +6,10 @@ angular.module('claudeApp').
                 otherWebsites : []
             },
             normalizeWebsitesObject : function (websites, facebookUrl) {
+                factory.websites = {
+                    iconWebsites : [],
+                    otherWebsites : []
+                };
                 for (var i = 0; i < websites.length; i++) {
                     websites[i] = {url: websites[i]};
                     if (websites[i].url.length > 0) {
