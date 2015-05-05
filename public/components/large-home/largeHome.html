@@ -1,0 +1,33 @@
+<div class="parallax-background top0">
+    <h4  ng-if="elementEnCours.fixedTitle == true"
+         class="intro-text text-center animate-show relative textColorWhite margin10">
+        {{elementEnCours.title}}
+    </h4>
+    <div ng-repeat="info in infos" class=" column large-12 intro-text animate-show"
+         ng-if="elementEnCours == info">
+        <h4 ng-if="info.title.length > 0 && info.fixedTitle == false" ng-bind-html="info.title"></h4>
+        <div ng-bind-html="info.content"></div>
+        <div class=" marginTop20 column medium-11 fade"
+             ng-if="elementEnCours.artist.tracks.length > 0">
+            <div class="float-right">
+                Ecouter {{elementEnCours.artist.name}}
+                <div class="img-circularPlayer BlackTrans">
+                    <i class="pauseInImg ng-scope fi-play font-size: 80px;"
+                       ng-click="$root.addAndPlay(elementEnCours.artist.tracks, elementEnCours.artist)"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="parallax-content ng-search padding0">
+</div>
+<div ng-if="elementEnCours.animation && $root.connected == false" id="infosTooltip"
+     class="animate-show animated">
+    <div style="{{elementEnCours.animation.style}}">
+        <i ng-click="removeAnimation()" class="fi-x pointer" style="
+    float: right;
+    color: rgba(0, 0, 0, 0.3);
+"></i>
+        <div ng-bind-html="elementEnCours.animation.content"></div>
+    </div>
+</div>

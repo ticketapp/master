@@ -1,0 +1,8 @@
+<div class="column large-12 padding0" ng-if="$root.connected == false">
+    <a ng-click="connectLink('http://localhost:9000/authenticate/facebook')" class="button">
+        <i class="fi fi-social-facebook" style="font-size: 26px"></i>
+        <b style="line-height: 26px">Connectez-vous via Facebook</b>
+    </a>
+    <a ng-click="connectLink('http://localhost:9000/authenticate/google')"> <img src="/assets/securesocial/images/providers/google.png"></a>
+</div>
+<h2 ng-if="$root.connected == true">Vous êtes connecté</h2>

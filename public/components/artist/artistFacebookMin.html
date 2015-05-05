@@ -1,0 +1,29 @@
+<div class="block_min">
+    <div class="img_min">
+        <div class="toGrow">
+            <img ng-click="createArtist(artist)"
+                 src="{{ artist.imagePath }}"
+                 alt="une belle image" class="min pointer"/>
+        </div>
+        <div class="absolute top0">
+            <i ng-repeat="genre in artist.genres"
+               ng-click="$root.research(genre.name); $root.redirectToSearch(genre.name)"
+               ng-class="{'fi-reggae': genre.name == 'reggae',
+                           'fi-hip-hop': genre.name == 'hip-hop',
+                           'fi-jazz': genre.name == 'jazz',
+                           'fi-latin': genre.name == 'musiques latines',
+                           'fi-electro': genre.name == 'electro',
+                           'fi-world': genre.name == 'musiques du monde',
+                           'fi-classique': genre.name == 'classique',
+                           'fi-rock': genre.name == 'rock',
+                           'fi-chanson': genre.name == 'chanson',
+                           }">
+            </i>
+        </div>
+        <a ng-click="createArtist(artist)">
+            <h3 class="minTitle">
+                {{ artist.name }}
+            </h3>
+        </a>
+    </div>
+</div>

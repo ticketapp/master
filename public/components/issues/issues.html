@@ -1,0 +1,85 @@
+<div class="column large-12">
+    <h1>FAQ / Bugs</h1>
+    <input placeholder="Rechercher" ng-model="newIssue.title"
+           ng-change="getIssues(newIssue.title); selectedIssue = false"
+           class="float-left height50">
+    <a class="button float-left height50" ng-click="addNewIssue = !addNewIssue; selectedIssue = false">Ajouter un sujet</a>
+    <form ng-show="addNewIssue" name="formIssue" class="column large-12" ng-submit="addIssue()">
+        <i>verifier si des sujets similaires n'ont pas été postés</i>
+        <md-input-container flex>
+            <input ng-model="newIssue.title"
+                   ng-minlength="8"
+                   required name="issueTitle"
+                   placeholder="Sujet">
+            <div ng-messages="formIssue.issueTitle.$error">
+                <div ng-message="required">Ce champ est obligatoire</div>
+                <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+            </div>
+        </md-input-container>
+        <md-input-container flex>
+            <textarea ng-minlength="8"
+                      required
+                      placeholder="message"
+                      name="issueContent"
+                      ng-model="newIssue.content"></textarea>
+            <div ng-messages="formIssue.issueContent.$error">
+                <div ng-message="required">Ce champ est obligatoire</div>
+                <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+            </div>
+        </md-input-container>
+        <input class="button" type="submit">
+        <a class="button" ng-click="addNewIssue = false">Annuler</a>
+    </form>
+    <div layout="row" layout-sm="column" layout-align="space-around" ng-if="loadingIssues">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
+    <ul class="column large-12" ng-show="selectedIssue == false">
+        <ul ng-repeat="issue in issues | filter: newIssue.title">
+            <h1 ng-click="$parent.selectedIssue = issue; $parent.selectedIssue.index = $index"><a>{{issue.title}}</a></h1>
+        </ul>
+        <a class="button" ng-click="$parent.issuesLimit = $parent.issuesLimit + 10" ng-if="issues.length > issuesLimit">Voir plus de Sujets</a>
+    </ul>
+    <div class="column large-12"
+         ng-if="selectedIssue != false">
+        <a class="button" ng-click="$parent.selectedIssue = false">Retour</a>
+        <div class="collumn large-12">
+            <h1>{{selectedIssue.title}}</h1>
+            <p>{{selectedIssue.content}}</p>
+            <div ng-show="viewComments" class="column large-12">
+                <h2>Commentaires</h2>
+                <p ng-if="selectedIssue.comments.length == 0"> Pas de commentaires pour le moment</p>
+                <div ng-repeat="comment in selectedIssue.comments">
+                    <p>{{comment.content}}</p>
+                    <hr>
+                </div>
+            </div>
+            <form ng-show="$parent.addNewComment" name="commentForm" ng-submit="addComment(selectedIssue.index)">
+                <md-input-container flex>
+                    <textarea ng-minlength="8" required name="commentContent" placeholder="Commantaire"
+                              ng-model="newComment.content"></textarea>
+                    <div ng-messages="commentForm.commentContent.$error">
+                        <div ng-message="required">Ce champ est obligatoire</div>
+                        <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+                    </div>
+                </md-input-container>
+                <input class="button" type="submit">
+                <a class="button" ng-click="$parent.addNewComment = !$parent.addNewComment">Annuler</a>
+            </form>
+            <a class="button"
+               ng-show="viewComments == false"
+               ng-click="getIssueComments(selectedIssue.issueId); viewComments = true">
+                Afficher les commantaires
+            </a>
+            <a class="button"
+               ng-show="viewComments == true"
+               ng-click="viewComments = false">
+                Masquer les commentaires
+            </a>
+            <a class="button"
+               ng-show="!$parent.addNewComment"
+               ng-click="$parent.addNewComment = !$parent.addNewComment">
+                Ajouter un commantaire
+            </a>
+        </div>
+    </div>
+</div>

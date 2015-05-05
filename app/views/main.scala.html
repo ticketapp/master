@@ -3,7 +3,7 @@
 <html class="no-js">
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>Claude</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -12,7 +12,7 @@
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
-    <link rel="stylesheet" href="@routes.Assets.at("app/styles/main.css")">
+    <link rel="stylesheet" href="@routes.Assets.at("styles/main.css")">
     <!-- endbuild -->
 </head>
 <body ng-app="claudeApp">
@@ -30,14 +30,14 @@
     ga('create', 'UA-60282251-1', 'auto');
     ga('send', 'pageview');
 </script>
-<!-- build:js(.) scripts/oldieshim.js") -->
+<!-- build:js(.) scripts/oldieshim.js -->
 <!--[if lt IE 9]>
-<script src="@routes.Assets.at("bower_components/es5-shim/es5-shim.js")"></script>
-<script src="@routes.Assets.at("bower_components/json3/lib/json3.js")"></script>
-<![endif]-->
+    <script src="@routes.Assets.at("bower_components/es5-shim/es5-shim.js")"></script>
+    <script src="@routes.Assets.at("bower_components/json3/lib/json3.js")"></script>
+    <![endif]-->
 <!-- endbuild -->
 
-<!-- build:js(.) scripts/vendor.js") -->
+<!-- build:js(.) scripts/vendor.js -->
 <!-- bower:js -->
 <script src="@routes.Assets.at("bower_components/angular/angular.js")"></script>
 <script src="@routes.Assets.at("bower_components/angular-animate/angular-animate.js")"></script>

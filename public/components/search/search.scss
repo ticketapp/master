@@ -1,0 +1,79 @@
+md-slider#timeSearchSlider > .md-thumb-container > .md-thumb {
+  width: 100px!important;
+  left: -28px!important;
+  top:5px;
+}
+md-slider#timeSearchSlider > .md-thumb-container {
+  width: 100px!important;
+}
+md-slider#timeSearchSlider                                                                                                                                                                                                                                                                                                                                                                                                                                                       .md-focus-thumb {
+  width: 100px!important;
+}
+md-slider#timeSearchSlider > .md-thumb-container > .md-thumb:after {
+  width: 100px!important;
+}
+md-slider#timeSearchSlider > .md-thumb-container > .md-thumb > b {
+  color: #ffffff;
+  position: absolute;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  left: 0;
+  font-size: 20px;
+  text-align: center;
+  width: 100%;
+  cursor: pointer;
+}
+md-sign {
+  width: 100px;
+  left: -50px;
+}
+md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
+  position: absolute;
+  font-size: 20px;
+  bottom: -20px;
+  left: -28px;
+  width: 100px;
+  color: #ffffff;
+  text-align: center;
+}
+.md-focus-ring {
+  width: 100px!important;
+}
+#searchBlock, #searchTopBlock {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  transform: translate3d(0, -1px, 0);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+  max-width: 100%;
+}
+
+#searchBar, #searchTopBar {
+  height:40px;
+  margin: 0;
+  float:left;
+}
+#searchBlock {
+  margin-top : -106px;
+
+}
+.inputName {
+  width: 18.6%;
+  float: left;
+  position: relative;
+  top: 0;
+  bottom: 0;
+  margin: 0;
+  height: 40px;
+  line-height: 40px;
+  background: #2DAAE1;
+}
+.inputName.active {
+  background: #007095!important;
+  color: #ffffff;
+}
+.inputName:hover {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+}
+

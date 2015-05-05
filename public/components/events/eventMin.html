@@ -1,0 +1,153 @@
+<div class="block_min">
+    <div class="img_min">
+        <div class="toGrow">
+            <a href="#/event/{{event.eventId}}">
+                <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
+            </a>
+        </div>
+        <div class="absolute top0">
+            <i ng-repeat="genre in event.genres"
+               ng-click="$root.research(genre.name); $root.redirectToSearch(genre.name)"
+               ng-class="{'fi-reggae': genre.name == 'reggae',
+               'fi-hip-hop': genre.name == 'hip-hop',
+               'fi-jazz': genre.name == 'jazz',
+               'fi-latin': genre.name == 'musiques latines',
+               'fi-electro': genre.name == 'electro',
+               'fi-world': genre.name == 'musiques du monde',
+               'fi-classique': genre.name == 'classique',
+               'fi-rock': genre.name == 'rock',
+               'fi-chanson': genre.name == 'chanson',
+               }">
+            </i>
+        </div>
+        <a href="#/event/{{event.eventId}}">
+            <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
+                {{ event.name }}
+            </h3>
+        </a>
+    </div>
+    <div class=" text_evnt_min" >
+        <i  style="font-size: 30px; color: {{event.priceColor}};"
+            class="fi-calendar">
+        </i>
+        <b style="vertical-align: text-bottom;">
+            {{ event.startTime | date:'dd/MM' }}
+            <i>à</i>
+            {{ event.startTime | date:'HH:mm' }}
+        </b>
+        <i ng-show="event.endTime">au
+            <b> {{ event.endTime | date:'dd/MM' }} </b>
+            à
+            <b> {{ event.endTime | date:'HH:mm' }} </b>
+        </i>
+        <i ng-if="$root.window == 'small'" style="color: {{event.priceColor}}; font-size: 30px;"
+           class="float-right fa "
+           ng-class="{'fa-chevron-down': !$parent.showEventDetail, 'fa-chevron-up': $parent.showEventDetail}"
+           ng-click="$parent.showEventDetail = !$parent.showEventDetail">
+        </i>
+        <span ng-show="$root.window != 'small' || showEventDetail">
+            <div class="img-circularPlayer float-right"
+                 ng-if="event.tariffRange != undefined"
+                 style="background: {{event.priceColor}};
+                  height: 70px;
+                  width: 70px;
+                 padding-top: 21px; color: #ffffff; text-align: center;">
+                <b>{{event.tariffRange}}</b>
+            </div>
+            <br/>
+            <div class="infos_event">
+                <span class="dropDown" data-ng-repeat="place in event.places">
+                    <i class="fa fa-map-marker" style="font-size: 30px; color: {{event.priceColor}};"></i>
+                    <b style="vertical-align: text-bottom;">
+                        <a href="#/places/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+                    </b>
+                    <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
+                        <li style="display: block;"
+                            class="float-left width100p relative">
+                            <a href="#/places/{{place.placeId}}"
+                               class="width100p padding0" style="height: 140px; overflow: hidden;
+                               background-color: {{event.priceColor}}">
+                                <img class="width100p " src="{{place.imagePath}}" ng-if="place.imagePath != undefined">
+                            </a>
+                            <button style='height:55px; float:right'
+                                    class="absolute right bottom0"
+                                    ng-click="$root.follow('places', place.placeId, place.name)">
+                                Suivre
+                            </button>
+                        </li>
+                    </ul>
+                </span>
+            <i      style="vertical-align: text-bottom;"
+                    class="eventMinFilter"
+                    ng-class="{'float-right': $root.window == 'small'}"
+                    ng-if="event.addresses[0].city.length > 0"
+                    ng-click="$root.research(event.addresses[0].city); $root.redirectToSearch(event.addresses[0].city)">
+                    ({{event.addresses[0].city}})
+                </i>
+            </div>
+            <div class="infos_event" ng-class="{'float-left': $root.window == 'small'}">
+                <span class="dropDown" ng-show="organizer.name != event.places[0].name"
+                      data-ng-repeat="organizer in event.organizers">
+                    <i class="fa fa-user"
+                       style="font-size: 30px; color: {{event.priceColor}};"></i>
+                    <b style="vertical-align: text-bottom;">
+                        <a href="#/organizers/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}}</a>
+                    </b>
+                    <ul class="f-dropdown"
+                        ng-if="$root.window != 'small' && $root.window != 'medium'">
+                        <li style="display: block;"
+                            class="float-left width100p relative">
+                            <a href="#/organizers/{{organizer.organizerId}}"
+                               class="width100p padding0" style="height: 150px; overflow: hidden">
+                                <img class="width100p " src="{{organizer.imagePath}}">
+                            </a>
+                            <button style='height:55px; float:right'
+                                    class="absolute right bottom0"
+                                    ng-click="$root.follow('organizers', organizer.organizerId, organizer.name)">
+                                Suivre
+                            </button>
+                        </li>
+                    </ul>
+                </span>
+            </div>
+            <div class="description_event_min" style="height: 60px;">
+                <span class="dropDown float-left"
+                      data-ng-repeat="artist in event.artists">
+                    <a href="#/artiste/{{artist.facebookUrl}}">
+                        <h3 style="color: {{event.priceColor}};" class="float-left margin0"
+                            ng-mouseover="showDrop = true;">
+                            {{ artist.name }}
+                            <b ng-show="$index != event.artists.length - 1"> -&nbsp;</b>
+                        </h3>
+                    </a>
+                    <ul class="f-dropdown marginTop30"
+                        ng-mouseleave="$parent.showDrop = false;"
+                        ng-if="$root.window != 'small' && $root.window != 'medium'">
+                        <li style="display: block; min-height: 100px"
+                            class="float-left width100p paddingTop10 paddingBottom10
+                            paddingRight10 marginBottom10 relative">
+                            <a href="#/artiste/{{artist.facebookUrl}}"
+                               class="absolute width100p height100p imgBlur"
+                               style="display: block;
+                                background-image: url('{{artist.imagePath}}');
+                                background-size: 100%">
+
+                            </a>
+                            <div class="img-circularPlayer float-right marginTop20 relative"
+                                 style="background: rgba(0, 0, 0, 0.42);"
+                                 ng-if="artist.tracks.length > 0">
+                                <i class="pauseInImg ng-scope fi-play"
+                                   style="color: {{event.priceColor}}; font-size: 80px;"
+                                   ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
+                            </div>
+                            <button style='height:55px; float:left; margin-top: 30px;'
+                                    ng-click="$root.followArtist(artist.artistId, artist.name)">
+                                Suivre
+                            </button>
+                        </li>
+                    </ul>
+                </span>
+            </div>
+        </span>
+    </div>
+</div>

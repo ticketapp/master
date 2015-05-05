@@ -1,0 +1,117 @@
+.hiddenVideo {position:fixed; top:-10000px}
+.onplay {opacity: 1!important;}
+.video_contener{width:25%; float:left; display:table-cell; margin:10px auto;}
+#iframe-lecture {z-index: 9;
+  position: absolute;
+  margin-top: 10px;
+}
+#youtubePlayer{z-index: 9;
+  position: absolute;
+}
+.iClose{
+  display: none;
+  z-index: 2;
+  margin-left: 190px;
+  font-size: 26px;
+  margin-top: -8px;
+}
+.playInImg {
+  display : none;
+  font-size: 57px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+.pauseInImg {
+  display: block;
+  font-size: 57px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+.img-circularPlayer:hover > .playInImg {
+  display: block;
+}
+.img-circularPlayer{
+  width: 80px;
+  height: 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: block;
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  margin: 5px;
+  float: left;
+}
+.trackContener:hover > .iClose {
+  display: block;
+}
+.trackInfos {
+  padding-top: 10px;
+  font-size: 11px;
+}
+.trackInfos:hover {
+  cursor: move;
+}
+.trackContener {
+  width: 205px;
+  display:inline-block;
+  white-space: normal;
+  opacity: 0.6;
+  margin: 5px;
+  padding-right: 5px;
+  box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
+}
+.trackContener:hover {
+  opacity: 1!important;
+}
+.lecteurError {
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.46);
+  color: white;
+  float: left;
+  padding: 0 5px 5px 0;
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+.lecteurError > h3 {
+  margin: 5px;
+  color: white;
+}
+.playlistContener {
+  font-size: 11px;
+  width: auto;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  white-space: nowrap;
+  display: inline-flex;}
+.ng-player{
+  bottom: 0;
+  position: fixed;
+  width: 100%;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  z-index: 12;
+  box-shadow: 0px -2px 24px 0 rgba(0, 0, 0, 0.2);
+}
+.lecteur_controller{position:absolute; background-color:rgba(0, 0, 0, 0.7); display:none;}
+.lecteurControls{
+  background: rgb(0, 140, 186);
+  padding: 0px 20px 20px 20px;
+  height: 20px;
+  color: white;
+  margin: 0;
+  cursor: pointer;
+  text-align: center;
+  line-height: 20px;
+}
+.lecteurControls.active {
+  background: #007095;
+  color: #43AC6A;
+}
+#progressBar {border: 0;
+  height: 20px;}
+.lecteurControls:hover {background-color:#007095; }
+.ng-control{height:20px;}

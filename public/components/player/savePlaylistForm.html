@@ -1,0 +1,8 @@
+<form>
+    <input type="text" ng-model="$root.playlist.name" placeholder="Nom de la playlist">
+    <a class="button" ng-click="cancel()">Annuler</a>
+    <a ng-click="createNewPlaylist(playlist)" class="button">créer une nouvelle playlist</a>
+    <a class="button" ng-if="newPlaylist == false" ng-click="updatePlaylist(playlist)">
+        Mettre à jours
+    </a>
+</form>

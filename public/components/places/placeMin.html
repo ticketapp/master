@@ -1,0 +1,40 @@
+<div class="block_min">
+    <div class="img_min">
+        <div class="toGrow">
+            <a href="#/places/{{place.placeId}}">
+                <img src="{{ place.imagePath }}" alt="une belle image" class="min"/>
+                <map ng-if="place.imagePath.length == 0 || place.imagePath == undefined"
+                     zoom="14"
+                     center="[{{place.geographicPoint}}]"
+                     scrollwheel="false"
+                     disable-default-u-i="true"
+                     styles="[
+                                     {
+                                         stylers:[
+                                             {hue:'#00654C'},
+                                             {visibility:'simplified'},
+                                             {gamma:0.5},
+                                             {weight:0.5}
+                                         ]
+                                     },
+                                     {
+                                        elementType:'labels',
+                                        stylers:[
+                                            {visibility:'off'}
+                                        ]
+                                    },
+                                    {featureType:'water',
+                                        stylers:[
+                                            {color:'#008CBA'}
+                                        ]
+                                    }
+                                ]"
+                     class="width100p img_min_evnt">
+                    <marker visible="true" position="{{place.geographicPoint}}">
+                    </marker>
+                </map>
+            </a>
+        </div>
+        <a href="#/places/{{place.placeId}}"><h3 class="minTitle">{{place.name}}</h3></a>
+    </div>
+</div>
