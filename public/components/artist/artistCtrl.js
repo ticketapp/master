@@ -8,7 +8,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.trackTitle = '';
         $scope.showDesc = false;
         $scope.selectedTab = 0;
-        if ($rootScope.artisteToCreate == false) {
+        if ($rootScope.artisteToCreate != true) {
             $scope.tracks = [];
             $scope.artist = [];
             $scope.artist.events = [];
@@ -21,10 +21,10 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     $scope.websites = WebsitesFactory.normalizeWebsitesObject(artist.websites,
                         $routeParams.facebookUrl);
                 }
-                ArtistsFactory.getArtistEvents(artist.artistId).then(function (events) {
-                    $scope.artist.events = events;
-                })
             });
+            ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
+                $scope.artist.events = events;
+            })
         } else {
             $scope.selectedTab = 1;
             ArtistsFactory.passArtisteToCreateToFalse();
@@ -58,7 +58,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     'vous proppose</b>' +
                     '<select ng-model="reason">'+
                     '<option value="B">Mauvais Artist</option>'+
-                    '<option value="Q">Mauvaise qualité</option>'+
+                    '<option value="Q">Mauvaise qualitée</option>'+
                     '</select><b class="column large-12">{{error}}</b>'+
                     '<input type="submit" class="button">'+
                     '<a class="button float-right" ng-click="cancel()">Annuler</a>'+

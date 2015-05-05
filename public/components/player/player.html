@@ -3,7 +3,7 @@
         <i ng-click="$parent.showVideo = false" ng-if="$root.window != 'small' && $root.window != 'medium'"
            class="fi-x pointer"></i>
         <i ng-click="$parent.showVideo = false; insertVideo()"
-           ng-if="$root.window != 'small' || $root.window != 'medium'"
+           ng-if="$root.window == 'small' || $root.window == 'medium'"
            class="fi-x pointer"></i>
     </div>
     <div id="youtubePlayer">
@@ -15,15 +15,15 @@
 </div>
 <div ng-show="showInfo" class="BlackTrans float-left width100p">
     <div class="column large-12">
-        <h3><a href="#/artiste/{{trackActive.artist.facebookUrl}}">{{trackActive.artist.name}}</a></h3>
+        <h3><a href="#/artists/{{trackActive.artist.facebookUrl}}">{{trackActive.artist.name}}</a></h3>
         <h3 style="color: #ffffff">Prochain concert prez de chez vous :</h3>
-        <a href="#/event/{{trackActive.nextShow.eventId}}">
+        <a href="#/events/{{trackActive.nextShow.eventId}}">
             {{trackActive.nextShow.name}}
         </a>
         <div class="column large-12 padding0">
             <i class="fa fa-calendar" style="color: #ffffff"></i>{{trackActive.nextShow.startTime | date:'dd/MM' }}
             <i class="fa fa-map-marker" style="color: #ffffff"></i>
-            <a href="#/lieu/{{trackActive.nextShow.places[0].placeId }}">
+            <a href="#/places/{{trackActive.nextShow.places[0].placeId }}">
                 {{trackActive.nextShow.places[0].name}}
             </a>
         </div>
@@ -142,7 +142,7 @@ margin-left: 5px;"
                        ng-class="{'fi-pause': onPlay, 'fi-play': !onPlay}" ng-click="playPause()"></i>
                 </div>
                 <div as-sortable-item-handle class="trackInfos">
-                    <a href="#/artiste/{{track.artist.facebookUrl}}">{{track.artist.name}}</a><br/>
+                    <a href="#/artists/{{track.artist.facebookUrl}}">{{track.artist.name}}</a><br/>
                     {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
                     <a target="_blank" href="{{track.redirectUrl}}"
                        class="column small-2 padding0"

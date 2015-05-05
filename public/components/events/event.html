@@ -8,7 +8,7 @@
             <b>
                 {{ event.startTime | date:'dd/MM - HH:mm'}}
             </b>
-            <a href="#/lieu/{{ place.placeId }}"
+            <a href="#/places/{{ place.placeId }}"
                ng-class="{'column padding0': $root.window == 'small'}"
                data-ng-repeat="place in event.places">
                 <i class="fa fa-map-marker"></i>
@@ -57,11 +57,11 @@
         <li ng-repeat="artist in event.artists"
             class="float-left width100p paddingTop10 paddingBottom10 paddingRight10
             marginBottom10 relative programmation">
-            <a href="#/artiste/{{artist.facebookUrl}}"
+            <a href="#/artists/{{artist.facebookUrl}}"
                class="progArtImg absolute width100p height100p imgBlur"
                style="background-image: url('{{artist.imagePath}}');">
             </a>
-            <a class="float-left relative" href="#/artiste/{{artist.facebookUrl}}">
+            <a class="float-left relative" href="#/artists/{{artist.facebookUrl}}">
                 <h2 class="margin0 progArtName">{{artist.name}}</h2>
             </a>
             <div class="img-circularPlayer float-right marginTop20 relative playProg"
@@ -74,7 +74,7 @@
     <div class="column large-4 float-left eventInfo" >
         <h2>Organisateur</h2>
         <div data-ng-repeat="organizer in event.organizers">
-            <a href="#/user/{{organizer.organizerId}}" class="column large-12 padding0">
+            <a href="#/organizers/{{organizer.organizerId}}" class="column large-12 padding0">
                 <img src="{{organizer.imagePath}}" class="relative width100p"/>
             </a>
             <h3 class="column large-8">
@@ -86,15 +86,15 @@
                        ng-click="$parent.readDesc = !$parent.readDesc">
                     </i>
                 </a>
-                <a href="#/user/{{organizer.organizerId}}">{{ organizer.name }}</a>
+                <a href="#/organizers/{{organizer.organizerId}}">{{ organizer.name }}</a>
             </h3>
             <button style='margin-top:5px;' class="float-right">Suivre</button>
             <div class="justify" ng-if="readDesc" data-ng-bind-html="organizer.description"></div>
         </div>
     </div>
-    <div class="column large-4 float-left eventInfo padding0 map-container">
+    <div class="column large-4 float-left eventInfo padding0 map-container" style="height: 300px">
         <div class="column large-12 zIndex1 absolute" ng-if="adresses">
-            <a href="#/lieu/{{ place.placeId }}" data-ng-repeat="place in event.places" class="column large-12">
+            <a href="#/places/{{ place.placeId }}" data-ng-repeat="place in event.places" class="column large-12">
                 <b>{{place.name}}</b>
             </a>
             <div style="font-size: 12px;" class="column large-5">

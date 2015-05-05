@@ -115,3 +115,22 @@
   height: 20px;}
 .lecteurControls:hover {background-color:#007095; }
 .ng-control{height:20px;}
+
+.as-sortable-item,
+.as-sortable-placeholder {
+  display: inline-block;
+  max-height: 110px;
+  float: left;
+}
+
+.sortable-row:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+#sortable-container {
+  display: inline-block;
+}

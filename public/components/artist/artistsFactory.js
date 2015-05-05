@@ -167,7 +167,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         },
         getArtistEvents : function (id) {
             var deferred = $q.defer();
-            if(factory.artists == true){
+            if(factory.artists == true) {
                 deferred.resolve(factory.artists);
             } else {
                 $http.get('/artists/'+ id + '/events').
@@ -186,20 +186,52 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             $rootScope.artist = artist;
             $rootScope.tracks = [];
             $rootScope.loadingTracks = true;
-            factory.postArtist(searchPattern, artist).then(function (tracks) {
+            oboe.post('artists/createArtist', {
+                searchPattern: searchPattern,
+                artist: {
+                    facebookUrl: artist.facebookUrl,
+                    artistName: artist.name,
+                    facebookId: artist.facebookId,
+                    imagePath: artist.imagePath,
+                    websites: artist.websites,
+                    description: artist.description,
+                    genre: artist.genre
+                }
+            }).start(function (data, etc) {
+            })
+            .done(function (value) {
                 $timeout(function () {
                     $rootScope.$apply(function () {
-                        $rootScope.artist.tracks = $rootScope.artist.tracks.concat(tracks);
+                        $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
                         $rootScope.tracks = $rootScope.artist.tracks;
                     });
-                    if (tracks.length > 0) {
+                    if (value.length > 0) {
                         $rootScope.loadingTracks = false;
                     } else {
                         $timeout(function () {
                             $rootScope.loadingTracks = false;
                         }, 1000)
                     }
-                });
+                }, 0);
+                function saveTrack (track) {
+                    if (track.redirectUrl == undefined) {
+                        track.redirectUrl = track.url;
+                    }
+                    $http.post('/tracks/create', {
+                        artistFacebookUrl: artist.facebookUrl,
+                        redirectUrl : track.redirectUrl,
+                        title: track.title,
+                        url: track.url,
+                        platform: track.platform,
+                        thumbnailUrl: track.thumbnailUrl
+                    }).error(function (data) {
+                        console.log(data)
+                    })
+                }
+                value.forEach(saveTrack);
+            })
+            .fail(function (error) {
+                console.log(error)
             });
         },
         passArtisteToCreateToFalse : function () {

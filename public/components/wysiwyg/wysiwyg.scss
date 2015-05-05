@@ -1,0 +1,40 @@
+/*wysiwyg*/
+.parallax-background {
+  background-color: #0078A0;
+  height: 100%;
+  background-repeat: no-repeat;
+  -webkit-background-size: 120%;
+  -moz-background-size: 120%;
+  -o-background-size: 120%;
+  background-size: 120%;
+  position: fixed;
+  width: 100%;
+  background-position-x: 20%;
+  background-position-y: -4em;
+  background-image: url('../img/caroussel1.png');
+}
+
+.intro-text {
+  font-size: 50px;
+  color: #fff;
+  text-align: center;
+}
+.parallax-content {
+  max-width: 100%;
+  position: relative;
+  margin-top: 500px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  background-color: #fff;
+  padding-left: 0;
+  padding-right: 0;
+  float: left;
+  width: 100%;
+  background: #ffffff;
+}
+.mapControls{
+  padding: 5px;
+  color: white;
+  float: right;
+  background: rgb(0, 140, 186);
+}

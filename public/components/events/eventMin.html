@@ -1,7 +1,7 @@
 <div class="block_min">
     <div class="img_min">
         <div class="toGrow">
-            <a href="#/event/{{event.eventId}}">
+            <a href="#/events/{{event.eventId}}">
                 <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
             </a>
         </div>
@@ -20,7 +20,7 @@
                }">
             </i>
         </div>
-        <a href="#/event/{{event.eventId}}">
+        <a href="#/events/{{event.eventId}}">
             <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
                 {{ event.name }}
             </h3>
@@ -113,7 +113,7 @@
             <div class="description_event_min" style="height: 60px;">
                 <span class="dropDown float-left"
                       data-ng-repeat="artist in event.artists">
-                    <a href="#/artiste/{{artist.facebookUrl}}">
+                    <a href="#/artists/{{artist.facebookUrl}}">
                         <h3 style="color: {{event.priceColor}};" class="float-left margin0"
                             ng-mouseover="showDrop = true;">
                             {{ artist.name }}
@@ -126,7 +126,7 @@
                         <li style="display: block; min-height: 100px"
                             class="float-left width100p paddingTop10 paddingBottom10
                             paddingRight10 marginBottom10 relative">
-                            <a href="#/artiste/{{artist.facebookUrl}}"
+                            <a href="#/artists/{{artist.facebookUrl}}"
                                class="absolute width100p height100p imgBlur"
                                style="display: block;
                                 background-image: url('{{artist.imagePath}}');

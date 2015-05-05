@@ -1,5 +1,4 @@
-<map ng-if="map && adresses"
-     zoom="{{zoom}}"
+<map zoom="{{zoom}}"
      center="[{{geographicPoint}}]"
      scrollwheel="false"
      navigationControl="false"
@@ -27,7 +26,7 @@
                     ]
                 }
             ]"
-     style="{{mapHeight}}"
+     style="height: 100%"
      class="width100p">
     <directions
             draggable="true"

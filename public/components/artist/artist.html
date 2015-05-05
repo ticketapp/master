@@ -1,17 +1,17 @@
 <div class="parallax-background">
-    <img class="width100p" src="{{ artiste.imagePath }}"/>
+    <img class="width100p" src="{{ artist.imagePath }}"/>
 </div>
 <div class="parallax-content">
 <div class="columns large-12">
     <h2 id="eventTitle" class="marginTop0">
-        {{artiste.name}}
+        {{artist.name}}
         <a class="button" ng-click="follow()">Suivre</a>
         <websites></websites>
     </h2>
 </div>
 <div class="column large-12">
     <div class="column large-12 float-left marginBottom10"
-         ng-if="artiste.description.length > 0"
+         ng-if="artist.description.length > 0"
          style="background-color: #e7e7e7">
         <h2 class="float-left"
             style="line-height: 50px;
@@ -30,7 +30,7 @@
                ng-if="showDesc == true"
                ng-click="$parent.showDesc = false"></i>
         </div>
-        <div ng-if="showDesc == true" class="float-left width100p" data-ng-bind-html="artiste.description">
+        <div ng-if="showDesc == true" class="float-left width100p" data-ng-bind-html="artist.description">
         </div>
     </div>
 </div>
@@ -40,10 +40,10 @@
             <md-content>
                 <ul id="events_contener"
                     class="descriptionContent width100p float-left marginTop10">
-                    <div class="min_contener data-ng-event fade margin0 column large-4 medium-6 float-left"
-                         data-ng-repeat="event in artiste.events"
-                         ng-class="{'padding0': $root.window == 'small'}"></div>
-                    <h3 ng-show="artiste.events.length == 0">Pas d'événements pour cet artisite pour le moments</h3>
+                    <event-min class="min_contener fade margin0 column large-4 medium-6 float-left"
+                         data-ng-repeat="event in artist.events"
+                         ng-class="{'padding0': $root.window == 'small'}"></event-min>
+                    <h3 ng-show="artist.events.length == 0">Pas d'événements pour cet artisite pour le moments</h3>
                 </ul>
             </md-content>
         </md-tab>
@@ -57,7 +57,7 @@
                     <a class="button column float-left padding0"
                        style="min-height: 40px; line-height: 40px;"
                        ng-if="tracksFiltered.length > 0"
-                       ng-click="$root.addAndPlay(artiste.tracks, artiste)"
+                       ng-click="$root.addAndPlay(artist.tracks, artist)"
                        ng-class="{'padding0': $root.window == 'small',
                            'small-6': $root.playlist.tracks.length == 0,
                            'small-4': $root.playlist.tracks.length > 0}">
@@ -67,7 +67,7 @@
                        style="min-height: 40px; line-height: 40px;"
                        ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0"
                        ng-class="{'padding0': $root.window == 'small'}"
-                       ng-click="$root.addToPlaylist(artiste.tracks, artiste)">
+                       ng-click="$root.addToPlaylist(artist.tracks, artist)">
                         <i class="fi-plus"></i> Tout ajouter
                     </a>
                     <a class="button column float-left padding0"
@@ -80,7 +80,7 @@
                         Suggérer
                     </a>
                     <form ng-if="$parent.suggest"
-                          ng-submit="suggestQuery($parent.trackTitle, artiste.name, artiste.facebookUrl)"
+                          ng-submit="suggestQuery($parent.trackTitle, artist.name, artist.facebookUrl)"
                           class="column large-12">
                         <b class="collum large-12">
                             Faîtes découvrir de nouveaux morceaux à Claude !
@@ -95,11 +95,11 @@
                 <div layout="row" layout-sm="column" layout-align="space-around" class="column" ng-if="$root.loadingTracks">
                     <md-progress-circular md-mode="indeterminate"></md-progress-circular>
                 </div>
-                <div ng-if="artiste.tracks.length == 0 && trackTitle.length == 0 && !$root.loadingTracks"
+                <div ng-if="artist.tracks.length == 0 && trackTitle.length == 0 && !$root.loadingTracks"
                      class="column large-12 text-center">
                     <b>Désolé, Claude ne connait pour le moment aucun morceau pour cet artist.
                         <br/>Vous pouvez ici lui en suggerer</b><br/>
-                    <form ng-submit="suggestQuery(trackTitleSuggest, artiste.name, artiste.facebookUrl)">
+                    <form ng-submit="suggestQuery(trackTitleSuggest, artist.name, artist.facebookUrl)">
                         <input placeholder="Titre du morceau à ajouter" ng-model="trackTitleSuggest">
                         <input class="button" type="submit" />
                     </form>
@@ -108,11 +108,11 @@
                      class="column large-12 text-center">
                     <b>Désolé, Claude ne connait pas "{{trackTitle}}" pour cet artist. <br/>
                         Demendez-lui d'aller la chercher pour vous en cliquant sur le boutton "suggérer"</b><br/>
-                    <a class="button" ng-click="suggestQuery(trackTitle, artiste.name, artiste.facebookUrl)">
+                    <a class="button" ng-click="suggestQuery(trackTitle, artist.name, artist.facebookUrl)">
                         Suggérer la track {{trackTitle}}
                     </a>
                 </div>
-                <div ng-repeat="track in tracksFiltered = (artiste.tracks | limitTo: trackLimit) track by $index"
+                <div ng-repeat="track in tracksFiltered = (artist.tracks | limitTo: trackLimit) track by $index"
                      class="column fade paddingBottom10 medium-6 large-4 float-left"
                      ng-class="{'paddingRight0 paddingLeft0': $root.window == 'small'}">
                     <div class="column large-12 arTrack">
@@ -126,13 +126,13 @@
                                 </md-tooltip>
                             </i>
                             <i class="fi-play column medium-12 padding0 pointer"
-                               ng-click="$root.addAndPlay([track], artiste)">
+                               ng-click="$root.addAndPlay([track], artist)">
                                 <md-tooltip>
                                     Lire
                                 </md-tooltip>
                             </i>
                             <i class="fi-plus column medium-12 padding0 pointer"
-                               ng-click="$root.addToPlaylist([track], artiste)">
+                               ng-click="$root.addToPlaylist([track], artist)">
                                 <md-tooltip>
                                     Ajouter à la lecture en cours
                                 </md-tooltip>
@@ -143,7 +143,7 @@
                              style="background-image: url('{{track.thumbnailUrl}}');"
                              ng-class="{'padding0 margin0': $root.window == 'small'}">
                             <i class="fi-play playInImg"
-                               ng-click="$root.addToPlaylist([track], artiste)">
+                               ng-click="$root.addToPlaylist([track], artist)">
                             </i>
                         </div>
                         <div ng-class="{'column medium-7': $root.window != 'small'}"
@@ -174,7 +174,7 @@
                     </div>
                 </div>
                 <div class="column large-12 padding0">
-                    <button ng-if="trackLimit < artiste.tracks.length"
+                    <button ng-if="trackLimit < artist.tracks.length"
                             class="float-left column large-3 medium-4 small-6"
                             ng-click="$parent.trackLimit = $parent.trackLimit + 12">More tracks</button>
                     <button ng-if="trackLimit > 12 && trackTitle.length <= 1"

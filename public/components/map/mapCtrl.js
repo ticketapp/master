@@ -1,5 +1,5 @@
 angular.module('claudeApp').
-    controller('MapCtrl', ['$scope', function ($scope) {
+    controller('MapCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
         $scope.zoom = 13;
         $scope.moreZoom = function() {
             $scope.zoom = $scope.zoom + 1;

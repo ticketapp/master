@@ -38,7 +38,7 @@ angular
             controller : 'ArtistCtrl'
         })
         .when('/organizers/:id',{
-            templateUrl:'assets/components/organizers/organizers.html',
+            templateUrl:'assets/components/organizers/organizer.html',
             controller : 'OrganizerCtrl'
         })
         .when('/places/:id',{

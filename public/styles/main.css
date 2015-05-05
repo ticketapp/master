@@ -12008,18 +12008,15 @@ Copyright (c) 2014 Daniel Eden
   -o-animation-name: fadeOut; }
 
 .parallax-background {
-  background-color: #0078A0;
+  background-color: primary;
   height: 100%;
   background-repeat: no-repeat;
-  -webkit-background-size: 120%;
-  -moz-background-size: 120%;
-  -o-background-size: 120%;
-  background-size: 120%;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  -o-background-size: 100%;
+  background-size: 100%;
   position: fixed;
-  width: 100%;
-  background-position-x: 20%;
-  background-position-y: -4em;
-  background-image: url("../images/caroussel1.png"); }
+  width: 100%; }
 
 .parallax-content {
   max-width: 100%;
@@ -18814,6 +18811,36 @@ top-search-block > search-bar-contener {
 .ng-control {
   height: 20px; }
 
+.as-sortable-item,
+.as-sortable-placeholder {
+  display: inline-block;
+  max-height: 110px;
+  float: left; }
+
+.sortable-row:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden; }
+
+#sortable-container {
+  display: inline-block; }
+
+.caroussel {
+  background-color: #0078A0;
+  height: 100%;
+  background-repeat: no-repeat;
+  -webkit-background-size: 120%;
+  -moz-background-size: 120%;
+  -o-background-size: 120%;
+  background-size: 120%;
+  position: fixed;
+  width: 100%;
+  background-position-x: 20%;
+  background-position-y: -4em;
+  background-image: url("../images/caroussel1.png"); }
+
 .intro-text {
   font-size: 50px;
   color: #fff;
@@ -19062,13 +19089,19 @@ md-tabs-ink-bar {
 artist-min, artist-facebook-min {
   overflow: hidden; }
 
+md-content {
+  overflow: hidden; }
+
+.arTrack {
+  box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26); }
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;
   color: #000;
   padding: 0.2em 0; }
 
-.block_min:hover > .images_min > div.toGrow {
+.block_min:hover > .img_min > .toGrow {
   -webkit-transform: scale(1.2);
   -moz-transform: scale(1.2);
   -o-transform: scale(1.2);
@@ -19092,7 +19125,7 @@ artist-min, artist-facebook-min {
 .block_min:hover {
   box-shadow: 1px 1px 12px -1px rgba(85, 85, 85, 0.59); }
 
-.images_min {
+.img_min {
   width: 100%;
   overflow: hidden;
   position: relative;
@@ -19117,6 +19150,49 @@ artist-min, artist-facebook-min {
 .minFilter:hover {
   cursor: pointer;
   text-decoration: underline; }
+
+.toGrow {
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  -o-transition: all 1s ease;
+  -ms-transition: all 1s ease;
+  transition: all 1s ease;
+  width: 100%;
+  height: 100%; }
+
+.fade.ng-enter {
+  transition: 0.5s linear all;
+  opacity: 0; }
+
+/* The starting CSS styles for the enter animation */
+.fade.ng-enter.ng-enter-active {
+  opacity: 1; }
+
+.fade.ng-leave {
+  transition: 0.5s linear all;
+  opacity: 1; }
+
+.fade.ng-leave.ng-leave-active {
+  opacity: 0; }
+
+.text_evnt_min {
+  margin: 10px auto;
+  width: 95%; }
+
+.event_entete > h2 {
+  float: left;
+  margin: 0; }
+
+.event_entete {
+  line-height: 40px; }
+
+.infos_event {
+  height: 40px; }
+
+.description_event_min {
+  height: 48px;
+  width: 100%;
+  overflow: hidden; }
 
 .images-circularPlayer:hover > .playInimages {
   display: block; }
@@ -19265,19 +19341,16 @@ md-toast {
   position: fixed !important; }
 
 .f-dropdown {
-  opacity: 0; }
+  display: block; }
 
 @keyframes drop {
   from {
-    left: -99999px;
-    opacity: 0; }
+    left: -99999px; }
   to {
-    left: 0;
-    opacity: 1; } }
+    left: 0; } }
 .dropDown:hover > .f-dropdown {
+  left: 0;
   position: absolute;
-  float: left;
-  left: 20px;
   max-width: 90%;
   -webkit-animation-delay: .5s;
   -moz-animation-delay: .5s;
@@ -19287,15 +19360,14 @@ md-toast {
   -moz-transition-delay: .5s;
   -ms-transition-delay: .5s;
   -o-transition-delay: .5s;
-  -webkit-animation-duration: .8s;
-  -moz-animation-duration: .8s;
-  -ms-animation-duration: .8s;
-  -o-animation-duration: .8s;
-  -webkit-animation-name: drop;
-  -moz-animation-name: drop;
-  -ms-animation-name: drop;
-  -o-animation-name: drop;
-  opacity: 1; }
+  -webkit-animation-duration: .2s;
+  -moz-animation-duration: .2s;
+  -ms-animation-duration: .2s;
+  -o-animation-duration: .2s;
+  -webkit-animation-name: slideInLeft;
+  -moz-animation-name: slideInLeft;
+  -ms-animation-name: slideInLeft;
+  -o-animation-name: slideInLeft; }
 
 .f-dropdown:hover {
   opacity: 1; }
@@ -19303,15 +19375,54 @@ md-toast {
 .f-dropdown > li:hover {
   background: white !important; }
 
-.imagesBlur {
+.imgBlur {
   -webkit-filter: sepia(0.5) blur(2px);
   -moz-filter: sepia(0.5) blur(2px);
   -ms-filter: sepia(0.5) blur(2px);
   -o-filter: sepia(0.5) blur(2px); }
 
 /* Responsive: Portrait tablets and up */
-@media screen and (min-width: 768px) {
-  .iClose, .images-circularPlayer, .playInimages {
-    display: block; } }
+@media (max-width: 979px) {
+  body {
+    margin-top: 0;
+    margin-right: 0;
+    padding: 0; }
+
+  /*events*/
+  .event_min_contener {
+    width: 33.33%; } }
+@media (max-width: 767px) {
+  body {
+    margin-top: 0;
+    margin-right: 0;
+    padding: 0; }
+
+  .inputName:hover {
+    box-shadow: none; }
+
+  .iClose, .img-circularPlayer, .playInImg {
+    display: block; }
+
+  /*events*/
+  .event_min_contener {
+    width: 100%; }
+
+  .img_min_evnt {
+    height: 100px; } }
+@media (max-width: 500px) {
+  .inputName {
+    width: 25%; }
+
+  #searchBar, #searchTopBar {
+    width: 100%; }
+
+  md-slider {
+    padding: 0 !important;
+    margin-bottom: 20px; }
+
+  body {
+    margin-top: 0;
+    margin-right: 0;
+    padding: 0; } }
 
 /*# sourceMappingURL=main.css.map */

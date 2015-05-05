@@ -89,11 +89,12 @@ angular.module('claudeApp').
                     tracksLenght = 10;
                     needRepeat = true
                 }
-                for (var tr = 0; tr < tracksLenght; tr++) {
-                    pushTrack(tracks[tr], artist)
-                }
+                pushTrack(tracks[0], artist)
                 if (play == true) {
-                    $scope.play($rootScope.playlist.tracks.length);
+                    $scope.play($rootScope.playlist.tracks.length-1);
+                }
+                for (var tr = 1; tr < tracksLenght; tr++) {
+                    pushTrack(tracks[tr], artist)
                 }
                 if (needRepeat == true) {
                     tracksLenght = tracks.length;
