@@ -1,4 +1,4 @@
-angular.module('claudeApp').controller('smallHomeCtrl', function ($scope, $rootScope, $http, $timeout, $filter) {
+angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootScope, $http, $timeout, $filter) {
     $scope.events = [];
     $scope.infos = [];
     $scope.time = 6;
@@ -37,18 +37,21 @@ angular.module('claudeApp').controller('smallHomeCtrl', function ($scope, $rootS
                         if ( el.places[0] != undefined) {
                             el.addresses[0].geographicPoint = el.places[0].geographicPoint.replace('(', '').replace(')', '');
                             var geoPoint = el.addresses[0].geographicPoint;
-                            console.log($scope.mapBounces)
-                            if ($scope.mapBounces != undefined && geoPoint.substring(0, geoPoint.indexOf(',')) <= $scope.mapBounces.Da.j &&
-                                geoPoint.substring(0, geoPoint.indexOf(',')) >= $scope.mapBounces.Da.k &&
-                                geoPoint.replace(/^.+,/,'') <= $scope.mapBounces.va.k &&
-                                geoPoint.replace(/^.+,/,'') >= $scope.mapBounces.va.j) {
-                                eventInBounce = true;
+                            var firstObject = $scope.mapBounces[Object.keys($scope.mapBounces)[0]];
+                            var secondObject = $scope.mapBounces[Object.keys($scope.mapBounces)[1]];
+                            if ($scope.mapBounces != undefined) {
+                                if (geoPoint.substring(0, geoPoint.indexOf(',')) <= firstObject[Object.keys(firstObject)[1]] &&
+                                    geoPoint.substring(0, geoPoint.indexOf(',')) >= firstObject[Object.keys(firstObject)[0]] &&
+                                    geoPoint.replace(/^.+,/, '') <= secondObject[Object.keys(secondObject)[1]] &&
+                                    geoPoint.replace(/^.+,/, '') >= secondObject[Object.keys(secondObject)[0]]) {
+                                    eventInBounce = true;
+                                }
                             }
                         }
                         $scope.events.push(el);
                     }
                 }
-                data.forEach(uploadEvents)
+                data.forEach(uploadEvents);
                 if (eventInBounce == false && firstShow == true) {
                     $scope.searchEventFirst = true;
                     if ($scope.time < 24) {
@@ -98,9 +101,11 @@ angular.module('claudeApp').controller('smallHomeCtrl', function ($scope, $rootS
             if ($scope.events[i].addresses[0] != undefined) {
                 var geoPoint = $scope.events[i].addresses[0].geographicPoint;
                 var markerGenre;
-                function pushMarker (markerGenre, geoPoint) {
+                function pushMarker (markerGenre, geoPoint, id) {
                     var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
-                    $scope.dynMarkers.push(new google.maps.Marker({position: latLng, icon: {url: '../assets/img/' + markerGenre, scaledSize: new google.maps.Size(50, 50)}}));
+                    $scope.dynMarkers.push(new google.maps.Marker({position: latLng,
+                        icon: {url: '../assets/images/' + markerGenre,
+                        scaledSize: new google.maps.Size(50, 50)}, id: id}));
                     console.log($scope.dynMarkers)
                 }
                 if ($scope.events[i].genres.length == 0) {
@@ -134,34 +139,20 @@ angular.module('claudeApp').controller('smallHomeCtrl', function ($scope, $rootS
                         markerGenre = 'autres.png';
                     }
                 }
-                pushMarker(markerGenre, geoPoint);
+                pushMarker(markerGenre, geoPoint, $scope.events[i].eventId);
             }
         }
         $scope.markerClusterer = new MarkerClusterer(map, $scope.dynMarkers, {});
         $scope.markerClusterer.zoomOnClick_ = false;
-        var markersLength = $scope.markerClusterer.markers_.length
+        var markersLength = $scope.dynMarkers.length;
         for (i = 0; i < markersLength; i++) {
-            var marker = $scope.markerClusterer.markers_[i]
-            google.maps.event.addListener(marker, 'click', function(marker) {
-                var redirectPath = ''
-                var eventsLength = $scope.events.length;
-                for (var i = 0; i < eventsLength; i++) {
-                    if ($scope.events[i].addresses[0] != undefined) {
-                        var geopoint = $scope.events[i].addresses[0].geographicPoint
-
-                        if (geopoint.substring(0, geopoint.indexOf(',')) < marker.latLng.k + 0.000001 &&
-                            geopoint.substring(0, geopoint.indexOf(',')) > marker.latLng.k - 0.000001 &&
-                            geopoint.replace(/^.+,/,'') < marker.latLng.D + 0.000001 &&
-                            geopoint.replace(/^.+,/,'') > marker.latLng.D - 0.000001) {
-                            redirectPath = 'event/' + $scope.events[i].eventId;
-                        }
-                    }
-                }
-                window.location.href =('#/' + redirectPath);
+            var marker = $scope.dynMarkers[i];
+            var id = $scope.dynMarkers[i].id;
+            marker.addListener('click', function() {
+                window.location.href =('#/events/' + id);
             });
         }
         google.maps.event.addListener($scope.markerClusterer, 'clusterclick', function(cluster) {
-
             var eventsLength = $scope.events.length;
             var redirectPath = '';
             var count =0;
@@ -184,7 +175,7 @@ angular.module('claudeApp').controller('smallHomeCtrl', function ($scope, $rootS
                 }
             }
             if (count == 1) {
-                redirectPath = 'lieu/' + places.replace(', ', '');
+                redirectPath = 'places/' + places.replace(', ', '');
             } else {
                 $timeout(function () {
                     $scope.$apply(function () {
@@ -216,11 +207,11 @@ angular.module('claudeApp').controller('smallHomeCtrl', function ($scope, $rootS
             textSlider[i].innerHTML = textSlider[i].innerHTML + '<b style="color: #ffffff">' +
                 $filter('millSecondsToTimeString')($scope.selectedTime) + '</b>';
         }
-        clearTimeout(StartTimer)
+        clearTimeout(StartTimer);
         StartTimer = setTimeout($scope.getEvents, doneStartInterval);
     }
     $scope.goTo = function (e, id) {
-        var redirectPath = 'event/' + $scope.events[id].eventId;
+        var redirectPath = 'events/' + $scope.events[id].eventId;
         var eventsLength = $scope.events.length;
         for (var i = 0; i < eventsLength; i++) {
             if (i != id &&
@@ -229,7 +220,7 @@ angular.module('claudeApp').controller('smallHomeCtrl', function ($scope, $rootS
                 if ($scope.events[i].addresses[0].geographicPoint == $scope.events[id].addresses[0].geographicPoint) {
                     console.log($scope.events[i])
                     console.log($scope.events[id])
-                    redirectPath = 'lieu/' + $scope.events[id].places[0].placeId;
+                    redirectPath = 'places/' + $scope.events[id].places[0].placeId;
                 }
             }
         }

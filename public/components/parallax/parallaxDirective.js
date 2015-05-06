@@ -7,7 +7,7 @@ angular.module('claudeApp').
             link : function (scope, element) {
                 function resizeEl() {
                     if ($rootScope.path != 'home') {
-                        $(element).css('margin-top', window.innerWidth * 0.376 + 'px');
+                        $(element).css('margin-top', window.innerWidth * 0.35 + 'px');
                     } else {
                         $(element).css('margin-top', '500px');
                     }

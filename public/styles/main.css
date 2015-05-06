@@ -15243,7 +15243,6 @@ md-checkbox .md-label {
 md-content {
   display: block;
   position: relative;
-  overflow: auto;
   -webkit-overflow-scrolling: touch; }
 
 md-content[md-scroll-y] {
@@ -18029,8 +18028,7 @@ md-switch:not(.md-dragging) .md-bar, md-switch:not(.md-dragging) .md-thumb {
 md-tabs {
   display: block;
   width: 100%;
-  font-weight: 500;
-  overflow: auto; }
+  font-weight: 500; }
 
 .md-header {
   width: 100%;
@@ -18108,7 +18106,6 @@ md-tabs[center] .md-header:not(.md-paginating) .md-header-items {
   width: 99999px; }
 
 .md-tabs-content {
-  overflow: hidden;
   width: 100%;
   position: relative; }
 
@@ -18795,7 +18792,8 @@ top-search-block > search-bar-contener {
   margin: 0;
   cursor: pointer;
   text-align: center;
-  line-height: 20px; }
+  line-height: 20px;
+  vertical-align: center; }
 
 .lecteurControls.active {
   background: #007095;
@@ -19071,7 +19069,7 @@ canvas {
   left: 0; }
 
 .md-header-items > md-tab {
-  width: 49.9% !important;
+  width: 49.99% !important;
   margin: 0 !important; }
 
 .md-paginator {
@@ -19087,9 +19085,6 @@ md-tabs-ink-bar {
   background: #a0d3e8 !important; }
 
 artist-min, artist-facebook-min {
-  overflow: hidden; }
-
-md-content {
   overflow: hidden; }
 
 .arTrack {

@@ -1,12 +1,14 @@
 angular.module('claudeApp')
 .controller('LargeHomeCtrl', ['$scope', '$localStorage', '$timeout', 'LargeHomeFactory', '$rootScope',
-    function ($scope, $localStorage, $timeout, LargeHomeFactory, $rootScope) {
+        '$location',
+    function ($scope, $localStorage, $timeout, LargeHomeFactory, $rootScope, $location) {
 
     $scope.infos = [];
 
     function getInfos () {
         LargeHomeFactory.getInfos().then(function (infos) {
             $scope.infos = infos;
+            $scope.elementEnCours = $scope.infos[0];
         });
     }
 
@@ -42,14 +44,14 @@ angular.module('claudeApp')
         $scope.elementEnCours.animation = '';
     }
 
-    var i = -1;
-    var updateInfo = setTimeout(function () {
+    var i = 0;
+    var updateInfo = setInterval(function () {
         if (i === $scope.infos.length - 1) {
             i = 0;
         } else {
             i++;
         }
-
+        console.log($scope.infos[i])
         $timeout(function () {
             $scope.$apply(function () {
                 $scope.elementEnCours = $scope.infos[i];
@@ -61,6 +63,9 @@ angular.module('claudeApp')
         };
 
     }, 8000);
-
+    updateInfo;
     removeAnimations();
+    $scope.$on('$locationChangeSuccess', function () {
+        clearInterval(updateInfo)
+    })
 }]);

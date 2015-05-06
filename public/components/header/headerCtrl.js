@@ -1,6 +1,6 @@
 'use strict';
 angular.module('claudeApp')
-    .controller('headerCtrl', ['$scope', 'DetectSize', 'GeolocFactory',
-        function ($scope, DetectSize, GeolocFactory) {
+    .controller('headerCtrl', ['$scope', 'DetectSize', 'DetectPath', 'GeolocFactory',
+        function ($scope, DetectSize, DetectPath, GeolocFactory) {
 
     }]);

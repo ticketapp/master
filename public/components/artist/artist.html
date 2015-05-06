@@ -38,13 +38,13 @@
     <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
         <md-tab label="Evenements">
             <md-content>
-                <ul id="events_contener"
+                <div id="events_contener"
                     class="descriptionContent width100p float-left marginTop10">
                     <event-min class="min_contener fade margin0 column large-4 medium-6 float-left"
                          data-ng-repeat="event in artist.events"
                          ng-class="{'padding0': $root.window == 'small'}"></event-min>
                     <h3 ng-show="artist.events.length == 0">Pas d'événements pour cet artisite pour le moments</h3>
-                </ul>
+                </div>
             </md-content>
         </md-tab>
         <md-tab label="Tracks">
@@ -176,10 +176,10 @@
                 <div class="column large-12 padding0">
                     <button ng-if="trackLimit < artist.tracks.length"
                             class="float-left column large-3 medium-4 small-6"
-                            ng-click="$parent.trackLimit = $parent.trackLimit + 12">More tracks</button>
+                            ng-click="$parent.trackLimit = $parent.trackLimit + 12">Voir plus</button>
                     <button ng-if="trackLimit > 12 && trackTitle.length <= 1"
                             class="float-left column large-3 medium-4 small-6"
-                            ng-click="$parent.trackLimit = 12">Less tracks</button>
+                            ng-click="$parent.trackLimit = 12">Voir moins</button>
                 </div>
             </md-content>
         </md-tab>

@@ -50,7 +50,8 @@ angular
             controller : 'CreateEventCtrl'
         })
         .when('/search',{
-            templateUrl:'assets/components/search/search.html'
+            templateUrl:'assets/components/search/search.html',
+            controller : 'searchCtrl'
         })
         .when('/iframeEvents',{
             templateUrl:'assets/components/iframe/iframe.html',

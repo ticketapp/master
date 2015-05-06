@@ -3159,7 +3159,6 @@ md-checkbox {
 md-content {
   display: block;
   position: relative;
-  overflow: auto;
   -webkit-overflow-scrolling: touch; }
   md-content[md-scroll-y] {
     overflow-y: auto;
@@ -5641,8 +5640,7 @@ md-switch {
 md-tabs {
   display: block;
   width: 100%;
-  font-weight: 500;
-  overflow: auto; }
+  font-weight: 500;}
 
 .md-header {
   width: 100%;
@@ -5715,7 +5713,6 @@ md-tabs[center] .md-header:not(.md-paginating) .md-header-items {
     width: 99999px; }
 
 .md-tabs-content {
-  overflow: hidden;
   width: 100%;
   position: relative; }
   .md-tabs-content .md-tab-content {

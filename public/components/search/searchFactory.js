@@ -1,7 +1,9 @@
-angular.module('claudeApp').factory('SearchFactory', ['$rootScope', function ($rootScope) {
+angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
+    function ($rootScope, $location) {
     var factory = {
         initSearch : false,
         init : function () {
+            console.log(factory.initSearch);
             if (factory.initSearch == false) {
                 $rootScope.activArtist = false;
                 $rootScope.activEvent = true;

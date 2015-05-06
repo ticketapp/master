@@ -10,9 +10,9 @@ angular.module('claudeApp').
                         var waitForElem = setInterval(function () {
                             if ($(element).innerWidth() > 50) {
                                 clearInterval(waitForElem);
-                                $(element).find('.img_min').css('height', Math.ceil($(element).innerWidth() * 0.376));
+                                $(element).find('.img_min').css('height', Math.ceil($(element).innerWidth() * 0.35));
                                 if ($rootScope.window != 'small') {
-                                    $(element).css('height', 94 + Math.ceil(($(element).innerWidth() * 0.376) / 2));
+                                    $(element).css('height', 94 + Math.ceil(($(element).innerWidth() * 0.35) / 2));
                                 }
                             }
                         }, 100);

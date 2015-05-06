@@ -2,6 +2,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
     'ArtistsFactory', 'EventsFactory', 'OrganizerFactory', 'PlaceFactory', 'SearchFactory',
     function($rootScope, $scope, $filter, $timeout, ArtistsFactory, EventsFactory, OrganizerFactory,
              PlaceFactory, SearchFactory){
+        SearchFactory.init();
         $scope.limit = 12;
         $scope.artists = [];
         $scope.artistsFb = [];
@@ -14,7 +15,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         var _selEvent = $rootScope.activEvent;
         var _selOrganizer = $rootScope.activUsr;
         var _selPlace = $rootScope.activPlace;
-        var _selStart = ($rootScope.maxStart-23)*24;
+        var _selStart;
         if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
             var _research = $rootScope.storeSearch;
             $rootScope.remStoreSearch();
@@ -105,6 +106,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         function getEventsByGenre() {
             EventsFactory.getEventsByGenre(_research, offset, $rootScope.geoLoc).then(function (events) {
                 updateScope(events, $scope.events, 'eventId');
+                console.log(events)
             });
         }
 
@@ -206,6 +208,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             } else if (newName > 40) {
                 newName = (newName - 39) * 720;
             }
+            _selStart = newName;
             var waitForSearchBar = setInterval(function () {
                 if ($rootScope.window == 'small' || $rootScope.window == 'medium') {
                     var textSlider = document.getElementById('timeSearchSliderPhone').getElementsByClassName('md-thumb');
