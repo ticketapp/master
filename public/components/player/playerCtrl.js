@@ -19,6 +19,8 @@ angular.module('claudeApp').
             var played = [];
             var artNames = [];
             var i = 0;
+            var updateProgressYt;
+            var player;
             $scope.sortableOptions = {
                 containment: '#sortable-container',
                 //restrict move across columns. move only within column.
@@ -316,9 +318,7 @@ angular.module('claudeApp').
                 played.push($rootScope.playlist.tracks[i].title);
 
                 //clear yt progressBar interval and listeners//
-                if (typeof(updateProgressYt) != "undefined") {
-                    clearInterval(updateProgressYt);
-                }
+                clearInterval(updateProgressYt);
                 document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
                 document.getElementById('musicPlayer').removeEventListener('error', error);
 
@@ -440,7 +440,11 @@ angular.module('claudeApp').
                     document.getElementById('musicPlayer').pause();
                     document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                     document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
+                    clearInterval(updateProgressYt);
+                    console.log('clear')
                     function onPlayerReady(event) {
+                        console.log('clear');
+                        clearInterval(updateProgressYt);
                         $scope.playPause = function () {
                             if ($scope.onPlay == false) {
                                 event.target.playVideo();
@@ -486,10 +490,12 @@ angular.module('claudeApp').
 
                     function onPlayerStateChange(event) {
                         if (event.data === 1) {
-                            var duration = event.target.getDuration();
-                            var curentDuration = event.target.getCurrentTime();
+                            clearInterval(updateProgressYt);
+                            var duration = player.getDuration();
+                            var curentDuration = player.getCurrentTime();
                             updateProgressYt = setInterval(function () {
-                                curentDuration = event.target.getCurrentTime();
+                                curentDuration = player.getCurrentTime();
+                                console.log(curentDuration)
                                 var prog = document.getElementById("progress");
                                 var val = 0;
                                 if (curentDuration > 0) {
@@ -500,22 +506,20 @@ angular.module('claudeApp').
                                     readableDuration(curentDuration) +
                                     ' / ' + readableDuration(duration);
                                 if (val == 100) {
-                                    if (typeof(updateProgressYt) != "undefined") {
-                                        clearInterval(updateProgressYt);
-                                    }
+                                    clearInterval(updateProgressYt);
                                 }
                             }, 100);
                         } else {
-                            if (typeof(updateProgressYt) != "undefined") {
-                                clearInterval(updateProgressYt);
-                            }
+                            console.log('clear');
+                            clearInterval(updateProgressYt);
                         }
                         if (event.data === 0) {
+                            console.log('clear');
+                            clearInterval(updateProgressYt);
                             $scope.nextTrack()
                         }
                     }
-
-                    var player = new YT.Player('youtubePlayer', {
+                    player = new YT.Player('youtubePlayer', {
                         height: '200',
                         width: '100%',
                         videoId: $rootScope.playlist.tracks[i].url,
