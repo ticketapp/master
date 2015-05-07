@@ -183,6 +183,22 @@ angular.module('claudeApp').factory ('EventsFactory', function ($http, $q){
                     });
             }
             return deferred.promise;
+        },
+        postEventToCreate : function (facebookId) {
+            var deferred = $q.defer();
+            if(factory.events == true){
+                deferred.resolve(factory.events);
+            } else {
+                $http.post('/events/create/'  + facebookId).
+                    success(function (data) {
+                        factory.events = data;
+                        deferred.resolve(factory.events);
+                    }).error(function (data) {
+                        factory.events = data;
+                        deferred.resolve(factory.events);
+                    });
+            }
+            return deferred.promise;
         }
     };
     return factory;

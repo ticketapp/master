@@ -441,9 +441,7 @@ angular.module('claudeApp').
                     document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                     document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
                     clearInterval(updateProgressYt);
-                    console.log('clear')
                     function onPlayerReady(event) {
-                        console.log('clear');
                         clearInterval(updateProgressYt);
                         $scope.playPause = function () {
                             if ($scope.onPlay == false) {
@@ -495,7 +493,6 @@ angular.module('claudeApp').
                             var curentDuration = player.getCurrentTime();
                             updateProgressYt = setInterval(function () {
                                 curentDuration = player.getCurrentTime();
-                                console.log(curentDuration)
                                 var prog = document.getElementById("progress");
                                 var val = 0;
                                 if (curentDuration > 0) {
@@ -510,11 +507,9 @@ angular.module('claudeApp').
                                 }
                             }, 100);
                         } else {
-                            console.log('clear');
                             clearInterval(updateProgressYt);
                         }
                         if (event.data === 0) {
-                            console.log('clear');
                             clearInterval(updateProgressYt);
                             $scope.nextTrack()
                         }

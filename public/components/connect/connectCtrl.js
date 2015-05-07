@@ -1,10 +1,10 @@
 angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '$http',
     'ArtistsFactory', 'UserFactory', 'OrganizerFactory', 'EventsFactory', 'PlaceFactory',
-    'StoreRequest',
+    'StoreRequest', '$timeout',
     function ($scope, $rootScope, $http, ArtistsFactory, UserFactory, OrganizerFactory,
-              EventsFactory, PlaceFactory, StoreRequest) {
+              EventsFactory, PlaceFactory, StoreRequest, $timeout) {
 
-        var token = '';
+        var token;
 
         function followArtist (id, toCreate) {
             ArtistsFactory.followArtistByFacebookId(id).then(function (isFollowed) {
@@ -17,8 +17,8 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
         function followOrganizer (id, toCreate) {
             OrganizerFactory.followOrganizerByFacebookId(id).then(function (isFollowed) {
                 if (isFollowed == 'error' && toCreate == true) {
-                    //getOrganizerPage(id);
-                    //getOrganizerEvents(id);
+                    getOrganizerPage(id);
+                    getOrganizerEvents(id);
                 }
             });
         }
@@ -27,6 +27,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
             PlaceFactory.followPlaceByFacebookId(id).then(function (isFollowed) {
                 if (isFollowed == 'error' && toCreate == true) {
                     getPlacePage(id);
+                    getOrganizerEvents(id);
                 }
             });
         }
@@ -64,6 +65,10 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 })
         }
 
+        function postEventId (event) {
+            EventsFactory.postEventToCreate(event.id)
+        }
+
         function postOrganizer (organizer) {
             if (organizer.cover != undefined) {
                 var newOrganizer = {};
@@ -84,10 +89,11 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
             $http.get('https://graph.facebook.com/v2.3/' + id + '?fields=events&access_token=' + token).
                 success(function (events) {
                     if (events.events != undefined) {
-                        //events.events.data.forEach(postEventId)
+                        events.events.data.forEach(postEventId)
                     }
                 })
         }
+
         function getOrganizerPage (id) {
             $http.get('https://graph.facebook.com/v2.3/' + id + '?access_token=' + token).
                 success(function (data) {
@@ -95,9 +101,8 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 })
         }
 
-
         function getCoverPlace(place) {
-            $http.get('https://graph.facebook.com/v2.2/' + searchPlaces.id + '/?fields=cover, picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
+            $http.get('https://graph.facebook.com/v2.2/' + place.id + '/?fields=cover, picture&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
                 success(function (data) {
                     var newPlace = {
                         name: place.name,
@@ -149,6 +154,9 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
             if (place.location.city == undefined) {
                 place.location.city = '';
             }
+            if (place.description == undefined) {
+                place.description;
+            }
             if (place.cover != undefined) {
                 var newPlace = {
                     name: place.name,
@@ -185,26 +193,26 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                     } else {
                         flag = 1;
                     }
-                    console.log(data)
                     if (flag == 0) {
                         var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
-                        if (data.description == undefined) {
-                            data.description = "";
-                        }
-                        data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
-                        data.description = data.description.replace(/(\n)/g, " <br/>");
-                        if (matchedLinks = data.description.match(links)) {
-                            var m = matchedLinks;
-                            var unique = [];
-                            for (var ii = 0; ii < m.length; ii++) {
-                                var current = m[ii];
-                                if (unique.indexOf(current) < 0) unique.push(current);
+                        if (data.description != undefined) {
+                            data.description = '<div class="column large-12">' + data.description + '</div>';
+                            data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
+                            data.description = data.description.replace(/(\n)/g, " <br/>");
+                            if (matchedLinks = data.description.match(links)) {
+                                var m = matchedLinks;
+                                var unique = [];
+                                for (var ii = 0; ii < m.length; ii++) {
+                                    var current = m[ii];
+                                    if (unique.indexOf(current) < 0) unique.push(current);
+                                }
+                                for (var i=0; i < unique.length; i++) {
+                                    data.description = data.description.replace(new RegExp(unique[i],"g"),
+                                            "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
+                                }
                             }
-                            for (var i=0; i < unique.length; i++) {
-                                data.description = data.description.replace(new RegExp(unique[i],"g"),
-                                        "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
-                            }
                         }
+
                         getPositionAndCreate(data);
                     }
                 }).
@@ -315,18 +323,25 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
         }
 
         function getConnected (connectWin) {
-            if (connectWin.document.getElementById('top') != undefined || connectWin.document.getElementById('top') != null) {
-                if (connectWin.document.getElementById('top').getAttribute("ng-init") == '$root.connected = true') {
-                    $rootScope.passConnectedToTrue();
-                    connectWin.close();
-                    getUserToken();
-                    if ($rootScope.lastReq != {}) {
-                        applyLastRequest();
+            var waitForConnected = setInterval(function () {
+                if (connectWin.document.getElementById('top') != undefined &&
+                    connectWin.document.getElementById('top') != null) {
+                        clearInterval(waitForConnected);
+                    if (connectWin.document.getElementById('top').getAttribute("ng-init") ==
+                        '$root.connected = true') {
+                        $timeout(function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.connected = true;
+                                connectWin.close();
+                            })
+                        }, 0);
+                        getUserToken();
+                        if ($rootScope.lastReq != {} && $rootScope.lastReq != undefined) {
+                            applyLastRequest();
+                        }
                     }
                 }
-            } else {
-                getConnected();
-            }
+            }, 500);
         }
         $scope.connectLink = function (url) {
             var connectWin = window.open(url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");

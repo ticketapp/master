@@ -51,7 +51,6 @@ angular.module('claudeApp')
         } else {
             i++;
         }
-        console.log($scope.infos[i])
         $timeout(function () {
             $scope.$apply(function () {
                 $scope.elementEnCours = $scope.infos[i];
