@@ -180,6 +180,20 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             }
             return deferred.promise;
         },
+        getNewArtistTrack : function (artistName, artistFacebookUrl, trackTitle) {
+            var deferred = $q.defer();
+            if(factory.artists == true) {
+                deferred.resolve(factory.artists);
+            } else {
+                $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
+                    success(function (data) {
+                        deferred.resolve(data);
+                    }).error(function (data) {
+                        deferred.resolve('error');
+                    })
+            }
+            return deferred.promise;
+        },
         createNewArtistAndPassItToRootScope : function (artist) {
             var searchPattern = document.getElementById('searchBar').value.trim();
             $rootScope.artisteToCreate = true;

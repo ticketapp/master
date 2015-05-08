@@ -51,7 +51,7 @@
             <md-content>
                 <input class="column float-left height50 large-12"
                        ng-if="tracks.length > 0 || trackTitle.length > 0"
-                       ng-model="$parent.$parent.trackTitle" ng-change="filterTracks()"
+                       ng-model="$parent.trackTitle" ng-change="filterTracks(trackTitle)"
                        placeholder="filter tracks"/>
                 <div class="float-left column large-12 padding0">
                     <a class="button column float-left padding0"
@@ -82,14 +82,16 @@
                     <form ng-if="$parent.suggest"
                           ng-submit="suggestQuery($parent.trackTitle, artist.name, artist.facebookUrl)"
                           class="column large-12">
-                        <b class="collum large-12">
+                        <b class="column medium-7">
                             Faîtes découvrir de nouveaux morceaux à Claude !
                             Demendez-lui d'aller les chercher pour vous.
                         </b>
-                        <input ng-model="$parent.$parent.trackTitle"
-                               ng-change="filterTracks()"
-                               placeholder="Titre du morceau à ajouter">
-                        <input type="submit" class="button"/>
+                        <input type="submit" class="button column small-3 medium-2 float-right"/>
+                        <input ng-model="$parent.trackTitle"
+                               ng-change="filterTracks(trackTitle)"
+                               placeholder="Titre du morceau à ajouter"
+                                class="column medium-3 float-right small-9"
+                                style="height: 3.2rem">
                     </form>
                 </div>
                 <div layout="row" layout-sm="column" layout-align="space-around" class="column" ng-if="$root.loadingTracks">

@@ -1,11 +1,11 @@
 angular.module('claudeApp').
 controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout', '$filter',
-        '$modal', '$rootScope', '$routeParams', 'WebsitesFactory',
+        '$modal', '$rootScope', '$routeParams', 'WebsitesFactory', 'InfoModal',
     function ($scope, $localStorage, ArtistsFactory, $timeout, $filter, $modal, $rootScope,
-              $routeParams, WebsitesFactory) {
+              $routeParams, WebsitesFactory, InfoModal) {
 
         $scope.trackLimit = 12;
-        $scope.trackTitle = '';
+        $scope.trackTitle = 'hjh';
         $scope.showDesc = false;
         $scope.selectedTab = 0;
         if ($rootScope.artisteToCreate != true) {
@@ -48,6 +48,41 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 $scope.$apply(function(){
                     $scope.artist.tracks = $filter('filter')($scope.tracks,
                         {title: $scope.trackTitle})
+                })
+            }, 0)
+        };
+
+        $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
+            $scope.suggest = false;
+            if (trackTitle.length > 2) {
+                artistName = artistName.toLowerCase().replace('officiel', '');
+                artistName = artistName.toLowerCase().replace('official', '');
+                artistName = artistName.toLowerCase().replace('music', '');
+                artistName = artistName.toLowerCase().replace('musique', '');
+                artistName = artistName.toLowerCase().replace('musik', '');
+                artistName = artistName.toLowerCase().replace('fanpage', '');
+                artistName = artistName.toLowerCase().replace(/[^\w\s].*/, '');
+                ArtistsFactory.getNewArtistTrack(artistName, trackTitle, artistFacebookUrl).then(
+                    function (tracks) {
+                        for (var i = 0; i < tracks.length; i++) {
+                            $scope.artist.tracks.push(tracks[i]);
+                            $scope.tracks.push(tracks[i])
+                        }
+                        if (tracks.length == 0) {
+                            InfoModal.displayInfo('Nous n\'avons pas trouvé "' + trackTitle + '"');
+                        }
+                    }
+                );
+            } else {
+                InfoModal.displayInfo('le nom de la track doit faire plus de deux lettres');
+            }
+        };
+
+        $scope.filterTracks = function (trackTitle) {
+            $scope.trackTitle = trackTitle;
+            $timeout(function () {
+                $scope.$apply(function(){
+                    $scope.artist.tracks = $filter('filter')($scope.tracks, {title: $scope.trackTitle})
                 })
             }, 0)
         };
