@@ -8,7 +8,7 @@
     </li>
 </ul>
 <a ng-repeat="website in websites.iconWebsites"
-   href="http://www.{{website.url}}" target="_blank">
+   href="{{website.url}}" target="_blank">
     <i ng-class="{'fi-social-facebook' : website.name == 'facebook',
                    'fi-social-twitter' : website.name == 'twitter',
                    'fi-soundcloud' : website.name == 'soundcloud',

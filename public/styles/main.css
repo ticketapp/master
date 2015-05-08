@@ -19189,6 +19189,9 @@ artist-min, artist-facebook-min {
   width: 100%;
   overflow: hidden; }
 
+.eventMinFilter:hover {
+  text-decoration: underline; }
+
 .images-circularPlayer:hover > .playInimages {
   display: block; }
 

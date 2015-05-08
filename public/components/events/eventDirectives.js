@@ -12,7 +12,6 @@ angular.module('claudeApp').
                             $(element).find('.img_min').css('height', Math.ceil($(element).innerWidth() * 0.35));
                         }
                     }, 100);
-                    waitForElem;
                 }
                 resizeElem();
                 $window.addEventListener('resize', resizeElem);
@@ -27,9 +26,9 @@ angular.module('claudeApp').
     directive('eventInfo', [ '$rootScope', function ($rootScope) {
         return {
             restrict : 'C',
-            link : function (element) {
+            link : function (scope, element) {
                 if ( $rootScope.window != 'small' && $rootScope.window != 'medium') {
-                    if ($(element).offsetLeft < 30) {
+                    if ($(element).offset().left < 30) {
                         $(element).removeClass('large-4');
                         $(element).addClass('large-12');
                     }

@@ -1,4 +1,7 @@
-angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootScope, $http, $timeout, $filter) {
+angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope', '$http',
+    '$timeout', '$filter', 'GeolocFactory', 'RefactorGeopoint', 'EventsFactory',
+    function ($scope, $rootScope, $http, $timeout, $filter, GeolocFactory, RefactorGeopoint,
+              EventsFactory) {
     $scope.events = [];
     $scope.infos = [];
     $scope.time = 6;
@@ -10,66 +13,73 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
     var offset = 0;
     var map;
     var firstShow = true;
+
+    function uploadEvents(el, index, array) {
+        var scopeIdList = [];
+        function getEventId(el) {
+            scopeIdList.push(el.eventId);
+        }
+        $scope.events.forEach(getEventId);
+        if ($scope.mapBounces == undefined) {
+            $scope.mapBounces = map.getBounds()
+        }
+        if (scopeIdList.indexOf(el.eventId) == -1) {
+            if ( el.places[0] != undefined) {
+                el.addresses[0].geographicPoint = el.places[0].geographicPoint.replace('(', '').replace(')', '');
+                var geoPoint = el.addresses[0].geographicPoint;
+                var firstObject = $scope.mapBounces[Object.keys($scope.mapBounces)[0]];
+                var secondObject = $scope.mapBounces[Object.keys($scope.mapBounces)[1]];
+                if ($scope.mapBounces != undefined) {
+                    if (geoPoint.substring(0, geoPoint.indexOf(',')) <= firstObject[Object.keys(firstObject)[1]] &&
+                        geoPoint.substring(0, geoPoint.indexOf(',')) >= firstObject[Object.keys(firstObject)[0]] &&
+                        geoPoint.replace(/^.+,/, '') <= secondObject[Object.keys(secondObject)[1]] &&
+                        geoPoint.replace(/^.+,/, '') >= secondObject[Object.keys(secondObject)[0]]) {
+                        eventInBounce = true;
+                    }
+                }
+            }
+            $scope.events.push(el);
+        }
+    }
+
     $scope.getEvents = function () {
-        var eventsLenghtForTime = $scope.events.length;
+        var eventsLengthForTime = $scope.events.length;
         var maxStartTime =  time*3600000 + new Date().getTime();
-        for (var e = 0; e < eventsLenghtForTime; e++) {
+        for (var e = 0; e < eventsLengthForTime; e++) {
             if ($scope.events[e].startTime > maxStartTime) {
-                $scope.events.splice(e, 1)
-                $scope.$apply();
+                $timeout(function () {
+                    $scope.$apply(function () {
+                        $scope.events.splice(e, 1);
+                    })
+                }, 0);
                 e = e -1;
-                eventsLenghtForTime = eventsLenghtForTime - 1;
+                eventsLengthForTime = eventsLengthForTime - 1;
             }
         }
-        $http.get('/events/inInterval/' + time + '/(' + $scope.mapCenter.replace(/^.+, /,'') + ',' +
-            $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')/20/'+ offset).
-            success(function (data, status, headers, config) {
-                var scopeIdList = [];
-                function getEventId(el, index, array) {
-                    scopeIdList.push(el.eventId);
-                }
-                $scope.events.forEach(getEventId);
-                function uploadEvents(el, index, array) {
-                    if ($scope.mapBounces == undefined) {
-                        $scope.mapBounces = map.getBounds()
-                    }
-                    if (scopeIdList.indexOf(el.eventId) == -1) {
-                        if ( el.places[0] != undefined) {
-                            el.addresses[0].geographicPoint = el.places[0].geographicPoint.replace('(', '').replace(')', '');
-                            var geoPoint = el.addresses[0].geographicPoint;
-                            var firstObject = $scope.mapBounces[Object.keys($scope.mapBounces)[0]];
-                            var secondObject = $scope.mapBounces[Object.keys($scope.mapBounces)[1]];
-                            if ($scope.mapBounces != undefined) {
-                                if (geoPoint.substring(0, geoPoint.indexOf(',')) <= firstObject[Object.keys(firstObject)[1]] &&
-                                    geoPoint.substring(0, geoPoint.indexOf(',')) >= firstObject[Object.keys(firstObject)[0]] &&
-                                    geoPoint.replace(/^.+,/, '') <= secondObject[Object.keys(secondObject)[1]] &&
-                                    geoPoint.replace(/^.+,/, '') >= secondObject[Object.keys(secondObject)[0]]) {
-                                    eventInBounce = true;
-                                }
-                            }
-                        }
-                        $scope.events.push(el);
-                    }
-                }
-                data.forEach(uploadEvents);
-                if (eventInBounce == false && firstShow == true) {
-                    $scope.searchEventFirst = true;
-                    if ($scope.time < 24) {
-                        $scope.time = $scope.time + 6;
-                    } else if ($scope.time < 30) {
-                        $scope.time = $scope.time + 1;
-                    } else {
-                        $scope.zoom --
-                    }
-                    $scope.timeChange();
-
+        console.log($scope.mapCenter);
+        EventsFactory.getEvents(time, '(' + $scope.mapCenter.replace(/^.+, /,'') + ',' +
+            $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')', offset).
+            then(function (events) {
+            events.forEach(uploadEvents);
+            if (eventInBounce == false && firstShow == true) {
+                $scope.searchEventFirst = true;
+                if ($scope.time < 24) {
+                    $scope.time = $scope.time + 6;
+                } else if ($scope.time < 30) {
+                    $scope.time = $scope.time + 1;
                 } else {
-                    firstShow = false;
-                    $scope.searchEventFirst = false;
-                    $scope.updateMarkers()
+                    $scope.zoom --
                 }
-            })
+                $scope.timeChange();
+
+            } else {
+                firstShow = false;
+                $scope.searchEventFirst = false;
+                $scope.updateMarkers()
+            }
+        });
     };
+
     $scope.initializeTime = function () {
         var newName = $scope.time;
         if (newName > 23 && newName <= 38) {
@@ -80,7 +90,7 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
             newName = (newName - 39) * 720;
         }
         var waitForSearchBar = setInterval(function () {
-            var textSlider = document.getElementsByClassName('md-thumb');;
+            var textSlider = document.getElementsByClassName('md-thumb');
             if (textSlider != undefined) {
                 clearInterval(waitForSearchBar);
                 for (var i = 0; i < textSlider.length; i++) {
@@ -90,7 +100,52 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
                 }
             }
         }, 100);
+    };
+
+    function pushMarker (markerGenre, geoPoint, id, placeId) {
+        var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
+        $scope.dynMarkers.push(new google.maps.Marker({position: latLng,
+            icon: {url: '../assets/images/' + markerGenre,
+                scaledSize: new google.maps.Size(50, 50)}, id: id, placeId: placeId}));
+        console.log($scope.dynMarkers)
     }
+
+    function addIcon(i) {
+        var geoPoint = $scope.events[i].addresses[0].geographicPoint;
+        var markerGenre;
+        if ($scope.events[i].genres.length == 0) {
+            markerGenre = 'autres.png';
+        } else {
+            var foundMarkerGenre = false;
+            for (var g = 0; g < $scope.events[i].genres.length; g++) {
+                if ($scope.events[i].genres[g].name == 'electro' && foundMarkerGenre == false) {
+                    markerGenre = 'electro.png';
+                    foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'rock' && foundMarkerGenre == false) {
+                    markerGenre = 'rock.png';
+                    foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'reggae' && foundMarkerGenre == false) {
+                    markerGenre = 'rasta.png';
+                    foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'hip-hop' && foundMarkerGenre == false) {
+                    markerGenre = 'rap.png';
+                    foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'jazz' && foundMarkerGenre == false) {
+                    markerGenre = 'jazz.png';
+                    foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'chanson' && foundMarkerGenre == false) {
+                    markerGenre = 'accoustique.png';
+                    foundMarkerGenre = true;
+                }
+
+            }
+            if (foundMarkerGenre == false) {
+                markerGenre = 'autres.png';
+            }
+        }
+        return {geoPoint: geoPoint, markerGenre: markerGenre};
+    }
+
     $scope.updateMarkers = function () {
         $scope.dynMarkers = [];
         if ($scope.markerClusterer != undefined) {
@@ -99,51 +154,15 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
         var eventsLength = $scope.events.length;
         for (var i=0; i<eventsLength; i++) {
             if ($scope.events[i].addresses[0] != undefined) {
-                var geoPoint = $scope.events[i].addresses[0].geographicPoint;
-                var markerGenre;
-                function pushMarker (markerGenre, geoPoint, id) {
-                    var latLng = new google.maps.LatLng(geoPoint.substring(0, geoPoint.indexOf(',')), geoPoint.replace(/^.+,/,''));
-                    $scope.dynMarkers.push(new google.maps.Marker({position: latLng,
-                        icon: {url: '../assets/images/' + markerGenre,
-                        scaledSize: new google.maps.Size(50, 50)}, id: id}));
-                    console.log($scope.dynMarkers)
-                }
-                if ($scope.events[i].genres.length == 0) {
-                    markerGenre = 'autres.png';
-                } else {
-                    var foundMarkerGenre = false;
-                    for (var g = 0; g < $scope.events[i].genres.length; g++) {
-                        console.log($scope.events[i].genres[g])
-                        if ($scope.events[i].genres[g].name == 'electro' && foundMarkerGenre == false) {
-                            markerGenre = 'electro.png';
-                            foundMarkerGenre = true;
-                        } else if ($scope.events[i].genres[g].name == 'rock' && foundMarkerGenre == false) {
-                            markerGenre = 'rock.png';
-                            foundMarkerGenre = true;
-                        } else if ($scope.events[i].genres[g].name == 'reggae' && foundMarkerGenre == false) {
-                            markerGenre = 'rasta.png';
-                            foundMarkerGenre = true;
-                        }  else if ($scope.events[i].genres[g].name == 'hip-hop' && foundMarkerGenre == false) {
-                            markerGenre = 'rap.png';
-                            foundMarkerGenre = true;
-                        } else if ($scope.events[i].genres[g].name == 'jazz' && foundMarkerGenre == false) {
-                            markerGenre = 'jazz.png';
-                            foundMarkerGenre = true;
-                        } else if ($scope.events[i].genres[g].name == 'chanson' && foundMarkerGenre == false) {
-                            markerGenre = 'accoustique.png';
-                            foundMarkerGenre = true;
-                        }
-
-                    }
-                    if (foundMarkerGenre == false) {
-                        markerGenre = 'autres.png';
-                    }
-                }
-                pushMarker(markerGenre, geoPoint, $scope.events[i].eventId);
+                var __ret = addIcon(i);
+                var geoPoint = __ret.geoPoint;
+                var markerGenre = __ret.markerGenre;
+                pushMarker(markerGenre, geoPoint, $scope.events[i].eventId,
+                    $scope.events[i].places[0].placeId);
             }
         }
         $scope.markerClusterer = new MarkerClusterer(map, $scope.dynMarkers, {});
-        $scope.markerClusterer.zoomOnClick_ = false;
+        //$scope.markerClusterer.zoomOnClick_ = false;
         var markersLength = $scope.dynMarkers.length;
         for (i = 0; i < markersLength; i++) {
             var marker = $scope.dynMarkers[i];
@@ -153,38 +172,18 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
             });
         }
         google.maps.event.addListener($scope.markerClusterer, 'clusterclick', function(cluster) {
-            var eventsLength = $scope.events.length;
-            var redirectPath = '';
-            var count =0;
-            var places = '';
-            for (var i = 0; i < eventsLength; i++) {
-                if ($scope.events[i].addresses[0] != undefined) {
-                    var geopoints = $scope.events[i].addresses[0].geographicPoint
-                    var markerLength = cluster.markers_.length;
-                    for (var m = 0; m < markerLength; m++) {
-                        if (geopoints.substring(0, geopoints.indexOf(',')) < cluster.markers_[m].position.k + 0.000001 &&
-                            geopoints.substring(0, geopoints.indexOf(',')) > cluster.markers_[m].position.k - 0.000001 &&
-                            geopoints.replace(/^.+,/, '') < cluster.markers_[m].position.D + 0.000001 &&
-                            geopoints.replace(/^.+,/, '') > cluster.markers_[m].position.D - 0.000001) {
-                            if (places.indexOf($scope.events[i].places[0].placeId) == -1) {
-                                places = places + ', ' + $scope.events[i].places[0].placeId;
-                                count = count + 1;
-                            }
-                        }
-                    }
+            console.log(cluster);
+            var places = [];
+            var markersLength = cluster.markerClusterer_.markers_.length;
+            for (i = 0; i < markersLength; i ++) {
+                if (places.indexOf(cluster.markerClusterer_.markers_[i].placeId) == -1) {
+                    places.push(cluster.markerClusterer_.markers_[i].placeId)
                 }
             }
-            if (count == 1) {
-                redirectPath = 'places/' + places.replace(', ', '');
-            } else {
-                $timeout(function () {
-                    $scope.$apply(function () {
-                        $scope.mapCenter = cluster.center_.k + ',' + cluster.center_.D;
-                        $scope.zoom = 14;
-                    })
-                }, 0)
+            console.log(places)
+            if (places.length == 1) {
+                window.location.href =('#/places/' + places[0]);
             }
-            window.location.href =('#/' + redirectPath);
         });
     };
     var StartTimer;
@@ -209,31 +208,14 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
         }
         clearTimeout(StartTimer);
         StartTimer = setTimeout($scope.getEvents, doneStartInterval);
-    }
-    $scope.goTo = function (e, id) {
-        var redirectPath = 'events/' + $scope.events[id].eventId;
-        var eventsLength = $scope.events.length;
-        for (var i = 0; i < eventsLength; i++) {
-            if (i != id &&
-                $scope.events[id].places[0] != undefined &&
-                $scope.events[i].addresses[0] != undefined) {
-                if ($scope.events[i].addresses[0].geographicPoint == $scope.events[id].addresses[0].geographicPoint) {
-                    console.log($scope.events[i])
-                    console.log($scope.events[id])
-                    redirectPath = 'places/' + $scope.events[id].places[0].placeId;
-                }
-            }
-        }
-        window.location.href =('#/' + redirectPath);
     };
     function getBounds () {
         $scope.initializeTime();
-        console.log(map)
         var waitForMap = setInterval(function () {
             if (document.getElementsByTagName('map').length > 0) {
-                clearInterval(waitForMap)
+                clearInterval(waitForMap);
                 google.maps.event.addListener(map, 'zoom_changed', function() {
-                    $scope.mapBounces = map.getBounds()
+                    $scope.mapBounces = map.getBounds();
                     if (map.zoom < $scope.zoom) {
                         $scope.zoom = map.zoom;
                         offset = offset + 20;
@@ -241,10 +223,10 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
                     }
                 });
                 google.maps.event.addListener(map, 'center_changed', function() {
-                    $scope.mapBounces = map.getBounds()
-                    $scope.mapCenter = map.center.k + ', ' + map.center.D;
-                })
-                $scope.mapBounces = map.getBounds()
+                    $scope.mapBounces = map.getBounds();
+                    $scope.mapCenter = map.center[Object.keys(map.center)[0]] + ', ' + map.center[Object.keys(map.center)[1]];
+                });
+                $scope.mapBounces = map.getBounds();
                 $scope.getEvents();
             }
         }, 500)
@@ -252,11 +234,9 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
     if ($rootScope.geoLoc.length > 0) {
         $timeout(function () {
             $scope.$apply(function() {
-                $scope.mapCenter = $rootScope.geoLoc.replace('(', '');
-                $scope.mapCenter = $scope.mapCenter.replace(')', '');
-                $scope.mapCenter = $scope.mapCenter.replace(",", ", ");
-            })
-            $scope.map = true;
+                $scope.mapCenter = RefactorGeopoint.refactorGeopoint($rootScope.geoLoc);
+                $scope.map = true;
+            });
             $scope.$on('mapInitialized', function(event, evmap) {
                 map = evmap;
                 getBounds(evmap)
@@ -267,11 +247,9 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
             if (newVal.length > 0) {
                 $timeout(function () {
                     $scope.$apply(function () {
-                        $scope.mapCenter = newVal.replace('(', '');
-                        $scope.mapCenter = $scope.mapCenter.replace(')', '');
-                        $scope.mapCenter = $scope.mapCenter.replace(",", ", ");
-                    })
-                    $scope.map = true;
+                        $scope.mapCenter = RefactorGeopoint.refactorGeopoint($rootScope.geoLoc);
+                        $scope.map = true;
+                    });
                     $scope.$on('mapInitialized', function (event, evmap) {
                         map = evmap;
                         getBounds(evmap)
@@ -280,4 +258,4 @@ angular.module('claudeApp').controller('SmallHomeCtrl', function ($scope, $rootS
             }
         })
     }
-});
+}]);
