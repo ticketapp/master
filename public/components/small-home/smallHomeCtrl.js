@@ -179,8 +179,7 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                 if (places.indexOf(cluster.markerClusterer_.markers_[i].placeId) == -1) {
                     places.push(cluster.markerClusterer_.markers_[i].placeId)
                 }
-            }
-            console.log(places)
+            };
             if (places.length == 1) {
                 window.location.href =('#/places/' + places[0]);
             }
