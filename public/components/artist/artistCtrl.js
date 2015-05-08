@@ -5,7 +5,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
               $routeParams, WebsitesFactory, InfoModal) {
 
         $scope.trackLimit = 12;
-        $scope.trackTitle = 'hjh';
+        $scope.trackTitle = '';
         $scope.showDesc = false;
         $scope.selectedTab = 0;
         if ($rootScope.artisteToCreate != true) {
@@ -16,6 +16,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
                 $scope.tracks = artist.tracks;
+                console.log(artist.websites);
                 $rootScope.loadingTracks = false;
                 if (artist.websites != undefined) {
                     $scope.websites = WebsitesFactory.normalizeWebsitesObject(artist.websites,
