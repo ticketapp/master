@@ -8,15 +8,31 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.trackTitle = '';
         $scope.showDesc = false;
         $scope.selectedTab = 0;
+        if ($localStorage.tracksSignaled == undefined) {
+            $localStorage.tracksSignaled = [];
+        }
         if ($rootScope.artisteToCreate != true) {
             $scope.tracks = [];
             $scope.artist = [];
             $scope.artist.events = [];
             $rootScope.loadingTracks = true;
+            function pushTrack (track) {
+                var pushTrack = true;
+                for (var i = 0; i < $localStorage.tracksSignaled.length; i++) {
+                    if (track.trackId == $localStorage.tracksSignaled[i]) {
+                        pushTrack = false;
+                        return
+                    }
+                }
+                if (pushTrack == true) {
+                    $scope.tracks.push(track)
+                }
+            }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
-                $scope.tracks = artist.tracks;
-                console.log(artist.websites);
+                $scope.tracks = [];
+                artist.tracks.forEach(pushTrack);
+                $scope.artist.tracks = $scope.tracks;
                 $rootScope.loadingTracks = false;
                 if (artist.websites != undefined) {
                     $scope.websites = WebsitesFactory.normalizeWebsitesObject(artist.websites,
@@ -118,6 +134,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                         tracksLength --;
                     }
                 }
+                $scope.artist.tracks.splice(index, 1);
             }, function () {
             });
 
@@ -128,7 +145,6 @@ angular.module('claudeApp').controller('SignalTrackCtrl', function ($scope, $mod
 
     $scope.ok = function (reason) {
         if (reason != undefined) {
-            console.log(reason);
             $modalInstance.close();
         } else {
             $scope.error = 'veuyez renseigner ce champs'

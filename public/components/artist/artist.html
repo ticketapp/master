@@ -116,9 +116,9 @@
                 <div ng-repeat="track in tracksFiltered = (artist.tracks | limitTo: trackLimit) track by $index"
                      class="column fade paddingBottom10 medium-6 large-4 float-left"
                      ng-class="{'paddingRight0 paddingLeft0': $root.window == 'small'}">
-                    <div class="column large-12 arTrack marginTop10">
-                        <div class="column small-1 padding0 text-center float-right"
-                             style="border-left:solid 1px rgba(0, 0, 0, 0.45) ">
+                    <div class="column large-12 arTrack">
+                        <div class="column small-1 padding0 text-center float-right marginTop10"
+                             style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:70px;">
                             <i class="fi-x column medium-12 padding0 pointer"
                                ng-click="signalTrack($index)">
                                 <md-tooltip>
