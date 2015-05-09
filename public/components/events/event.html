@@ -21,7 +21,7 @@
     </div>
     <div ng-if="$root.window == 'large'"
          class="descriptionContent column large-8 float-left padding0 justify">
-        <div ng-bind-html="event.description"></div>
+        <div id="description" ng-bind-html="event.description"></div>
     </div>
     <div class="column large-4 float-left eventInfo" ng-if="event.tariffs.length > 0">
         <h2>Acheter des places</h2>

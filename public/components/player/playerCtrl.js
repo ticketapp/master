@@ -380,7 +380,7 @@ angular.module('claudeApp').
                                         }
                                     }
                                 } else {
-                                    document.getElementById('musicPlayer').addEventListener('error', error);
+                                    error();
                                 }
                             });
                         }

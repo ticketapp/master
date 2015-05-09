@@ -133,7 +133,7 @@ margin-left: 5px;"
     <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed"></audio>
     <div class="width100p playlistScroller" style="overflow-x: auto;">
         <div ng-if="playlist.tracks.length > 0" style="position: relative; overflow: auto; max-height: 150px; display: inline-flex; min-width: 100%"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
-            <div ng-class="{onplay : track == trackActive}" class="float-left trackContener"
+            <div ng-class="{onplay : track == trackActive}" class="trackContener"
                  as-sortable-item ng-repeat="track in playlist.tracks">
                 <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
                 <div class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">

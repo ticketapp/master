@@ -8,7 +8,7 @@
     <div id="events_contener" ng-class="{'paddingTop50 marginTop50': $root.path == 'search'}">
         <event-min ng-if="$root.activEvent && events.length > 0"
              class="float-left column small-12 medium-6 large-4 fade min_contener margin0"
-             data-ng-repeat="event in events">
+             data-ng-repeat="event in events | limitTo: limit">
         </event-min>
         <artist-min ng-if="$root.activArtist && artists.length > 0"
              class="column large-4 medium-6 float-left marginBottom20 fade marginLeft0

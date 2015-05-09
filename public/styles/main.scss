@@ -18,7 +18,7 @@
 @import "../components/buttonsControls/controls";
 @import "../components/artist/artist";
 
-.browsehappy {
+.browsehappy {  
   margin: 0.2em 0;
   background: #ccc;
   color: #000;
@@ -33,6 +33,7 @@
   -ms-transform: scale(1.2);
   transform: scale(1.2);
 }
+
 .block_min{
   margin:0 auto;
   box-shadow: 1px 1px 12px -5px rgba(85, 85, 85, 0.59);
@@ -63,7 +64,6 @@
   height: 1.4em;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.4);
-  margin: auto auto;
   position: absolute;
   right: 0;
   color: white;

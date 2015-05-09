@@ -28,10 +28,15 @@ angular.module('claudeApp').
             restrict : 'C',
             link : function (scope, element) {
                 if ( $rootScope.window != 'small' && $rootScope.window != 'medium') {
-                    if ($(element).offset().left < 30) {
-                        $(element).removeClass('large-4');
-                        $(element).addClass('large-12');
-                    }
+                    var waitForBinding = setInterval(function () {
+                        if ($(document).find('#description').html().length > 0) {
+                            clearInterval(waitForBinding);
+                            if ($(element).offset().left < 30) {
+                                $(element).removeClass('large-4');
+                                $(element).addClass('large-12');
+                            }
+                        }
+                    }, 500)
                 }
             }
         }
