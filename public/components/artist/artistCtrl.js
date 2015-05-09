@@ -79,6 +79,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 artistName = artistName.toLowerCase().replace('musik', '');
                 artistName = artistName.toLowerCase().replace('fanpage', '');
                 artistName = artistName.toLowerCase().replace(/[^\w\s].*/, '');
+                console.log(artistName, trackTitle, artistFacebookUrl)
                 ArtistsFactory.getNewArtistTrack(artistName, trackTitle, artistFacebookUrl).then(
                     function (tracks) {
                         for (var i = 0; i < tracks.length; i++) {

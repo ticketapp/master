@@ -180,7 +180,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             }
             return deferred.promise;
         },
-        getNewArtistTrack : function (artistName, artistFacebookUrl, trackTitle) {
+        getNewArtistTrack : function (artistName, trackTitle, artistFacebookUrl) {
             var deferred = $q.defer();
             if(factory.artists == true) {
                 deferred.resolve(factory.artists);

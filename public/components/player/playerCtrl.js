@@ -123,14 +123,16 @@ angular.module('claudeApp').
 
             $rootScope.addToPlaylist = function (tracks, artist) {
                 offset = 0;
-                $scope.playlistEnd = false;
                 if ($rootScope.playlist.tracks.length == 0) {
                     pushListOfTracks(artist, tracks, true);
                     played = [];
+                    $scope.playlistEnd = false;
                 } else if ( $scope.playlistEnd == true) {
                     pushListOfTracks(artist, tracks, true);
+                    $scope.playlistEnd = false;
                 } else {
                     pushListOfTracks(artist, tracks, false);
+                    $scope.playlistEnd = false;
                 }
                 artist.genres.forEach(addGenres);
                 eventsPlaylist();

@@ -1,7 +1,7 @@
 angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout',
-    'ArtistsFactory', 'EventsFactory', 'OrganizerFactory', 'PlaceFactory', 'SearchFactory',
+    'ArtistsFactory', 'EventsFactory', 'OrganizerFactory', 'PlaceFactory', 'SearchFactory', 'RefactorGeopoint',
     function($rootScope, $scope, $filter, $timeout, ArtistsFactory, EventsFactory, OrganizerFactory,
-             PlaceFactory, SearchFactory){
+             PlaceFactory, SearchFactory, RefactorGeopoint){
         SearchFactory.init();
         $scope.limit = 12;
         $scope.artists = [];
@@ -23,6 +23,10 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             var _research = document.getElementById('searchBar').value.trim();
         } else {
             var _research = '';
+        }
+
+        function refactorGeopoint (place) {
+            place.geographicPoint = RefactorGeopoint.refactorGeopoint(place.geographicPoint)
         }
         function updateScope (data, scope, idName, otherScopeToCheck) {
             var scopeIdList = [];
@@ -136,6 +140,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getPlaces() {
             PlaceFactory.getPlaces(offset, $rootScope.geoLoc).then(function (places) {
+                places.forEach(refactorGeopoint)
                 updateScope(places, $scope.places, 'placeId');
             });
         }
