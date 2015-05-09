@@ -22,6 +22,9 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
                 };
                 factory.initSearch = true;
             }
+        },
+        storeSearch : function (search) {
+            $rootScope.storeSearch = search;
         }
     };
     factory.init();

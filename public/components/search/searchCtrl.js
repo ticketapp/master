@@ -16,6 +16,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         var _selOrganizer = $rootScope.activUsr;
         var _selPlace = $rootScope.activPlace;
         var _selStart;
+        console.log($rootScope.storeSearch)
         if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
             var _research = $rootScope.storeSearch;
             $rootScope.remStoreSearch();
@@ -247,11 +248,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         var facebookSearchInterval = 600;
         var otherSearch;
         var otherSearchInterval = 600;
-        var reseachNb = 0;
         $scope.research = function(newName) {
             if (angular.isDefined(newName) && (_selArtist == true || _selEvent == true || _selOrganizer == true ||
                 _selPlace == true)) {
-                reseachNb++;
                 $scope.loadingMore = true;
                 _research = newName;
                 $scope.searchPat = newName;
@@ -284,6 +283,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 clearTimeout(otherSearch);
                 otherSearch = setTimeout(search, otherSearchInterval);
             }
+            SearchFactory.storeSearch(_research);
             return _research;
         };
         $scope.selArtist = function(newName) {

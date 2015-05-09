@@ -7,6 +7,7 @@
         </div>
         <div class="absolute top0">
             <i ng-repeat="genre in artist.genres"
+               class="eventMinFilter"
                ng-click="$root.research(genre.name); $root.redirectToSearch(genre.name)"
                ng-class="{'fi-reggae': genre.name == 'reggae',
                            'fi-hip-hop': genre.name == 'hip-hop',
