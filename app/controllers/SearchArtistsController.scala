@@ -170,8 +170,7 @@ object SearchArtistsController extends Controller {
 
   def removeUselessInSoundCloudWebsite(website: String): String = website match {
     case soundCloudWebsite if soundCloudWebsite contains "soundcloud" =>
-      println(website)
-      soundCloudWebsite.dropRight(soundCloudWebsite.lastIndexOf('/'))
+      soundCloudWebsite.take(soundCloudWebsite.lastIndexOf('/'))
     case _ => website
   }
 }

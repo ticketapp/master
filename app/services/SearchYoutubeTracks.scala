@@ -111,7 +111,7 @@ object SearchYoutubeTracks {
         (__ \ "snippet" \ "thumbnails" \ "default" \ "url").readNullable[String]
       )((title: Option[String], url: Option[String], thumbnailUrl: Option[String]) =>
       (title, url, thumbnailUrl))
-    val collectOnlyValidTracks = Reads.seq(youtubeTrackReads).map { tracks =>
+    val collectOnlyValidTracks = Reads.seq(youtubeTrackReads) map { tracks =>
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
           if isArtistNameInTrackTitle(title, artist.name) =>

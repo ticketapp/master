@@ -4,6 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
+import controllers.SearchArtistsController._
 import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, WebServiceException}
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
@@ -233,8 +234,9 @@ object Artist {
       soundCloudTrack.redirectUrl match {
         case None =>
         case Some(redirectUrl) =>
-          if (!artist.websites.contains(redirectUrl))
-            Artist.addWebsite(artist.artistId, redirectUrl)
+          val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(Utilities.normalizeUrl(redirectUrl))
+          if (!artist.websites.contains(refactoredRedirectUrl))
+            Artist.addWebsite(artist.artistId, refactoredRedirectUrl)
       }
   }
 

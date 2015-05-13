@@ -68,7 +68,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       whenReady(enumerateSongs |>> iteratee, timeout(Span(2, Seconds))) { any => any }
     }
 
-    "return " in {
+    "return a set of tracks for a set of titles" in {
       val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
         Option("description"), "facebookUrl3", Set("website"))
       val tracksTitle = Set("Le poinçonneur des Lilas")
@@ -86,6 +86,29 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       whenReady(getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>
         tracks mustBe expectedTracks
       }
+    }
+
+    "return a set of tracks for a title" in {
+      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
+        Option("description"), "facebookUrl3", Set("website"))
+
+      val expectedTracks = Set(Track(None,
+        ", Le Poinçonneur des Lilas, 1959", "E8ZCvYg5-ZQ", 'y', "https://i.ytimg.com/vi/E8ZCvYg5-ZQ/default.jpg",
+        "facebookUrl3", None, None), Track(None, """"Le poinçonneur des Lilas" (live officiel) - Archive INA""",
+        "25EzXPQUWRc", 'y', "https://i.ytimg.com/vi/25EzXPQUWRc/default.jpg", "facebookUrl3", None, None),
+        Track(None, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y', "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg",
+          "facebookUrl3", None, None), Track(None, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
+          "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", None, None), Track(None,
+          "Le Poinconneur Des Lilas [SUBTITLED]", "JVSRMxZU1dY", 'y', "https://i.ytimg.com/vi/JVSRMxZU1dY/default.jpg",
+          "facebookUrl3", None, None))
+
+      whenReady(getYoutubeTracksByTitleAndArtistName(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
+        tracks => tracks should contain theSameElementsAs expectedTracks
+      }
+    }
+
+    "return a sequence of tracks" in {
+      true mustBe false
     }
 
     "return an enumerator of tracks" in {
