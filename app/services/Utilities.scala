@@ -23,6 +23,7 @@ object Utilities {
   val echonestApiKey = "3ZYZKU3H3MKR2M59Z"
 
   val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-z@A-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
+
   val geographicPointPattern = """(-?\(\d+\.?\d*,-?\d+\.?\d*\))""".r
 
   val UNIQUE_VIOLATION = "23505"
@@ -85,8 +86,7 @@ object Utilities {
     case None =>
       Set.empty
     case Some(description) =>
-      play.Play.application.configuration.getString("regex.linkPattern").r
-        .findAllIn(description).toSet.map { normalizeUrl }
+      linkPattern.findAllIn(description).toSet.map { normalizeUrl }
   }
 
   def phoneNumbersStringToSet(phoneNumbers: Option[String]): Set[String] = phoneNumbers match {
@@ -130,7 +130,8 @@ object Utilities {
             if (matcherString contains "@")
               matcherString
             else
-              """<a href='http://""" + normalizeUrl(matcherString) + """'>""" + normalizeUrl(matcherString) + """</a>"""
+              """<a href='http://""" + normalizeUrl(matcherString) + """'>""" + normalizeUrl(matcherString) +
+                """</a>"""
         }
       }
       Option("<div class='column large-12'>" +

@@ -41,7 +41,8 @@ case class Event(eventId: Option[Long],
                  genres: Seq[Genre] = Seq.empty)
 
 object Event {
-  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
+  val geographicPointPattern = """(-?\(\d+\.?\d*,-?\d+\.?\d*\))""".r
+  val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
 
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
                 endTime: Option[Date], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],

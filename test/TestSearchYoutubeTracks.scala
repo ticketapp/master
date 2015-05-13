@@ -66,7 +66,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
     }
 
     "return an Enumerator of Set[String]" in {
-      val enumerateSongs = getEchonestSongFrom0("ARNJ7441187B999AFD")
+      val enumerateSongs = getEchonestSongs("ARNJ7441187B999AFD")
 
       val iteratee = Iteratee.foreach[Set[String]](_ should not be empty)
 

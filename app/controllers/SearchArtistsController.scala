@@ -16,9 +16,9 @@ import play.api.libs.json.Reads._
 import services.Utilities.{ normalizeUrl, getNormalizedWebsitesInText }
 
 object SearchArtistsController extends Controller {
-  val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
-  val token = play.Play.application.configuration.getString("facebook.token")
-  val linkPattern = play.Play.application.configuration.getString("regex.linkPattern").r
+  val soundCloudClientId = "f297807e1780623645f8f858637d4abb"
+  val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
+  val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-z@A-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     getEventuallyFacebookArtists(pattern).map { artists =>
@@ -33,7 +33,7 @@ object SearchArtistsController extends Controller {
         "type" -> "page",
         "limit" -> "400",
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
-        "access_token" -> token)
+        "access_token" -> facebookToken)
       .get()
       .map { readFacebookArtists } //(_).take(20)
   }
@@ -123,7 +123,7 @@ object SearchArtistsController extends Controller {
     WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
       .withQueryString(
         "fields" -> "name,cover{source},id,category,link,website,description,genre",
-        "access_token" -> token)
+        "access_token" -> facebookToken)
       .get()
       .map { readFacebookArtist }
   }
@@ -160,9 +160,18 @@ object SearchArtistsController extends Controller {
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                  maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
-    val websitesSet = getNormalizedWebsitesInText(maybeWebsites).filterNot(_.contains("facebook.com")).filterNot(_ == "")
+    val websitesSet = getNormalizedWebsitesInText(maybeWebsites)
+      .filterNot(_.contains("facebook.com"))
+      .filterNot(_ == "")
     val description = Utilities.formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
     Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq, Seq.empty)
+  }
+
+  def removeUselessInSoundCloudWebsite(website: String): String = website match {
+    case soundCloudWebsite if soundCloudWebsite contains "soundcloud" =>
+      println(website)
+      soundCloudWebsite.dropRight(soundCloudWebsite.lastIndexOf('/'))
+    case _ => website
   }
 }

@@ -71,38 +71,28 @@ object SearchYoutubeTracks {
   }
 
   def getYoutubeTracksByEchonestId(artist: Artist, echonestId: String): Enumerator[Set[Track]] = {
-    Future {
-      saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId
-        .getOrElse(throw new Exception("SearchYoutubeTracks.getYoutubeTracksByEchonestId: artist without id found"))))
+    eventuallySaveArtistGenres(echonestId, artist)
+
+    val enumerateSongsTitle: Enumerator[Set[String]] = getEchonestSongs(echonestId)
+
+    val toEventuallyTracks: Enumeratee[Set[String], Future[Set[Track]]] = Enumeratee.map[Set[String]]{ tracksTitle =>
+      getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle)
     }
 
-    getEchonestSongFrom0(echonestId).flatMap { echonestSongsTitle: Set[String] =>
-      getYoutubeTracksByTitlesAndArtistName(artist, echonestSongsTitle)
-    }
-
-   /* val enumerateSongs = getEchonestSongFrom0(echonestId)
-
-    val iteratee = Iteratee.foreach[Set[String]](getYoutubeTracksByTitlesAndArtistName(artist, _))
-
-    val toTracks: Enumeratee[Set[String], Seq[Track]] =
-      Enumeratee.map[Set[String]]{ setTitles => Iteratee.flatten(getYoutubeTracksByTitlesAndArtistName(artist, setTitles)) }
-
-    enumerateSongs |>> iteratee*/
+    enumerateSongsTitle &> toEventuallyTracks &> Enumeratee.mapM(identity)
   }
-  /*
-  val enumerateSongs = getEchonestSongFrom0("ARNJ7441187B999AFD")
 
-      val iteratee = Iteratee.foreach[Set[String]](_ should not be empty)
+  def eventuallySaveArtistGenres(echonestId: String, artist: Artist): Unit = Future {
+    saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId
+      .getOrElse(throw new Exception("SearchYoutubeTracks.getYoutubeTracksByEchonestId: artist without id found"))))
+  }
 
-      enumerateSongs |>> iteratee
-   */
+  def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Future[Set[Track]] =
+    Future.sequence(
+      tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) }
+    ).map { nestedTracks => nestedTracks.flatten }
 
-  def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Enumerator[Set[Track]] =
-    Enumerator.flatten(
-      Future.sequence(
-        tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) }
-      ).map { nestedTracks => Enumerator(nestedTracks.flatten) }
-    )
+
 
   def getYoutubeTracksByTitleAndArtistName(artist: Artist, trackTitle: String): Future[Seq[Track]] = {
     WS.url("https://www.googleapis.com/youtube/v3/search")
@@ -130,20 +120,14 @@ object SearchYoutubeTracks {
           Track(None, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl)
       }
     }
-//    println(youtubeResponse.json)
+
     (youtubeResponse.json \ "items")
       .asOpt[Seq[Track]](collectOnlyValidTracks)
       .getOrElse(Seq.empty)
   }
 
-  def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean = {
-    //val ArtistNameRegex = artist.name.toLowerCase.r
+  def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean =
     trackTitle.toLowerCase contains artistName.toLowerCase
-    /*match {
-      case ArtistNameRegex(title) => true
-      case _ => false
-    }*/
-  }
 
   def getMaybeEchonestArtistUrlsByFacebookId(facebookArtistId: String): Future[Option[(String, Set[String])]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/urls")
@@ -197,19 +181,21 @@ object SearchYoutubeTracks {
       None
   }
 
-  def getEchonestSongFrom0(echonestArtistId: String): Enumerator[Set[String]] = {
-    def getEchonestSongs(start: Long, echonestArtistId: String): Enumerator[Set[String]] = {
-      Enumerator.flatten(getEchonestSongsWSCall(start: Long, echonestArtistId: String).map { echonestResponse =>
-        val total = (echonestResponse \ "response" \ "total").asOpt[Int]
-        total.exists(_ > start + 100) match {
-          case false =>
-            Enumerator.eof
-          case true =>
-            Enumerator(readEchonestSongs(echonestResponse)) >>> getEchonestSongs(start + 100, echonestArtistId)
+  def getEchonestSongs(echonestArtistId: String): Enumerator[Set[String]] = {
+    def getEchonestSongsFrom(start: Long, echonestArtistId: String): Enumerator[Set[String]] = {
+      Enumerator.flatten(
+        getEchonestSongsWSCall(start: Long, echonestArtistId: String).map { echonestResponse =>
+          val total = (echonestResponse \ "response" \ "total").asOpt[Int]
+          total.exists(_ > start + 100) match {
+            case false =>
+              Enumerator.eof
+            case true =>
+              Enumerator(readEchonestSongs(echonestResponse)) >>> getEchonestSongsFrom(start + 100, echonestArtistId)
+          }
         }
-      })
+      )
     }
-    getEchonestSongs(0, echonestArtistId)
+    getEchonestSongsFrom(0, echonestArtistId)
   }
 
   def getEchonestSongsWSCall(start: Long, echonestArtistId: String): Future[JsValue] = {
@@ -234,7 +220,7 @@ object SearchYoutubeTracks {
       .flatten
   }
 
-  def getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
+  def  getSeqTupleEchonestIdFacebookId(artistName: String): Future[Seq[(String, String)]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/search")
       .withQueryString(
         "name" -> artistName,
