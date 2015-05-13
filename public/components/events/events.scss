@@ -1,0 +1,31 @@
+.eventInfos > i {
+  font-size: 30px;
+  color: primary;
+}
+.eventInfos > b {
+  line-height: 24px;
+  vertical-align: text-bottom;
+}
+
+.eventInfo {
+  box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.programmation {
+  display: block;
+  min-height: 125px;
+}
+.progArtImg {
+  display: block;
+  background-size: 100%
+}
+
+.progArtName {
+  text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.5);
+  color: white;
+}
+
+.playProg {
+  background: transparentBlack;
+}

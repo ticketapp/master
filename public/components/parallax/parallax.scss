@@ -1,0 +1,24 @@
+.parallax-background {
+  background-color: primary;
+  height: 100%;
+  background-repeat: no-repeat;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  -o-background-size: 100%;
+  background-size: 100%;
+  position: fixed;
+  width: 100%;
+}
+
+.parallax-content {
+  max-width: 100%;
+  position: relative;
+  margin-top: 500px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 0;
+  padding-right: 0;
+  float: left;
+  width: 100%;
+  background: #ffffff;
+}

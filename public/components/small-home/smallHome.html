@@ -1,0 +1,51 @@
+<div class="absolute top0 bottom0 right left" style="z-index: 11">
+    <div class="absolute zIndex5 column">
+        <a class="button column small-6 margin0 float-left" href="#/search"><i class="fi-magnifying-glass"></i></a>
+        <a ng-if="$root.path != 'iframe'" class="button column small-6 float-left margin0"
+           data-ng-controller="toolsCtrl" ng-click="open()">
+            <i class="fi-thumbnails"></i>
+        </a>
+        <md-slider flex ng-change="timeChange()"
+                   ng-model="time" min="1" max="51" step="1"
+                   aria-label="timeSlider"
+                   id="timeSearchSliderPhone"
+                   class="md-primary column small-12 float-left padding0 margin0">
+        </md-slider>
+    </div>
+    <div layout="row" layout-sm="column"
+         ng-if="searchEventFirst"
+         style="text-align: center; background: rgba(0, 0, 0, 0.37)"
+         class="absolute paddingTop50 top0 column large-12 bottom0 zIndex5" layout-align="space-around">
+        <md-progress-circular class="marginAuto" md-mode="indeterminate"></md-progress-circular>
+        <h2>Recherche d'évenements...</h2>
+    </div>
+    <map ng-if="map"
+         zoom="{{zoom}}"
+         center="[{{mapCenter}}]"
+         scrollwheel="false"
+         disable-default-u-i="true"
+         style="height: 100%"
+         styles="[
+                 {
+                     stylers:[
+                         {hue:'#00654C'},
+                         {visibility:'simplified'},
+                         {gamma:0.5},
+                         {weight:0.5}
+                     ]
+                 },
+                 {
+                    elementType:'labels',
+                    stylers:[
+                        {visibility:'off'}
+                    ]
+                },
+                {featureType:'water',
+                    stylers:[
+                        {color:'#008CBA'}
+                    ]
+                }
+            ]"
+         class="width100p">
+    </map>
+</div>
