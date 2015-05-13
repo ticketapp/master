@@ -92,8 +92,6 @@ object SearchYoutubeTracks {
       tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) }
     ).map { nestedTracks => nestedTracks.flatten }
 
-
-
   def getYoutubeTracksByTitleAndArtistName(artist: Artist, trackTitle: String): Future[Seq[Track]] = {
     WS.url("https://www.googleapis.com/youtube/v3/search")
       .withQueryString(

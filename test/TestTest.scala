@@ -52,10 +52,6 @@ class TestTest extends PlaySpec {
       val ints: Enumerator[Future[Int]] = strings &> toInt
       val ints2: Enumerator[Int] = Enumerator(1, 2, 3)
 
-
-      val toNotFutures = Enumeratee.map[Future[Int], Int]{ f => f }
-
-
       val printInts = Iteratee.foreach[Future[Int]] { futureInt => futureInt onComplete {
           case Success(int) => int.toString
           case Failure(f) => "failure"

@@ -29,14 +29,9 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
     "return a list of echonestId/facebookId" in {
       val futureSeqTupleEchonestIdFacebookId = getSeqTupleEchonestIdFacebookId("rone")
       
-      val expectedResponse = List(("ARWRC4A1187FB5B7D5", "114140585267550"), ("AR4CUEZ1187B9B75A6", "39109015282"),
-        ("AR3KOM61187B99740F", "112089615877"), ("ARTCFOI11F4C83CCCD", "108719029161362"),
-        ("ARVVHOF1269FB35B7D", "166601410076014"), ("ARUQRKV12AF7D959A6", "131569216902639"))
-
-      futureSeqTupleEchonestIdFacebookId shouldBe a [Future[Seq[(String, String)]]]
-
       whenReady (futureSeqTupleEchonestIdFacebookId, timeout(Span(2, Seconds))) { seqTupleEchonestIdFacebookId =>
-        seqTupleEchonestIdFacebookId mustBe expectedResponse
+        seqTupleEchonestIdFacebookId should contain allOf (("ARWRC4A1187FB5B7D5", "114140585267550"),
+          ("AR3KOM61187B99740F", "112089615877"))
       }
     }
 
@@ -73,21 +68,24 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       whenReady(enumerateSongs |>> iteratee, timeout(Span(2, Seconds))) { any => any }
     }
 
-    "test" in {
-      def testt(): Future[Iteratee[String, Int]] = {
-        val strings: Enumerator[String] = Enumerator("1","2","3","4")
+    "return " in {
+      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
+        Option("description"), "facebookUrl3", Set("website"))
+      val tracksTitle = Set("Le poinçonneur des Lilas")
 
-        val sum: Iteratee[Int,Int] = Iteratee.fold[Int,Int](0){ (s,e) => s + e }
+      val expectedTracks = Set(Track(None,
+        ", Le Poinçonneur des Lilas, 1959", "E8ZCvYg5-ZQ", 'y', "https://i.ytimg.com/vi/E8ZCvYg5-ZQ/default.jpg",
+        "facebookUrl3", None, None), Track(None, """"Le poinçonneur des Lilas" (live officiel) - Archive INA""",
+        "25EzXPQUWRc", 'y', "https://i.ytimg.com/vi/25EzXPQUWRc/default.jpg", "facebookUrl3", None, None),
+        Track(None, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y', "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg",
+          "facebookUrl3", None, None), Track(None, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
+          "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", None, None), Track(None,
+          "Le Poinconneur Des Lilas [SUBTITLED]", "JVSRMxZU1dY", 'y', "https://i.ytimg.com/vi/JVSRMxZU1dY/default.jpg",
+          "facebookUrl3", None, None))
 
-        val toInt: Enumeratee[String,Int] = Enumeratee.map[String]{ s => s.toInt }
-
-        strings |>> toInt &>> sum
+      whenReady(getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>
+        tracks mustBe expectedTracks
       }
-
-      val ii = testt() onSuccess {
-        case s => println(s)
-      }
-
     }
 
     "return an enumerator of tracks" in {
