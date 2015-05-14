@@ -93,8 +93,14 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
       formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       place => {
         Place.save(place) map {
-          case Some(placeId) => Ok(Json.toJson(Place.find(placeId)))
-          case None => Ok(Json.toJson("The place couldn't be saved"))
+          case Success(Some(placeId)) =>
+            Ok(Json.toJson(Place.find(placeId)))
+          case Success(None) =>
+            Logger.error("PlaceController.createPlace")
+            Status(INTERNAL_SERVER_ERROR)
+          case Failure(psqlException) =>
+            Logger.error("PlaceController.createPlace")//, psqlException)
+            Status(INTERNAL_SERVER_ERROR)
         }
       }
     )

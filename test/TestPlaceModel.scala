@@ -1,6 +1,6 @@
 import java.util.Date
 import controllers.DAOException
-import models.Place
+import models.{Address, Place}
 import models.Place._
 import org.postgresql.util.PSQLException
 import org.scalatestplus.play._
@@ -20,12 +20,18 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
   "A place" must {
 
-    val place = Place(None, "name", Option("facebookId1"), Option("(0,0)"))
+//    val place = Place(None, "name", Option("facebookId1"), Option("(0,0)"))
+    val place = Place(None, "Le Transbordeur", Some("164354640267171"), None,
+      Some("""<div class="column large-12">Ancienne usine destinée à l’origine au traitement des eaux, le bâtiment situé sur la commune de Villeen fait un lieu de référence au niveau régional, national, voire international !</div>"""),
+      Some("www.transbordeur.fr"), Some(9099), None,
+      Some("https://scontent.xx.fbcdn.net/hphotos-xfa1/t31.0-8/s720x720/10699809_743219622380667_4218063112874186795_o.jpg"),
+      Some(Address(None,None,None,None,None)))
+
 
     "be able to be saved and deleted in database and return the new id" in {
       save(place).map { placeId =>
-        find(placeId.get) mustEqual Option(place.copy(placeId = placeId))
-        delete(placeId.get) mustBe Success(Option(1))
+        find(placeId.get.get) mustEqual Option(place.copy(placeId = placeId.get))
+        delete(placeId.get.get) mustBe Success(Option(1))
       }
     }
 

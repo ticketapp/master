@@ -51,7 +51,7 @@ object Scheduler {
 
       Event.save(facebookEvent.copy(geographicPoint = placeGeographicPoint,
         organizers = List(organizerWithGeographicPoint))) match {
-        case None => Event.update(facebookEvent) //delete old images and insert news
+        case None => Event.update(facebookEvent)
         case Some(eventId) =>
           Place.saveEventPlaceRelation(eventId, placeId)
           facebookEvent.addresses.map { address =>

@@ -52,9 +52,9 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 32 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 39 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -212,6 +212,31 @@ CREATE TABLE users_login (
 );
 INSERT INTO users_login(userId, providerId, firstName, lastName, fullName, authMethod)
 VALUES ('userTestId', 'providerId', 'firstName', 'lastName', 'fullName', 'oauth2');
+
+CREATE OR REPLACE FUNCTION insertUser(
+  userIdValue         VARCHAR(255),
+  providerIdValue     VARCHAR(255),
+  firstNameValue      VARCHAR(255),
+  lastNameValue       VARCHAR(255),
+  fullNameValue       VARCHAR(255),
+  emailValue          VARCHAR(255),
+  avatarUrlValue      VARCHAR,
+  authMethodValue     VARCHAR(255),
+  oAuth1InfoValue     VARCHAR,
+  oAuth2InfoValue     VARCHAR,
+  passwordInfoValue   VARCHAR(255))
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO users_login (userId, providerId, firstName, lastName, fullName, email, avatarUrl, authMethod,
+                             oAuth1Info, oAuth2Info, passwordInfo)
+      VALUES (userIdValue, providerIdValue, firstNameValue, lastNameValue, fullNameValue, emailValue, avatarUrlValue,
+              authMethodValue, oAuth1InfoValue, oAuth2InfoValue, passwordInfoValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
+
 
 CREATE TABLE users_token (
   id                        VARCHAR(36) NOT NULL,

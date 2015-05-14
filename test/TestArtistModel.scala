@@ -55,7 +55,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 }
 
-  "be updated to add this other website" in {
+  "have another website" in {
     val maybeTrack = Option(Track(None, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl",
       Option("redirectUrl")))
     val artist = Artist(Option(2), Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),

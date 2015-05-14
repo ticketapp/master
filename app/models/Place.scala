@@ -11,7 +11,7 @@ import securesocial.core.IdentityId
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
-import scala.util.Try
+import scala.util.{Success, Failure, Try}
 import services.Utilities.geographicPointPattern
 
 case class Place (placeId: Option[Long],
@@ -62,30 +62,31 @@ object Place {
     }
   }
 
-  def save(place: Place): Future[Option[Long]] = try {
-      val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
-      eventuallyAddressId map { addressId =>
-        DB.withConnection { implicit connection =>
+  def save(place: Place): Future[Try[Option[Long]]] = {
+    println(place)
+    val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
+    eventuallyAddressId map { addressId =>
+      DB.withConnection { implicit connection =>
         val organizerId = findOrganizerIdWithSameFacebookId(place.facebookId)
-        SQL(
-          s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
-             |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
-          .on(
-            'name -> place.name,
-            'geographicPoint -> place.geographicPoint,
-            'addressId -> addressId,
-            'facebookId -> place.facebookId,
-            'description -> place.description,
-            'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
-            'capacity -> place.capacity,
-            'openingHours -> place.openingHours,
-            'imagePath -> place.imagePath,
-            'organizerId -> organizerId)
-          .as(scalar[Option[Long]].single)
+        Try {
+          SQL(
+            s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
+               |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
+            .on(
+              'name -> place.name,
+              'geographicPoint -> place.geographicPoint,
+              'addressId -> addressId,
+              'facebookId -> place.facebookId,
+              'description -> place.description,
+              'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
+              'capacity -> place.capacity,
+              'openingHours -> place.openingHours,
+              'imagePath -> place.imagePath,
+              'organizerId -> organizerId)
+            .as(scalar[Long].singleOpt)
+        }
       }
     }
-  } catch {
-    case e: Exception => throw new DAOException("Place.save: " + e.getMessage)
   }
 
   def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Option[Long]] = {
@@ -190,6 +191,14 @@ object Place {
     case e: Exception => throw new DAOException("Place.find: " + e.getMessage)
   }
 
+  def findIdByFacebookId(facebookId: String): Try[Option[Long]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT placeId FROM places WHERE facebookId = {facebookId}""")
+        .on('facebookId -> facebookId)
+        .as(scalar[Option[Long]].single)
+    }
+  }
+
   def followByPlaceId(userId : String, placeId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO placesFollowed(userId, placeId) VALUES({userId}, {placeId})""")
@@ -213,18 +222,12 @@ object Place {
     case e: Exception => throw new DAOException("Place.unFollow: " + e.getMessage)
   }
 
-  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT placeId FROM places WHERE facebookId = {facebookId}""")
-        .on('facebookId -> facebookId)
-        .as(scalar[Long].singleOpt) match {
-        case None => throw new ThereIsNoPlaceForThisFacebookIdException("Place.followPlaceIdByFacebookId")
-        case Some(placeId) => followByPlaceId(userId, placeId)
-      }
+  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
+    findIdByFacebookId(facebookId) match {
+      case Success(Some(placeId)) => followByPlaceId(userId, placeId)
+      case Success(None)=> Failure(ThereIsNoPlaceForThisFacebookIdException("Place.followPlaceIdByFacebookId"))
+      case failure => failure
     }
-  } catch {
-    case e: Exception => throw new DAOException("Place.followPlaceIdByFacebookId: " + e.getMessage)
-  }
 
   def isFollowed(userId: IdentityId, placeId: Long): Boolean = try {
     DB.withConnection { implicit connection =>

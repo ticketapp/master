@@ -84,7 +84,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
           "facebookUrl3", None, None))
 
       whenReady(getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>
-        tracks mustBe expectedTracks
+        tracks should contain theSameElementsAs expectedTracks
       }
     }
 

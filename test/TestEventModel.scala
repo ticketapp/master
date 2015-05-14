@@ -62,7 +62,6 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         Some("69100"),Some("3 boulevard de la bataille de Stalingrad"))), List(), List())
 
 
-      // findEventOnFacebookByFacebookId("809097205831013") shouldBe a [Future[Event]]
       whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
         val dateWhileThisProblemWithDatesIsNotSolved = new Date()
         event.copy(startTime = dateWhileThisProblemWithDatesIsNotSolved) mustBe

@@ -18,16 +18,13 @@ package controllers.secureSocial
 
 import play.Logger
 import play.api.Play
-import play.api.Play.current
 import play.api.mvc.{Action, Controller}
-import securesocial.controllers.{ProviderController, TemplatesPlugin}
 import securesocial.core._
 import securesocial.core.providers.UsernamePasswordProvider
 import securesocial.core.providers.utils.RoutesHelper
+import play.api.Play.current
+import com.typesafe.plugin._
 
-/**
- * The Login page controller
- */
 object LoginPage extends Controller
 {
   /**
@@ -35,28 +32,11 @@ object LoginPage extends Controller
    */
   val onLogoutGoTo = "securesocial.onLogoutGoTo"
 
-  /**
-   * Renders the login page
-   * @return
-   */
   def login = Action { implicit request =>
-    val to = ProviderController.landingUrl
-    if ( SecureSocial.currentUser.isDefined ) {
-      // if the user is already logged in just redirect to the app
-      if ( Logger.isDebugEnabled ) {
-        Logger.debug(s"User already logged in, skipping login page. Redirecting to $to")
-      }
-      Redirect( to )
-    } else {
-      import com.typesafe.plugin._
-      if ( SecureSocial.enableRefererAsOriginalUrl ) {
-        SecureSocial.withRefererAsOriginalUrl(Ok(use[TemplatesPlugin].getLoginPage(request, UsernamePasswordProvider.loginForm)))
-      } else {
-        import play.api.Play.current
-        Ok(use[TemplatesPlugin].getLoginPage(request, UsernamePasswordProvider.loginForm))
-
-      }
-    }
+    if (SecureSocial.currentUser.isDefined)
+      Status(CONFLICT)("User already logged")
+    else
+      Ok
   }
 
   /**
