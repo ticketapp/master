@@ -33,8 +33,8 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       save(Option(address)) mustBe addressId
     }
 
-    "be saved if empty" in {
-
+    "not be saved if empty" in {
+    
 
     }
   }

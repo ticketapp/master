@@ -9,4 +9,4 @@ resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositori
 // Use the Play sbt plugin for Play projects
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.6")
 
-addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.6.0")
+//addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.6.0")
