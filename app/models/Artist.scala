@@ -4,6 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
+import controllers.SearchArtistsController._
 import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, WebServiceException}
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
@@ -233,8 +234,9 @@ object Artist {
       soundCloudTrack.redirectUrl match {
         case None =>
         case Some(redirectUrl) =>
-          if (!artist.websites.contains(redirectUrl))
-            Artist.addWebsite(artist.artistId, redirectUrl)
+          val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(Utilities.normalizeUrl(redirectUrl))
+          if (!artist.websites.contains(refactoredRedirectUrl))
+            Artist.addWebsite(artist.artistId, refactoredRedirectUrl)
       }
   }
 
@@ -243,7 +245,7 @@ object Artist {
     case Some(artistId: Long) => saveEventArtistRelation(eventId, artistId)
   }
 
-  def returnArtistId(name: String): Long = try {
+  def findIdByName(name: String): Long = try {
     DB.withConnection { implicit connection =>
       SQL("SELECT artistId FROM artists WHERE name = {name}")
         .on('name -> name)
@@ -253,7 +255,15 @@ object Artist {
     case e: Exception => throw new DAOException("Cannot returnArtistId: " + e.getMessage)
   }
 
-  def returnArtistIdByFacebookUrl(facebookUrl: String)(implicit connection: Connection): Option[Long] = try {
+  def findIdByFacebookId(facebookId: String): Try[Option[Long]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
+        .on('facebookId -> facebookId)
+        .as(scalar[Long].singleOpt)
+    }
+  }
+
+  def findIdByFacebookUrl(facebookUrl: String)(implicit connection: Connection): Option[Long] = try {
     SQL("SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl}")
       .on('facebookUrl -> facebookUrl)
       .as(scalar[Option[Long]].single)
@@ -306,21 +316,12 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.unFollow: " + e.getMessage)
   }
 
-  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
-        .on('facebookId -> facebookId)
-        .as(scalar[Long].singleOpt) match {
-        case None => throw ThereIsNoArtistForThisFacebookIdException("Artist.followArtistByFacebookId")
-        case Some(artistId) => followByArtistId(userId, artistId)
-      }
+  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
+    findIdByFacebookId(facebookId) match {
+        case Success(None) => Failure(ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId"))
+        case Success(Some(artistId)) => followByArtistId(userId, artistId)
+        case failure => failure
     }
-  } catch {
-    case thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException =>
-      throw ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId")
-    case e: Exception =>
-      throw DAOException("Artist.followByFacebookId: " + e.getMessage)
-  }
 
   def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {
     DB.withConnection { implicit connection =>

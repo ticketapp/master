@@ -52,9 +52,9 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 32 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 45 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
@@ -146,7 +146,6 @@ CREATE TABLE genres (
   icon                    CHAR,
   UNIQUE(name)
 );
-
 CREATE OR REPLACE FUNCTION insertGenre(nameValue VARCHAR(255), iconValue VARCHAR) RETURNS INT AS
   $$
   DECLARE genreIdToReturn int;;
@@ -161,6 +160,8 @@ CREATE OR REPLACE FUNCTION insertGenre(nameValue VARCHAR(255), iconValue VARCHAR
   END;;
   $$
 LANGUAGE plpgsql;
+SELECT insertGenre('rock', 'r');
+
 
 CREATE TABLE tracks (
   trackId                 SERIAL PRIMARY KEY,
@@ -213,6 +214,31 @@ CREATE TABLE users_login (
 INSERT INTO users_login(userId, providerId, firstName, lastName, fullName, authMethod)
 VALUES ('userTestId', 'providerId', 'firstName', 'lastName', 'fullName', 'oauth2');
 
+CREATE OR REPLACE FUNCTION insertUser(
+  userIdValue         VARCHAR(255),
+  providerIdValue     VARCHAR(255),
+  firstNameValue      VARCHAR(255),
+  lastNameValue       VARCHAR(255),
+  fullNameValue       VARCHAR(255),
+  emailValue          VARCHAR(255),
+  avatarUrlValue      VARCHAR,
+  authMethodValue     VARCHAR(255),
+  oAuth1InfoValue     VARCHAR,
+  oAuth2InfoValue     VARCHAR,
+  passwordInfoValue   VARCHAR(255))
+  RETURNS VOID AS
+  $$
+  BEGIN
+    INSERT INTO users_login (userId, providerId, firstName, lastName, fullName, email, avatarUrl, authMethod,
+                             oAuth1Info, oAuth2Info, passwordInfo)
+      VALUES (userIdValue, providerIdValue, firstNameValue, lastNameValue, fullNameValue, emailValue, avatarUrlValue,
+              authMethodValue, oAuth1InfoValue, oAuth2InfoValue, passwordInfoValue);;
+    EXCEPTION WHEN unique_violation THEN RETURN;;
+  END;;
+  $$
+LANGUAGE plpgsql;
+
+
 CREATE TABLE users_token (
   id                        VARCHAR(36) NOT NULL,
   email                     VARCHAR(255) NOT NULL,
@@ -247,7 +273,6 @@ CREATE TABLE events (
   UNIQUE(facebookId)
 );
 CREATE INDEX eventGeographicPoint ON events USING GIST (geographicPoint);
-
 CREATE OR REPLACE FUNCTION insertEvent(
   facebookIdValue                VARCHAR(63),
   isPublicValue                  BOOLEAN,
@@ -279,7 +304,8 @@ CREATE OR REPLACE FUNCTION insertEvent(
   $$
 LANGUAGE plpgsql;
 SELECT insertEvent('facebookId', true, true, 'name', '(0,0)', 'description', current_timestamp,
-                   current_timestamp, 'imagePath', 16, '5-10', 'ticketSeller');
+                   current_timestamp + interval '2000000 hour', 'imagePath', 16, '5-10', 'ticketSeller');
+
 
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
@@ -304,7 +330,7 @@ values ('Le transbordeur', POINT('(45.783808,4.860598)'), '117030545096697');
 CREATE OR REPLACE FUNCTION insertPlace(
   nameValue                      VARCHAR(255),
   geographicPointValue           VARCHAR(63),
-  addressIdValue                 INT,
+  addressIdValue                 BIGINT,
   facebookIdValue                VARCHAR(63),
   descriptionValue               VARCHAR,
   webSitesValue                  VARCHAR,
@@ -318,7 +344,7 @@ DECLARE placeIdToReturn int;;
   BEGIN
     INSERT INTO places (name, geographicPoint, addressId, facebookId, description, webSites,
                         capacity, openingHours, imagePath, organizerId)
-    VALUES (nameValue, POINT(geographicPointValue), addressIdValue::BIGINT, facebookIdValue, descriptionValue,
+    VALUES (nameValue, POINT(geographicPointValue), addressIdValue, facebookIdValue, descriptionValue,
             webSitesValue, capacityValue, openingHoursValue, imagePathValue, organizerIdValue)
     RETURNING placeId INTO placeIdToReturn;;
     RETURN placeIdToReturn;;
@@ -569,22 +595,22 @@ LANGUAGE plpgsql;
 
 CREATE TABLE placesFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   VARCHAR REFERENCES users_login(userId),
-  placeId                  INT REFERENCES places(placeId)
+  userId                   VARCHAR REFERENCES users_login(userId) NOT NULL,
+  placeId                  INT REFERENCES places(placeId)  NOT NULL
 );
 CREATE UNIQUE INDEX placesFollowedIndex ON placesFollowed (userId, placeId);
 
 CREATE TABLE usersFollowed (
   tableId                 SERIAL PRIMARY KEY,
-  userIdFollower          VARCHAR REFERENCES users_login(userId),
-  userIdFollowed          VARCHAR REFERENCES users_login(userId)
+  userIdFollower          VARCHAR REFERENCES users_login(userId)  NOT NULL,
+  userIdFollowed          VARCHAR REFERENCES users_login(userId)  NOT NULL
 );
 CREATE UNIQUE INDEX usersFollowedIndex ON usersFollowed (userIdFollower, userIdFollowed);
 
 CREATE TABLE organizersFollowed (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR REFERENCES users_login(userId),
-  organizerId             INT REFERENCES organizers(organizerId)
+  userId                  VARCHAR REFERENCES users_login(userId)  NOT NULL,
+  organizerId             INT REFERENCES organizers(organizerId)  NOT NULL
 );
 CREATE UNIQUE INDEX organizersFollowedIndex ON organizersFollowed (userId, organizerId);
 
@@ -624,6 +650,8 @@ CREATE OR REPLACE FUNCTION insertEventGenreRelation(
   END;;
   $$
 LANGUAGE plpgsql;
+SELECT insertEventGenreRelation(1, 1);
+
 
 CREATE TABLE eventsOrganizers (
   eventId                 INT REFERENCES events (eventId),

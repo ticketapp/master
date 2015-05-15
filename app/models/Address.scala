@@ -11,6 +11,8 @@ import services.Utilities.{geographicPointToString, googleKey}
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
+import scala.util.{Failure, Try}
+
 case class Address (addressId: Option[Long],
                     geographicPoint: Option[String],
                     city: Option[String],
@@ -101,12 +103,12 @@ object Address {
     }
   }
 
-  def saveAddressAndEventRelation(address: Address, eventId: Long): Option[Long] = save(Option(address)) match {
-    case None => throw new DAOException("Address.saveAddressAndEventRelation: Address.save returned None")
+  def saveAddressAndEventRelation(address: Address, eventId: Long): Try[Option[Long]] = save(Option(address)) match {
+    case None => Failure(DAOException("Address.saveAddressAndEventRelation: Address.save returned None"))
     case Some(addressId) => saveEventAddressRelation(eventId, addressId)
   }
 
-  def saveEventAddressRelation(eventId: Long, addressId: Long): Option[Long] = try {
+  def saveEventAddressRelation(eventId: Long, addressId: Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO eventsAddresses (eventId, addressId)
@@ -116,8 +118,6 @@ object Address {
           'addressId -> addressId)
         .executeInsert()
     }
-  } catch {
-   case e: Exception => throw new DAOException("Address.saveEventAddressRelation: " + e.getMessage)
   }
 
   def delete(addressId: Long): Long = try {

@@ -9,7 +9,7 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
 
   "A utilities" must {
 
-    "return a normalized string with the method normalizeString" in {
+    "normalize string with the method normalizeString" in {
       val strings = List("éh'=)àç_è-(aék", "abc de#f")
 
       val normalizedString: List[String] = strings.map { normalizeString }
@@ -18,7 +18,31 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
 
       normalizedString mustBe expectedResult
     }
-  }//List("éh'=)àç_è-(aék", "abc de
-  // List("éh'=)àç_è-(aék", "abc de#f") (TestUtilities.scala:20)
-}
+  }
 
+  "normalize urls" in {
+    val urls = Seq("abc.fr", "www.abc.com", "http://cde.org", "https://jkl.wtf", "http://www.claude.cool",
+      "https://www.claude.music")
+
+    val expectedUrls = Seq("abc.fr", "abc.com", "cde.org", "jkl.wtf", "claude.cool", "claude.music")
+
+    val normalizedUrls = urls map { normalizeUrl }
+
+    normalizedUrls mustBe expectedUrls
+  }
+
+  "create a new instance of GeographicPoints" in {
+    GeographicPoint("(0,0)")
+    GeographicPoint("(0.4,0)")
+    GeographicPoint("(0.4,0.5784)")
+    GeographicPoint("(9,0.5784)")
+    GeographicPoint("(-9,0.5784)")
+    GeographicPoint("(-9,-0.5784)")
+    GeographicPoint("(9,-0.5784)")
+    GeographicPoint("(-48.87965412354687,-145.5754545484)")
+  }
+
+  "throw exceptions while instantiating these geographicPoints" in {
+    an [IllegalArgumentException] should be thrownBy GeographicPoint("0,0")
+  }
+}

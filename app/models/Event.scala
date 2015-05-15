@@ -19,6 +19,7 @@ import scala.util.Try
 import scala.util.matching.Regex
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
+import Utilities.GeographicPoint
 
 case class Event(eventId: Option[Long],
                  facebookId: Option[String],
@@ -41,7 +42,8 @@ case class Event(eventId: Option[Long],
                  genres: Seq[Genre] = Seq.empty)
 
 object Event {
-  val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
+  val geographicPointPattern = """(-?\(\d+\.?\d*,-?\d+\.?\d*\))""".r
+  val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
 
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
                 endTime: Option[Date], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
@@ -170,7 +172,9 @@ object Event {
     case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
 
-  def findAllByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int): Seq[Event] = try {
+  def findAllByGenre(genre: String, geographicPoint: GeographicPoint, offset: Int, numberToReturn: Int): Try[Seq[Event]]
+  = Try {
+    val geographicPointString = geographicPoint.toString
     DB.withConnection { implicit connection =>
       SQL(
         s"""SELECT e.* FROM eventsGenres eG
@@ -179,15 +183,13 @@ object Event {
            |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
            |  INNER JOIN genres g ON g.genreId = eG.genreId
            |    WHERE g.name = {genre}
-           |  ORDER BY geographicPoint <-> point '$geographicPoint'
+           |  ORDER BY geographicPoint <-> point '$geographicPointString'
            |LIMIT $numberToReturn
            |OFFSET $offset""".stripMargin)
         .on('genre -> genre)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllByGenre: " + e.getMessage)
   }
 
   def findAllByOrganizer(organizerId: Long): Seq[Event] = try {

@@ -116,14 +116,15 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   }
 
   def followArtistByArtistId(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Artist.followByArtistId(request.user.identityId.userId, artistId) match {
+    val userId = request.user.identityId.userId
+    Artist.followByArtistId(userId, artistId) match {
       case Success(_) =>
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-        Logger.error("ArtistController.followArtistByArtistId", psqlException)
-        Status(CONFLICT)("This user already follow this artist.")
+        Logger.error(s"ArtistController.followArtistByArtistId: user with id $userId already follows artist with id $artistId")
+        Status(CONFLICT)("This user already follows this artist.")
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-        Logger.error("ArtistController.followArtistByArtistId", psqlException)
+        Logger.error(s"ArtistController.followArtistByArtistId: there is no artist with the id $artistId")
         Status(CONFLICT)("There is no artist with this id.")
       case Failure(unknownException) =>
         Logger.error("ArtistController.followArtistByArtistId", unknownException)
@@ -132,14 +133,17 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   } 
   
   def followArtistByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
-    Artist.followByFacebookId(request.user.identityId.userId, facebookId) match {
+    val userId = request.user.identityId.userId
+    Artist.followByFacebookId(userId, facebookId) match {
       case Success(_) =>
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-        Logger.error("ArtistController.followArtistByFacebookId", psqlException)
-        Status(CONFLICT)("This user already follow this artist.")
-      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-        Logger.error("ArtistController.followArtistByFacebookId", psqlException)
+        Logger.error(
+          s"""ArtistController.followArtistByFacebookId: user with id $userId already follows
+             |artist with facebook id $facebookId""".stripMargin)
+        Status(CONFLICT)("This user already follows this artist.")
+      case Failure(thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException) =>
+        Logger.error(s"ArtistController.followArtistByFacebookId : there is no artist with the facebook id $facebookId")
         Status(CONFLICT)("There is no artist with this id.")
       case Failure(unknownException) =>
         Logger.error("ArtistController.followArtistByFacebookId", unknownException)
