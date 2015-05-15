@@ -38,7 +38,6 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
       val description = Option("06.60.63.14.16")
 
       val formattedDescription = formatDescription(description)
-      println(formattedDescription)
 
       val expectedResult = Option("<div class='column large-12'>06.60.63.14.16</div>")
 
