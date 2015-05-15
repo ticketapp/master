@@ -53,7 +53,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             if(factory.artists ==true){
                 deferred.resolve(factory.artists);
             } else {
-                $http.get('/genres/' + genre + '/12/' + offset + '/artists')
+                $http.get('/genres/' + genre + '/artists?offset=' + offset + '&numberToReturn=12')
                     .success(function(data, status){
                         factory.artists = data;
                         deferred.resolve(factory.artists);
