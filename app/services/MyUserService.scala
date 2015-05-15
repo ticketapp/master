@@ -21,20 +21,23 @@ import scala.language.postfixOps
 
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
 
-  def find(id: IdentityId): Option[Identity] = try {
-    DB.withConnection { implicit  connection =>
-      SQL(s"SELECT ${USERS.FIELDS} FROM users_login WHERE userId = {userId} AND providerId = {providerId}")
-        .on(
-          'userId -> id.userId,
-          'providerId -> id.providerId)
+  def find(id: IdentityId): Option[Identity] = {
+    if (Logger.isDebugEnabled)
+      Logger.debug(s"Find identity by IdentityId: $id")
+    val ret = DB.withConnection { implicit  connection =>
+      SQL(s"SELECT ${USERS.FIELDS} FROM users_login WHERE userId={userId} AND providerId={providerId}").on(
+        'userId -> id.userId,
+        'providerId -> id.providerId)
         .as(USERS.parser *)
         .headOption
     }
-  } catch {
-    case e: Exception => throw new DAOException("MyUserService.find")
+    Logger.debug("Found: " + ret)
+    ret
   }
 
-  def findByEmailAndProvider(email: String, providerId: String): Option[Identity] = try {
+  def findByEmailAndProvider(email: String, providerId: String): Option[Identity] = {
+    if (Logger.isDebugEnabled)
+      Logger.debug(s"Find identity by email and providerId: $email and $providerId")
     DB.withConnection { implicit  connection =>
       SQL(
         s"""SELECT ${USERS.FIELDS} FROM users_login
@@ -42,50 +45,51 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
         .on(
           'email -> email,
           'providerId -> providerId)
-        .as(USERS.parser *)
-        .headOption
+        .as(USERS.parser *).headOption
     }
-  } catch {
-    case e: Exception => throw new DAOException("MyUserService.findByEmailAndProvider")
   }
 
-  def save(user: Identity): Identity = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT insertUser({userId}, {providerId}, {firstName}, {lastName}, {fullName}, {email}, {avatarUrl},
-          |{authMethod}, {oAuth1Info}, {oAuth2Info}, {passwordInfo})""".stripMargin)
-        .on(
-          'userId -> user.identityId.userId,
-          'providerId -> user.identityId.providerId,
-          'firstName -> user.firstName,
-          'lastName -> user.lastName,
-          'fullName -> user.fullName,
-          'email -> user.email,
-          'avatarUrl -> user.avatarUrl,
-          'authMethod -> user.authMethod.method,
-          'oAuth1Info -> user.oAuth1Info.toString,
-          'oAuth2Info -> user.oAuth2Info.toString,
-          'passwordInfo -> user.passwordInfo.toString)
-        .execute()
+  def save(user: Identity): Identity = {
+    def stringifyAuth1Info(oAuth1Info: Option[OAuth1Info]) = oAuth1Info match {
+      case Some(oAuth) => Json.stringify(Json.toJson(oAuth))
+      case _ => None
+    }
+
+
+    def stringifyAuth2Info(oAuth2Info: Option[OAuth2Info]) = oAuth2Info match {
+      case Some(oAuth) => Json.stringify(Json.toJson(oAuth))
+      case _ => None
+    }
+
+
+    def stringifyPasswordInfo(passwordInfo: Option[PasswordInfo]) = passwordInfo match {
+      case Some(passwordInfoFound) => Json.stringify(Json.toJson(passwordInfoFound))
+      case _ => None
+    }
+
+    try {
+      DB.withConnection { implicit connection =>
+        SQL(
+          """SELECT insertUser({userId}, {providerId}, {firstName}, {lastName}, {fullName}, {email}, {avatarUrl},
+            |{authMethod}, {oAuth1Info}, {oAuth2Info}, {passwordInfo})""".stripMargin)
+          .on(
+            'userId -> user.identityId.userId,
+            'providerId -> user.identityId.providerId,
+            'firstName -> user.firstName,
+            'lastName -> user.lastName,
+            'fullName -> user.fullName,
+            'email -> user.email,
+            'avatarUrl -> user.avatarUrl,
+            'authMethod -> user.authMethod.method,
+            'oAuth1Info -> stringifyAuth1Info(user.oAuth1Info),
+            'oAuth2Info -> stringifyAuth2Info(user.oAuth2Info),
+            'passwordInfo -> stringifyPasswordInfo(user.passwordInfo))
+          .execute()
+      }
+    } catch {
+      case e: Exception => println("Cannot create user_login: " + e.getMessage)
     }
     user
-  } catch {
-    case e: Exception => throw new DAOException("MyUserService.save: " + e.getMessage)
-  }
-
-  def stringifyAuth1Info(oAuth1Info: Option[OAuth1Info]) = oAuth1Info match {
-    case Some(oAuth) => Json.stringify(Json.toJson(oAuth))
-    case _ => None
-  }
-
-  def stringifyAuth2Info(oAuth2Info: Option[OAuth2Info]) = oAuth2Info match {
-    case Some(oAuth) => Json.stringify(Json.toJson(oAuth))
-    case _ => None
-  }
-
-  def stringifyPasswordInfo(passwordInfo: Option[PasswordInfo]) = passwordInfo match {
-    case Some(passwordInfoFound) => Json.stringify(Json.toJson(passwordInfoFound))
-    case _ => None
   }
 
   def save(token: Token) = try {
@@ -106,7 +110,10 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
       throw new DAOException("Cannot create users_token: " + e.getClass + " " + e.getMessage + " " + e.getCause)
   }
 
-  def findToken(uuid: String): Option[Token] = try {
+
+  def findToken(uuid: String): Option[Token] = {
+    if (Logger.isDebugEnabled)
+      Logger.debug(s"Find token by uuid: $uuid")
     DB.withConnection { implicit  connection =>
       SQL(s"SELECT ${TOKENS.FIELDS} FROM users_token WHERE id = {id}")
         .on('id -> uuid)
@@ -166,7 +173,7 @@ object USERS {
   implicit val oAuth2InfoReads = Json.reads[OAuth2Info]
 
   val parser = {
-    get[Long]("id") ~
+    get[Pk[Long]]("id") ~
       get[String]("userId") ~
       get[String]("providerId") ~
       get[String]("firstName") ~
@@ -179,17 +186,18 @@ object USERS {
       get[Option[String]]("oAuth2Info") ~
       get[Option[String]]("passwordInfo") map {
       case id ~ userId ~ providerId ~ firstName ~ lastName ~ fullName
-        ~ email ~ avatarUrl ~ authMethod ~ oAuth1Info ~ oAuth2Info ~ passwordInfo =>
-        SSIdentity(Option(id), IdentityId(userId, providerId),
+        ~ email ~ avatarUrl ~ authMethod ~ oAuth1Info ~ oAuth2Info
+        ~ passwordInfo => SSIdentity(id.toOption, IdentityId(userId, providerId),
         firstName, lastName, fullName, email, avatarUrl, AuthenticationMethod(authMethod),
         returnOAuth1Info(oAuth1Info), returnOAuth2Info(oAuth2Info), returnPasswordInfo(passwordInfo))
     }
   }
 
+  //ecrire une fonction pour les trois suivantes avec match type trois case et un default error
   def returnOAuth1Info(oAuth1InfoOptionString: Option[String]): Option[OAuth1Info] = oAuth1InfoOptionString match {
     case Some(value) => Json.fromJson[OAuth1Info](Json.parse(value)) match {
       case JsSuccess(oAuth1Info, _) => Some(oAuth1Info)
-      case JsError(errors) => Logger.debug("Errors in returnOAuth1Info : " + errors.mkString); None
+      case JsError(errors) => println("Errors in returnOAuth1Info : " + errors.mkString); None
     }
     case None => None
   }
@@ -197,7 +205,7 @@ object USERS {
   def returnOAuth2Info(oAuth2InfoOptionString: Option[String]): Option[OAuth2Info] = oAuth2InfoOptionString match {
     case Some(value) => Json.fromJson[OAuth2Info](Json.parse(value)) match {
       case JsSuccess(oAuth2Info, _) => Some(oAuth2Info)
-      case JsError(errors) => Logger.debug("Errors in returnOAuth2Info : " + errors.mkString); None
+      case JsError(errors) => println("Errors in returnOAuth2Info : " + errors.mkString); None
     }
     case None => None
   }
@@ -205,7 +213,7 @@ object USERS {
   def returnPasswordInfo(passwordInfoString: Option[String]): Option[PasswordInfo] = passwordInfoString match {
     case Some(value) => Json.fromJson[PasswordInfo](Json.parse(value)) match {
       case JsSuccess(passwordInfo, _) => Some(passwordInfo)
-      case JsError(errors) => Logger.debug("Errors in returnPasswordInfo : " + errors.mkString); None
+      case JsError(errors) => println("Errors in returnPasswordInfo : " + errors.mkString); None
     }
     case None => None
   }
