@@ -30,4 +30,19 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
 
     normalizedUrls mustBe expectedUrls
   }
+
+  "create a new instance of GeographicPoints" in {
+    GeographicPoint("(0,0)")
+    GeographicPoint("(0.4,0)")
+    GeographicPoint("(0.4,0.5784)")
+    GeographicPoint("(9,0.5784)")
+    GeographicPoint("(-9,0.5784)")
+    GeographicPoint("(-9,-0.5784)")
+    GeographicPoint("(9,-0.5784)")
+    GeographicPoint("(-48.87965412354687,-145.5754545484)")
+  }
+
+  "throw exceptions while instantiating these geographicPoints" in {
+    an [IllegalArgumentException] should be thrownBy GeographicPoint("0,0")
+  }
 }

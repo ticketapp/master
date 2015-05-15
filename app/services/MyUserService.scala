@@ -22,8 +22,6 @@ import scala.language.postfixOps
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
 
   def find(id: IdentityId): Option[Identity] = {
-    if (Logger.isDebugEnabled)
-      Logger.debug(s"Find identity by IdentityId: $id")
     val ret = DB.withConnection { implicit  connection =>
       SQL(s"SELECT ${USERS.FIELDS} FROM users_login WHERE userId={userId} AND providerId={providerId}").on(
         'userId -> id.userId,
@@ -31,7 +29,6 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
         .as(USERS.parser *)
         .headOption
     }
-    Logger.debug("Found: " + ret)
     ret
   }
 

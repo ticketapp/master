@@ -63,7 +63,6 @@ object Place {
   }
 
   def save(place: Place): Future[Try[Option[Long]]] = {
-    println(place)
     val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
     eventuallyAddressId map { addressId =>
       DB.withConnection { implicit connection =>
@@ -195,7 +194,7 @@ object Place {
     DB.withConnection { implicit connection =>
       SQL("""SELECT placeId FROM places WHERE facebookId = {facebookId}""")
         .on('facebookId -> facebookId)
-        .as(scalar[Option[Long]].single)
+        .as(scalar[Long].singleOpt)
     }
   }
 
@@ -225,7 +224,7 @@ object Place {
   def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
     findIdByFacebookId(facebookId) match {
       case Success(Some(placeId)) => followByPlaceId(userId, placeId)
-      case Success(None)=> Failure(ThereIsNoPlaceForThisFacebookIdException("Place.followPlaceIdByFacebookId"))
+      case Success(None)=> Failure(ThereIsNoPlaceForThisFacebookIdException("Place.followByFacebookId"))
       case failure => failure
     }
 

@@ -259,7 +259,7 @@ object Artist {
     DB.withConnection { implicit connection =>
       SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
         .on('facebookId -> facebookId)
-        .as(scalar[Option[Long]].single)
+        .as(scalar[Long].singleOpt)
     }
   }
 
@@ -318,7 +318,7 @@ object Artist {
 
   def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
     findIdByFacebookId(facebookId) match {
-        case Success(None) => Failure(ThereIsNoArtistForThisFacebookIdException("Artist.followArtistByFacebookId"))
+        case Success(None) => Failure(ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId"))
         case Success(Some(artistId)) => followByArtistId(userId, artistId)
         case failure => failure
     }

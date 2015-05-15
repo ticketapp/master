@@ -31,7 +31,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
         Ok(Json.toJson(
           Event.findInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
       case _ =>
-        Ok(Json.toJson("Invalid geographicPoint"))
+        Status(BAD_REQUEST)("Invalid geographicPoint")
     }
   }
 
@@ -42,23 +42,31 @@ object EventController extends Controller with securesocial.core.SecureSocial {
         Ok(Json.toJson(
           Event.findPassedInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
       case _ =>
-        Ok(Json.toJson("Invalid geographicPoint"))
+        Status(BAD_REQUEST)("Invalid geographicPoint")
     }
   }
 
-  def eventsByPlace(placeId: Long) = Action {
-    Ok(Json.toJson(Event.findAllByPlace(placeId)))
-  }
+  def findByPlaceId(placeId: Long) = Action { Ok(Json.toJson(Event.findAllByPlace(placeId))) }
 
   def eventsByOrganizer(organizerId: Long) = Action {
     Ok(Json.toJson(Event.findAllByOrganizer(organizerId)))
   }
 
-  def eventsByGenre(genre: String, geographicPoint: String, offset: Int , numberToReturn: Int) = Action {
-    Ok(Json.toJson(Event.findAllByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)))
+  def findByGenre(genre: String, geographicPointString: String, offset: Int , numberToReturn: Int) = Action {
+    try {
+      Event.findAllByGenre(genre, GeographicPoint(geographicPointString), offset, numberToReturn) match {
+        case Success(events) =>
+          Ok(Json.toJson(events))
+        case Failure(throwable) =>
+          Logger.error("EventController.eventsByGenre:", throwable)
+          Status(INTERNAL_SERVER_ERROR)
+      }
+    } catch {
+      case e: IllegalArgumentException => Status(BAD_REQUEST)("GeographicPoint wrongly formatted")
+    }
   }
 
-  def findAll(id: Long) = Action {
+  def find(id: Long) = Action {
     Event.find(id) match {
       case Some(event) => Ok(Json.toJson(event))
       case None => NotFound
