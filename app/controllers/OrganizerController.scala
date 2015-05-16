@@ -60,7 +60,13 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
         Status(INTERNAL_SERVER_ERROR)
     }
   }
-  
+
+  def getFollowedOrganizers = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Organizer.getFollowedOrganizers(identity.identityId)))
+    }
+  }
 
   def isOrganizerFollowed(organizerId: Long) = UserAwareAction { implicit request =>
     request.user match {

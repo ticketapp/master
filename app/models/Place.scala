@@ -242,6 +242,18 @@ object Place {
     case e: Exception => throw new DAOException("Place.isPlaceFollowed: " + e.getMessage)
   }
 
+  def getFollowedPlaces(userId: IdentityId): Seq[Place] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""select a.* from places a
+            |  INNER JOIN placesFollowed af ON a.placeId = af.placeId
+            |WHERE af.userId = {userId}""".stripMargin)
+        .on('userId -> userId.userId)
+        .as(PlaceParser.*)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.getFollowedPlaces: " + e.getMessage)
+  }
+
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(

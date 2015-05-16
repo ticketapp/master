@@ -154,6 +154,32 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.findAllContaining: " + e.getMessage)
   }
 
+  def findIdByName(name: String): Long = try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT artistId FROM artists WHERE name = {name}")
+        .on('name -> name)
+        .as(scalar[Long].single)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Cannot returnArtistId: " + e.getMessage)
+  }
+
+  def findIdByFacebookId(facebookId: String): Try[Option[Long]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
+        .on('facebookId -> facebookId)
+        .as(scalar[Long].singleOpt)
+    }
+  }
+
+  def findIdByFacebookUrl(facebookUrl: String)(implicit connection: Connection): Option[Long] = try {
+    SQL("SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl}")
+      .on('facebookUrl -> facebookUrl)
+      .as(scalar[Option[Long]].single)
+  } catch {
+    case e: Exception => throw new DAOException("Cannot returnArtistIdByFacebookUrl: " + e.getMessage)
+  }
+
   def save(artist: Artist): Option[Long] = try {
     val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
     DB.withConnection { implicit connection =>
@@ -243,32 +269,6 @@ object Artist {
   def saveWithEventRelation(artist: Artist, eventId: Long): Boolean = save(artist) match {
     case None => false
     case Some(artistId: Long) => saveEventArtistRelation(eventId, artistId)
-  }
-
-  def findIdByName(name: String): Long = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT artistId FROM artists WHERE name = {name}")
-        .on('name -> name)
-        .as(scalar[Long].single)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot returnArtistId: " + e.getMessage)
-  }
-
-  def findIdByFacebookId(facebookId: String): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT artistId FROM artists WHERE facebookId = {facebookId}""")
-        .on('facebookId -> facebookId)
-        .as(scalar[Long].singleOpt)
-    }
-  }
-
-  def findIdByFacebookUrl(facebookUrl: String)(implicit connection: Connection): Option[Long] = try {
-    SQL("SELECT artistId FROM artists WHERE facebookUrl = {facebookUrl}")
-      .on('facebookUrl -> facebookUrl)
-      .as(scalar[Option[Long]].single)
-  } catch {
-    case e: Exception => throw new DAOException("Cannot returnArtistIdByFacebookUrl: " + e.getMessage)
   }
 
   def saveEventArtistRelation(eventId: Long, artistId: Long): Boolean = try {

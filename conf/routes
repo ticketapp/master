@@ -48,6 +48,7 @@ GET       /places/containing/:pattern                               controllers.
 POST      /places/create                                            controllers.PlaceController.createPlace
 GET       /places/:placeId/events                                   controllers.EventController.findByPlaceId(placeId: Long)
 GET       /places/nearCity/:city                                    controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
+GET       /places/followed/                                        controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
 GET       /organizers                                               controllers.OrganizerController.organizers(numberToReturn: Int, offset: Int)
@@ -59,6 +60,7 @@ GET       /organizers/containing/:pattern                           controllers.
 POST      /organizers/create                                        controllers.OrganizerController.createOrganizer
 GET       /organizers/:organizerId/events                           controllers.EventController.eventsByOrganizer(organizerId: Long)
 GET       /organizers/findNearCity/:city    						controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+GET       /organizers/followed/                                        controllers.OrganizerController.getFollowedOrganizers
 
 ################################# Playlists ############################################
 GET       /playlists                                        controllers.PlaylistController.findByUser

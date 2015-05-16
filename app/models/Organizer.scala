@@ -154,6 +154,29 @@ object Organizer {
     }
   }
 
+  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT * FROM organizers
+           |ORDER BY geographicPoint <-> point '$geographicPoint'
+                                                                  |LIMIT $numberToReturn
+            |OFFSET $offset""".stripMargin)
+        .as(OrganizerParser.*)
+        .map(getOrganizerProperties)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.findNear: " + e.getMessage)
+  }
+
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
+    Address.findGeographicPointOfCity(city) match {
+      case None => Seq.empty
+      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.findNearCity: " + e.getMessage)
+  }
+
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Boolean = {
     save(organizer) match {
       case Success(Some(organizerId)) => saveEventOrganizerRelation(eventId, organizerId)
@@ -172,6 +195,16 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)
+  }
+
+  def delete(organizerId: Long): Int = try {
+    DB.withConnection { implicit connection =>
+      SQL("DELETE FROM organizers WHERE organizerId = {organizerId}")
+        .on('organizerId -> organizerId)
+        .executeUpdate()
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.delete : " + e.getMessage)
   }
 
   def followByOrganizerId(userId : String, organizerId : Long): Try[Option[Long]] = Try {
@@ -210,39 +243,6 @@ object Organizer {
     case e: Exception => throw new DAOException("Organizer.unFollow: " + e.getMessage)
   }
 
-  def delete(organizerId: Long): Int = try {
-    DB.withConnection { implicit connection =>
-      SQL("DELETE FROM organizers WHERE organizerId = {organizerId}")
-        .on('organizerId -> organizerId)
-        .executeUpdate()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.delete : " + e.getMessage)
-  }
-
-  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT * FROM organizers
-           |ORDER BY geographicPoint <-> point '$geographicPoint'
-           |LIMIT $numberToReturn
-           |OFFSET $offset""".stripMargin)
-        .as(OrganizerParser.*)
-        .map(getOrganizerProperties)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.findNear: " + e.getMessage)
-  }
-
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
-    Address.findGeographicPointOfCity(city) match {
-      case None => Seq.empty
-      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.findNearCity: " + e.getMessage)
-  }
-
   def isFollowed(userId: IdentityId, organizerId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -254,6 +254,19 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Organizer.isOrganizerFollowed: " + e.getMessage)
+  }
+
+  def getFollowedOrganizers(userId: IdentityId): Seq[Organizer] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""select a.* from organizers a
+            |  INNER JOIN organizersFollowed af ON a.organizerId = af.organizerId
+            |WHERE af.userId = {userId}""".stripMargin)
+        .on('userId -> userId.userId)
+        .as(OrganizerParser.*)
+        .map(getOrganizerProperties)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Organizer.getFollowedOrganizers: " + e.getMessage)
   }
 
   def readOrganizer(organizer: Response, organizerId: String): Option[Organizer] = {
