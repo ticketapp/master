@@ -1,6 +1,7 @@
 angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScope', '$modalInstance', '$http', '$modal',
-    'UserFactory', 'InfoModal', 'StoreRequest',
-    function ($scope, $rootScope, $modalInstance, $http, $modal, UserFactory, InfoModal, StoreRequest) {
+    'UserFactory', 'InfoModal', 'StoreRequest', 'TracksRecommender',
+    function ($scope, $rootScope, $modalInstance, $http, $modal, UserFactory, InfoModal, StoreRequest,
+              TracksRecommender) {
     if ($rootScope.playlist.name.length > 0) {
         $scope.newPlaylist = false;
     }
@@ -8,6 +9,7 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
         var tracksToSave = [];
         $scope.newPlaylist = true;
         for (var i=0; i < playlist.tracks.length; i++) {
+            TracksRecommender.UpsertTrackRate(true, playlist.tracks[i].trackId);
             tracksToSave.push({trackId: playlist.tracks[i].trackId, trackRank: i})
         }
         $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
@@ -27,9 +29,7 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
     };
 
     $scope.updatePlaylist = function (playlist) {
-        console.log(playlist)
         UserFactory.deletePlaylist(playlist.playlistId).then(function (del) {
-            console.log(del);
             $scope.createNewPlaylist(playlist)
         })
     };

@@ -1,9 +1,8 @@
 angular.module('claudeApp').
 controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout', '$filter',
-        '$modal', '$rootScope', '$routeParams', 'WebsitesFactory', 'InfoModal',
+        '$modal', '$rootScope', '$routeParams', 'WebsitesFactory', 'InfoModal', 'TracksRecommender',
     function ($scope, $localStorage, ArtistsFactory, $timeout, $filter, $modal, $rootScope,
-              $routeParams, WebsitesFactory, InfoModal) {
-
+              $routeParams, WebsitesFactory, InfoModal, TracksRecommender) {
         $scope.trackLimit = 12;
         $scope.trackTitle = '';
         $scope.showDesc = false;
@@ -17,20 +16,14 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             $scope.artist.events = [];
             $rootScope.loadingTracks = true;
             function pushTrack (track) {
-                var pushTrack = true;
-                for (var i = 0; i < $localStorage.tracksSignaled.length; i++) {
-                    if (track.trackId == $localStorage.tracksSignaled[i]) {
-                        pushTrack = false;
-                        return
-                    }
-                }
-                if (pushTrack == true) {
+                if ($localStorage.tracksSignaled.indexOf(track.trackId) > -1) {
                     $scope.tracks.push(track)
                 }
             }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
                 $scope.tracks = [];
+                //$filter('orderBy')(artist.tracks, artist.tracks.confidence, true);
                 artist.tracks.forEach(pushTrack);
                 $scope.artist.tracks = $scope.tracks;
                 $rootScope.loadingTracks = false;
@@ -131,6 +124,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 for (var i = 0; i < tracksLength; i++) {
                     if ($scope.tracks[i].trackId == $scope.artist.tracks[index].trackId) {
                         $localStorage.tracksSignaled.push($scope.tracks[i].trackId);
+                        TracksRecommender.UpsertTrackRate(false, $scope.tracks[i].trackId);
                         $scope.tracks.splice(i, 1);
                         tracksLength --;
                     }
@@ -142,8 +136,8 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 }]);
 
-angular.module('claudeApp').controller('SignalTrackCtrl', function ($scope, $modalInstance) {
-
+angular.module('claudeApp').controller('SignalTrackCtrl', ['$scope', '$modalInstance',
+    function ($scope, $modalInstance) {
     $scope.ok = function (reason) {
         if (reason != undefined) {
             $modalInstance.close();
@@ -154,4 +148,4 @@ angular.module('claudeApp').controller('SignalTrackCtrl', function ($scope, $mod
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
-});
+}]);
