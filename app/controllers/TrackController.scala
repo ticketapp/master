@@ -70,11 +70,19 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
       case Success(1) =>
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-        NotFound(s"The track $trackId is not in the favorites oh this user.")
+        NotFound(s"The track $trackId is not in the favorites of this user or this track does not exist.")
       case _ =>
         InternalServerError
     }
   }
 
-
+  def findFavorites = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Track.findFavorites(userId) match {
+      case Success(tracks) =>
+        Ok(Json.toJson(tracks))
+      case _ =>
+        InternalServerError
+    }
+  }
 }

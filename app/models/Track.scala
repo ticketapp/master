@@ -241,16 +241,14 @@ object Track {
     }
   }
 
-  def findFavorites(userId: String, trackId: Long): Try[Seq[Track]] = Try {
+  def findFavorites(userId: String): Try[Seq[Track]] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT tracks.* FROM tracks tracks
           |  INNER JOIN usersFavoriteTracks usersFavoriteTracks
           |    ON tracks.trackId = usersFavoriteTracks.trackId
-          |WHERE usersFavoriteTracks.userId = {userId} AND usersFavoriteTracks.trackId = {trackId}""".stripMargin)
-        .on(
-          'userId -> userId,
-          'trackId -> trackId)
+          |WHERE usersFavoriteTracks.userId = {userId}""".stripMargin)
+        .on('userId -> userId)
         .as(trackParser.*)
     }
   }

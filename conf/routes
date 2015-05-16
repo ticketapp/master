@@ -81,6 +81,7 @@ GET     /tracks/:trackId/rating                                   controllers.Tr
 POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRating(trackId: Long, rating: Int)
 POST    /tracks/:trackId/addToFavorites                           controllers.TrackController.addToFavorites(trackId: Long)
 POST    /tracks/:trackId/removeFromFavorites                      controllers.TrackController.removeFromFavorites(trackId: Long)
+GET     /tracks/favorites                                         controllers.TrackController.findFavorites
 
 ################################## Infos ################################################
 GET     /infos                                                    controllers.Application.infos
