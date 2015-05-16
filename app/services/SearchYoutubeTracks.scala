@@ -182,7 +182,7 @@ object SearchYoutubeTracks {
   def getEchonestSongs(echonestArtistId: String): Enumerator[Set[String]] = {
     def getEchonestSongsFrom(start: Long, echonestArtistId: String): Enumerator[Set[String]] = {
       Enumerator.flatten(
-        getEchonestSongsWSCall(start: Long, echonestArtistId: String).map { echonestResponse =>
+        getEchonestSongsOnEchonest(start: Long, echonestArtistId: String).map { echonestResponse =>
           val total = (echonestResponse \ "response" \ "total").asOpt[Int]
           total.exists(_ > start + 100) match {
             case false =>
@@ -196,7 +196,7 @@ object SearchYoutubeTracks {
     getEchonestSongsFrom(0, echonestArtistId)
   }
 
-  def getEchonestSongsWSCall(start: Long, echonestArtistId: String): Future[JsValue] = {
+  def getEchonestSongsOnEchonest(start: Long, echonestArtistId: String): Future[JsValue] = {
     WS.url("http://developer.echonest.com/api/v4/artist/songs")
       .withQueryString(
         "api_key" -> echonestApiKey,
@@ -212,9 +212,6 @@ object SearchYoutubeTracks {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
     (result \ "response" \ "songs")
       .as[Set[Option[String]]](Reads.set(titleReads))
-      //asOpt
-//      .as[Enumerator[Option[String]]](Reads.set(titleReads))
-      //.getOrElse(Set.empty)
       .flatten
   }
 
@@ -223,8 +220,6 @@ object SearchYoutubeTracks {
       .withQueryString(
         "name" -> artistName,
         "format" -> "json",
-        "bucket" -> "urls",
-        "bucket" -> "images",
         "bucket" -> "id:facebook",
         "api_key" -> echonestApiKey)
       .get()
@@ -237,7 +232,7 @@ object SearchYoutubeTracks {
     val TupleEnIdFbIdReads = (
       (__ \ "id").read[String] and
         (__ \ "foreign_ids").lazyReadNullable(
-          Reads.seq( cleanFacebookId((__ \ "foreign_id").read[String]) )
+          Reads.seq(cleanFacebookId((__ \ "foreign_id").read[String]))
         )
         tupled
       )

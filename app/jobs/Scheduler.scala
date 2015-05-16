@@ -68,13 +68,4 @@ object Scheduler {
 
   def splitArtistNamesInTitle(title: String): List[String] =
     "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
-
-  def getArtistsFromTitle(title: String): Set[String] = {
-    /*val artistsFromTitle: List[String] = splitArtistNamesInTitle(name)
-    println(artistsFromTitle)
-    artistsFromTitle.map { artistName =>
-     getFacebookArtist(artistName)
-    }*/
-    Set.empty
-  }
 }
