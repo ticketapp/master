@@ -16,7 +16,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         var _selOrganizer = $rootScope.activUsr;
         var _selPlace = $rootScope.activPlace;
         var _selStart;
-        console.log($rootScope.storeSearch)
         if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
             var _research = $rootScope.storeSearch;
             $rootScope.remStoreSearch();
@@ -32,18 +31,19 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         function updateScope (data, scope, idName, otherScopeToCheck) {
             var scopeIdList = [];
             function getId(el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
+                var idDictionary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
                     'placeId': el.placeId, 'facebookId': el.facebookId};
-                scopeIdList.push(idDictionnary[idName]);
+                scopeIdList.push(idDictionary[idName]);
             }
             if (otherScopeToCheck != undefined) {
                 otherScopeToCheck.forEach(getId);
             }
             scope.forEach(getId);
             function pushEl (el, index, array) {
-                var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId,
+                var idDictionary = {'artistId': el.artistId, 'eventId': el.eventId,
                     'organizerId': el.organizerId, 'placeId': el.placeId, 'facebookId': el.facebookId};
-                if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
+                if (scopeIdList.indexOf(idDictionary[idName]) == -1) {
+                    scopeIdList.push(idDictionary[idName]);
                     $timeout(function () {
                         $scope.$apply(function () {
                             scope.push(el);
@@ -56,13 +56,13 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         }
 
         function filterEventsByTime() {
-            var eventsLenght = $scope.events.length;
+            var eventsLength = $scope.events.length;
             var maxStartTime = _selStart * 3600000 + new Date().getTime();
-            for (var e = 0; e < eventsLenght; e++) {
+            for (var e = 0; e < eventsLength; e++) {
                 if ($scope.events[e].startTime > maxStartTime) {
                     $scope.events.splice(e, 1)
                     e = e - 1;
-                    eventsLenght = eventsLenght - 1;
+                    eventsLength = eventsLength - 1;
                 }
             }
         }
@@ -142,7 +142,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getPlaces() {
             PlaceFactory.getPlaces(offset, $rootScope.geoLoc).then(function (places) {
-                places.forEach(refactorGeopoint)
+                places.forEach(refactorGeopoint);
                 updateScope(places, $scope.places, 'placeId');
             });
         }
@@ -303,15 +303,15 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                         getArtistsByContaining();
                         getArtistsByGenre();
                         if ( _research.length > 2 &&
-                            newName != 'electro' &&
-                            newName != 'reggae' &&
-                            newName != 'rock' &&
-                            newName != 'jazz' &&
-                            newName != 'musique du monde' &&
-                            newName != 'musique latine' &&
-                            newName != 'classique' &&
-                            newName != 'hip-hop' &&
-                            newName != 'chanson'
+                            _research != 'electro' &&
+                            _research != 'reggae' &&
+                            _research != 'rock' &&
+                            _research != 'jazz' &&
+                            _research != 'musique du monde' &&
+                            _research != 'musique latine' &&
+                            _research != 'classique' &&
+                            _research != 'hip-hop' &&
+                            _research != 'chanson'
                             ) {
                             getArtistsFacebook();
                         }
@@ -367,7 +367,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         $scope.selUsr = function(newName) {
             if (angular.isDefined(newName)) {
                 _selOrganizer = newName;
-                search();
                 $scope.limit = 12;
                 offset = 0;
                 if (newName == true) {
@@ -400,10 +399,10 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 _selStart = newName;
                 clearTimeout(StartTimer);
                 StartTimer = setTimeout(function () {
+                    $scope.loadingMore = true;
                     filterEventsByTime();
                     getEvents()
                 }, doneStartInterval);
-                $scope.loadingMore = true;
                 return _selStart;
             }
         };
