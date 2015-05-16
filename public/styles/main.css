@@ -27485,32 +27485,39 @@ top-search-block > search-bar-contener {
   cursor: pointer;
   text-align: center;
   line-height: 20px;
-  vertical-align: center;
+  vertical-align: middle;
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
 }
 
-/* line 111, ../../public/components/player/player.scss */
+/* line 118, ../../public/components/player/player.scss */
 .lecteurControls.active {
   background: #007095;
   color: #43AC6A;
 }
 
-/* line 115, ../../public/components/player/player.scss */
+/* line 122, ../../public/components/player/player.scss */
 #progressBar {
   border: 0;
   height: 20px;
 }
 
-/* line 117, ../../public/components/player/player.scss */
+/* line 124, ../../public/components/player/player.scss */
 .lecteurControls:hover {
   background-color: #007095;
 }
 
-/* line 118, ../../public/components/player/player.scss */
+/* line 125, ../../public/components/player/player.scss */
 .ng-control {
   height: 20px;
 }
 
-/* line 120, ../../public/components/player/player.scss */
+/* line 127, ../../public/components/player/player.scss */
 .as-sortable-item,
 .as-sortable-placeholder {
   display: inline-block;
@@ -27518,7 +27525,7 @@ top-search-block > search-bar-contener {
   float: left;
 }
 
-/* line 127, ../../public/components/player/player.scss */
+/* line 134, ../../public/components/player/player.scss */
 .sortable-row:after {
   content: ".";
   display: block;
@@ -27527,7 +27534,7 @@ top-search-block > search-bar-contener {
   visibility: hidden;
 }
 
-/* line 135, ../../public/components/player/player.scss */
+/* line 142, ../../public/components/player/player.scss */
 #sortable-container {
   display: inline-block;
 }
@@ -27537,32 +27544,30 @@ top-search-block > search-bar-contener {
   background-color: #0078A0;
   height: 100%;
   background-repeat: no-repeat;
-  -webkit-background-size: 120%;
-  -moz-background-size: 120%;
-  -o-background-size: 120%;
-  background-size: 120%;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  -o-background-size: 100%;
+  background-size: 100%;
   position: fixed;
   width: 100%;
-  background-position-x: 20%;
-  background-position-y: -4em;
   background-image: url("../images/caroussel1.png");
 }
 
-/* line 15, ../../public/components/large-home/largeHome.scss */
+/* line 13, ../../public/components/large-home/largeHome.scss */
 .intro-text {
   font-size: 50px;
   color: #fff;
   text-align: center;
 }
 
-/* line 20, ../../public/components/large-home/largeHome.scss */
+/* line 18, ../../public/components/large-home/largeHome.scss */
 .animate-show {
   padding-left: 50px;
   color: white;
   position: absolute;
 }
 
-/* line 22, ../../public/components/large-home/largeHome.scss */
+/* line 20, ../../public/components/large-home/largeHome.scss */
 .animate-show.ng-leave, .animate-show.ng-enter {
   -webkit-animation-duration: .8s;
   -moz-animation-duration: .8s;
@@ -27574,7 +27579,7 @@ top-search-block > search-bar-contener {
   -o-animation-fill-mode: both;
 }
 
-/* line 34, ../../public/components/large-home/largeHome.scss */
+/* line 32, ../../public/components/large-home/largeHome.scss */
 .animate-show.ng-leave {
   position: absolute;
   -webkit-animation-name: fadeOut;
@@ -27583,7 +27588,7 @@ top-search-block > search-bar-contener {
   -o-animation-name: fadeOut;
 }
 
-/* line 41, ../../public/components/large-home/largeHome.scss */
+/* line 39, ../../public/components/large-home/largeHome.scss */
 .animate-show.ng-enter {
   -webkit-animation-delay: 0.8s;
   -moz-animation-delay: 0.8s;
@@ -28126,15 +28131,17 @@ body {
   width: 50px;
 }
 
-/*.fi-latin{
-    background-image: url('../images/);
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    height: 50px;
-    width: 50px;
-}*/
+/* line 181, ../../public/styles/main.scss */
+.fi-latin {
+  background-image: url("../images/salsa.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  height: 50px;
+  width: 50px;
+}
+
 /* line 190, ../../public/styles/main.scss */
 .fi-electro {
   background-image: url("../images/electro.png");
@@ -28146,7 +28153,29 @@ body {
   width: 50px;
 }
 
-/* line 201, ../../public/styles/main.scss */
+/* line 199, ../../public/styles/main.scss */
+.fi-world {
+  background-image: url("../images/du%20monde.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+
+/* line 206, ../../public/styles/main.scss */
+.fi-classique {
+  background-image: url("../images/classique.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+
+/* line 213, ../../public/styles/main.scss */
 .fi-rock {
   background-image: url("../images/rock.png");
   background-size: 100%;
@@ -28157,7 +28186,7 @@ body {
   width: 50px;
 }
 
-/* line 210, ../../public/styles/main.scss */
+/* line 222, ../../public/styles/main.scss */
 .fi-chanson {
   background-image: url("../images/accoustique.png");
   background-size: 100%;
@@ -28168,7 +28197,7 @@ body {
   width: 50px;
 }
 
-/* line 219, ../../public/styles/main.scss */
+/* line 231, ../../public/styles/main.scss */
 .fi-claude {
   background-image: url("../images/logo.png");
   background-size: 100%;
@@ -28179,7 +28208,7 @@ body {
   width: 50px;
 }
 
-/* line 228, ../../public/styles/main.scss */
+/* line 240, ../../public/styles/main.scss */
 .fi-claude-min {
   background-image: url("../images/claude%20icone%203.png");
   background-size: 100%;
@@ -28190,7 +28219,7 @@ body {
   width: 50px;
 }
 
-/* line 237, ../../public/styles/main.scss */
+/* line 249, ../../public/styles/main.scss */
 .fi-mixcloud {
   background-image: url("../images/mixcloud-logo.png");
   width: 44px;
@@ -28201,23 +28230,23 @@ body {
 }
 
 /*pages*/
-/* line 246, ../../public/styles/main.scss */
+/* line 258, ../../public/styles/main.scss */
 .dropDown {
   padding-bottom: 5px;
   margin: 0;
 }
 
-/* line 250, ../../public/styles/main.scss */
+/* line 262, ../../public/styles/main.scss */
 .f-dropdown:before, .f-dropdown:after {
   display: none !important;
 }
 
-/* line 253, ../../public/styles/main.scss */
+/* line 265, ../../public/styles/main.scss */
 md-toast {
   position: fixed !important;
 }
 
-/* line 254, ../../public/styles/main.scss */
+/* line 266, ../../public/styles/main.scss */
 .f-dropdown {
   display: block;
 }
@@ -28230,7 +28259,7 @@ md-toast {
     left: 0;
   }
 }
-/* line 259, ../../public/styles/main.scss */
+/* line 271, ../../public/styles/main.scss */
 .dropDown:hover > .f-dropdown {
   left: 0;
   position: absolute;
@@ -28253,17 +28282,17 @@ md-toast {
   -o-animation-name: slideInLeft;
 }
 
-/* line 280, ../../public/styles/main.scss */
+/* line 292, ../../public/styles/main.scss */
 .f-dropdown:hover {
   opacity: 1;
 }
 
-/* line 283, ../../public/styles/main.scss */
+/* line 295, ../../public/styles/main.scss */
 .f-dropdown > li:hover {
   background: white !important;
 }
 
-/* line 286, ../../public/styles/main.scss */
+/* line 298, ../../public/styles/main.scss */
 .imgBlur {
   -webkit-filter: sepia(0.5) blur(2px);
   -moz-filter: sepia(0.5) blur(2px);
@@ -28273,7 +28302,7 @@ md-toast {
 
 /* Responsive: Portrait tablets and up */
 @media (max-width: 979px) {
-  /* line 296, ../../public/styles/main.scss */
+  /* line 308, ../../public/styles/main.scss */
   body {
     margin-top: 0;
     margin-right: 0;
@@ -28281,58 +28310,58 @@ md-toast {
   }
 
   /*events*/
-  /* line 300, ../../public/styles/main.scss */
+  /* line 312, ../../public/styles/main.scss */
   .event_min_contener {
     width: 33.33%;
   }
 }
 @media (max-width: 767px) {
-  /* line 304, ../../public/styles/main.scss */
+  /* line 316, ../../public/styles/main.scss */
   body {
     margin-top: 0;
     margin-right: 0;
     padding: 0;
   }
 
-  /* line 306, ../../public/styles/main.scss */
+  /* line 318, ../../public/styles/main.scss */
   .inputName:hover {
     box-shadow: none;
   }
 
-  /* line 309, ../../public/styles/main.scss */
+  /* line 321, ../../public/styles/main.scss */
   .iClose, .img-circularPlayer, .playInImg {
     display: block;
   }
 
   /*events*/
-  /* line 313, ../../public/styles/main.scss */
+  /* line 325, ../../public/styles/main.scss */
   .event_min_contener {
     width: 100%;
   }
 
-  /* line 314, ../../public/styles/main.scss */
+  /* line 326, ../../public/styles/main.scss */
   .img_min_evnt {
     height: 100px;
   }
 }
 @media (max-width: 500px) {
-  /* line 319, ../../public/styles/main.scss */
+  /* line 331, ../../public/styles/main.scss */
   .inputName {
     width: 25%;
   }
 
-  /* line 320, ../../public/styles/main.scss */
+  /* line 332, ../../public/styles/main.scss */
   #searchBar, #searchTopBar {
     width: 100%;
   }
 
-  /* line 321, ../../public/styles/main.scss */
+  /* line 333, ../../public/styles/main.scss */
   md-slider {
     padding: 0 !important;
     margin-bottom: 20px;
   }
 
-  /* line 322, ../../public/styles/main.scss */
+  /* line 334, ../../public/styles/main.scss */
   body {
     margin-top: 0;
     margin-right: 0;

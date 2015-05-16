@@ -178,15 +178,15 @@ body {padding-bottom: 0; color: #5a5a5a;}
   height: 50px;
   width: 50px;
 }
-/*.fi-latin{
-    background-image: url('../images/);
+.fi-latin{
+    background-image: url('../images/salsa.png');
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
     position: absolute;
     height: 50px;
     width: 50px;
-}*/
+}
 .fi-electro{
   background-image: url('../images/electro.png');
   background-size: 100%;
@@ -196,8 +196,20 @@ body {padding-bottom: 0; color: #5a5a5a;}
   height: 50px;
   width: 50px;
 }
-.fi-world{}
-.fi-classique{}
+.fi-world{ background-image: url('../images/du%20monde.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;}
+.fi-classique{ background-image: url('../images/classique.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  height: 50px;
+  width: 50px;}
 .fi-rock{
   background-image: url('../images/rock.png');
   background-size: 100%;

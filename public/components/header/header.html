@@ -3,7 +3,12 @@
      class="column fixed padding0">
     <search-bar-contener id="searchTopBlock" ng-if="$root.path == 'home' || $root.path == 'search'"
          ng-class="{'hiddenBlock': $root.path != 'search','paddingTop50': $root.window == 'small'}">
-        <ng-search-bar class="column large-8 medium-10 large-offset-2 medium-offset-1"
+        <div class="column large-2 medium-1" ng-if="$root.window != 'small'">
+            <a href="#/">
+                <i class="float-right fi-claude pointer" style="height: 80px;width: 80px;"></i>
+            </a>
+        </div>
+        <ng-search-bar class="column large-8 medium-10 float-left"
                        ng-class="{'padding0': $root.window == 'small'}">
         </ng-search-bar>
     </search-bar-contener>

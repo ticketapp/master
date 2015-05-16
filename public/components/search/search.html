@@ -1,5 +1,8 @@
 <div id="searchBlock" class="right left absolute" ng-if="$root.path != 'search'">
-    <ng-search-bar class="column large-8 medium-10 medium-offset-1 large-offset-2"></ng-search-bar>
+    <div class="column large-2 medium-1" ng-if="$root.window != 'small'">
+        <i class="float-right fi-claude" style="height: 80px;width: 80px;"></i>
+    </div>
+    <ng-search-bar class="column large-8 medium-10 float-left"></ng-search-bar>
 </div>
 <div class="paddingTop20"
      ng-show="(events.length > 0 && $root.activEvent ) || (artists.length > 0 && $root.activArtist)||
