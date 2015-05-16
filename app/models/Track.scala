@@ -127,7 +127,7 @@ object Track {
     case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
   }
 
-  def save(track: Track): Option[Long] = try {
+  def save(track: Track): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertTrack({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
         .on(
@@ -139,8 +139,6 @@ object Track {
           'redirectUrl -> track.redirectUrl)
         .as(scalar[Option[Long]].single)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Track.save: " + e.getMessage)
   }
 
   def savePlaylistTrackRelation(playlistId: Long, trackIdAndRank: TrackIdAndRank): Option[Long] = try {
@@ -221,6 +219,37 @@ object Track {
         .on('userId -> userId,
             'trackId -> trackId)
         .executeUpdate()
+    }
+  }
+
+  def addToFavorites(userId: String, trackId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("INSERT INTO usersFavoriteTracks(userId, trackId) VALUES({userId}, {trackId})")
+        .on(
+          'userId -> userId,
+          'trackId -> trackId)
+        .executeUpdate()
+    }
+  }
+
+  def removeFromFavorites(userId: String, trackId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("""DELETE FROM usersFavoriteTracks WHERE userId = {userId} AND trackId = {trackId}""")
+        .on('userId -> userId,
+          'trackId -> trackId)
+        .executeUpdate()
+    }
+  }
+
+  def findFavorites(userId: String): Try[Seq[Track]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT tracks.* FROM tracks tracks
+          |  INNER JOIN usersFavoriteTracks usersFavoriteTracks
+          |    ON tracks.trackId = usersFavoriteTracks.trackId
+          |WHERE usersFavoriteTracks.userId = {userId}""".stripMargin)
+        .on('userId -> userId)
+        .as(trackParser.*)
     }
   }
 }

@@ -17,7 +17,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
     "be able to be saved and deleted" in {
       val artistId = Artist.save(artist).get
       val track = Track(None, "title", "url", 'y', "thumbnailUrl", "artistFacebookUrl")
-      val trackId = save(track)
+      val trackId = save(track).get
 
       find(trackId.get) mustEqual Option(track.copy(trackId = trackId))
       delete(trackId.get) mustBe 1
@@ -26,7 +26,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
 
     "be able to be noted by a user" in {
       val artistId = Artist.save(artist).get
-      val trackId = save(Track(None, "title", "url", 'y', "thumbnailUrl", "artistFacebookUrl")).get
+      val trackId = save(Track(None, "title", "url", 'y', "thumbnailUrl", "artistFacebookUrl")).get.get
 
       upsertRating("userTestId", trackId, -2) mustBe Success(true)
       getRating("userTestId", trackId) mustBe Success(Some(-2))
@@ -35,6 +35,19 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
       getRating("userTestId", trackId) mustBe Success(Some(0))
 
       deleteRating("userTestId", trackId) mustBe Success(1)
+      delete(trackId) mustBe 1
+      Artist.delete(artistId) mustBe 1
+    }
+
+    "be able to be added to favorites and deleted from favorites" in {
+      val artistId = Artist.save(artist).get
+      val track = Track(None, "title", "url", 'y', "thumbnailUrl", "artistFacebookUrl")
+      val trackId = save(track).get.get
+
+      addToFavorites("userTestId", trackId) mustBe Success(1)
+      findFavorites("userTestId", trackId) mustBe Success(Seq(track.copy(trackId = Option(trackId))))
+      removeFromFavorites("userTestId", trackId) mustBe Success(1)
+
       delete(trackId) mustBe 1
       Artist.delete(artistId) mustBe 1
     }

@@ -1,13 +1,14 @@
 package controllers
 
 import models.Track
+import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
-
-import scala.util.Success
+import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
+import scala.util.{Failure, Success}
 
 object TrackController extends Controller with securesocial.core.SecureSocial {
   val trackBindingForm = Form(mapping(
@@ -28,8 +29,8 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
       track => {
         Track.save(track)
         match {
-          case Some(trackId) => Ok(Json.toJson(Track.find(trackId)))
-          case None => Ok(Json.toJson("The track couldn't be saved"))
+          case Success(Some(trackId)) => Ok(Json.toJson(Track.find(trackId)))
+          case _ => InternalServerError
         }
       }
     )
@@ -48,6 +49,40 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     Track.getRating(userId, trackId) match {
       case Success(Some(rating)) => Ok(Json.toJson(rating))
       case _ => InternalServerError
+    }
+  }
+
+  def addToFavorites(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Track.addToFavorites(userId, trackId) match {
+      case Success(1) =>
+        Ok
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        Conflict(s"This user already has track $trackId in his favorites.")
+      case _ =>
+        InternalServerError
+    }
+  }
+
+  def removeFromFavorites(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Track.removeFromFavorites(userId, trackId) match {
+      case Success(1) =>
+        Ok
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        NotFound(s"The track $trackId is not in the favorites of this user or this track does not exist.")
+      case _ =>
+        InternalServerError
+    }
+  }
+
+  def findFavorites = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Track.findFavorites(userId) match {
+      case Success(tracks) =>
+        Ok(Json.toJson(tracks))
+      case _ =>
+        InternalServerError
     }
   }
 }
