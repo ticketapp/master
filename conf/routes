@@ -78,7 +78,7 @@ POST    /tracks/create                                            controllers.Tr
 GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle        controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
 GET     /tracks/youtubeTrackInfo/:youtubeId                       controllers.SearchTracksController.getYoutubeTrackInfos(youtubeId: String)
 GET     /tracks/:trackId/rating                                   controllers.TrackController.getRating(trackId: Long)
-POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRating(trackId: Long, rating: Int)
+POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRatingUp(trackId: Long, rating: Int)
 POST    /tracks/:trackId/addToFavorites                           controllers.TrackController.addToFavorites(trackId: Long)
 POST    /tracks/:trackId/removeFromFavorites                      controllers.TrackController.removeFromFavorites(trackId: Long)
 GET     /tracks/favorites                                         controllers.TrackController.findFavorites

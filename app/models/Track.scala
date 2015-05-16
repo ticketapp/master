@@ -176,7 +176,7 @@ object Track {
         .executeUpdate()
     }
   } catch {
-    case e: Exception => throw new DAOException("Track.deleteTrack: " + e.getMessage)
+    case e: Exception => throw new DAOException("Track.delete: " + e.getMessage)
   }
 
   def followTrack(userId : Long, trackId : Long): Option[Long] = try {
@@ -191,9 +191,9 @@ object Track {
     case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)
   }
 
-  def upsertRating(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
+  def upsertRatingUp(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT upsertTrackRating({userId}, {trackId}, {rating})")
+      SQL("SELECT upsertTrackRatingUp({userId}, {trackId}, {rating})")
         .on(
           'userId -> userId,
           'trackId -> trackId,
@@ -202,13 +202,31 @@ object Track {
     }
   }
 
-  def getRating(userId: String, trackId: Long): Try[Option[Int]] = Try {
+  def upsertRatingDown(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
     DB.withConnection { implicit connection =>
-      SQL("SELECT rating FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
+      SQL("SELECT upsertTrackRatingDown({userId}, {trackId}, {rating})")
+        .on(
+          'userId -> userId,
+          'trackId -> trackId,
+          'rating -> rating)
+        .execute()
+    }
+  }
+
+  private val ratingParser: RowParser[String] = {
+    get[Option[Int]]("ratingUp") ~
+      get[Option[Int]]("ratingDown") map {
+      case ratingUp ~ ratingDown => ratingUp.getOrElse(0).toString + "," + ratingDown.getOrElse(0).toString
+    }
+  }
+
+  def getRating(userId: String, trackId: Long): Try[Option[String]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT ratingUp, ratingDown FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
         .on(
           'userId -> userId,
           'trackId -> trackId)
-        .as(scalar[Int].singleOpt)
+        .as(ratingParser.singleOpt)
     }
   }
 

@@ -24,15 +24,30 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
       Artist.delete(artistId) mustBe 1
     }
 
-    "be able to be noted by a user" in {
+    "be able to be rated up by a user" in {
       val artistId = Artist.save(artist).get
       val trackId = save(Track(None, "title", "url", 'y', "thumbnailUrl", "artistFacebookUrl")).get.get
 
-      upsertRating("userTestId", trackId, -2) mustBe Success(true)
-      getRating("userTestId", trackId) mustBe Success(Some(-2))
+      upsertRatingUp("userTestId", trackId, 1) mustBe Success(true)
+      getRating("userTestId", trackId) mustBe Success(Some("1,0"))
 
-      upsertRating("userTestId", trackId, 2) mustBe Success(true)
-      getRating("userTestId", trackId) mustBe Success(Some(0))
+      upsertRatingUp("userTestId", trackId, 2) mustBe Success(true)
+      getRating("userTestId", trackId) mustBe Success(Some("3,0"))
+
+      deleteRating("userTestId", trackId) mustBe Success(1)
+      delete(trackId) mustBe 1
+      Artist.delete(artistId) mustBe 1
+    }  
+    
+    "be able to be rated down by a user" in {
+      val artistId = Artist.save(artist).get
+      val trackId = save(Track(None, "title", "url", 'y', "thumbnailUrl", "artistFacebookUrl")).get.get
+
+      upsertRatingDown("userTestId", trackId, -1) mustBe Success(true)
+      getRating("userTestId", trackId) mustBe Success(Some("0,-1"))
+
+      upsertRatingDown("userTestId", trackId, -2) mustBe Success(true)
+      getRating("userTestId", trackId) mustBe Success(Some("0,-3"))
 
       deleteRating("userTestId", trackId) mustBe Success(1)
       delete(trackId) mustBe 1
@@ -45,7 +60,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
       val trackId = save(track).get.get
 
       addToFavorites("userTestId", trackId) mustBe Success(1)
-      findFavorites("userTestId", trackId) mustBe Success(Seq(track.copy(trackId = Option(trackId))))
+      findFavorites("userTestId") mustBe Success(Seq(track.copy(trackId = Option(trackId))))
       removeFromFavorites("userTestId", trackId) mustBe Success(1)
 
       delete(trackId) mustBe 1
