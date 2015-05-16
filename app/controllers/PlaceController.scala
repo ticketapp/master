@@ -78,6 +78,13 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
+  def getFollowedPlaces = UserAwareAction { implicit request =>
+    request.user match {
+      case None => Ok(Json.toJson("User not connected"))
+      case Some(identity: Identity) => Ok(Json.toJson(Place.getFollowedPlaces(identity.identityId)))
+    }
+  }
+
   val placeBindingForm = Form(mapping(
     "name" -> nonEmptyText(2),
     "facebookId" -> optional(nonEmptyText()),

@@ -112,6 +112,11 @@ object Utilities {
       normalizedNumbers.toSet
   }
 
+  def phoneNumbersSetToOptionString(phoneNumbers: Set[String]): Option[String] = phoneNumbers match {
+    case emptySet: Set[String] if emptySet.isEmpty => None
+    case phoneNumbersFound => Option(phoneNumbersFound.mkString(","))
+  }
+
   def formatDescription(description: Option[String]): Option[String] = description match {
     //see if not faster to useGetWebsitesInDescription and after replace all matched ?
     case None =>

@@ -23,7 +23,8 @@ case class Place (placeId: Option[Long],
                   capacity: Option[Int] = None,
                   openingHours: Option[String] = None,
                   imagePath: Option[String] = None,
-                  address : Option[Address] = None)
+                  address : Option[Address] = None,
+                  linkedOrganizerId: Option[Long] = None)
 
 object Place {
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
@@ -46,11 +47,12 @@ object Place {
       get[Option[Int]]("capacity") ~
       get[Option[String]]("openingHours") ~
       get[Option[Long]]("addressId") ~
-      get[Option[String]]("imagePath") map {
+      get[Option[String]]("imagePath") ~
+      get[Option[Long]]("organizerId") map {
       case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
-        addressId  ~ imagePath =>
+        addressId  ~ imagePath ~ organizerId =>
           Place(Option(placeId), name, facebookId, geographicPoint, description, webSites, capacity, openingHours,
-            imagePath, Address.find(addressId))
+            imagePath, Address.find(addressId), organizerId)
     }
   }
 
@@ -66,7 +68,6 @@ object Place {
     val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
     eventuallyAddressId map { addressId =>
       DB.withConnection { implicit connection =>
-        val organizerId = findOrganizerIdWithSameFacebookId(place.facebookId)
         Try {
           SQL(
             s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
@@ -81,7 +82,7 @@ object Place {
               'capacity -> place.capacity,
               'openingHours -> place.openingHours,
               'imagePath -> place.imagePath,
-              'organizerId -> organizerId)
+              'organizerId -> Organizer.findIdByFacebookId(place.facebookId))
             .as(scalar[Long].singleOpt)
         }
       }
@@ -99,7 +100,7 @@ object Place {
     }
   }
 
-  def findOrganizerIdWithSameFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
+  def findIdByFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
     SQL(
       """SELECT placeId FROM places
         | WHERE facebookId = {facebookId}""".stripMargin)
@@ -239,6 +240,18 @@ object Place {
     }
   } catch {
     case e: Exception => throw new DAOException("Place.isPlaceFollowed: " + e.getMessage)
+  }
+
+  def getFollowedPlaces(userId: IdentityId): Seq[Place] = try {
+    DB.withConnection { implicit connection =>
+      SQL("""select a.* from places a
+            |  INNER JOIN placesFollowed af ON a.placeId = af.placeId
+            |WHERE af.userId = {userId}""".stripMargin)
+        .on('userId -> userId.userId)
+        .as(PlaceParser.*)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Place.getFollowedPlaces: " + e.getMessage)
   }
 
   def saveEventPlaceRelation(eventId: Long, placeId: Long): Boolean = try {

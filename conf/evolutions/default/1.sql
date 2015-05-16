@@ -52,7 +52,7 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 32 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 31 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -671,6 +671,7 @@ CREATE OR REPLACE FUNCTION insertEventOrganizerRelation(
   $$
 LANGUAGE plpgsql;
 
+
 CREATE TABLE eventsAddresses (
   eventId                 INT REFERENCES events (eventId),
   addressId               INT REFERENCES addresses(addressId),
@@ -696,12 +697,12 @@ CREATE OR REPLACE FUNCTION insertUserOrganizerRelation(
   $$
 LANGUAGE plpgsql;
 
+
 CREATE TABLE eventsArtists (
   eventId                 INT REFERENCES events (eventId),
   artistId                INT REFERENCES artists (artistId),
   PRIMARY KEY (eventId, artistId)
 );
-
 CREATE OR REPLACE FUNCTION insertEventArtistRelation(
   eventIdValue            BIGINT,
   artistIdValue           BIGINT)
@@ -714,6 +715,7 @@ CREATE OR REPLACE FUNCTION insertEventArtistRelation(
   END;;
   $$
 LANGUAGE plpgsql;
+
 
 CREATE TABLE artistsGenres (
   artistId                INT REFERENCES artists (artistId),
@@ -739,11 +741,14 @@ CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(artistIdValue INT, 
   $$
 LANGUAGE plpgsql;
 
+
 CREATE TABLE playlists (
   playlistId              SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users_login (userId),
-  name                    VARCHAR(255)
+  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
+  name                    VARCHAR(255) NOT NULL
 );
+CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);
+
 
 CREATE TABLE playlistsTracks (
   playlistId              BIGINT REFERENCES playlists (playlistId),
@@ -751,8 +756,42 @@ CREATE TABLE playlistsTracks (
   trackRank               FLOAT NOT NULL,
   PRIMARY KEY (playlistId, trackId)
 );
+CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId);
+
+
+CREATE TABLE tracksRating (
+  tableId                 SERIAL PRIMARY KEY,
+  trackId                 BIGINT REFERENCES tracks (trackId) NOT NULL,
+  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
+  rating                  SMALLINT NOT NULL,
+  reason                  CHAR NOT NULL
+);
+CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (trackId, userId);
+CREATE OR REPLACE FUNCTION upsertTrackRating(
+  trackIdValue BIGINT,
+  userIdValue  VARCHAR(255),
+  ratingValue  INT,
+  reason       VARCHAR(1))
+  RETURNS VOID AS
+  $$
+    BEGIN
+      LOOP
+        UPDATE tracksRating SET rating = rating + ratingValue WHERE trackId = trackIdValue AND userId = userIdValue;;
+        IF found THEN
+          RETURN;;
+        END IF;;
+        BEGIN
+          INSERT INTO tracksRating(trackId, userId, rating) VALUES (trackIdValue, userIdValue, ratingValue);;
+          RETURN;;
+        EXCEPTION WHEN unique_violation THEN
+        END;;
+      END LOOP;;
+    END;;
+  $$
+LANGUAGE plpgsql;
 
 # --- !Downs
+DROP TABLE IF EXISTS tracksRating;
 DROP TABLE IF EXISTS usersPlaylists;
 DROP TABLE IF EXISTS playlistsTracks;
 DROP TABLE IF EXISTS eventsGenres;

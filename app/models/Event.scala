@@ -174,7 +174,7 @@ object Event {
 
   def findAllByGenre(genre: String, geographicPoint: GeographicPoint, offset: Int, numberToReturn: Int): Try[Seq[Event]]
   = Try {
-    val geographicPointString = geographicPoint.toString
+    val geographicPointString = geographicPoint.toString()
     DB.withConnection { implicit connection =>
       SQL(
         s"""SELECT e.* FROM eventsGenres eG

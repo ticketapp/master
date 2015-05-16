@@ -14,6 +14,7 @@ import play.api.Play.current
 import securesocial.core.IdentityId
 import scala.util.Success
 import scala.util.Failure
+import org.scalatest.OptionValues._
 
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
   "An address" must {
@@ -24,7 +25,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       val addressId = save(Option(address))
 
       find(addressId) mustEqual Option(address.copy(addressId = addressId))
-      delete(addressId.get) mustBe 1
+      delete(addressId.value) mustBe 1
     }
 
     "not be saved twice and return database addressId on unique violation" in {
@@ -34,8 +35,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
     }
 
     "not be saved if empty" in {
-    
-
+      save(Option(Address(None, None, None, None, None))) mustBe None
     }
   }
 }
