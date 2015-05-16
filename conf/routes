@@ -70,7 +70,7 @@ GET     /playlists/:playlistId                                    controllers.Pl
 DELETE  /playlists/:playlistId                                    controllers.PlaylistController.delete(playlistId: Long)
 
 ################################# Genres ############################################
-GET     /genres/:genre/artists                                    controllers.ArtistController.artistsByGenre(genre: String, offset: Int, numberToReturn: Int)
+GET     /genres/:genre/artists                                    controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
 GET     /genres/:genre/events                                     controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################
