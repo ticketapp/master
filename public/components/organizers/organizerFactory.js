@@ -34,7 +34,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             if(factory.organizers == true) {
                 deferred.resolve(factory.organizers);
             } else {
-                $http.get('/organizers/all/12/' + offset).
+                $http.get('/organizers?numberToReturn=12&offset='+offset).
                     success(function(data, status, headers, config) {
                         factory.organizers = data;
                         deferred.resolve(factory.organizers);

@@ -98,6 +98,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getEventsByContaining() {
             EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
+                events = $filter('filter')(events, {name: _research});
                 updateScope(events, $scope.events, 'eventId');
             });
         }

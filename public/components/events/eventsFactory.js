@@ -52,7 +52,7 @@ angular.module('claudeApp').factory ('EventsFactory', function ($http, $q){
             if(factory.events == true){
                 deferred.resolve(factory.events);
             } else {
-                $http.get('/events/inInterval/' + start + '/' + geoloc + '/12/' + offset)
+                $http.get('/events/inInterval/' + start + '?geographicPoint='+ geoloc + '&offset='+offset+'&numberToReturn=12')
                     .success(function(data, status){
                         data.forEach(factory.colorEvent);
                         factory.events = data;
@@ -84,7 +84,7 @@ angular.module('claudeApp').factory ('EventsFactory', function ($http, $q){
             if(factory.events == true){
                 deferred.resolve(factory.events);
             } else {
-                $http.get('/events/containing/' + pattern + '/' + geoloc)
+                $http.get('/events/containing/' + pattern + '?geographicPoint=' + geoloc)
                     .success(function(data, status){
                         factory.events = data;
                         deferred.resolve(factory.events);
@@ -108,7 +108,7 @@ angular.module('claudeApp').factory ('EventsFactory', function ($http, $q){
                                     function pushEvents (event) {
                                         artistsEvents.push(event)
                                     }
-                                    data.forEach(pushEvents)
+                                    data.forEach(pushEvents);
                                     factory.events = artistsEvents;
                                     deferred.resolve(factory.events);
                                 })
@@ -147,7 +147,7 @@ angular.module('claudeApp').factory ('EventsFactory', function ($http, $q){
             if(factory.events == true){
                 deferred.resolve(factory.events);
             } else {
-                $http.get('/genres/'+ pattern +'/12/' + offset + '/events/' + geoloc).
+                $http.get('/genres/'+ pattern + '/events?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12').
                     success(function(data, status, headers, config) {
                         factory.events = data;
                         deferred.resolve(factory.events);
@@ -160,7 +160,7 @@ angular.module('claudeApp').factory ('EventsFactory', function ($http, $q){
             if(factory.events == true){
                 deferred.resolve(factory.events);
             } else {
-                $http.get('/events/nearCity/' + pattern + '/12/' + offset ).
+                $http.get('/events/nearCity/' + pattern + '?numberToReturn=12&offset='+offset).
                     success(function (data) {
                         factory.events = data;
                         deferred.resolve(factory.events);

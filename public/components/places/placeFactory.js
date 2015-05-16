@@ -34,7 +34,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             if(factory.places == true) {
                 deferred.resolve(factory.places);
             } else {
-                $http.get('/places/' + geoLoc + '/12/' + offset)
+                $http.get('/places?geographicPoint='+geoLoc+'&numberToReturn=12&offset='+offset)
                     .success(function(data, status) {
                         factory.places = data;
                         deferred.resolve(factory.places);
@@ -64,7 +64,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             if(factory.places == true) {
                 deferred.resolve(factory.places);
             } else {
-                $http.get('/places/nearCity/' +  pattern + '/12/' + offset)
+                $http.get('/places/nearCity/'+pattern+'?numberToReturn=12&offset='+offset)
                     .success(function(data, status) {
                         factory.places = data;
                         deferred.resolve(factory.places);
@@ -94,13 +94,11 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             if(factory.places == true) {
                 deferred.resolve(factory.places);
             } else {
-                console.log(place)
                 $http.post('/places/create', place )
                     .success(function(data, status) {
                         factory.places = data;
                         deferred.resolve(factory.places);
                     }).error(function(data, status) {
-                        console.log(data)
                         deferred.resolve('error');
                     });
             }
