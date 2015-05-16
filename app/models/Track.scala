@@ -190,4 +190,8 @@ object Track {
   } catch {
     case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)
   }
+
+  def modifyTrackRating(userId: String, trackId: Long, rating: Int, reason: Char): Int = {
+    rating
+  }
 }

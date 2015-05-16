@@ -767,7 +767,28 @@ CREATE TABLE tracksRating (
   reason                  CHAR NOT NULL
 );
 CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (trackId, userId);
-
+CREATE OR REPLACE FUNCTION upsertTrackRating(
+  trackIdValue BIGINT,
+  userIdValue  VARCHAR(255),
+  ratingValue  INT,
+  reason       VARCHAR(1))
+  RETURNS VOID AS
+  $$
+    BEGIN
+      LOOP
+        UPDATE tracksRating SET rating = rating + ratingValue WHERE trackId = trackIdValue AND userId = userIdValue;;
+        IF found THEN
+          RETURN;;
+        END IF;;
+        BEGIN
+          INSERT INTO tracksRating(trackId, userId, rating) VALUES (trackIdValue, userIdValue, ratingValue);;
+          RETURN;;
+        EXCEPTION WHEN unique_violation THEN
+        END;;
+      END LOOP;;
+    END;;
+  $$
+LANGUAGE plpgsql;
 
 # --- !Downs
 DROP TABLE IF EXISTS tracksRating;
