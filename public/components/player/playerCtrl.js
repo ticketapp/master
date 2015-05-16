@@ -1,6 +1,7 @@
 angular.module('claudeApp').
-    controller('PlayerCtrl', ['$scope', '$rootScope', '$timeout', '$filter', 'EventsFactory', '$modal',
-        function ($scope, $rootScope, $timeout, $filter, EventsFactory, $modal) {
+    controller('PlayerCtrl', ['$scope', '$rootScope', '$timeout', '$filter', 'EventsFactory',
+        '$modal', 'TracksRecommender',
+        function ($scope, $rootScope, $timeout, $filter, EventsFactory, $modal, TracksRecommender) {
             $rootScope.playlist = {
                 name : '',
                 genres: [],
@@ -229,6 +230,9 @@ angular.module('claudeApp').
 
             $scope.nextTrack = function () {
                 $scope.onPlay = false;
+                TracksRecommender.trackRateByTime(document.getElementById('musicPlayer').duration,
+                    document.getElementById('musicPlayer').currentTime,
+                    $rootScope.playlist.tracks[i].trackId);
                 if ($scope.shuffle == true) {
                     i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                     shuffle()
