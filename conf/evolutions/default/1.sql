@@ -761,17 +761,16 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
-  trackId                 BIGINT REFERENCES tracks (trackId) NOT NULL,
   userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
-  rating                  SMALLINT NOT NULL,
-  reason                  CHAR NOT NULL
+  trackId                 BIGINT REFERENCES tracks (trackId) NOT NULL,
+  rating                  INT NOT NULL,
+  reason                  CHAR
 );
-CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (trackId, userId);
+CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
 CREATE OR REPLACE FUNCTION upsertTrackRating(
-  trackIdValue BIGINT,
   userIdValue  VARCHAR(255),
-  ratingValue  INT,
-  reason       VARCHAR(1))
+  trackIdValue BIGINT,
+  ratingValue  INT)
   RETURNS VOID AS
   $$
     BEGIN

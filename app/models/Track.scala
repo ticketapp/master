@@ -20,6 +20,8 @@ import java.util.Date
 import java.math.BigDecimal
 import anorm.Column.rowToBigDecimal
 
+import scala.util.Try
+
 case class Track (trackId: Option[Long],
                   title: String, 
                   url: String, 
@@ -168,7 +170,7 @@ object Track {
     case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
   }
 
-  def deleteTrack(trackId: Long): Long = try {
+  def delete(trackId: Long): Int = try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM tracks WHERE trackId = {trackId}""".stripMargin)
@@ -191,7 +193,34 @@ object Track {
     case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)
   }
 
-  def modifyTrackRating(userId: String, trackId: Long, rating: Int, reason: Char): Int = {
-    rating
+  def upsertRating(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT upsertTrackRating({userId}, {trackId}, {rating})")
+        .on(
+          'userId -> userId,
+          'trackId -> trackId,
+          'rating -> rating)
+        .execute()
+    }
+  }
+
+  def getRating(userId: String, trackId: Long): Try[Option[Int]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT rating FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
+        .on(
+          'userId -> userId,
+          'trackId -> trackId)
+        .as(scalar[Int].singleOpt)
+    }
+  }
+
+  def deleteRating(userId: String, trackId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}""".stripMargin)
+        .on('userId -> userId,
+            'trackId -> trackId)
+        .executeUpdate()
+    }
   }
 }

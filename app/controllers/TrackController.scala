@@ -7,7 +7,9 @@ import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
 
-object TrackController extends Controller {
+import scala.util.Success
+
+object TrackController extends Controller with securesocial.core.SecureSocial {
   val trackBindingForm = Form(mapping(
     "title" -> nonEmptyText(2),
     "url" -> nonEmptyText(3),
@@ -31,5 +33,21 @@ object TrackController extends Controller {
         }
       }
     )
+  }
+
+  def upsertRating(trackId: Long, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Track.upsertRating(userId, trackId, rating) match {
+      case Success(true) => Ok
+      case _ => InternalServerError
+    }
+  }
+
+  def getRating(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Track.getRating(userId, trackId) match {
+      case Success(Some(rating)) => Ok(Json.toJson(rating))
+      case _ => InternalServerError
+    }
   }
 }
