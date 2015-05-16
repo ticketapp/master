@@ -63,4 +63,18 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
         InternalServerError
     }
   }
+
+  def removeFromFavorites(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Track.removeFromFavorites(userId, trackId) match {
+      case Success(1) =>
+        Ok
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        NotFound(s"The track $trackId is not in the favorites oh this user.")
+      case _ =>
+        InternalServerError
+    }
+  }
+
+
 }

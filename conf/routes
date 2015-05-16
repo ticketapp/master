@@ -80,6 +80,7 @@ GET     /tracks/youtubeTrackInfo/:youtubeId                       controllers.Se
 GET     /tracks/:trackId/rating                                   controllers.TrackController.getRating(trackId: Long)
 POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRating(trackId: Long, rating: Int)
 POST    /tracks/:trackId/addToFavorites                           controllers.TrackController.addToFavorites(trackId: Long)
+POST    /tracks/:trackId/removeFromFavorites                      controllers.TrackController.removeFromFavorites(trackId: Long)
 
 ################################## Infos ################################################
 GET     /infos                                                    controllers.Application.infos
