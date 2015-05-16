@@ -789,7 +789,15 @@ CREATE OR REPLACE FUNCTION upsertTrackRating(
   $$
 LANGUAGE plpgsql;
 
+CREATE TABLE usersFavoriteTracks(
+  tableId                 SERIAL PRIMARY KEY,
+  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
+  trackId                 BIGINT REFERENCES tracks (trackId) NOT NULL
+);
+CREATE UNIQUE INDEX usersFavoriteTracksIndex ON usersFavoriteTracks (userId, trackId);
+
 # --- !Downs
+DROP TABLE IF EXISTS usersFavoriteTracks;
 DROP TABLE IF EXISTS tracksRating;
 DROP TABLE IF EXISTS usersPlaylists;
 DROP TABLE IF EXISTS playlistsTracks;
