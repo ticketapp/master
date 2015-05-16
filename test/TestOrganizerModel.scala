@@ -1,8 +1,10 @@
 import java.util.Date
 import controllers.DAOException
-import models.Organizer
+import models.{Address, Place, Organizer}
 import models.Organizer._
 import org.postgresql.util.PSQLException
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
@@ -16,12 +18,13 @@ import scala.util.Success
 import scala.util.Failure
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import scala.util.{Failure, Success}
+import play.api.libs.concurrent.Execution.Implicits._
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 
   "An Organizer" must {
 
-    val organizer = new Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
+    val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
       None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
       geographicPoint = Option("(5.4,5.6)"))
 
@@ -31,29 +34,13 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 
       delete(organizerId) mustBe 1
     }
-/*
- Organizer.followByOrganizerId(request.user.identityId.userId, organizerId) match {
-      case Success(_) =>
-        Created
-      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
-        Status(CONFLICT)("This user already follow this organizer.")
-      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
-        Status(CONFLICT)("There is no organizer with this id.")
-      case Failure(unknownException) =>
-        Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
-        Status(INTERNAL_SERVER_ERROR)
-    }
- */
-    "not be able to be saves twice" in {
+
+    "not be able to be saved twice" in {
       val organizerId = save(organizer).get.get
       val saveStatus = save(organizer)
 
-      saveStatus shouldBe a [Failure[PSQLException]]
-
       saveStatus match {
-        case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+        case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
         case _ => throw new Exception("save an organizer twice didn't throw a PSQL UNIQUE_VIOLATION")
       }
 
@@ -61,15 +48,33 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
     }
 
     "be able to be followed and unfollowed by a user" in {
-      followByOrganizerId("userTestId", 1) shouldBe a [Success[Option[Long]]]
+      followByOrganizerId("userTestId", 1)
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
       unfollowByOrganizerId("userTestId", 1) mustBe 1
     }
 
     "not be able to be followed twice" in {
-      followByOrganizerId("userTestId", 1) shouldBe a [Success[Option[Long]]]
-      followByOrganizerId("userTestId", 1) shouldBe a [Failure[PSQLException]]
+      followByOrganizerId("userTestId", 1)
+
+      followByOrganizerId("userTestId", 1) match {
+        case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
+        case _ => throw new Exception("follow an organizer twice didn't throw a PSQL UNIQUE_VIOLATION")
+      }
+
       unfollowByOrganizerId("userTestId", 1) mustBe 1
+    }
+
+    "be linked to a place if one with the same facebookId already exists" in {
+      whenReady (Place.save(Place(None, "Name", Some("123456789"), None, None, None, None, None, None, None)),
+        timeout(Span(2, Seconds)))  { tryPlaceId =>
+          val placeId = tryPlaceId.get
+          val organizerId = save(Organizer(None, Some("123456789"), "organizerTest2")).get.get
+
+          find(organizerId).get.linkedPlaceId mustBe placeId
+
+          delete(organizerId) mustBe 1
+          Place.delete(placeId.get) mustBe Success(1)
+      }
     }
   }
 }

@@ -53,7 +53,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
     }
 
     "return songs" in {
-      whenReady (getEchonestSongsWSCall(0, "ARNJ7441187B999AFD"), timeout(Span(2, Seconds))) { echonestSongs: JsValue =>
+      whenReady (getEchonestSongsOnEchonest(0, "ARNJ7441187B999AFD"), timeout(Span(2, Seconds))) { echonestSongs: JsValue =>
         val songs = readEchonestSongs(echonestSongs)
 
         songs should not be empty

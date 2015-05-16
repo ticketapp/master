@@ -90,7 +90,7 @@ object Address {
     case Some(address) =>
       try {
         DB.withConnection { implicit connection =>
-          SQL( """SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
+          SQL("""SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
             .on(
               'geographicPoint -> address.geographicPoint,
               'city -> address.city,

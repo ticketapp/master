@@ -1,5 +1,7 @@
 package models
 
+import java.sql.Connection
+
 import anorm.SqlParser._
 import anorm._
 import controllers.{ThereIsNoOrganizerForThisFacebookIdException, DAOException}
@@ -27,7 +29,8 @@ case class Organizer (organizerId: Option[Long],
                       verified: Boolean = false,
                       imagePath: Option[String] = None,
                       geographicPoint: Option[String] = None,
-                      address: Option[Address] = None)
+                      address: Option[Address] = None,
+                      linkedPlaceId: Option[Long] = None)
 
 object Organizer {
 
@@ -47,11 +50,12 @@ object Organizer {
       get[Option[String]]("websites") ~
       get[Boolean]("verified") ~
       get[Option[String]]("imagePath") ~
-      get[Option[String]]("geographicPoint") map {
+      get[Option[String]]("geographicPoint") ~
+      get[Option[Long]]("placeId") map {
       case organizerId ~ facebookId ~ name ~ description ~ addressId ~ phone ~ publicTransit ~ websites ~ verified ~
-        imagePath ~ geographicPoint =>
+        imagePath ~ geographicPoint ~ placeId =>
         Organizer(Option(organizerId), facebookId, name, description, addressId, phone, publicTransit, websites,
-          verified, imagePath, geographicPoint)
+          verified, imagePath, geographicPoint, None, placeId)
     }
   }
 
@@ -107,6 +111,14 @@ object Organizer {
   } catch {
     case e: Exception => throw new DAOException("Organizer.findAllContaining: " + e.getMessage)
   }
+  
+  def findIdByFacebookId(facebookId: Option[String])(implicit connection: Connection): Option[Long] = {
+    SQL(
+      """SELECT organizerId FROM organizers
+        | WHERE facebookId = {facebookId}""".stripMargin)
+      .on("facebookId" -> facebookId)
+      .as(scalar[Long].singleOpt)
+  }
 
   def save(organizer: Organizer): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
@@ -114,15 +126,8 @@ object Organizer {
         case None => None
         case Some(address) => Address.save(Option(address))
       }
-      val placeIdWithSameFacebookId = SQL(
-        """SELECT organizerId FROM organizers
-          | WHERE facebookId = {facebookId}""".stripMargin)
-        .on("facebookId" -> organizer.facebookId)
-        .as(scalar[Long].singleOpt)
-      val phoneNumbers = Utilities.phoneNumbersStringToSet(organizer.phone) match {
-        case emptySet: Set[String] if emptySet.isEmpty => None
-        case phoneNumbersFound => Option(phoneNumbersFound.mkString(","))
-      }
+      val placeIdWithSameFacebookId = Place.findIdByFacebookId(organizer.facebookId)
+      val phoneNumbers = Utilities.phoneNumbersSetToOptionString(Utilities.phoneNumbersStringToSet(organizer.phone)) 
       SQL(
         """SELECT insertOrganizer({facebookId}, {name}, {description}, {addressId}, {phone}, {publicTransit},
           |{websites}, {imagePath}, {geographicPoint}, {placeId})""".stripMargin)
@@ -141,14 +146,12 @@ object Organizer {
     }
   }
 
-  def returnOrganizerId(name: String): Long = try {
+  def findIdByName(name: String): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL("SELECT organizerId FROM organizers WHERE name = {name}")
         .on('name -> name)
-        .as(scalar[Long].single)
+        .as(scalar[Long].singleOpt)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.returnOrganizerId: " + e.getMessage)
   }
 
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Boolean = {
@@ -170,10 +173,6 @@ object Organizer {
   } catch {
     case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)
   }
-
-  val organizer = new Organizer(None, Option("facebookId1"), "organizerTest", Option("description"), None, Option("phone"),
-    Option("publicTransit"), Option("websites"), verified = true, imagePath = Option("imagePath"),
-    geographicPoint = Option("(5.4,5.6)"))
 
   def followByOrganizerId(userId : String, organizerId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
@@ -272,8 +271,8 @@ object Organizer {
               zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
               website: Option[String]) =>
       Organizer(None, Some(organizerId), name, Utilities.formatDescription(description), None, phone, public_transit,
-        website, verified = false, source, None,
-        Option(Address(None, None, city, zip, street)))
+        website, verified = false, imagePath = source, geographicPoint = None, address = Option(Address(None, None,
+          city, zip, street)))
       )
     organizer.json.asOpt[Organizer](readOrganizer)
   }
