@@ -87,6 +87,22 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 });
             return deferred.promise;
         },
+        unfollowOrganizer : function (id, organizerName) {
+            var deferred = $q.defer();
+            $http.post('/organizers/' + id +'/unfollowOrganizerByOrganizerId').
+                success(function (data) {
+                    deferred.resolve(data);
+                }).error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/organizers/' + id +'/unfollowOrganizerByOrganizerId',
+                            "", 'vous ne suivez plus ' + organizerName)
+                    } else {
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                    }
+                    deferred.reject('erreur');
+                });
+            return deferred.promise;
+        },
         getIsFollowed : function (id) {
             var deferred = $q.defer();
             $http.get('/organizers/' + id + '/isFollowed')

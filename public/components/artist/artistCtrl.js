@@ -16,7 +16,6 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             $scope.artist.events = [];
             $rootScope.loadingTracks = true;
             function pushTrack (track) {
-                console.log($localStorage.tracksSignaled)
                 if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
                     $scope.tracks.push(track)
                 }
@@ -24,7 +23,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
                 $scope.tracks = [];
-                //$filter('orderBy')(artist.tracks, artist.tracks.confidence, true);
+                artist.tracks = $filter('orderBy')(artist.tracks, 'confidence', true);
                 artist.tracks.forEach(pushTrack);
                 $scope.artist.tracks = $scope.tracks;
                 $rootScope.loadingTracks = false;

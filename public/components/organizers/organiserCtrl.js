@@ -49,7 +49,12 @@ angular.module('claudeApp').
         };
 
         $scope.stopFollow = function () {
-            /*ArtistsFactory.followArtistByArtistId($scope.artist.artistId).then(function (followed) {
-             })*/
+            OrganizerFactory.unfollowOrganizer($scope.organizer.organizerId, $scope.organizer.name).
+                then(
+                function (followed) {
+                    if (followed != 'error') {
+                        $scope.isFollowed = false;
+                    }
+                })
         };
     }]);

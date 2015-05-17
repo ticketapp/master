@@ -6,9 +6,10 @@ angular.module('claudeApp').factory('TracksRecommender', ['$http', '$rootScope',
         },
         trackRateByTime : function (duration, time, trackId) {
             var rate;
+            console.log(time);
             if ($rootScope.connected == true) {
-                if (time <= 10000) {
-                    rate = '-' + Math.round(time / 100);
+                if (time <= 10) {
+                    rate = '-' + Math.round(time*10);
                 } else if (100 / duration * time < 95) {
                     var t = 100 / duration * time;
                     rate = '-' + Math.round((100 - t) - (t ^ 1.08 / 100 * (100 - t)));
