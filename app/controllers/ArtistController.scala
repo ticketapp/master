@@ -132,7 +132,21 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         Logger.error("ArtistController.followArtistByArtistId", unknownException)
         Status(INTERNAL_SERVER_ERROR)
     }
-  } 
+  }
+
+  def unfollowArtistByArtistId(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Artist.unfollowByArtistId(userId, artistId) match {
+      case Success(1) =>
+        Ok
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"The user (id: $userId) does not follow the artist (artistId: $artistId) or the artist does not exist.")
+        Conflict
+      case Failure(unknownException) =>
+        Logger.error("ArtistController.followArtistByArtistId", unknownException)
+        InternalServerError
+    }
+  }
   
   def followArtistByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId

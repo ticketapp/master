@@ -31,6 +31,7 @@ GET     /artists/:facebookUrl                                     controllers.Ar
 GET     /artists/byId/:id                                         controllers.ArtistController.artist(id: Long)
 POST    /artists/createArtist                                     controllers.ArtistController.createArtist
 POST    /artists/:artistId/followByArtistId                       controllers.ArtistController.followArtistByArtistId(artistId: Long)
+POST    /artists/:artistId/unfollowArtistByArtistId               controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
 POST    /artists/:facebookId/followByFacebookId                   controllers.ArtistController.followArtistByFacebookId(facebookId: String)
 GET     /artists/followed/                                        controllers.ArtistController.getFollowedArtists
 GET     /artists/:artistId/isFollowed                             controllers.ArtistController.isArtistFollowed(artistId: Long)

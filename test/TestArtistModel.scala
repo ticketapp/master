@@ -21,7 +21,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
     val artist = Artist(None, Option("facebookId3"), "artistTest", Option("imagePath"), Option("description"),
       "facebookUrl3", Set("website"))
-/*
+
     "be saved and deleted in database and return the new id" in {
       save(artist) match {
         case None =>
@@ -35,13 +35,13 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     "be followed and unfollowed by a user" in {
       followByArtistId("userTestId", 1) shouldBe a[Success[Option[Long]]]
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
-      unfollowByArtistId("userTestId", 1) mustBe 1
+      unfollowByArtistId("userTestId", 1) mustBe Success(1)
     }
 
     "not be followed twice" in {
       followByArtistId("userTestId", 1) shouldBe a[Success[Option[Long]]]
       followByArtistId("userTestId", 1) shouldBe a[Failure[PSQLException]]
-      unfollowByArtistId("userTestId", 1) mustBe 1
+      unfollowByArtistId("userTestId", 1) mustBe Success(1)
     }
 
     "be updated" in {
@@ -61,7 +61,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
       find(artistId.get) mustBe Option(artist.copy(artistId = artistId, websites = Set("website", "normalizedUrl")))
       delete(artistId.get) mustBe 1
-    }*/
+    }
 
     "have another website" in {
       val maybeTrack = Option(Track(None, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl",

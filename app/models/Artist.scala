@@ -310,7 +310,7 @@ object Artist {
     }
   }
 
-  def unfollowByArtistId(userId: String, artistId: Long): Long = try {
+  def unfollowByArtistId(userId: String, artistId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM artistsFollowed
@@ -319,8 +319,6 @@ object Artist {
             'artistId -> artistId)
         .executeUpdate()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Artist.unFollow: " + e.getMessage)
   }
 
   def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
