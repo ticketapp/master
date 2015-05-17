@@ -119,7 +119,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       event => {
         Event.save(event) match {
           case Some(eventId) => Ok(Json.toJson(Event.find(eventId)))
-          case None => Status(INTERNAL_SERVER_ERROR)
+          case None => InternalServerError
         }
       }
     )
@@ -130,7 +130,8 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       case Success(_) =>
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-        Conflict("This user already follow this event.")
+        Logger.error(s"EventController.followEventByEventId: there is no event with the id $eventId")
+        Conflict
       case Failure(unknownException) =>
         Logger.error("EventController.followEvent", unknownException)
         InternalServerError
@@ -138,11 +139,13 @@ object EventController extends Controller with securesocial.core.SecureSocial {
   }
 
   def unfollowEvent(eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Event.unfollow(request.user.identityId.userId, eventId) match {
+    val userId = request.user.identityId.userId
+    Event.unfollow(userId, eventId) match {
       case Success(1) =>
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-        Conflict("This user was not following this event.")
+        Logger.error(s"The user (id: $userId) does not follow the event (eventId: $eventId) or the event does not exist.")
+        Conflict
       case Failure(unknownException) =>
         Logger.error("EventController.unfollowEvent", unknownException)
         InternalServerError

@@ -43,6 +43,7 @@ GET     /artists/facebookContaining/:pattern                      controllers.Se
 GET     /places                                                   controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET     /places/:id                                               controllers.PlaceController.place(id: Long)
 POST    /places/:placeId/followByPlaceId                          controllers.PlaceController.followPlaceByPlaceId(placeId: Long)
+POST    /places/:placeId/unfollowPlaceByPlaceId                   controllers.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
 POST    /places/:facebookId/followByFacebookId                    controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
 GET     /places/:placeId/isFollowed                               controllers.PlaceController.isPlaceFollowed(placeId: Long)
 GET     /places/containing/:pattern                               controllers.PlaceController.findPlacesContaining(pattern: String)
