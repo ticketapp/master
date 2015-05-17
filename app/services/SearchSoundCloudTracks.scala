@@ -1,6 +1,7 @@
 package services
 
 import controllers.DAOException
+import controllers.SearchArtistsController._
 import models.{Genre, Artist, Track}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, Response}
@@ -20,7 +21,8 @@ object SearchSoundCloudTracks {
       case None =>
         getSoundCloudTracksNotDefinedInFb(artist)
       case Some(soundCloudLink) =>
-        getSoundCloudTracksWithLink(soundCloudLink.substring("soundcloud.com".length + 1), artist)
+        getSoundCloudTracksWithLink(
+          removeUselessInSoundCloudWebsite(soundCloudLink).substring("soundcloud.com/".length), artist)
     }
 
   def getSoundCloudTracksNotDefinedInFb(artist: Artist): Future[Seq[Track]] =
@@ -30,15 +32,6 @@ object SearchSoundCloudTracks {
 
   def compareArtistWebsitesWSCWebsitesAndGetTracks(artist: Artist, idAndWebsitesSeq: Seq[(Long, Seq[String])])
   :Future[Seq[Track]] = {
-    //http://stackoverflow.com/questions/4900140/search-scala-list-for-something-matching-a-property
-    /*val artistWebsites = artist.facebookId match {
-      case None => artist.websites.toSeq + ("facebook.com/" + artist.facebookUrl)
-      case Some(artistFacebookId) => artist.websites.toSeq + ("facebook.com/" + artist.facebookUrl) + artistFacebookId
-    }
-
-    idAndWebsitesSeq find { idAndWebsites =>
-      (idAndWebsites._2.map { normalizeUrl } intersect artistWebsites).nonEmpty
-    }*/
     var matchedId: Long = 0
     for (websitesAndId <- idAndWebsitesSeq) {
       for (website <- websitesAndId._2) {
