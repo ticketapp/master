@@ -132,11 +132,15 @@ margin-left: 5px;"
 <div ng-show="showLecteur" class="width100p float-left white">
     <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed"></audio>
     <div class="width100p playlistScroller" style="overflow-x: auto;">
-        <div ng-if="playlist.tracks.length > 0" style="position: relative; max-height: 150px; display: inline-flex; min-width: 100%"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
-            <div ng-class="{onplay : track == trackActive}" class="trackContener"
-                 as-sortable-item ng-repeat="track in playlist.tracks">
-                <ng-playlist-track></ng-playlist-track>
-            </div>
+        <div ng-if="playlist.tracks.length > 0"
+             style="position: relative; max-height: 150px; display: inline-flex; min-width: 100%"
+             class="sortable-row"
+             as-sortable="sortableOptions"
+             ng-model="playlist.tracks">
+                <ng-playlist-track
+                ng-class="{onplay : track == trackActive}" class="trackContener"
+                as-sortable-item ng-repeat="track in playlist.tracks">
+                </ng-playlist-track>
         </div>
     </div>
 </div>

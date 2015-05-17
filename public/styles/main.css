@@ -116,13 +116,7 @@ img {
 img {
   -ms-interpolation-mode: bicubic;
 }
-.favorite {
-    left: 5px;
-    top: 5px;
-}
-.favorite.active {
-    color: #ffff4f;
-}
+
 /* line 461, ../../public/modules/foundation/scss/foundation/components/_global.scss */
 #map_canvas img,
 #map_canvas embed,
@@ -27271,6 +27265,112 @@ md-tooltip[width-32="8"].md-show .md-background {
   display: inline-block;
 }
 
+/* line 1, ../../public/components/tracks/tracks.scss */
+.iSignal {
+  display: none;
+  top: 15px;
+  margin-left: 191px;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+/* line 10, ../../public/components/tracks/tracks.scss */
+.iClose {
+  display: none;
+  z-index: 2;
+  margin-left: 190px;
+  font-size: 26px;
+  margin-top: -8px;
+}
+
+/* line 19, ../../public/components/tracks/tracks.scss */
+.trackContener:hover > .iClose, .trackContener:hover > .iSignal {
+  display: block;
+}
+
+/* line 23, ../../public/components/tracks/tracks.scss */
+.playInImg {
+  display: none;
+  font-size: 57px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* line 30, ../../public/components/tracks/tracks.scss */
+.pauseInImg {
+  display: block;
+  font-size: 57px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* line 37, ../../public/components/tracks/tracks.scss */
+.img-circularPlayer:hover > .playInImg {
+  display: block;
+}
+
+/* line 40, ../../public/components/tracks/tracks.scss */
+.img-circularPlayer {
+  width: 80px;
+  height: 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: block;
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  margin: 5px;
+  float: left;
+}
+
+/* line 53, ../../public/components/tracks/tracks.scss */
+.trackInfos {
+  padding-top: 10px;
+  font-size: 11px;
+}
+
+/* line 57, ../../public/components/tracks/tracks.scss */
+.trackInfos:hover {
+  cursor: move;
+}
+
+/* line 61, ../../public/components/tracks/tracks.scss */
+.favorite {
+  left: 5px;
+  top: 5px;
+}
+
+/* line 65, ../../public/components/tracks/tracks.scss */
+.favorite.active, .favoriteActive {
+  color: #ffff4f;
+}
+
+/* line 69, ../../public/components/tracks/tracks.scss */
+md-track-tooltipe {
+  position: absolute;
+  display: none;
+}
+
+/* line 73, ../../public/components/tracks/tracks.scss */
+i:hover > md-track-tooltipe, h3:hover > md-track-tooltipe {
+  position: absolute;
+  display: block;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  pointer-events: auto;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  font-size: 14px;
+  z-index: 100;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 4px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.47);
+}
+
 /* line 1, ../../public/components/websites/websites.scss */
 .openWebsitesContainer {
   margin-left: 5px;
@@ -27358,69 +27458,6 @@ top-search-block > search-bar-contener {
 }
 
 /* line 11, ../../public/components/player/player.scss */
-.iClose {
-  display: none;
-  z-index: 2;
-  margin-left: 190px;
-  font-size: 26px;
-  margin-top: -8px;
-}
-
-/* line 18, ../../public/components/player/player.scss */
-.playInImg {
-  display: none;
-  font-size: 57px;
-  color: white;
-  text-align: center;
-  cursor: pointer;
-}
-
-/* line 25, ../../public/components/player/player.scss */
-.pauseInImg {
-  display: block;
-  font-size: 57px;
-  color: white;
-  text-align: center;
-  cursor: pointer;
-}
-
-/* line 32, ../../public/components/player/player.scss */
-.img-circularPlayer:hover > .playInImg {
-  display: block;
-}
-
-/* line 35, ../../public/components/player/player.scss */
-.img-circularPlayer {
-  width: 80px;
-  height: 80px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  display: block;
-  border-radius: 100px;
-  -webkit-border-radius: 100px;
-  -moz-border-radius: 100px;
-  margin: 5px;
-  float: left;
-}
-
-/* line 48, ../../public/components/player/player.scss */
-.trackContener:hover > .iClose {
-  display: block;
-}
-
-/* line 51, ../../public/components/player/player.scss */
-.trackInfos {
-  padding-top: 10px;
-  font-size: 11px;
-}
-
-/* line 55, ../../public/components/player/player.scss */
-.trackInfos:hover {
-  cursor: move;
-}
-
-/* line 58, ../../public/components/player/player.scss */
 .trackContener {
   width: 205px;
   display: inline-block;
@@ -27431,12 +27468,12 @@ top-search-block > search-bar-contener {
   box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 
-/* line 67, ../../public/components/player/player.scss */
+/* line 20, ../../public/components/player/player.scss */
 .trackContener:hover {
   opacity: 1 !important;
 }
 
-/* line 70, ../../public/components/player/player.scss */
+/* line 23, ../../public/components/player/player.scss */
 .lecteurError {
   border-radius: 5px;
   background: rgba(0, 0, 0, 0.46);
@@ -27447,13 +27484,13 @@ top-search-block > search-bar-contener {
   margin-bottom: 5px;
 }
 
-/* line 79, ../../public/components/player/player.scss */
+/* line 32, ../../public/components/player/player.scss */
 .lecteurError > h3 {
   margin: 5px;
   color: white;
 }
 
-/* line 83, ../../public/components/player/player.scss */
+/* line 36, ../../public/components/player/player.scss */
 .playlistContener {
   font-size: 11px;
   width: auto;
@@ -27463,7 +27500,7 @@ top-search-block > search-bar-contener {
   display: inline-flex;
 }
 
-/* line 90, ../../public/components/player/player.scss */
+/* line 43, ../../public/components/player/player.scss */
 .ng-player {
   bottom: 0;
   position: fixed;
@@ -27474,14 +27511,14 @@ top-search-block > search-bar-contener {
   box-shadow: 0px -2px 24px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* line 99, ../../public/components/player/player.scss */
+/* line 52, ../../public/components/player/player.scss */
 .lecteur_controller {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.7);
   display: none;
 }
 
-/* line 100, ../../public/components/player/player.scss */
+/* line 53, ../../public/components/player/player.scss */
 .lecteurControls {
   background: #008cba;
   padding: 0px 20px 20px 20px;
@@ -27501,29 +27538,29 @@ top-search-block > search-bar-contener {
   transform: translate(0, 0);
 }
 
-/* line 118, ../../public/components/player/player.scss */
+/* line 71, ../../public/components/player/player.scss */
 .lecteurControls.active {
   background: #007095;
   color: #43AC6A;
 }
 
-/* line 122, ../../public/components/player/player.scss */
+/* line 75, ../../public/components/player/player.scss */
 #progressBar {
   border: 0;
   height: 20px;
 }
 
-/* line 124, ../../public/components/player/player.scss */
+/* line 77, ../../public/components/player/player.scss */
 .lecteurControls:hover {
   background-color: #007095;
 }
 
-/* line 125, ../../public/components/player/player.scss */
+/* line 78, ../../public/components/player/player.scss */
 .ng-control {
   height: 20px;
 }
 
-/* line 127, ../../public/components/player/player.scss */
+/* line 80, ../../public/components/player/player.scss */
 .as-sortable-item,
 .as-sortable-placeholder {
   display: inline-block;
@@ -27531,7 +27568,7 @@ top-search-block > search-bar-contener {
   float: left;
 }
 
-/* line 134, ../../public/components/player/player.scss */
+/* line 87, ../../public/components/player/player.scss */
 .sortable-row:after {
   content: ".";
   display: block;
@@ -27540,7 +27577,7 @@ top-search-block > search-bar-contener {
   visibility: hidden;
 }
 
-/* line 142, ../../public/components/player/player.scss */
+/* line 95, ../../public/components/player/player.scss */
 #sortable-container {
   display: inline-block;
 }
@@ -27904,7 +27941,7 @@ artist-min, artist-facebook-min {
   box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 
-/* line 21, ../../public/styles/main.scss */
+/* line 22, ../../public/styles/main.scss */
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;
@@ -27912,7 +27949,7 @@ artist-min, artist-facebook-min {
   padding: 0.2em 0;
 }
 
-/* line 29, ../../public/styles/main.scss */
+/* line 30, ../../public/styles/main.scss */
 .block_min:hover > .img_min > .toGrow {
   -webkit-transform: scale(1.2);
   -moz-transform: scale(1.2);
@@ -27921,7 +27958,7 @@ artist-min, artist-facebook-min {
   transform: scale(1.2);
 }
 
-/* line 37, ../../public/styles/main.scss */
+/* line 38, ../../public/styles/main.scss */
 .block_min {
   margin: 0 auto;
   box-shadow: 1px 1px 12px -5px rgba(85, 85, 85, 0.59);
@@ -27937,12 +27974,12 @@ artist-min, artist-facebook-min {
   position: relative;
 }
 
-/* line 52, ../../public/styles/main.scss */
+/* line 53, ../../public/styles/main.scss */
 .block_min:hover {
   box-shadow: 1px 1px 12px -1px rgba(85, 85, 85, 0.59);
 }
 
-/* line 56, ../../public/styles/main.scss */
+/* line 57, ../../public/styles/main.scss */
 .img_min {
   width: 100%;
   overflow: hidden;
@@ -27950,7 +27987,7 @@ artist-min, artist-facebook-min {
   height: 160px;
 }
 
-/* line 63, ../../public/styles/main.scss */
+/* line 64, ../../public/styles/main.scss */
 .minTitle {
   height: 1.4em;
   overflow: hidden;
@@ -27967,13 +28004,13 @@ artist-min, artist-facebook-min {
   margin-top: -26px;
 }
 
-/* line 78, ../../public/styles/main.scss */
+/* line 79, ../../public/styles/main.scss */
 .minFilter:hover {
   cursor: pointer;
   text-decoration: underline;
 }
 
-/* line 83, ../../public/styles/main.scss */
+/* line 84, ../../public/styles/main.scss */
 .toGrow {
   -webkit-transition: all 1s ease;
   -moz-transition: all 1s ease;
@@ -27984,70 +28021,70 @@ artist-min, artist-facebook-min {
   height: 100%;
 }
 
-/* line 91, ../../public/styles/main.scss */
+/* line 92, ../../public/styles/main.scss */
 .fade.ng-enter {
   transition: 0.5s linear all;
   opacity: 0;
 }
 
 /* The starting CSS styles for the enter animation */
-/* line 97, ../../public/styles/main.scss */
+/* line 98, ../../public/styles/main.scss */
 .fade.ng-enter.ng-enter-active {
   opacity: 1;
 }
 
-/* line 100, ../../public/styles/main.scss */
+/* line 101, ../../public/styles/main.scss */
 .fade.ng-leave {
   transition: 0.5s linear all;
   opacity: 1;
 }
 
-/* line 104, ../../public/styles/main.scss */
+/* line 105, ../../public/styles/main.scss */
 .fade.ng-leave.ng-leave-active {
   opacity: 0;
 }
 
-/* line 108, ../../public/styles/main.scss */
+/* line 109, ../../public/styles/main.scss */
 .text_evnt_min {
   margin: 10px auto;
   width: 95%;
 }
 
-/* line 109, ../../public/styles/main.scss */
+/* line 110, ../../public/styles/main.scss */
 .event_entete > h2 {
   float: left;
   margin: 0;
 }
 
-/* line 110, ../../public/styles/main.scss */
+/* line 111, ../../public/styles/main.scss */
 .event_entete {
   line-height: 40px;
 }
 
-/* line 111, ../../public/styles/main.scss */
+/* line 112, ../../public/styles/main.scss */
 .infos_event {
   height: 40px;
 }
 
-/* line 112, ../../public/styles/main.scss */
+/* line 113, ../../public/styles/main.scss */
 .description_event_min {
   height: 48px;
   width: 100%;
   overflow: hidden;
 }
 
-/* line 113, ../../public/styles/main.scss */
+/* line 114, ../../public/styles/main.scss */
 .eventMinFilter:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
-/* line 120, ../../public/styles/main.scss */
+/* line 121, ../../public/styles/main.scss */
 .images-circularPlayer:hover > .playInimages {
   display: block;
 }
 
-/* line 123, ../../public/styles/main.scss */
+/* line 124, ../../public/styles/main.scss */
 .images-circularPlayer {
   width: 80px;
   height: 80px;
@@ -28063,30 +28100,30 @@ artist-min, artist-facebook-min {
 }
 
 /* Space out content a bit */
-/* line 138, ../../public/styles/main.scss */
+/* line 139, ../../public/styles/main.scss */
 html, body, #contener {
   height: 100%;
 }
 
-/* line 139, ../../public/styles/main.scss */
+/* line 140, ../../public/styles/main.scss */
 html {
   overflow-x: hidden;
 }
 
-/* line 140, ../../public/styles/main.scss */
+/* line 141, ../../public/styles/main.scss */
 body > #contener {
   height: auto;
   min-height: 100%;
   overflow: hidden;
 }
 
-/* line 141, ../../public/styles/main.scss */
+/* line 142, ../../public/styles/main.scss */
 body {
   padding-bottom: 0;
   color: #5a5a5a;
 }
 
-/* line 142, ../../public/styles/main.scss */
+/* line 143, ../../public/styles/main.scss */
 .wrapper-outer {
   width: 100%;
   padding-bottom: 200px;
@@ -28094,7 +28131,7 @@ body {
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
-/* line 146, ../../public/styles/main.scss */
+/* line 147, ../../public/styles/main.scss */
 .fi-soundcloud {
   background-image: url("../images/logoBlackSoundcloud.png");
   width: 44px;
@@ -28104,7 +28141,7 @@ body {
   background-position: center;
 }
 
-/* line 154, ../../public/styles/main.scss */
+/* line 155, ../../public/styles/main.scss */
 .fi-reggae {
   background-image: url("../images/rasta.png");
   background-size: 100%;
@@ -28115,7 +28152,7 @@ body {
   width: 50px;
 }
 
-/* line 163, ../../public/styles/main.scss */
+/* line 164, ../../public/styles/main.scss */
 .fi-hip-hop {
   background-image: url("../images/rap.png");
   background-size: 100%;
@@ -28126,7 +28163,7 @@ body {
   width: 50px;
 }
 
-/* line 172, ../../public/styles/main.scss */
+/* line 173, ../../public/styles/main.scss */
 .fi-jazz {
   background-image: url("../images/jazz.png");
   background-size: 100%;
@@ -28137,7 +28174,7 @@ body {
   width: 50px;
 }
 
-/* line 181, ../../public/styles/main.scss */
+/* line 182, ../../public/styles/main.scss */
 .fi-latin {
   background-image: url("../images/salsa.png");
   background-size: 100%;
@@ -28148,7 +28185,7 @@ body {
   width: 50px;
 }
 
-/* line 190, ../../public/styles/main.scss */
+/* line 191, ../../public/styles/main.scss */
 .fi-electro {
   background-image: url("../images/electro.png");
   background-size: 100%;
@@ -28159,7 +28196,7 @@ body {
   width: 50px;
 }
 
-/* line 199, ../../public/styles/main.scss */
+/* line 200, ../../public/styles/main.scss */
 .fi-world {
   background-image: url("../images/du%20monde.png");
   background-size: 100%;
@@ -28170,7 +28207,7 @@ body {
   width: 50px;
 }
 
-/* line 206, ../../public/styles/main.scss */
+/* line 207, ../../public/styles/main.scss */
 .fi-classique {
   background-image: url("../images/classique.png");
   background-size: 100%;
@@ -28181,7 +28218,7 @@ body {
   width: 50px;
 }
 
-/* line 213, ../../public/styles/main.scss */
+/* line 214, ../../public/styles/main.scss */
 .fi-rock {
   background-image: url("../images/rock.png");
   background-size: 100%;
@@ -28192,7 +28229,7 @@ body {
   width: 50px;
 }
 
-/* line 222, ../../public/styles/main.scss */
+/* line 223, ../../public/styles/main.scss */
 .fi-chanson {
   background-image: url("../images/accoustique.png");
   background-size: 100%;
@@ -28203,7 +28240,7 @@ body {
   width: 50px;
 }
 
-/* line 231, ../../public/styles/main.scss */
+/* line 232, ../../public/styles/main.scss */
 .fi-claude {
   background-image: url("../images/logo.png");
   background-size: 100%;
@@ -28214,7 +28251,7 @@ body {
   width: 50px;
 }
 
-/* line 240, ../../public/styles/main.scss */
+/* line 241, ../../public/styles/main.scss */
 .fi-claude-min {
   background-image: url("../images/claude%20icone%203.png");
   background-size: 100%;
@@ -28225,7 +28262,7 @@ body {
   width: 50px;
 }
 
-/* line 249, ../../public/styles/main.scss */
+/* line 250, ../../public/styles/main.scss */
 .fi-mixcloud {
   background-image: url("../images/mixcloud-logo.png");
   width: 44px;
@@ -28236,23 +28273,23 @@ body {
 }
 
 /*pages*/
-/* line 258, ../../public/styles/main.scss */
+/* line 260, ../../public/styles/main.scss */
 .dropDown {
   padding-bottom: 5px;
   margin: 0;
 }
 
-/* line 262, ../../public/styles/main.scss */
+/* line 264, ../../public/styles/main.scss */
 .f-dropdown:before, .f-dropdown:after {
   display: none !important;
 }
 
-/* line 265, ../../public/styles/main.scss */
+/* line 267, ../../public/styles/main.scss */
 md-toast {
   position: fixed !important;
 }
 
-/* line 266, ../../public/styles/main.scss */
+/* line 268, ../../public/styles/main.scss */
 .f-dropdown {
   display: block;
 }
@@ -28265,7 +28302,7 @@ md-toast {
     left: 0;
   }
 }
-/* line 271, ../../public/styles/main.scss */
+/* line 273, ../../public/styles/main.scss */
 .dropDown:hover > .f-dropdown {
   left: 0;
   position: absolute;
@@ -28288,17 +28325,17 @@ md-toast {
   -o-animation-name: slideInLeft;
 }
 
-/* line 292, ../../public/styles/main.scss */
+/* line 294, ../../public/styles/main.scss */
 .f-dropdown:hover {
   opacity: 1;
 }
 
-/* line 295, ../../public/styles/main.scss */
+/* line 297, ../../public/styles/main.scss */
 .f-dropdown > li:hover {
   background: white !important;
 }
 
-/* line 298, ../../public/styles/main.scss */
+/* line 300, ../../public/styles/main.scss */
 .imgBlur {
   -webkit-filter: sepia(0.5) blur(2px);
   -moz-filter: sepia(0.5) blur(2px);
@@ -28308,7 +28345,7 @@ md-toast {
 
 /* Responsive: Portrait tablets and up */
 @media (max-width: 979px) {
-  /* line 308, ../../public/styles/main.scss */
+  /* line 310, ../../public/styles/main.scss */
   body {
     margin-top: 0;
     margin-right: 0;
@@ -28316,58 +28353,58 @@ md-toast {
   }
 
   /*events*/
-  /* line 312, ../../public/styles/main.scss */
+  /* line 314, ../../public/styles/main.scss */
   .event_min_contener {
     width: 33.33%;
   }
 }
 @media (max-width: 767px) {
-  /* line 316, ../../public/styles/main.scss */
+  /* line 318, ../../public/styles/main.scss */
   body {
     margin-top: 0;
     margin-right: 0;
     padding: 0;
   }
 
-  /* line 318, ../../public/styles/main.scss */
+  /* line 320, ../../public/styles/main.scss */
   .inputName:hover {
     box-shadow: none;
   }
 
-  /* line 321, ../../public/styles/main.scss */
+  /* line 323, ../../public/styles/main.scss */
   .iClose, .img-circularPlayer, .playInImg {
     display: block;
   }
 
   /*events*/
-  /* line 325, ../../public/styles/main.scss */
+  /* line 327, ../../public/styles/main.scss */
   .event_min_contener {
     width: 100%;
   }
 
-  /* line 326, ../../public/styles/main.scss */
+  /* line 328, ../../public/styles/main.scss */
   .img_min_evnt {
     height: 100px;
   }
 }
 @media (max-width: 500px) {
-  /* line 331, ../../public/styles/main.scss */
+  /* line 333, ../../public/styles/main.scss */
   .inputName {
     width: 25%;
   }
 
-  /* line 332, ../../public/styles/main.scss */
+  /* line 334, ../../public/styles/main.scss */
   #searchBar, #searchTopBar {
     width: 100%;
   }
 
-  /* line 333, ../../public/styles/main.scss */
+  /* line 335, ../../public/styles/main.scss */
   md-slider {
     padding: 0 !important;
     margin-bottom: 20px;
   }
 
-  /* line 334, ../../public/styles/main.scss */
+  /* line 336, ../../public/styles/main.scss */
   body {
     margin-top: 0;
     margin-right: 0;

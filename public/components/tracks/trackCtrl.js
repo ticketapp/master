@@ -4,6 +4,10 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
         $scope.addTrackToFavorite = function (trackId) {
             UserFactory.AddTrackToFavorite(trackId)
         };
+
+        $scope.removeFromFavorites = function (trackId) {
+            UserFactory.removeFromFavorites(trackId)
+        };
         $scope.signalTrack = function (trackId) {
             var modalInstance = $modal.open({
                 template: '<form ng-submit="ok(reason)">' +
@@ -18,12 +22,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                     '<input type="submit" class="button">'+
                     '<a class="button float-right" ng-click="cancel()">Annuler</a>'+
                     '</form>',
-                controller: 'SignalTrackCtrl',
-                resolve: {
-                    index: function () {
-                        return index;
-                    }
-                }
+                controller: 'SignalTrackCtrl'
             });
             modalInstance.result.then(function () {
                 $localStorage.tracksSignaled.push(trackId);

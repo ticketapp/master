@@ -1,29 +1,37 @@
 <div class="column large-12 arTrack">
-    <i class="fa fa-star absolute favorite pointer"
-       ng-click="addTrackToFavorite(track.trackId)">
-        <md-tooltip>
+    <i class="fa fa-star absolute pointer"
+       ng-if="!track.isFavorite"
+       ng-click="addTrackToFavorite(track.trackId); track.isFavorite = true">
+        <md-track-tooltipe>
             Ajouter aux favoris
-        </md-tooltip>
+        </md-track-tooltipe>
+    </i>
+    <i class="fa fa-star absolute pointer favoriteActive"
+       ng-if="track.isFavorite"
+       ng-click="removeFromFavorites(track.trackId); track.isFavorite = false">
+        <md-track-tooltipe>
+            Ajouter aux favoris
+        </md-track-tooltipe>
     </i>
     <div class="column small-1 padding0 text-center float-right marginTop10"
          style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:70px;">
         <i class="fi-x column medium-12 padding0 pointer"
            ng-click="signalTrack(track.trackId); closeTrack($index)">
-            <md-tooltip>
+            <md-track-tooltipe>
                 Signaler
-            </md-tooltip>
+            </md-track-tooltipe>
         </i>
         <i class="fi-play column medium-12 padding0 pointer"
            ng-click="$root.addAndPlay([track], artist)">
-            <md-tooltip>
+            <md-track-tooltipe>
                 Lire
-            </md-tooltip>
+            </md-track-tooltipe>
         </i>
         <i class="fi-plus column medium-12 padding0 pointer"
            ng-click="$root.addToPlaylist([track], artist)">
-            <md-tooltip>
+            <md-track-tooltipe>
                 Ajouter à la lecture en cours
-            </md-tooltip>
+            </md-track-tooltipe>
         </i>
     </div>
     <div ng-if="track.thumbnailUrl != undefined"
@@ -37,9 +45,9 @@
     <div ng-class="{'column medium-7': $root.window != 'small'}"
          style="overflow: hidden; height: 48px;">
         <h3>{{track.title}}</h3>
-        <md-tooltip>
+        <md-track-tooltipe>
             {{track.title}}
-        </md-tooltip>
+        </md-track-tooltipe>
     </div>
     <a target="_blank"
        href="{{track.redirectUrl}}"

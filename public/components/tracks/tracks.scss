@@ -1,0 +1,87 @@
+.iSignal {
+  display: none;
+  top: 15px;
+  margin-left: 191px;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+
+.iClose{
+  display: none;
+  z-index: 2;
+  margin-left: 190px;
+  font-size: 26px;
+  margin-top: -8px;
+}
+
+
+.trackContener:hover > .iClose, .trackContener:hover > .iSignal {
+  display: block;
+}
+
+.playInImg {
+  display : none;
+  font-size: 57px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+.pauseInImg {
+  display: block;
+  font-size: 57px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+.img-circularPlayer:hover > .playInImg {
+  display: block;
+}
+.img-circularPlayer{
+  width: 80px;
+  height: 80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: block;
+  border-radius: 100px;
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  margin: 5px;
+  float: left;
+}
+.trackInfos {
+  padding-top: 10px;
+  font-size: 11px;
+}
+.trackInfos:hover {
+  cursor: move;
+}
+
+.favorite {
+  left: 5px;
+  top: 5px;
+}
+.favorite.active, .favoriteActive {
+  color: #ffff4f;
+}
+
+md-track-tooltipe {
+  position: absolute;
+  display: none;
+}
+i:hover > md-track-tooltipe, h3:hover > md-track-tooltipe {
+  position: absolute;
+  display: block;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  pointer-events: auto;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  font-size: 14px;
+  z-index: 100;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 4px;
+  color: rgb(255,255,255);
+  background-color: rgba(0, 0, 0, 0.47);
+}

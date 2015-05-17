@@ -62,6 +62,19 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     }
                 })
         },
+        removeFromFavorites: function (trackId) {
+            $http.post('/tracks/' + trackId + '/removeFromFavorites').
+                success(function () {
+                    TracksRecommender.UpsertTrackRate(true, trackId);
+                }).
+                error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
+                    } else {
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                    }
+                })
+        },
         getFavoritesTracks: function () {
             var deferred = $q.defer();
             $http.get('/tracks/favorites').

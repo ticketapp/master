@@ -1,8 +1,8 @@
 angular.module('claudeApp').
     controller('PlayerCtrl', ['$scope', '$rootScope', '$timeout', '$filter', 'EventsFactory',
-        '$modal', 'TracksRecommender', 'UserFactory', 'ArtistsFactory',
+        '$modal', 'TracksRecommender', 'UserFactory', 'ArtistsFactory', '$localStorage',
         function ($scope, $rootScope, $timeout, $filter, EventsFactory, $modal, TracksRecommender,
-                  UserFactory, ArtistsFactory) {
+                  UserFactory, ArtistsFactory, $localStorage) {
             $rootScope.playlist = {
                 name : '',
                 genres: [],
@@ -23,6 +23,9 @@ angular.module('claudeApp').
             var i = 0;
             var updateProgressYt;
             var player;
+            if ($localStorage.tracksSignaled == undefined) {
+                $localStorage.tracksSignaled = [];
+            }
             $scope.sortableOptions = {
                 containment: '#sortable-container',
                 //restrict move across columns. move only within column.
@@ -40,10 +43,6 @@ angular.module('claudeApp').
                 });
                 modalInstance.result.then( function () {
                 });
-            };
-
-            $scope.addTrackToFavorite = function (trackId) {
-                UserFactory.AddTrackToFavorite(trackId)
             };
 
             function eventsPlaylist () {
@@ -97,7 +96,7 @@ angular.module('claudeApp').
                     tracksLenght = 10;
                     needRepeat = true
                 }
-                pushTrack(tracks[0], artist)
+                pushTrack(tracks[0], artist);
                 if (play == true) {
                     $scope.play($rootScope.playlist.tracks.length-1);
                 }
@@ -110,7 +109,9 @@ angular.module('claudeApp').
                     function pushAllTracks (start) {
                         for (tr = start; tr < start + 100; tr++) {
                             if (tracks[tr] != undefined) {
-                                pushTrack(tracks[tr], artist)
+                                if ($localStorage.tracksSignaled.indexOf(tracks[tr].trackId) > -1) {
+                                    pushTrack(tracks[tr], artist)
+                                }
                             } else {
                                 return;
                             }

@@ -8,53 +8,6 @@
 #youtubePlayer{z-index: 9;
   position: absolute;
 }
-.iClose{
-  display: none;
-  z-index: 2;
-  margin-left: 190px;
-  font-size: 26px;
-  margin-top: -8px;
-}
-.playInImg {
-  display : none;
-  font-size: 57px;
-  color: white;
-  text-align: center;
-  cursor: pointer;
-}
-.pauseInImg {
-  display: block;
-  font-size: 57px;
-  color: white;
-  text-align: center;
-  cursor: pointer;
-}
-.img-circularPlayer:hover > .playInImg {
-  display: block;
-}
-.img-circularPlayer{
-  width: 80px;
-  height: 80px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  display: block;
-  border-radius: 100px;
-  -webkit-border-radius: 100px;
-  -moz-border-radius: 100px;
-  margin: 5px;
-  float: left;
-}
-.trackContener:hover > .iClose {
-  display: block;
-}
-.trackInfos {
-  padding-top: 10px;
-  font-size: 11px;
-}
-.trackInfos:hover {
-  cursor: move;
-}
 .trackContener {
   width: 205px;
   display:inline-block;

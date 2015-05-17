@@ -8,6 +8,7 @@
 @import "../components/parallax/parallax";
 @import "../modules/angular-component/angular-material";
 @import "../modules/ui-sortable/uiSortable";
+@import "../components/tracks/tracks";
 @import "../components/websites/websites";
 @import "../components/header/headerStyle";
 @import "../components/player/player";
@@ -255,13 +256,6 @@ body {padding-bottom: 0; color: #5a5a5a;}
   background-position: center;
 }
 
-.favorite {
-  left: 5px;
-  top: 5px;
-}
-.favorite.active {
-  color: #ffff4f;
-}
 /*pages*/
 .dropDown {
   padding-bottom: 5px;
