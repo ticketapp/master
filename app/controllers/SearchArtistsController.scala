@@ -32,7 +32,7 @@ object SearchArtistsController extends Controller {
         "q" -> pattern,
         "type" -> "page",
         "limit" -> "400",
-        "fields" -> "name,cover{source},id,category,link,website,description,genre",
+        "fields" -> "name,cover{offset_x,offset_y,source},id,category,link,website,description,genre",
         "access_token" -> facebookToken)
       .get()
       .map { readFacebookArtists } //(_).take(20)

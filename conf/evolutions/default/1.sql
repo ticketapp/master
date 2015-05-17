@@ -52,7 +52,7 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 31 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 30 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -763,24 +763,26 @@ CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
   userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
   trackId                 BIGINT REFERENCES tracks (trackId) NOT NULL,
-  rating                  INT NOT NULL,
+  ratingUp                INT,
+  ratingDown              INT,
   reason                  CHAR
 );
 CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
-CREATE OR REPLACE FUNCTION upsertTrackRating(
+CREATE OR REPLACE FUNCTION upsertTrackRatingUp(
   userIdValue  VARCHAR(255),
   trackIdValue BIGINT,
-  ratingValue  INT)
+  ratingUpValue  INT)
   RETURNS VOID AS
   $$
     BEGIN
       LOOP
-        UPDATE tracksRating SET rating = rating + ratingValue WHERE trackId = trackIdValue AND userId = userIdValue;;
+        UPDATE tracksRating SET ratingUp = ratingUp + ratingUpValue
+          WHERE trackId = trackIdValue AND userId = userIdValue;;
         IF found THEN
           RETURN;;
         END IF;;
         BEGIN
-          INSERT INTO tracksRating(trackId, userId, rating) VALUES (trackIdValue, userIdValue, ratingValue);;
+          INSERT INTO tracksRating(trackId, userId, ratingUp) VALUES (trackIdValue, userIdValue, ratingUpValue);;
           RETURN;;
         EXCEPTION WHEN unique_violation THEN
         END;;
@@ -788,6 +790,29 @@ CREATE OR REPLACE FUNCTION upsertTrackRating(
     END;;
   $$
 LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION upsertTrackRatingDown(
+  userIdValue  VARCHAR(255),
+  trackIdValue BIGINT,
+  ratingDownValue  INT)
+  RETURNS VOID AS
+  $$
+    BEGIN
+      LOOP
+        UPDATE tracksRating SET ratingDown = ratingDown + ratingDownValue 
+          WHERE trackId = trackIdValue AND userId = userIdValue;;
+        IF found THEN
+          RETURN;;
+        END IF;;
+        BEGIN
+          INSERT INTO tracksRating(trackId, userId, ratingDown) VALUES (trackIdValue, userIdValue, ratingDownValue);;
+          RETURN;;
+        EXCEPTION WHEN unique_violation THEN
+        END;;
+      END LOOP;;
+    END;;
+  $$
+LANGUAGE plpgsql;
+
 
 CREATE TABLE usersFavoriteTracks(
   tableId                 SERIAL PRIMARY KEY,

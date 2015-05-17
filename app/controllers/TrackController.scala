@@ -36,11 +36,20 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     )
   }
 
-  def upsertRating(trackId: Long, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
+  def upsertRatingUp(trackId: Long, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
-    Track.upsertRating(userId, trackId, rating) match {
-      case Success(true) => Ok
-      case _ => InternalServerError
+    rating match {
+      case ratingUp if ratingUp > 0 =>
+        Track.upsertRatingUp(userId, trackId, ratingUp) match {
+          case Success(true) => Ok
+          case _ => InternalServerError
+        }
+      case ratingDown if ratingDown < 0 =>
+        Track.upsertRatingDown(userId, trackId, ratingDown) match {
+          case Success(true) => Ok
+          case _ => InternalServerError
+        }
+      case _ => BadRequest
     }
   }
 
