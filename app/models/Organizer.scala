@@ -230,7 +230,7 @@ object Organizer {
     }
   }
 
-  def unfollowByOrganizerId(userId: String, organizerId: Long): Long = try {
+  def unfollowByOrganizerId(userId: String, organizerId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM organizersFollowed
@@ -239,8 +239,6 @@ object Organizer {
           'organizerId -> organizerId)
         .executeUpdate()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.unFollow: " + e.getMessage)
   }
 
   def isFollowed(userId: IdentityId, organizerId: Long): Boolean = try {

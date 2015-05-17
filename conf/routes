@@ -57,6 +57,7 @@ GET     /places/followed/                                         controllers.Pl
 GET     /organizers                                               controllers.OrganizerController.organizers(numberToReturn: Int, offset: Int)
 GET     /organizers/:id                                           controllers.OrganizerController.organizer(id: Long)
 POST    /organizers/:organizerId/followByOrganizerId              controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
+POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId   controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
 POST    /organizers/:facebookId/followByFacebookId                controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
 GET     /organizers/:organizerId/isFollowed                       controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
 GET     /organizers/containing/:pattern                           controllers.OrganizerController.findOrganizersContaining(pattern: String)

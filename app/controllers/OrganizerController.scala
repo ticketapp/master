@@ -13,7 +13,7 @@ import play.api.libs.json.Json
 import json.JsonHelper.organizerWrites
 import securesocial.core.Identity
 
-import scala.util.{Failure, Success}
+import scala.util.{Try, Failure, Success}
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 
 object OrganizerController extends Controller with securesocial.core.SecureSocial {
@@ -35,13 +35,27 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
-        Status(CONFLICT)("This user already follow this organizer.")
+        Conflict
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
-        Status(CONFLICT)("There is no organizer with this id.")
+        Conflict
       case Failure(unknownException) =>
         Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
-        Status(INTERNAL_SERVER_ERROR)
+        InternalServerError
+    }
+  }
+
+  def unfollowOrganizerByOrganizerId(organizerId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Organizer.unfollowByOrganizerId(userId, organizerId) match {
+      case Success(1) =>
+        Ok
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerId: $organizerId) or the organizer does not exist.")
+        Conflict
+      case Failure(unknownException) =>
+        Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
+        InternalServerError
     }
   }
 
@@ -51,13 +65,13 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error("OrganizerController.followOrganizerByFacebookId", psqlException)
-        Status(CONFLICT)("This user already follow this organizer.")
+        Conflict("This user already follow this organizer.")
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error("OrganizerController.followOrganizerByFacebookId", psqlException)
-        Status(CONFLICT)("There is no organizer with this id.")
+        Conflict("There is no organizer with this id.")
       case Failure(unknownException) =>
         Logger.error("OrganizerController.followOrganizerByFacebookId", unknownException)
-        Status(INTERNAL_SERVER_ERROR)
+        InternalServerError
     }
   }
 
