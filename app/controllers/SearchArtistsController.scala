@@ -37,7 +37,7 @@ object SearchArtistsController extends Controller {
         "fields" -> facebookCallsFields,
         "access_token" -> facebookToken)
       .get()
-      .map { readFacebookArtists } //(_).take(20)
+      .map { readFacebookArtists }
   }
   
   def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] = {
@@ -132,27 +132,27 @@ object SearchArtistsController extends Controller {
       (__ \ "link").read[String] and
       (__ \ "description").readNullable[String] and
       (__ \ "genre").readNullable[String] and
-      (__ \ "likes").read[Long] and
+      (__ \ "likes").readNullable[Int] and
       (__ \ "location").readNullable[Option[String]](
         (__ \ "country").readNullable[String]
       )
     ).apply((name: String, category: String, id: String, maybeCover: Option[String], maybeOffsetX: Option[Int],
              maybeOffsetY: Option[Int], websites: Option[String], link: String, maybeDescription: Option[String],
-             maybeGenre: Option[String], likes: Long, maybeCountry: Option[Option[String]]) =>
+             maybeGenre: Option[String], maybeLikes: Option[Int], maybeCountry: Option[Option[String]]) =>
     (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
-      maybeCountry))
+      maybeLikes, maybeCountry))
 
   def readFacebookArtists(facebookResponse: Response): Seq[Artist] = {
     val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
         case (name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
-        maybeDescription, maybeGenre, maybeCountry) =>
+        maybeDescription, maybeGenre, maybeLikes, maybeCountry) =>
           makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
-            maybeDescription, maybeGenre)
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
         case (name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
-        maybeDescription, maybeGenre, maybeCountry) =>
+        maybeDescription, maybeGenre, maybeLikes, maybeCountry) =>
           makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
-            maybeDescription, maybeGenre)
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
       }
     }
     (facebookResponse.json \ "data")
@@ -163,29 +163,31 @@ object SearchArtistsController extends Controller {
   def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
     facebookResponse.json
       .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String],
-        String, Option[String], Option[String], Option[Option[String]])](readArtist)
+        String, Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
       match {
         case Some((name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeCountry)) =>
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
           Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre))
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
         case Some((name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeCountry)) =>
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
           Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre))
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
         case _ => None
       }
   }
 
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
-                 maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
+                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
+                 maybeCountry: Option[String]): Artist = {
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val websitesSet = getNormalizedWebsitesInText(maybeWebsites)
       .filterNot(_.contains("facebook.com"))
       .filterNot(_ == "")
     val description = Utilities.formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
-    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq, Seq.empty)
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq,
+      Seq.empty, maybeLikes, maybeCountry)
   }
 
   def removeUselessInSoundCloudWebsite(website: String): String = website match {

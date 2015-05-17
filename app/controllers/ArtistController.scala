@@ -70,7 +70,9 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
             "artistFacebookUrl" -> nonEmptyText(2),
             "redirectUrl" -> optional(nonEmptyText(2))
           )(Track.formApplyForTrackCreatedWithArtist)(Track.formUnapplyForTrackCreatedWithArtist)
-        )
+        ),
+        "likes" -> optional(number),
+        "country" -> optional(nonEmptyText)
       )(Artist.formApply)(Artist.formUnapply)
     )(Artist.formWithPatternApply)(Artist.formWithPatternUnapply)
   )

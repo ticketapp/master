@@ -21,7 +21,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
     val artist = Artist(None, Option("facebookId3"), "artistTest", Option("imagePath"), Option("description"),
       "facebookUrl3", Set("website"))
-
+/*
     "be saved and deleted in database and return the new id" in {
       save(artist) match {
         case None =>
@@ -33,40 +33,48 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "be followed and unfollowed by a user" in {
-      followByArtistId("userTestId", 1) shouldBe a [Success[Option[Long]]]
+      followByArtistId("userTestId", 1) shouldBe a[Success[Option[Long]]]
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
       unfollowByArtistId("userTestId", 1) mustBe 1
     }
 
     "not be followed twice" in {
-      followByArtistId("userTestId", 1) shouldBe a [Success[Option[Long]]]
-      followByArtistId("userTestId", 1) shouldBe a [Failure[PSQLException]]
+      followByArtistId("userTestId", 1) shouldBe a[Success[Option[Long]]]
+      followByArtistId("userTestId", 1) shouldBe a[Failure[PSQLException]]
       unfollowByArtistId("userTestId", 1) mustBe 1
     }
 
     "be updated" in {
       val artistInDatabase = find(1)
-      val updatedArtist = artistInDatabase.get.copy(name="updatedName")
+      val updatedArtist = artistInDatabase.get.copy(name = "updatedName")
       update(updatedArtist)
 
       find(1) mustBe Option(updatedArtist)
 
       find(update(artistInDatabase.get)) mustBe artistInDatabase
     }
-}
 
-  "have another website" in {
-    val maybeTrack = Option(Track(None, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl",
-      Option("redirectUrl")))
-    val artist = Artist(Option(2), Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),
-      "facebookUrl2", Set("website1","website2"))
+    "have his websites updated" in {
+      val artistId = Artist.save(artist)
 
-    addSoundCloudWebsiteIfMissing(maybeTrack, artist)
+      addWebsite(artistId, "normalizedUrl")
 
-    val expectedArtist = artist.copy(websites = Set("website1", "website2", "redirectUrl"))
+      find(artistId.get) mustBe Option(artist.copy(artistId = artistId, websites = Set("website", "normalizedUrl")))
+      delete(artistId.get) mustBe 1
+    }*/
 
-    find(artist.artistId.get) mustBe Option(expectedArtist)
+    "have another website" in {
+      val maybeTrack = Option(Track(None, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl",
+        Option("redirectUrl")))
+      val artistId = Artist.save(artist)
+      val artistWithId = artist.copy(artistId = artistId)
 
-    update(artist.copy(websites = Set("website1", "website2")))
+      addSoundCloudWebsiteIfMissing(maybeTrack, artistWithId)
+
+      val expectedArtist = Option(artistWithId.copy(websites = Set("website", "redirectUrl")))
+
+      find(artistId.get) mustBe expectedArtist
+      delete(artistId.get) mustBe 1
+    }
   }
 }

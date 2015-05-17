@@ -66,6 +66,8 @@ CREATE TABLE artists (
   description               VARCHAR,
   facebookUrl               VARCHAR(255) NOT NULL,
   websites                  VARCHAR,
+  likes                     INTEGER,
+  country                   VARCHAR,
   UNIQUE(facebookId),
   UNIQUE(facebookUrl)
 );

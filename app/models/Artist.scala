@@ -30,7 +30,9 @@ case class Artist (artistId: Option[Long],
                    facebookUrl: String,
                    websites: Set[String] = Set.empty,
                    genres: Seq[Genre] = Seq.empty,
-                   tracks: Seq[Track] = Seq.empty)
+                   tracks: Seq[Track] = Seq.empty,
+                   likes: Option[Int] = None,
+                   country: Option[String] = None)
 
 object Artist {
   private val ArtistParser: RowParser[Artist] = {
@@ -40,19 +42,22 @@ object Artist {
       get[Option[String]]("imagePath") ~
       get[Option[String]]("description") ~
       get[String]("facebookUrl") ~
-      get[Option[String]]("websites") map {
-      case artistId ~ facebookId ~ name ~ imagePath ~ description ~ facebookUrl ~ websites =>
+      get[Option[String]]("websites") ~
+      get[Option[Int]]("likes") ~
+      get[Option[String]]("country") map {
+      case artistId ~ facebookId ~ name ~ imagePath ~ description ~ facebookUrl ~ websites ~ likes ~ country =>
         Artist(Option(artistId), facebookId, name, imagePath, description, facebookUrl,
-          websites.getOrElse("").split(",").toSet, Seq.empty, Seq.empty)
+          websites.getOrElse("").split(",").toSet, Seq.empty, Seq.empty, likes, country)
     }
   }
 
   def formApply(facebookId: Option[String], name: String, imagePath: Option[String], description: Option[String],
-                facebookUrl: String, websites: Seq[String], genres: Seq[Genre], tracks: Seq[Track]): Artist =
-    new Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet, genres, tracks)
+                facebookUrl: String, websites: Seq[String], genres: Seq[Genre], tracks: Seq[Track], likes: Option[Int],
+                country: Option[String]): Artist =
+    Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet, genres, tracks, likes, country)
   def formUnapply(artist: Artist) =
     Option((artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
-      artist.websites.toSeq, artist.genres, artist.tracks))
+      artist.websites.toSeq, artist.genres, artist.tracks, artist.likes, artist.country))
 
   case class PatternAndArtist (searchPattern: String, artist: Artist)
   def formWithPatternApply(searchPattern: String, artist: Artist) =
@@ -116,7 +121,7 @@ object Artist {
         .map(getArtistProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.findAll: " + e.getMessage)
   }
 
   def find(artistId: Long): Option[Artist] = try {
@@ -127,7 +132,7 @@ object Artist {
         .map(getArtistProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.find: " + e.getMessage)
   }
 
   def findByFacebookUrl(facebookUrl: String): Option[Artist] = try {
@@ -138,7 +143,7 @@ object Artist {
         .map(getArtistProperties)
     }
   } catch {
-    case e: Exception => throw new DAOException("Problem with method Artist.findAll: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.findByFacebookUrl: " + e.getMessage)
   }
 
   def findAllContaining(searchPattern: String): Seq[Artist] = try {
@@ -161,7 +166,7 @@ object Artist {
         .as(scalar[Long].single)
     }
   } catch {
-    case e: Exception => throw new DAOException("Cannot returnArtistId: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.findIdByName: " + e.getMessage)
   }
 
   def findIdByFacebookId(facebookId: String): Try[Option[Long]] = Try {
@@ -177,7 +182,7 @@ object Artist {
       .on('facebookUrl -> facebookUrl)
       .as(scalar[Option[Long]].single)
   } catch {
-    case e: Exception => throw new DAOException("Cannot returnArtistIdByFacebookUrl: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.findIdByFacebookUrl: " + e.getMessage)
   }
 
   def save(artist: Artist): Option[Long] = try {
@@ -261,7 +266,9 @@ object Artist {
         case None =>
         case Some(redirectUrl) =>
           val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(Utilities.normalizeUrl(redirectUrl))
+          println(refactoredRedirectUrl)
           if (!artist.websites.contains(refactoredRedirectUrl))
+            println("ok")
             Artist.addWebsite(artist.artistId, refactoredRedirectUrl)
       }
   }
