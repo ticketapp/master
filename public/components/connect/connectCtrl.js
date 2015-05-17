@@ -294,6 +294,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 if ($rootScope.lastReq.object != "") {
                     $http.post($rootScope.lastReq.path, $rootScope.lastReq.object).
                         success(function (data) {
+                            console.log(data);
                             $scope.info = $rootScope.lastReq.success;
                             $rootScope.lastReq = {};
                         }).

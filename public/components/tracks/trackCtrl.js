@@ -4,7 +4,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
         $scope.addTrackToFavorite = function (trackId) {
             UserFactory.AddTrackToFavorite(trackId)
         };
-        $scope.signalTrack = function (index) {
+        $scope.signalTrack = function (trackId) {
             var modalInstance = $modal.open({
                 template: '<form ng-submit="ok(reason)">' +
                     '<b class="column large-12 center">Pour quelle raison souhaitez-vous signaler ' +
@@ -26,16 +26,8 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                 }
             });
             modalInstance.result.then(function () {
-                var tracksLength = $scope.tracks.length;
-                for (var i = 0; i < tracksLength; i++) {
-                    if ($scope.tracks[i].trackId == $scope.artist.tracks[index].trackId) {
-                        $localStorage.tracksSignaled.push($scope.tracks[i].trackId);
-                        TracksRecommender.UpsertTrackRate(false, $scope.tracks[i].trackId);
-                        $scope.tracks.splice(i, 1);
-                        tracksLength --;
-                    }
-                }
-                $scope.artist.tracks.splice(index, 1);
+                $localStorage.tracksSignaled.push(trackId);
+                TracksRecommender.UpsertTrackRate(false, trackId);
             }, function () {
             });
 

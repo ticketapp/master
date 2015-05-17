@@ -70,7 +70,6 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     deferred.resolve(factory.user);
                 }).
                 error (function (data) {
-                deferred.resolve(data)
             })
             return deferred.promise;
         }

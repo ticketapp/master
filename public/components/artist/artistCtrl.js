@@ -53,6 +53,14 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             })
         };
 
+        $scope.closeTrack = function (index) {
+            for (var i = 0; i < $scope.tracks.length; i++) {
+                if ($scope.tracks[i].trackId == $scope.artist.tracks[index].trackId) {
+                    $scope.tracks.splice(i, 1);
+                }
+            }
+            $scope.artist.tracks.splice(index, 1);
+        };
         $scope.filterTracks = function () {
             $timeout(function () {
                 $scope.$apply(function(){

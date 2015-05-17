@@ -5,3 +5,11 @@ angular.module('claudeApp').directive('ngTrack', function () {
         controller: 'TrackCtrl'
     }
 });
+
+angular.module('claudeApp').directive('ngPlaylistTrack', function () {
+    return {
+        restrict: 'E',
+        templateUrl: 'assets/components/tracks/playlistTrack.html',
+        controller: 'TrackCtrl'
+    }
+});

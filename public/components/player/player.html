@@ -135,28 +135,7 @@ margin-left: 5px;"
         <div ng-if="playlist.tracks.length > 0" style="position: relative; max-height: 150px; display: inline-flex; min-width: 100%"  class="sortable-row" as-sortable="sortableOptions" ng-model="playlist.tracks">
             <div ng-class="{onplay : track == trackActive}" class="trackContener"
                  as-sortable-item ng-repeat="track in playlist.tracks">
-                <i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)"></i>
-                <div class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
-                    <i class="fi-play playInImg" ng-if="track != trackActive" ng-click="$root.play($index)"></i>
-                    <i class="fi-pause pauseInImg" ng-if="track == trackActive"
-                       ng-class="{'fi-pause': onPlay, 'fi-play': !onPlay}" ng-click="playPause()"></i>
-                </div>
-                <div as-sortable-item-handle class="trackInfos">
-                    <a href="#/artists/{{track.artist.facebookUrl}}">{{track.artist.name}}</a><br/>
-                    {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
-                    <a target="_blank" href="{{track.redirectUrl}}"
-                       class="column small-2 padding0"
-                       style="font-size: 27px;"
-                       ng-if="track.platform == 's'">
-                        <i style="display: block" class="fi-soundcloud"></i>
-                    </a>
-                    <a href="https://youtube.com/watch?v={{track.url}}"
-                       style="font-size: 27px;"
-                       ng-if="track.platform == 'y'"
-                       target="_blank">
-                        <i style="display: block" class="fi-social-youtube"></i>
-                    </a>
-                </div>
+                <ng-playlist-track></ng-playlist-track>
             </div>
         </div>
     </div>

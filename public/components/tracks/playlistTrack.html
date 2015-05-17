@@ -1,0 +1,37 @@
+<i class="fa fa-star absolute favorite pointer"
+   ng-click="addTrackToFavorite(track.trackId)">
+    <md-tooltip>
+        Ajouter aux favoris
+    </md-tooltip>
+</i>
+<i class="fi-x-circle absolute top0 iClose" ng-click="closeTrack($index)">
+    <md-tooltip>
+        supprimer de la lecture en cours
+    </md-tooltip>
+</i>
+<i class="fi-x absolute top20                                                                                                                                                                                                                                                                                                                                                                   " ng-click="signalTrack(track.trackId); closeTrack($index)">
+    <md-tooltip>
+        signaler le morceau
+    </md-tooltip>
+</i>
+<div class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
+    <i class="fi-play playInImg" ng-if="track != trackActive" ng-click="$root.play($index)"></i>
+    <i class="fi-pause pauseInImg" ng-if="track == trackActive"
+       ng-class="{'fi-pause': onPlay, 'fi-play': !onPlay}" ng-click="playPause()"></i>
+</div>
+<div as-sortable-item-handle class="trackInfos">
+    <a href="#/artists/{{track.artist.facebookUrl}}">{{track.artist.name}}</a><br/>
+    {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
+    <a target="_blank" href="{{track.redirectUrl}}"
+       class="column small-2 padding0"
+       style="font-size: 27px;"
+       ng-if="track.platform == 's'">
+        <i style="display: block" class="fi-soundcloud"></i>
+    </a>
+    <a href="https://youtube.com/watch?v={{track.url}}"
+       style="font-size: 27px;"
+       ng-if="track.platform == 'y'"
+       target="_blank">
+        <i style="display: block" class="fi-social-youtube"></i>
+    </a>
+</div>

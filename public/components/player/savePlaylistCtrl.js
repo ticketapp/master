@@ -20,7 +20,7 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
             error(function (data) {
                 if (data.error == 'Credentials required') {
                     $modalInstance.dismiss();
-                    var object = {name: playlist.name, tracks: tracksToSave};
+                    var object = {name: playlist.name, tracksId: tracksToSave};
                     StoreRequest.storeRequest('post', '/playlists', object, 'votre playlist "' + playlist.name + '" est enregistée')
                 } else {
                     InfoModal.displayInfo('Désolé une erreur s\'est produite');

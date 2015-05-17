@@ -45,7 +45,6 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     };
     $scope.getFavoritesTracks = function() {
         UserFactory.getFavoritesTracks().then(function (tracks) {
-            console.log(tracks)
             $scope.favorites = tracks;
         })
     };
