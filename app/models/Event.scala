@@ -424,7 +424,7 @@ object Event {
 
         val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
 
-        new Event(None, facebookId, true, true, name, None,
+        new Event(None, facebookId, true, true, Utilities.refactorEventOrPlaceName(name), None,
           Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
           formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
           nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
@@ -433,8 +433,7 @@ object Event {
     try {
       eventFacebookResponse.json.as[Future[Event]](eventRead)
     } catch {
-      case e: Exception =>
-        throw new Exception("Empty event read by Event.readFacebookEvent")
+      case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent")
     }
   }
 }

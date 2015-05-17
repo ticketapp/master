@@ -45,4 +45,11 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
   "throw exceptions while instantiating these geographicPoints" in {
     an [IllegalArgumentException] should be thrownBy GeographicPoint("0,0")
   }
+
+  "refactor events or places names" in {
+    val eventsName = Seq("abc", "abcdef @transbordeur abc", "abcdef@hotmail.fr")
+    val expectedEventsName = Seq("abc", "abcdef", "abcdef@hotmail.fr")
+
+    eventsName map  { refactorEventOrPlaceName } mustBe expectedEventsName
+  }
 }

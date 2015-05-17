@@ -49,7 +49,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
     "be able to be found on facebook by a facebookId" in {
       whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
-        event.name mustBe "Mad Professor vs Prince Fatty - Dub Attack Tour @ Club Transbo"
+        event.name mustBe "Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }
 
