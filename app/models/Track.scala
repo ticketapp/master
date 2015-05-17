@@ -1,25 +1,19 @@
 package models
 
-import anorm.SqlParser._
-import anorm._
-import controllers._
 import models.Playlist.TrackIdAndRank
-import play.api.db.DB
-import play.api.libs.json.Json
-import play.api.Play.current
+import play.api.Logger
 import services.Utilities.columnToChar
-import json.JsonHelper._
+import json.JsonHelper.trackWrites
 import play.api.libs.json.DefaultWrites
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
 import play.api.db.DB
-import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
 import java.util.Date
 import java.math.BigDecimal
 import anorm.Column.rowToBigDecimal
-
+import scala.util.Success
 import scala.util.Try
 
 case class Track (trackId: Option[Long],
@@ -29,10 +23,10 @@ case class Track (trackId: Option[Long],
                   thumbnailUrl: String,
                   artistFacebookUrl: String,
                   redirectUrl: Option[String] = None,
+                  confidence: Option[Int] = None,
                   playlistRank: Option[Float] = None)
 
 object Track {
-  implicit val trackWrites = Json.writes[Track]
 
   def formApplyForTrackCreatedWithArtist(title: String, url: String, platform: String, thumbnailUrl: Option[String],
   userThumbnailUrl: Option[String], artistFacebookUrl: String, redirectUrl: Option[String]): Track = {
@@ -63,9 +57,10 @@ object Track {
       get[Char]("platform") ~
       get[String]("thumbnailUrl") ~
       get[String]("artistFacebookUrl") ~
-      get[Option[String]]("redirectUrl")  map {
-      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl =>
-        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
+      get[Option[String]]("redirectUrl") ~
+      get[Option[Int]]("confidence") map {
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl ~ confidence =>
+        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl, confidence)
     }
   }
 
@@ -192,6 +187,11 @@ object Track {
   }
 
   def upsertRatingUp(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
+    getRating(trackId) match {
+      case Success(Some(actualRating)) => updateConfidence(trackId, calculateConfidence(actualRating, rating))
+      case _ => Logger.error(s"Track.upsertRatingUp: rating up error with trackId: trackId and userId: $userId")
+    }
+
     DB.withConnection { implicit connection =>
       SQL("SELECT upsertTrackRatingUp({userId}, {trackId}, {rating})")
         .on(
@@ -203,12 +203,17 @@ object Track {
   }
 
   def upsertRatingDown(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
+    getRating(trackId) match {
+      case Success(Some(actualRating)) => updateConfidence(trackId, calculateConfidence(actualRating, rating))
+      case _ => Logger.error(s"Track.upsertRatingDown: rating down error with trackId: trackId and userId: $userId")
+    }
+
     DB.withConnection { implicit connection =>
       SQL("SELECT upsertTrackRatingDown({userId}, {trackId}, {rating})")
         .on(
           'userId -> userId,
           'trackId -> trackId,
-          'rating -> rating)
+          'rating -> math.abs(rating))
         .execute()
     }
   }
@@ -220,7 +225,25 @@ object Track {
     }
   }
 
-  def getRating(userId: String, trackId: Long): Try[Option[String]] = Try {
+  def getRating(trackId: Long): Try[Option[String]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("SELECT ratingUp, ratingDown FROM tracks WHERE trackId = {trackId}")
+        .on('trackId -> trackId)
+        .as(ratingParser.singleOpt)
+    }
+  }
+
+  def updateConfidence(trackId: Long, confidence: Int): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(
+      s"""UPDATE tracks
+        | SET confidence = $confidence
+        | WHERE trackId = $trackId""".stripMargin)
+      .executeUpdate()
+    }
+  }
+
+  def getRatingForUser(userId: String, trackId: Long): Try[Option[String]] = Try {
     DB.withConnection { implicit connection =>
       SQL("SELECT ratingUp, ratingDown FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
         .on(
@@ -230,7 +253,7 @@ object Track {
     }
   }
 
-  def deleteRating(userId: String, trackId: Long): Try[Int] = Try {
+  def deleteRatingForUser(userId: String, trackId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}""".stripMargin)
@@ -268,6 +291,27 @@ object Track {
           |WHERE usersFavoriteTracks.userId = {userId}""".stripMargin)
         .on('userId -> userId)
         .as(trackParser.*)
+    }
+  }
+
+  def calculateConfidence(actualRating: String, newRate: Int): Int = {
+    val actualRatingSplit = actualRating.split(",")
+    var ups = actualRatingSplit(0).toFloat
+    var downs = actualRatingSplit(1).toFloat
+    newRate match {
+      case ratingUp if ratingUp > 0 => ups = ups + ratingUp
+      case ratingDown if ratingDown <= 0 => downs = downs + math.abs(ratingDown)
+    }
+
+    if (ups == 0)
+      (-downs).toInt
+    else {
+      val n = ups + downs
+      val z = 1.64485
+      val phat = ups / n
+
+      val confidence = (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
+      (confidence * 1000000).toInt
     }
   }
 }

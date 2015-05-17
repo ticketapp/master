@@ -57,6 +57,7 @@ GET     /places/followed/                                         controllers.Pl
 GET     /organizers                                               controllers.OrganizerController.organizers(numberToReturn: Int, offset: Int)
 GET     /organizers/:id                                           controllers.OrganizerController.organizer(id: Long)
 POST    /organizers/:organizerId/followByOrganizerId              controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
+POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId   controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
 POST    /organizers/:facebookId/followByFacebookId                controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
 GET     /organizers/:organizerId/isFollowed                       controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
 GET     /organizers/containing/:pattern                           controllers.OrganizerController.findOrganizersContaining(pattern: String)
@@ -80,8 +81,8 @@ GET     /genres/:genre/events                                     controllers.Ev
 POST    /tracks/create                                            controllers.TrackController.createTrack
 GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle        controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
 GET     /tracks/youtubeTrackInfo/:youtubeId                       controllers.SearchTracksController.getYoutubeTrackInfos(youtubeId: String)
-GET     /tracks/:trackId/rating                                   controllers.TrackController.getRating(trackId: Long)
-POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRatingUp(trackId: Long, rating: Int)
+GET     /tracks/:trackId/rating                                   controllers.TrackController.getRatingForUser(trackId: Long)
+POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRatingForUser(trackId: Long, rating: Int)
 POST    /tracks/:trackId/addToFavorites                           controllers.TrackController.addToFavorites(trackId: Long)
 POST    /tracks/:trackId/removeFromFavorites                      controllers.TrackController.removeFromFavorites(trackId: Long)
 GET     /tracks/favorites                                         controllers.TrackController.findFavorites

@@ -20,7 +20,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
 
   "SearchArtistController" must {
 
-    "find e sequence of artists on facebook" in {
+    "find a sequence of artists on facebook" in {
       whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
         println(artists.head)
         artists should not be empty
@@ -40,9 +40,16 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
     }
 
     "remove useless words in a SoundCloudUrl (even if it contains uppercase letters)" in {
-      val refactoredSoundCloudWebsite = removeUselessInSoundCloudWebsite(
+      val refactoredSoundCloudWebsite1 = removeUselessInSoundCloudWebsite(
         normalizeUrl("https://sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
-      refactoredSoundCloudWebsite mustBe "soundcloud.com/nina-kraviz"
+      val refactoredSoundCloudWebsite2 = removeUselessInSoundCloudWebsite(
+        normalizeUrl("sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
+      val refactoredSoundCloudWebsite3 = removeUselessInSoundCloudWebsite(
+        normalizeUrl("sounDcloud.com/nina-kraviz"))
+
+      refactoredSoundCloudWebsite1 mustBe "soundcloud.com/nina-kraviz"
+      refactoredSoundCloudWebsite2 mustBe "soundcloud.com/nina-kraviz"
+      refactoredSoundCloudWebsite3 mustBe "soundcloud.com/nina-kraviz"
     }
 
     "remove nothing in a non-soundCloud website" in {

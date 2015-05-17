@@ -8,11 +8,11 @@ import controllers.{PlaylistUpdateTrackWithoutRankException, PlaylistDoesNotExis
 import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
+import json.JsonHelper._
 
 case class Playlist(playlistId: Option[Long], userId: String, name: String, tracks: Seq[Track])
 
 object Playlist {
-  implicit val playlistWrites = Json.writes[Playlist]
 
   case class TrackIdAndRank(id: Long, rank: BigDecimal)
   def idAndRankFormApply(id: Long, rank: BigDecimal) = TrackIdAndRank(id, rank)

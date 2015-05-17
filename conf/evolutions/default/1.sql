@@ -52,7 +52,7 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 30 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 27 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -173,6 +173,9 @@ CREATE TABLE tracks (
   thumbnailUrl            VARCHAR NOT NULL,
   artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
   redirectUrl             VARCHAR(255),
+  confidence              INT NOT NULL DEFAULT 0,
+  ratingUp                INT NOT NULL DEFAULT 0,
+  ratingDown              INT NOT NULL DEFAULT 0,
   UNIQUE(url)
 );
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
@@ -771,9 +774,9 @@ CREATE TABLE tracksRating (
 );
 CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
 CREATE OR REPLACE FUNCTION upsertTrackRatingUp(
-  userIdValue  VARCHAR(255),
-  trackIdValue BIGINT,
-  ratingUpValue  INT)
+  userIdValue     VARCHAR(255),
+  trackIdValue    BIGINT,
+  ratingUpValue   INT)
   RETURNS VOID AS
   $$
     BEGIN

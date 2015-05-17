@@ -1,15 +1,14 @@
 package controllers
 
 import models.Playlist
-import models.Playlist.existsPlaylistForUser
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
-import securesocial.core._
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
+import json.JsonHelper._
 
 object PlaylistController extends Controller with securesocial.core.SecureSocial {
 
@@ -40,56 +39,6 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       }
     )
   }
-/*
-  val addTracksInPlaylistBindingForm = Form(mapping(
-    "id" -> longNumber,
-    "tracksId" -> seq(mapping(
-      "trackId" -> longNumber
-    )(Playlist.idFormApply)(Playlist.idFormUnapply))
-  )(Playlist.addOrRemoveTracksFormApply)(Playlist.addOrRemoveTracksFormUnapply))
-
-  def addTracks() = SecuredAction(ajaxCall = true) { implicit request =>
-    addTracksInPlaylistBindingForm.bindFromRequest().fold(
-      formWithErrors => {
-        println(formWithErrors.errorsAsJson)
-        BadRequest(formWithErrors.errorsAsJson)
-      },
-      playlistIdAndTracksId => {
-        val userId = request.user.identityId.userId
-        //if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
-          Future { Playlist.addTracksInPlaylist(userId, playlistIdAndTracksId) }
-          Ok
-        /*} else
-          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))*/
-      }
-    )
-  }
-
-  def deleteTracks() = SecuredAction(ajaxCall = true) { implicit request =>
-    addTracksInPlaylistBindingForm.bindFromRequest().fold(
-      formWithErrors => {
-        println(formWithErrors.errorsAsJson)
-        BadRequest(formWithErrors.errorsAsJson)
-      },
-      playlistIdAndTracksId => {
-        val userId = request.user.identityId.userId
-        //if(existsPlaylistForUser(userId, playlistIdAndTracksId.id)) {
-          Future { Playlist.deleteTracksInPlaylist(userId, playlistIdAndTracksId) }
-          Ok
-        /*} else
-          Ok(Json.toJson("There is no playlist with this playlist Id for this user"))*/
-      }
-    )
-  }*/
-
-  /*
-  case class TrackInfo(trackId: Long, action: Char, trackRank: Option[Long])
-  case class PlaylistIdAndTracksInfo(id: Long, tracksInfo: Seq[TrackInfo])
-  def updateFormApply(id: Long, tracksInfo: Seq[TrackInfo]) =
-    PlaylistIdAndTracksInfo(id, tracksInfo)
-  def updateFormUnapply(playlistIdAndTracksInfo: PlaylistIdAndTracksInfo) =
-    Option((playlistIdAndTracksInfo.id, playlistIdAndTracksInfo.tracksInfo))
-   */
 
   val updatePlaylistBindingForm = Form(mapping(
     "playlistId" -> longNumber,
