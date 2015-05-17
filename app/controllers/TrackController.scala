@@ -9,6 +9,8 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import scala.util.{Failure, Success}
+import json.JsonHelper._
+import play.api.libs.json.DefaultWrites
 
 object TrackController extends Controller with securesocial.core.SecureSocial {
   val trackBindingForm = Form(mapping(
@@ -36,7 +38,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     )
   }
 
-  def upsertRatingUp(trackId: Long, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
+  def upsertRatingForUser(trackId: Long, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
     rating match {
       case ratingUp if ratingUp > 0 =>
@@ -53,9 +55,9 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def getRating(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+  def getRatingForUser(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
-    Track.getRating(userId, trackId) match {
+    Track.getRatingForUser(userId, trackId) match {
       case Success(Some(rating)) => Ok(Json.toJson(rating))
       case _ => InternalServerError
     }
