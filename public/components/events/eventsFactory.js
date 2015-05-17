@@ -1,8 +1,10 @@
 angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequest', 'InfoModal',
-    function ($http, $q, StoreRequest, InfoModal){
+    'ImagesFactory',
+    function ($http, $q, StoreRequest, InfoModal, ImagesFactory){
     var factory = {
         events : false,
         refactorTicketsInfo : function (event) {
+            event.artists.forEach(ImagesFactory);
             if (event.ticketSellers != undefined) {
                 if (event.ticketSellers.indexOf("digitick") > -1) {
                     event.ticketPlatform = "digitick";
@@ -35,6 +37,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             return event;
         },
         colorEvent : function (event) {
+            event.artists.forEach(ImagesFactory);
             event.priceColor = '#2DAAE1';
             if (event.tariffRange != undefined) {
                 var tariffs = event.tariffRange.split('-');
@@ -161,6 +164,21 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 }).error(function (data) {
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/events/' + id +'/follow', "", 'vous suivez ' + eventName)
+                    } else {
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                    }
+                    deferred.reject('erreur');
+                });
+            return deferred.promise;
+        },
+        unfollowEvent : function (id, eventName) {
+            var deferred = $q.defer();
+            $http.post('/events/' + id +'/unfollow').
+                success(function (data) {
+                    deferred.resolve(data);
+                }).error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/events/' + id +'/unfollow', "", 'vous ne suivez plus ' + eventName)
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite');
                     }

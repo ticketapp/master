@@ -28,7 +28,9 @@ angular.module('claudeApp').
             } else {
                 $rootScope.$watch('connected', function () {
                     OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
-                        $scope.isFollowed = isFollowed;
+                        if (isFollowed == true || isFollowed == false) {
+                            $scope.isFollowed = isFollowed;
+                        }
                     })
                 })
             }

@@ -1,6 +1,7 @@
 angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$rootScope',
-    '$timeout', 'EventsFactory', 'StoreRequest', 'InfoModal',
-    function ($http, $q, oboe, $rootScope, $timeout, EventsFactory, StoreRequest, InfoModal) {
+    '$timeout', 'EventsFactory', 'StoreRequest', 'InfoModal', 'ImagesFactory',
+    function ($http, $q, oboe, $rootScope, $timeout, EventsFactory, StoreRequest, InfoModal,
+              ImagesFactory) {
     var factory = {
         artists : false,
         getArtist : function (url) {
@@ -10,6 +11,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/' + url)
                     .success(function(data, status){
+                        data = ImagesFactory(data);
                         factory.artists = data;
                         deferred.resolve(factory.artists);
                     }).error(function(data, status){
@@ -39,6 +41,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/since/' + offset + '/12 ')
                     .success(function(data, status){
+                        data.forEach(ImagesFactory);
                         factory.artists = data;
                         deferred.resolve(factory.artists);
                     }).error(function(data, status){
@@ -54,6 +57,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/followed/')
                     .success(function(data, status){
+                        data.forEach(ImagesFactory);
                         factory.artists = data;
                         deferred.resolve(factory.artists);
                     }).error(function(data, status){
@@ -69,6 +73,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/genres/' + genre + '/artists?offset=' + offset + '&numberToReturn=12')
                     .success(function(data, status){
+                        data.forEach(ImagesFactory);
                         factory.artists = data;
                         deferred.resolve(factory.artists);
                     }).error(function(data, status){
@@ -84,6 +89,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/containing/' + pattern)
                     .success(function(data, status){
+                        data.forEach(ImagesFactory);
                         factory.artists = data;
                         deferred.resolve(factory.artists);
                     }).error(function(data, status){
@@ -99,6 +105,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/facebookContaining/'+pattern)
                     .success(function(data, status){
+                        data.forEach(ImagesFactory);
                         factory.artists = data;
                         deferred.resolve(factory.artists);
                     }).error(function(data, status){
@@ -118,7 +125,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         facebookUrl: artist.facebookUrl,
                         artistName: artist.name,
                         facebookId: artist.facebookId,
-                        imagePath: artist.imagePath,
+                        imagePath: artist.oldImagePath,
                         websites: artist.websites,
                         description: artist.description,
                         genre: artist.genre
@@ -184,6 +191,26 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             }
             return deferred.promise;
         },
+        unfollowArtist : function (id, artistName) {
+            var deferred = $q.defer();
+            if(factory.artists == true){
+                deferred.resolve(factory.artists);
+            } else {
+                $http.post('/artists/' + id +'/unfollowArtistByArtistId').
+                    success(function (data) {
+                        deferred.resolve(data);
+                    }).error(function (data) {
+                        if (data.error == 'Credentials required') {
+                            StoreRequest.storeRequest('post', '/artists/' + id +
+                                '/unfollowArtistByArtistId', "", 'vous ne suivez plus' + artistName)
+                        } else {
+                            InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        }
+                        deferred.resolve('error');
+                    })
+            }
+            return deferred.promise;
+        },
         getArtistEvents : function (id) {
             var deferred = $q.defer();
             if(factory.artists == true) {
@@ -225,7 +252,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     facebookUrl: artist.facebookUrl,
                     artistName: artist.name,
                     facebookId: artist.facebookId,
-                    imagePath: artist.imagePath,
+                    imagePath: artist.oldImagePath,
                     websites: artist.websites,
                     description: artist.description,
                     genre: artist.genre

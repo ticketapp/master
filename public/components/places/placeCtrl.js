@@ -28,7 +28,9 @@ angular.module('claudeApp').
                 } else {
                     $rootScope.$watch('connected', function () {
                         PlaceFactory.getIsFollowed(place.placeId).then(function (isFollowed) {
-                            $scope.isFollowed = isFollowed;
+                            if (isFollowed == true || isFollowed == false) {
+                                $scope.isFollowed = isFollowed;
+                            }
                         })
                     })
                 }
@@ -47,7 +49,12 @@ angular.module('claudeApp').
             };
 
             $scope.stopFollow = function () {
-                /*ArtistsFactory.followArtistByArtistId($scope.artist.artistId).then(function (followed) {
-                 })*/
+                PlaceFactory.unfollowPlace($scope.place.placeId,
+                    $scope.place.name).then(
+                    function (followed) {
+                        if (followed != 'error') {
+                            $scope.isFollowed = false;
+                        }
+                    })
             };
         }]);

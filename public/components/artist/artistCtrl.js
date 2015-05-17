@@ -38,7 +38,9 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 } else {
                     $rootScope.$watch('connected', function () {
                         ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
-                            $scope.isFollowed = isFollowed;
+                            if (isFollowed == true || isFollowed == false) {
+                                $scope.isFollowed = isFollowed;
+                            }
                         })
                     })
                 }
@@ -68,8 +70,11 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         };
 
         $scope.stopFollow = function () {
-            /*ArtistsFactory.followArtistByArtistId($scope.artist.artistId).then(function (followed) {
-            })*/
+            ArtistsFactory.unfollowArtist($scope.artist.artistId).then(function (followed) {
+                if (followed != 'error') {
+                    $scope.isFollowed = false;
+                }
+            })
         };
 
         $scope.closeTrack = function (index) {
