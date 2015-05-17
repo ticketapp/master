@@ -25,7 +25,7 @@
              data-ng-repeat="artist in artistsFb | filter: searchPat"
              style="padding-bottom: 10px;">
         </artist-facebook-min>
-        <div layout="row" layout-sm="column" layout-align="space-around" class="float-left"
+        <div layout="row" layout-sm="column" layout-align="space-around" class="column large-12"
              ng-if="loadingFbArt && !loadingMore">
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
@@ -41,7 +41,7 @@
              data-ng-repeat="organizer in organizers | filter: searchPat">
         </organizer-min>
     </div>
-    <div layout="row" lass="column large-12" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
+    <div layout="row" class="column large-12" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
         <md-progress-circular md-mode="indeterminate"></md-progress-circular>
     </div>
     <div class="column large-12" ng-show="events.length >= limit || artists.length >= limit ||

@@ -8,7 +8,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
         $scope.removeFromFavorites = function (trackId) {
             UserFactory.removeFromFavorites(trackId)
         };
-        $scope.signalTrack = function (trackId) {
+        $scope.signalTrack = function (trackId, index) {
             var modalInstance = $modal.open({
                 template: '<form ng-submit="ok(reason)">' +
                     '<b class="column large-12 center">Pour quelle raison souhaitez-vous signaler ' +
@@ -27,6 +27,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
             modalInstance.result.then(function () {
                 $localStorage.tracksSignaled.push(trackId);
                 TracksRecommender.UpsertTrackRate(false, trackId);
+                $scope.closeTrack(index);
             }, function () {
             });
 

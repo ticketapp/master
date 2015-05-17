@@ -16,6 +16,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             $scope.artist.events = [];
             $rootScope.loadingTracks = true;
             function pushTrack (track) {
+                console.log($localStorage.tracksSignaled)
                 if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
                     $scope.tracks.push(track)
                 }
