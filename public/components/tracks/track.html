@@ -1,13 +1,13 @@
 <div class="column large-12 arTrack">
-    <i class="fa fa-star absolute pointer"
-       ng-if="!track.isFavorite"
+    <i class="fa fa-star absolute pointer left"
+       ng-if="!track.isFavorite || $root.connected == false"
        ng-click="addTrackToFavorite(track.trackId); track.isFavorite = true">
         <md-track-tooltipe>
             Ajouter aux favoris
         </md-track-tooltipe>
     </i>
-    <i class="fa fa-star absolute pointer favoriteActive"
-       ng-if="track.isFavorite"
+    <i class="fa fa-star absolute pointer favoriteActive left"
+       ng-if="track.isFavorite && $root.connected == true"
        ng-click="removeFromFavorites(track.trackId); track.isFavorite = false">
         <md-track-tooltipe>
             Ajouter aux favoris

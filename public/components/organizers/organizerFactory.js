@@ -1,5 +1,6 @@
-angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsFactory',
-    function ($http, $q, EventsFactory){
+angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsFactory', 'StoreRequest',
+    'InfoModal',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal){
     var factory = {
         organizers : false,
         getOrganizer : function(id) {
@@ -68,6 +69,33 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                         deferred.resolve('error');
                     })
             }
+            return deferred.promise;
+        },
+        followOrganizerByOrganizerId : function (id, organizerName) {
+            var deferred = $q.defer();
+            $http.post('/organizers/' + id +'/followByOrganizerId').
+                success(function (data) {
+                    deferred.resolve(data);
+                }).error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/organizers/' + id +'/followByOrganizerId',
+                            "", 'vous suivez ' + organizerName)
+                    } else {
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                    }
+                    deferred.reject('erreur');
+                });
+            return deferred.promise;
+        },
+        getIsFollowed : function (id) {
+            var deferred = $q.defer();
+            $http.get('/organizers/' + id + '/isFollowed')
+                .success(function(data, status){
+                    factory.events = data;
+                    deferred.resolve(factory.events);
+                }).error(function(data, status){
+                    deferred.reject('erreur');
+                });
             return deferred.promise;
         },
         createOrganizer : function(organizer) {

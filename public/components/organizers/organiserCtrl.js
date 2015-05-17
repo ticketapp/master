@@ -1,7 +1,7 @@
 angular.module('claudeApp').
     controller('OrganizerCtrl', ['$scope', 'OrganizerFactory', '$routeParams', 'WebsitesFactory',
-        'RefactorGeopoint',
-        function ($scope, OrganizerFactory, $routeParams, WebsitesFactory, RefactorGeopoint) {
+        'RefactorGeopoint', '$rootScope',
+        function ($scope, OrganizerFactory, $routeParams, WebsitesFactory, RefactorGeopoint, $rootScope) {
         $scope.organizer = {};
         $scope.map = false;
         $scope.showDesc = false;
@@ -21,8 +21,33 @@ angular.module('claudeApp').
                 $scope.websites = WebsitesFactory.normalizeWebsitesObject(organizer.websites,
                     organizer.facebookUrl);
             }
+            if ($rootScope.connected == true) {
+                OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
+                    $scope.isFollowed = isFollowed;
+                })
+            } else {
+                $rootScope.$watch('connected', function () {
+                    OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
+                        $scope.isFollowed = isFollowed;
+                    })
+                })
+            }
         });
         OrganizerFactory.getOrganizerEvents($routeParams.id).then(function (events) {
             $scope.organizer.events = events;
-        })
+        });
+        $scope.follow = function () {
+            OrganizerFactory.followOrganizerByOrganizerId($scope.organizer.organizerId, $scope.organizer.name).
+                then(
+                function (followed) {
+                    if (followed != 'error') {
+                        $scope.isFollowed = true;
+                    }
+                })
+        };
+
+        $scope.stopFollow = function () {
+            /*ArtistsFactory.followArtistByArtistId($scope.artist.artistId).then(function (followed) {
+             })*/
+        };
     }]);

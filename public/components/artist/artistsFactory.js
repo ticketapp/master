@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$rootScope',
-    '$timeout', 'EventsFactory',
-    function ($http, $q, oboe, $rootScope, $timeout, EventsFactory) {
+    '$timeout', 'EventsFactory', 'StoreRequest', 'InfoModal',
+    function ($http, $q, oboe, $rootScope, $timeout, EventsFactory, StoreRequest, InfoModal) {
     var factory = {
         artists : false,
         getArtist : function (url) {
@@ -12,6 +12,20 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     .success(function(data, status){
                         factory.artists = data;
                         deferred.resolve(factory.artists);
+                    }).error(function(data, status){
+                        deferred.reject('erreur');
+                    });
+            }
+            return deferred.promise;
+        },
+        getIsFollowed : function (id) {
+            var deferred = $q.defer();
+            if(factory.artists == true){
+                deferred.resolve(factory.artists);
+            } else {
+                $http.get('/artists/' + id + '/isFollowed')
+                    .success(function(data, status){
+                        deferred.resolve(data);
                     }).error(function(data, status){
                         deferred.reject('erreur');
                     });
@@ -151,7 +165,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             }
             return deferred.promise;
         },
-        followArtistByArtistId : function (id) {
+        followArtistByArtistId : function (id, artistName) {
             var deferred = $q.defer();
             if(factory.artists == true){
                 deferred.resolve(factory.artists);
@@ -160,6 +174,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     success(function (data) {
                         deferred.resolve(data);
                     }).error(function (data) {
+                        if (data.error == 'Credentials required') {
+                            StoreRequest.storeRequest('post', '/artists/' + id +'/followByArtistId', "", 'vous suivez ' + artistName)
+                        } else {
+                            InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        }
                         deferred.resolve('error');
                     })
             }

@@ -1,6 +1,6 @@
 angular.module('claudeApp').
-    controller('EventCtrl', ['$scope', 'EventsFactory', '$routeParams', 'RefactorGeopoint',
-        function ($scope, EventFactory, $routeParams, RefactorGeopoint) {
+    controller('EventCtrl', ['$scope', 'EventsFactory', '$routeParams', 'RefactorGeopoint', '$rootScope',
+        function ($scope, EventFactory, $routeParams, RefactorGeopoint, $rootScope) {
             $scope.event = {};
             $scope.map = false;
             EventFactory.getEvent($routeParams.id).then(function (event) {
@@ -13,5 +13,30 @@ angular.module('claudeApp').
                     $scope.mapHeight = '300px';
                     $scope.map = true;
                 }
-            })
+                if ($rootScope.connected == true) {
+                    EventFactory.getIsFollowed(event.eventId).then(function (isFollowed) {
+                        $scope.isFollowed = isFollowed;
+                        console.log(isFollowed)
+                    })
+                } else {
+                    $rootScope.$watch('connected', function () {
+                        EventFactory.getIsFollowed(event.eventId).then(function (isFollowed) {
+                            $scope.isFollowed = isFollowed;
+                        })
+                    })
+                }
+            });
+            $scope.follow = function () {
+                EventFactory.followEventByEventId($scope.event.eventId, $scope.event.name).then(
+                    function (followed) {
+                        if (followed != 'error') {
+                            $scope.isFollowed = true;
+                        }
+                    })
+            };
+
+            $scope.stopFollow = function () {
+                /*ArtistsFactory.followArtistByArtistId($scope.artist.artistId).then(function (followed) {
+                 })*/
+            };
     }]);
