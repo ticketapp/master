@@ -243,6 +243,7 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
         },0)
     } else {
         $rootScope.$watch('geoLoc', function (newVal) {
+            console.log($rootScope.geoloc)
             if (newVal.length > 0) {
                 $timeout(function () {
                     $scope.$apply(function () {

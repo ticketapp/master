@@ -1,20 +1,41 @@
-angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http',
-    function ($rootScope, $http) {
-    $rootScope.geoLoc = '';
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-                $rootScope.geoLoc = "(" + position.coords.latitude + "," + position.coords.longitude + ")";
-                $rootScope.$apply();
-            }, function erreurPosition(error) {
-                $http.get('/users/geographicPoint/ ').success(function (data) {
+angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$timeout',
+    function ($rootScope, $http, $timeout) {
+        $rootScope.geoLoc = '';
+        if ($rootScope.geoLoc == '') {
+            $http.get('/users/geographicPoint/ ').success(function (data) {
+                if (data.status != 'fail') {
                     $rootScope.geoLoc = data;
-                })
-            }
-        );
-    } else {
-        $http.get('/users/geographicPoint/ ').success(function (data) {
-            $rootScope.geoLoc = data;
-        })
-    }
-    return $rootScope.geoLoc;
+                }
+            })
+        }
+        function getPos(position) {
+            $timeout(function () {
+                $rootScope.$apply(function () {
+                    $rootScope.geoLoc = "(" + position.coords.latitude + "," + position.coords.longitude + ")";
+                    return $rootScope.geoLoc;
+                });
+
+            },0)
+        }
+
+        function erreurPosition(error) {
+            $http.get('/users/geographicPoint/ ').success(function (data) {
+                if (data.status != 'fail') {
+                    $rootScope.geoLoc = data;
+                    return $rootScope.geoLoc;
+                }
+            })
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(getPos, erreurPosition, { enableHighAccuracy: false, timeout: 1000});
+        } else {
+            $http.get('/users/geographicPoint/ ').success(function (data) {
+                if (data.status != 'fail') {
+                    $rootScope.geoLoc = data;
+                    return $rootScope.geoLoc;
+                }
+            })
+        }
+        return $rootScope.geoLoc;
 }]);

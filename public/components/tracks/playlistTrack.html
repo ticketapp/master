@@ -1,17 +1,3 @@
-<i class="fa fa-star absolute pointer"
-   ng-if="!track.isFavorite || $root.connected == false"
-   ng-click="addTrackToFavorite(track.trackId); track.isFavorite = true">
-    <md-track-tooltipe>
-        Ajouter aux favoris
-    </md-track-tooltipe>
-</i>
-<i class="fa fa-star absolute pointer favoriteActive"
-   ng-if="track.isFavorite && $root.connected == true"
-   ng-click="removeFromFavorites(track.trackId); track.isFavorite = false">
-    <md-track-tooltipe>
-        Supprimer des favoris
-    </md-track-tooltipe>
-</i>
 <i class="fi-x-circle absolute top0 iClose pointer" ng-click="closeTrack($index)">
     <md-track-tooltipe>
         Supprimer de la lecture en cours
@@ -23,6 +9,20 @@
     </md-track-tooltipe>
 </i>
 <div class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
+    <i class="fa fa-star absolute pointer"
+       ng-if="!track.isFavorite || $root.connected == false"
+       ng-click="addTrackToFavorite(track.trackId); track.isFavorite = true">
+        <md-track-tooltipe>
+            Ajouter aux favoris
+        </md-track-tooltipe>
+    </i>
+    <i class="fa fa-star absolute pointer favoriteActive"
+       ng-if="track.isFavorite && $root.connected == true"
+       ng-click="removeFromFavorites(track.trackId); track.isFavorite = false">
+        <md-track-tooltipe>
+            Supprimer des favoris
+        </md-track-tooltipe>
+    </i>
     <i class="fi-play playInImg" ng-if="track != trackActive" ng-click="$root.play($index)"></i>
     <i class="fi-pause pauseInImg" ng-if="track == trackActive"
        ng-class="{'fi-pause': onPlay, 'fi-play': !onPlay}" ng-click="playPause()"></i>

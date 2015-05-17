@@ -46,6 +46,9 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     $scope.getFavoritesTracks = function() {
         UserFactory.getFavoritesTracks().then(function (tracks) {
             $scope.favorites = tracks;
+            $scope.closeTrack = function (index) {
+                $scope.favorites.splice(index, 1);
+            };
         })
     };
     $scope.deletePlaylist = function (playlistId, index) {
