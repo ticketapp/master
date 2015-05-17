@@ -336,7 +336,7 @@ object Event {
     }
   }
 
-  def unfollow(userId: String, eventId: Long): Long = try {
+  def unfollow(userId: String, eventId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM eventsFollowed
@@ -345,8 +345,6 @@ object Event {
             'eventId -> eventId)
         .executeUpdate()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Event.unFollow: " + e.getMessage)
   }
 
   def getFollowedEvents(userId: IdentityId): Seq[Event] = try {

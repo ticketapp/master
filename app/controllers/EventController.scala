@@ -130,11 +130,22 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       case Success(_) =>
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-        Logger.error("EventController.followEvent", psqlException)
-        Status(CONFLICT)("This user already follow this event.")
+        Conflict("This user already follow this event.")
       case Failure(unknownException) =>
         Logger.error("EventController.followEvent", unknownException)
-        Status(INTERNAL_SERVER_ERROR)
+        InternalServerError
+    }
+  }
+
+  def unfollowEvent(eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    Event.unfollow(request.user.identityId.userId, eventId) match {
+      case Success(1) =>
+        Ok
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Conflict("This user was not following this event.")
+      case Failure(unknownException) =>
+        Logger.error("EventController.unfollowEvent", unknownException)
+        InternalServerError
     }
   }
 
@@ -156,7 +167,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       Event.saveFacebookEventByFacebookId(facebookId)
       Ok
     } catch {
-      case e: Exception => Status(INTERNAL_SERVER_ERROR)
+      case e: Exception => InternalServerError
     }
   }
 }
