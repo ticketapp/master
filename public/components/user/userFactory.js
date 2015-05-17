@@ -1,5 +1,6 @@
-angular.module('claudeApp').factory ('UserFactory', ['$http', '$q',
-    function ($http, $q){
+angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreRequest', 'InfoModal',
+    'TracksRecommender',
+    function ($http, $q, StoreRequest, InfoModal, TracksRecommender){
     var factory = {
         user : false,
         getToken : function () {
@@ -46,6 +47,31 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q',
                     deferred.resolve(data)
                 })
             }
+            return deferred.promise;
+        },
+        AddTrackToFavorite: function (trackId) {
+            $http.post('/tracks/' + trackId + '/addToFavorites').
+                success(function () {
+                    TracksRecommender.UpsertTrackRate(true, trackId);
+                }).
+                error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
+                    } else {
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                    }
+                })
+        },
+        getFavoritesTracks: function () {
+            var deferred = $q.defer();
+            $http.get('/tracks/favorites').
+                success(function (data) {
+                    factory.user = data;
+                    deferred.resolve(factory.user);
+                }).
+                error (function (data) {
+                deferred.resolve(data)
+            })
             return deferred.promise;
         }
     };

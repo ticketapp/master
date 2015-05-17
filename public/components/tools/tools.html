@@ -5,8 +5,12 @@
 <div class="modal-body column large-12">
     <ng-connect ng-if="$root.connected == false">
     </ng-connect>
-    <a class="button" ng-click="viewIssues = !viewIssues; viewPlaylists = false"> Issues </a>
-    <a class="button" ng-click="getPlaylists(); viewIssues = false; viewPlaylists = !viewPlaylists"> playlists </a>
+    <a class="button" ng-click="viewIssues = !viewIssues; viewPlaylists = false;
+    viewFavorites = false"> Issues </a>
+    <a class="button" ng-click="getPlaylists(); viewFavorites = false; viewIssues = false;
+    viewPlaylists = !viewPlaylists"> playlists </a>
+    <a class="button" ng-click="getFavoritesTracks(); viewIssues = false; viewPlaylists = false;
+    viewFavorites = !viewFavorites"> Morceaux favoris </a>
     <a  ng-if="$root.connected == true" class="button" ng-click="logout()">Logout</a>
     <div ng-if="viewPlaylists">
         <ul ng-repeat="playlist in playlists">
@@ -23,6 +27,13 @@
                     Annuler
                 </a>
             </div>
+        </ul>
+        <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
+        <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>
+    </div>
+    <div ng-if="viewFavorites">
+        <ul ng-repeat="track in favorites">
+            <ng-track class="column large-6"></ng-track>
         </ul>
         <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
         <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>

@@ -116,62 +116,7 @@
                 <div ng-repeat="track in tracksFiltered = (artist.tracks | limitTo: trackLimit) track by $index"
                      class="column fade paddingBottom10 medium-6 large-4 float-left"
                      ng-class="{'paddingRight0 paddingLeft0': $root.window == 'small'}">
-                    <div class="column large-12 arTrack">
-                        <div class="column small-1 padding0 text-center float-right marginTop10"
-                             style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:70px;">
-                            <i class="fi-x column medium-12 padding0 pointer"
-                               ng-click="signalTrack($index)">
-                                <md-tooltip>
-                                    Signaler
-                                </md-tooltip>
-                            </i>
-                            <i class="fi-play column medium-12 padding0 pointer"
-                               ng-click="$root.addAndPlay([track], artist)">
-                                <md-tooltip>
-                                    Lire
-                                </md-tooltip>
-                            </i>
-                            <i class="fi-plus column medium-12 padding0 pointer"
-                               ng-click="$root.addToPlaylist([track], artist)">
-                                <md-tooltip>
-                                    Ajouter à la lecture en cours
-                                </md-tooltip>
-                            </i>
-                        </div>
-                        <div ng-if="track.thumbnailUrl != undefined"
-                             class="img-circularPlayer"
-                             style="background-image: url('{{track.thumbnailUrl}}');"
-                             ng-class="{'padding0 margin0': $root.window == 'small'}">
-                            <i class="fi-play playInImg"
-                               ng-click="$root.addToPlaylist([track], artist)">
-                            </i>
-                        </div>
-                        <div ng-class="{'column medium-7': $root.window != 'small'}"
-                             style="overflow: hidden; height: 48px;">
-                            <h3>{{track.title}}</h3>
-                            <md-tooltip>
-                                {{track.title}}
-                            </md-tooltip>
-                        </div>
-                        <a target="_blank"
-                           href="{{track.redirectUrl}}"
-                           class="column small-7"
-                           ng-class="{'float-left': $root.window != 'small'}"
-                           style="font-size: 27px;" ng-if="track.platform == 's'">
-                            <i style="display: block"
-                               ng-class="{'float-right': $root.window == 'small'}"
-                               class="fi-soundcloud"></i>
-                        </a>
-                        <a href="https://youtube.com/watch?v={{track.url}}"
-                           class="column small-7"
-                           ng-class="{'float-left': $root.window != 'small'}"
-                           style="font-size: 27px;"
-                           ng-if="track.platform == 'y'"
-                           target="_blank">
-                            <i style="display: block" ng-class="{'float-right': $root.window == 'small'}"
-                               class="fi-social-youtube"></i>
-                        </a>
-                    </div>
+                    <ng-track></ng-track>
                 </div>
                 <div class="column large-12 padding0">
                     <button ng-if="trackLimit < artist.tracks.length"

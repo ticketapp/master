@@ -254,6 +254,14 @@ body {padding-bottom: 0; color: #5a5a5a;}
   background-repeat: no-repeat;
   background-position: center;
 }
+
+.favorite {
+  left: 5px;
+  top: 5px;
+}
+.favorite.active {
+  color: #ffff4f;
+}
 /*pages*/
 .dropDown {
   padding-bottom: 5px;

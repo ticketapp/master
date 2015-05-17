@@ -1,4 +1,5 @@
-angular.module('claudeApp').controller('toolsCtrl', function ($scope, $modal, $log, $rootScope) {
+angular.module('claudeApp').controller('toolsCtrl', ['$scope', '$modal', '$log', '$rootScope',
+    function ($scope, $modal, $log, $rootScope) {
     $scope.connected = $rootScope.connected;
     $scope.open = function () {
         var modalInstance = $modal.open({
@@ -20,14 +21,14 @@ angular.module('claudeApp').controller('toolsCtrl', function ($scope, $modal, $l
             $log.info('Modal dismissed at: ' + new Date());
         });
     };
-});
+}]);
 
 // Please note that $modalInstance represents a modal window (instance) dependency.
 // It is not the same as the $modal service used above.
 
 angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalInstance', '$rootScope',
-'$http', 'InfoModal',
-    function ($scope, $modalInstance, $rootScope, $http, InfoModal) {
+'$http', 'InfoModal', 'UserFactory',
+    function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory) {
     $scope.logout = function () {
         $http.get('/logout').
             success(function (data) {
@@ -41,6 +42,12 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
                 $scope.playlists = data;
                 console.log(data)
             })
+    };
+    $scope.getFavoritesTracks = function() {
+        UserFactory.getFavoritesTracks().then(function (tracks) {
+            console.log(tracks)
+            $scope.favorites = tracks;
+        })
     };
     $scope.deletePlaylist = function (playlistId, index) {
         $http.delete('/playlists/' + playlistId).

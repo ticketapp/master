@@ -12,8 +12,6 @@ angular.module('claudeApp').factory('StoreRequest', ['$modal', '$rootScope',
                     }
                 });
                 modalInstance.result.then(function (selectedItem) {
-                }, function () {
-                    $log.info('Modal dismissed at: ' + new Date());
                 });
                 $rootScope.lastReq = {
                     'method': method, 'path': path, 'object':object, 'success':success, 'error': error
