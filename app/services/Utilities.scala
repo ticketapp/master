@@ -153,4 +153,11 @@ object Utilities {
       }
     case _ => None
   }
+
+  def refactorEventOrPlaceName(eventName: String): String = {
+    eventName.indexOf(" @") match {
+      case -1 => eventName
+      case index => eventName.take(index).trim
+    }
+  }
 }

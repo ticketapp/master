@@ -209,7 +209,7 @@ object Place {
     }
   }
 
-  def unfollowByPlaceId(userId: String, placeId: Long): Long = try {
+  def unfollowByPlaceId(userId: String, placeId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM placesFollowed
@@ -218,8 +218,6 @@ object Place {
           'placeId -> placeId)
         .executeUpdate()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Place.unFollow: " + e.getMessage)
   }
 
   def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =

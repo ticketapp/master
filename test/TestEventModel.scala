@@ -13,7 +13,7 @@ import play.api.Play.current
 import securesocial.core.IdentityId
 import services.Utilities.GeographicPoint
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Success, Failure}
 import play.api.libs.concurrent.Execution.Implicits._
 import org.scalatest.concurrent.ScalaFutures._
 import java.util.Date
@@ -38,18 +38,18 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
     "be able to be followed and unfollowed by a user" in {
       follow("userTestId", 1) shouldBe a [Success[Option[Long]]]
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
-      unfollow("userTestId", 1) mustBe 1
+      unfollow("userTestId", 1) mustBe Success(1)
     }
 
     "not be able to be followed twice" in {
       follow("userTestId", 1) shouldBe a [Success[Option[Long]]]
       follow("userTestId", 1) shouldBe a [Failure[PSQLException]]
-      unfollow("userTestId", 1) mustBe 1
+      unfollow("userTestId", 1) mustBe Success(1)
     }
 
     "be able to be found on facebook by a facebookId" in {
       whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
-        event.name mustBe "Mad Professor vs Prince Fatty - Dub Attack Tour @ Club Transbo"
+        event.name mustBe "Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }
 

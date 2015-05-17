@@ -37,7 +37,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
     "be able to be followed and unfollowed by a user" in {
       followByPlaceId("userTestId", 1)
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
-      unfollowByPlaceId("userTestId", 1) mustBe 1
+      unfollowByPlaceId("userTestId", 1) mustBe Success(1)
     }
 
     "not be able to be followed twice" in {
@@ -46,7 +46,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
         case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
         case _ => throw new Exception("folow a place twice didn't throw a PSQL UNIQUE_VIOLATION")
       }
-      unfollowByPlaceId("userTestId", 1) mustBe 1
+      unfollowByPlaceId("userTestId", 1) mustBe Success(1)
     }
 
     "be linked to a place if one with the same facebookId already exists" in {

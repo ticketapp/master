@@ -20,6 +20,8 @@ object SearchArtistsController extends Controller {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
   val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-z@A-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
 
+  val facebookCallsFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
+
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     getEventuallyFacebookArtists(pattern).map { artists =>
       Ok(Json.toJson(artists))
@@ -32,10 +34,10 @@ object SearchArtistsController extends Controller {
         "q" -> pattern,
         "type" -> "page",
         "limit" -> "400",
-        "fields" -> "name,cover{offset_x,offset_y,source},id,category,link,website,description,genre",
+        "fields" -> facebookCallsFields,
         "access_token" -> facebookToken)
       .get()
-      .map { readFacebookArtists } //(_).take(20)
+      .map { readFacebookArtists }
   }
   
   def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] = {
@@ -44,35 +46,6 @@ object SearchArtistsController extends Controller {
         getEventuallyFacebookArtists(_).map { artists => artists }
       }
     ).map { _.flatten collect { case artist: Artist if (artist.websites intersect webSites).nonEmpty => artist } }
-  }
-  
-  val readArtist = (
-    (__ \ "name").read[String] and
-      (__ \ "category").read[String] and
-      (__ \ "id").read[String] and
-      (__ \ "cover").readNullable[String](
-        (__ \ "source").read[String]
-      ) and
-      (__ \ "website").readNullable[String] and
-      (__ \ "link").read[String] and
-      (__ \ "description").readNullable[String] and
-      (__ \ "genre").readNullable[String]
-    ).apply((name: String, category: String, id: String, maybeCover: Option[String], websites: Option[String],
-             link: String, maybeDescription: Option[String], maybeGenre: Option[String]) =>
-    (name, id, category, maybeCover, websites, link, maybeDescription, maybeGenre))
-
-  def readFacebookArtists(facebookResponse: Response): Seq[Artist] = {
-    val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
-      artists.collect {
-        case (name, facebookId, "Musician/band", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
-          makeArtist(name, facebookId, cover, websites, link, maybeDescription, maybeGenre)
-        case (name, facebookId, "Artist", Some(cover: String), websites, link, maybeDescription, maybeGenre) =>
-          makeArtist(name, facebookId, cover, websites, link, maybeDescription, maybeGenre)
-      }
-    }
-    (facebookResponse.json \ "data")
-      .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
-      .getOrElse(Seq.empty)
   }
 
   def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
@@ -119,10 +92,9 @@ object SearchArtistsController extends Controller {
   }
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
-    //tinyUrl api??
     WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
       .withQueryString(
-        "fields" -> "name,cover{source},id,category,link,website,description,genre",
+        "fields" -> facebookCallsFields,
         "access_token" -> facebookToken)
       .get()
       .map { readFacebookArtist }
@@ -138,34 +110,84 @@ object SearchArtistsController extends Controller {
     firstNormalization match {
       case urlWithArguments if urlWithArguments contains "?" =>
         urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?"))
-      case urlWithoutArguments => urlWithoutArguments
+      case urlWithoutArguments =>
+        urlWithoutArguments
     }
+  }
+
+  val readArtist = (
+    (__ \ "name").read[String] and
+      (__ \ "category").read[String] and
+      (__ \ "id").read[String] and
+      (__ \ "cover").readNullable[String](
+        (__ \ "source").read[String]
+      ) and
+      (__ \ "cover").readNullable[Int](
+        (__ \ "offset_x").read[Int]
+      ) and
+      (__ \ "cover").readNullable[Int](
+        (__ \ "offset_y").read[Int]
+      ) and
+      (__ \ "website").readNullable[String] and
+      (__ \ "link").read[String] and
+      (__ \ "description").readNullable[String] and
+      (__ \ "genre").readNullable[String] and
+      (__ \ "likes").readNullable[Int] and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "country").readNullable[String]
+      )
+    ).apply((name: String, category: String, id: String, maybeCover: Option[String], maybeOffsetX: Option[Int],
+             maybeOffsetY: Option[Int], websites: Option[String], link: String, maybeDescription: Option[String],
+             maybeGenre: Option[String], maybeLikes: Option[Int], maybeCountry: Option[Option[String]]) =>
+    (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
+      maybeLikes, maybeCountry))
+
+  def readFacebookArtists(facebookResponse: Response): Seq[Artist] = {
+    val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
+      artists.collect {
+        case (name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
+        maybeDescription, maybeGenre, maybeLikes, maybeCountry) =>
+          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
+        case (name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
+        maybeDescription, maybeGenre, maybeLikes, maybeCountry) =>
+          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
+      }
+    }
+    (facebookResponse.json \ "data")
+      .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
+      .getOrElse(Seq.empty)
   }
   
   def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
     facebookResponse.json
-      .asOpt[(String, String, String, Option[String], Option[String],
-        String, Option[String], Option[String])](readArtist)
+      .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String],
+        String, Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
       match {
-        case Some((name, facebookId, "Musician/band", Some(cover: String), maybeWebsites,
-            link, maybeDescription, maybeGenre)) =>
-          Option(makeArtist(name, facebookId, cover, maybeWebsites, link, maybeDescription, maybeGenre))
-        case Some((name, facebookId, "Artist", Some(cover: String), maybeWebsites,
-            link, maybeDescription, maybeGenre)) =>
-          Option(makeArtist(name, facebookId, cover, maybeWebsites, link, maybeDescription, maybeGenre))
+        case Some((name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
+          Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
+        case Some((name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
+          Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
         case _ => None
       }
   }
 
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
-                 maybeDescription: Option[String], maybeGenre: Option[String]): Artist = {
+                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
+                 maybeCountry: Option[String]): Artist = {
     val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val websitesSet = getNormalizedWebsitesInText(maybeWebsites)
       .filterNot(_.contains("facebook.com"))
       .filterNot(_ == "")
     val description = Utilities.formatDescription(maybeDescription)
     val genres = genresStringToGenresSet(maybeGenre)
-    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq, Seq.empty)
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq,
+      Seq.empty, maybeLikes, maybeCountry)
   }
 
   def removeUselessInSoundCloudWebsite(website: String): String = website match {
@@ -173,4 +195,7 @@ object SearchArtistsController extends Controller {
       soundCloudWebsite.take(soundCloudWebsite.lastIndexOf('/'))
     case _ => website
   }
+
+  def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =
+    imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
 }

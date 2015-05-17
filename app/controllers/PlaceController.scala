@@ -42,13 +42,27 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: user with id $userId already follows place with id $placeId")
-        Status(CONFLICT)("This user already follows this place.")
+        Conflict
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: there is no place with the id $placeId")
-        Status(CONFLICT)("There is no place with this id.")
+        Conflict
       case Failure(unknownException) =>
         Logger.error("PlaceController.followPlaceByPlaceId", unknownException)
-        Status(INTERNAL_SERVER_ERROR)
+        InternalServerError
+    }
+  }
+
+  def unfollowPlaceByPlaceId(placeId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
+    val userId = request.user.identityId.userId
+    Place.unfollowByPlaceId(userId, placeId) match {
+      case Success(1) =>
+        Ok
+      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"The user (id: $userId) does not follow the place (placeId: $placeId) or the place does not exist.")
+        Conflict
+      case Failure(unknownException) =>
+        Logger.error("PlaceController.followPlaceByPlaceId", unknownException)
+        InternalServerError
     }
   }
 
@@ -61,13 +75,13 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
         Logger.error(
           s"""PlaceController.followPlaceByFacebookId: user with id $userId already follows
              |place with facebook id $facebookId""".stripMargin)
-        Status(CONFLICT)("This user already follows this place.")
+        Conflict("This user already follows this place.")
       case Failure(thereIsNoPlaceForThisFacebookIdException: ThereIsNoPlaceForThisFacebookIdException) =>
         Logger.error(s"PlaceController.followPlaceByFacebookId : there is no place with the facebook id $facebookId")
-        Status(CONFLICT)("There is no place with this id.")
+        Conflict
       case Failure(unknownException) =>
         Logger.error("PlaceController.followPlaceByFacebookId", unknownException)
-        Status(INTERNAL_SERVER_ERROR)
+        InternalServerError
     }
   }
   
