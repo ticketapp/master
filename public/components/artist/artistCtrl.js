@@ -16,7 +16,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             $scope.artist.events = [];
             $rootScope.loadingTracks = true;
             function pushTrack (track) {
-                if ($localStorage.tracksSignaled.indexOf(track.trackId) > -1) {
+                if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
                     $scope.tracks.push(track)
                 }
             }
@@ -30,6 +30,17 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 if (artist.websites != undefined) {
                     $scope.websites = WebsitesFactory.normalizeWebsitesObject(artist.websites,
                         $routeParams.facebookUrl);
+                }
+                if ($rootScope.connected == true) {
+                    ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
+                        $scope.isFollowed = isFollowed;
+                    })
+                } else {
+                    $rootScope.$watch('connected', function () {
+                        ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
+                            $scope.isFollowed = isFollowed;
+                        })
+                    })
                 }
             });
             ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
@@ -48,9 +59,17 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 
         $scope.follow = function () {
-            ArtistsFactory.followArtistByArtistId($scope.artist.artistId).then(function (followed) {
-                console.log(followed)
+            ArtistsFactory.followArtistByArtistId($scope.artist.artistId, $scope.artist.name).then(
+                function (followed) {
+                if (followed != 'error') {
+                    $scope.isFollowed = true;
+                }
             })
+        };
+
+        $scope.stopFollow = function () {
+            /*ArtistsFactory.followArtistByArtistId($scope.artist.artistId).then(function (followed) {
+            })*/
         };
 
         $scope.closeTrack = function (index) {

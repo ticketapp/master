@@ -1,5 +1,6 @@
-angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFactory',
-    function ($http, $q, EventsFactory){
+angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFactory', 'StoreRequest',
+    'InfoModal',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal){
     var factory = {
         places : false,
         getPlace : function(id) {
@@ -87,6 +88,33 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         deferred.resolve('error');
                     });
             }
+            return deferred.promise;
+        },
+        followPlaceByPlaceId : function (id, placeName) {
+            var deferred = $q.defer();
+            $http.post('/places/' + id +'/followByPlaceId').
+                success(function (data) {
+                    deferred.resolve(data);
+                }).error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/places/' + id +'/followByPlaceId',
+                            "", 'vous suivez ' + placeName)
+                    } else {
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                    }
+                    deferred.reject('erreur');
+                });
+            return deferred.promise;
+        },
+        getIsFollowed : function (id) {
+            var deferred = $q.defer();
+            $http.get('/places/' + id + '/isFollowed')
+                .success(function(data, status){
+                    factory.events = data;
+                    deferred.resolve(factory.events);
+                }).error(function(data, status){
+                    deferred.reject('erreur');
+                });
             return deferred.promise;
         },
         postPlace : function (place) {

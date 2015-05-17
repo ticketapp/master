@@ -5,7 +5,8 @@
 <div class="columns large-12">
     <h2 id="eventTitle" class="marginTop0">
         {{artist.name}}
-        <a class="button" ng-click="follow()">Suivre</a>
+        <a class="button" ng-if="!isFollowed" ng-click="follow()">Suivre</a>
+        <a class="button" ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</a>
         <websites></websites>
     </h2>
 </div>
