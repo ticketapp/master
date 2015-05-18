@@ -237,9 +237,16 @@ angular.module('claudeApp').
 
             $scope.nextTrack = function () {
                 $scope.onPlay = false;
-                TracksRecommender.trackRateByTime(document.getElementById('musicPlayer').duration,
-                    document.getElementById('musicPlayer').currentTime,
-                    $rootScope.playlist.tracks[i].trackId);
+                if ($rootScope.playlist.tracks[i].platform == 's' || $rootScope.window == 'small'
+                    || $rootScope.window == 'medium') {
+                    TracksRecommender.trackRateByTime(document.getElementById('musicPlayer').duration,
+                        document.getElementById('musicPlayer').currentTime,
+                        $rootScope.playlist.tracks[i].trackId);
+                } else if (player != undefined) {
+                    TracksRecommender.trackRateByTime(player.getDuration(),
+                    player.getCurrentTime(),
+                        $rootScope.playlist.tracks[i].trackId);
+                }
                 if ($scope.shuffle == true) {
                     i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                     shuffle()

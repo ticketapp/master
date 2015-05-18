@@ -160,6 +160,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         }
 
         function getArtistsFacebook() {
+            $scope.loadingFbArt = true;
             ArtistsFactory.getArtistsFacebookByContaining(_research).then(function (artists) {
                 updateScope(artists, $scope.artistsFb, 'facebookId', $scope.artists);
                 $scope.loadingFbArt = false;
@@ -169,7 +170,8 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             if (_selArtist == true) {
                 if (_research.length == 0) {
                     if (offset == 0 && $rootScope.connected == true) {
-                        getArtistsFolowed()
+                        getArtistsFolowed();
+                        getArtists()
                     } else {
                         getArtists()
                     }
@@ -277,7 +279,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     newName != 'hip-hop' &&
                     newName != 'chanson'
                     ) {
-                    $scope.loadingFbArt = true;
                     clearTimeout(facebookSearch);
                     facebookSearch = setTimeout(getArtistsFacebook, facebookSearchInterval);
                 }
