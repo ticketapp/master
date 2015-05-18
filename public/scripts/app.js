@@ -60,6 +60,9 @@ angular
         .when('/connected',{
             templateUrl:'assets/views/connected.html'
         })
+        .when('/mentionsLegales',{
+            templateUrl:'assets/views/connected.html'
+        })
       .otherwise({
         redirectTo: '/'
       });

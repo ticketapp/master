@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$timeout',
     function ($rootScope, $http, $timeout) {
-        $rootScope.geoLoc = '';
+        $rootScope.geoLoc = '(45.768434199999994,4.8153293999999995)';
         if ($rootScope.geoLoc == '') {
             $http.get('/users/geographicPoint/ ').success(function (data) {
                 if (data.status != 'fail') {
