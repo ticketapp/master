@@ -3,6 +3,7 @@ angular.module('claudeApp').
         return {
             restrict : 'E',
             templateUrl: 'assets/components/events/eventMin.html',
+            controller: 'EventMinCtrl',
             scope : true,
             link : function (scope, element) {
                 function resizeElem () {

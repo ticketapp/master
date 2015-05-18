@@ -63,7 +63,7 @@
                 <span class="dropDown" data-ng-repeat="place in event.places">
                     <i class="fa fa-map-marker" style="font-size: 30px; color: {{event.priceColor}};"></i>
                     <b style="vertical-align: text-bottom;">
-                        <a href="#/places/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+                        <a ng-mouseenter="isFollowedPlace(place)" href="#/places/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
                     </b>
                     <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <li style="display: block;"
@@ -77,9 +77,16 @@
                                      on-error-src="assets/images/caroussel1.png">
                             </a>
                             <button style='height:55px; float:right'
+                                    ng-if="!place.isFollowed"
                                     class="absolute right bottom0"
-                                    ng-click="followPlace(place.placeId, place.name)">
+                                    ng-click="followPlace(place)">
                                 Suivre
+                            </button>
+                            <button style='height:55px; float:right'
+                                    ng-if="place.isFollowed"
+                                    class="absolute right bottom0"
+                                    ng-click="unfollowPlace(place)">
+                                Ne plus suivre
                             </button>
                         </li>
                     </ul>
@@ -98,7 +105,8 @@
                     <i class="fa fa-user"
                        style="font-size: 30px; color: {{event.priceColor}};"></i>
                     <b style="vertical-align: text-bottom;">
-                        <a href="#/organizers/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}}</a>
+                        <a ng-mouseenter="isFollowedOrganizer(organizer)"
+                           href="#/organizers/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}}</a>
                     </b>
                     <ul class="f-dropdown"
                         ng-if="$root.window != 'small' && $root.window != 'medium'">
@@ -111,9 +119,16 @@
                                      on-error-src="assets/images/caroussel1.png">
                             </a>
                             <button style='height:55px; float:right'
+                                    ng-if="!organizer.isFollowed"
                                     class="absolute right bottom0"
-                                    ng-click="followOrganizer(organizer.organizerId, organizer.name)">
+                                    ng-click="followOrganizer(organizer)">
                                 Suivre
+                            </button>
+                            <button style='height:55px; float:right'
+                                    ng-if="organizer.isFollowed"
+                                    class="absolute right bottom0"
+                                    ng-click="unfollowOrganizer(organizer)">
+                                Ne plus suivre
                             </button>
                         </li>
                     </ul>
@@ -124,13 +139,12 @@
                       data-ng-repeat="artist in event.artists">
                     <a href="#/artists/{{artist.facebookUrl}}">
                         <h3 style="color: {{event.priceColor}};" class="float-left margin0"
-                            ng-mouseover="showDrop = true;">
+                            ng-mouseenter="isFollowedArtist(artist)">
                             {{ artist.name }}
                             <b ng-show="$index != event.artists.length - 1"> -&nbsp;</b>
                         </h3>
                     </a>
                     <ul class="f-dropdown marginTop30"
-                        ng-mouseleave="$parent.showDrop = false;"
                         ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <li style="display: block; min-height: 100px"
                             class="float-left width100p paddingTop10 paddingBottom10
@@ -149,9 +163,17 @@
                                    style="color: {{event.priceColor}}; font-size: 80px;"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
                             </div>
-                            <button style='height:55px; float:left; margin-top: 30px;'
-                                    ng-click="followArtist(artist.artistId, artist.name)">
+                            <button style='height:55px; float:right'
+                                    ng-if="!artist.isFollowed"
+                                    class="absolute right bottom0"
+                                    ng-click="followArtist(artist)">
                                 Suivre
+                            </button>
+                            <button style='height:55px; float:right'
+                                    ng-if="artist.isFollowed"
+                                    class="absolute right bottom0"
+                                    ng-click="unfollowArtist(artist)">
+                                Ne plus suivre
                             </button>
                         </li>
                     </ul>

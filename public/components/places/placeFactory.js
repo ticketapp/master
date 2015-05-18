@@ -102,7 +102,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite');
                     }
-                    deferred.reject('erreur');
+                    deferred.reject('error');
                 });
             return deferred.promise;
         },
@@ -118,7 +118,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite');
                     }
-                    deferred.reject('erreur');
+                    deferred.reject('error');
                 });
             return deferred.promise;
         },

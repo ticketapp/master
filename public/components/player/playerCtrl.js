@@ -112,6 +112,7 @@ angular.module('claudeApp').
 
             $rootScope.addToPlaylist = function (tracks, artist) {
                 offset = 0;
+                tracks = $filter('orderBy')(tracks, 'confidence', true);
                 if ($rootScope.playlist.tracks.length == 0) {
                     pushListOfTracks(artist, tracks, true);
                     played = [];
@@ -159,6 +160,7 @@ angular.module('claudeApp').
             };
 
             $rootScope.addAndPlay = function (tracks, artist) {
+                tracks = $filter('orderBy')(tracks, 'confidence', true);
                 offset = 0;
                 pushListOfTracks(artist, tracks, true);
                 artist.genres.forEach(addGenres);
