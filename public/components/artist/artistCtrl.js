@@ -16,8 +16,15 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             $scope.artist.events = [];
             $rootScope.loadingTracks = true;
             function pushTrack (track) {
-                if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
-                    $scope.tracks.push(track)
+                if ($rootScope.favoritesTracks) {
+                    if ($rootScope.favoritesTracks.indexOf(track.trackId) > -1) {
+                        track.isFavorite = true;
+                    }
+                }
+                if ($localStorage.tracksSignaled) {
+                    if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
+                        $scope.tracks.push(track)
+                    }
                 }
             }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {

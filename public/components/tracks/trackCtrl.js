@@ -1,12 +1,14 @@
 angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$localStorage', '$modal',
-    'TracksRecommender',
-    function ($scope, UserFactory, $localStorage, $modal, TracksRecommender) {
+    'TracksRecommender', '$rootScope',
+    function ($scope, UserFactory, $localStorage, $modal, TracksRecommender, $rootScope) {
         $scope.addTrackToFavorite = function (trackId) {
-            UserFactory.AddTrackToFavorite(trackId)
+            UserFactory.AddTrackToFavorite(trackId);
+            $rootScope.favoritesTracks.push(trackId)
         };
 
         $scope.removeFromFavorites = function (trackId) {
-            UserFactory.removeFromFavorites(trackId)
+            UserFactory.removeFromFavorites(trackId);
+            $rootScope.favoritesTracks.splice($rootScope.favoritesTracks.indexOf(trackId), 1)
         };
         $scope.signalTrack = function (trackId, index) {
             var modalInstance = $modal.open({

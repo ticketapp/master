@@ -74,6 +74,12 @@ angular.module('claudeApp').
 
             function pushTrack (track, art) {
                 $scope.newTrack = {};
+                if ($rootScope.favoritesTracks) {
+                    if ($rootScope.favoritesTracks.indexOf(track.trackId) > -1) {
+                        track.isFavorite = true;
+                        $scope.newTrack.isFavorite = true;
+                    }
+                }
                 if (track.platform == 's') {
                     $scope.newTrack.redirectUrl = track.redirectUrl;
                 }

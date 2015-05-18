@@ -52,7 +52,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                        },
                        content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Connectez-vous</h3> <p>' +
                            '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
-                           'Pour enregistrer vos playlist et faire connaitre à Claude vos artistes et vos lieux favoris ' +
+                           'Pour enregistrer vos playlists et faire connaitre à Claude vos artistes et vos lieux favoris ' +
                            '</b>' +
                            '</p>')
                    }

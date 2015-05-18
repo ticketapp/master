@@ -336,6 +336,13 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                                 connectWin.close();
                             })
                         }, 0);
+                        $rootScope.favoritesTracks = [];
+                        function passFavoritesTracksToRootscope (track) {
+                            $rootScope.favoritesTracks.push(track.trackId)
+                        }
+                        UserFactory.getFavoritesTracks().then(function (tracks) {
+                            tracks.forEach(passFavoritesTracksToRootscope)
+                        });
                         getUserToken();
                         if ($rootScope.lastReq != {} && $rootScope.lastReq != undefined) {
                             applyLastRequest();
