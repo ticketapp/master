@@ -2,7 +2,8 @@
     <div class="img_min">
         <div class="toGrow">
             <a href="#/artists/{{artist.facebookUrl}}">
-                <img src="{{artist.imagePath}}" alt="une belle image" class="min"/>
+                <img ng-if="artist.imagePath" ng-src="{{artist.imagePath}}"
+                     on-error-src="assets/images/caroussel1.png" class="min"/>
             </a>
         </div>
         <div class="absolute top0">

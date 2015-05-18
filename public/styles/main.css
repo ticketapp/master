@@ -17890,6 +17890,7 @@ Copyright (c) 2014 Daniel Eden
 .parallax-background {
   background-color: primary;
   height: 100%;
+  background-image: url("../images/caroussel1.png");
   background-repeat: no-repeat;
   -webkit-background-size: 100%;
   -moz-background-size: 100%;
@@ -17899,7 +17900,7 @@ Copyright (c) 2014 Daniel Eden
   width: 100%;
 }
 
-/* line 13, ../../public/components/parallax/parallax.scss */
+/* line 14, ../../public/components/parallax/parallax.scss */
 .parallax-content {
   max-width: 100%;
   position: relative;

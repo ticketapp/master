@@ -2,7 +2,8 @@
     <div class="img_min">
         <div class="toGrow">
             <a href="#/events/{{event.eventId}}">
-                <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
+                <img ng-if="event.imagePath" ng-src="{{ event.imagePath }}" class="width100p"
+                     on-error-src="assets/images/caroussel1.png"/>
             </a>
         </div>
         <div class="absolute top0">
@@ -67,8 +68,11 @@
                             class="float-left width100p relative">
                             <a href="#/places/{{place.placeId}}"
                                class="width100p padding0" style="height: 140px; overflow: hidden;
-                               background-color: {{event.priceColor}}">
-                                <img class="width100p " src="{{place.imagePath}}" ng-if="place.imagePath != undefined">
+                               background-color: {{event.priceColor}};
+                               background-image: url('assets/images/caroussel1.png'); background-repeat: no-repeat;
+                               background-size: 100%">
+                                <img class="width100p " ng-src="{{place.imagePath}}"
+                                     on-error-src="assets/images/caroussel1.png">
                             </a>
                             <button style='height:55px; float:right'
                                     class="absolute right bottom0"
@@ -99,8 +103,10 @@
                         <li style="display: block;"
                             class="float-left width100p relative">
                             <a href="#/organizers/{{organizer.organizerId}}"
-                               class="width100p padding0" style="height: 150px; overflow: hidden">
-                                <img class="width100p " src="{{organizer.imagePath}}">
+                               class="width100p padding0" style="height: 150px;
+                               overflow: hidden;">
+                                <img class="width100p " ng-src="{{organizer.imagePath}}"
+                                     on-error-src="assets/images/caroussel1.png">
                             </a>
                             <button style='height:55px; float:right'
                                     class="absolute right bottom0"

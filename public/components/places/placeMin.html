@@ -2,7 +2,7 @@
     <div class="img_min">
         <div class="toGrow">
             <a href="#/places/{{place.placeId}}">
-                <img src="{{ place.imagePath }}" ng-if="place.imagePath != undefined" class="min"/>
+                <img ng-src="{{ place.imagePath }}" ng-if="place.imagePath != undefined" class="min"/>
                 <map ng-if="place.imagePath.length == 0 || place.imagePath == undefined"
                      zoom="14"
                      center="[{{place.geographicPoint}}]"

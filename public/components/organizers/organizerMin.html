@@ -2,7 +2,8 @@
     <div class="img_min">
         <div class="toGrow">
             <a href="#/organizers/{{organizer.organizerId}}">
-                <img src="{{ organizer.imagePath }}" alt="une belle image" class="min"/>
+                <img ng-src="{{ organizer.imagePath }}" alt="une belle image" class="min"
+                     on-error-src="assets/images/caroussel1.png"/>
             </a>
         </div>
         <a href="#/organizers/{{organizer.organizerId}}"><h3 class="minTitle">{{organizer.name}}</h3></a>
