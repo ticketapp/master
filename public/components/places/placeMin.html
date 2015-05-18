@@ -3,7 +3,9 @@
         <div class="toGrow">
             <a href="#/places/{{place.placeId}}">
                 <img ng-src="{{place.imagePath}}" on-error-src="assets/images/caroussel1.png"
-                     ng-if="place.imagePath != undefined || !place.geographicPoint" class="min"/>
+                     ng-if="place.imagePath != undefined" class="min"/>
+                <img src="assets/images/caroussel1.png"
+                     ng-if="place.imagePath == undefined && !place.geographicPoint" class="min"/>
                 <map ng-if="(place.imagePath.length == 0 || place.imagePath == undefined) && place.geographicPoint"
                      zoom="12"
                      center="[{{place.geographicPoint}}]"

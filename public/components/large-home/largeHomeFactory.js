@@ -29,7 +29,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                    'position: fixed;top: 110px;width: 25%;background: white;'
 
                            },
-                           content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Claude à besoin de vos suggestions</h3><p>' +
+                           content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Claude a besoin de vos suggestions</h3><p>' +
                                '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
                                'Claude est en version Beta, aidez-le à s\'ammeliorer en reportant les bugs ou en laissant vos suggestions ' +
                                '</b>' +

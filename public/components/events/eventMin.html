@@ -3,7 +3,9 @@
         <div class="toGrow">
             <a href="#/events/{{event.eventId}}">
                 <img ng-src="{{ event.imagePath }}" class="width100p"
-                     on-error-src="assets/images/caroussel1.png"/>
+                     on-error-src="assets/images/caroussel1.png" ng-if="event.imagePath"/>
+                <img src="assets/images/caroussel1.png"
+                     ng-if="event.imagePath == undefined" class="min"/>
             </a>
         </div>
         <div class="absolute top0">
