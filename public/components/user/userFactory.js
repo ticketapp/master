@@ -89,8 +89,17 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     deferred.resolve(factory.user);
                 }).
                 error (function (data) {
-            })
+            });
             return deferred.promise;
+        },
+        makeFavoriteTracksRootScope : function () {
+            $rootScope.favoritesTracks = [];
+            function passFavoritesTracksToRootscope(track) {
+                $rootScope.favoritesTracks.push(track.trackId)
+            }
+            factory.getFavoritesTracks().then(function (tracks) {
+                tracks.forEach(passFavoritesTracksToRootscope)
+            });
         }
     };
     return factory;

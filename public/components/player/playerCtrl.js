@@ -97,36 +97,12 @@ angular.module('claudeApp').
 
             function pushListOfTracks (artist, tracks, play) {
                 var tracksLenght = tracks.length;
-                var needRepeat = false;
-                if (tracksLenght > 10) {
-                    tracksLenght = 10;
-                    needRepeat = true
-                }
                 pushTrack(tracks[0], artist);
                 if (play == true) {
                     $scope.play($rootScope.playlist.tracks.length-1);
                 }
                 for (var tr = 1; tr < tracksLenght; tr++) {
                     pushTrack(tracks[tr], artist)
-                }
-                if (needRepeat == true) {
-                    tracksLenght = tracks.length;
-                    var start = 10;
-                    function pushAllTracks (start) {
-                        for (tr = start; tr < start + 100; tr++) {
-                            if (tracks[tr] != undefined) {
-                                if ($localStorage.tracksSignaled.indexOf(tracks[tr].trackId) > -1) {
-                                    pushTrack(tracks[tr], artist)
-                                }
-                            } else {
-                                return;
-                            }
-                        }
-                    }
-                    if (start < tracksLenght) {
-                        start = start + 100;
-                        pushAllTracks(start)
-                    }
                 }
             }
 
