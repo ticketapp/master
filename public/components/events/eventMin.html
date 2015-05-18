@@ -163,15 +163,15 @@
                                    style="color: {{event.priceColor}}; font-size: 80px;"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
                             </div>
-                            <button style='height:55px; float:right'
+                            <button style='height:55px; top:40px'
                                     ng-if="!artist.isFollowed"
-                                    class="absolute right bottom0"
+                                    class="absolute left"
                                     ng-click="followArtist(artist)">
                                 Suivre
                             </button>
-                            <button style='height:55px; float:right'
+                            <button style='height:55px; top:40px'
                                     ng-if="artist.isFollowed"
-                                    class="absolute right bottom0"
+                                    class="absolute left"
                                     ng-click="unfollowArtist(artist)">
                                 Ne plus suivre
                             </button>
