@@ -2,9 +2,10 @@
     <div class="img_min">
         <div class="toGrow">
             <a href="#/places/{{place.placeId}}">
-                <img ng-src="{{ place.imagePath }}" ng-if="place.imagePath != undefined" class="min"/>
-                <map ng-if="place.imagePath.length == 0 || place.imagePath == undefined"
-                     zoom="14"
+                <img ng-src="{{place.imagePath}}" on-error-src="assets/images/caroussel1.png"
+                     ng-if="place.imagePath != undefined || !place.geographicPoint" class="min"/>
+                <map ng-if="(place.imagePath.length == 0 || place.imagePath == undefined) && place.geographicPoint"
+                     zoom="12"
                      center="[{{place.geographicPoint}}]"
                      scrollwheel="false"
                      disable-default-u-i="true"
@@ -29,7 +30,7 @@
                                         ]
                                     }
                                 ]"
-                     class="width100p img_min_evnt">
+                     class="width100p img_min_evnt" style="height: 100%">
                     <marker visible="true" position="{{place.geographicPoint}}">
                     </marker>
                 </map>

@@ -27,7 +27,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         }
 
         function refactorGeopoint (place) {
-            place.geographicPoint = RefactorGeopoint.refactorGeopoint(place.geographicPoint)
+            if (place.geographicPoint) {
+                place.geographicPoint = RefactorGeopoint.refactorGeopoint(place.geographicPoint)
+            }
         }
         function updateScope (data, scope, idName, otherScopeToCheck) {
             var scopeIdList = [];

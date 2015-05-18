@@ -18,8 +18,8 @@
                 <i class="fi-social-facebook"></i>
             </a>
         </li>
-        <li class="generalControls float-right ng-hide" ng-if="$root.path != 'iframe'">
-            <button ng-click="createPlaces()"><i class="fi-plus"></i></button>
+        <li ng-controller="controlsCtrl" class="generalControls float-right" ng-if="$root.path != 'iframe'">
+            <button ng-click="addAllPlaces()"><i class="fi-plus"></i></button>
         </li>
     </ul>
 </div>

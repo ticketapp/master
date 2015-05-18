@@ -1,5 +1,5 @@
-angular.module('claudeApp').directive('ngControls', ['$rootScope', '$window',
-    function($rootScope, $window){
+angular.module('claudeApp').directive('ngControls', ['$rootScope', '$window', '$timeout',
+    function($rootScope, $window, $timeout){
     return{
         restrict : 'E',
         templateUrl:'assets/components/buttonsControls/controls.html',
