@@ -162,7 +162,9 @@ object Event {
       SQL(
         """SELECT event.* FROM eventsPlaces eP
           | INNER JOIN events event ON event.eventId = eP.eventId
-          |   WHERE eP.placeId = {placeId} 
+          |   WHERE eP.placeId = {placeId}
+          |     AND (endTime IS NOT NULL AND endTime > CURRENT_TIMESTAMP
+          |        OR endTime IS NULL AND startTime > CURRENT_TIMESTAMP - interval '12 hour')
           |ORDER BY event.creationDateTime DESC""".stripMargin)
         .on('placeId -> placeId)
         .as(EventParser.*)
@@ -196,8 +198,10 @@ object Event {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT e.* FROM eventsOrganizers eO
-          | INNER JOIN events e ON e.eventId = eO.eventId
-          |WHERE eO.organizerId = {organizerId} 
+          | INNER JOIN events e ON e.eventId = eO.eventId AND
+          |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
+          |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
+          |   WHERE eO.organizerId = {organizerId}
           |ORDER BY e.creationDateTime DESC""".stripMargin)
         .on('organizerId -> organizerId)
         .as(EventParser.*)
