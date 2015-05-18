@@ -1,0 +1,20 @@
+<form ng-show="success.length == 0" name="contactForm" ng-submit="postMsg(message)">
+    <md-input-container flex>
+        <input ng-model="message.subject" required placeholder="Sujet" ng-minlength="3" name="subject">
+        <div ng-messages="contactForm.subject.$error">
+            <div ng-message="required">Ce champ est obligatoire</div>
+            <div ng-message="minlength">Ce champ doit comporter au moins 3 characters</div>
+        </div>
+     </md-input-container>
+    <md-input-container flex>
+    <textarea ng-model="message.content" ng-minlength="8" required placeholder="message" name="message"></textarea>
+    <div ng-messages="contactForm.message.$error">
+        <div ng-message="required">Ce champ est obligatoire</div>
+        <div ng-message="minlength">Ce champ doit comporter au moins 8 characters</div>
+    </div>
+    </md-input-container>
+    <input type="submit" class="button">
+</form>
+<div ng-show="success.length > 0">
+    <h3>{{success}}</h3>
+</div>
