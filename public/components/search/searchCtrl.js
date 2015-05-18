@@ -408,12 +408,15 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             }
         };
         if ($rootScope.geoLoc.length > 0) {
-            console.log($rootScope.geoLoc)
+            console.log($rootScope.geoLoc);
             search()
         } else {
             $rootScope.$watch('geoLoc', function (newVal) {
-                console.log($rootScope.geoLoc)
+                console.log($rootScope.geoLoc);
                 if (newVal.length > 0) {
+                    $scope.events = [];
+                    $scope.places = [];
+                    $scope.organizers = [];
                     search()
                 }
             })

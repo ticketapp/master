@@ -61,7 +61,7 @@ angular
             templateUrl:'assets/views/connected.html'
         })
         .when('/mentionsLegales',{
-            templateUrl:'assets/views/connected.html'
+            templateUrl:'assets/views/legales.html'
         })
       .otherwise({
         redirectTo: '/'
