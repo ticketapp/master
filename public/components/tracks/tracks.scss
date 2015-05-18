@@ -69,8 +69,12 @@
 md-track-tooltipe {
   position: absolute;
   display: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 8px;
+  z-index: 100;
 }
-i:hover > md-track-tooltipe, h3:hover > md-track-tooltipe {
+i:hover > md-track-tooltipe {
   position: absolute;
   display: block;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);

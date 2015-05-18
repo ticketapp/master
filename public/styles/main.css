@@ -27353,10 +27353,14 @@ md-tooltip[width-32="8"].md-show .md-background {
 md-track-tooltipe {
   position: absolute;
   display: none;
+  white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 8px;
+    z-index: 100;
 }
 
 /* line 73, ../../public/components/tracks/tracks.scss */
-i:hover > md-track-tooltipe, h3:hover > md-track-tooltipe {
+i:hover > md-track-tooltipe {
   position: absolute;
   display: block;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);

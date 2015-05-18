@@ -40,31 +40,38 @@
          ng-class="{'padding0 margin0': $root.window == 'small'}">
         <i class="fi-play playInImg"
            ng-click="$root.addToPlaylist([track], artist)">
+            <md-track-tooltipe>
+                Ajouter à la lecture en cours
+            </md-track-tooltipe>
         </i>
     </div>
-    <div ng-class="{'column medium-7': $root.window != 'small'}"
-         style="overflow: hidden; height: 48px;">
-        <h3>{{track.title}}</h3>
-        <md-track-tooltipe>
-            {{track.title}}
-        </md-track-tooltipe>
+    <div style="overflow: hidden; height: 48px; margin-top: 5px;">
+        <b>{{track.title}}</b>
     </div>
     <a target="_blank"
        href="{{track.redirectUrl}}"
-       class="column small-7"
+       class="column small-7 padding0"
        ng-class="{'float-left': $root.window != 'small'}"
        style="font-size: 27px;" ng-if="track.platform == 's'">
         <i style="display: block"
            ng-class="{'float-right': $root.window == 'small'}"
-           class="fi-soundcloud"></i>
+           class="fa fa-soundcloud">
+            <md-track-tooltipe>
+                Ecouter sur Soundcloud
+            </md-track-tooltipe>
+           </i>
     </a>
     <a href="https://youtube.com/watch?v={{track.url}}"
-       class="column small-7"
+       class="column small-7 padding0"
        ng-class="{'float-left': $root.window != 'small'}"
        style="font-size: 27px;"
        ng-if="track.platform == 'y'"
        target="_blank">
         <i style="display: block" ng-class="{'float-right': $root.window == 'small'}"
-           class="fi-social-youtube"></i>
+           class="fi-social-youtube">
+            <md-track-tooltipe>
+                Ecouter sur Youtube
+            </md-track-tooltipe>
+           </i>
     </a>
 </div>

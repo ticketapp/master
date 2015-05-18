@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreRequest', 'InfoModal',
-    'TracksRecommender',
-    function ($http, $q, StoreRequest, InfoModal, TracksRecommender){
+    'TracksRecommender', '$rootScope',
+    function ($http, $q, StoreRequest, InfoModal, TracksRecommender, $rootScope){
     var factory = {
         user : false,
         getToken : function () {
@@ -57,6 +57,12 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                 error(function (data) {
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
+                        var connectListener = $rootScope.$watch('connected', function (newVal) {
+                            if (newVal == true) {
+                                TracksRecommender.UpsertTrackRate(true, trackId);
+                                connectListener();
+                            }
+                        })
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite');
                     }
@@ -65,7 +71,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         removeFromFavorites: function (trackId) {
             $http.post('/tracks/' + trackId + '/removeFromFavorites').
                 success(function () {
-                    TracksRecommender.UpsertTrackRate(true, trackId);
+                    TracksRecommender.UpsertTrackRate(false, trackId);
                 }).
                 error(function (data) {
                     if (data.error == 'Credentials required') {
