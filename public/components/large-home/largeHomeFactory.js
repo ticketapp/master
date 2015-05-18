@@ -13,6 +13,50 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                        factory.infos.push(info);
                    }
                    data.forEach(pushInfo);
+                   factory.infos = [
+                       {
+                           id: 1,
+                           displayIfConnected: true,
+                           animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
+                               'Poster vos messages dans la rubrique bug/FAQ' +
+                               '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
+                               'transparent;top: 20px;' +
+                               'width: 0;   height: 0;   border-top: 10px solid transparent;  ' +
+                               'border-bottom: 10px solid transparent;' +
+                               'border-left: 10px solid white;"></div>'),
+                               style : 'right: 80px;padding: 10px;' +
+                                   'box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);' +
+                                   'position: fixed;top: 110px;width: 25%;background: white;'
+
+                           },
+                           content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Claude à besoin de vos suggestions</h3><p>' +
+                               '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
+                               'Claude est en version Beta, aidez-le à s\'ammeliorer en reportant les bugs ou en laissant vos suggestions ' +
+                               '</b>' +
+                               '</p>')
+                       },
+                       {
+                       id: 1,
+                       displayIfConnected: false,
+                       animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
+                           'Connectez-vous en un clic via Facebook' +
+                           '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
+                           'transparent;top: 20px;' +
+                           'width: 0;   height: 0;   border-top: 10px solid transparent;  ' +
+                           'border-bottom: 10px solid transparent;' +
+                           'border-left: 10px solid white;"></div>'),
+                           style : 'right: 80px;padding: 10px;' +
+                               'box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);' +
+                               'position: fixed;top: 180px;width: 25%;background: white;'
+
+                       },
+                       content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Connectez-vous</h3> <p>' +
+                           '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
+                           'Pour enregistrer vos playlist et faire connaitre à Claude vos artistes et vos lieux favoris ' +
+                           '</b>' +
+                           '</p>')
+                   }
+                   ];
                    deferred.resolve(factory.infos);
                 }).error(function () {
                 });
