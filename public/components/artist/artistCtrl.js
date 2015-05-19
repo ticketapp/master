@@ -40,14 +40,20 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 }
                 if ($rootScope.connected == true) {
                     ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
-                        $scope.isFollowed = isFollowed;
+                        $timeout(function () {
+                            $scope.$apply(function () {
+                                $scope.isFollowed = isFollowed;
+                            })
+                        },0);
                     })
                 } else {
                     $rootScope.$watch('connected', function () {
                         ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
-                            if (isFollowed == true || isFollowed == false) {
-                                $scope.isFollowed = isFollowed;
-                            }
+                            $timeout(function () {
+                                $scope.$apply(function () {
+                                    $scope.isFollowed = isFollowed;
+                                })
+                            },0);
                         })
                     })
                 }
@@ -71,7 +77,11 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             ArtistsFactory.followArtistByArtistId($scope.artist.artistId, $scope.artist.name).then(
                 function (followed) {
                 if (followed != 'error') {
-                    $scope.isFollowed = true;
+                    $timeout(function () {
+                        $scope.$apply(function () {
+                            $scope.isFollowed = true;
+                        })
+                    },0);
                 }
             })
         };
@@ -79,7 +89,11 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.stopFollow = function () {
             ArtistsFactory.unfollowArtist($scope.artist.artistId).then(function (followed) {
                 if (followed != 'error') {
-                    $scope.isFollowed = false;
+                    $timeout(function () {
+                        $scope.$apply(function () {
+                            $scope.isFollowed = false;
+                        })
+                    },0);
                 }
             })
         };
