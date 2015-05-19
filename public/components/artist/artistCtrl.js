@@ -7,6 +7,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.trackTitle = '';
         $scope.showDesc = false;
         $scope.selectedTab = 0;
+        $scope.isFollowed = false;
         if ($localStorage.tracksSignaled == undefined) {
             $localStorage.tracksSignaled = [];
         }
@@ -31,6 +32,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 $scope.artist = artist;
                 $scope.tracks = [];
                 artist.tracks = $filter('orderBy')(artist.tracks, 'confidence', true);
+                console.log(artist.tracks)
                 artist.tracks.forEach(pushTrack);
                 $scope.artist.tracks = $scope.tracks;
                 $rootScope.loadingTracks = false;
@@ -42,18 +44,22 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
                         $timeout(function () {
                             $scope.$apply(function () {
-                                $scope.isFollowed = isFollowed;
+                                if (isFollowed == true || isFollowed == false) {
+                                    $scope.isFollowed = isFollowed;
+                                }
                             })
                         },0);
                     })
                 } else {
                     $rootScope.$watch('connected', function () {
                         ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
-                            $timeout(function () {
-                                $scope.$apply(function () {
-                                    $scope.isFollowed = isFollowed;
-                                })
-                            },0);
+                            if (isFollowed == true || isFollowed == false) {
+                                $timeout(function () {
+                                    $scope.$apply(function () {
+                                        $scope.isFollowed = isFollowed;
+                                    })
+                                }, 0);
+                            }
                         })
                     })
                 }

@@ -8,6 +8,7 @@ angular.module('claudeApp').
             $scope.showDesc = false;
             PlaceFactory.getPlace($routeParams.id).then(function (place) {
                 $scope.place = place;
+                console.log(place);
                 if ($scope.place.geographicPoint != undefined) {
                     $scope.geographicPoint =
                         RefactorGeopoint.refactorGeopoint($scope.place.geographicPoint);
@@ -23,7 +24,9 @@ angular.module('claudeApp').
                 }
                 if ($rootScope.connected == true) {
                     PlaceFactory.getIsFollowed(place.placeId).then(function (isFollowed) {
-                        $scope.isFollowed = isFollowed;
+                        if (isFollowed == true || isFollowed == false) {
+                            $scope.isFollowed = isFollowed;
+                        }
                     })
                 } else {
                     $rootScope.$watch('connected', function () {

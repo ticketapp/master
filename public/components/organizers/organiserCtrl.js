@@ -6,6 +6,7 @@ angular.module('claudeApp').
         $scope.map = false;
         $scope.showDesc = false;
         $scope.mapHeight = '100%';
+        $scope.isFollowed = false;
         OrganizerFactory.getOrganizer($routeParams.id).then(function (organizer) {
             $scope.organizer = organizer;
             if ($scope.organizer.geographicPoint != undefined) {
@@ -23,13 +24,17 @@ angular.module('claudeApp').
             }
             if ($rootScope.connected == true) {
                 OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
-                    $scope.isFollowed = isFollowed;
+                    if (isFollowed == true || isFollowed == false) {
+                        $scope.isFollowed = isFollowed;
+                    }
                 })
             } else {
                 $rootScope.$watch('connected', function () {
                     OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
-                            $scope.isFollowed = isFollowed;
+                            if (isFollowed == true || isFollowed == false) {
+                                $scope.isFollowed = isFollowed;
+                            }
                         }
                     })
                 })

@@ -38,6 +38,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 $http.get('/places?geographicPoint='+geoLoc+'&numberToReturn=12&offset='+offset)
                     .success(function(data, status) {
                         factory.places = data;
+                        console.log(data)
                         deferred.resolve(factory.places);
                     }).error(function(data, status) {
                         deferred.reject('erreur');

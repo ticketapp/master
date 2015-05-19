@@ -3,6 +3,7 @@ angular.module('claudeApp').
         function ($scope, EventFactory, $routeParams, RefactorGeopoint, $rootScope) {
             $scope.event = {};
             $scope.map = false;
+            $scope.isFollowed = false;
             EventFactory.getEvent($routeParams.id).then(function (event) {
                 $scope.event = event;
                 if (event.places[0].geographicPoint != undefined) {
@@ -15,8 +16,10 @@ angular.module('claudeApp').
                 }
                 if ($rootScope.connected == true) {
                     EventFactory.getIsFollowed(event.eventId).then(function (isFollowed) {
-                        $scope.isFollowed = isFollowed;
-                        console.log(isFollowed)
+                        if (isFollowed == true || isFollowed == false) {
+                            $scope.isFollowed = isFollowed;
+                            console.log(isFollowed)
+                        }
                     })
                 } else {
                     $rootScope.$watch('connected', function () {
