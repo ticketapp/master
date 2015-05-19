@@ -264,14 +264,10 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     $rootScope.$apply(function () {
                         $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
                         $rootScope.tracks = $rootScope.artist.tracks;
-                    });
-                    if (value.length > 0) {
-                        $rootScope.loadingTracks = false;
-                    } else {
                         $timeout(function () {
                             $rootScope.loadingTracks = false;
-                        }, 1000)
-                    }
+                        }, 2000)
+                    });
                 }, 0);
                 function saveTrack (track) {
                     if (track.redirectUrl == undefined) {

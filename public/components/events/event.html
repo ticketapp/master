@@ -94,7 +94,9 @@
             <div class="justify" ng-if="readDesc" data-ng-bind-html="organizer.description"></div>
         </div>
     </div>
-    <div class="column large-4 float-left eventInfo padding0 map-container" style="height: 300px">
+    <div class="column large-4 float-left eventInfo padding0 map-container"
+         style="height: 300px"
+            ng-if="map">
         <div class="column large-12 zIndex1 absolute" ng-if="adresses">
             <a href="#/places/{{ place.placeId }}" data-ng-repeat="place in event.places" class="column large-12">
                 <b>{{place.name}}</b>

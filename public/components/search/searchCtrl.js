@@ -95,12 +95,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         function getEvents() {
             filterEventsByTime();
             EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
-            });
-        }
-
-        function getEventsByContaining() {
-            EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
                 updateScope(events, $scope.filtredEvents, 'eventId', $scope.events);
             });
         }
@@ -127,6 +121,17 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         function getEventsByCity() {
             EventsFactory.getEventsByCity(_research, offset).then(function (events) {
                 updateScope(events, $scope.events, 'eventId');
+            });
+        }
+
+        function getEventsByContaining() {
+            EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
+                updateScope(events, $scope.filtredEvents, 'eventId', $scope.events);
+                console.log(events);
+                getEventsArtistByContaining();
+                getEventsByGenre();
+                getPlacesEventsByContaining();
+                getEventsByCity();
             });
         }
 
@@ -202,10 +207,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     getEvents()
                 } else {
                     getEventsByContaining();
-                    getEventsArtistByContaining();
-                    getEventsByGenre();
-                    getPlacesEventsByContaining();
-                    getEventsByCity();
                 }
             }
         }
@@ -265,6 +266,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     $scope.initializeTime()
                 } else {
                     $scope.events = $filter('filter')($scope.events, {name: _research});
+                    $scope.filtredEvents = $filter('filter')($scope.filtredEvents, {name: _research});
                     $scope.organizers = $filter('filter')($scope.organizers, {nickname :  _research});
                     $scope.places = $filter('filter')($scope.places, {name :  _research});
                     $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});

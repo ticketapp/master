@@ -5,10 +5,10 @@ angular.module('claudeApp').
             $scope.map = false;
             EventFactory.getEvent($routeParams.id).then(function (event) {
                 $scope.event = event;
-                if (event.places.length > 0) {
+                if (event.places[0].geographicPoint != undefined) {
                     $scope.geographicPoint =
                         RefactorGeopoint.refactorGeopoint(event.places[0].geographicPoint);
-                    console.log($scope.geographicPoint);
+                    console.log(event.places[0].geographicPoint);
                     $scope.adresses = true;
                     $scope.mapHeight = '300px';
                     $scope.map = true;

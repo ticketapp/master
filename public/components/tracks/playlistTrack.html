@@ -30,7 +30,7 @@
 <div as-sortable-item-handle class="trackInfos">
     <a href="#/artists/{{track.artist.facebookUrl}}">{{track.artist.name}}</a><br/>
     {{track.title | limitTo: 32}}<b ng-if="track.title.length > 32">...</b><br/>
-    <a target="_blank" href="{{track.redirectUrl}}"
+    <a target="_blank" href="http://{{track.redirectUrl}}"
        class="column small-2 padding0"
        style="font-size: 27px;"
        ng-if="track.platform == 's'">
