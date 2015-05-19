@@ -5,11 +5,12 @@
     </h4>
     <div ng-repeat="info in infos" class=" column large-12 intro-text animate-show"
          ng-if="elementEnCours == info">
-        <h4 ng-if="info.title.length > 0 && info.fixedTitle == false" ng-bind-html="info.title"></h4>
+        <h3 class="textColorWhite margin10" ng-if="info.title.length > 0 && info.fixedTitle == false" ng-bind-html="info.title"></h3>
         <div ng-bind-html="info.content"></div>
         <div class=" marginTop20 column medium-11 fade"
              ng-if="elementEnCours.artist.tracks.length > 0">
-            <div class="float-right">
+            <div class="float-right pointer"
+                 ng-click="$root.addAndPlay(elementEnCours.artist.tracks, elementEnCours.artist)">
                 Ecouter {{elementEnCours.artist.name}}
                 <div class="img-circularPlayer BlackTrans">
                     <i class="pauseInImg ng-scope fi-play font-size: 80px;"

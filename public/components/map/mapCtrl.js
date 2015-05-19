@@ -1,5 +1,6 @@
 angular.module('claudeApp').
-    controller('MapCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
+    controller('MapCtrl', ['$scope', '$rootScope', '$timeout',
+        function ($scope, $rootScope, $timeout) {
         $scope.zoom = 13;
         $scope.moreZoom = function() {
             $scope.zoom = $scope.zoom + 1;
@@ -14,10 +15,11 @@ angular.module('claudeApp').
             var oldInf = window.directionInfos;
             var waitForInfosChanges = setInterval(function () {
                 if (window.directionInfos != oldInf) {
-                    clearInterval(waitForInfosChanges)
+                    clearInterval(waitForInfosChanges);
                     $timeout(function () {
                         $scope.$apply(function () {
                             $scope.directionInfos = window.directionInfos;
+                            console.log($scope.directionInfos)
                         })
                     }, 0)
                 }
