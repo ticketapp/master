@@ -39,11 +39,6 @@
             <i>à</i>
             {{ event.startTime | date:'HH:mm' }}
         </b>
-        <i ng-show="event.endTime">au
-            <b> {{ event.endTime | date:'dd/MM' }} </b>
-            à
-            <b> {{ event.endTime | date:'HH:mm' }} </b>
-        </i>
         <i ng-if="$root.window == 'small'" style="color: {{event.priceColor}}; font-size: 30px;"
            class="float-right fa "
            ng-class="{'fa-chevron-down': !$parent.showEventDetail, 'fa-chevron-up': $parent.showEventDetail}"

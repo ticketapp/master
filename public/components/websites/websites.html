@@ -1,6 +1,7 @@
 <i ng-if="websites.otherWebsites.length > 0"
-   class="float-right fa fa-chevron-down openWebsitesContainer pointer"
-   ng-click="$parent.showUrls = !$parent.showUrls"></i>
+   class="float-right fa openWebsitesContainer pointer"
+   ng-click="$parent.showUrls = !$parent.showUrls"
+   ng-class="{'fa-chevron-down': !$parent.showUrls, 'fa-chevron-up': $parent.showUrls}"></i>
 <ul class="absolute zIndex4 websitesContainer"
     ng-if="showUrls">
     <li ng-repeat="website in websites.otherWebsites"
