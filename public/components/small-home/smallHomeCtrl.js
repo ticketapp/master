@@ -136,6 +136,15 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                 } else if ($scope.events[i].genres[g].name == 'chanson' && foundMarkerGenre == false) {
                     markerGenre = 'accoustique.png';
                     foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'musiques latines' && foundMarkerGenre == false) {
+                    markerGenre = 'salsa.png';
+                    foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'musiques du monde' && foundMarkerGenre == false) {
+                    markerGenre = 'du%20monde.png';
+                    foundMarkerGenre = true;
+                } else if ($scope.events[i].genres[g].name == 'classique' && foundMarkerGenre == false) {
+                    markerGenre = 'classique.png';
+                    foundMarkerGenre = true;
                 }
 
             }
