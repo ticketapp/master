@@ -220,31 +220,40 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             }).start(function (data, etc) {
             })
             .done(function (value) {
-                $timeout(function () {
-                    $rootScope.$apply(function () {
-                        $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
-                        $rootScope.tracks = $rootScope.artist.tracks;
-                        $timeout(function () {
+                    $rootScope.loadingTracks = true;
+                    function saveTrack(track) {
+                        if (track.redirectUrl == undefined) {
+                            track.redirectUrl = track.url;
+                        }
+                        $http.post('/tracks/create', {
+                            artistFacebookUrl: artist.facebookUrl,
+                            redirectUrl: track.redirectUrl,
+                            title: track.title,
+                            url: track.url,
+                            platform: track.platform,
+                            thumbnailUrl: track.thumbnailUrl
+                        }).success(function (){
                             $rootScope.loadingTracks = false;
-                        }, 2000)
-                    });
-                }, 0);
-                function saveTrack (track) {
-                    if (track.redirectUrl == undefined) {
-                        track.redirectUrl = track.url;
+                        }).error(function (data) {
+                            console.log(data)
+                        })
                     }
-                    $http.post('/tracks/create', {
-                        artistFacebookUrl: artist.facebookUrl,
-                        redirectUrl : track.redirectUrl,
-                        title: track.title,
-                        url: track.url,
-                        platform: track.platform,
-                        thumbnailUrl: track.thumbnailUrl
-                    }).error(function (data) {
-                        console.log(data)
-                    })
-                }
-                value.forEach(saveTrack);
+
+                    function pushTrack(track) {
+                        $timeout(function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.artist.tracks.push(track);
+                                $rootScope.tracks.push(track);
+                            });
+                        }, 0);
+                        saveTrack(track)
+                    }
+
+                    if (value != []) {
+                        value.forEach(pushTrack);
+                    } else {
+                        $rootScope.loadingTracks = false;
+                    }
             })
             .fail(function (error) {
                 console.log(error)

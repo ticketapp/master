@@ -62,7 +62,9 @@
                        ng-class="{'padding0': $root.window == 'small',
                            'small-6': $root.playlist.tracks.length == 0,
                            'small-4': $root.playlist.tracks.length > 0}">
-                        <i class="fi-play"></i> Tout jouer
+                        <i class="fi-play"></i> Tout jouer <b ng-if="artist.tracks.length>12">
+                        ({{artist.tracks.length}} moceaux)
+                        </b>
                     </a>
                     <a class="button column float-left padding0 small-4"
                        style="min-height: 40px; line-height: 40px;"
