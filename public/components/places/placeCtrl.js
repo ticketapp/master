@@ -1,7 +1,8 @@
 angular.module('claudeApp').
     controller('PlaceCtrl', ['$scope', 'PlaceFactory', '$routeParams', 'WebsitesFactory',
-        'RefactorGeopoint', '$rootScope',
-        function ($scope, PlaceFactory, $routeParams, WebsitesFactory, RefactorGeopoint, $rootScope) {
+        'RefactorGeopoint', '$rootScope', 'InfoModal',
+        function ($scope, PlaceFactory, $routeParams, WebsitesFactory, RefactorGeopoint, $rootScope,
+            InfoModal) {
             $scope.place = {};
             $scope.map = false;
             $scope.mapHeight = '100%';
@@ -28,15 +29,18 @@ angular.module('claudeApp').
                             $scope.isFollowed = isFollowed;
                         }
                     })
-                } else {
-                    $rootScope.$watch('connected', function () {
+                }
+                $rootScope.$watch('connected', function (connected) {
+                    if (connected == false) {
+                        $scope.isConnected = false;
+                    } else {
                         PlaceFactory.getIsFollowed(place.placeId).then(function (isFollowed) {
                             if (isFollowed == true || isFollowed == false) {
                                 $scope.isFollowed = isFollowed;
                             }
                         })
-                    })
-                }
+                    }
+                })
             });
             PlaceFactory.getPlaceEvents($routeParams.id).then(function (events) {
                 $scope.place.events = events;
@@ -47,16 +51,18 @@ angular.module('claudeApp').
                     function (followed) {
                         if (followed != 'error') {
                             $scope.isFollowed = true;
+                            InfoModal.displayInfo('Vous suivez ' + $scope.place.name)
                         }
                     })
             };
 
-            $scope.stopFollow = function () {
+            $scope.unfollow = function () {
                 PlaceFactory.unfollowPlace($scope.place.placeId,
                     $scope.place.name).then(
                     function (followed) {
                         if (followed != 'error') {
                             $scope.isFollowed = false;
+                            InfoModal.displayInfo('Vous ne suivez plus ' + $scope.place.name)
                         }
                     })
             };

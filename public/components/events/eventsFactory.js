@@ -170,7 +170,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/events/' + id +'/follow', "", 'vous suivez ' + eventName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('erreur');
                 });
@@ -185,7 +185,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/events/' + id +'/unfollow', "", 'vous ne suivez plus ' + eventName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('erreur');
                 });

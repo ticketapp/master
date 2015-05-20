@@ -4,10 +4,21 @@
   width: 70px;
   height: 55px;
 }
-.generalControls i{
+.generalControls i {
   color: #ffffff;
-  font-size: 25px;
-  line-height: 25px;
+  font-size: 35px;
+  line-height: 40px;
+  margin-top: 2.5px;
+}
+
+
+.generalControls > a {
+  border-radius: 3px 0 0 3px;
+  background: rgb(45, 170, 225);
+  float: right;
+  padding: 5px 12px;
+  width: 100%;
+  text-align: center;
 }
 .ng-controls {
   right: 0;

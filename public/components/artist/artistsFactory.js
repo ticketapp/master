@@ -149,7 +149,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByArtistId', "", 'vous suivez ' + artistName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.resolve('error');
                 })
@@ -165,10 +165,10 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         StoreRequest.storeRequest('post', '/artists/' + id +
                             '/unfollowArtistByArtistId', "", 'vous ne suivez plus' + artistName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.resolve('error');
-                })
+                });
             return deferred.promise;
         },
         getArtistEvents : function (id) {

@@ -12,12 +12,13 @@
 .float-none{float:none!important;}
 .hiddenBlock{position: absolute; top: -99999px; opacity: 0;}
 /*Colors*/
-.primCol {background: $primary-color; color : #ffffff}
+.primCol {background: #007095; color : #ffffff}
 .primCol > a {color : #ffffff}
 /*.primCol:hover {background: #007095}*/
 .white {background: #ffffff}
 .active{background: primary-color}
-.BlackTrans{background: transparentBlack}
+.BlackTrans{background: rgba(0, 0, 0, 0.48)
+}
 /*z-index*/
 .zIndex1{z-index:1;}
 .zIndex2{z-index:2;}

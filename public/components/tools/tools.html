@@ -1,17 +1,26 @@
-<div class="modal-header">
-    <h3 class="modal-title column small-9">Tools</h3>
-    <a ng-click="cancel()" class="float-right close">&times;</a>
-</div>
-<div class="modal-body column large-12">
-    <ng-connect ng-if="$root.connected == false">
-    </ng-connect>
-    <a class="button" ng-click="viewIssues = !viewIssues; viewPlaylists = false;
-    viewFavorites = false"> Issues </a>
-    <a class="button" ng-click="getPlaylists(); viewFavorites = false; viewIssues = false;
-    viewPlaylists = !viewPlaylists"> playlists </a>
-    <a class="button" ng-click="getFavoritesTracks(); viewIssues = false; viewPlaylists = false;
-    viewFavorites = !viewFavorites"> Morceaux favoris </a>
-    <a  ng-if="$root.connected == true" class="button" ng-click="logout()">Logout</a>
+<b ng-click="cancel()" class="close-modal textColorWhite"><i class="fi-x-circle"></i></b>
+<div class="modal-body column large-12 padding0">
+    <b class="button column"
+       ng-class="{'medium-4': $root.connected == false, 'medium-3': $root.connected == true,
+       'active': viewIssues == true}"
+       ng-click="viewIssues = true; viewPlaylists = false; viewFavorites = false">
+        <i class="fa fa-bug"></i>
+        <b>FAQ/Bugs</b>
+    </b>
+    <b class="button column"
+       ng-class="{'medium-4': $root.connected == false,
+       'medium-3': $root.connected == true,
+       'active': viewPlaylists == true
+       }"
+       ng-click="getPlaylists(); viewFavorites = false; viewIssues = false;
+    viewPlaylists = true"><i class="fa fa-th-list"></i><b> playlists</b></b>
+    <b class="button column"
+       ng-class="{'medium-4': $root.connected == false, 'medium-3': $root.connected == true,
+       'active': viewFavorites == true}"
+       ng-click="getFavoritesTracks(); viewIssues = false; viewPlaylists = false;
+    viewFavorites = true"><i class="fa fa-star"></i><b> Morceaux favoris</b></b>
+    <b  ng-if="$root.connected == true" class="button column medium-3"
+        ng-click="logout()"><i class="fa fa-sign-out"></i><b> Deconnexion</b></b>
     <div ng-if="viewPlaylists">
         <ul ng-repeat="playlist in playlists">
             <a ng-click="$root.loadPlaylist(playlist)">{{playlist.name}}</a>
@@ -31,14 +40,17 @@
         <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
         <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>
     </div>
+    <ng-connect ng-if="$root.connected == false">
+</ng-connect>
     <div ng-if="viewFavorites">
-        <ul ng-repeat="track in favorites">
+        <ul ng-repeat="track in favorites" ng-init="track.isFavorite = true">
             <ng-track class="column large-6"></ng-track>
         </ul>
         <b ng-if="viewFavorites && favorites.length == 0">Vous n'avez pas de favoris</b>
         <b ng-if="viewFavorites && $root.connected == false">Vous devez vous connecter</b>
     </div>
     <div ng-if="viewIssues" ng-issues></div>
+
 </div>
 <div class="modal-footer">
 </div>

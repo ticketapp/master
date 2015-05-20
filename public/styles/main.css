@@ -16946,12 +16946,23 @@ Copyright (c) 2014 Daniel Eden
 
 /* line 19, ../../public/styles/tools.scss */
 .active {
-  background: primary-color;
+  background: #007095;
 }
-
+.isFollowButton > .first {
+    display: block;
+}
+.isFollowButton > .second {
+    display: none;
+}
+.isFollowButton:hover > .second {
+    display: block;
+}
+.isFollowButton:hover > .first {
+    display: none;
+}
 /* line 20, ../../public/styles/tools.scss */
 .BlackTrans {
-  background: transparentBlack;
+  background: rgba(0, 0, 0, 0.47);
 }
 
 /*z-index*/
@@ -27832,19 +27843,37 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
 
 /* line 1, ../../public/components/buttonsControls/controls.scss */
 .generalControls {
-  display: block;
-  margin-top: 5px;
-  width: 70px;
-  height: 55px;
+    display: block;
+    margin-top: 5px;
+    width: 70px;
+    height: 50px;
 }
 
 /* line 7, ../../public/components/buttonsControls/controls.scss */
 .generalControls i {
   color: #ffffff;
-  font-size: 25px;
-  line-height: 25px;
+    font-size: 35px;
+    line-height: 40px;
+    margin-top: 2.5px;
+}
+.close-modal {
+    top: -17.5px;
+    right: -10px;
+    z-index: 1;
+    font-weight: bold;
+    font-size: 25px;
+    position: absolute;
+    cursor: pointer;
 }
 
+.generalControls > a {
+    border-radius: 3px 0 0 3px;
+    background: rgb(45, 170, 225);
+    float: right;
+    padding: 5px 12px;
+    width: 100%;
+    text-align: center;
+}
 /* line 12, ../../public/components/buttonsControls/controls.scss */
 .ng-controls {
   right: 0;

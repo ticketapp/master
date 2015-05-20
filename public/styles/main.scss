@@ -27,6 +27,15 @@
   padding: 0.2em 0;
 }
 
+.close-modal {
+  top: -17.5px;
+  right: -10px;
+  z-index: 1;
+  font-weight: bold;
+  font-size: 25px;
+  position: absolute;
+  cursor: pointer;
+}
 //miniatures//
 .block_min:hover >.img_min>.toGrow{
   -webkit-transform: scale(1.2);

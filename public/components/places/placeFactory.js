@@ -101,7 +101,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         StoreRequest.storeRequest('post', '/places/' + id +'/followByPlaceId',
                             "", 'vous suivez ' + placeName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('error');
                 });
@@ -117,7 +117,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         StoreRequest.storeRequest('post', '/places/' + id +'/unfollowPlaceByPlaceId',
                             "", 'vous ne suivez plus ' + placeName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('error');
                 });

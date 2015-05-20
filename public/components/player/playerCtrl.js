@@ -23,6 +23,7 @@ angular.module('claudeApp').
             var i = 0;
             var updateProgressYt;
             var player;
+            var stopPush = false;
             if ($localStorage.tracksSignaled == undefined) {
                 $localStorage.tracksSignaled = [];
             }
@@ -110,11 +111,14 @@ angular.module('claudeApp').
                     var end = 10;
                     function addLotOfTracks (start, end) {
                         for (var tr = start; tr < end; tr++) {
+                            if (stopPush == true) {
+                                return;
+                            }
                             if (tracks[tr] != undefined) {
                                 pushTrack(tracks[tr], artist)
                             }
                         }
-                        if (end < tracksLenght) {
+                        if (end < tracksLenght && stopPush == false) {
                             $timeout(function () {
                                 addLotOfTracks(start + 10, end + 10)
                             },10)
@@ -130,6 +134,7 @@ angular.module('claudeApp').
             }
 
             $rootScope.addToPlaylist = function (tracks, artist) {
+                stopPush = false
                 offset = 0;
                 tracks = $filter('orderBy')(tracks, 'confidence', true);
                 if ($rootScope.playlist.tracks.length == 0) {
@@ -148,6 +153,7 @@ angular.module('claudeApp').
             };
 
             $rootScope.loadPlaylist = function (playlist) {
+                stopPush = false
                 $rootScope.playlist.name = playlist.name;
                 $rootScope.playlist.playlistId = playlist.playlistId;
                 $rootScope.playlist.tracks = [];
@@ -179,6 +185,7 @@ angular.module('claudeApp').
             };
 
             $rootScope.addAndPlay = function (tracks, artist) {
+                stopPush = false
                 tracks = $filter('orderBy')(tracks, 'confidence', true);
                 offset = 0;
                 pushListOfTracks(artist, tracks, true);
@@ -286,6 +293,7 @@ angular.module('claudeApp').
             };
 
             $scope.remPlaylist = function () {
+                stopPush = true;
                 $rootScope.playlist.tracks = [];
                 played = [];
                 playlistEvents = [];

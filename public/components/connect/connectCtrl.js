@@ -1,8 +1,8 @@
 angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '$http',
     'ArtistsFactory', 'UserFactory', 'OrganizerFactory', 'EventsFactory', 'PlaceFactory',
-    'StoreRequest', '$timeout',
+    'StoreRequest', '$timeout', 'InfoModal',
     function ($scope, $rootScope, $http, ArtistsFactory, UserFactory, OrganizerFactory,
-              EventsFactory, PlaceFactory, StoreRequest, $timeout) {
+              EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal) {
 
         var token;
 
@@ -294,16 +294,16 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 if ($rootScope.lastReq.object != "") {
                     $http.post($rootScope.lastReq.path, $rootScope.lastReq.object).
                         success(function (data) {
-                            console.log(data);
-                            $scope.info = $rootScope.lastReq.success;
+                            InfoModal.displayInfo($rootScope.lastReq.success);
                             $rootScope.lastReq = {};
                         }).
                         error(function (data) {
                             if (data.error == 'Credentials required') {
-                                StoreRequest.storeRequest('post', $rootScope.lastReq.path, $rootScope.lastReq.object, $rootScope.lastReq.success)
+                                StoreRequest.storeRequest('post',
+                                    $rootScope.lastReq.path, $rootScope.lastReq.object,
+                                    $rootScope.lastReq.success)
                             } else {
-
-                                $scope.info = 'Désolé une erreur s\'est produite';
+                                InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                             }
                         })
                 } else {
@@ -316,7 +316,6 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                             if (data.error == 'Credentials required') {
                                 StoreRequest.storeRequest('post', $rootScope.lastReq.path, $rootScope.lastReq.object, $rootScope.lastReq.success)
                             } else {
-                                $scope.info = 'Désolé une erreur s\'est produite';
                             }
                         })
                 }
@@ -334,6 +333,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                             $rootScope.$apply(function () {
                                 $rootScope.connected = true;
                                 connectWin.close();
+                                InfoModal.displayInfo('Vous êtes connécté')
                             })
                         }, 0);
                         UserFactory.makeFavoriteTracksRootScope();
@@ -348,10 +348,12 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
         $scope.connectLink = function (url) {
             var connectWin = window.open(url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
             var changePath = setInterval(function() {
-                if (connectWin.location.href == undefined) {
-                    clearInterval(changePath)
+                console.log(connectWin.location);
+                if (connectWin.location == undefined && connectWin.location != {}) {
+                    clearInterval(changePath);
+                    InfoModal.displayInfo('Une erreure c\'est produite', 'error')
                 }
-                if (connectWin.location.href == 'http://localhost:9000/#/connected') {
+                if (connectWin.location.href.indexOf('#/connected') > -1) {
                     clearInterval(changePath);
                     getConnected(connectWin);
                 }

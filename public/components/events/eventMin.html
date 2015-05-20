@@ -77,10 +77,11 @@
                                      ng-click="followPlace(place)">
                                     <b>Suivre</b>
                                 </div>
-                                <div class="width100p primCol padding10 textWhite text-center"
+                                <div class="width100p primCol padding10 textWhite text-center isFollowButton"
                                      ng-if="place.isFollowed"
                                    ng-click="unfollowPlace(place)">
-                                    <b>Ne plus suivre</b>
+                                    <b class="first">Suivi</b>
+                                    <b class="second">Ne plus suivre</b>
                                 </div>
                             </a>
                         </li>
@@ -119,12 +120,11 @@
                                      ng-click="followOrganizer(organizer)">
                                     <b>Suivre</b>
                                 </div>
-                                <div class="width100p primCol padding10 textWhite text-center"
+                                <div class="width100p primCol padding10 textWhite text-center isFollowButton"
                                      ng-if="organizer.isFollowed"
                                      ng-click="unfollowOrganizer(organizer)">
-                                    <b>
-                                    Ne plus suivre
-                                    </b>
+                                    <b class="first">Suivi</b>
+                                    <b class="second">Ne plus suivre</b>
                                 </div>
                             </a>
                         </li>
@@ -166,10 +166,11 @@
                                      ng-click="followArtist(artist)">
                                     <b>Suivre</b>
                                 </div>
-                                <div class="width100p primCol padding10 textWhite text-center"
+                                <div class="width100p primCol padding10 textWhite text-center isFollowButton"
                                      ng-if="artist.isFollowed"
                                      ng-click="unfollowArtist(artist)">
-                                    <b>Ne plus suivre</b>
+                                    <b class="first">Suivi</b>
+                                    <b class="second">Ne plus suivre</b>
                                 </div>
                             </a>
                         </li>

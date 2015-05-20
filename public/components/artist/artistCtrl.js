@@ -61,8 +61,11 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                             })
                         },0);
                     })
-                } else {
-                    $rootScope.$watch('connected', function () {
+                }
+                $rootScope.$watch('connected', function (connected) {
+                    if (connected == false) {
+                        $scope.isFollowed = false;
+                    } else {
                         ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
                             if (isFollowed == true || isFollowed == false) {
                                 $timeout(function () {
@@ -72,8 +75,9 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                                 }, 0);
                             }
                         })
-                    })
-                }
+                    }
+                })
+
             });
             ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
                 $scope.artist.events = events;
@@ -97,6 +101,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     $timeout(function () {
                         $scope.$apply(function () {
                             $scope.isFollowed = true;
+                            InfoModal.displayInfo('Vous suivez ' + $scope.artist.name)
                         })
                     },0);
                 }
@@ -109,6 +114,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     $timeout(function () {
                         $scope.$apply(function () {
                             $scope.isFollowed = false;
+                            InfoModal.displayInfo('Vous ne suivez plus ' + $scope.artist.name)
                         })
                     },0);
                 }
