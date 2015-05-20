@@ -3,15 +3,20 @@
 </div>
 <div class="parallax-content">
 <div class="columns large-12">
-    <h2 id="eventTitle" class="marginTop0">
+    <a class="column medium-2 padding0">
+        <div ng-if="!isFollowed" class="width100p primCol padding10 textWhite text-center"
+             ng-click="follow()">
+            <b>Suivre</b>
+        </div>
+        <div ng-if="isFollowed" class="width100p primCol padding10 textWhite text-center"
+             ng-click="unfollow()">
+            <b>Ne plus suivre</b>
+        </div>
+    </a>
+    <h2 id="eventTitle" class="marginTop0 float-left">
         {{artist.name}}
-        <a class="button">
-            <b ng-if="!isFollowed" ng-click="follow()">Suivre</b>
-            <b ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</b>
-        </a>
-
-        <websites></websites>
     </h2>
+    <websites></websites>
 </div>
 <div class="column large-12">
     <div class="column large-12 float-left marginBottom10"
@@ -51,12 +56,12 @@
                 </div>
             </md-content>
         </md-tab>
-        <md-tab label="Tracks">
+        <md-tab label="Musique">
             <md-content>
                 <input class="column float-left height50 large-12"
                        ng-if="tracks.length > 0 || trackTitle.length > 0"
                        ng-model="$parent.trackTitle" ng-change="filterTracks(trackTitle)"
-                       placeholder="filter tracks"/>
+                       placeholder="filtrer les morceaux"/>
                 <div class="float-left column large-12 padding0">
                     <a class="button column float-left padding0"
                        style="min-height: 40px; line-height: 40px;"
@@ -66,7 +71,7 @@
                         <i class="fi-play padding0"
                            style="min-height: 40px; line-height: 40px;"
                            ng-click="playTop()">
-                            <b ng-show="selectedTop == 0">Jouer ({{artist.tracks.length}} moceaux)</b>
+                            <b ng-show="selectedTop == 0">Tout jouer ({{artist.tracks.length}} morceaux)</b>
                             <b ng-show="selectedTop > 0">Jouer le top {{selectedTop}}</b>
                         </i>
                         <b class="padding0"
@@ -96,7 +101,7 @@
                        ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0"
                        ng-class="{'padding0': $root.window == 'small'}"
                        ng-click="$root.addToPlaylist(artist.tracks, artist)">
-                        <i class="fi-plus"></i> Tout ajouter
+                        <i class="fi-plus"></i> <b>Tout ajouter</b>
                     </a>
                     <a class="button column float-left padding0"
                        style="min-height: 40px; line-height: 40px;"
@@ -105,7 +110,7 @@
                            'small-4': $root.playlist.tracks.length > 0}"
                        ng-if="tracksFiltered.length > 0"
                        ng-click="$parent.$parent.suggest = !$parent.$parent.suggest">
-                        Suggérer
+                        <b>Suggérer</b>
                     </a>
                     <form ng-if="$parent.suggest"
                           ng-submit="suggestQuery($parent.trackTitle, artist.name, artist.facebookUrl)"

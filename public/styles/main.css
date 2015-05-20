@@ -26647,6 +26647,9 @@ md-tab md-tab-label {
   overflow: hidden;
 }
 
+md-tab-label { color: white;
+    font-weight: bold;}
+
 /* line 5802, ../../public/modules/angular-component/angular-material.scss */
 md-input-group label, .md-input-group label {
   display: block;
@@ -27688,6 +27691,10 @@ top-search-block > search-bar-contener {
 /* line 29, ../../public/components/events/events.scss */
 .playProg {
   background: rgba(119, 219, 246, 0.39);
+}
+websites {
+    font-size: 35px;
+    line-height: 35px;
 }
 
 /* line 1, ../../public/components/footer/footer.scss */

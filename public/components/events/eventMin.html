@@ -160,15 +160,15 @@
                                    style="color: {{event.priceColor}}; font-size: 80px;"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
                             </div>
-                            <a class="absolute left column medium-4 padding0"                                                   >
+                            <a class="absolute left column medium-4 padding0">
                                 <div class="width100p primCol padding10 textWhite text-center"
-                                     ng-if="artist.isFollowed"
+                                     ng-if="!artist.isFollowed"
                                      ng-click="followArtist(artist)">
                                     <b>Suivre</b>
                                 </div>
                                 <div class="width100p primCol padding10 textWhite text-center"
-                                     ng-if="!artist.isFollowed"
-                                     ng-click="followArtist(artist)">
+                                     ng-if="artist.isFollowed"
+                                     ng-click="unfollowArtist(artist)">
                                     <b>Ne plus suivre</b>
                                 </div>
                             </a>

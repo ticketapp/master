@@ -103,7 +103,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             })
         };
 
-        $scope.stopFollow = function () {
+        $scope.unfollow = function () {
             ArtistsFactory.unfollowArtist($scope.artist.artistId).then(function (followed) {
                 if (followed != 'error') {
                     $timeout(function () {
