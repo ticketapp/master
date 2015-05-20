@@ -1,30 +1,28 @@
-<div class="column large-7 float-right paddingRight30">
-    <a class=" mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
-    <a class=" mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
-    <a class=" mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
-        <i class="fa fa-road"></i>
+<a class=" mapControls" ng-click="moreZoom()"><i class="fi-plus"></i></a>
+<a class=" mapControls" ng-click="lessZoom()"><i class="fi-minus"></i></a>
+<a class=" mapControls" ng-click="getItineraire(); selectTravel = !selectTravel">
+    <i class="fa fa-road"></i>
+</a>
+<b>
+    {{directionInfos.distance.text}}
+    {{directionInfos.duration.text}}
+</b>
+<span ng-if="selectTravel" class="width100p float-left ">
+    {{$root.infoDirection}}
+    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
+       ng-click="changeTravelMode('WALKING')">
+        Walking
     </a>
-    <b>
-        {{directionInfos.distance.text}}
-        {{directionInfos.duration.text}}
-    </b>
-    <span ng-if="selectTravel" class="width100p float-left ">
-        {{$root.infoDirection}}
-        <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
-           ng-click="changeTravelMode('WALKING')">
-            Walking
-        </a>
-        <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
-           ng-click="changeTravelMode('BICYCLING')">
-            Bicycle
-        </a>
-        <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
-           ng-click="changeTravelMode('TRANSIT')">
-            Transit
-        </a>-->
-        <a class="mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
-           ng-click="changeTravelMode('DRIVING')">
-            Drive
-        </a>
-    </span>
-</div>
+    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
+       ng-click="changeTravelMode('BICYCLING')">
+        Bicycle
+    </a>
+    <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
+       ng-click="changeTravelMode('TRANSIT')">
+        Transit
+    </a>-->
+    <a class="mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
+       ng-click="changeTravelMode('DRIVING')">
+        Drive
+    </a>
+</span>

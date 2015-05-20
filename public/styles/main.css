@@ -27687,7 +27687,7 @@ top-search-block > search-bar-contener {
 
 /* line 29, ../../public/components/events/events.scss */
 .playProg {
-  background: transparentBlack;
+  background: rgba(119, 219, 246, 0.39);
 }
 
 /* line 1, ../../public/components/footer/footer.scss */
@@ -28244,7 +28244,14 @@ body {
   height: 50px;
   width: 50px;
 }
-
+.connectionModal {
+    width:50%;
+}
+@media (max-width: 767px) {
+    .connectionModal {
+        width:100%;
+    }
+}
 /* line 232, ../../public/styles/main.scss */
 .fi-claude {
   background-image: url("../images/logo.png");

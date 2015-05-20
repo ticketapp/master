@@ -58,7 +58,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.followOrganizer = function (organizer) {
-            OrganizerFactory.followOrganizerByOrganizerId(organizer.organizerId, organizer.name).then(function (follow) {
+            UserFactory.followOrganizerByOrganizerId(organizer.organizerId, organizer.name).then(function (follow) {
                 if (follow != 'error') {
                     organizer.isFollowed = true;
                 }

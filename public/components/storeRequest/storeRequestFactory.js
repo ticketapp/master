@@ -5,6 +5,7 @@ angular.module('claudeApp').factory('StoreRequest', ['$modal', '$rootScope',
                 var modalInstance = $modal.open({
                     templateUrl: 'assets/components/connect/connectionModal.html',
                     controller: 'ConnectionModalCtrl',
+                    windowClass: 'connectionModal',
                     resolve: {
                         connected: function () {
                             return $rootScope.connected;
