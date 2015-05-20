@@ -17,9 +17,11 @@
                 </a>
             </b>
         </p>
-        <a class="button column medium-2">
-            <b ng-if="!isFollowed" ng-click="follow()">J'y vais</b>
-            <b ng-if="isFollowed" ng-click="stopFollow()">Je n'y vais plus</b>
+        <a class="column medium-2">
+            <div ng-if="!isFollowed" class="width100p primCol padding10 textWhite text-center"
+               ng-click="follow()"><b>J'y vais</b></div>
+            <div ng-if="isFollowed" class="width100p primCol padding10 textWhite text-center"
+               ng-click="stopFollow()"><b>Je n'y vais plus</b></div>
         </a>
         <h2 class="column padding0 marginTop0">{{event.name}}</h2>
     </div>
@@ -76,13 +78,19 @@
             <a class="float-left relative" href="#/artists/{{artist.facebookUrl}}">
                 <h2 class="margin0 progArtName">{{artist.name}}</h2>
             </a>
-            <button class="absolute bottom0 button left"
-                    style='height:55px; top:40px'>
-                <b ng-if="!artist.isFollowed"
-                   ng-click="followArtist(artist)">Suivre</b>
-                <b ng-if="artist.isFollowed"
-                   ng-click="unfollowArtist(artist)">Ne plus suivre</b>
-            </button>
+            <a class="absolute bottom0 left column medium-4 padding0"
+               style='height:55px; top:40px'>
+                <div class="width100p primCol padding10 textWhite text-center"
+                     ng-if="!artist.isFollowed"
+                     ng-click="followArtist(artist)">
+                    <b>Suivre</b>
+                </div>
+                <div ng-if="artist.isFollowed"
+                   ng-click="unfollowArtist(artist)"
+                   class="width100p primCol padding10 textWhite text-center">
+                    <b>Ne plus suivre</b>
+                </div>
+            </a>
             <div class="img-circularPlayer float-right marginTop20 relative playProg"
                  ng-show="artist.tracks.length > 0">
                 <i class="pauseInImg ng-scope fi-play"
@@ -108,11 +116,18 @@
                 </a>
                 <a href="#/organizers/{{organizer.organizerId}}">{{ organizer.name }}</a>
             </h3>
-            <button class="column medium-2 large-4" style='height:55px; float:right'>
-                <b ng-if="!organizer.isFollowed"
-                   ng-click="followOrganizer(organizer)">Suivre</b>
-                <b ng-if="organizer.isFollowed" ng-click="unfollowOrganizer(organizer)">Ne plus suivre</b>
-            </button>
+            <a class="absolute bottom0 column medium-4 padding0"
+               style='height:55px; right:0;'>
+                <div class="width100p primCol padding10 textWhite text-center"
+                     ng-if="!organizer.isFollowed"
+                   ng-click="followOrganizer(organizer)"><b>Suivre</b>
+                </div>
+                <div class="width100p primCol padding10 textWhite text-center"
+                     ng-if="organizer.isFollowed"
+                     ng-click="unfollowOrganizer(organizer)">
+                    <b>Ne plus suivre</b>
+                </div>
+            </a>
             <div class="justify" ng-if="readDesc" data-ng-bind-html="organizer.description"></div>
         </div>
     </div>
@@ -129,11 +144,19 @@
                 {{event.addresses[0].zip}}
                 {{event.addresses[0].city}}
             </div>
-            <button style='height:55px;' class="column medium-4">
-                <b ng-if="!place.isFollowed"
-                   ng-click="followPlace(event.places[0])">Suivre</b>
-                <b ng-if="place.isFollowed" ng-click="unfollowPlace(event.places[0])">Ne plus suivre</b>
-            </button>
+            <a class="column medium-4 padding0"
+               style='height:55px; right:0;'>
+                <div class="width100p primCol padding10 textWhite text-center"
+                     ng-if="!event.places[0].isFollowed"
+                   ng-click="followPlace(event.places[0])">
+                    <b>Suivre</b>
+                </div>
+                <div class="width100p primCol padding10 textWhite text-center"
+                     ng-if="event.places[0].isFollowed"
+                     ng-click="unfollowPlace(event.places[0])">
+                    <b>Ne plus suivre</b>
+                </div>
+            </a>
         </div>
         <map-controls class="column large-12"></map-controls>
         <stylized-map></stylized-map>

@@ -10,7 +10,7 @@ angular.module('claudeApp').
                 if (event.places[0].geographicPoint != undefined) {
                     $scope.geographicPoint =
                         RefactorGeopoint.refactorGeopoint(event.places[0].geographicPoint);
-                    UserFactory.getIsFollowedPlace(event.places[0]).then(function (isFollowed) {
+                    UserFactory.getIsFollowedPlace(event.places[0].placeId).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
                             $scope.event.places[0].isFollowed = isFollowed
                         }
@@ -20,6 +20,7 @@ angular.module('claudeApp').
                     $scope.mapHeight = '300px';
                     $scope.map = true;
                 }
+
                 function isFollowedOrganizer(i) {
                     UserFactory.getIsFollowedOrganizer(event.organizers[i].organizerId).then(
                         function (isFollowed) {
@@ -32,9 +33,27 @@ angular.module('claudeApp').
                     )
                 }
 
+                function isFollowedArtists(i) {
+                    UserFactory.ArtistIsFollowed(event.artists[i].artistId).then(
+                        function (isFollowed) {
+                            if (isFollowed == true || isFollowed == false) {
+                                event.artists[i].isFollowed = isFollowed
+                            } else {
+                                event.artists[i].isFollowed = false;
+                            }
+                        }
+                    )
+                }
+
                 if (event.organizers != undefined && event.organizers.length > 0) {
                     for (var i = 0; i < event.organizers.length; i++) {
                         isFollowedOrganizer(i);
+                    }
+                }
+
+                if (event.artists != undefined && event.artists.length > 0) {
+                    for (var j = 0; j < event.artists.length; j++) {
+                        isFollowedArtists(j);
                     }
                 }
                 if ($rootScope.connected == true) {
