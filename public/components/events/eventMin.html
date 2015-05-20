@@ -71,17 +71,11 @@
                                 <img class="width100p " ng-src="{{place.imagePath}}"
                                      on-error-src="assets/images/caroussel1.png">
                             </a>
-                            <button style='height:55px; float:right'
-                                    ng-if="!place.isFollowed"
-                                    class="absolute right bottom0"
-                                    ng-click="followPlace(place)">
-                                Suivre
-                            </button>
-                            <button style='height:55px; float:right'
-                                    ng-if="place.isFollowed"
-                                    class="absolute right bottom0"
-                                    ng-click="unfollowPlace(place)">
-                                Ne plus suivre
+                            <button class="absolute right bottom0 button"
+                               style='height:55px; float:right'>
+                                <b ng-if="!place.isFollowed"
+                                   ng-click="followPlace(place)">Suivre</b>
+                                <b ng-if="place.isFollowed" ng-click="unfollowPlace(place)">Ne plus suivre</b>
                             </button>
                         </li>
                     </ul>
@@ -113,17 +107,11 @@
                                 <img class="width100p " ng-src="{{organizer.imagePath}}"
                                      on-error-src="assets/images/caroussel1.png">
                             </a>
-                            <button style='height:55px; float:right'
-                                    ng-if="!organizer.isFollowed"
-                                    class="absolute right bottom0"
-                                    ng-click="followOrganizer(organizer)">
-                                Suivre
-                            </button>
-                            <button style='height:55px; float:right'
-                                    ng-if="organizer.isFollowed"
-                                    class="absolute right bottom0"
-                                    ng-click="unfollowOrganizer(organizer)">
-                                Ne plus suivre
+                            <button class="absolute right bottom0 button"
+                               style='height:55px; float:right'>
+                                <b ng-if="!organizer.isFollowed"
+                                   ng-click="followOrganizer(organizer)">Suivre</b>
+                                <b ng-if="organizer.isFollowed" ng-click="unfollowOrganizer(organizer)">Ne plus suivre</b>
                             </button>
                         </li>
                     </ul>
@@ -158,17 +146,12 @@
                                    style="color: {{event.priceColor}}; font-size: 80px;"
                                    ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
                             </div>
-                            <button style='height:55px; top:40px'
-                                    ng-if="!artist.isFollowed"
-                                    class="absolute left"
-                                    ng-click="followArtist(artist)">
-                                Suivre
-                            </button>
-                            <button style='height:55px; top:40px'
-                                    ng-if="artist.isFollowed"
-                                    class="absolute left"
-                                    ng-click="unfollowArtist(artist)">
-                                Ne plus suivre
+                            <button class="absolute bottom0 button"
+                               style='height:55px; top:40px'>
+                                <b ng-if="!artist.isFollowed"
+                                   ng-click="followArtist(artist)">Suivre</b>
+                                <b ng-if="artist.isFollowed"
+                                   ng-click="unfollowArtist(artist)">Ne plus suivre</b>
                             </button>
                         </li>
                     </ul>

@@ -15,10 +15,10 @@
                 <b>{{ place.name }}</b>
             </a>
         </p>
-        <a class="button float-right column medium-2"
-           ng-if="!isFollowed" ng-click="follow()">Suivre</a>
-        <a class="button float-right column medium-2"
-           ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</a>
+        <a class="button">
+            <b ng-if="!isFollowed" ng-click="follow()">Suivre</b>
+            <b ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</b>
+        </a>
         <h2 class="column padding0 marginBottom0">{{event.name}}</h2>
     </div>
     <div ng-if="$root.window == 'large'"

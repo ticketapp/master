@@ -5,8 +5,11 @@
 <div class="columns large-12">
     <h2 id="eventTitle" class="marginTop0">
         {{artist.name}}
-        <a class="button" ng-if="!isFollowed" ng-click="follow()">Suivre</a>
-        <a class="button" ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</a>
+        <a class="button">
+            <b ng-if="!isFollowed" ng-click="follow()">Suivre</b>
+            <b ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</b>
+        </a>
+
         <websites></websites>
     </h2>
 </div>
@@ -58,14 +61,36 @@
                     <a class="button column float-left padding0"
                        style="min-height: 40px; line-height: 40px;"
                        ng-if="tracksFiltered.length > 0"
-                       ng-click="$root.addAndPlay(artist.tracks, artist)"
-                       ng-class="{'padding0': $root.window == 'small',
-                           'small-6': $root.playlist.tracks.length == 0,
+                       ng-class="{'small-6': $root.playlist.tracks.length == 0,
                            'small-4': $root.playlist.tracks.length > 0}">
-                        <i class="fi-play"></i> Tout jouer <b ng-if="artist.tracks.length>12">
-                        ({{artist.tracks.length}} moceaux)
+                        <i class="fi-play padding0"
+                           style="min-height: 40px; line-height: 40px;"
+                           ng-click="playTop()">
+                            <b ng-show="selectedTop == 0">Jouer ({{artist.tracks.length}} moceaux)</b>
+                            <b ng-show="selectedTop > 0">Jouer le top {{selectedTop}}</b>
+                        </i>
+                        <b class="padding0"
+                                style="border-left: 1px rgba(0, 0, 0, 0.53)">
+                            <i class="fa pointer"
+                               ng-click="$parent.showTop = !$parent.showTop"
+                               ng-show="numberOfTop.length > 0"
+                               ng-class="{'fa-chevron-down': !showTop, 'fa-chevron-up': showTop}">
+                            </i>
                         </b>
                     </a>
+                    <ul class="absolute primCol column marginTop40 zIndex5"
+                        ng-class="{'small-6 large-3 large-offset-3': $root.playlist.tracks.length == 0,
+                           'small-4 large-3 large-offset-1': $root.playlist.tracks.length > 0}"
+                        ng-if="showTop">
+                        <b  ng-if="selectedTop > 0"
+                            class="column pointer"
+                            ng-click="selectTop(0); playTop(); $parent.$parent.showTop = false">
+                            {{artist.tracks.length}} moceaux
+                        </b>
+                        <b ng-repeat="top in numberOfTop track by $index"
+                           class="column pointer"
+                           ng-click="selectTop(($index+1)*10); playTop(); $parent.$parent.showTop = false">Top {{($index+1)*10}}</b>
+                    </ul>
                     <a class="button column float-left padding0 small-4"
                        style="min-height: 40px; line-height: 40px;"
                        ng-if="tracksFiltered.length > 0 && $root.playlist.tracks.length > 0"

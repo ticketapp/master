@@ -15,10 +15,10 @@
 </div>
 <div class="parallax-content">
     <h2 class="column">{{organizer.name}}
-        <a class="button column medium-2"
-           ng-if="!isFollowed" ng-click="follow()">Suivre</a>
-        <a class="button column medium-2"
-           ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</a>
+        <a class="button column medium-2">
+            <b ng-if="!isFollowed" ng-click="follow()">Suivre</b>
+            <b ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</b>
+        </a>
         <websites></websites>
     </h2>
     <div class="column large-12" ng-if="organizer.description.length > 0">

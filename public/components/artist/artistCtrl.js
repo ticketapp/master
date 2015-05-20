@@ -8,6 +8,8 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.showDesc = false;
         $scope.selectedTab = 0;
         $scope.isFollowed = false;
+        $scope.showTop = false;
+        $scope.numberOfTop = 0;
         if ($localStorage.tracksSignaled == undefined) {
             $localStorage.tracksSignaled = [];
         }
@@ -28,12 +30,21 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     }
                 }
             }
+
+            var numberOfRates = 0;
+            function countRates (track) {
+                if (track.confidence != undefined && track.confidence > 5000000 && numberOfRates <50) {
+                    numberOfRates ++;
+                }
+            }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
                 $scope.tracks = [];
                 artist.tracks = $filter('orderBy')(artist.tracks, 'confidence', true);
-                console.log(artist.tracks)
                 artist.tracks.forEach(pushTrack);
+                artist.tracks.forEach(countRates);
+                $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
+                console.log($scope.numberOfTop);
                 $scope.artist.tracks = $scope.tracks;
                 $rootScope.loadingTracks = false;
                 if (artist.websites != undefined) {
@@ -121,6 +132,22 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             }, 0)
         };
 
+        $scope.selectedTop = 0;
+        $scope.selectTop = function (top) {
+            $scope.selectedTop = top;
+        };
+
+        $scope.playTop = function () {
+            if ($scope.selectedTop == 0) {
+                $rootScope.addAndPlay($scope.artist.tracks, $scope.artist)
+            } else {
+                var tracksToPlay = [];
+                for (var i = 0; i < $scope.selectedTop; i++) {
+                    tracksToPlay.push($scope.tracks[i]);
+                }
+                $rootScope.addAndPlay(tracksToPlay, $scope.artist)
+            }
+        };
         $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
             $scope.suggest = false;
             if (trackTitle.length > 2) {
