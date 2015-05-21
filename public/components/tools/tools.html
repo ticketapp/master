@@ -53,7 +53,20 @@
         <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>
     </div>
     <div ng-if="viewFavorites">
-        <ul ng-repeat="track in favorites" ng-init="track.isFavorite = true">
+        <div class="column large-12">
+            <a class="button column medium-4" ng-click="$root.loadPlaylist(favorites)">
+                <i class="fi-play">
+                    <md-track-tooltipe>
+                        Lire tout les favoris
+                    </md-track-tooltipe>
+                </i>
+            </a>
+            <input type="text"
+                   class="column medium-8"
+                   placeholder="Filtrer"
+                   ng-model="filterFavorites"/>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+        </div>
+        <ul ng-repeat="track in favorites.tracks | filter: filterFavorites" ng-init="track.isFavorite = true">
             <ng-track class="column large-6"></ng-track>
         </ul>
         <b ng-if="viewFavorites && favorites.length == 0">Vous n'avez pas de favoris</b>
