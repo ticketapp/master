@@ -134,7 +134,7 @@ angular.module('claudeApp').
             }
 
             $rootScope.addToPlaylist = function (tracks, artist) {
-                stopPush = false
+                stopPush = false;
                 offset = 0;
                 tracks = $filter('orderBy')(tracks, 'confidence', true);
                 if ($rootScope.playlist.tracks.length == 0) {
@@ -153,35 +153,53 @@ angular.module('claudeApp').
             };
 
             $rootScope.loadPlaylist = function (playlist) {
-                stopPush = false
+                stopPush = false;
                 $rootScope.playlist.name = playlist.name;
                 $rootScope.playlist.playlistId = playlist.playlistId;
                 $rootScope.playlist.tracks = [];
                 $rootScope.playlist.genres = [];
                 var tracksLenght = playlist.tracks.length;
-                var tr = 0;
-                function addtr (tr) {
-                    ArtistsFactory.getArtist(playlist.tracks[tr].artistFacebookUrl).then(function
-                        (artist) {
-                        pushTrack(playlist.tracks[tr], artist);
-                        if (tr == 0) {
-                            console.log('yo')
-                            $scope.play(i);
+                var tracks = playlist.tracks;
+                ArtistsFactory.getArtist(playlist.tracks[0].artistFacebookUrl).then(function
+                    (artist) {
+                    pushTrack(tracks[0], artist);
+                    $scope.play($rootScope.playlist.tracks.length-1);
+                    artist.genres.forEach(addGenres);
+                    if (tracksLenght < 10) {
+                        for (var tr = 1; tr < tracksLenght; tr++) {
+                            ArtistsFactory.getArtist(playlist.tracks[tr].artistFacebookUrl).then(function
+                                (artist) {
+                                pushTrack(tracks[tr], artist);
+                                artist.genres.forEach(addGenres);
+                            });
                         }
-                        if (tr < tracksLenght -1 && stopPush == false) {
-                            $timeout(function () {
-                                addtr(tr + 1)
-                            }, 10)
+                    } else {
+                        var start = 1;
+                        var end = 10;
+                        function addLotOfTracks (start, end) {
+                            for (var tr = start; tr < end; tr++) {
+                                if (stopPush == true) {
+                                    return;
+                                }
+                                if (tracks[tr] != undefined) {
+                                    ArtistsFactory.getArtist(playlist.tracks[tr].artistFacebookUrl).then(function
+                                        (artist) {
+                                        pushTrack(tracks[tr], artist);
+                                        artist.genres.forEach(addGenres);
+                                    });
+                                }
+                            }
+                            if (end < tracksLenght && stopPush == false) {
+                                $timeout(function () {
+                                    addLotOfTracks(start + 10, end + 10)
+                                },10)
+                            }
                         }
-                        function addGenres (genre) {
-                            $rootScope.playlist.genres =
-                                $rootScope.playlist.genres.concat(genre.name);
-                        }
-                        artist.genres.forEach(addGenres);
-                        eventsPlaylist();
-                    });
-                }
-                addtr(tr);
+                        addLotOfTracks(start, end)
+
+                    }
+                    eventsPlaylist();
+                });
                 $scope.playlistEnd = false;
                 played = [];
             };

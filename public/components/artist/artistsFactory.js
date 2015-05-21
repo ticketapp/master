@@ -279,9 +279,9 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             $rootScope.$apply(function () {
                                 $rootScope.artist.tracks.push(track);
                                 $rootScope.tracks.push(track);
+                                saveTrack(track)
                             });
                         }, 0);
-                        saveTrack(track)
                     }
 
                     if (value != []) {
