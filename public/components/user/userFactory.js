@@ -52,7 +52,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                             }
                         })
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                 })
         },
@@ -65,7 +65,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                 })
         },
@@ -99,7 +99,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                         StoreRequest.storeRequest('post', '/places/' + id +'/followByPlaceId',
                             "", 'vous suivez ' + placeName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('error');
                 });
@@ -115,7 +115,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                         StoreRequest.storeRequest('post', '/places/' + id +'/unfollowPlaceByPlaceId',
                             "", 'vous ne suivez plus ' + placeName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('error');
                 });
@@ -142,7 +142,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/followByOrganizerId',
                             "", 'vous suivez ' + organizerName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('erreur');
                 });
@@ -158,7 +158,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/unfollowOrganizerByOrganizerId',
                             "", 'vous ne suivez plus ' + organizerName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('erreur');
                 });
@@ -184,7 +184,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByArtistId', "", 'vous suivez ' + artistName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.resolve('error');
                 });
@@ -200,7 +200,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                         StoreRequest.storeRequest('post', '/artists/' + id +
                             '/unfollowArtistByArtistId', "", 'vous ne suivez plus' + artistName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.resolve('error');
                 });

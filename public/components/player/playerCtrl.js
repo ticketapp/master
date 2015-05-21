@@ -23,6 +23,7 @@ angular.module('claudeApp').
             var i = 0;
             var updateProgressYt;
             var player;
+            var stopPush = false;
             if ($localStorage.tracksSignaled == undefined) {
                 $localStorage.tracksSignaled = [];
             }
@@ -110,17 +111,20 @@ angular.module('claudeApp').
                     var end = 10;
                     function addLotOfTracks (start, end) {
                         for (var tr = start; tr < end; tr++) {
+                            if (stopPush == true) {
+                                return;
+                            }
                             if (tracks[tr] != undefined) {
                                 pushTrack(tracks[tr], artist)
                             }
                         }
-                        if (end < tracksLenght) {
+                        if (end < tracksLenght && stopPush == false) {
                             $timeout(function () {
-                                addLotOfTracks(start + 10, end + 10)
+                                addLotOfTracks(end, end + 10)
                             },10)
                         }
                     }
-                    addLotOfTracks(start, end)
+                    addLotOfTracks(start, end);
 
                 }
             }
@@ -130,8 +134,8 @@ angular.module('claudeApp').
             }
 
             $rootScope.addToPlaylist = function (tracks, artist) {
+                stopPush = false;
                 offset = 0;
-                tracks = $filter('orderBy')(tracks, 'confidence', true);
                 if ($rootScope.playlist.tracks.length == 0) {
                     pushListOfTracks(artist, tracks, true);
                     played = [];
@@ -148,38 +152,63 @@ angular.module('claudeApp').
             };
 
             $rootScope.loadPlaylist = function (playlist) {
+                stopPush = false;
                 $rootScope.playlist.name = playlist.name;
                 $rootScope.playlist.playlistId = playlist.playlistId;
                 $rootScope.playlist.tracks = [];
                 $rootScope.playlist.genres = [];
                 var tracksLenght = playlist.tracks.length;
-                var tr = 0;
-                playlist.tracks = $filter('orderBy')(playlist.tracks, 'rank', false);
-                function addtr (tr) {
-                    ArtistsFactory.getArtist(playlist.tracks[tr].artistFacebookUrl).then(function
-                        (artist) {
-                        pushTrack(playlist.tracks[tr], artist);
-                        if (tr == 0) {
-                            $scope.play(i);
+                var tracks = playlist.tracks;
+                ArtistsFactory.getArtist(playlist.tracks[0].artistFacebookUrl).then(function
+                    (artist) {
+                    pushTrack(tracks[0], artist);
+                    $scope.play($rootScope.playlist.tracks.length-1);
+                    artist.genres.forEach(addGenres);
+                    if (tracksLenght < 10) {
+                        for (var tr = 1; tr < tracksLenght; tr++) {
+                            ArtistsFactory.getArtist(playlist.tracks[tr].artistFacebookUrl).then(function
+                                (artist) {
+                                pushTrack(tracks[tr], artist);
+                                artist.genres.forEach(addGenres);
+                            });
                         }
-                        if (tr < tracksLenght -1) {
-                            addtr(tr + 1)
+                    } else {
+                        var start = 1;
+                        var end = 10;
+                        function getArtistAndPushTrack(tr) {
+                            ArtistsFactory.getArtist(tracks[tr].artistFacebookUrl).then(function
+                                (artist) {
+                                console.log(tracks[tr]);
+                                pushTrack(tracks[tr], artist);
+                                artist.genres.forEach(addGenres);
+                            });
                         }
-                        function addGenres (genre) {
-                            $rootScope.playlist.genres =
-                                $rootScope.playlist.genres.concat(genre.name);
+                        function addLotOfTracks (start, end) {
+                            for (var tr = start; tr < end; tr++) {
+                                if (stopPush == true) {
+                                    return;
+                                }
+                                if (tracks[tr] != undefined) {
+                                    getArtistAndPushTrack(tr);
+                                }
+                            }
+                            if (end < tracksLenght && stopPush == false) {
+                                $timeout(function () {
+                                    addLotOfTracks(end, end + 10)
+                                },10)
+                            }
                         }
-                        artist.genres.forEach(addGenres);
-                        eventsPlaylist();
-                    });
-                }
-                addtr(tr);
+                        addLotOfTracks(start, end)
+
+                    }
+                    eventsPlaylist();
+                });
                 $scope.playlistEnd = false;
                 played = [];
             };
 
             $rootScope.addAndPlay = function (tracks, artist) {
-                tracks = $filter('orderBy')(tracks, 'confidence', true);
+                stopPush = false;
                 offset = 0;
                 pushListOfTracks(artist, tracks, true);
                 artist.genres.forEach(addGenres);
@@ -286,7 +315,11 @@ angular.module('claudeApp').
             };
 
             $scope.remPlaylist = function () {
+                stopPush = true;
                 $rootScope.playlist.tracks = [];
+                $rootScope.playlist.genres = [];
+                $rootScope.playlist.id = '';
+                $rootScope.playlist.name = '';
                 played = [];
                 playlistEvents = [];
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";

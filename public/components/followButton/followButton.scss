@@ -1,0 +1,12 @@
+.isFollowButton > .first {
+  display: block;
+}
+.isFollowButton > .second {
+  display: none;
+}
+.isFollowButton:hover > .second {
+  display: block;
+}
+.isFollowButton:hover > .first {
+  display: none;
+}

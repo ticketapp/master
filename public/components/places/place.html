@@ -13,13 +13,13 @@
     </div>
 </div>
 <div class="parallax-content">
-    <h2 class="column">{{place.name}}
-    <a class="button column medium-2">
-        <b ng-if="!isFollowed" ng-click="follow()">Suivre</b>
-        <b ng-if="isFollowed" ng-click="stopFollow()">Ne plus suivre</b>
+   <div class="column large-12">
+       <a class="float-right padding0 followButton column medium-2">
     </a>
-        <websites></websites>
+    <h2 class="float-left marginTop0">{{place.name}}
     </h2>
+    <websites></websites>
+   </div>
     <div class="column large-12" ng-if="place.description.length > 0">
         <div class="column large-12 float-left marginBottom10"
              style="background-color: #e7e7e7">

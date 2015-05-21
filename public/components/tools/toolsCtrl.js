@@ -5,6 +5,7 @@ angular.module('claudeApp').controller('toolsCtrl', ['$scope', '$modal', '$log',
         var modalInstance = $modal.open({
             templateUrl: 'assets/components/tools/tools.html',
             controller: 'ModalInstanceCtrl',
+            windowClass: 'padding0',
             resolve: {
                 items: function () {
                     return $scope.items;
@@ -43,9 +44,14 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
                 console.log(data)
             })
     };
+    $scope.getPlaylists();
+    $scope.viewPlaylists = true;
+
     $scope.getFavoritesTracks = function() {
         UserFactory.getFavoritesTracks().then(function (tracks) {
-            $scope.favorites = tracks;
+            $scope.favorites = {};
+            $scope.favorites.name = 'favories';
+            $scope.favorites.tracks = tracks;
             $scope.closeTrack = function (index) {
                 $scope.favorites.splice(index, 1);
             };

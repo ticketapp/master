@@ -96,6 +96,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             filterEventsByTime();
             EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
                 updateScope(events, $scope.filtredEvents, 'eventId', $scope.events);
+                console.log(events)
             });
         }
 
@@ -127,7 +128,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         function getEventsByContaining() {
             EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
                 updateScope(events, $scope.filtredEvents, 'eventId', $scope.events);
-                console.log(events);
                 getEventsArtistByContaining();
                 getEventsByGenre();
                 getPlacesEventsByContaining();
@@ -255,39 +255,41 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         var otherSearch;
         var otherSearchInterval = 600;
         $scope.research = function(newName) {
-            if (angular.isDefined(newName) && (_selArtist == true || _selEvent == true || _selOrganizer == true ||
-                _selPlace == true)) {
-                $scope.loadingMore = true;
+            if (angular.isDefined(newName)) {
                 _research = newName;
-                $scope.searchPat = newName;
-                $scope.limit = 12;
-                offset = 0;
-                if (_research.length == 0) {
-                    $scope.initializeTime()
-                } else {
-                    $scope.events = $filter('filter')($scope.events, {name: _research});
-                    $scope.filtredEvents = $filter('filter')($scope.filtredEvents, {name: _research});
-                    $scope.organizers = $filter('filter')($scope.organizers, {nickname :  _research});
-                    $scope.places = $filter('filter')($scope.places, {name :  _research});
-                    $scope.artistsFb = $filter('filter')($scope.artistsFb, {name :  _research});
-                    $scope.artists = $filter('filter')($scope.artists, {name: _research});
+                if (_selArtist == true || _selEvent == true || _selOrganizer == true ||
+                    _selPlace == true) {
+                    $scope.loadingMore = true;
+                    $scope.searchPat = newName;
+                    $scope.limit = 12;
+                    offset = 0;
+                    if (_research.length == 0) {
+                        $scope.initializeTime()
+                    } else {
+                        $scope.events = $filter('filter')($scope.events, {name: _research});
+                        $scope.filtredEvents = $filter('filter')($scope.filtredEvents, {name: _research});
+                        $scope.organizers = $filter('filter')($scope.organizers, {nickname: _research});
+                        $scope.places = $filter('filter')($scope.places, {name: _research});
+                        $scope.artistsFb = $filter('filter')($scope.artistsFb, {name: _research});
+                        $scope.artists = $filter('filter')($scope.artists, {name: _research});
+                    }
+                    if (_selArtist == true && _research.length > 2 &&
+                        newName != 'electro' &&
+                        newName != 'reggae' &&
+                        newName != 'rock' &&
+                        newName != 'jazz' &&
+                        newName != 'musique du monde' &&
+                        newName != 'musique latine' &&
+                        newName != 'classique' &&
+                        newName != 'hip-hop' &&
+                        newName != 'chanson'
+                        ) {
+                        clearTimeout(facebookSearch);
+                        facebookSearch = setTimeout(getArtistsFacebook, facebookSearchInterval);
+                    }
+                    clearTimeout(otherSearch);
+                    otherSearch = setTimeout(search, otherSearchInterval);
                 }
-                if (_selArtist == true && _research.length > 2 &&
-                    newName != 'electro' &&
-                    newName != 'reggae' &&
-                    newName != 'rock' &&
-                    newName != 'jazz' &&
-                    newName != 'musique du monde' &&
-                    newName != 'musique latine' &&
-                    newName != 'classique' &&
-                    newName != 'hip-hop' &&
-                    newName != 'chanson'
-                    ) {
-                    clearTimeout(facebookSearch);
-                    facebookSearch = setTimeout(getArtistsFacebook, facebookSearchInterval);
-                }
-                clearTimeout(otherSearch);
-                otherSearch = setTimeout(search, otherSearchInterval);
             }
             SearchFactory.storeSearch(_research);
             return _research;
@@ -424,5 +426,18 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     search()
                 }
             })
+        }
+        if (_selArtist == true && _research.length > 2 &&
+            _research != 'electro' &&
+            _research != 'reggae' &&
+            _research != 'rock' &&
+            _research != 'jazz' &&
+            _research != 'musique du monde' &&
+            _research != 'musique latine' &&
+            _research != 'classique' &&
+            _research != 'hip-hop' &&
+            _research != 'chanson'
+            ) {
+            getArtistsFacebook();
         }
     }]);

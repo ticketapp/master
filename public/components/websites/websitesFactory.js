@@ -25,6 +25,12 @@ angular.module('claudeApp').
                         } else if (websites[i].url.indexOf('mixcloud') > -1) {
                             websites[i].name = 'mixcloud';
                             factory.websites.iconWebsites.push(websites[i])
+                        } else if (websites[i].url.indexOf('youtube') > -1) {
+                            websites[i].name = 'youtube';
+                            factory.websites.iconWebsites.push(websites[i])
+                        }else if (websites[i].url.indexOf('instagram') > -1) {
+                            websites[i].name = 'instagram';
+                            factory.websites.iconWebsites.push(websites[i])
                         } else {
                             websites[i].name = 'website';
                             factory.websites.otherWebsites.push(websites[i])

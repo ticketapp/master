@@ -1,0 +1,9 @@
+<div ng-if="!isFollowed" class="width100p primCol padding10 textWhite text-center"
+     ng-click="follow()">
+    <b>Suivre</b>
+</div>
+<div ng-if="isFollowed" class="isFollowButton width100p primCol padding10 textWhite text-center"
+     ng-click="unfollow()">
+    <b class="first">Suivi</b>
+    <b class="second">Ne plus suivre</b>
+</div>

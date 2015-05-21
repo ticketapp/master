@@ -3,73 +3,96 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
     function ($http, $q, EventsFactory, StoreRequest, InfoModal){
     var factory = {
         places : false,
+        lastGetPlace: {id: 0, place: []},
         getPlace : function(id) {
             var deferred = $q.defer();
-            if(factory.organizers == true) {
-                deferred.resolve(factory.organizers);
+            if(factory.lastGetPlace.id == id) {
+                deferred.resolve(factory.lastGetPlace.place);
             } else {
                 $http.get('/places/' + id).
                     success(function(data, status, headers, config) {
-                        factory.organizers = data;
-                        deferred.resolve(factory.organizers);
+                        factory.lastGetPlace.place = data;
+                        factory.lastGetPlace.id = id;
+                        deferred.resolve(factory.lastGetPlace.place);
                     })
             }
             return deferred.promise;
         },
+        lastGetPlaceEvents: {id: 0, events: []},
         getPlaceEvents : function(id) {
             var deferred = $q.defer();
-            if(factory.organizers == true) {
-                deferred.resolve(factory.organizers);
+            if(factory.lastGetPlaceEvents.id == id) {
+                deferred.resolve(factory.lastGetPlaceEvents.events);
             } else {
                 $http.get('/places/' + id + '/events').
                     success(function(data, status, headers, config) {
                         data.forEach(EventsFactory.colorEvent);
-                        factory.organizers = data;
-                        deferred.resolve(factory.organizers);
+                        factory.lastGetPlaceEvents.events = data;
+                        factory.lastGetPlaceEvents.id = id;
+                        deferred.resolve(factory.lastGetPlaceEvents.events);
                     })
             }
             return deferred.promise;
         },
+        lastGetPlaces: {offset: -1, geoloc: 0, places: []},
         getPlaces : function (offset, geoLoc) {
             var deferred = $q.defer();
-            if(factory.places == true) {
-                deferred.resolve(factory.places);
+            if(factory.lastGetPlaces.offset >= offset &&
+                factory.lastGetPlaces.geoloc == geoLoc) {
+                console.log(factory.lastGetPlaces.places)
+                deferred.resolve(factory.lastGetPlaces.places);
             } else {
                 $http.get('/places?geographicPoint='+geoLoc+'&numberToReturn=12&offset='+offset)
                     .success(function(data, status) {
-                        factory.places = data;
-                        console.log(data)
-                        deferred.resolve(factory.places);
+                        console.log(factory.lastGetPlaces.offset)
+                        if (offset > factory.lastGetPlaces.offset) {
+                            factory.lastGetPlaces.places = factory.lastGetPlaces.places.concat(data);
+                        } else {
+                            factory.lastGetPlaces.places = data;
+                        }
+                        factory.lastGetPlaces.offset = offset;
+                        factory.lastGetPlaces.geoloc = geoLoc;
+                        deferred.resolve(factory.lastGetPlaces.places);
                     }).error(function(data, status) {
                         deferred.reject('erreur');
                     });
             }
             return deferred.promise;
         },
+        lastGetPlacesByContaining: {pattern: '', places: []},
         getPlacesByContaining : function (pattern) {
             var deferred = $q.defer();
-            if(factory.places == true) {
-                deferred.resolve(factory.places);
+            if(factory.lastGetPlacesByContaining.pattern == pattern) {
+                deferred.resolve(factory.lastGetPlacesByContaining.places);
             } else {
                 $http.get('/places/containing/'+ pattern)
                     .success(function(data, status) {
-                        factory.places = data;
-                        deferred.resolve(factory.places);
+                        factory.lastGetPlacesByContaining.places = data;
+                        factory.lastGetPlacesByContaining.pattern = pattern;
+                        deferred.resolve(factory.lastGetPlacesByContaining.places);
                     }).error(function(data, status) {
                         deferred.reject('erreur');
                     });
             }
             return deferred.promise;
         },
+        lastGetPlacesByCity: {pattern: '', offset: -1, places: []},
         getPlacesByCity : function (pattern, offset) {
             var deferred = $q.defer();
-            if(factory.places == true) {
-                deferred.resolve(factory.places);
+            if(factory.lastGetPlacesByCity.pattern == pattern &&
+                factory.lastGetPlacesByCity.offset >= offset) {
+                deferred.resolve(factory.lastGetPlacesByCity.places);
             } else {
                 $http.get('/places/nearCity/'+pattern+'?numberToReturn=12&offset='+offset)
                     .success(function(data, status) {
-                        factory.places = data;
-                        deferred.resolve(factory.places);
+                        if (offset > factory.lastGetPlacesByCity.offset) {
+                            factory.lastGetPlacesByCity.places = factory.lastGetPlacesByCity.places.concat(data);
+                        } else {
+                            factory.lastGetPlacesByCity.places = data;
+                        }
+                        factory.lastGetPlacesByCity.pattern = pattern;
+                        factory.lastGetPlacesByCity.offset = offset;
+                        deferred.resolve(factory.lastGetPlacesByCity.places);
                     }).error(function(data, status) {
                         deferred.reject('erreur');
                     });
@@ -78,17 +101,13 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         },
         followPlaceByFacebookId : function (id) {
             var deferred = $q.defer();
-            if(factory.places == true) {
-                deferred.resolve(factory.places);
-            } else {
-                $http.post('/places/' +  id + '/followByFacebookId')
-                    .success(function(data, status) {
-                        factory.places = data;
-                        deferred.resolve(factory.places);
-                    }).error(function(data, status) {
-                        deferred.resolve('error');
-                    });
-            }
+            $http.post('/places/' +  id + '/followByFacebookId')
+                .success(function(data, status) {
+                    factory.places = data;
+                    deferred.resolve(factory.places);
+                }).error(function(data, status) {
+                    deferred.resolve('error');
+                });
             return deferred.promise;
         },
         followPlaceByPlaceId : function (id, placeName) {
@@ -101,7 +120,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         StoreRequest.storeRequest('post', '/places/' + id +'/followByPlaceId',
                             "", 'vous suivez ' + placeName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('error');
                 });
@@ -117,7 +136,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         StoreRequest.storeRequest('post', '/places/' + id +'/unfollowPlaceByPlaceId',
                             "", 'vous ne suivez plus ' + placeName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('error');
                 });
@@ -135,18 +154,13 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             return deferred.promise;
         },
         postPlace : function (place) {
-            var deferred = $q.defer();
-            if(factory.places == true) {
-                deferred.resolve(factory.places);
-            } else {
-                $http.post('/places/create', place )
-                    .success(function(data, status) {
-                        factory.places = data;
-                        deferred.resolve(factory.places);
-                    }).error(function(data, status) {
-                        deferred.resolve('error');
-                    });
-            }
+            $http.post('/places/create', place )
+                .success(function(data, status) {
+                    factory.places = data;
+                    deferred.resolve(factory.places);
+                }).error(function(data, status) {
+                    deferred.resolve('error');
+                });
             return deferred.promise;
         }
     };

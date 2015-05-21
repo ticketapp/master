@@ -1,4 +1,4 @@
-<form ng-show="success.length == 0" name="contactForm" ng-submit="postMsg(message)">
+<form ng-show="success.length == 0" name="contactForm" ng-submit="postMsg(message); cancel()">
     <md-input-container flex>
         <input ng-model="message.subject" required placeholder="Sujet" ng-minlength="3" name="subject">
         <div ng-messages="contactForm.subject.$error">

@@ -9,20 +9,20 @@
 </b>
 <span ng-if="selectTravel" class="width100p float-left ">
     {{$root.infoDirection}}
-    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'WALKING'}"
+    <a class="mapControls column small-4" ng-class="{'active': $parent.travelMode == 'WALKING'}"
        ng-click="changeTravelMode('WALKING')">
-        Walking
+        <i class="fi-blind"></i>
     </a>
-    <a class=" mapControls" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
+    <a class=" mapControls column small-4" ng-class="{'active': $parent.travelMode == 'BICYCLING'}"
        ng-click="changeTravelMode('BICYCLING')">
-        Bicycle
+        <i class="fa fa-bicycle"></i>
     </a>
     <!--<a class="button mapControls" ng-class="{'active': $parent.travelMode == 'TRANSIT'}"
        ng-click="changeTravelMode('TRANSIT')">
         Transit
     </a>-->
-    <a class="mapControls" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
+    <a class="mapControls column small-4" ng-class="{'active': $parent.travelMode == 'DRIVING'}"
        ng-click="changeTravelMode('DRIVING')">
-        Drive
+        <i class="fa fa-car"></i>
     </a>
 </span>

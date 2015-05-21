@@ -93,7 +93,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                             }
                             title = artist.name + ' bientôt à :';
                             for (var e = 0; e < eventsLength; e++) {
-                                info = info + '<div class="column large-12"><a href="#/event/' + events[e].eventId + '" class="textColorWhite">' +
+                                info = info + '<div class="column large-12"><a href="#/events/' + events[e].eventId + '" class="textColorWhite">' +
                                     events[e].places[0].name + '</a></div>'
                             }
                             if (events.length > 2) {

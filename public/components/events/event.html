@@ -17,11 +17,7 @@
                 </a>
             </b>
         </p>
-        <a class="column medium-2">
-            <div ng-if="!isFollowed" class="width100p primCol padding10 textWhite text-center"
-               ng-click="follow()"><b>J'y vais</b></div>
-            <div ng-if="isFollowed" class="width100p primCol padding10 textWhite text-center"
-               ng-click="stopFollow()"><b>Je n'y vais plus</b></div>
+        <a class="column medium-2 followButton">
         </a>
         <h2 class="column padding0 marginTop0">{{event.name}}</h2>
     </div>
@@ -59,17 +55,18 @@
     </div>
     <div class="column large-4 float-left eventInfo"
          ng-if="event.tariffRange.length != undefined || event.ticketSellers != undefined">
-        <h2>Tarifs</h2>
-        <h3 class="float-left">{{event.tariffRange}}</h3>
-        <a ng-if="event.ticketSellers != undefined"
-           href="http://www.{{event.ticketSellers}}"
-           class="button float-right"
-           target="_blank">Acheter des places sur {{event.ticketPlatform}}</a>
+        <div class="column large-12">
+            <h3 class="float-left">{{event.tariffRange}}</h3>
+            <a ng-if="event.ticketSellers != undefined"
+               href="http://www.{{event.ticketSellers}}"
+               class="button float-right"
+               target="_blank">Acheter des places sur {{event.ticketPlatform}}</a>
+        </div>
     </div>
-    <div class="column large-4 float-left eventInfo" ng-if="event.artists.length > 0">
-        <h2>Programmation</h2>
-        <li ng-repeat="artist in event.artists"
-            class="float-left width100p paddingTop10 paddingBottom10 paddingRight10
+    <div class="column medium-4 float-left"
+         ng-repeat="artist in event.artists"
+         ng-if="event.artists.length > 0">
+        <li class="float-left width100p paddingTop10 paddingBottom10 paddingRight10
             marginBottom10 relative programmation">
             <a href="#/artists/{{artist.facebookUrl}}"
                class="progArtImg absolute width100p height100p imgBlur"
@@ -87,8 +84,9 @@
                 </div>
                 <div ng-if="artist.isFollowed"
                    ng-click="unfollowArtist(artist)"
-                   class="width100p primCol padding10 textWhite text-center">
-                    <b>Ne plus suivre</b>
+                   class="width100p primCol padding10 textWhite text-center isFollowButton">
+                    <b class="first">Suivi</b>
+                    <b class="second">Ne plus suivre</b>
                 </div>
             </a>
             <div class="img-circularPlayer float-right marginTop20 relative playProg"
@@ -98,10 +96,9 @@
             </div>
         </li>
     </div>
-    <div class="column large-4 float-left eventInfo"
+    <div class="column large-4 float-left eventInfo marginTop10"
             ng-if="event.organizers.length > 0">
-        <h2>Organisateur</h2>
-        <div data-ng-repeat="organizer in event.organizers">
+        <div class="column large-12 padding0" data-ng-repeat="organizer in event.organizers">
             <a href="#/organizers/{{organizer.organizerId}}" class="column large-12 padding0">
                 <img src="{{organizer.imagePath}}" class="relative width100p"/>
             </a>
@@ -122,16 +119,17 @@
                      ng-if="!organizer.isFollowed"
                    ng-click="followOrganizer(organizer)"><b>Suivre</b>
                 </div>
-                <div class="width100p primCol padding10 textWhite text-center"
+                <div class="width100p primCol padding10 textWhite text-center isFollowButton"
                      ng-if="organizer.isFollowed"
                      ng-click="unfollowOrganizer(organizer)">
-                    <b>Ne plus suivre</b>
+                    <b class="first">Suivi</b>
+                    <b class="second">Ne plus suivre</b>
                 </div>
             </a>
             <div class="justify" ng-if="readDesc" data-ng-bind-html="organizer.description"></div>
         </div>
     </div>
-    <div class="column large-4 float-left eventInfo padding0 map-container"
+    <div class="column large-4 float-left eventInfo map-container marginTop10"
          style="height: 300px"
             ng-if="map">
         <div class="column large-12 paddingLeft0" ng-if="adresses">
@@ -151,14 +149,17 @@
                    ng-click="followPlace(event.places[0])">
                     <b>Suivre</b>
                 </div>
-                <div class="width100p primCol padding10 textWhite text-center"
+                <div class="width100p primCol padding10 textWhite text-center isFollowButton"
                      ng-if="event.places[0].isFollowed"
                      ng-click="unfollowPlace(event.places[0])">
-                    <b>Ne plus suivre</b>
+                    <b class="first">Suivi</b>
+                    <b class="second">Ne plus suivre</b>
                 </div>
             </a>
         </div>
-        <map-controls class="column large-12"></map-controls>
+        <div class="column large-12 marginTop10">
+            <map-controls></map-controls>
+        </div>
         <stylized-map></stylized-map>
     </div>
     <div ng-if="$root.window == 'small' || $root.window == 'medium'" class="descriptionContent column padding0 float-left" style="text-align: justify;">

@@ -2,21 +2,23 @@
    class="float-right fa openWebsitesContainer pointer"
    ng-click="$parent.showUrls = !$parent.showUrls"
    ng-class="{'fa-chevron-down': !$parent.showUrls, 'fa-chevron-up': $parent.showUrls}"></i>
-<ul class="absolute zIndex4 websitesContainer"
+<ul class="absolute zIndex4 websitesContainer column medium-4"
     ng-if="showUrls">
     <li ng-repeat="website in websites.otherWebsites"
-        class="otherWebsite">
-        <a href="http://www.{{website.url}}" target="_blank">{{website.url}}</a>
+        class="otherWebsite width100p">
+        <a href="http://www.{{website.url}}" class="width100p" target="_blank">{{website.url}}</a>
     </li>
 </ul>
 <a ng-repeat="website in websites.iconWebsites"
    href="http://{{website.url}}" target="_blank">
-    <i ng-class="{'fi-social-facebook' : website.name == 'facebook',
+    <i ng-class="{'fa fa-facebook' : website.name == 'facebook',
                    'fi-social-twitter' : website.name == 'twitter',
                    'fa fa-soundcloud' : website.name == 'soundcloud',
+                   'fa fa-youtube' : website.name == 'youtube',
+                   'fa fa-instagram' : website.name == 'instagram',
                    'fi-mixcloud' : website.name == 'mixcloud'}"
        class="float-right iconWebsites" style="margin-right: 5px;"></i>
 </a>
 <a href="http://www.facebook.com/{{websites.facebookUrl}}" target="_blank">
-    <i class="float-right fi-social-facebook" style="margin-right: 5px;"></i>
+    <i class="float-right fa fa-facebook" style="margin-right: 5px;"></i>
 </a>

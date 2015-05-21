@@ -1,5 +1,5 @@
-angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
-    function ($scope, UserFactory) {
+angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory', 'InfoModal',
+    function ($scope, UserFactory, InfoModal) {
 
         $scope.isFollowedPlace = function (place) {
             UserFactory.getIsFollowedPlace(place.placeId).then(function (isFollowed) {
@@ -13,6 +13,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
             UserFactory.followPlaceByPlaceId(place.placeId, place.name).then(function (follow) {
                 if (follow != 'error') {
                     place.isFollowed = true;
+                    InfoModal.displayInfo('Vous suivez ' + place.name)
                 }
             })
         };
@@ -21,6 +22,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
             UserFactory.unfollowPlace(place.placeId, place.name).then(function (follow) {
                 if (follow != 'error') {
                     place.isFollowed = false;
+                    InfoModal.displayInfo('Vous ne suivez plus ' + place.name)
                 }
             })
         };
@@ -37,6 +39,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
             UserFactory.followArtistByArtistId(artist.artistId, artist.name).then(function (follow) {
                 if (follow != 'error') {
                     artist.isFollowed = true;
+                    InfoModal.displayInfo('Vous suivez ' + artist.name)
                 }
             })
         };
@@ -45,6 +48,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
             UserFactory.unfollowArtist(artist.artistId, artist.name).then(function (follow) {
                 if (follow != 'error') {
                     artist.isFollowed = false;
+                    InfoModal.displayInfo('Vous ne suivez plus ' + artist.name)
                 }
             })
         };
@@ -61,6 +65,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
             UserFactory.followOrganizerByOrganizerId(organizer.organizerId, organizer.name).then(function (follow) {
                 if (follow != 'error') {
                     organizer.isFollowed = true;
+                    InfoModal.displayInfo('Vous suivez ' + organizer.name)
                 }
             })
         };
@@ -69,6 +74,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
             UserFactory.unfollowOrganizer(organizer.organizerId, organizer.name).then(function (follow) {
                 if (follow != 'error') {
                     organizer.isFollowed = false;
+                    InfoModal.displayInfo('Vous ne suivez plus ' + organizer.name)
                 }
             })
         };

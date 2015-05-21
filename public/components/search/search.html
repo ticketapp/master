@@ -16,7 +16,7 @@
         </event-min>
         <event-min ng-if="$root.activEvent && filtredEvents.length > 0"
              class="float-left column small-12 medium-6 large-4 fade min_contener margin0"
-             data-ng-repeat="event in filtredEvents | filter: searchPat">
+             data-ng-repeat="event in filEvents = (filtredEvents | filter: searchPat) | limitTo: limit">
         </event-min>
         <artist-min ng-if="$root.activArtist && artists.length > 0"
              class="column large-4 medium-6 float-left marginBottom20 fade marginLeft0
@@ -27,7 +27,7 @@
         <artist-facebook-min class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0
         minNoText"
              ng-if="$root.activArtist && artistsFb.length > 0"
-             data-ng-repeat="artist in artistsFb | filter: searchPat"
+             data-ng-repeat="artist in filteredArtistFb =  (artistsFb | filter: searchPat) | limitTo: limit"
              style="padding-bottom: 10px;">
         </artist-facebook-min>
         <div layout="row" layout-sm="column" layout-align="space-around" class="column large-12"
@@ -38,12 +38,12 @@
         minNoText"
              ng-if="$root.activPlace && places.length > 0"
              style="padding-bottom: 10px;"
-             data-ng-repeat="place in places | filter: searchPat" >
+             data-ng-repeat="place in filteredPlaces = (places | filter: searchPat) | limitTo: limit" >
         </place-min>
         <organizer-min class="column large-4 medium-6 float-left fade marginBottom20 marginLeft0 marginRight0
         minNoText"
              ng-if="$root.activUsr && organizers.length > 0"
-             data-ng-repeat="organizer in organizers | filter: searchPat">
+             data-ng-repeat="organizer in filteredorganizers = (organizers | filter: searchPat) | limitTo: limit">
         </organizer-min>
     </div>
     <div layout="row" class="column large-12" layout-sm="column" layout-align="space-around" ng-if="loadingMore">

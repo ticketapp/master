@@ -16946,12 +16946,27 @@ Copyright (c) 2014 Daniel Eden
 
 /* line 19, ../../public/styles/tools.scss */
 .active {
-  background: primary-color;
+  background: #007095;color: #ffffff!important;
 }
-
+.mapControls {
+    text-align: center;
+    font-size: 30px;
+}
+.isFollowButton > .first {
+    display: block;
+}
+.isFollowButton > .second {
+    display: none;
+}
+.isFollowButton:hover > .second {
+    display: block;
+}
+.isFollowButton:hover > .first {
+    display: none;
+}
 /* line 20, ../../public/styles/tools.scss */
 .BlackTrans {
-  background: transparentBlack;
+  background: rgba(0, 0, 0, 0.47);
 }
 
 /*z-index*/
@@ -27539,7 +27554,7 @@ top-search-block > search-bar-contener {
   vertical-align: middle;
   display: inline-block;
   font: normal normal normal 14px/1 FontAwesome;
-  font-size: inherit;
+  font-size: 20px;
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -27665,9 +27680,11 @@ top-search-block > search-bar-contener {
 
 /* line 10, ../../public/components/events/events.scss */
 .eventInfo {
-  box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
   padding-bottom: 10px;
   margin-bottom: 10px;
+}
+.eventInfo > div {
+    box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 
 /* line 15, ../../public/components/events/events.scss */
@@ -27832,19 +27849,37 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
 
 /* line 1, ../../public/components/buttonsControls/controls.scss */
 .generalControls {
-  display: block;
-  margin-top: 5px;
-  width: 70px;
-  height: 55px;
+    display: block;
+    margin-top: 5px;
+    width: 70px;
+    height: 50px;
 }
 
 /* line 7, ../../public/components/buttonsControls/controls.scss */
 .generalControls i {
   color: #ffffff;
-  font-size: 25px;
-  line-height: 25px;
+    font-size: 35px;
+    line-height: 40px;
+    margin-top: 2.5px;
+}
+.close-modal {
+    top: -17.5px;
+    right: -10px;
+    z-index: 1;
+    font-weight: bold;
+    font-size: 25px;
+    position: absolute;
+    cursor: pointer;
 }
 
+.generalControls > a {
+    border-radius: 3px 0 0 3px;
+    background: rgb(45, 170, 225);
+    float: right;
+    padding: 5px 12px;
+    width: 100%;
+    text-align: center;
+}
 /* line 12, ../../public/components/buttonsControls/controls.scss */
 .ng-controls {
   right: 0;

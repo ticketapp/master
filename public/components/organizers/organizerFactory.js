@@ -3,55 +3,64 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
     function ($http, $q, EventsFactory, StoreRequest, InfoModal){
     var factory = {
         organizers : false,
+        lastOrganizer: {id: 0, organizer: {}},
         getOrganizer : function(id) {
             var deferred = $q.defer();
-            if(factory.organizers == true) {
-                deferred.resolve(factory.organizers);
+            if (id == factory.lastOrganizer.id) {
+                deferred.resolve(factory.lastOrganizer.organizer)
             } else {
                 $http.get('/organizers/' + id).
                     success(function(data, status, headers, config) {
-                        factory.organizers = data;
-                        deferred.resolve(factory.organizers);
+                        factory.lastOrganizer.id = id;
+                        factory.lastOrganizer.organizer = data;
+                        deferred.resolve(factory.lastOrganizer.organizer);
                     })
             }
             return deferred.promise;
         },
+        lastOrganizerEvents : {id: 0, events: []},
         getOrganizerEvents : function(id) {
             var deferred = $q.defer();
-            if(factory.organizers == true) {
-                deferred.resolve(factory.organizers);
+            if(id == factory.lastOrganizerEvents.id) {
+                deferred.resolve(factory.lastOrganizerEvents.events);
             } else {
                 $http.get('/organizers/' + id + '/events').
                     success(function(data, status, headers, config) {
+                        factory.lastOrganizerEvents.id = id;
                         data.forEach(EventsFactory.colorEvent);
-                        factory.organizers = data;
-                        deferred.resolve(factory.organizers);
+                        factory.lastOrganizerEvents.events = data;
+                        deferred.resolve(factory.lastOrganizerEvents.events);
                     })
             }
             return deferred.promise;
         },
+        lastGetOrganizers : {offset: -1, organizers: []},
         getOrganizers : function(offset) {
             var deferred = $q.defer();
-            if(factory.organizers == true) {
-                deferred.resolve(factory.organizers);
+            if(factory.lastGetOrganizers.offset >= offset) {
+                deferred.resolve(factory.lastGetOrganizers.organizers);
             } else {
                 $http.get('/organizers?numberToReturn=12&offset='+offset).
                     success(function(data, status, headers, config) {
-                        factory.organizers = data;
-                        deferred.resolve(factory.organizers);
+                        factory.lastGetOrganizers.offset = offset;
+                        factory.lastGetOrganizers.organizers =
+                            factory.lastGetOrganizers.organizers.concat(data);
+                        deferred.resolve(factory.lastGetOrganizers.organizers);
                     })
             }
             return deferred.promise;
         },
+        lastGetOrganizersByContaining: {pattern: '', organizers: []},
         getOrganizersByContaining : function(pattern) {
             var deferred = $q.defer();
-            if(factory.organizers ==true) {
-                deferred.resolve(factory.organizers);
+            if(factory.lastGetOrganizersByContaining.pattern ==pattern) {
+                deferred.resolve(factory.lastGetOrganizersByContaining.organizers);
             } else {
                 $http.get('/organizers/containing/'+ pattern).
                     success(function(data, status, headers, config) {
-                        factory.organizers = data;
-                        deferred.resolve(factory.organizers);
+                        factory.lastGetOrganizersByContaining.organizers = data;
+                        factory.lastGetOrganizersByContaining.pattern = pattern;
+                        deferred.resolve(factory.lastGetOrganizersByContaining.organizers);
                     })
             }
             return deferred.promise;
@@ -81,7 +90,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/followByOrganizerId',
                             "", 'vous suivez ' + organizerName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('erreur');
                 });
@@ -97,7 +106,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/unfollowOrganizerByOrganizerId',
                             "", 'vous ne suivez plus ' + organizerName)
                     } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite');
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.reject('erreur');
                 });
@@ -116,16 +125,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
         },
         createOrganizer : function(organizer) {
             var deferred = $q.defer();
-            if(factory.organizers ==true) {
-                deferred.resolve(factory.organizers);
-            } else {
-                $http.post('/organizers/create', organizer).
-                    success(function(data, status, headers, config) {
-                        deferred.resolve(data);
-                    }).error(function (data) {
-                        deferred.resolve('error');
-                    })
-            }
+            $http.post('/organizers/create', organizer).
+                success(function(data, status, headers, config) {
+                    deferred.resolve(data);
+                }).error(function (data) {
+                    deferred.resolve('error');
+                })
             return deferred.promise;
         }
     };

@@ -1,7 +1,8 @@
 angular.module('claudeApp').
     controller('OrganizerCtrl', ['$scope', 'OrganizerFactory', '$routeParams', 'WebsitesFactory',
-        'RefactorGeopoint', '$rootScope',
-        function ($scope, OrganizerFactory, $routeParams, WebsitesFactory, RefactorGeopoint, $rootScope) {
+        'RefactorGeopoint', '$rootScope', 'InfoModal',
+        function ($scope, OrganizerFactory, $routeParams, WebsitesFactory, RefactorGeopoint, $rootScope,
+            InfoModal) {
         $scope.organizer = {};
         $scope.map = false;
         $scope.showDesc = false;
@@ -28,8 +29,11 @@ angular.module('claudeApp').
                         $scope.isFollowed = isFollowed;
                     }
                 })
-            } else {
-                $rootScope.$watch('connected', function () {
+            }
+            $rootScope.$watch('connected', function (connected) {
+                if (connected == false) {
+                    $scope.isFollowed = false;
+                } else {
                     OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
                             if (isFollowed == true || isFollowed == false) {
@@ -37,8 +41,8 @@ angular.module('claudeApp').
                             }
                         }
                     })
-                })
-            }
+                }
+            })
         });
         OrganizerFactory.getOrganizerEvents($routeParams.id).then(function (events) {
             $scope.organizer.events = events;
@@ -49,16 +53,18 @@ angular.module('claudeApp').
                 function (followed) {
                     if (followed != 'error') {
                         $scope.isFollowed = true;
+                        InfoModal.displayInfo('Vous suivez ' + $scope.organizer.name)
                     }
                 })
         };
 
-        $scope.stopFollow = function () {
+        $scope.unfollow = function () {
             OrganizerFactory.unfollowOrganizer($scope.organizer.organizerId, $scope.organizer.name).
                 then(
                 function (followed) {
                     if (followed != 'error') {
                         $scope.isFollowed = false;
+                        InfoModal.displayInfo('Vous ne suivez plus ' + $scope.organizer.name)
                     }
                 })
         };

@@ -24,9 +24,9 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
             $scope.mapBounces = map.getBounds()
         }
         if (scopeIdList.indexOf(el.eventId) == -1) {
-            if ( el.places[0] != undefined) {
-                el.addresses[0].geographicPoint = el.places[0].geographicPoint.replace('(', '').replace(')', '');
-                var geoPoint = el.addresses[0].geographicPoint;
+            if ( el.geographicPoint != undefined) {
+                el.geographicPoint = el.geographicPoint.replace('(', '').replace(')', '');
+                var geoPoint = el.geographicPoint;
                 var firstObject = $scope.mapBounces[Object.keys($scope.mapBounces)[0]];
                 var secondObject = $scope.mapBounces[Object.keys($scope.mapBounces)[1]];
                 if ($scope.mapBounces != undefined) {
@@ -37,8 +37,8 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                         eventInBounce = true;
                     }
                 }
+                $scope.events.push(el);
             }
-            $scope.events.push(el);
         }
     }
 
@@ -56,7 +56,6 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                 eventsLengthForTime = eventsLengthForTime - 1;
             }
         }
-        console.log($scope.mapCenter);
         EventsFactory.getEvents(time, '(' + $scope.mapCenter.replace(/^.+, /,'') + ',' +
             $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')', offset).
             then(function (events) {
@@ -111,7 +110,7 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
     }
 
     function addIcon(i) {
-        var geoPoint = $scope.events[i].addresses[0].geographicPoint;
+        var geoPoint = $scope.events[i].geographicPoint;
         var markerGenre;
         if ($scope.events[i].genres.length == 0) {
             markerGenre = 'autres.png';
@@ -252,11 +251,10 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
         },0)
     } else {
         $rootScope.$watch('geoLoc', function (newVal) {
-            console.log($rootScope.geoloc)
-            if (newVal.length > 0) {
+            if (newVal.length > 0 && newVal !== undefined) {
                 $timeout(function () {
                     $scope.$apply(function () {
-                        $scope.mapCenter = RefactorGeopoint.refactorGeopoint($rootScope.geoLoc);
+                        $scope.mapCenter = RefactorGeopoint.refactorGeopoint(newVal);
                         $scope.map = true;
                     });
                     $scope.$on('mapInitialized', function (event, evmap) {

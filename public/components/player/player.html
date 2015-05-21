@@ -29,14 +29,13 @@
            }"></i>
         <i ng-click="remPlaylist()"
            ng-class="{'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"
-           ng-show="showLecteur" class="fi-trash float-left  lecteurControls"></i>
+           ng-show="showLecteur" class="fa fa-trash-o float-left  lecteurControls"></i>
         <i ng-click="savePlaylist()" ng-show="showLecteur"
-           class="fi-save lecteurControls float-left"
+           class="fa fa-floppy-o lecteurControls float-left"
            ng-class="{'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
         <i class="fa float-left lecteurControls"
            ng-class="{'fa-volume-down': $parent.levelVol <= 50 && $parent.levelVol > 0 ,
            'fa-volume-up': $parent.levelVol > 50, 'fa-volume-off': $parent.levelVol == 0}"
-           style="line-height: 20px;"
            ng-show="showLecteur"
            ng-if="$root.window != 'small' && $root.window != 'medium'"
            ng-mouseover="$parent.showVol = true"></i>
@@ -56,15 +55,15 @@
                     >
             </md-slider>
         </div>
-        <i class="fi-previous lecteurControls float-left"
+        <i class="fa fa-step-backward lecteurControls float-left"
            ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
            'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"
            ng-click="prevTrack()"></i>
-        <i class=" lecteurControls float-left"
-           ng-class="{'fi-pause': onPlay == true, 'fi-play': onPlay == false,
+        <i class=" lecteurControls float-left fa"
+           ng-class="{'fa-pause': onPlay == true, 'fa-play': onPlay == false,
            'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
            'ng-hide': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}" ng-click="playPause()"></i>
-        <i class="fi-next lecteurControls float-left" ng-click="nextTrack()"
+        <i class="fa fa-step-forward lecteurControls float-left" ng-click="nextTrack()"
            ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
            'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
         <i class="fi-shuffle lecteurControls float-left" ng-show="showLecteur"
@@ -87,32 +86,33 @@ margin-left: 5px;"
                 {{trackActive.artist.name}}: {{trackActive.title}}
                 <a target="_blank" href="{{track.redirectUrl}}" style="font-size: 27px;"
                    ng-if="track.platform == 's'">
-                    <i style="display: block" class="fi-soundcloud"></i>
+                    <i style="display: block" class="fa fa-soundcloud"></i>
                 </a>
             </b>
         </span>
     </div>
-    <div class="float-left column large-2 padding0 small-4" style="height: 20px; background: #a0d3e8">
+    <div class="float-left column large-2 padding0 small-4"
+         style="height: 20px; background: #a0d3e8">
         <a target="_blank" href="{{trackActive.redirectUrl}}"
-           style="font-size: 24px; height: 20px; padding-left: 5px; color: white"
+           style="font-size: 20px; height: 20px; padding-left: 5px; color: white"
            class="float-left"
            ng-if="trackActive.platform == 's'">
             <i style="display: block; height:20px; width:35px;" class="fa fa-soundcloud float-left"></i>
         </a>
         <a href="https://youtube.com/watch?v={{trackActive.url}}"
-           style="font-size: 24px; height: 20px; padding-left: 5px; color: white "
+           style="font-size: 20px; height: 20px; padding-left: 5px; color: white "
            ng-if="trackActive.platform == 'y'"
            target="_blank"
            class="float-left">
-            <i style="display: block; margin-top: -7px; margin-right: 3px" class="fi-social-youtube float-left"></i>
+            <i style="display: block; margin-right: 3px" class="fa fa-youtube float-left"></i>
         </a>
         <i ng-if="trackActive.platform == 'y' && $root.window != 'small' && $root.window != 'medium'"
            ng-click="$parent.showVideo = !$parent.showVideo"
-           class="fi-video lecteurControls float-left"
+           class="fa fa-video-camera lecteurControls float-left"
            style="background: #a0d3e8"></i>
         <i ng-if="trackActive.platform == 'y' && ($root.window == 'small' || $root.window == 'medium')"
            ng-click="$parent.showVideo = !$parent.showVideo; insertVideo()"
-           class="fi-video lecteurControls float-left"
+           class="fa fa-video-camera lecteurControls float-left"
            style="background: #a0d3e8"></i>
         <b class="float-left" style="color: #ffffff"
            ng-show="$root.window != 'small' && $root.window != 'medium'" id="currentTime"></b>
