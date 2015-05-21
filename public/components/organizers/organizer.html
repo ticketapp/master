@@ -14,11 +14,13 @@
     </div>
 </div>
 <div class="parallax-content">
-    <h2 class="column">{{organizer.name}}
-        <a class="button column medium-2 followButton">
+    <div class="column large-12">
+        <a class="float-right padding0 followButton column medium-2">
         </a>
+        <h2 class="float-left marginTop0">{{organizer.name}}
+        </h2>
         <websites></websites>
-    </h2>
+    </div>
     <div class="column large-12" ng-if="organizer.description.length > 0">
         <div class="column large-12 float-left marginBottom10"
              style="background-color: #e7e7e7">

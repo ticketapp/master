@@ -2,6 +2,7 @@ angular.module('claudeApp').
     controller('MapCtrl', ['$scope', '$rootScope', '$timeout',
         function ($scope, $rootScope, $timeout) {
         $scope.zoom = 13;
+        $scope.travelMode = 'DRIVING'
         $scope.moreZoom = function() {
             $scope.zoom = $scope.zoom + 1;
         };
