@@ -59,15 +59,19 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         }
 
         function filterEventsByTime() {
-            var eventsLength = $scope.events.length;
-            var maxStartTime = _selStart * 3600000 + new Date().getTime();
-            for (var e = 0; e < eventsLength; e++) {
-                if ($scope.events[e].startTime > maxStartTime) {
-                    $scope.events.splice(e, 1)
-                    e = e - 1;
-                    eventsLength = eventsLength - 1;
+            function filter (events) {
+                var eventsLength = events.length;
+                var maxStartTime = _selStart * 3600000 + new Date().getTime();
+                for (var e = 0; e < eventsLength; e++) {
+                    if (events[e].startTime > maxStartTime) {
+                        events.splice(e, 1);
+                        e = e - 1;
+                        eventsLength = eventsLength - 1;
+                    }
                 }
             }
+            filter($scope.events);
+            filter($scope.filtredEvents)
         }
         function getArtists () {
             ArtistsFactory.getArtists(offset).then(function (artists) {
