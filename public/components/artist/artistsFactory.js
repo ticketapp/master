@@ -279,13 +279,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             $rootScope.$apply(function () {
                                 $rootScope.artist.tracks.push(track);
                                 $rootScope.tracks.push(track);
-                                saveTrack(track)
                             });
                         }, 0);
                     }
 
                     if (value != []) {
                         value.forEach(pushTrack);
+                        value.forEach(saveTrack);
                     } else {
                         $rootScope.loadingTracks = false;
                     }
