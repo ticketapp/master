@@ -160,16 +160,18 @@ angular.module('claudeApp').
                 $rootScope.playlist.genres = [];
                 var tracksLenght = playlist.tracks.length;
                 var tr = 0;
-                playlist.tracks = $filter('orderBy')(playlist.tracks, 'rank', false);
                 function addtr (tr) {
                     ArtistsFactory.getArtist(playlist.tracks[tr].artistFacebookUrl).then(function
                         (artist) {
                         pushTrack(playlist.tracks[tr], artist);
                         if (tr == 0) {
+                            console.log('yo')
                             $scope.play(i);
                         }
-                        if (tr < tracksLenght -1) {
-                            addtr(tr + 1)
+                        if (tr < tracksLenght -1 && stopPush == false) {
+                            $timeout(function () {
+                                addtr(tr + 1)
+                            }, 10)
                         }
                         function addGenres (genre) {
                             $rootScope.playlist.genres =
@@ -185,7 +187,7 @@ angular.module('claudeApp').
             };
 
             $rootScope.addAndPlay = function (tracks, artist) {
-                stopPush = false
+                stopPush = false;
                 tracks = $filter('orderBy')(tracks, 'confidence', true);
                 offset = 0;
                 pushListOfTracks(artist, tracks, true);
