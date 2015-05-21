@@ -98,7 +98,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 
         $scope.follow = function () {
-            ArtistsFactory.followArtistByArtistId($scope.artist.artistId, $scope.artist.name).then(
+            ArtistsFactory.followArtistByFacebookId($scope.artist.facebookId, $scope.artist.name).then(
                 function (followed) {
                 if (followed != 'error') {
                     $timeout(function () {
