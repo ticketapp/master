@@ -23,7 +23,7 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
 
       Organizer.getFollowedOrganizers(IdentityId("userTestId", "providerId")) should not be empty
 
-      Organizer.unfollowByOrganizerId("userTestId", 1) mustBe 1
+      Organizer.unfollowByOrganizerId("userTestId", 1) mustBe Success(1)
     }
   }
 }

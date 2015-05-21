@@ -9,7 +9,11 @@ import play.api.libs.functional.syntax._
 
 object JsonHelper {
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
-    def writes(o : java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(o))
+    def writes(o: java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(o))
+  }
+
+  implicit object FloatWrites extends AnyRef with Writes[Float] {
+    def writes(float : Float): JsNumber = JsNumber(BigDecimal(float))
   }
 
   implicit object CharWrites extends AnyRef with Writes[Char] {

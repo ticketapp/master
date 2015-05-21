@@ -9,14 +9,31 @@ import Matchers._
 
 class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
 
-  val artist = Artist(None, Option("facebookId3"), "nina", Option("imagePath"), Option("description"),
+  val ninaKraviz = Artist(None, Option("facebookId3"), "nina", Option("imagePath"), Option("description"),
     "facebookUrl3", Set("soundcloud.com/nina-kraviz"))
+  val worakls = Artist(None, Option("facebookId3"), "worakls", Option("imagePath"), Option("description"),
+    "worakls", Set.empty)
 
   "SearchSoundCloudTracks" must {
 
     "find tracks on SoundCloud" in {
-      whenReady(getSoundCloudTracksForArtist(artist), timeout(Span(2, Seconds))) { tracks =>
+      whenReady(getSoundCloudTracksForArtist(ninaKraviz), timeout(Span(3, Seconds))) { tracks =>
         tracks should not be empty
+      }
+    }
+
+    "find soundCloud ids for artist name worakls" in {
+      whenReady(getSoundCloudIdsForName("worakls"), timeout(Span(2, Seconds))) { soundCloudIds =>
+        soundCloudIds should contain allOf (68442, 4329372, 13302835, 97091845, 129311935, 366396, 48457, 1957879, 19050912, 90244, 13369539, 11104769, 62830, 464934, 191876, 1072342, 21044, 18142163, 16831396, 113114, 6904729, 1150209, 45742673, 362936, 9949484, 718770, 28455500, 4634034, 3529290, 241074, 7467342, 15877, 67597007, 24866108, 1653496, 439005, 12482658, 51277648, 75529, 70326, 4256204, 433864, 9120445, 946902, 605303, 710029, 16719236, 1679324, 105028051, 8343788)
+      }
+    }
+
+    "find soundCloud websites for a list of soundCloud ids" in {
+      whenReady(getTupleIdAndSoundCloudWebsitesForIds(List(68442, 4329372, 13302835, 97091845, 129311935, 366396)),
+        timeout(Span(2, Seconds))) { tupleSounCloudIdWebsites =>
+        tupleSounCloudIdWebsites should contain (366396,
+          List("shop.ticketscript.com/channel/web2/start-order/rid/6rfq8stj/language/nl",
+            "facebook.com/events/1567964680141717"))
       }
     }
   }

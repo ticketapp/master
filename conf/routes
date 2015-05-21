@@ -1,5 +1,5 @@
 # Home page
-GET           /                                                         controllers.Application.index
+GET           /                                                   controllers.Application.index
 
 GET     /test                                                     controllers.Test.test1
 GET     /insertFrenchCities                                       controllers.InsertFrenchCities.insertFrenchCities
