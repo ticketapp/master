@@ -12,9 +12,9 @@ import services.Utilities.normalizeUrl
 import scala.util.matching._
 import java.util.regex.Pattern
 import models.Genre.saveGenreForArtistInFuture
+import Utilities.soundCloudClientId
 
 object SearchSoundCloudTracks {
-  val soundCloudClientId = play.Play.application.configuration.getString("soundCloud.clientId")
 
   def getSoundCloudTracksForArtist(artist: Artist): Future[Seq[Track]] =
     artist.websites find (_ contains "soundcloud.com") match {

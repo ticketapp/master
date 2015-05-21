@@ -2,7 +2,7 @@ package models
 
 import models.Playlist.TrackIdAndRank
 import play.api.Logger
-import services.Utilities.columnToChar
+import services.Utilities.{columnToChar}
 import json.JsonHelper.trackWrites
 import play.api.libs.json.DefaultWrites
 import anorm.SqlParser._
@@ -13,8 +13,7 @@ import play.api.Play.current
 import java.util.Date
 import java.math.BigDecimal
 import anorm.Column.rowToBigDecimal
-import scala.util.Success
-import scala.util.Try
+import scala.util.{Try, Success, Failure}
 
 case class Track (trackId: Option[Long],
                   title: String, 
@@ -23,7 +22,7 @@ case class Track (trackId: Option[Long],
                   thumbnailUrl: String,
                   artistFacebookUrl: String,
                   redirectUrl: Option[String] = None,
-                  confidence: Option[Int] = None,
+                  confidence: Option[Double] = None,
                   playlistRank: Option[Float] = None)
 
 object Track {
@@ -58,9 +57,9 @@ object Track {
       get[String]("thumbnailUrl") ~
       get[String]("artistFacebookUrl") ~
       get[Option[String]]("redirectUrl") ~
-      get[Option[Int]]("confidence") map {
+      get[Double]("confidence") map {
       case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl ~ confidence =>
-        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl, confidence)
+        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl, Option(confidence))
     }
   }
 
@@ -187,10 +186,7 @@ object Track {
   }
 
   def upsertRatingUp(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
-    getRating(trackId) match {
-      case Success(Some(actualRating)) => updateConfidence(trackId, calculateConfidence(actualRating, rating))
-      case _ => Logger.error(s"Track.upsertRatingUp: rating up error with trackId: trackId and userId: $userId")
-    }
+    updateRating(trackId, rating)
 
     DB.withConnection { implicit connection =>
       SQL("SELECT upsertTrackRatingUp({userId}, {trackId}, {rating})")
@@ -203,10 +199,7 @@ object Track {
   }
 
   def upsertRatingDown(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
-    getRating(trackId) match {
-      case Success(Some(actualRating)) => updateConfidence(trackId, calculateConfidence(actualRating, rating))
-      case _ => Logger.error(s"Track.upsertRatingDown: rating down error with trackId: trackId and userId: $userId")
-    }
+    updateRating(trackId, rating)
 
     DB.withConnection { implicit connection =>
       SQL("SELECT upsertTrackRatingDown({userId}, {trackId}, {rating})")
@@ -218,32 +211,63 @@ object Track {
     }
   }
 
-  private val ratingParser: RowParser[String] = {
+  private val ratingParser: RowParser[(Int, Int)] = {
     get[Option[Int]]("ratingUp") ~
       get[Option[Int]]("ratingDown") map {
-      case ratingUp ~ ratingDown => ratingUp.getOrElse(0).toString + "," + ratingDown.getOrElse(0).toString
+      case ratingUp ~ ratingDown => (ratingUp.getOrElse(0), ratingDown.getOrElse(0))
     }
   }
 
-  def getRating(trackId: Long): Try[Option[String]] = Try {
+  def getRating(trackId: Long): Try[Option[(Int, Int)]] = Try {
+    println("getRating: trackId:" + trackId)
     DB.withConnection { implicit connection =>
-      SQL("SELECT ratingUp, ratingDown FROM tracks WHERE trackId = {trackId}")
+      val a = SQL("SELECT ratingUp, ratingDown FROM tracks WHERE trackId = {trackId}")
         .on('trackId -> trackId)
         .as(ratingParser.singleOpt)
+      println("getRating: sql returned " + a)
+      a
     }
   }
 
-  def updateConfidence(trackId: Long, confidence: Int): Try[Int] = Try {
+  def updateRating(trackId: Long, ratingToAdd: Int): Try[Double] = Try {
+    getRating(trackId) match {
+      case Success(Some(actualRating)) =>
+        var actualRatingUp = actualRating._1
+        var actualRatingDown = actualRating._2
+
+        println("actualRatingUp = " + actualRatingUp)
+        println("actualRatingDown = " + actualRatingDown)
+        println("ratingToAdd = " + ratingToAdd)
+
+        ratingToAdd match {
+          case ratingUp if ratingUp > 0 => actualRatingUp = actualRatingUp + ratingUp
+          case ratingDown if ratingDown <= 0 => actualRatingDown = actualRatingDown + math.abs(ratingDown)
+        }
+
+        val confidence = calculateConfidence(actualRatingUp, actualRatingDown)
+        println("confidence = " + confidence)
+
+        println(persistUpdateRating(trackId, actualRatingUp, actualRatingDown, confidence))
+
+        confidence
+      case _ =>
+        Logger.error(s"Track.updateRating: error while updating with trackId: trackId")
+        throw new DAOException("Track.updateRating")
+    }
+  }
+
+  def persistUpdateRating(trackId: Long, actualRatingUp: Int, actualRatingDown: Int, confidence: Double)
+  : Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
-      s"""UPDATE tracks
-        | SET confidence = $confidence
-        | WHERE trackId = $trackId""".stripMargin)
-      .executeUpdate()
+        s"""UPDATE tracks
+           | SET ratingUp = $actualRatingUp, ratingDown = $actualRatingDown, confidence = $confidence
+            | WHERE trackId = $trackId""".stripMargin)
+        .executeUpdate()
     }
   }
 
-  def getRatingForUser(userId: String, trackId: Long): Try[Option[String]] = Try {
+  def getRatingForUser(userId: String, trackId: Long): Try[Option[(Int, Int)]] = Try {
     DB.withConnection { implicit connection =>
       SQL("SELECT ratingUp, ratingDown FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
         .on(
@@ -294,24 +318,19 @@ object Track {
     }
   }
 
-  def calculateConfidence(actualRating: String, newRate: Int): Int = {
-    val actualRatingSplit = actualRating.split(",")
-    var ups = actualRatingSplit(0).toFloat
-    var downs = actualRatingSplit(1).toFloat
-    newRate match {
-      case ratingUp if ratingUp > 0 => ups = ups + ratingUp
-      case ratingDown if ratingDown <= 0 => downs = downs + math.abs(ratingDown)
-    }
+  def calculateConfidence(actualRatingUp: Int, actualRatingDown: Int): Double = {
+    val up = actualRatingUp.toDouble
+    val down = actualRatingDown.toDouble
 
-    if (ups == 0)
-      (-downs).toInt
+
+    if (up == 0)
+      -down
     else {
-      val n = ups + downs
-      val z = 1.64485
-      val phat = ups / n
+      val n = up + down
+      val z= 1.64485
+      val phat = up / n
 
-      val confidence = (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
-      (confidence * 1000000).toInt
+      (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
     }
   }
 }

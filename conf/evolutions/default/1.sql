@@ -52,6 +52,8 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
+
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 25 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -172,7 +174,7 @@ CREATE TABLE tracks (
   thumbnailUrl            VARCHAR NOT NULL,
   artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
   redirectUrl             VARCHAR(255),
-  confidence              INT NOT NULL DEFAULT 0,
+  confidence              DOUBLE PRECISION NOT NULL DEFAULT 0,
   ratingUp                INT NOT NULL DEFAULT 0,
   ratingDown              INT NOT NULL DEFAULT 0,
   UNIQUE(url)
