@@ -71,7 +71,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 }
             }
             filter($scope.events);
-            filter($scope.filtredEvents)
+            filter($scope.filtredEvents);
         }
         function getArtists () {
             ArtistsFactory.getArtists(offset).then(function (artists) {
