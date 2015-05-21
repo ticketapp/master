@@ -2,7 +2,6 @@ angular.module('claudeApp').factory('TracksRecommender', ['$http', '$rootScope',
     function ($http, $rootScope) {
     var factory = {
         postTrackRate: function (trackId, rate) {
-            console.log(rate)
             $http.post('/tracks/'+ trackId + '/' + rate + '/rating')
         },
         trackRateByTime : function (duration, time, trackId) {

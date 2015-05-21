@@ -35,7 +35,7 @@
                     </md-track-tooltipe>
                 </i>
             </div>
-            <b><a ng-click="$root.loadPlaylist(playlist)">{{playlist.name}}</a></b>
+            <b><a ng-click="$root.loadPlaylist(playlist)">{{playlist.name}} ({{playlist.tracks.length}}) morceaux</a></b>
             <a ng-click="confirmDelete = !confirmDelete" class="float-right">supprimer la playlist</a>
             <div class="column large-12" ng-show="confirmDelete">
                 Etes vous sur de vouloir supprimer la playlist "{{playlist.name}}" ?

@@ -120,11 +120,11 @@ angular.module('claudeApp').
                         }
                         if (end < tracksLenght && stopPush == false) {
                             $timeout(function () {
-                                addLotOfTracks(start + 10, end + 10)
+                                addLotOfTracks(end, end + 10)
                             },10)
                         }
                     }
-                    addLotOfTracks(start, end)
+                    addLotOfTracks(start, end);
 
                 }
             }
@@ -176,22 +176,26 @@ angular.module('claudeApp').
                     } else {
                         var start = 1;
                         var end = 10;
+                        function getArtistAndPushTrack(tr) {
+                            ArtistsFactory.getArtist(tracks[tr].artistFacebookUrl).then(function
+                                (artist) {
+                                console.log(tracks[tr]);
+                                pushTrack(tracks[tr], artist);
+                                artist.genres.forEach(addGenres);
+                            });
+                        }
                         function addLotOfTracks (start, end) {
                             for (var tr = start; tr < end; tr++) {
                                 if (stopPush == true) {
                                     return;
                                 }
                                 if (tracks[tr] != undefined) {
-                                    ArtistsFactory.getArtist(playlist.tracks[tr].artistFacebookUrl).then(function
-                                        (artist) {
-                                        pushTrack(tracks[tr], artist);
-                                        artist.genres.forEach(addGenres);
-                                    });
+                                    getArtistAndPushTrack(tr);
                                 }
                             }
                             if (end < tracksLenght && stopPush == false) {
                                 $timeout(function () {
-                                    addLotOfTracks(start + 10, end + 10)
+                                    addLotOfTracks(end, end + 10)
                                 },10)
                             }
                         }
@@ -315,6 +319,9 @@ angular.module('claudeApp').
             $scope.remPlaylist = function () {
                 stopPush = true;
                 $rootScope.playlist.tracks = [];
+                $rootScope.playlist.genres = [];
+                $rootScope.playlist.id = '';
+                $rootScope.playlist.name = '';
                 played = [];
                 playlistEvents = [];
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";

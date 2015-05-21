@@ -26,7 +26,11 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 }
                 if ($localStorage.tracksSignaled) {
                     if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
-                        $scope.tracks.push(track)
+                        $timeout(function () {
+                            $scope.$apply(function () {
+                                $scope.tracks.push(track)
+                            })
+                        })
                     }
                 }
             }
@@ -44,7 +48,6 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 artist.tracks.forEach(pushTrack);
                 artist.tracks.forEach(countRates);
                 $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
-                console.log($scope.numberOfTop);
                 $scope.artist.tracks = $scope.tracks;
                 $rootScope.loadingTracks = false;
                 if (artist.websites != undefined) {
