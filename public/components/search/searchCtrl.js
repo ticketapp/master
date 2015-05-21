@@ -96,6 +96,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             filterEventsByTime();
             EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
                 updateScope(events, $scope.filtredEvents, 'eventId', $scope.events);
+                console.log(events)
             });
         }
 
@@ -426,5 +427,18 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     search()
                 }
             })
+        }
+        if (_selArtist == true && _research.length > 2 &&
+            _research != 'electro' &&
+            _research != 'reggae' &&
+            _research != 'rock' &&
+            _research != 'jazz' &&
+            _research != 'musique du monde' &&
+            _research != 'musique latine' &&
+            _research != 'classique' &&
+            _research != 'hip-hop' &&
+            _research != 'chanson'
+            ) {
+            getArtistsFacebook();
         }
     }]);

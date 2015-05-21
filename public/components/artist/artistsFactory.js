@@ -4,16 +4,22 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
               ImagesFactory) {
     var factory = {
         artists : false,
+        lastGetArtist: {url: '', artist: {}},
         getArtist : function (url) {
             var deferred = $q.defer();
-            $http.get('/artists/' + url)
-                .success(function(data, status){
-                    data = ImagesFactory(data);
-                    factory.artists = data;
-                    deferred.resolve(factory.artists);
-                }).error(function(data, status){
-                    deferred.reject('erreur');
-                });
+            if (url == factory.lastGetArtist.url) {
+                deferred.resolve(factory.lastGetArtist.artist)
+            } else {
+                $http.get('/artists/' + url)
+                    .success(function (data, status) {
+                        data = ImagesFactory(data);
+                        factory.lastGetArtist.artist = data;
+                        factory.lastGetArtist.url = url;
+                        deferred.resolve(factory.lastGetArtist.artist);
+                    }).error(function (data, status) {
+                        deferred.reject('erreur');
+                    });
+            }
             return deferred.promise;
         },
         getIsFollowed : function (id) {
@@ -26,16 +32,22 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 });
             return deferred.promise;
         },
+        lastGetArtists: {offset: -1, artists: []},
         getArtists : function (offset) {
             var deferred = $q.defer();
-            $http.get('/artists/since/' + offset + '/12 ')
-                .success(function(data, status){
-                    data.forEach(ImagesFactory);
-                    factory.artists = data;
-                    deferred.resolve(factory.artists);
-                }).error(function(data, status){
-                    deferred.reject('erreur');
-                });
+            if (offset == factory.lastGetArtists.offset) {
+                deferred.resolve(factory.lastGetArtists.artists)
+            } else {
+                $http.get('/artists/since/' + offset + '/12 ')
+                    .success(function (data, status) {
+                        data.forEach(ImagesFactory);
+                        factory.lastGetArtists.artists = data;
+                        factory.lastGetArtists.offset = offset;
+                        deferred.resolve(factory.lastGetArtists.artists);
+                    }).error(function (data, status) {
+                        deferred.reject('erreur');
+                    });
+            }
             return deferred.promise;
         },
         getFollowArtists : function () {
@@ -50,44 +62,60 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 });
             return deferred.promise;
         },
+        lastGetArtistByGenre: {offset: -1, genre: '', artists: []},
         getArtistsByGenre : function (offset, genre) {
             var deferred = $q.defer();
-            if(factory.artists ==true){
-                deferred.resolve(factory.artists);
+            if(factory.lastGetArtistByGenre.offset == offset &&
+                factory.lastGetArtistByGenre.genre == genre){
+                deferred.resolve(factory.lastGetArtistByGenre.artists);
             } else {
                 $http.get('/genres/' + genre + '/artists?offset=' + offset + '&numberToReturn=12')
                     .success(function(data, status){
                         data.forEach(ImagesFactory);
-                        factory.artists = data;
-                        deferred.resolve(factory.artists);
+                        factory.lastGetArtistByGenre.artists = data;
+                        factory.lastGetArtistByGenre.offset = offset;
+                        factory.lastGetArtistByGenre.genre = genre;
+                        deferred.resolve(factory.lastGetArtistByGenre.artists);
                     }).error(function(data, status){
                         deferred.reject('erreur');
                     });
             }
             return deferred.promise;
         },
+        lastGetArtistsByContainig: {pattern: '', artists: []},
         getArtistsByContaining : function (pattern) {
             var deferred = $q.defer();
-            $http.get('/artists/containing/' + pattern)
-                .success(function(data, status){
-                    data.forEach(ImagesFactory);
-                    factory.artists = data;
-                    deferred.resolve(factory.artists);
-                }).error(function(data, status){
-                    deferred.reject('erreur');
-                });
+            if (factory.lastGetArtistsByContainig.pattern == pattern) {
+                deferred.resolve(factory.lastGetArtistsByContainig.artists)
+            } else {
+                $http.get('/artists/containing/' + pattern)
+                    .success(function (data, status) {
+                        data.forEach(ImagesFactory);
+                        factory.lastGetArtistsByContainig.artists = data;
+                        factory.lastGetArtistsByContainig.pattern = pattern;
+                        deferred.resolve(factory.lastGetArtistsByContainig.artists);
+                    }).error(function (data, status) {
+                        deferred.reject('erreur');
+                    });
+            }
             return deferred.promise;
         },
+        lastGetArtistsFacebookByContaining: {pattern: '', artists: []},
         getArtistsFacebookByContaining : function (pattern) {
             var deferred = $q.defer();
-            $http.get('/artists/facebookContaining/'+pattern)
-                .success(function(data, status){
-                    data.forEach(ImagesFactory);
-                    factory.artists = data;
-                    deferred.resolve(factory.artists);
-                }).error(function(data, status){
-                    deferred.reject('erreur');
-                });
+            if (pattern == factory.lastGetArtistsFacebookByContaining.pattern) {
+                deferred.resolve(factory.lastGetArtistsFacebookByContaining.artists)
+            } else {
+                $http.get('/artists/facebookContaining/' + pattern)
+                    .success(function (data, status) {
+                        data.forEach(ImagesFactory);
+                        factory.lastGetArtistsFacebookByContaining.artists = data;
+                        factory.lastGetArtistsFacebookByContaining.pattern = pattern;
+                        deferred.resolve(factory.lastGetArtistsFacebookByContaining.artists);
+                    }).error(function (data, status) {
+                        deferred.reject('erreur');
+                    });
+            }
             return deferred.promise;
         },
         postArtist : function (searchPattern, artist) {
@@ -171,15 +199,18 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 });
             return deferred.promise;
         },
+        lastGetArtistEvents: {id: 0 , events: []},
         getArtistEvents : function (id) {
             var deferred = $q.defer();
-            if(factory.artists == true) {
-                deferred.resolve(factory.artists);
+            if(factory.lastGetArtistEvents.id == id) {
+                deferred.resolve(factory.lastGetArtistEvents.events);
             } else {
                 $http.get('/artists/'+ id + '/events').
                     success(function (data) {
                         data.forEach(EventsFactory.colorEvent);
-                        deferred.resolve(data);
+                        factory.lastGetArtistEvents.events = data;
+                        factory.lastGetArtistEvents.id = id;
+                        deferred.resolve(factory.lastGetArtistEvents.events);
                     }).error(function (data) {
                         deferred.resolve('error');
                     })
