@@ -86,28 +86,16 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             }
             return deferred.promise;
         },
-        lastGetArtistsByContainig: {pattern: '', artists: []},
-        getArtistsByContaining : function (pattern) {
-            var deferred = $q.defer();
-            if (factory.lastGetArtistsByContainig.pattern == pattern) {
-                deferred.resolve(factory.lastGetArtistsByContainig.artists)
-            } else {
-                $http.get('/artists/containing/' + pattern)
-                    .success(function (data, status) {
-                        data.forEach(ImagesFactory);
-                        factory.lastGetArtistsByContainig.artists = data;
-                        factory.lastGetArtistsByContainig.pattern = pattern;
-                        deferred.resolve(factory.lastGetArtistsByContainig.artists);
-                    }).error(function (data, status) {
-                        deferred.reject('erreur');
-                    });
-            }
-            return deferred.promise;
-        },
         lastGetArtistsFacebookByContaining: {pattern: '', artists: []},
         getArtistsFacebookByContaining : function (pattern) {
             var deferred = $q.defer();
             if (pattern == factory.lastGetArtistsFacebookByContaining.pattern) {
+                if ($rootScope.artist != undefined && $rootScope.artist.facebookUrl.length > 0) {
+                    factory.lastGetArtistsFacebookByContaining.artists.splice(
+                        factory.lastGetArtistsFacebookByContaining.artists.indexOf($rootScope.artist),
+                        1
+                    )
+                }
                 deferred.resolve(factory.lastGetArtistsFacebookByContaining.artists)
             } else {
                 $http.get('/artists/facebookContaining/' + pattern)
@@ -116,6 +104,27 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtistsFacebookByContaining.artists = data;
                         factory.lastGetArtistsFacebookByContaining.pattern = pattern;
                         deferred.resolve(factory.lastGetArtistsFacebookByContaining.artists);
+                    }).error(function (data, status) {
+                        deferred.reject('erreur');
+                    });
+            }
+            return deferred.promise;
+        },
+        lastGetArtistsByContainig: {pattern: '', artists: []},
+        getArtistsByContaining : function (pattern) {
+            var deferred = $q.defer();
+            if (factory.lastGetArtistsByContainig.pattern == pattern) {
+                if ($rootScope.artist != undefined && $rootScope.artist.facebookUrl.length > 0) {
+                    factory.lastGetArtistsByContainig.artists.push($rootScope.artist);
+                }
+                deferred.resolve(factory.lastGetArtistsByContainig.artists)
+            } else {
+                $http.get('/artists/containing/' + pattern)
+                    .success(function (data, status) {
+                        data.forEach(ImagesFactory);
+                        factory.lastGetArtistsByContainig.artists = data;
+                        factory.lastGetArtistsByContainig.pattern = pattern;
+                        deferred.resolve(factory.lastGetArtistsByContainig.artists);
                     }).error(function (data, status) {
                         deferred.reject('erreur');
                     });
@@ -169,7 +178,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     deferred.resolve(data);
                 }).error(function (data) {
                     deferred.resolve('error');
-                })
+                });
             return deferred.promise;
         },
         followArtistByArtistId : function (id, artistName) {
