@@ -98,7 +98,7 @@
     </div>
     <div class="column large-4 float-left eventInfo marginTop10"
             ng-if="event.organizers.length > 0">
-        <div data-ng-repeat="organizer in event.organizers">
+        <div class="column large-12 padding0" data-ng-repeat="organizer in event.organizers">
             <a href="#/organizers/{{organizer.organizerId}}" class="column large-12 padding0">
                 <img src="{{organizer.imagePath}}" class="relative width100p"/>
             </a>

@@ -37,14 +37,15 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
         lastGetOrganizers : {offset: -1, organizers: []},
         getOrganizers : function(offset) {
             var deferred = $q.defer();
-            if(factory.lastGetOrganizers.offset == offset) {
+            if(factory.lastGetOrganizers.offset >= offset) {
                 deferred.resolve(factory.lastGetOrganizers.organizers);
             } else {
                 $http.get('/organizers?numberToReturn=12&offset='+offset).
                     success(function(data, status, headers, config) {
                         factory.lastGetOrganizers.offset = offset;
-                        factory.lastGetOrganizers.organizers = data;
-                        deferred.resolve(factory.organizers);
+                        factory.lastGetOrganizers.organizers =
+                            factory.lastGetOrganizers.organizers.concat(data);
+                        deferred.resolve(factory.lastGetOrganizers.organizers);
                     })
             }
             return deferred.promise;
@@ -124,16 +125,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
         },
         createOrganizer : function(organizer) {
             var deferred = $q.defer();
-            if(factory.organizers ==true) {
-                deferred.resolve(factory.organizers);
-            } else {
-                $http.post('/organizers/create', organizer).
-                    success(function(data, status, headers, config) {
-                        deferred.resolve(data);
-                    }).error(function (data) {
-                        deferred.resolve('error');
-                    })
-            }
+            $http.post('/organizers/create', organizer).
+                success(function(data, status, headers, config) {
+                    deferred.resolve(data);
+                }).error(function (data) {
+                    deferred.resolve('error');
+                })
             return deferred.promise;
         }
     };

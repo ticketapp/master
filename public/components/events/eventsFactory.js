@@ -54,23 +54,27 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
         lastGetEvents : {
             start : 0,
             geoloc : 0,
-            offset : 0,
+            offset : -1,
             events : []
         },
         getEvents : function (start, geoloc, offset) {
             var deferred = $q.defer();
             if (start == factory.lastGetEvents.start && geoloc == factory.lastGetEvents.geoloc &&
-                offset == factory.lastGetEvents.offset) {
+                offset <= factory.lastGetEvents.offset) {
                 console.log(factory.lastGetEvents.events);
                 deferred.resolve(factory.lastGetEvents.events);
             } else {
                 $http.get('/events/inInterval/' + start + '?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12')
                     .success(function (data, status) {
+                        data.forEach(factory.colorEvent);
+                        if (offset > factory.lastGetEvents.offset) {
+                            factory.lastGetEvents.events =  factory.lastGetEvents.events.concat(data);
+                        } else {
+                            factory.lastGetEvents.events = data;
+                        }
                         factory.lastGetEvents.start = start;
                         factory.lastGetEvents.geoloc = geoloc;
                         factory.lastGetEvents.offset = offset;
-                        data.forEach(factory.colorEvent);
-                        factory.lastGetEvents.events = data;
                         deferred.resolve(factory.lastGetEvents.events);
                     }).error(function (data, status) {
                         deferred.reject('erreur');
@@ -78,9 +82,10 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             }
             return deferred.promise;
         },
-        lastGetEvent : {id: 0, event: []},
+        lastGetEvent : {id: 0, event: {}},
         getEvent : function (id) {
             var deferred = $q.defer();
+            console.log(factory.lastGetEvent)
             if (id == factory.lastGetEvent.id) {
                 deferred.resolve(factory.lastGetEvent.event)
             } else {
@@ -93,8 +98,8 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                     }).error(function (data, status) {
                         deferred.reject('erreur');
                     });
-                return deferred.promise;
             }
+            return deferred.promise;
         },
         lastGetEventsByContaining: {pattern: '', geoloc: 0, events: []},
         getEventsByContaining : function (pattern, geoloc) {
@@ -174,22 +179,27 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             }
             return deferred.promise;
         },
-        lastGetEventsByGenre: {pattern: '', offset: '', geoloc: '', events: []},
+        lastGetEventsByGenre: {pattern: '', offset: -1, geoloc: '', events: []},
         getEventsByGenre : function (pattern, offset, geoloc) {
             var deferred = $q.defer();
             if (pattern == factory.lastGetEventsByGenre.pattern &&
-                offset == factory.lastGetEventsByGenre.offset &&
+                offset <= factory.lastGetEventsByGenre.offset &&
                 geoloc == factory.lastGetEventsByGenre.geoloc) {
                 deferred.resolve(factory.lastGetEventsByGenre.events)
             } else {
                 $http.get('/genres/' + pattern + '/events?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12').
                     success(function (data, status, headers, config) {
+                        data.forEach(factory.colorEvent);
+                        if (offset > factory.lastGetEventsByGenre.offset) {
+                            factory.lastGetEventsByGenre.events =
+                                factory.lastGetEventsByGenre.events.concat(data);
+                        } else {
+                            factory.lastGetEventsByGenre.events = data;
+                        }
                         factory.lastGetEventsByGenre.pattern = pattern;
                         factory.lastGetEventsByGenre.offset = offset;
                         factory.lastGetEventsByGenre.geoloc = geoloc;
-                        data.forEach(factory.colorEvent);
-                        factory.events = data;
-                        deferred.resolve(factory.events);
+                        deferred.resolve(factory.lastGetEventsByGenre.events);
                     });
             }
             return deferred.promise;
@@ -198,16 +208,20 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
         getEventsByCity : function (pattern, offset) {
             var deferred = $q.defer();
             if (pattern == factory.lastGetEventsByCity.pattern &&
-                offset == factory.lastGetEventsByCity.offset) {
+                offset <= factory.lastGetEventsByCity.offset) {
                 deferred.resolve(factory.lastGetEventsByCity.events)
             } else {
                 $http.get('/events/nearCity/' + pattern + '?numberToReturn=12&offset=' + offset).
                     success(function (data) {
+                        data.forEach(factory.colorEvent);
+                        if (offset > factory.lastGetEventsByCity.offset) {
+                            factory.lastGetEventsByCity.events = factory.lastGetEventsByCity.events.concat(data);
+                        } else {
+                            factory.lastGetEventsByCity.events = data;
+                        }
                         factory.lastGetEventsByCity.pattern = pattern;
                         factory.lastGetEventsByCity.offset = offset;
-                        data.forEach(factory.colorEvent);
-                        factory.events = data;
-                        deferred.resolve(factory.events);
+                        deferred.resolve(factory.lastGetEventsByCity.events);
                     });
             }
             return deferred.promise;

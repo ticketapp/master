@@ -46,24 +46,24 @@ angular.module('claudeApp').
                     )
                 }
 
-                if (event.organizers != undefined && event.organizers.length > 0) {
-                    for (var i = 0; i < event.organizers.length; i++) {
-                        isFollowedOrganizer(i);
-                    }
-                }
-
-                if (event.artists != undefined && event.artists.length > 0) {
-                    for (var j = 0; j < event.artists.length; j++) {
-                        isFollowedArtists(j);
-                    }
-                }
                 if ($rootScope.connected == true) {
                     EventFactory.getIsFollowed(event.eventId).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
                             $scope.isFollowed = isFollowed;
                             console.log(isFollowed)
                         }
-                    })
+                    });
+                    if (event.organizers != undefined && event.organizers.length > 0) {
+                        for (var i = 0; i < event.organizers.length; i++) {
+                            isFollowedOrganizer(i);
+                        }
+                    }
+
+                    if (event.artists != undefined && event.artists.length > 0) {
+                        for (var j = 0; j < event.artists.length; j++) {
+                            isFollowedArtists(j);
+                        }
+                    }
                 }
                 $rootScope.$watch('connected', function (connected) {
                     if (connected == false) {
@@ -76,6 +76,17 @@ angular.module('claudeApp').
                         })
                     }
                 })
+                if (event.organizers != undefined && event.organizers.length > 0) {
+                    for (var i = 0; i < event.organizers.length; i++) {
+                        isFollowedOrganizer(i);
+                    }
+                }
+
+                if (event.artists != undefined && event.artists.length > 0) {
+                    for (var j = 0; j < event.artists.length; j++) {
+                        isFollowedArtists(j);
+                    }
+                }
             });
             $scope.follow = function () {
                 EventFactory.followEventByEventId($scope.event.eventId, $scope.event.name).then(

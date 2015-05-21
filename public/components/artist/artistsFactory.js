@@ -35,13 +35,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         lastGetArtists: {offset: -1, artists: []},
         getArtists : function (offset) {
             var deferred = $q.defer();
-            if (offset == factory.lastGetArtists.offset) {
+            if (offset <= factory.lastGetArtists.offset) {
                 deferred.resolve(factory.lastGetArtists.artists)
             } else {
                 $http.get('/artists/since/' + offset + '/12 ')
                     .success(function (data, status) {
                         data.forEach(ImagesFactory);
-                        factory.lastGetArtists.artists = data;
+                        factory.lastGetArtists.artists = factory.lastGetArtists.artists.concat(data);
                         factory.lastGetArtists.offset = offset;
                         deferred.resolve(factory.lastGetArtists.artists);
                     }).error(function (data, status) {
@@ -65,14 +65,18 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         lastGetArtistByGenre: {offset: -1, genre: '', artists: []},
         getArtistsByGenre : function (offset, genre) {
             var deferred = $q.defer();
-            if(factory.lastGetArtistByGenre.offset == offset &&
+            if(factory.lastGetArtistByGenre.offset >= offset &&
                 factory.lastGetArtistByGenre.genre == genre){
                 deferred.resolve(factory.lastGetArtistByGenre.artists);
             } else {
                 $http.get('/genres/' + genre + '/artists?offset=' + offset + '&numberToReturn=12')
                     .success(function(data, status){
                         data.forEach(ImagesFactory);
-                        factory.lastGetArtistByGenre.artists = data;
+                        if (offset > factory.lastGetArtistByGenre.offset) {
+                            factory.lastGetArtistByGenre.artists = factory.lastGetArtistByGenre.artists.concat(data);
+                        } else {
+                            factory.lastGetArtistByGenre.artists = data;
+                        }
                         factory.lastGetArtistByGenre.offset = offset;
                         factory.lastGetArtistByGenre.genre = genre;
                         deferred.resolve(factory.lastGetArtistByGenre.artists);
