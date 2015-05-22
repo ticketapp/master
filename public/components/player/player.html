@@ -14,9 +14,11 @@
     <h3>{{error}}</h3>
 </div>
 <div ng-show="showInfo" class="lecteurError animated fadeIn">
-    <a href="#/events/{{trackActive.nextShow.eventId}}">
-        Bientôt en concert
-    </a>
+    <b>
+        <a class="textColorWhite" href="#/events/{{trackActive.nextShow.eventId}}">
+            Bientôt en concert
+        </a>
+    </b>
 </div>
 <div class="zIndex1" ng-class="{'column large-12 padding0': $root.window != 'small' && $root.window != 'medium'}">
     <!--<a class="close float-right">X</a>-->

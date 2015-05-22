@@ -45,6 +45,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 $scope.artist = artist;
                 $scope.tracks = [];
                 artist.tracks = $filter('orderBy')(artist.tracks, 'confidence', true);
+                console.log(artist.tracks)
                 artist.tracks.forEach(pushTrack);
                 artist.tracks.forEach(countRates);
                 $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
