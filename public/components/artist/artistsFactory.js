@@ -292,8 +292,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         }, 0);
                     }
 
-                    if (value != []) {
+                    if (value.length > 0) {
                         value.forEach(pushTrack);
+                        /*$timeout(function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
+                            })
+                        },0)  */
                         value.forEach(saveTrack);
                     } else {
                         $rootScope.loadingTracks = false;
