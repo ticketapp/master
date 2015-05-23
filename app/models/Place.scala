@@ -4,6 +4,7 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
+import play.api.Logger
 import play.api.db.DB
 import play.api.Play.current
 import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
@@ -89,15 +90,11 @@ object Place {
     }
   }
 
-  def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Option[Long]] = {
-    placeAddress match {
-      case None =>
-        Future {
-          None
-        }
-      case Some(address) =>
-        Address.getGeographicPoint(address) map { addressWithGeoPoint => Address.save(Option(addressWithGeoPoint)) }
-    }
+  def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Option[Long]] = placeAddress match {
+    case None =>
+      Future { None }
+    case Some(address) =>
+      Address.getGeographicPoint(address) map { addressWithGeoPoint => Address.save(Option(addressWithGeoPoint)) }
   }
 
   def findIdByFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
@@ -252,16 +249,24 @@ object Place {
     case e: Exception => throw new DAOException("Place.getFollowedPlaces: " + e.getMessage)
   }
 
-  def saveEventPlaceRelation(eventId: Long, placeId: Long): Boolean = try {
+  def saveEventRelation(eventId: Long, placeId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT insertEventPlaceRelation({eventId}, {placeId})""")
+      SQL("""SELECT insertEventPlaceRelation({eventId}, {placeId})""")
         .on(
           'eventId -> eventId,
           'placeId -> placeId)
         .execute()
     }
   } catch {
-    case e: Exception => throw new DAOException("Place.saveEventPlaceRelation: " + e.getMessage)
+    case e: Exception =>
+      Logger.error(s"Place.saveEventRelation: error with eventId $eventId and placeId $placeId", e)
+      throw new DAOException("Place.saveEventRelation: " + e.getMessage)
+  }
+  
+  def deleteEventRelation(eventId: Long, placeId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(s"""DELETE FROM eventsPlaces WHERE eventId = $eventId AND placeId = $placeId""")
+        .executeUpdate()
+    }
   }
 }

@@ -157,6 +157,26 @@ object Event {
     case e: Exception => throw new DAOException("Event.findPassedInHourIntervalNear: " + e.getMessage)
   }
 
+  def findAllByGenre(genre: String, geographicPoint: GeographicPoint, offset: Int, numberToReturn: Int): Try[Seq[Event]]
+  = Try {
+    val geographicPointString = geographicPoint.toString()
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT e.* FROM eventsGenres eG
+           |  INNER JOIN events e ON e.eventId = eG.eventId AND
+           |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
+           |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
+           |  INNER JOIN genres g ON g.genreId = eG.genreId
+           |    WHERE g.name = {genre}
+           |  ORDER BY geographicPoint <-> point '$geographicPointString'
+                                                                          |LIMIT $numberToReturn
+            |OFFSET $offset""".stripMargin)
+        .on('genre -> genre)
+        .as(EventParser.*)
+        .map(getPropertiesOfEvent)
+    }
+  }
+
   def findAllByPlace(placeId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -173,25 +193,21 @@ object Event {
   } catch {
     case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
-
-  def findAllByGenre(genre: String, geographicPoint: GeographicPoint, offset: Int, numberToReturn: Int): Try[Seq[Event]]
-  = Try {
-    val geographicPointString = geographicPoint.toString()
+  
+  def findAllPassedByPlace(placeId: Long): Seq[Event] = try {
     DB.withConnection { implicit connection =>
       SQL(
-        s"""SELECT e.* FROM eventsGenres eG
-           |  INNER JOIN events e ON e.eventId = eG.eventId AND
-           |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
-           |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
-           |  INNER JOIN genres g ON g.genreId = eG.genreId
-           |    WHERE g.name = {genre}
-           |  ORDER BY geographicPoint <-> point '$geographicPointString'
-           |LIMIT $numberToReturn
-           |OFFSET $offset""".stripMargin)
-        .on('genre -> genre)
+        """SELECT event.* FROM eventsPlaces eP
+          | INNER JOIN events event ON event.eventId = eP.eventId
+          |   WHERE eP.placeId = {placeId}
+          |     AND startTime < CURRENT_TIMESTAMP
+          |ORDER BY event.creationDateTime DESC""".stripMargin)
+        .on('placeId -> placeId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
   }
 
   def findAllByOrganizer(organizerId: Long): Seq[Event] = try {
@@ -203,6 +219,22 @@ object Event {
           |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
           |   WHERE eO.organizerId = {organizerId}
           |ORDER BY e.creationDateTime DESC""".stripMargin)
+        .on('organizerId -> organizerId)
+        .as(EventParser.*)
+        .map(getPropertiesOfEvent)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findAllByOrganizer: " + e.getMessage)
+  }
+  
+  def findAllPassedByOrganizer(organizerId: Long): Seq[Event] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT event.* FROM eventsOrganizers eP
+          | INNER JOIN events event ON event.eventId = eP.eventId
+          |   WHERE eP.organizerId = {organizerId}
+          |     AND startTime < CURRENT_TIMESTAMP
+          |ORDER BY event.creationDateTime DESC""".stripMargin)
         .on('organizerId -> organizerId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
@@ -222,6 +254,22 @@ object Event {
           |   WHERE a.facebookUrl = {facebookUrl}
           |ORDER BY e.creationDateTime DESC""".stripMargin)
         .on('facebookUrl -> facebookUrl)
+        .as(EventParser.*)
+        .map(getPropertiesOfEvent)
+    }
+  } catch {
+    case e: Exception => throw new DAOException("Event.findAllByArtist: " + e.getMessage)
+  }
+
+  def findAllPassedByArtist(artistId: Long): Seq[Event] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT event.* FROM eventsArtists eP
+          | INNER JOIN events event ON event.eventId = eP.eventId
+          |   WHERE eP.artistId = {artistId}
+          |     AND startTime < CURRENT_TIMESTAMP
+          |ORDER BY event.creationDateTime DESC""".stripMargin)
+        .on('artistId -> artistId)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
     }
