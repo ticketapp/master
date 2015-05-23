@@ -64,7 +64,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "have another website" in {
-      val maybeTrack = Option(Track(None, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl",
+      val maybeTrack = Option(Track(None, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
         Option("redirectUrl")))
       val artistId = Artist.save(artist)
       val artistWithId = artist.copy(artistId = artistId)

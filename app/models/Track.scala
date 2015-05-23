@@ -15,51 +15,59 @@ import java.math.BigDecimal
 import anorm.Column.rowToBigDecimal
 import scala.util.{Try, Success, Failure}
 
-case class Track (trackId: Option[Long],
+case class Track (trackId: Option[String],
                   title: String, 
                   url: String, 
                   platform: Char,
                   thumbnailUrl: String,
                   artistFacebookUrl: String,
+                  artistName: String,
                   redirectUrl: Option[String] = None,
                   confidence: Option[Double] = None,
                   playlistRank: Option[Float] = None)
 
 object Track {
 
-  def formApplyForTrackCreatedWithArtist(title: String, url: String, platform: String, thumbnailUrl: Option[String],
-  userThumbnailUrl: Option[String], artistFacebookUrl: String, redirectUrl: Option[String]): Track = {
+  def formApplyForTrackCreatedWithArtist(trackId: String, title: String, url: String, platform: String,
+                                         thumbnailUrl: Option[String], userThumbnailUrl: Option[String],
+                                         artistFacebookUrl: String, artistName: String, redirectUrl: Option[String])
+  : Track = {
     thumbnailUrl match {
-      case Some(thumbnail: String) => new Track(None, title, url, platform(0), thumbnail, artistFacebookUrl, redirectUrl)
+      case Some(thumbnail: String) =>
+        Track(Option(trackId), title, url, platform(0), thumbnail, artistFacebookUrl, artistName, redirectUrl)
       case None => userThumbnailUrl match {
         case Some(userThumbnail: String) =>
-          new Track(None, title, url, platform(0), userThumbnail, artistFacebookUrl, redirectUrl)
+          new Track(Option(trackId), title, url, platform(0), userThumbnail, artistFacebookUrl, artistName, redirectUrl)
         case None =>
           throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
       }
     }
   }
 
-  def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.title, track.url, track.platform.toString,
-    Some(track.thumbnailUrl), None, track.artistFacebookUrl, track.redirectUrl))
+  def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.trackId.get, track.title, track.url,
+    track.platform.toString, Some(track.thumbnailUrl), None, track.artistFacebookUrl, track.artistName: String,
+    track.redirectUrl))
 
-  def formApply(title: String, url: String, platform: String, thumbnailUrl: String, artistFacebookUrl: String,
-                redirectUrl: Option[String]): Track =
-   new Track(None, title, url, platform(0), thumbnailUrl, artistFacebookUrl, redirectUrl)
+  def formApply(trackId: String, title: String, url: String, platform: String, thumbnailUrl: String,
+                artistFacebookUrl: String, artistName: String, redirectUrl: Option[String]): Track =
+   new Track(Option(trackId), title, url, platform(0), thumbnailUrl, artistFacebookUrl, artistName, redirectUrl)
   def formUnapply(track: Track) =
-    Some((track.title, track.url, track.platform.toString, track.thumbnailUrl, track.artistFacebookUrl, track.redirectUrl))
+    Some((track.trackId.get, track.title, track.url, track.platform.toString, track.thumbnailUrl,
+      track.artistFacebookUrl, track.artistName, track.redirectUrl))
 
   private val trackParser: RowParser[Track] = {
-    get[Long]("trackId") ~
+    get[String]("trackId") ~
       get[String]("title") ~
       get[String]("url") ~
       get[Char]("platform") ~
       get[String]("thumbnailUrl") ~
       get[String]("artistFacebookUrl") ~
+      get[String]("artistName") ~
       get[Option[String]]("redirectUrl") ~
       get[Double]("confidence") map {
-      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ redirectUrl ~ confidence =>
-        Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl, Option(confidence))
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ artistName ~ redirectUrl ~
+        confidence => Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, artistName,
+        redirectUrl, Option(confidence))
     }
   }
 
@@ -103,7 +111,7 @@ object Track {
     }
   }
 
-  def find(trackId: Long): Option[Track] = {
+  def find(trackId: String): Try[Option[Track]] = Try {
     DB.withConnection { implicit connection =>
       SQL("SELECT * FROM tracks WHERE trackId = {trackId}")
         .on('trackId -> trackId)
@@ -121,17 +129,21 @@ object Track {
     case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
   }
 
-  def save(track: Track): Try[Option[Long]] = Try {
+  def save(track: Track): Try[Boolean] = Try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT insertTrack({title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl}, {redirectUrl})""")
+      SQL(
+        """SELECT insertTrack({trackId}, {title}, {url}, {platform}, {thumbnailUrl}, {artistFacebookUrl},
+          |{artistName}, {redirectUrl})""".stripMargin)
         .on(
+          'trackId -> track.trackId,
           'title -> track.title,
           'url -> track.url,
           'platform -> track.platform,
           'thumbnailUrl -> track.thumbnailUrl,
           'artistFacebookUrl -> track.artistFacebookUrl,
+          'artistName -> track.artistName,
           'redirectUrl -> track.redirectUrl)
-        .as(scalar[Option[Long]].single)
+        .execute()
     }
   }
 
@@ -162,7 +174,7 @@ object Track {
     case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
   }
 
-  def delete(trackId: Long): Int = try {
+  def delete(trackId: String): Int = try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM tracks WHERE trackId = {trackId}""".stripMargin)
@@ -173,7 +185,7 @@ object Track {
     case e: Exception => throw new DAOException("Track.delete: " + e.getMessage)
   }
 
-  def followTrack(userId : Long, trackId : Long): Option[Long] = try {
+  def followTrack(userId : Long, trackId : String): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL("INSERT INTO trackFollowed(userId, trackId) VALUES ({userId}, {trackId})")
         .on(
@@ -185,7 +197,7 @@ object Track {
     case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)
   }
 
-  def upsertRatingUp(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
+  def upsertRatingUp(userId: String, trackId: String, rating: Int): Try[Boolean] = Try {
     updateRating(trackId, rating)
 
     DB.withConnection { implicit connection =>
@@ -198,7 +210,7 @@ object Track {
     }
   }
 
-  def upsertRatingDown(userId: String, trackId: Long, rating: Int): Try[Boolean] = Try {
+  def upsertRatingDown(userId: String, trackId: String, rating: Int): Try[Boolean] = Try {
     updateRating(trackId, rating)
 
     DB.withConnection { implicit connection =>
@@ -218,26 +230,19 @@ object Track {
     }
   }
 
-  def getRating(trackId: Long): Try[Option[(Int, Int)]] = Try {
-    println("getRating: trackId:" + trackId)
+  def getRating(trackId: String): Try[Option[(Int, Int)]] = Try {
     DB.withConnection { implicit connection =>
-      val a = SQL("SELECT ratingUp, ratingDown FROM tracks WHERE trackId = {trackId}")
+      SQL("SELECT ratingUp, ratingDown FROM tracks WHERE trackId = {trackId}")
         .on('trackId -> trackId)
         .as(ratingParser.singleOpt)
-      println("getRating: sql returned " + a)
-      a
     }
   }
 
-  def updateRating(trackId: Long, ratingToAdd: Int): Try[Double] = Try {
+  def updateRating(trackId: String, ratingToAdd: Int): Try[Double] = Try {
     getRating(trackId) match {
       case Success(Some(actualRating)) =>
         var actualRatingUp = actualRating._1
         var actualRatingDown = actualRating._2
-
-        println("actualRatingUp = " + actualRatingUp)
-        println("actualRatingDown = " + actualRatingDown)
-        println("ratingToAdd = " + ratingToAdd)
 
         ratingToAdd match {
           case ratingUp if ratingUp > 0 => actualRatingUp = actualRatingUp + ratingUp
@@ -245,29 +250,40 @@ object Track {
         }
 
         val confidence = calculateConfidence(actualRatingUp, actualRatingDown)
-        println("confidence = " + confidence)
 
-        println(persistUpdateRating(trackId, actualRatingUp, actualRatingDown, confidence))
+        persistUpdateRating(trackId, actualRatingUp, actualRatingDown, confidence) match {
+          case Success(1) =>
+            confidence
+          case Failure(exception) =>
+            Logger.error(s"Track.updateRating: persistUpdateRating: error while updating with trackId: trackId", exception)
+            throw exception
+          case _ =>
+            throw new DAOException("Track.updateRating: persistUpdateRating")
+        }
 
-        confidence
+      case Failure(exception) =>
+        Logger.error(s"Track.updateRating: error while updating with trackId: trackId", exception)
+        throw exception
+
       case _ =>
         Logger.error(s"Track.updateRating: error while updating with trackId: trackId")
         throw new DAOException("Track.updateRating")
     }
   }
 
-  def persistUpdateRating(trackId: Long, actualRatingUp: Int, actualRatingDown: Int, confidence: Double)
+  def persistUpdateRating(trackId: String, actualRatingUp: Int, actualRatingDown: Int, confidence: Double)
   : Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         s"""UPDATE tracks
-           | SET ratingUp = $actualRatingUp, ratingDown = $actualRatingDown, confidence = $confidence
-            | WHERE trackId = $trackId""".stripMargin)
+           |  SET ratingUp = $actualRatingUp, ratingDown = $actualRatingDown, confidence = $confidence
+           |    WHERE trackId = {trackId}""".stripMargin)
+        .on('trackId -> trackId)
         .executeUpdate()
     }
   }
 
-  def getRatingForUser(userId: String, trackId: Long): Try[Option[(Int, Int)]] = Try {
+  def getRatingForUser(userId: String, trackId: String): Try[Option[(Int, Int)]] = Try {
     DB.withConnection { implicit connection =>
       SQL("SELECT ratingUp, ratingDown FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
         .on(
@@ -277,7 +293,7 @@ object Track {
     }
   }
 
-  def deleteRatingForUser(userId: String, trackId: Long): Try[Int] = Try {
+  def deleteRatingForUser(userId: String, trackId: String): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}""".stripMargin)
@@ -287,7 +303,7 @@ object Track {
     }
   }
 
-  def addToFavorites(userId: String, trackId: Long): Try[Int] = Try {
+  def addToFavorites(userId: String, trackId: String): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL("INSERT INTO usersFavoriteTracks(userId, trackId) VALUES({userId}, {trackId})")
         .on(
@@ -297,7 +313,7 @@ object Track {
     }
   }
 
-  def removeFromFavorites(userId: String, trackId: Long): Try[Int] = Try {
+  def removeFromFavorites(userId: String, trackId: String): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL("""DELETE FROM usersFavoriteTracks WHERE userId = {userId} AND trackId = {trackId}""")
         .on('userId -> userId,
@@ -321,7 +337,6 @@ object Track {
   def calculateConfidence(actualRatingUp: Int, actualRatingDown: Int): Double = {
     val up = actualRatingUp.toDouble
     val down = actualRatingDown.toDouble
-
 
     if (up == 0)
       -down

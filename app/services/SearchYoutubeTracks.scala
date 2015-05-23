@@ -15,7 +15,6 @@ import scala.language.postfixOps
 import services.Utilities._
 
 object SearchYoutubeTracks {
-  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Enumerator[Set[Track]] = Enumerator.flatten(
     getMaybeEchonestIdByFacebookId(artist) map {
@@ -99,7 +98,7 @@ object SearchYoutubeTracks {
         "q" -> (artist.name + " " + trackTitle),
         "type" -> "video",
         "videoCategoryId" -> "10",
-        "key" -> youtubeKey)
+        "key" -> googleKey)
       .get()
       .map { readYoutubeTracks(_, artist) }
   }
@@ -115,7 +114,8 @@ object SearchYoutubeTracks {
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
           if isArtistNameInTrackTitle(title, artist.name) =>
-          Track(None, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl)
+          Track(None, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl,
+            artist.name)
       }
     }
 

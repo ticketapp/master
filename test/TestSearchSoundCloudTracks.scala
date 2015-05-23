@@ -24,7 +24,7 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
 
     "find soundCloud ids for artist name worakls" in {
       whenReady(getSoundCloudIdsForName("worakls"), timeout(Span(2, Seconds))) { soundCloudIds =>
-        soundCloudIds should contain allOf (68442, 4329372, 13302835, 97091845, 129311935, 366396, 48457, 1957879, 19050912, 90244, 13369539, 11104769, 62830, 464934, 191876, 1072342, 21044, 18142163, 16831396, 113114, 6904729, 1150209, 45742673, 362936, 9949484, 718770, 28455500, 4634034, 3529290, 241074, 7467342, 15877, 67597007, 24866108, 1653496, 439005, 12482658, 51277648, 75529, 70326, 4256204, 433864, 9120445, 946902, 605303, 710029, 16719236, 1679324, 105028051, 8343788)
+        soundCloudIds should contain allOf (68442, 4329372, 13302835)
       }
     }
 

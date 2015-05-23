@@ -53,7 +53,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 25 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 21 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -167,37 +167,36 @@ SELECT insertGenre('rock', 'r');
 
 
 CREATE TABLE tracks (
-  trackId                 SERIAL PRIMARY KEY,
+  trackId                 VARCHAR(255) NOT NULL,
   title                   VARCHAR(255) NOT NULL,
   url                     VARCHAR NOT NULL,
   platform                CHAR NOT NULL,
   thumbnailUrl            VARCHAR NOT NULL,
   artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
+  artistName              VARCHAR(255) NOT NULL,
   redirectUrl             VARCHAR(255),
   confidence              DOUBLE PRECISION NOT NULL DEFAULT 0,
   ratingUp                INT NOT NULL DEFAULT 0,
   ratingDown              INT NOT NULL DEFAULT 0,
   UNIQUE(url)
 );
+CREATE UNIQUE INDEX trackId ON tracks(trackId);
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
-CREATE OR REPLACE FUNCTION insertTrack(titleValue VARCHAR(255),
+CREATE OR REPLACE FUNCTION insertTrack(trackIdValue VARCHAR(255),
+                                       titleValue VARCHAR(255),
                                        urlValue VARCHAR,
                                        platformValue CHAR,
                                        thumbnailUrlValue VARCHAR,
                                        artistFacebookUrlValue VARCHAR(255),
+                                       artistNameValue VARCHAR(255),
                                        redirectUrlValue VARCHAR(255))
-  RETURNS INT AS
+  RETURNS VOID AS
   $$
-  DECLARE trackIdToReturn int;;
   BEGIN
-    INSERT INTO tracks (title, url, platform, thumbnailUrl, artistFacebookUrl, redirectUrl)
-      VALUES (titleValue, urlValue, platformValue, thumbnailUrlValue, artistFacebookUrlValue, redirectUrlValue)
-      RETURNING trackId INTO trackIdToReturn;;
-      RETURN trackIdToReturn;;
-    EXCEPTION WHEN unique_violation THEN
-      SELECT trackId INTO trackIdToReturn FROM tracks WHERE url = urlValue;;
-      RETURN trackIdToReturn;;
+    INSERT INTO tracks (trackId, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl)
+    VALUES (trackIdValue, titleValue, urlValue, platformValue, thumbnailUrlValue, artistFacebookUrlValue,
+            artistNameValue, redirectUrlValue);;
   END;;
   $$
 LANGUAGE plpgsql;
@@ -365,9 +364,9 @@ CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
   path                      VARCHAR NOT NULL,
   category                  VARCHAR(31),
-  organizerId               BIGINT references organizers(organizerId),
-  infoId                    BIGINT references infos(infoId),
-  trackId                   BIGINT references tracks(trackId),
+  organizerId               BIGINT REFERENCES organizers(organizerId),
+  infoId                    BIGINT REFERENCES infos(infoId),
+  trackId                   VARCHAR(255) REFERENCES tracks(trackId),
   UNIQUE(path)
 );
 
@@ -758,9 +757,9 @@ CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);
 
 CREATE TABLE playlistsTracks (
   playlistId              BIGINT REFERENCES playlists (playlistId),
-  trackId                 BIGINT REFERENCES tracks (trackId),
+  trackId                 VARCHAR(255) REFERENCES tracks (trackId),
   trackRank               FLOAT NOT NULL,
-  PRIMARY KEY (playlistId, trackId)
+  PRIMARY KEY (playlistId)
 );
 CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId);
 
@@ -768,7 +767,7 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
   userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
-  trackId                 BIGINT REFERENCES tracks (trackId) NOT NULL,
+  trackId                 VARCHAR(255) REFERENCES tracks (trackId) NOT NULL,
   ratingUp                INT,
   ratingDown              INT,
   reason                  CHAR
@@ -776,7 +775,7 @@ CREATE TABLE tracksRating (
 CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
 CREATE OR REPLACE FUNCTION upsertTrackRatingUp(
   userIdValue     VARCHAR(255),
-  trackIdValue    BIGINT,
+  trackIdValue    VARCHAR(255),
   ratingUpValue   INT)
   RETURNS VOID AS
   $$
@@ -797,9 +796,9 @@ CREATE OR REPLACE FUNCTION upsertTrackRatingUp(
   $$
 LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION upsertTrackRatingDown(
-  userIdValue  VARCHAR(255),
-  trackIdValue BIGINT,
-  ratingDownValue  INT)
+  userIdValue       VARCHAR(255),
+  trackIdValue      VARCHAR(255),
+  ratingDownValue   INT)
   RETURNS VOID AS
   $$
     BEGIN
@@ -823,7 +822,7 @@ LANGUAGE plpgsql;
 CREATE TABLE usersFavoriteTracks(
   tableId                 SERIAL PRIMARY KEY,
   userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
-  trackId                 BIGINT REFERENCES tracks (trackId) NOT NULL
+  trackId                 VARCHAR(255) REFERENCES tracks (trackId) NOT NULL
 );
 CREATE UNIQUE INDEX usersFavoriteTracksIndex ON usersFavoriteTracks (userId, trackId);
 

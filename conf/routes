@@ -81,10 +81,10 @@ GET     /genres/:genre/events                                     controllers.Ev
 POST    /tracks/create                                            controllers.TrackController.createTrack
 GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle        controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
 GET     /tracks/youtubeTrackInfo/:youtubeId                       controllers.SearchTracksController.getYoutubeTrackInfos(youtubeId: String)
-GET     /tracks/:trackId/rating                                   controllers.TrackController.getRatingForUser(trackId: Long)
-POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRatingForUser(trackId: Long, rating: Int)
-POST    /tracks/:trackId/addToFavorites                           controllers.TrackController.addToFavorites(trackId: Long)
-POST    /tracks/:trackId/removeFromFavorites                      controllers.TrackController.removeFromFavorites(trackId: Long)
+GET     /tracks/:trackId/rating                                   controllers.TrackController.getRatingForUser(trackId: String)
+POST    /tracks/:trackId/:rating/rating                           controllers.TrackController.upsertRatingForUser(trackId: String, rating: Int)
+POST    /tracks/:trackId/addToFavorites                           controllers.TrackController.addToFavorites(trackId: String)
+POST    /tracks/:trackId/removeFromFavorites                      controllers.TrackController.removeFromFavorites(trackId: String)
 GET     /tracks/favorites                                         controllers.TrackController.findFavorites
 
 ################################## Infos ################################################
@@ -153,6 +153,3 @@ POST    /password                                                 securesocial.c
 GET     /authenticate/:provider                                   securesocial.controllers.ProviderController.authenticate(provider)
 POST    /authenticate/:provider                                   securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /not-authorized                                           securesocial.controllers.ProviderController.notAuthorized
-
-
-

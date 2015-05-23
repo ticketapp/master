@@ -14,10 +14,12 @@ import play.api.libs.json.DefaultWrites
 
 object TrackController extends Controller with securesocial.core.SecureSocial {
   val trackBindingForm = Form(mapping(
+    "trackId" -> nonEmptyText(8),
     "title" -> nonEmptyText(2),
     "url" -> nonEmptyText(3),
     "platform" -> nonEmptyText,
     "thumbnailUrl" -> nonEmptyText(2),
+    "artistName" -> nonEmptyText(2),
     "artistFacebookUrl" -> nonEmptyText(2),
     "redirectUrl" -> optional(nonEmptyText(2))
   )(Track.formApply)(Track.formUnapply))
@@ -31,16 +33,20 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
       track => {
         Track.save(track)
         match {
-          case Success(Some(trackId)) => Ok(Json.toJson(Track.find(trackId)))
-          case _ => InternalServerError
+          case Success(true) =>
+            Track.find(track.trackId.get) match {
+              case Success(Some(trackFound)) => Ok(Json.toJson(trackFound))
+              case _ => NotFound
+            }
+          case _ =>
+            InternalServerError
         }
       }
     )
   }
 
-  def upsertRatingForUser(trackId: Long, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
+  def upsertRatingForUser(trackId: String, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
-    println("rating:" + rating)
     rating match {
       case ratingUp if ratingUp > 0 =>
         Track.upsertRatingUp(userId, trackId, ratingUp) match {
@@ -56,7 +62,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def getRatingForUser(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+  def getRatingForUser(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
     Track.getRatingForUser(userId, trackId) match {
       case Success(Some(rating)) => Ok(Json.toJson(rating._1.toString + "," + rating._2.toString))
@@ -64,7 +70,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def addToFavorites(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+  def addToFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
     Track.addToFavorites(userId, trackId) match {
       case Success(1) =>
@@ -76,7 +82,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def removeFromFavorites(trackId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
+  def removeFromFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
     Track.removeFromFavorites(userId, trackId) match {
       case Success(1) =>
