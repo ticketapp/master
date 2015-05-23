@@ -43,6 +43,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
+                console.log(artist)
                 $scope.tracks = [];
                 artist.tracks = $filter('orderBy')(artist.tracks, 'confidence', true);
                 artist.tracks.forEach(pushTrack);

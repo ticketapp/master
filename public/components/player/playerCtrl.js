@@ -34,19 +34,11 @@ angular.module('claudeApp').
                 } else if ($rootScope.window == 'medium') {
                     $scope.numberToDisplay = 3;
                 } else if ($rootScope.window == 'small') {
-                    $scope.numberToDisplay = 3;
+                    $scope.numberToDisplay = 1;
                 }
             }
             calculeNumberToDisplay();
             $rootScope.$watch('window', calculeNumberToDisplay);
-            $scope.guid = function () {
-                function s4() {
-                    return Math.floor((1 + Math.random()) * 0x10000)
-                        .toString(16)
-                        .substring(1);
-                }
-                return s4() + s4();
-            };
             $scope.sortableOptions = {
                 containment: '#sortable-container',
                 //restrict move across columns. move only within column.

@@ -13,22 +13,26 @@
             Supprimer des favoris
         </md-track-tooltipe>
     </i>
-    <div class="column small-1 padding0 text-center float-right marginTop10"
-         style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:70px;">
-        <i class="fi-x column medium-12 padding0 pointer"
-           ng-click="signalTrack(track.trackId, $index)">
+    <div class="column small-1 padding0 text-center float-right"
+         style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:80px; margin-top: 15px">
+        <i class="fa fa-exclamation column medium-12 padding0 pointer"
+           ng-click="signalTrack(track.trackId, $index)"
+           style="line-height: 26.66px"
+                >
             <md-track-tooltipe>
                 Signaler
             </md-track-tooltipe>
         </i>
-        <i class="fi-play column medium-12 padding0 pointer"
-           ng-click="$root.addAndPlay([track], artist)">
+        <i class="fa fa-play column medium-12 padding0 pointer"
+           ng-click="$root.addAndPlay([track], artist)"
+           style="line-height: 26.66px">
             <md-track-tooltipe>
                 Lire
             </md-track-tooltipe>
         </i>
-        <i class="fi-plus column medium-12 padding0 pointer"
-           ng-click="$root.addToPlaylist([track], artist)">
+        <i class="fa fa-plus column medium-12 padding0 pointer"
+           ng-click="$root.addToPlaylist([track], artist)"
+           style="line-height: 26.66px">
             <md-track-tooltipe>
                 Ajouter à la lecture en cours
             </md-track-tooltipe>
@@ -45,6 +49,7 @@
             </md-track-tooltipe>
         </i>
     </div>
+    <a href="#/artists/{{track.artistFacebookUrl}}">{{track.artistName}}</a>
     <div style="overflow: hidden; height: 48px; margin-top: 5px;">
         <b>{{track.title}}</b>
     </div>

@@ -177,6 +177,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 success(function (data) {
                     deferred.resolve(data);
                 }).error(function (data) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
+                    } else {
+                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
+                    }
                     deferred.resolve('error');
                 });
             return deferred.promise;
@@ -193,7 +198,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                     deferred.resolve('error');
-                })
+                });
             return deferred.promise;
         },
         unfollowArtist : function (id, artistName) {
@@ -245,6 +250,15 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             return deferred.promise;
         },
         createNewArtistAndPassItToRootScope : function (artist) {
+            function guid() {
+                function s4() {
+                    return Math.floor((1 + Math.random()) * 0x10000)
+                        .toString(16)
+                        .substring(1);
+                }
+                return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                    s4() + '-' + s4() + s4() + s4();
+            }
             var searchPattern = document.getElementById('searchBar').value.trim();
             $rootScope.artisteToCreate = true;
             $rootScope.artist = artist;
@@ -269,13 +283,16 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         if (track.redirectUrl == undefined) {
                             track.redirectUrl = track.url;
                         }
+                        console.log(track);
                         $http.post('/tracks/create', {
+                            trackId: track.trackId,
                             artistFacebookUrl: artist.facebookUrl,
                             redirectUrl: track.redirectUrl,
                             title: track.title,
                             url: track.url,
                             platform: track.platform,
-                            thumbnailUrl: track.thumbnailUrl
+                            thumbnailUrl: track.thumbnailUrl,
+                            artistName: track.artistName
                         }).success(function (){
                             $rootScope.loadingTracks = false;
                         }).error(function (data) {
@@ -286,13 +303,18 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     function pushTrack(track) {
                         $timeout(function () {
                             $rootScope.$apply(function () {
+                                track.artistName = artist.name;
                                 $rootScope.artist.tracks.push(track);
                                 $rootScope.tracks.push(track);
                             });
                         }, 0);
                     }
 
+                    function getUuid (track) {
+                        track.trackId = guid();
+                    }
                     if (value.length > 0) {
+                        value.forEach(getUuid);
                         value.forEach(pushTrack);
                         /*$timeout(function () {
                             $rootScope.$apply(function () {
