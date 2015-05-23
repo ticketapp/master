@@ -27265,7 +27265,6 @@ md-tooltip[width-32="8"].md-show .md-background {
 .as-sortable-item,
 .as-sortable-placeholder {
   display: inline-block;
-  width: 124px;
   max-height: 110px;
   float: left;
 }
@@ -27482,7 +27481,6 @@ top-search-block > search-bar-contener {
 
 /* line 11, ../../public/components/player/player.scss */
 .trackContener {
-  width: 205px;
   display: inline-block;
   white-space: normal;
   opacity: 0.6;

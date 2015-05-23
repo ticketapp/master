@@ -23,7 +23,7 @@
             Supprimer des favoris
         </md-track-tooltipe>
     </i>
-    <i class="fi-play playInImg" ng-if="track != trackActive" ng-click="$root.play($index)"></i>
+    <i class="fi-play playInImg" ng-if="track != trackActive" ng-click="$root.play(track.index)"></i>
     <i class="fi-pause pauseInImg" ng-if="track == trackActive"
        ng-class="{'fi-pause': onPlay, 'fi-play': !onPlay}" ng-click="playPause()"></i>
 </div>

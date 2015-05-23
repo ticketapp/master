@@ -35,6 +35,11 @@ angular.module('claudeApp').
                 }
             };
 
+            $scope.changeIndexToStart = function (newVal) {
+                $scope.indexToStart = newVal;
+                $scope.newIndexToStart = newVal
+            };
+
             /* modify playlist */
 
             $scope.savePlaylist = function () {
@@ -93,6 +98,7 @@ angular.module('claudeApp').
                 $scope.newTrack.artist = art;
                 $scope.newTrack.title = track.title;
                 $scope.newTrack.trackId = track.trackId;
+                $scope.newTrack.index = $rootScope.playlist.tracks.length;
                 $rootScope.playlist.tracks.push($scope.newTrack);
             }
 
@@ -358,7 +364,7 @@ angular.module('claudeApp').
 
             $scope.play = function (trackIndex) {
                 i = trackIndex;
-                $scope.indexToStart = trackIndex;
+                $scope.changeIndexToStart(trackIndex)
                 //display nextShow info//
                 if ( $rootScope.playlist.tracks[i].nextShow != undefined) {
                     $timeout(function () {
@@ -477,21 +483,6 @@ angular.module('claudeApp').
                             / document.getElementById("progressBar").clientWidth)
                     };
                     document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
-                    if (i > 0) {
-                        function goToTrackActive () {
-                            if (document.getElementsByClassName('trackContener').length >= i) {
-                                $timeout(function() {
-                                    if (document.getElementsByClassName('trackContener')[i] != undefined) {
-                                        var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                                        document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
-                                    }
-                                }, 100);
-                            } else {
-                                goToTrackActive ()
-                            }
-                        }
-                        goToTrackActive ()
-                    }
                     document.getElementById('musicPlayer').play();
                 } else if ($rootScope.playlist.tracks[i].platform == 'y') {
                     document.getElementById('musicPlayer').pause();
@@ -526,21 +517,6 @@ angular.module('claudeApp').
                         yPlayer.playVideo();
                         $scope.onPlay = true;
                         $scope.$apply();
-
-                        if (i > 0) {
-                            function goToTrackActive() {
-                                if (document.getElementsByClassName('trackContener').length >= i) {
-                                    $timeout(function () {
-                                        var posTrackActive = document.getElementsByClassName('trackContener')[i].getBoundingClientRect();
-                                        document.getElementsByClassName('playlistScroller')[0].scrollLeft = document.getElementsByClassName('playlistScroller')[0].scrollLeft + posTrackActive.left - 5;
-                                    }, 100);
-                                } else {
-                                    goToTrackActive()
-                                }
-                            }
-
-                            goToTrackActive()
-                        }
                     }
 
                     function onPlayerStateChange(event) {
