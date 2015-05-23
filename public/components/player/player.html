@@ -130,8 +130,10 @@ margin-left: 5px;"
              ng-model="playlist.tracks">
                 <ng-playlist-track
                 ng-class="{onplay : track == trackActive}" class="trackContener"
-                as-sortable-item ng-repeat="track in playlist.tracks">
+                as-sortable-item ng-repeat="track in playlist.tracks | slice:indexToStart:indexToStart+5">
                 </ng-playlist-track>
+            <md-slider flex ng-model="$parent.indexToStart" min="0" max="{{playlist.tracks.length}}" aria-label="indexToStart" class="column large-12">
+            </md-slider>
         </div>
     </div>
 </div>

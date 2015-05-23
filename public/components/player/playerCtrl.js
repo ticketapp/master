@@ -358,6 +358,7 @@ angular.module('claudeApp').
 
             $scope.play = function (trackIndex) {
                 i = trackIndex;
+                $scope.indexToStart = trackIndex;
                 //display nextShow info//
                 if ( $rootScope.playlist.tracks[i].nextShow != undefined) {
                     $timeout(function () {
