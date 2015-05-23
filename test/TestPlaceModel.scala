@@ -1,23 +1,18 @@
 import java.util.Date
-import controllers.DAOException
-import models.{Event, Organizer, Address, Place}
+
 import models.Place._
+import models.{Event, Organizer, Place}
 import org.postgresql.util.PSQLException
+import org.scalatest.Matchers._
+import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
-import play.api.Play.current
 import securesocial.core.IdentityId
-import scala.util.Success
-import scala.util.Failure
+import services.Utilities.UNIQUE_VIOLATION
 import play.api.libs.concurrent.Execution.Implicits._
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
+
+import scala.util.{Failure, Success}
 
 class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
@@ -65,7 +60,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
     "save and delete his relation with an event" in {
       val eventId = Event.save(Event(None, None, isPublic = true, isActive = true, "event name", Option("(5.4,5.6)"),
-        Option("description"), new Date(), Option(new Date()), 16, None, None, None, List.empty, List.empty,
+        Option("description"), new Date(), Option(new Date(100000000000000L)), 16, None, None, None, List.empty, List.empty,
         List.empty, List.empty, List.empty, List.empty)).get
 
       whenReady(save(place), timeout(Span(2, Seconds))) { tryPlaceId =>
@@ -74,7 +69,9 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
         find(placeId) shouldEqual Option(place.copy(placeId = Option(placeId)))
 
         saveEventRelation(eventId, placeId) mustBe true
+
         findAllByEvent(eventId) should not be empty
+        Event.findAllByPlace(placeId) should not be empty
         deleteEventRelation(eventId, placeId) mustBe Success(1)
 
         delete(placeId) mustBe Success(1)

@@ -48,6 +48,8 @@ object EventController extends Controller with securesocial.core.SecureSocial {
 
   def findByPlaceId(placeId: Long) = Action { Ok(Json.toJson(Event.findAllByPlace(placeId))) }
 
+  def findPassedByPlaceId(placeId: Long) = Action { Ok(Json.toJson(Event.findAllPassedByPlace(placeId))) }
+
   def eventsByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(Event.findAllByOrganizer(organizerId))) }
 
   def findByGenre(genre: String, geographicPointString: String, offset: Int , numberToReturn: Int) = Action {

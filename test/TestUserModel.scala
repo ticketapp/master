@@ -1,14 +1,20 @@
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import models.{Organizer, Place}
+import models.{User, Organizer, Place}
 import securesocial.core.IdentityId
 import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
 import scala.util.Success
+import java.util.Date
 
 class TestUserModel extends PlaySpec with OneAppPerSuite {
 
   "A user" must {
+
+    "be saved and deleted" in {
+//      val user = User("userTestId", new Date(), "email", "nickName", "password", "profile")
+//      save()
+    }
 
     "be able to get his followed places" in {
       Place.followByPlaceId("userTestId", 1)

@@ -50,6 +50,7 @@ GET     /places/:placeId/isFollowed                               controllers.Pl
 GET     /places/containing/:pattern                               controllers.PlaceController.findPlacesContaining(pattern: String)
 POST    /places/create                                            controllers.PlaceController.createPlace
 GET     /places/:placeId/events                                   controllers.EventController.findByPlaceId(placeId: Long)
+GET     /places/:placeId/passedEvents                             controllers.EventController.findPassedByPlaceId(placeId: Long)
 GET     /places/nearCity/:city                                    controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 GET     /places/followed/                                         controllers.PlaceController.getFollowedPlaces
 
