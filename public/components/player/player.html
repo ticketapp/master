@@ -126,13 +126,15 @@ margin-left: 5px;"
     <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed"></audio>
     <div class="width100p column large-12">
         <div ng-if="playlist.tracks.length > 0"
-             style="position: relative; max-height: 150px; display: inline-flex; min-width: 100%"
+             style="position: relative; max-height: 150px;"
              class="sortable-row"
              as-sortable="sortableOptions"
              ng-model="playlist.tracks">
                 <ng-playlist-track
-                ng-class="{onplay : track == trackActive}" class="column large-3 medium-4 small-6"
-                as-sortable-item ng-repeat="track in playlist.tracks | slice:indexToStart:indexToStart+5">
+                ng-class="{onplay : track == trackActive}"
+                class="column large-3 medium-4 small-6 fadeTrack trackContener"
+                as-sortable-item
+                ng-repeat="track in limitedTRacks = (playlist.tracks | slice:indexToStart:indexToStart+numberToDisplay)">
                 </ng-playlist-track>
         </div>
         <md-slider flex ng-model="newIndexToStart"
@@ -142,7 +144,6 @@ margin-left: 5px;"
                    ng-change="(changeIndexToStart(newIndexToStart))"
                    min="0" max="{{playlist.tracks.length}}"
                    aria-label="newIndexToStart"
-                   style = "overflow: hidden"
                    class="column large-12">
         </md-slider>
     </div>

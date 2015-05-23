@@ -27,10 +27,23 @@ angular.module('claudeApp').
             if ($localStorage.tracksSignaled == undefined) {
                 $localStorage.tracksSignaled = [];
             }
+            function calculeNumberToDisplay () {
+                if ($rootScope.window == 'large') {
+                    $scope.numberToDisplay = 4;
+                } else if ($rootScope.window == 'medium') {
+                    $scope.numberToDisplay = 3;
+                } else if ($rootScope.window == 'small') {
+                    $scope.numberToDisplay = 3;
+                }
+            }
+            $rootScope.$watch('window', calculeNumberToDisplay);
             $scope.sortableOptions = {
                 containment: '#sortable-container',
                 //restrict move across columns. move only within column.
                 accept: function (sourceItemHandleScope, destSortableScope) {
+                    console.log(sourceItemHandleScope, destSortableScope);
+                    sourceItemHandleScope.itemScope.$index = sourceItemHandleScope.itemScope.track.index;
+                    sourceItemHandleScope.itemScope.track.$index = sourceItemHandleScope.itemScope.track.index;
                     return sourceItemHandleScope.itemScope.sortableScope.$id === destSortableScope.$id;
                 }
             };

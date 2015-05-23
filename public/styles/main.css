@@ -27264,14 +27264,12 @@ md-tooltip[width-32="8"].md-show .md-background {
 /* line 1, ../../public/modules/ui-sortable/uiSortable.scss */
 .as-sortable-item,
 .as-sortable-placeholder {
-  display: inline-block;
   max-height: 110px;
   float: left;
 }
 
 /* line 9, ../../public/modules/ui-sortable/uiSortable.scss */
 .sortable-row:after {
-  content: ".";
   display: block;
   height: 0;
   clear: both;
@@ -27280,7 +27278,6 @@ md-tooltip[width-32="8"].md-show .md-background {
 
 /* line 17, ../../public/modules/ui-sortable/uiSortable.scss */
 #sortable-container {
-  display: inline-block;
 }
 
 /* line 1, ../../public/components/tracks/tracks.scss */
@@ -27481,12 +27478,12 @@ top-search-block > search-bar-contener {
 
 /* line 11, ../../public/components/player/player.scss */
 .trackContener {
-  display: inline-block;
-  white-space: normal;
   opacity: 0.6;
-  margin: 5px;
   padding-right: 5px;
-  box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
+}
+
+.trackContener>div {
+    box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 
 /* line 20, ../../public/components/player/player.scss */
@@ -27514,11 +27511,6 @@ top-search-block > search-bar-contener {
 /* line 36, ../../public/components/player/player.scss */
 .playlistContener {
   font-size: 11px;
-  width: auto;
-  overflow-y: hidden;
-  overflow-x: hidden;
-  white-space: nowrap;
-  display: inline-flex;
 }
 
 /* line 43, ../../public/components/player/player.scss */
@@ -27526,8 +27518,6 @@ top-search-block > search-bar-contener {
   bottom: 0;
   position: fixed;
   width: 100%;
-  overflow-y: hidden;
-  overflow-x: hidden;
   z-index: 12;
   box-shadow: 0px -2px 24px 0 rgba(0, 0, 0, 0.2);
 }
@@ -27584,7 +27574,6 @@ top-search-block > search-bar-contener {
 /* line 80, ../../public/components/player/player.scss */
 .as-sortable-item,
 .as-sortable-placeholder {
-  display: inline-block;
   max-height: 110px;
   float: left;
 }
@@ -27600,7 +27589,6 @@ top-search-block > search-bar-contener {
 
 /* line 95, ../../public/components/player/player.scss */
 #sortable-container {
-  display: inline-block;
 }
 
 /* line 1, ../../public/components/large-home/largeHome.scss */
@@ -28071,10 +28059,17 @@ artist-min, artist-facebook-min {
   transition: 0.5s linear all;
   opacity: 0;
 }
+.fadeTrack.ng-enter {
+  transition: 0.5s linear all;
+  opacity: 0;
+}
 
 /* The starting CSS styles for the enter animation */
 /* line 98, ../../public/styles/main.scss */
 .fade.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+.fadeTrack.ng-enter.ng-enter-active {
   opacity: 1;
 }
 
@@ -28083,9 +28078,16 @@ artist-min, artist-facebook-min {
   transition: 0.5s linear all;
   opacity: 1;
 }
+.fadeTrack.ng-leave {
+  transition: 0s linear all;
+  opacity: 1;
+}
 
 /* line 105, ../../public/styles/main.scss */
 .fade.ng-leave.ng-leave-active {
+  opacity: 0;
+}
+.fadeTrack.ng-leave.ng-leave-active {
   opacity: 0;
 }
 
