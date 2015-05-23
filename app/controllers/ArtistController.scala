@@ -83,7 +83,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     try {
       artistBindingForm.bindFromRequest().fold(
         formWithErrors => {
-          Logger.warn(formWithErrors.errorsAsJson.toString())
+          Logger.error(formWithErrors.errorsAsJson.toString())
           BadRequest(formWithErrors.errorsAsJson)
         },
         patternAndArtist => {

@@ -19,8 +19,8 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     "url" -> nonEmptyText(3),
     "platform" -> nonEmptyText,
     "thumbnailUrl" -> nonEmptyText(2),
-    "artistName" -> nonEmptyText(2),
     "artistFacebookUrl" -> nonEmptyText(2),
+    "artistName" -> nonEmptyText(2),
     "redirectUrl" -> optional(nonEmptyText(2))
   )(Track.formApply)(Track.formUnapply))
 

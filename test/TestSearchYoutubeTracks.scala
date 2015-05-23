@@ -100,7 +100,6 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       val enumerateYoutubeTracks = getYoutubeTracksByEchonestId(artist, "ARNJ7441187B999AFD")
 
       val iteratee = Iteratee.foreach[Set[Track]](a => {
-        println(a)
         a should not be empty
       })
 
