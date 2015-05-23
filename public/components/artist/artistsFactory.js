@@ -2,6 +2,17 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
     '$timeout', 'EventsFactory', 'StoreRequest', 'InfoModal', 'ImagesFactory',
     function ($http, $q, oboe, $rootScope, $timeout, EventsFactory, StoreRequest, InfoModal,
               ImagesFactory) {
+
+    function guid() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+            s4() + '-' + s4() + s4() + s4();
+    }
+
     var factory = {
         artists : false,
         lastGetArtist: {url: '', artist: {}},
@@ -151,13 +162,16 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         if (track.redirectUrl == undefined) {
                             track.redirectUrl = track.url;
                         }
+                        track.trackId = guid();
                         $http.post('/tracks/create', {
                             artistFacebookUrl: artist.facebookUrl,
                             redirectUrl : track.redirectUrl,
                             title: track.title,
                             url: track.url,
                             platform: track.platform,
-                            thumbnailUrl: track.thumbnailUrl
+                            thumbnailUrl: track.thumbnailUrl,
+                            artistName: track.artistName,
+                            trackId: track.trackId
                         }).error(function (data) {
                             console.log(data)
                         })
@@ -250,15 +264,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             return deferred.promise;
         },
         createNewArtistAndPassItToRootScope : function (artist) {
-            function guid() {
-                function s4() {
-                    return Math.floor((1 + Math.random()) * 0x10000)
-                        .toString(16)
-                        .substring(1);
-                }
-                return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-                    s4() + '-' + s4() + s4() + s4();
-            }
             var searchPattern = document.getElementById('searchBar').value.trim();
             $rootScope.artisteToCreate = true;
             $rootScope.artist = artist;
@@ -286,13 +291,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         console.log(track);
                         $http.post('/tracks/create', {
                             trackId: track.trackId,
-                            artistFacebookUrl: artist.facebookUrl,
-                            redirectUrl: track.redirectUrl,
                             title: track.title,
                             url: track.url,
                             platform: track.platform,
                             thumbnailUrl: track.thumbnailUrl,
-                            artistName: track.artistName
+                            artistFacebookUrl: track.artistFacebookUrl,
+                            artistName: track.artistName,
+                            redirectUrl: track.redirectUrl
                         }).success(function (){
                             $rootScope.loadingTracks = false;
                         }).error(function (data) {
@@ -313,18 +318,16 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     function getUuid (track) {
                         track.trackId = guid();
                     }
-                    if (value.length > 0) {
-                        value.forEach(getUuid);
-                        value.forEach(pushTrack);
-                        /*$timeout(function () {
-                            $rootScope.$apply(function () {
-                                $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
-                            })
-                        },0)  */
-                        value.forEach(saveTrack);
-                    } else {
-                        $rootScope.loadingTracks = false;
-                    }
+                    value.forEach(getUuid);
+                    //value.forEach(pushTrack);
+                    $timeout(function () {
+                        $rootScope.$apply(function () {
+                            $rootScope.tracks = $rootScope.artist.tracks.concat(value);
+                            $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
+                            $rootScope.loadingTracks = false;
+                        })
+                    },0);
+                    value.forEach(saveTrack);
             })
             .fail(function (error) {
                 console.log(error)
