@@ -53,7 +53,7 @@ object Scheduler {
         organizers = List(organizerWithGeographicPoint))) match {
         case None => Event.update(facebookEvent)
         case Some(eventId) =>
-          Place.saveEventPlaceRelation(eventId, placeId)
+          Place.saveEventRelation(eventId, placeId)
           facebookEvent.addresses.map { address =>
             Address.saveAddressAndEventRelation(address, eventId)
           }

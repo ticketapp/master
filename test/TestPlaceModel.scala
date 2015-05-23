@@ -1,6 +1,6 @@
 import java.util.Date
 import controllers.DAOException
-import models.{Organizer, Address, Place}
+import models.{Event, Organizer, Address, Place}
 import models.Place._
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
@@ -23,13 +23,13 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
   "A place" must {
 
-    val place = Place(None, "test", Some("123456789"), None,
+    val place = Place(None, "test", Some("123"), None,
       Some("""<div class="column large-12">Ancienne usine destinée à l’origine au traitement des eaux...</div>"""),
-      Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"), None)
+      Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
 
     "be able to be saved and deleted in database and return the new id" in {
       whenReady(save(place), timeout(Span(2, Seconds))) { placeId =>
-        find(placeId.get.get) shouldEqual Option(place.copy(placeId = placeId.get))
+        find(placeId.get.get) mustBe Option(place.copy(placeId = placeId.get))
         delete(placeId.get.get) mustBe Success(1)
       }
     }
@@ -49,10 +49,10 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       unfollowByPlaceId("userTestId", 1) mustBe Success(1)
     }
 
-    "be linked to a place if one with the same facebookId already exists" in {
-      val organizerId = Organizer.save(Organizer(None, Some("123456789"), "organizerTest2")).get
+    "be linked to an organizer if one with the same facebookId already exists" in {
+      val organizerId = Organizer.save(Organizer(None, Some("1234567"), "organizerTestee")).get
 
-      whenReady (save(Place(None, "Name", Some("123456789"), None, None, None, None, None, None, None)),
+      whenReady (save(Place(None, "Name", Some("1234567"), None, None, None, None, None, None, None)),
         timeout(Span(2, Seconds)))  { tryPlaceId =>
         val placeId = tryPlaceId.get.get
 
@@ -60,6 +60,25 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
         delete(placeId) mustBe Success(1)
         Organizer.delete(organizerId.get) mustBe 1
+      }
+    }
+
+    "save and delete his relation with an event" in {
+      val eventId = Event.save(Event(None, None, isPublic = true, isActive = true, "event name", Option("(5.4,5.6)"),
+        Option("description"), new Date(), Option(new Date()), 16, None, None, None, List.empty, List.empty,
+        List.empty, List.empty, List.empty, List.empty)).get
+
+      whenReady(save(place), timeout(Span(2, Seconds))) { tryPlaceId =>
+        val placeId = tryPlaceId.get.get
+
+        find(placeId) shouldEqual Option(place.copy(placeId = Option(placeId)))
+
+        saveEventRelation(eventId, placeId) mustBe true
+        findAllByEvent(eventId) should not be empty
+        deleteEventRelation(eventId, placeId) mustBe Success(1)
+
+        delete(placeId) mustBe Success(1)
+        Event.delete(eventId) mustBe 1
       }
     }
   }

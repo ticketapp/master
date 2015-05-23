@@ -57,5 +57,23 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       val eventRock = findAllByGenre("rock", GeographicPoint("(0,0)"), 0, 1)
       eventRock.get should not be empty
     }
+
+    "return passed events for a place" in {
+      val eventId = save(event).get
+
+      val passedEvent = Event(None, None, isPublic = true, isActive = true, "event name", Option("(5.4,5.6)"),
+        Option("description"), new Date(0), Option(new Date()), 16, None, None, None, List.empty, List.empty,
+        List.empty, List.empty, List.empty, List.empty)
+
+//      findAllByPlace()
+    }
+
+    "return passed events for an artist" in {
+
+    }
+
+    "return passed events for an organizer" in {
+
+    }
   }
 }

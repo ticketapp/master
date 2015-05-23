@@ -31,14 +31,17 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
         BadRequest(formWithErrors.errorsAsJson)
       },
       track => {
-        Track.save(track)
-        match {
+        Track.save(track) match {
           case Success(true) =>
             Track.find(track.trackId.get) match {
               case Success(Some(trackFound)) => Ok(Json.toJson(trackFound))
               case _ => NotFound
             }
-          case _ =>
+          case Failure(exception) =>
+            Logger.error("TrackController.createTrack", exception)
+            InternalServerError
+          case Failure(_) =>
+            Logger.error("TrackController.createTrack")
             InternalServerError
         }
       }
