@@ -154,6 +154,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             return deferred.promise;
         },
         postPlace : function (place) {
+            var deferred = $q.defer();
             $http.post('/places/create', place )
                 .success(function(data, status) {
                     factory.places = data;

@@ -4,16 +4,6 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
         if ($localStorage.geoloc == undefined) {
             $localStorage.geoloc = '(45.768434199999994,4.8153293999999995)';
         }
-        if ($rootScope.geoLoc == '') {
-            $http.get('/users/geographicPoint/ ').success(function (data) {
-                if (data.status != 'fail') {
-                    $rootScope.geoLoc = data;
-                    $localStorage.geoloc = data;
-                } else {
-                    $rootScope.geoLoc = $localStorage.geoloc
-                }
-            })
-        }
         function getPos(position) {
             $timeout(function () {
                 $rootScope.$apply(function () {
@@ -40,9 +30,19 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
         } else {
             $http.get('/users/geographicPoint/ ').success(function (data) {
                 if (data.status != 'fail') {
-                    $rootScope.geoLoc = data;
-                    $localStorage.geoloc = data;
+                    $rootScope.geoLoc = "(" + data.lat + "," + data.lon + ")";;
+                    $localStorage.geoloc = $rootScope.geoLoc;
                     return $rootScope.geoLoc;
+                }
+            })
+        }
+        if ($rootScope.geoLoc == '') {
+            $http.get('/users/geographicPoint/ ').success(function (data) {
+                if (data.status != 'fail') {
+                    $rootScope.geoLoc = "(" + data.lat + "," + data.lon + ")";;
+                    $localStorage.geoloc = $rootScope.geoLoc;
+                } else {
+                    $rootScope.geoLoc = $localStorage.geoloc
                 }
             })
         }
