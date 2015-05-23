@@ -16,6 +16,13 @@
                     <b>{{ place.name }}</b>
                 </a>
             </b>
+            <b ng-if="event.tariffRange.length != undefined || event.ticketSellers != undefined">
+                    <i class="fa fa-ticket"></i><b>{{event.tariffRange}}</b>
+                    <a ng-if="event.ticketSellers != undefined"
+                       href="http://www.{{event.ticketSellers}}"
+                       class="button"
+                       target="_blank">Acheter des places sur {{event.ticketPlatform}}</a>
+            </b>
         </p>
         <a class="column medium-2 followButton">
         </a>
@@ -53,16 +60,6 @@
             <button class="column large-4">Acheter</button>
         </li>
     </div>
-    <div class="column large-4 float-left eventInfo"
-         ng-if="event.tariffRange.length != undefined || event.ticketSellers != undefined">
-        <div class="column large-12">
-            <h3 class="float-left">{{event.tariffRange}}</h3>
-            <a ng-if="event.ticketSellers != undefined"
-               href="http://www.{{event.ticketSellers}}"
-               class="button float-right"
-               target="_blank">Acheter des places sur {{event.ticketPlatform}}</a>
-        </div>
-    </div>
     <div class="column medium-4 float-left"
          ng-repeat="artist in event.artists"
          ng-if="event.artists.length > 0">
@@ -75,7 +72,7 @@
             <a class="float-left relative" href="#/artists/{{artist.facebookUrl}}">
                 <h2 class="margin0 progArtName">{{artist.name}}</h2>
             </a>
-            <a class="absolute bottom0 left column medium-4 padding0"
+            <a class="absolute bottom0 left column medium-4 small-6 padding0"
                style='height:55px; top:40px'>
                 <div class="width100p primCol padding10 textWhite text-center"
                      ng-if="!artist.isFollowed"
@@ -130,7 +127,6 @@
         </div>
     </div>
     <div class="column large-4 float-left eventInfo map-container marginTop10"
-         style="height: 300px"
             ng-if="map">
         <div class="column large-12 paddingLeft0" ng-if="adresses">
             <a href="#/places/{{event.places[0].placeId }}"
@@ -142,7 +138,7 @@
                 {{event.addresses[0].zip}}
                 {{event.addresses[0].city}}
             </div>
-            <a class="column medium-4 padding0"
+            <a class="column medium-4"
                style='height:55px; right:0;'>
                 <div class="width100p primCol padding10 textWhite text-center"
                      ng-if="!event.places[0].isFollowed"
@@ -160,7 +156,10 @@
         <div class="column large-12 marginTop10">
             <map-controls></map-controls>
         </div>
-        <stylized-map></stylized-map>
+        <div class="column large-12 padding0"
+             style="height: 300px">
+            <stylized-map></stylized-map>
+        </div>
     </div>
     <div ng-if="$root.window == 'small' || $root.window == 'medium'" class="descriptionContent column padding0 float-left" style="text-align: justify;">
         <div ng-bind-html="event.description"></div>

@@ -14,9 +14,11 @@
     <h3>{{error}}</h3>
 </div>
 <div ng-show="showInfo" class="lecteurError animated fadeIn">
-    <a href="#/events/{{trackActive.nextShow.eventId}}">
-        Bientôt en concert
-    </a>
+    <b>
+        <a class="textColorWhite" href="#/events/{{trackActive.nextShow.eventId}}">
+            Bientôt en concert
+        </a>
+    </b>
 </div>
 <div class="zIndex1" ng-class="{'column large-12 padding0': $root.window != 'small' && $root.window != 'medium'}">
     <!--<a class="close float-right">X</a>-->
@@ -62,9 +64,11 @@
         <i class=" lecteurControls float-left fa"
            ng-class="{'fa-pause': onPlay == true, 'fa-play': onPlay == false,
            'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
-           'ng-hide': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}" ng-click="playPause()"></i>
+           'ng-hide': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"
+           ng-click="playPause()"></i>
         <i class="fa fa-step-forward lecteurControls float-left" ng-click="nextTrack()"
-           ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') && showLecteur == false,
+           ng-class="{'small-3': ($root.window == 'small' || $root.window == 'medium') &&
+           showLecteur == false,
            'small-2': ($root.window == 'small' || $root.window == 'medium') && showLecteur == true}"></i>
         <i class="fi-shuffle lecteurControls float-left" ng-show="showLecteur"
            ng-class="{'active': shuffle,
@@ -120,16 +124,47 @@ margin-left: 5px;"
 </div>
 <div ng-show="showLecteur" class="width100p float-left white">
     <audio class="width100p ng-hide" id="musicPlayer" style="position: fixed"></audio>
-    <div class="width100p playlistScroller" style="overflow-x: auto;">
-        <div ng-if="playlist.tracks.length > 0"
-             style="position: relative; max-height: 150px; display: inline-flex; min-width: 100%"
-             class="sortable-row"
-             as-sortable="sortableOptions"
-             ng-model="playlist.tracks">
-                <ng-playlist-track
-                ng-class="{onplay : track == trackActive}" class="trackContener"
-                as-sortable-item ng-repeat="track in playlist.tracks">
-                </ng-playlist-track>
+    <div style="height: 100px; overflow: hidden" class="width100p float-left">
+        <div class="column small-1 button float-left padding0"
+             style="height: 100px"
+             ng-click="changeIndexToStart(indexToStart -1)"
+             ng-show="(playlist.tracks.length > numberToDisplay && indexToStart > 0)"
+                >
+            <i class="fa fa-chevron-left" style="line-height: 100px"></i>
+        </div>
+        <div class="column small-1 button float-right height100p padding0"
+             ng-click="changeIndexToStart(indexToStart +1)"
+             style="height: 100px"
+             ng-show="(playlist.tracks.length > numberToDisplay &&
+             indexToStart < playlist.tracks.length - numberToDisplay)"
+                >
+            <i class="fa fa-chevron-right"  style="line-height: 100px"></i>
+        </div>
+        <div class="column small-10 float-left padding0">
+            <div ng-if="playlist.tracks.length > 0"
+                 style="position: relative; max-height: 100px;"
+                 class="sortable-row"
+                 as-sortable="sortableOptions"
+                 ng-model="limitedTracks">
+                    <ng-playlist-track
+                    style="margin-top: 5px;"
+                    ng-class="{onplay : track == trackActive}"
+                    class="column large-3 medium-4 small-6 fadeTrack trackContener float-left"
+                    as-sortable-item
+                    ng-repeat="track in limitedTracks">
+                    </ng-playlist-track>
+            </div>
         </div>
     </div>
+    <md-content class="column large-12">
+        <md-slider flex ng-model="newIndexToStart"
+               ng-show="(playlist.tracks.length > 4 && $root.window == 'large') ||
+               (playlist.tracks.length > 3 && $root.window == 'medium') ||
+               (playlist.tracks.length > 2 && $root.window == 'small')"
+               ng-change="changeIndexToStart(newIndexToStart)"
+               min="0" max="{{playlist.tracks.length - numberToDisplay}}"
+               aria-label="newIndexToStart"
+               class="column large-12 padding0">
+         </md-slider>
+    </md-content>
 </div>

@@ -9,12 +9,10 @@
   position: absolute;
 }
 .trackContener {
-  width: 205px;
-  display:inline-block;
-  white-space: normal;
   opacity: 0.6;
-  margin: 5px;
   padding-right: 5px;
+}
+.trackContener>div {
   box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 .trackContener:hover {
@@ -34,18 +32,11 @@
   color: white;
 }
 .playlistContener {
-  font-size: 11px;
-  width: auto;
-  overflow-y: hidden;
-  overflow-x: hidden;
-  white-space: nowrap;
-  display: inline-flex;}
+  font-size: 11px;}
 .ng-player{
   bottom: 0;
   position: fixed;
   width: 100%;
-  overflow-y: hidden;
-  overflow-x: hidden;
   z-index: 12;
   box-shadow: 0px -2px 24px 0 rgba(0, 0, 0, 0.2);
 }
@@ -79,13 +70,11 @@
 
 .as-sortable-item,
 .as-sortable-placeholder {
-  display: inline-block;
   max-height: 110px;
   float: left;
 }
 
 .sortable-row:after {
-  content: ".";
   display: block;
   height: 0;
   clear: both;
@@ -93,5 +82,4 @@
 }
 
 #sortable-container {
-  display: inline-block;
 }

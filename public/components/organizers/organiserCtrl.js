@@ -23,6 +23,17 @@ angular.module('claudeApp').
                 $scope.websites = WebsitesFactory.normalizeWebsitesObject(organizer.websites,
                     organizer.facebookUrl);
             }
+            /*console.log(organizer);
+            if (organizer.placeId !== undefined) {
+                OrganizerFactory.getPlaceEvents(organizer.placeId).then(function (events) {
+                    console.log(events);
+                    if ($scope.organizer.events) {
+                        $scope.organizer.events = $scope.organizer.events.concat(events)
+                    } else {
+                        $scope.organizer.events = events;
+                    }
+                })
+            }*/
             if ($rootScope.connected == true) {
                 OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
                     if (isFollowed == true || isFollowed == false) {

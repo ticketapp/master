@@ -132,6 +132,22 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                     deferred.resolve('error');
                 })
             return deferred.promise;
+        },
+        lastGetPlaceEvents: {id: 0, events: []},
+        getPlaceEvents : function(id) {
+            var deferred = $q.defer();
+            if(factory.lastGetPlaceEvents.id == id) {
+                deferred.resolve(factory.lastGetPlaceEvents.events);
+            } else {
+                $http.get('/places/' + id + '/events').
+                    success(function(data, status, headers, config) {
+                        data.forEach(EventsFactory.colorEvent);
+                        factory.lastGetPlaceEvents.events = data;
+                        factory.lastGetPlaceEvents.id = id;
+                        deferred.resolve(factory.lastGetPlaceEvents.events);
+                    })
+            }
+            return deferred.promise;
         }
     };
     return factory;

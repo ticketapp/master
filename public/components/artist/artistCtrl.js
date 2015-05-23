@@ -175,7 +175,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                             $scope.tracks.push(tracks[i])
                         }
                         if (tracks.length == 0) {
-                            InfoModal.displayInfo('Nous n\'avons pas trouvé "' + trackTitle + '"');
+                            InfoModal.displayInfo('Nous n\'avons pas trouvé "' + trackTitle + '"', 'error');
                         }
                     }
                 );
