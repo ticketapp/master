@@ -22,14 +22,12 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
 
     "find a sequence of artists on facebook" in {
       whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
-        println(artists.head)
         artists should not be empty
       }
     }
 
     "find one artist on facebook" in {
       whenReady (getFacebookArtistByFacebookUrl("djvadim"), timeout(Span(6, Seconds))) { artist =>
-        println(artist)
         artist shouldBe defined
       }
     }

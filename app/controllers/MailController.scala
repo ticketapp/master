@@ -1,6 +1,7 @@
 package controllers
 
 import models.Mail
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -19,7 +20,7 @@ object MailController extends Controller with securesocial.core.SecureSocial {
   def create = SecuredAction(ajaxCall = true) { implicit request =>
     mailBindingForm.bindFromRequest().fold(
       formWithErrors => {
-        println(formWithErrors.errorsAsJson)
+        Logger.error("MailController.create:" + formWithErrors.errorsAsJson)
         BadRequest(formWithErrors.errorsAsJson)
       },
       mail => { Ok(Json.toJson(Mail.save(mail.copy(userId = Option(request.user.identityId.userId))))) }

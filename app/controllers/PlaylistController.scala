@@ -52,7 +52,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
   def update() = SecuredAction(ajaxCall = true) { implicit request =>
     updatePlaylistBindingForm.bindFromRequest().fold(
       formWithErrors => {
-        println(formWithErrors.errorsAsJson)
+        Logger.error("PlaylistController.update:" + formWithErrors.errorsAsJson)
         BadRequest(formWithErrors.errorsAsJson)
       },
       playlistIdAndTracksInfo => {

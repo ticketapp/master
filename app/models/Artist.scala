@@ -266,9 +266,7 @@ object Artist {
         case None =>
         case Some(redirectUrl) =>
           val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(Utilities.normalizeUrl(redirectUrl))
-          println(refactoredRedirectUrl)
           if (!artist.websites.contains(refactoredRedirectUrl))
-            println("ok")
             Artist.addWebsite(artist.artistId, refactoredRedirectUrl)
       }
   }

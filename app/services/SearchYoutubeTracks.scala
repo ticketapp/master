@@ -15,6 +15,7 @@ import scala.language.postfixOps
 import services.Utilities._
 
 object SearchYoutubeTracks {
+  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Enumerator[Set[Track]] = Enumerator.flatten(
     getMaybeEchonestIdByFacebookId(artist) map {
@@ -98,7 +99,7 @@ object SearchYoutubeTracks {
         "q" -> (artist.name + " " + trackTitle),
         "type" -> "video",
         "videoCategoryId" -> "10",
-        "key" -> googleKey)
+        "key" -> youtubeKey)
       .get()
       .map { readYoutubeTracks(_, artist) }
   }

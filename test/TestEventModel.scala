@@ -65,6 +65,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         Option("description"), new Date(0), Option(new Date()), 16, None, None, None, List.empty, List.empty,
         List.empty, List.empty, List.empty, List.empty)
 
+      val passedEventId = save(event).get
+
 //      findAllByPlace()
     }
 
