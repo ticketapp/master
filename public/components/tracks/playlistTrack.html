@@ -20,7 +20,6 @@
         </i>
     </div>
     <div class="column small-11">
-        {{$index + indexToStart}}
         <div class="img-circularPlayer" style="background-image: url('{{track.thumbnailUrl}}');">
             <i class="fa fa-star absolute pointer favoriteActive"
                ng-if="track.isFavorite && $root.connected == true"
