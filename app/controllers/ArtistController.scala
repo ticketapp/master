@@ -92,7 +92,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           val artistWithArtistId = patternAndArtist.artist.copy(artistId = artistId)
           val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
 
-          val tracksEnumerator = getArtistTracks(patternAndArtistWithArtistId)
+          val tracksEnumerator = Artist.getArtistTracks(patternAndArtistWithArtistId)
           val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks => Json.toJson(tracks) }
           val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
 
@@ -104,19 +104,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
     } catch {
       case e: Exception => InternalServerError(e.getMessage)
     }
-  }
-
-  def getArtistTracks(patternAndArtist: PatternAndArtist) = {
-    val soundCloudTracksEnumerator = Enumerator.flatten(
-      getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        Artist.addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
-        Enumerator(soundCloudTracks.toSet)
-      })
-
-    val youtubeTracksEnumerator =
-      getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
-
-    Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator).andThen(Enumerator.eof)
   }
 
   def deleteArtist(artistId: Long) = Action {

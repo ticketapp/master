@@ -37,8 +37,7 @@ object Scheduler {
 
   def getEventsIdsByPlace(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
-      .withQueryString(
-        "access_token" -> token)
+      .withQueryString("access_token" -> token)
       .get()
       .map { readEventsIdsFromResponse }
   }
@@ -54,9 +53,7 @@ object Scheduler {
         case None => Event.update(facebookEvent)
         case Some(eventId) =>
           Place.saveEventRelation(eventId, placeId)
-          facebookEvent.addresses.map { address =>
-            Address.saveAddressAndEventRelation(address, eventId)
-          }
+          facebookEvent.addresses.map { address => Address.saveAddressAndEventRelation(address, eventId) }
       }
     }
   }

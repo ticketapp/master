@@ -19,5 +19,7 @@ import scala.util.{Success, Failure, Try}
 class TestTest extends PlaySpec {
 
   "This test" must {
+    val a = Enumerator(1, 2, 3)
+//    println(a.
   }
 }
