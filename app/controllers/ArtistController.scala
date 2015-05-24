@@ -7,7 +7,7 @@ import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.iteratee.Enumerator
+import play.api.libs.iteratee.{Iteratee, Enumeratee, Enumerator}
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -15,7 +15,9 @@ import securesocial.core.Identity
 import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
 import services.SearchYoutubeTracks.getYoutubeTracksForArtist
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import java.util.UUID.randomUUID
 
 object ArtistController extends Controller with securesocial.core.SecureSocial {
   def artists = Action { Ok(Json.toJson(Artist.findAll)) }
@@ -84,14 +86,19 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
           Logger.error(formWithErrors.errorsAsJson.toString())
           BadRequest(formWithErrors.errorsAsJson)
         },
+
         patternAndArtist => {
           val artistId = Artist.save(patternAndArtist.artist)
           val artistWithArtistId = patternAndArtist.artist.copy(artistId = artistId)
           val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
-          val tracksEnumerator = getArtistTracks(patternAndArtistWithArtistId).map { tracks =>
-            Json.toJson(tracks)
-          }
-          Ok.chunked(tracksEnumerator)
+
+          val tracksEnumerator = getArtistTracks(patternAndArtistWithArtistId)
+          val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks => Json.toJson(tracks) }
+          val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
+
+          Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { Track.save }) }
+
+          Ok.chunked(tracksJsonEnumerator)
         }
       )
     } catch {

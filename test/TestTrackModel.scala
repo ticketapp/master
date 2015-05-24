@@ -17,20 +17,20 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
 
     "be able to be saved and deleted" in {
       val artistId = Artist.save(artist).get
-      val trackId = Option(randomUUID.toString)
+      val trackId = randomUUID.toString
       val track = Track(trackId, "title", "url", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
 
       save(track) mustBe Success(true)
+      find(trackId) mustEqual Success(Option(track.copy(trackId = trackId, confidence = Some(0))))
+      delete(trackId) mustBe 1
 
-      find(trackId.get) mustEqual Success(Option(track.copy(trackId = trackId, confidence = Some(0))))
-      delete(trackId.get) mustBe 1
       Artist.delete(artistId) mustBe 1
     }
 
     "be able to be rated up by a user" in {
       val artistId = Artist.save(artist).get
       val trackId = randomUUID.toString
-      save(Track(Option(trackId), "title", "url1", 'y', "thumbnailUrl", "artistFacebookUrl",
+      save(Track(trackId, "title", "url1", 'y', "thumbnailUrl", "artistFacebookUrl",
         "artistName")) mustBe Success(true)
 
       upsertRatingUp("userTestId", trackId, 1) mustBe Success(true)
@@ -47,7 +47,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
     "be able to be rated down by a user" in {
       val artistId = Artist.save(artist).get
       val trackId = randomUUID.toString
-      save(Track(Option(trackId), "title", "url2", 's', "thumbnailUrl", "artistFacebookUrl",
+      save(Track(trackId, "title", "url2", 's', "thumbnailUrl", "artistFacebookUrl",
         "artistName")) mustBe Success(true)
 
       upsertRatingDown("userTestId", trackId, -1) mustBe Success(true)
@@ -64,7 +64,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
     "be able to be added to favorites and deleted from favorites" in {
       val artistId = Artist.save(artist).get
       val trackId = randomUUID.toString
-      val track = Track(Option(trackId), "title", "url3", 'y', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track = Track(trackId, "title", "url3", 'y', "thumbnailUrl", "artistFacebookUrl", "artistName")
       save(track) mustBe Success(true)
 
       addToFavorites("userTestId", trackId) mustBe Success(1)
@@ -78,7 +78,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
     "update rating up&down and confidence" in {
       val artistId = Artist.save(artist).get
       val newTrackId = randomUUID.toString
-      val track = Track(Option(newTrackId), "title", "url5", 'y', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track = Track(newTrackId, "title", "url5", 'y', "thumbnailUrl", "artistFacebookUrl", "artistName")
       save(track) mustBe Success(true)
 
       persistUpdateRating(newTrackId, 1, 2, 0.46922029272774324) mustBe Success(1)
@@ -99,7 +99,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
     "get ratings up and down" in {
       val artistId = Artist.save(artist).get
       val trackId = randomUUID.toString
-      save(Track(Option(trackId), "title", "url4", 'y', "thumbnailUrl", "artistFacebookUrl", "artistName")) mustBe
+      save(Track(trackId, "title", "url4", 'y', "thumbnailUrl", "artistFacebookUrl", "artistName")) mustBe
         Success(true)
 
       getRating(trackId) mustBe Success(Some((0,0)))
@@ -125,7 +125,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
     "have his confidence updated" in {
       val artistId = Artist.save(artist).get
       val newTrackId = randomUUID.toString
-      val track = Track(Option(newTrackId), "title", "url6", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track = Track(newTrackId, "title", "url6", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
       save(track) mustBe Success(true)
 
       var confidence = calculateConfidence(5000, 0)
@@ -139,6 +139,41 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
       getRating(newTrackId) mustBe Success(Some((5000, 2000)))
 
       delete(newTrackId) mustBe 1
+      Artist.delete(artistId) mustBe 1
+    }
+
+    "find all tracks sorted by confidence for an artist" in {
+      val artistId = Artist.save(artist).get
+      val newTrackId = randomUUID.toString
+      val newTrackId2 = randomUUID.toString
+      val track = Track(newTrackId, "title", "url7", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track2 = Track(newTrackId2, "title", "url8", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      save(track) mustBe Success(true)
+      save(track2) mustBe Success(true)
+
+      updateRating(newTrackId, 5000) mustBe Success(calculateConfidence(5000, 0))
+
+      findAllByArtist(artist.facebookUrl, 0, 0) should contain theSameElementsInOrderAs
+        Seq(track.copy(confidence = Some(calculateConfidence(5000, 0))), track2.copy(confidence = Some(0)))
+
+      delete(newTrackId) mustBe 1
+      delete(newTrackId2) mustBe 1
+      Artist.delete(artistId) mustBe 1
+    }
+
+    "find n (numberToReturn) tracks for an artist" in {
+      val artistId = Artist.save(artist).get
+      val newTrackId = randomUUID.toString
+      val newTrackId2 = randomUUID.toString
+      val track = Track(newTrackId, "title", "url7", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track2 = Track(newTrackId2, "title", "url8", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      save(track) mustBe Success(true)
+      save(track2) mustBe Success(true)
+
+      findAllByArtist(artist.facebookUrl, 1, 1) should have length 1
+
+      delete(newTrackId) mustBe 1
+      delete(newTrackId2) mustBe 1
       Artist.delete(artistId) mustBe 1
     }
   }

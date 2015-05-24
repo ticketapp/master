@@ -1,5 +1,7 @@
 package services
 
+import java.util.UUID._
+
 import models.{Artist, Track}
 import play.api.libs.iteratee.{Enumeratee, Iteratee, Enumerator}
 import play.api.libs.iteratee.Input.EOF
@@ -115,7 +117,7 @@ object SearchYoutubeTracks {
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
           if isArtistNameInTrackTitle(title, artist.name) =>
-          Track(None, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl,
+          Track(randomUUID.toString, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl,
             artist.name)
       }
     }
