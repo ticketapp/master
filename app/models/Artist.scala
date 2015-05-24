@@ -6,12 +6,13 @@ import anorm.SqlParser._
 import anorm._
 import controllers.SearchArtistsController._
 import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, WebServiceException}
+import play.api.libs.iteratee.{Enumerator, Enumeratee, Iteratee}
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import services.{SearchSoundCloudTracks, Utilities}
 import play.api.db.DB
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.Play.current
 import java.util.Date
 import play.api.libs.ws.Response
@@ -235,14 +236,21 @@ object Artist {
   def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
     artists.map { artist =>
       val artistWithId = artist.copy(artistId = Artist.save(artist))
-      getSoundCloudTracksForArtist(artistWithId).map { tracks =>
-        SearchSoundCloudTracks.addSoundCloudWebsiteIfNotInWebsites(tracks.headOption, artistWithId)
-        tracks.map { Track.save }
-      }
-      getYoutubeTracksForArtist(artistWithId, Artist.normalizeArtistName(artistWithId.name)).map {
-        _.map(Track.save)
-      }
+      getArtistTracks(PatternAndArtist(artistWithId.name, artistWithId)) |>> Iteratee.foreach( a => a.map { Track.save })
     }
+  }
+
+  def getArtistTracks(patternAndArtist: PatternAndArtist): Enumerator[Set[Track]] = {
+    val soundCloudTracksEnumerator = Enumerator.flatten(
+      getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
+        Artist.addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
+        Enumerator(soundCloudTracks.toSet)
+      })
+
+    val youtubeTracksEnumerator =
+      getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
+
+    Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator).andThen(Enumerator.eof)
   }
 
   def addWebsite(artistId: Option[Long], normalizedUrl: String): Int = {
