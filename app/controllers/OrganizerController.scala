@@ -21,9 +21,7 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
     Ok(Json.toJson(Organizer.findAll(numberToReturn: Int, offset: Int)))
   }
 
-  def organizer(id: Long) = Action {
-    Ok(Json.toJson(Organizer.find(id)))
-  }
+  def organizer(id: Long) = Action { Ok(Json.toJson(Organizer.find(id))) }
 
   def findOrganizersContaining(pattern: String) = Action {
     Ok(Json.toJson(Organizer.findAllContaining(pattern)))

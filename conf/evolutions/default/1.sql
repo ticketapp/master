@@ -53,7 +53,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 20 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 19 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -84,7 +84,7 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
 
   BEGIN
     INSERT INTO artists (facebookId, name, imagePath, description, facebookUrl, websites)
-    VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
+      VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
     RETURNING artistId INTO artistIdToReturn;;
     RETURN artistIdToReturn;;
     EXCEPTION WHEN unique_violation

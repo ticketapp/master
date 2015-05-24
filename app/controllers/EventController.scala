@@ -46,9 +46,24 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def findByPlaceId(placeId: Long) = Action { Ok(Json.toJson(Event.findAllByPlace(placeId))) }
+  def find(id: Long) = Action {
+    Event.find(id) match {
+      case Some(event) => Ok(Json.toJson(event))
+      case None => NotFound
+    }
+  }
 
-  def eventsByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(Event.findAllByOrganizer(organizerId))) }
+  def findByPlace(placeId: Long) = Action { Ok(Json.toJson(Event.findAllByPlace(placeId))) }
+  
+  def findPassedByPlace(placeId: Long) = Action { Ok(Json.toJson(Event.findAllPassedByPlace(placeId))) }
+
+  def findByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(Event.findAllByOrganizer(organizerId))) }
+  
+  def findPassedByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(Event.findAllPassedByOrganizer(organizerId))) }
+
+  def findByArtist(facebookUrl: String) = Action { Ok(Json.toJson(Event.findAllByArtist(facebookUrl))) }
+  
+  def findPassedByArtist(artistId: Long) = Action { Ok(Json.toJson(Event.findAllPassedByArtist(artistId))) }
 
   def findByGenre(genre: String, geographicPointString: String, offset: Int , numberToReturn: Int) = Action {
     try {
@@ -61,13 +76,6 @@ object EventController extends Controller with securesocial.core.SecureSocial {
       }
     } catch {
       case e: IllegalArgumentException => BadRequest("GeographicPoint wrongly formatted")
-    }
-  }
-
-  def find(id: Long) = Action {
-    Event.find(id) match {
-      case Some(event) => Ok(Json.toJson(event))
-      case None => NotFound
     }
   }
 

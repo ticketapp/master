@@ -88,7 +88,7 @@ object User {
         .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("TestEvents, error while saving user: " + e.getMessage)
+    case e: Exception => throw new DAOException("User.save: " + e.getMessage)
   }
 
   def delete(userId: String): Boolean = try {
