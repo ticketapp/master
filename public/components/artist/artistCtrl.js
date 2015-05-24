@@ -28,7 +28,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             function countRates (track) {
                 if (numberOfRates >= 50) {
                     return
-                }TA-268Loann: create filter for signaled tracks
+                }
                 if (track.confidence != undefined && track.confidence > 5000000 && numberOfRates <50) {
                     numberOfRates ++;
                 }
