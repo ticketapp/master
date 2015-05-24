@@ -170,8 +170,9 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             if (placeId == factory.getPassedEvents.id) {
                 defered.resolve(factory.getPassedEvents.events)
             } else {
-                $http.get(RoutesFactory.getPlacesPassedEvents(placeId)).success(
+                $http.get(RoutesFactory.places.getPlacesPassedEvents(placeId)).success(
                     function (data) {
+                        data.forEach(EventsFactory.colorEvent);
                         factory.getPassedEvents.id = placeId;
                         factory.getPassedEvents.events = data;
                         defered.resolve(factory.getPassedEvents.events)

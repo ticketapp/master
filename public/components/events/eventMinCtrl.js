@@ -1,5 +1,5 @@
-angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory', 'InfoModal',
-    function ($scope, UserFactory, InfoModal) {
+angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory', 'InfoModal', 'SearchFactory',
+    function ($scope, UserFactory, InfoModal, SearchFactory) {
 
         $scope.isFollowedPlace = function (place) {
             UserFactory.getIsFollowedPlace(place.placeId).then(function (isFollowed) {

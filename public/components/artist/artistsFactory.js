@@ -158,25 +158,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             }).start(function (data, etc) {
             })
                 .done(function (value) {
-                    function saveTrack (track) {
-                        if (track.redirectUrl == undefined) {
-                            track.redirectUrl = track.url;
-                        }
-                        track.trackId = guid();
-                        $http.post('/tracks/create', {
-                            artistFacebookUrl: artist.facebookUrl,
-                            redirectUrl : track.redirectUrl,
-                            title: track.title,
-                            url: track.url,
-                            platform: track.platform,
-                            thumbnailUrl: track.thumbnailUrl,
-                            artistName: track.artistName,
-                            trackId: track.trackId
-                        }).error(function (data) {
-                            console.log(data)
-                        })
-                    }
-                    value.forEach(saveTrack);
                     deferred.resolve(value);
                 })
                 .fail(function (error) {
@@ -284,27 +265,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             })
             .done(function (value) {
                     $rootScope.loadingTracks = true;
-                    function saveTrack(track) {
-                        if (track.redirectUrl == undefined) {
-                            track.redirectUrl = track.url;
-                        }
-                        console.log(track);
-                        $http.post('/tracks/create', {
-                            trackId: track.trackId,
-                            title: track.title,
-                            url: track.url,
-                            platform: track.platform,
-                            thumbnailUrl: track.thumbnailUrl,
-                            artistFacebookUrl: track.artistFacebookUrl,
-                            artistName: track.artistName,
-                            redirectUrl: track.redirectUrl
-                        }).success(function (){
-                            $rootScope.loadingTracks = false;
-                        }).error(function (data) {
-                            console.log(data)
-                        })
-                    }
-
                     function pushTrack(track) {
                         $timeout(function () {
                             $rootScope.$apply(function () {
@@ -314,20 +274,8 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             });
                         }, 0);
                     }
-
-                    function getUuid (track) {
-                        track.trackId = guid();
-                    }
-                    value.forEach(getUuid);
-                    //value.forEach(pushTrack);
-                    $timeout(function () {
-                        $rootScope.$apply(function () {
-                            $rootScope.tracks = $rootScope.artist.tracks.concat(value);
-                            $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
-                            $rootScope.loadingTracks = false;
-                        })
-                    },0);
-                    value.forEach(saveTrack);
+                    value.forEach(pushTrack);
+                    $rootScope.loadingTracks = true;
             })
             .fail(function (error) {
                 console.log(error)

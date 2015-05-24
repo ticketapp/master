@@ -1,9 +1,9 @@
 angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsFactory', 'StoreRequest',
-    'InfoModal',
-    function ($http, $q, EventsFactory, StoreRequest, InfoModal){
+    'InfoModal', 'RoutesFactory',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory){
     var factory = {
         organizers : false,
-        lastOrganizer: {id: 0, organizer: {}},
+        lastOrganizer: {id: '', organizer: {}},
         getOrganizer : function(id) {
             var deferred = $q.defer();
             if (id == factory.lastOrganizer.id) {
@@ -18,7 +18,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             }
             return deferred.promise;
         },
-        lastOrganizerEvents : {id: 0, events: []},
+        lastOrganizerEvents : {id: '', events: []},
         getOrganizerEvents : function(id) {
             var deferred = $q.defer();
             if(id == factory.lastOrganizerEvents.id) {
@@ -67,17 +67,13 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
         },
         followOrganizerByFacebookId : function(id) {
             var deferred = $q.defer();
-            if(factory.organizers ==true) {
-                deferred.resolve(factory.organizers);
-            } else {
-                $http.post('/organizers/' + id + '/followByFacebookId ').
-                    success(function(data, status, headers, config) {
-                        deferred.resolve(data);
-                    }).
-                    error(function (data) {
-                        deferred.resolve('error');
-                    })
-            }
+            $http.post('/organizers/' + id + '/followByFacebookId ').
+                success(function(data, status, headers, config) {
+                    deferred.resolve(data);
+                }).
+                error(function (data) {
+                    deferred.resolve('error');
+                })
             return deferred.promise;
         },
         followOrganizerByOrganizerId : function (id, organizerName) {
@@ -130,10 +126,10 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                     deferred.resolve(data);
                 }).error(function (data) {
                     deferred.resolve('error');
-                })
+                });
             return deferred.promise;
         },
-        lastGetPlaceEvents: {id: 0, events: []},
+        lastGetPlaceEvents: {id: '', events: []},
         getPlaceEvents : function(id) {
             var deferred = $q.defer();
             if(factory.lastGetPlaceEvents.id == id) {
@@ -145,6 +141,22 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                         factory.lastGetPlaceEvents.events = data;
                         factory.lastGetPlaceEvents.id = id;
                         deferred.resolve(factory.lastGetPlaceEvents.events);
+                    })
+            }
+            return deferred.promise;
+        },
+        lastGetPassedEvents: {id: '', events: []},
+        getPassedEvents : function(id) {
+            var deferred = $q.defer();
+            if(factory.lastGetPassedEvents.id == id) {
+                deferred.resolve(factory.lastGetPassedEvents.events);
+            } else {
+                $http.get(RoutesFactory.organizers.getOrganizersPassedEvents(id)).
+                    success(function(data, status, headers, config) {
+                        data.forEach(EventsFactory.colorEvent);
+                        factory.lastGetPassedEvents.events = data;
+                        factory.lastGetPassedEvents.id = id;
+                        deferred.resolve(factory.lastGetPassedEvents.events);
                     })
             }
             return deferred.promise;

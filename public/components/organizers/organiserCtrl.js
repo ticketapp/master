@@ -23,7 +23,8 @@ angular.module('claudeApp').
                 $scope.websites = WebsitesFactory.normalizeWebsitesObject(organizer.websites,
                     organizer.facebookUrl);
             }
-            /*console.log(organizer);
+            console.log(organizer);
+            /*
             if (organizer.placeId !== undefined) {
                 OrganizerFactory.getPlaceEvents(organizer.placeId).then(function (events) {
                     console.log(events);
@@ -57,6 +58,9 @@ angular.module('claudeApp').
         });
         OrganizerFactory.getOrganizerEvents($routeParams.id).then(function (events) {
             $scope.organizer.events = events;
+        });
+        OrganizerFactory.getPassedEvents($routeParams.id).then(function (events) {
+            $scope.organizer.passedEvents = events;
         });
         $scope.follow = function () {
             OrganizerFactory.followOrganizerByOrganizerId($scope.organizer.organizerId, $scope.organizer.name).

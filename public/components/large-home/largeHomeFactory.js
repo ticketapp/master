@@ -1,5 +1,6 @@
-angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootScope', '$sce', 'ArtistsFactory',
-    function ($http, $q, $rootScope, $sce, ArtistsFactory) {
+angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootScope', '$sce',
+    'ArtistsFactory', 'RoutesFactory', 'OrganizerFactory', '$filter',
+    function ($http, $q, $rootScope, $sce, ArtistsFactory, RoutesFactory, OrganizerFactory, $filter) {
     var factory = {
         infos : [],
         getInfos : function () {
@@ -83,7 +84,6 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                     ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
                         var info = '';
                         var title;
-                        console.log(events);
                         if (events.length > 0) {
                             var eventsLength;
                             if (events.length > 2) {
@@ -110,6 +110,35 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                 }
                 ArtistsFactory.getFollowArtists().then(function (artists) {
                     artists.forEach(getEventsArtist)
+                });
+
+                function getOrganizerEvents (organizer) {
+                    OrganizerFactory.getOrganizerEvents(organizer.organizerId).then(function (events) {
+                        events = $filter('orderBy')(events, 'startTime', false);
+                        var eventsLength = events.length;
+                        for (var i = 0; i < eventsLength; i ++) {
+                            if (events[i].artists.length > 0) {
+                                events[i].tracks = [];
+                                for (var j = 0; j < events[i].artists.length; j++) {
+                                    for (var k = 0; k < 5; k++) {
+                                        if (events[i].artists[j].tracks[k] != undefined) {
+                                            events[i].tracks.push(events[i].artists[j].tracks[k])
+                                        }
+                                    }
+                                }
+                                if (events[i].tracks.length > 0) {
+                                    var title = 'Ecouter la playliste des événements avec Claude';
+                                    var info = events[i].name + 'organisé par ' + organizer.name
+                                    pushConnectedInfo(info, title, events[i], true);
+                                }
+                            }
+                        }
+                    })
+                }
+
+                $http.get(RoutesFactory.organizers.getFollowedOrganizers()).
+                    success(function (organizers) {
+                        organizers.forEach(getOrganizerEvents)
                 });
                 deferred.resolve(factory.infos);
                 return deferred.promise;
