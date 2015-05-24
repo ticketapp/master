@@ -80,30 +80,34 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
   )
 
   def createArtist = Action { implicit request =>
-    try {
-      artistBindingForm.bindFromRequest().fold(
-        formWithErrors => {
-          Logger.error(formWithErrors.errorsAsJson.toString())
-          BadRequest(formWithErrors.errorsAsJson)
-        },
+    artistBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        Logger.error(formWithErrors.errorsAsJson.toString())
+        BadRequest(formWithErrors.errorsAsJson)
+      },
 
-        patternAndArtist => {
-          val artistId = Artist.save(patternAndArtist.artist)
-          val artistWithArtistId = patternAndArtist.artist.copy(artistId = artistId)
-          val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
+      patternAndArtist => {
+        val artistId = Artist.save(patternAndArtist.artist)
+        val artistWithArtistId = patternAndArtist.artist.copy(artistId = artistId)
+        val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
 
-          val tracksEnumerator = Artist.getArtistTracks(patternAndArtistWithArtistId)
-          val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks => Json.toJson(tracks) }
-          val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
-
-          Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { Track.save }) }
-
-          Ok.chunked(tracksJsonEnumerator)
+        val tracksEnumerator = Artist.getArtistTracks(patternAndArtistWithArtistId)
+        val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
+          val filteredTracks: Set[Track] = tracks.map { track =>
+            Track.save(track) match {
+              case Success(true) => Some(track)
+              case _ => None
+            }
+          }.flatten
+          Json.toJson(filteredTracks)
         }
-      )
-    } catch {
-      case e: Exception => InternalServerError(e.getMessage)
-    }
+        val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
+
+        Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { Track.save }) }
+
+        Ok.chunked(tracksJsonEnumerator)
+      }
+    )
   }
 
   def deleteArtist(artistId: Long) = Action {

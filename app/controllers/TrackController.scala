@@ -89,7 +89,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
         Conflict(s"This user already has track $trackId in his favorites.")
       case Failure(e: Exception) =>
         Logger.error("TrackController.addToFavorites", e)
-        Conflict(s"This user already has track $trackId in his favorites.")
+        InternalServerError
       case _ =>
         InternalServerError(s"Track.controller.addTOFavorite: trackId $trackId was not added")
     }
