@@ -53,7 +53,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 18 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 17 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -175,6 +175,7 @@ CREATE TABLE tracks (
   UNIQUE(url)
 );
 CREATE UNIQUE INDEX trackId ON tracks(trackId);
+CREATE UNIQUE INDEX artistNameAndTitle ON tracks(title, artistName);
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 CREATE OR REPLACE FUNCTION insertTrack(trackIdValue VARCHAR(255),
@@ -649,8 +650,6 @@ CREATE OR REPLACE FUNCTION insertEventGenreRelation(
   END;;
   $$
 LANGUAGE plpgsql;
-SELECT insertEventGenreRelation(1, 1);
-
 
 CREATE TABLE eventsOrganizers (
   eventId                 INT REFERENCES events (eventId),

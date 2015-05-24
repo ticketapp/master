@@ -15,7 +15,7 @@ import java.math.BigDecimal
 import anorm.Column.rowToBigDecimal
 import scala.util.{Try, Success, Failure}
 
-case class Track (trackId: Option[String],
+case class Track (trackId: String,
                   title: String, 
                   url: String, 
                   platform: Char,
@@ -34,25 +34,25 @@ object Track {
   : Track = {
     thumbnailUrl match {
       case Some(thumbnail: String) =>
-        Track(Option(trackId), title, url, platform(0), thumbnail, artistFacebookUrl, artistName, redirectUrl)
+        Track(trackId, title, url, platform(0), thumbnail, artistFacebookUrl, artistName, redirectUrl)
       case None => userThumbnailUrl match {
         case Some(userThumbnail: String) =>
-          new Track(Option(trackId), title, url, platform(0), userThumbnail, artistFacebookUrl, artistName, redirectUrl)
+          new Track(trackId, title, url, platform(0), userThumbnail, artistFacebookUrl, artistName, redirectUrl)
         case None =>
           throw new Exception("A track must have a thumbnail or a user Thumbnail url to be saved")
       }
     }
   }
 
-  def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.trackId.get, track.title, track.url,
+  def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.trackId, track.title, track.url,
     track.platform.toString, Some(track.thumbnailUrl), None, track.artistFacebookUrl, track.artistName: String,
     track.redirectUrl))
 
   def formApply(trackId: String, title: String, url: String, platform: String, thumbnailUrl: String,
                 artistFacebookUrl: String, artistName: String, redirectUrl: Option[String]): Track =
-   new Track(Option(trackId), title, url, platform(0), thumbnailUrl, artistFacebookUrl, artistName, redirectUrl)
+   new Track(trackId, title, url, platform(0), thumbnailUrl, artistFacebookUrl, artistName, redirectUrl)
   def formUnapply(track: Track) =
-    Some((track.trackId.get, track.title, track.url, track.platform.toString, track.thumbnailUrl,
+    Some((track.trackId, track.title, track.url, track.platform.toString, track.thumbnailUrl,
       track.artistFacebookUrl, track.artistName, track.redirectUrl))
 
   private val trackParser: RowParser[Track] = {
@@ -66,7 +66,7 @@ object Track {
       get[Option[String]]("redirectUrl") ~
       get[Double]("confidence") map {
       case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ artistName ~ redirectUrl ~
-        confidence => Track(Option(trackId), title, url, platform, thumbnailUrl, artistFacebookUrl, artistName,
+        confidence => Track(trackId, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName,
         redirectUrl, Option(confidence))
     }
   }
