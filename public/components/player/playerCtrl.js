@@ -325,8 +325,11 @@ angular.module('claudeApp').
             };
 
             $scope.closeTrack = function (index) {
-                $rootScope.playlist.tracks.splice(index, 1);
-                if (index == $rootScope.playlist.tracks.length && index == i) {
+                $scope.limitedTracks.splice(index, 1);
+                $rootScope.playlist.tracks.splice(index + $scope.indexToStart, 1);
+                $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
+                if (index + $scope.indexToStart == $rootScope.playlist.tracks.length &&
+                    index + $scope.indexToStart == i) {
                     $rootScope.playlist.tracks = [];
                     played = [];
                     playlistEvents = [];

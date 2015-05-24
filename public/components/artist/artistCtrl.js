@@ -18,36 +18,37 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             $scope.artist = [];
             $scope.artist.events = [];
             $rootScope.loadingTracks = true;
-            function pushTrack (track) {
-                if ($rootScope.favoritesTracks) {
-                    if ($rootScope.favoritesTracks.indexOf(track.trackId) > -1) {
-                        track.isFavorite = true;
-                    }
-                }
-                if ($localStorage.tracksSignaled) {
-                    if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
-                        $timeout(function () {
-                            $scope.$apply(function () {
-                                $scope.tracks.push(track)
-                            })
-                        })
-                    }
+            function signaledTrack (track) {
+                if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
+                    return track;
                 }
             }
 
             var numberOfRates = 0;
             function countRates (track) {
+                if (numberOfRates >= 50) {
+                    return
+                }TA-268Loann: create filter for signaled tracks
                 if (track.confidence != undefined && track.confidence > 5000000 && numberOfRates <50) {
                     numberOfRates ++;
                 }
             }
+            function setFavorite (track) {
+                if ($rootScope.favoritesTracks) {
+                    if ($rootScope.favoritesTracks.indexOf(track.trackId) > -1) {
+                        track.isFavorite = true;
+                    }
+                }
+            }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
-                console.log(artist)
-                $scope.tracks = [];
                 artist.tracks = $filter('orderBy')(artist.tracks, 'confidence', true);
-                artist.tracks.forEach(pushTrack);
-                artist.tracks.forEach(countRates);
+                $scope.tracks = artist.tracks.filter(signaledTrack);
+                var tracksLength = $scope.tracks.length;
+                for (var i = 0; i < tracksLength; i ++) {
+                    setFavorite($scope.tracks[i]);
+                    countRates($scope.tracks[i])
+                }
                 $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
                 $scope.artist.tracks = $scope.tracks;
                 $rootScope.loadingTracks = false;

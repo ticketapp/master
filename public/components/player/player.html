@@ -129,7 +129,7 @@ margin-left: 5px;"
              style="height: 100px; font-size: 100px; line-height: 100px;"
              ng-click="changeIndexToStart(indexToStart -1)"
              ng-show="(indexToStart > 0)">
-            <i class="fa fa-angle-double-left" style="line-height: 100px"></i>
+            <i class="fa fa-angle-left" style="line-height: 100px"></i>
         </div>
         <div class="column small-1 float-right height100p padding0 text-center"
              ng-click="changeIndexToStart(indexToStart +1)"
@@ -137,11 +137,10 @@ margin-left: 5px;"
              ng-show="(playlist.tracks.length > numberToDisplay &&
              indexToStart < playlist.tracks.length - numberToDisplay)"
                 >
-            <i class="fa fa-angle-double-right"  style="line-height: 100px"></i>
+            <i class="fa fa-angle-right"  style="line-height: 100px"></i>
         </div>
         <div class="column float-left padding0"
-             ng-class="{'small-10': indexToStart > 0, 'small-11': indexToStart == 0}"
-                >
+             ng-class="{'small-10': indexToStart > 0, 'small-11': indexToStart == 0}">
             <div ng-if="playlist.tracks.length > 0"
                  style="position: relative; max-height: 100px;"
                  class="sortable-row"
