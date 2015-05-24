@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFactory', 'StoreRequest',
-    'InfoModal',
-    function ($http, $q, EventsFactory, StoreRequest, InfoModal){
+    'InfoModal', 'RoutesFactory',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory){
     var factory = {
         places : false,
         lastGetPlace: {id: 0, place: []},
@@ -163,6 +163,24 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                     deferred.resolve('error');
                 });
             return deferred.promise;
+        },
+        lastPassedEvents : {id: '', events: []},
+        getPassedEvents : function (placeId) {
+            var defered = $q.defer();
+            if (placeId == factory.getPassedEvents.id) {
+                defered.resolve(factory.getPassedEvents.events)
+            } else {
+                $http.get(RoutesFactory.getPlacesPassedEvents(placeId)).success(
+                    function (data) {
+                        factory.getPassedEvents.id = placeId;
+                        factory.getPassedEvents.events = data;
+                        defered.resolve(factory.getPassedEvents.events)
+                    }
+                ).error(function (data) {
+                        console.log(data)
+                    })
+            }
+            return defered.promise;
         }
     };
     return factory;

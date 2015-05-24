@@ -57,13 +57,32 @@
         </div>
         <stylized-map></stylized-map>
     </div>
-    <h2 class="column" ng-show="place.events.length > 0">Evenements</h2>
-    <event-min class="column large-4 medium-6 float-left fade margin0"
-         data-ng-repeat="event in place.events">
-    </event-min>
-    <div layout="row"
-         class="column large-12" layout-sm="column" layout-align="space-around"
-         ng-if="loadEvents">
-        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-    </div>
+    <md-content class="column">
+        <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
+            <md-tab label="Evenements">
+                <md-content  class="width100p float-left marginTop10">
+                    <event-min class="column large-4 medium-6 float-left fade margin0"
+                         data-ng-repeat="event in place.events">
+                    </event-min>
+                    <div layout="row"
+                         class="column large-12" layout-sm="column" layout-align="space-around"
+                         ng-if="loadEvents">
+                        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                    </div>
+                </md-content>
+            </md-tab>
+            <md-tab label="Evenements Passés">
+                <md-content class="width100p float-left marginTop10">
+                    <event-min class="column large-4 medium-6 float-left fade margin0"
+                         data-ng-repeat="event in place.passedEvents">
+                    </event-min>
+                    <div layout="row"
+                         class="column large-12" layout-sm="column" layout-align="space-around"
+                         ng-if="loadEvents">
+                        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                    </div>
+                </md-content>
+            </md-tab>
+        </md-tabs>
+    </md-content>
 </div>
