@@ -42,16 +42,19 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $scope.artist = artist;
-                artist.tracks = $filter('orderBy')(artist.tracks, 'confidence', true);
-                $scope.tracks = artist.tracks.filter(signaledTrack);
-                var tracksLength = $scope.tracks.length;
-                for (var i = 0; i < tracksLength; i ++) {
-                    setFavorite($scope.tracks[i]);
-                    countRates($scope.tracks[i])
-                }
-                $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
-                $scope.artist.tracks = $scope.tracks;
-                $rootScope.loadingTracks = false;
+                $timeout(function () {
+                    $scope.$apply(function() {
+                        $scope.tracks = artist.tracks.filter(signaledTrack);
+                        var tracksLength = $scope.tracks.length;
+                        for (var i = 0; i < tracksLength; i ++) {
+                            setFavorite($scope.tracks[i]);
+                            countRates($scope.tracks[i])
+                        }
+                        $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
+                        $scope.artist.tracks = $scope.tracks;
+                        $rootScope.loadingTracks = false;
+                    })
+                }, 0);
                 if (artist.websites != undefined) {
                     $scope.websites = WebsitesFactory.normalizeWebsitesObject(artist.websites,
                         $routeParams.facebookUrl);

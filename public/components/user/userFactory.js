@@ -52,6 +52,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                             }
                         })
                     } else {
+                        console.log(data)
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
                 })

@@ -157,13 +157,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 }
             }).start(function (data, etc) {
             })
-                .done(function (value) {
-                    deferred.resolve(value);
-                })
-                .fail(function (error) {
-                    deferred.resolve('error');
-                    console.log(error)
-                });
+            .done(function (value) {
+                deferred.resolve(value);
+            })
+            .fail(function (error) {
+                deferred.resolve('error');
+                console.log(error)
+            });
             return deferred.promise;
         },
         followArtistByFacebookId : function (id) {
@@ -265,7 +265,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             })
             .done(function (value) {
                     $rootScope.loadingTracks = true;
-                    function pushTrack(track) {
+                    /*function pushTrack(track) {
                         $timeout(function () {
                             $rootScope.$apply(function () {
                                 track.artistName = artist.name;
@@ -274,8 +274,14 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             });
                         }, 0);
                     }
-                    value.forEach(pushTrack);
-                    $rootScope.loadingTracks = true;
+                    value.forEach(pushTrack);*/
+                    $timeout(function () {
+                        $rootScope.$apply(function () {
+                            $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
+                            $rootScope.tracks = $rootScope.artist.tracks;
+                            $rootScope.loadingTracks = false;
+                        });
+                    }, 0);
             })
             .fail(function (error) {
                 console.log(error)

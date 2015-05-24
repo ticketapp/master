@@ -1,13 +1,15 @@
 <div class="column large-12 arTrack">
     <i class="fa fa-star absolute pointer left"
        ng-if="!track.isFavorite || $root.connected == false"
-       ng-click="addTrackToFavorite(track.trackId); track.isFavorite = true">
+       ng-click="addTrackToFavorite(track.trackId); track.isFavorite = true"
+            style="margin: 5px">
         <md-track-tooltipe>
             Ajouter aux favoris
         </md-track-tooltipe>
     </i>
     <i class="fa fa-star absolute pointer favoriteActive left"
        ng-if="track.isFavorite && $root.connected == true"
+       style="margin: 5px"
        ng-click="removeFromFavorites(track.trackId); track.isFavorite = false">
         <md-track-tooltipe>
             Supprimer des favoris
@@ -50,7 +52,7 @@
         </i>
     </div>
     <a href="#/artists/{{track.artistFacebookUrl}}">{{track.artistName}}</a>
-    <div style="overflow: hidden; height: 48px; margin-top: 5px;">
+    <div style="overflow: hidden; height: 48px;">
         <b>{{track.title}}</b>
     </div>
     <a target="_blank"
