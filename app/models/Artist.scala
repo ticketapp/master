@@ -202,11 +202,12 @@ object Artist {
             artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
             artist.tracks.foreach { Track.save }
             Option(artistId)
-          case None => None
+          case None =>
+            None
       }
     }
   } catch {
-    case e: Exception => throw new DAOException("Artist.save: " + e.getMessage)
+    case e: Exception => throw new DAOException("Artist.save:\n" + e.getMessage)
   }
 
   def update(artist: Artist): Int = try {
@@ -273,10 +274,10 @@ object Artist {
 
   def saveWithEventRelation(artist: Artist, eventId: Long): Boolean = save(artist) match {
     case None => false
-    case Some(artistId: Long) => saveEventArtistRelation(eventId, artistId)
+    case Some(artistId: Long) => saveEventRelation(eventId, artistId)
   }
 
-  def saveEventArtistRelation(eventId: Long, artistId: Long): Boolean = try {
+  def saveEventRelation(eventId: Long, artistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertEventArtistRelation({eventId}, {artistId})""")
         .on(
@@ -288,6 +289,13 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.saveEventArtistRelation: " + e.getMessage)
   }
 
+  def deleteEventRelation(eventId: Long, artistId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(s"""DELETE FROM eventsArtists WHERE eventId = $eventId AND artistId = $artistId""")
+        .executeUpdate()
+    }
+  }
+  
   def delete(artistId: Long): Int = try {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM artists WHERE artistId = {artistId}")

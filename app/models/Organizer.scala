@@ -179,13 +179,13 @@ object Organizer {
 
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Boolean = {
     save(organizer) match {
-      case Success(Some(organizerId)) => saveEventOrganizerRelation(eventId, organizerId)
+      case Success(Some(organizerId)) => saveEventRelation(eventId, organizerId)
       case Success(None) => false
       case Failure(_) => false
     }
   }
 
-  def saveEventOrganizerRelation(eventId: Long, organizerId: Long): Boolean = try {
+  def saveEventRelation(eventId: Long, organizerId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL( """SELECT insertEventOrganizerRelation({eventId}, {organizerId})""")
         .on(
@@ -195,6 +195,13 @@ object Organizer {
     }
   } catch {
     case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)
+  }
+
+  def deleteEventRelation(eventId: Long, organizerId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(s"""DELETE FROM eventsOrganizers WHERE eventId = $eventId AND organizerId = $organizerId""")
+        .executeUpdate()
+    }
   }
 
   def delete(organizerId: Long): Int = try {

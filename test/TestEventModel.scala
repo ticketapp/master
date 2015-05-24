@@ -2,7 +2,7 @@ import java.util.Date
 
 import models.Event.{delete, find, isFollowed, save, _}
 import models.Place._
-import models.{Event, Place}
+import models.{Organizer, Artist, Event, Place}
 import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -106,12 +106,46 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
     }
 
     "return passed events for an artist" in {
+      val eventId = save(event).get
 
+      val passedEvent = Event(None, None, isPublic = true, isActive = true, "passed event", Option("(5.4,5.6)"),
+        Option("description"), new Date(0), Option(new Date()), 16, None, None, None, List.empty, List.empty,
+        List.empty, List.empty, List.empty, List.empty)
+      val passedEventId = save(passedEvent).get
+      val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+        "facebookUrl")
+      val artistId = Artist.save(artist).get
 
+      Artist.saveEventRelation(eventId, artistId) mustBe true
+      Artist.saveEventRelation(passedEventId, artistId) mustBe true
+
+      findAllByArtist("facebookUrl").head.name mustBe "event name"
+      findAllPassedByArtist(artistId).head.name mustBe "passed event"
+
+      Artist.deleteEventRelation(eventId, artistId) mustBe Success(1)
+      Artist.deleteEventRelation(passedEventId, artistId) mustBe Success(1)
+      delete(eventId) mustBe 1
+      delete(passedEventId) mustBe 1
     }
 
     "return passed events for an organizer" in {
+      val eventId = save(event).get
+      val passedEventId = save(Event(None, None, isPublic = true, isActive = true, "passed event", Option("(5.4,5.6)"),
+        Option("description"), new Date(0), Option(new Date()), 16, None, None, None, List.empty, List.empty,
+        List.empty, List.empty, List.empty, List.empty)).get
 
+      val organizerId = Organizer.save(Organizer(None, Option("facebookId"), "organizerTest")).get.get
+
+      Organizer.saveEventRelation(eventId, organizerId) mustBe true
+      Organizer.saveEventRelation(passedEventId, organizerId) mustBe true
+
+      findAllByOrganizer(organizerId).head.name mustBe "event name"
+      findAllPassedByOrganizer(organizerId).head.name mustBe "passed event"
+
+      Organizer.deleteEventRelation(eventId, organizerId) mustBe Success(1)
+      Organizer.deleteEventRelation(passedEventId, organizerId) mustBe Success(1)
+      delete(eventId) mustBe 1
+      delete(passedEventId) mustBe 1
     }
   }
 }

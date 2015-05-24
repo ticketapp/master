@@ -84,7 +84,7 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
 
   BEGIN
     INSERT INTO artists (facebookId, name, imagePath, description, facebookUrl, websites)
-    VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
+      VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
     RETURNING artistId INTO artistIdToReturn;;
     RETURN artistIdToReturn;;
     EXCEPTION WHEN unique_violation

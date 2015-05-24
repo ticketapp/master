@@ -44,8 +44,6 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
 
   def findArtistsContaining(pattern: String) = Action { Ok(Json.toJson(Artist.findAllContaining(pattern))) }
 
-  def eventsByArtist(facebookUrl: String) = Action { Ok(Json.toJson(Event.findAllByArtist(facebookUrl))) }
-
   val artistBindingForm = Form(
     mapping(
       "searchPattern" -> nonEmptyText(3),
