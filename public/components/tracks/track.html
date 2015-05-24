@@ -16,10 +16,10 @@
         </md-track-tooltipe>
     </i>
     <div class="column small-1 padding0 text-center float-right"
-         style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:80px; margin-top: 15px">
+         style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:70px; margin-top: 10px">
         <i class="fa fa-exclamation column medium-12 padding0 pointer"
            ng-click="signalTrack(track.trackId, $index)"
-           style="line-height: 26.66px"
+           style="line-height: 24.66px"
                 >
             <md-track-tooltipe>
                 Signaler
@@ -27,14 +27,14 @@
         </i>
         <i class="fa fa-play column medium-12 padding0 pointer"
            ng-click="$root.addAndPlay([track], artist)"
-           style="line-height: 26.66px">
+           style="line-height: 24.66px">
             <md-track-tooltipe>
                 Lire
             </md-track-tooltipe>
         </i>
         <i class="fa fa-plus column medium-12 padding0 pointer"
            ng-click="$root.addToPlaylist([track], artist)"
-           style="line-height: 26.66px">
+           style="line-height: 24.66px">
             <md-track-tooltipe>
                 Ajouter à la lecture en cours
             </md-track-tooltipe>
@@ -51,34 +51,36 @@
             </md-track-tooltipe>
         </i>
     </div>
-    <a href="#/artists/{{track.artistFacebookUrl}}">{{track.artistName}}</a>
-    <div style="overflow: hidden; height: 48px;">
-        <b>{{track.title}}</b>
+    <a href="#/artists/{{track.artistFacebookUrl}}" style="font-size: 13.5px"">{{track.artistName}}</a>
+    <div style="overflow: hidden; height: 61px; font-size: 13.5px">
+        <b>
+            {{track.title}}
+            <a target="_blank"
+               href="http://{{track.redirectUrl}}"
+               class="float-right"
+               ng-class="{'float-left': $root.window != 'small'}"
+               style="font-size: 27px;" ng-if="track.platform == 's'">
+                <i style="display: block; margin: 5px;"
+                   ng-class="{'float-right': $root.window == 'small'}"
+                   class="fa fa-soundcloud">
+                    <md-track-tooltipe>
+                        Ecouter sur Soundcloud
+                    </md-track-tooltipe>
+                </i>
+            </a>
+            <a href="https://youtube.com/watch?v={{track.url}}"
+               class="float-right"
+               ng-class="{'float-left': $root.window != 'small'}"
+               style="font-size: 27px;"
+               ng-if="track.platform == 'y'"
+               target="_blank">
+                <i style="display: block; margin: 5px;" ng-class="{'float-right': $root.window == 'small'}"
+                   class="fa fa-youtube">
+                    <md-track-tooltipe>
+                        Ecouter sur Youtube
+                    </md-track-tooltipe>
+                </i>
+            </a>
+        </b>
     </div>
-    <a target="_blank"
-       href="http://{{track.redirectUrl}}"
-       class="column small-7 padding0"
-       ng-class="{'float-left': $root.window != 'small'}"
-       style="font-size: 27px;" ng-if="track.platform == 's'">
-        <i style="display: block"
-           ng-class="{'float-right': $root.window == 'small'}"
-           class="fa fa-soundcloud">
-            <md-track-tooltipe>
-                Ecouter sur Soundcloud
-            </md-track-tooltipe>
-           </i>
-    </a>
-    <a href="https://youtube.com/watch?v={{track.url}}"
-       class="column small-7 padding0"
-       ng-class="{'float-left': $root.window != 'small'}"
-       style="font-size: 27px;"
-       ng-if="track.platform == 'y'"
-       target="_blank">
-        <i style="display: block" ng-class="{'float-right': $root.window == 'small'}"
-           class="fa fa-youtube">
-            <md-track-tooltipe>
-                Ecouter sur Youtube
-            </md-track-tooltipe>
-           </i>
-    </a>
 </div>

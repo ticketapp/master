@@ -16945,7 +16945,7 @@ Copyright (c) 2014 Daniel Eden
 }
 
 /* line 19, ../../public/styles/tools.scss */
-.active {
+.button.active {
   background: #007095;color: #ffffff!important;
 }
 .mapControls {
