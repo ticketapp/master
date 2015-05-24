@@ -37,15 +37,19 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
               case Success(Some(trackFound)) => Ok(Json.toJson(trackFound))
               case _ => NotFound
             }
+          case Success(false) =>
+            Logger.error("TrackController.createTrack")
+            InternalServerError
           case Failure(exception) =>
             Logger.error("TrackController.createTrack", exception)
-            InternalServerError
-          case Failure(_) =>
-            Logger.error("TrackController.createTrack")
             InternalServerError
         }
       }
     )
+  }
+
+  def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int) = Action {
+    Ok(Json.toJson(Track.findAllByArtist(artistFacebookUrl, numberToReturn, offset)))
   }
 
   def upsertRatingForUser(trackId: String, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>

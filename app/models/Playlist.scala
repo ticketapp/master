@@ -39,7 +39,7 @@ object Playlist {
           | WHERE playlistId = {playlistId}""".stripMargin)
         .on('playlistId -> playlistId)
         .as(playlistParser.*)
-        .map(playlist => playlist.copy(tracks = Track.findTracksByPlaylistId(playlist.playlistId)))
+        .map(playlist => playlist.copy(tracks = Track.findByPlaylistId(playlist.playlistId)))
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
@@ -52,7 +52,7 @@ object Playlist {
           | WHERE userId = {userId}""".stripMargin)
       .on('userId -> userId)
       .as(playlistParser.*)
-      .map(playlist => playlist.copy(tracks = Track.findTracksByPlaylistId(playlist.playlistId)))
+      .map(playlist => playlist.copy(tracks = Track.findByPlaylistId(playlist.playlistId)))
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)

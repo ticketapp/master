@@ -66,7 +66,7 @@ object Artist {
     Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
   
   def getArtistProperties(artist: Artist): Artist = artist.copy(
-      tracks = Track.findAllByArtist(artist.facebookUrl),
+      tracks = Track.findAllByArtist(artist.facebookUrl, 0, 0),
       genres = Genre.findAllByArtist(artist.artistId.getOrElse(-1L).toInt)
   )
 

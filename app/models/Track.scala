@@ -78,17 +78,31 @@ object Track {
     }
   }
 
-  def findAllByArtist(artistFacebookUrl: String): Seq[Track] = try {
+  def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int): Seq[Track] = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT * FROM tracks WHERE artistFacebookUrl = {artistFacebookUrl}""")
-        .on('artistFacebookUrl -> artistFacebookUrl)
-        .as(trackParser.*)
+      numberToReturn match {
+        case 0 =>
+          SQL(
+            """SELECT * FROM tracks
+              |  WHERE artistFacebookUrl = {artistFacebookUrl}
+              |  ORDER BY confidence DESC""".stripMargin)
+            .on('artistFacebookUrl -> artistFacebookUrl)
+            .as(trackParser.*)
+        case n =>
+          SQL(
+            s"""SELECT * FROM tracks
+              |  WHERE artistFacebookUrl = {artistFacebookUrl}
+              |  ORDER BY confidence DESC
+              |  LIMIT $n OFFSET $offset""".stripMargin)
+            .on('artistFacebookUrl -> artistFacebookUrl)
+            .as(trackParser.*)
+      }
     }
   } catch {
     case e: Exception => throw new DAOException("Track.findAllByArtist: " + e.getMessage)
   }
 
-  def findTracksByPlaylistId(playlistId: Option[Long]): Seq[Track] = try {
+  def findByPlaylistId(playlistId: Option[Long]): Seq[Track] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT tracks.*, playlistsTracks.trackRank FROM tracks tracks

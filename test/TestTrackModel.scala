@@ -21,9 +21,9 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
       val track = Track(trackId, "title", "url", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
 
       save(track) mustBe Success(true)
-
       find(trackId.get) mustEqual Success(Option(track.copy(trackId = trackId, confidence = Some(0))))
       delete(trackId.get) mustBe 1
+
       Artist.delete(artistId) mustBe 1
     }
 
@@ -139,6 +139,41 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
       getRating(newTrackId) mustBe Success(Some((5000, 2000)))
 
       delete(newTrackId) mustBe 1
+      Artist.delete(artistId) mustBe 1
+    }
+
+    "find all tracks sorted by confidence for an artist" in {
+      val artistId = Artist.save(artist).get
+      val newTrackId = randomUUID.toString
+      val newTrackId2 = randomUUID.toString
+      val track = Track(Option(newTrackId), "title", "url7", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track2 = Track(Option(newTrackId2), "title", "url8", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      save(track) mustBe Success(true)
+      save(track2) mustBe Success(true)
+
+      updateRating(newTrackId, 5000) mustBe Success(calculateConfidence(5000, 0))
+
+      findAllByArtist(artist.facebookUrl, 0, 0) should contain theSameElementsInOrderAs
+        Seq(track.copy(confidence = Some(calculateConfidence(5000, 0))), track2.copy(confidence = Some(0)))
+
+      delete(newTrackId) mustBe 1
+      delete(newTrackId2) mustBe 1
+      Artist.delete(artistId) mustBe 1
+    }
+
+    "find n (numberToReturn) tracks for an artist" in {
+      val artistId = Artist.save(artist).get
+      val newTrackId = randomUUID.toString
+      val newTrackId2 = randomUUID.toString
+      val track = Track(Option(newTrackId), "title", "url7", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track2 = Track(Option(newTrackId2), "title", "url8", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      save(track) mustBe Success(true)
+      save(track2) mustBe Success(true)
+
+      findAllByArtist(artist.facebookUrl, 1, 1) should have length 1
+
+      delete(newTrackId) mustBe 1
+      delete(newTrackId2) mustBe 1
       Artist.delete(artistId) mustBe 1
     }
   }
