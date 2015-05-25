@@ -113,7 +113,7 @@ angular.module('claudeApp').
                 $scope.newTrack.thumbnailUrl = track.thumbnailUrl;
                 $scope.newTrack.url = track.url;
                 $scope.newTrack.artist = {name: track.artistName,
-                    facebookUrl: track.artistFacebookUrl};;
+                    facebookUrl: track.artistFacebookUrl};
                 $scope.newTrack.title = track.title;
                 $scope.newTrack.trackId = track.trackId;
                 $rootScope.playlist.tracks.push($scope.newTrack);

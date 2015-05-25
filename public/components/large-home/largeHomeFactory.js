@@ -1,6 +1,7 @@
 angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootScope', '$sce',
-    'ArtistsFactory', 'RoutesFactory', 'OrganizerFactory', '$filter',
-    function ($http, $q, $rootScope, $sce, ArtistsFactory, RoutesFactory, OrganizerFactory, $filter) {
+    'ArtistsFactory', 'RoutesFactory', 'OrganizerFactory', '$filter', 'PlaceFactory',
+    function ($http, $q, $rootScope, $sce, ArtistsFactory, RoutesFactory, OrganizerFactory, $filter,
+              PlaceFactory) {
     var factory = {
         infos : [],
         getInfos : function () {
@@ -138,9 +139,39 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                     })
                 }
 
+                function getPlaceEvents (place) {
+                    PlaceFactory.getPlaceEvents(place.placeId).then(function (events) {
+                        events = $filter('orderBy')(events, 'startTime', false);
+                        var eventsLength = events.length;
+                        for (var i = 0; i < eventsLength; i ++) {
+                            if (events[i].artists.length > 0) {
+                                events[i].tracks = [];
+                                for (var j = 0; j < events[i].artists.length; j++) {
+                                    for (var k = 0; k < 5; k++) {
+                                        if (events[i].artists[j].tracks[k] != undefined) {
+                                            events[i].tracks.push(events[i].artists[j].tracks[k])
+                                        }
+                                    }
+                                }
+                                if (events[i].tracks.length > 0) {
+                                    var title = 'Ecouter les playliste des événements de ' + place.name + ' avec Claude';
+                                    var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].eventId +'">'+ events[i].name + '</a>';
+                                    events[i].name = 'La playlist de l\'événements';
+                                    pushConnectedInfo(info, title, events[i], true);
+                                }
+                            }
+                        }
+                    })
+                }
+
                 $http.get(RoutesFactory.organizers.getFollowedOrganizers()).
                     success(function (organizers) {
                         organizers.forEach(getOrganizerEvents)
+                });
+
+                $http.get(RoutesFactory.places.getFollowedPlaces()).
+                    success(function (places) {
+                        places.forEach(getPlaceEvents)
                 });
                 deferred.resolve(factory.infos);
                 return deferred.promise;

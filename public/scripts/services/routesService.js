@@ -3,6 +3,9 @@ angular.module('claudeApp').factory('RoutesFactory', function () {
         places : {
             getPlacesPassedEvents: function (placeId) {
                 return '/places/' + placeId + '/passedEvents';
+            },
+            getFollowedPlaces: function () {
+                return '/places/followed/';
             }
         },
         organizers : {
