@@ -95,6 +95,22 @@ angular.module('claudeApp').
                 $rootScope.playlist.genres.forEach(getEventsByGenre)
             }
 
+            function addGenres (genre) {
+                $rootScope.playlist.genres = $rootScope.playlist.genres.concat(genre.name);
+            }
+
+            function getNextShow (track) {
+                ArtistsFactory.getArtist(track.artist.facebookUrl).then(function (artist) {
+                    if (artist.genres) {
+                        artist.genres.forEach(addGenres)
+                    }
+                    ArtistsFactory.getArtistEvents(track.artist.facebookUrl).then(function (events) {
+                        events = $filter('orderBy')(events, 'startTime', false);
+                        track.nextShow = events[0];
+                    });
+                });
+            }
+
             function pushTrack (track) {
                 $scope.newTrack = {};
                 if ($rootScope.favoritesTracks) {
@@ -117,6 +133,7 @@ angular.module('claudeApp').
                 $scope.newTrack.title = track.title;
                 $scope.newTrack.trackId = track.trackId;
                 $rootScope.playlist.tracks.push($scope.newTrack);
+                getNextShow($rootScope.playlist.tracks[$rootScope.playlist.tracks.length-1]);
                 $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
             }
 
@@ -151,10 +168,6 @@ angular.module('claudeApp').
                     addLotOfTracks(start, end);
 
                 }
-            }
-
-            function addGenres (genre) {
-                $rootScope.playlist.genres = $rootScope.playlist.genres.concat(genre.name);
             }
 
             $rootScope.addToPlaylist = function (tracks, artist) {
@@ -458,6 +471,7 @@ angular.module('claudeApp').
                             document.getElementById('musicPlayer').duration * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
                             / document.getElementById("progressBar").clientWidth)
                     };
+                    document.getElementById('musicPlayer').onError = error();
                     document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
                     document.getElementById('musicPlayer').play();
                 } else if ($rootScope.playlist.tracks[i].platform == 'y') {

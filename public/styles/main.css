@@ -16930,7 +16930,7 @@ Copyright (c) 2014 Daniel Eden
 /* line 15, ../../public/styles/tools.scss */
 .primCol {
   background: #008CBA;
-  color: #ffffff;
+  color: #ffffff!important;
 }
 
 /* line 16, ../../public/styles/tools.scss */
@@ -17905,7 +17905,7 @@ Copyright (c) 2014 Daniel Eden
 .parallax-background {
   background-color: primary;
   height: 100%;
-  background-image: url("../images/caroussel1.png");
+  background-image: url("../images/caroussel1.gif");
   background-repeat: no-repeat;
   -webkit-background-size: 100%;
   -moz-background-size: 100%;
@@ -27602,7 +27602,7 @@ top-search-block > search-bar-contener {
   background-size: 100%;
   position: fixed;
   width: 100%;
-  background-image: url("../images/caroussel1.png");
+  background-image: url("../images/caroussel1.gif");
 }
 
 /* line 13, ../../public/components/large-home/largeHome.scss */

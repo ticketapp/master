@@ -22,7 +22,7 @@
     <b  ng-if="$root.connected == true" class="button column medium-3"
         ng-click="logout()"><i class="fa fa-sign-out"></i><b> Deconnexion</b></b>
     <div ng-if="viewPlaylists" class="column large-12">
-        <h2>Les playlists de Claude</h2>
+        <h2 ng-show="suggeredPlaylists.length > 0">Les playlists de Claude</h2>
         <ul ng-repeat="playlist in suggeredPlaylists" class="column medium-6 margin0 float-left"
             style=" box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);">
             <div ng-if="playlist.tracks[0].thumbnailUrl != undefined"
@@ -74,7 +74,7 @@
     </div>
     <div ng-if="viewFavorites">
         <div class="column large-12"
-             ng-show="viewFavorites && $root.connected == true">
+             ng-show="viewFavorites && $root.connected == true && favorites.tracks.length > 0">
             <a class="button column medium-4" ng-click="$root.loadPlaylist(favorites)">
                 <i class="fi-play">
                     <md-track-tooltipe>

@@ -3,8 +3,8 @@
         <div class="toGrow">
             <a href="#/events/{{event.eventId}}">
                 <img ng-src="{{ event.imagePath }}" class="width100p"
-                     on-error-src="assets/images/caroussel1.png" ng-if="event.imagePath"/>
-                <img src="assets/images/caroussel1.png"
+                     on-error-src="assets/images/caroussel1.gif" ng-if="event.imagePath"/>
+                <img src="assets/images/caroussel1.gif"
                      ng-if="!event.imagePath" class="min"/>
             </a>
         </div>
@@ -66,10 +66,10 @@
                             <a href="#/places/{{place.placeId}}"
                                class="width100p padding0" style="height: 140px; overflow: hidden;
                                background-color: {{event.priceColor}};
-                               background-image: url('assets/images/caroussel1.png'); background-repeat: no-repeat;
+                               background-image: url('assets/images/caroussel1.gif'); background-repeat: no-repeat;
                                background-size: 100%">
                                 <img class="width100p " ng-src="{{place.imagePath}}"
-                                     on-error-src="assets/images/caroussel1.png">
+                                     on-error-src="assets/images/caroussel1.gif">
                             </a>
                             <a class="column medium-4 padding0 absolute right bottom0">
                                 <div class="width100p primCol padding10 textWhite text-center"
@@ -112,7 +112,7 @@
                                class="width100p padding0" style="height: 150px;
                                overflow: hidden;">
                                 <img class="width100p " ng-src="{{organizer.imagePath}}"
-                                     on-error-src="assets/images/caroussel1.png">
+                                     on-error-src="assets/images/caroussel1.gif">
                             </a>
                             <a class="column medium-4 padding0 absolute right bottom0">
                                 <div class="width100p primCol padding10 textWhite text-center"

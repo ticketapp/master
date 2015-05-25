@@ -8,7 +8,7 @@ angular.module('claudeApp').
             $scope.isFollowed = false;
             EventFactory.getEvent($routeParams.id).then(function (event) {
                 $scope.event = event;
-                if (event.places[0].geographicPoint != undefined) {
+                if (event.places[0] !== undefined && event.places[0].geographicPoint !== undefined) {
                     $scope.geographicPoint =
                         RefactorGeopoint.refactorGeopoint(event.places[0].geographicPoint);
                     UserFactory.getIsFollowedPlace(event.places[0].placeId).then(function (isFollowed) {
@@ -18,6 +18,10 @@ angular.module('claudeApp').
                     });
                     console.log(event.places[0].geographicPoint);
                     $scope.adresses = true;
+                    $scope.mapHeight = '300px';
+                    $scope.map = true;
+                } else if (event.geographicPoint !== undefined) {
+                    $scope.geographicPoint = RefactorGeopoint.refactorGeopoint(event.geographicPoint);
                     $scope.mapHeight = '300px';
                     $scope.map = true;
                 }

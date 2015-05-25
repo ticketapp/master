@@ -3,16 +3,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
     function ($http, $q, oboe, $rootScope, $timeout, EventsFactory, StoreRequest, InfoModal,
               ImagesFactory) {
 
-    function guid() {
-        function s4() {
-            return Math.floor((1 + Math.random()) * 0x10000)
-                .toString(16)
-                .substring(1);
-        }
-        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-            s4() + '-' + s4() + s4() + s4();
-    }
-
     var factory = {
         artists : false,
         lastGetArtist: {url: '', artist: {}},
