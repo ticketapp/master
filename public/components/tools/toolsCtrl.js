@@ -28,8 +28,9 @@ angular.module('claudeApp').controller('toolsCtrl', ['$scope', '$modal', '$log',
 // It is not the same as the $modal service used above.
 
 angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalInstance', '$rootScope',
-'$http', 'InfoModal', 'UserFactory',
-    function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory) {
+'$http', 'InfoModal', 'UserFactory', 'ToolsFactory',
+    function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, ToolsFactory) {
+    $scope.suggeredPlaylists = [];
     $scope.logout = function () {
         $http.get('/logout').
             success(function (data) {
@@ -47,6 +48,29 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     $scope.getPlaylists();
     $scope.viewPlaylists = true;
 
+    ToolsFactory.getEventsPlaylist().then(function (playlist) {
+        $scope.suggeredPlaylists.push(playlist)
+    });
+
+    ToolsFactory.getEventsGenrePlaylist('electro').then(function (playlist) {
+        $scope.suggeredPlaylists.push(playlist)
+    });
+
+    ToolsFactory.getEventsGenrePlaylist('reggae').then(function (playlist) {
+        $scope.suggeredPlaylists.push(playlist)
+    });
+
+    ToolsFactory.getEventsGenrePlaylist('rock').then(function (playlist) {
+        $scope.suggeredPlaylists.push(playlist)
+    });
+
+    ToolsFactory.getEventsGenrePlaylist('jazz').then(function (playlist) {
+        $scope.suggeredPlaylists.push(playlist)
+    });
+
+    ToolsFactory.getEventsGenrePlaylist('hip-hop').then(function (playlist) {
+        $scope.suggeredPlaylists.push(playlist)
+    });
     $scope.getFavoritesTracks = function() {
         UserFactory.getFavoritesTracks().then(function (tracks) {
             $scope.favorites = {};
