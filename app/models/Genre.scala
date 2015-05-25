@@ -107,12 +107,12 @@ object Genre {
 
   def saveWithEventRelation(genre: Genre, eventId: Long): Boolean = {
     save(genre) match {
-      case Some(genreId: Long) => saveEventGenreRelation(eventId, genreId)
+      case Some(genreId: Long) => saveEventRelation(eventId, genreId)
       case _ => false
     }
   }
 
-  def saveEventGenreRelation(eventId: Long, genreId: Long): Boolean = try {
+  def saveEventRelation(eventId: Long, genreId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertEventGenreRelation({eventId}, {genreId})""")
         .on(
@@ -124,14 +124,14 @@ object Genre {
     case e: Exception => throw new DAOException("Genre.saveEventGenreRelation: " + e.getMessage)
   }
 
-  def saveWithArtistRelation(genre: Genre, artistId: Int): Boolean = {
+  def saveWithArtistRelation(genre: Genre, artistId: Long): Boolean = {
     save(genre) match {
-      case Some(genreId: Long) => saveArtistGenreRelation(artistId, genreId.toInt)
+      case Some(genreId: Long) => saveArtistRelation(artistId, genreId.toInt)
       case _ => false
     }
   }
 
-  def saveArtistGenreRelation(artistId: Int, genreId: Int): Boolean = try {
+  def saveArtistRelation(artistId: Long, genreId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertOrUpdateArtistGenreRelation({artistId}, {genreId})""")
         .on(
@@ -140,10 +140,10 @@ object Genre {
         .execute()
     }
   } catch {
-    case e: Exception => throw new DAOException("Genre.saveArtistGenreRelation: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.saveArtistRelation: " + e.getMessage)
   }
 
-  def saveGenreForArtistInFuture(genreName: Option[String], artistId: Int): Unit = {
+  def saveGenreForArtistInFuture(genreName: Option[String], artistId: Long): Unit = {
     Future {
       genreName match {
         case Some(genreFound) if genreFound.nonEmpty =>
@@ -152,7 +152,7 @@ object Genre {
     }
   }
 
-  def deleteGenre(genreId: Long): Long = try {
+  def delete(genreId: Long): Int = try {
     DB.withConnection { implicit connection =>
       SQL("""DELETE FROM genres WHERE genreId = {genreId}""")
         .on('genreId -> genreId)

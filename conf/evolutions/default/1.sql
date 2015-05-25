@@ -53,7 +53,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 16 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 13 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -721,7 +721,7 @@ CREATE TABLE artistsGenres (
   counter                 INT NOT NULL,
   PRIMARY KEY (artistId, genreId)
 );
-CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(artistIdValue INT, genreIdValue INT) RETURNS VOID AS
+CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(artistIdValue BIGINT, genreIdValue BIGINT) RETURNS VOID AS
   $$
     BEGIN
       LOOP

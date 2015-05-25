@@ -14,16 +14,16 @@ import play.api.Play.current
 import securesocial.core.IdentityId
 import scala.util.Success
 import scala.util.Failure
+import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import java.util.UUID.randomUUID
 
 class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
   "An Artist" must {
 
-    val artist = Artist(None, Option("facebookId3"), "artistTest", Option("imagePath"), Option("description"),
-      "facebookUrl3", Set("website"))
-
     "be saved and deleted in database and return the new id" in {
+      val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+        "facebookUrl", Set("website"))
       save(artist) match {
         case None =>
           throw new DAOException("TestArtists, error while saving artist ")
@@ -34,14 +34,17 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "be followed and unfollowed by a user" in {
-      followByArtistId("userTestId", 1) shouldBe a[Success[Option[Long]]]
+      followByArtistId("userTestId", 1)
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
       unfollowByArtistId("userTestId", 1) mustBe Success(1)
     }
 
     "not be followed twice" in {
-      followByArtistId("userTestId", 1) shouldBe a[Success[Option[Long]]]
-      followByArtistId("userTestId", 1) shouldBe a[Failure[PSQLException]]
+      followByArtistId("userTestId", 1)
+      followByArtistId("userTestId", 1) match {
+        case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
+        case _ => throw new Exception("follow twice an artist worked !")
+      }
       unfollowByArtistId("userTestId", 1) mustBe Success(1)
     }
 
@@ -56,6 +59,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "have his websites updated" in {
+      val artist = Artist(None, Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),
+        "facebookUrl2", Set("website"))
       val artistId = Artist.save(artist)
 
       addWebsite(artistId, "normalizedUrl")
@@ -65,6 +70,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "have another website" in {
+      val artist = Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
+        "facebookUrl3", Set("website"))
       val maybeTrack = Option(Track(randomUUID.toString, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
         Option("redirectUrl")))
       val artistId = Artist.save(artist)

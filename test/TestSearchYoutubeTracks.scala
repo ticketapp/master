@@ -77,7 +77,8 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
           "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
       whenReady(getYoutubeTracksByTitleAndArtistName(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
-        tracks => tracks should contain (expectedTrack)
+        tracks => val tracksTitle = tracks.map { track => track.title}
+          tracksTitle should contain (expectedTrack.title)
       }
     }
 
@@ -90,7 +91,8 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
         "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
       whenReady(getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>
-        tracks should contain (expectedTrack)
+        val tracksTitle = tracks.map { track => track.title}
+        tracksTitle should contain (expectedTrack.title)
       }
     }
 

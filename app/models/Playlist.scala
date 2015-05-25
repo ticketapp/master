@@ -85,7 +85,7 @@ object Playlist {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO playlistsTracks (playlistId, trackId, trackRank)
-          | VALUES ({playlistId}, {trackId}, {trackRank})""".stripMargin)
+          |  VALUES ({playlistId}, {trackId}, {trackRank})""".stripMargin)
         .on(
           'playlistId -> playlistId,
           'trackId -> trackIdAndRank.id,
@@ -100,10 +100,10 @@ object Playlist {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM playlistsTracks
-          | WHERE playlistId = {playlistId};
+          |  WHERE playlistId = {playlistId};
           |DELETE FROM playlists
-          | WHERE userId = {userId}
-          | AND playlistId = {playlistId}""".stripMargin)
+          |  WHERE userId = {userId}
+          |  AND playlistId = {playlistId}""".stripMargin)
         .on(
           'userId -> userId,
           'playlistId -> playlistId)

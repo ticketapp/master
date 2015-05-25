@@ -147,7 +147,7 @@ class TestTrackModel extends PlaySpec with OneAppPerSuite {
       val newTrackId = randomUUID.toString
       val newTrackId2 = randomUUID.toString
       val track = Track(newTrackId, "title", "url7", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
-      val track2 = Track(newTrackId2, "title", "url8", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
+      val track2 = Track(newTrackId2, "title2", "url8", 's', "thumbnailUrl", "artistFacebookUrl", "artistName")
       save(track) mustBe Success(true)
       save(track2) mustBe Success(true)
 

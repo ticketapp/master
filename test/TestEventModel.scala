@@ -2,7 +2,7 @@ import java.util.Date
 
 import models.Event.{delete, find, isFollowed, save, _}
 import models.Place._
-import models.{Organizer, Artist, Event, Place}
+import models._
 import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
 class TestEventModel extends PlaySpec with OneAppPerSuite {
 
   "An event" must {
-    val event = Event(None, None, isPublic = true, isActive = true, "event name", Option("(5.4,5.6)"),
+    val event = Event(None, None, isPublic = true, isActive = true, "name", Option("(5.4,5.6)"),
       Option("description"), new Date(), Option(new Date(100000000000000L)), 16, None, None, None, List.empty,
       List.empty, List.empty, List.empty, List.empty, List.empty)
 
@@ -61,8 +61,18 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
     }
 
     "return events found by genre" in {
-      val eventRock = findAllByGenre("rock", GeographicPoint("(0,0)"), 0, 1)
-      eventRock.get should not be empty
+      val eventId = save(event).get
+      val genre = Genre(None, "rock", Option("r"))
+      Genre.save(genre) match {
+        case Some(long: Long) =>
+
+          val eventRock = findAllByGenre("rock", GeographicPoint("(0,0)"), 0, 1)
+          eventRock.get should not be empty
+
+          delete(eventId) mustBe 1
+          Genre.delete(long) mustBe 1
+        case _ => throw new Exception("genre could not be saved")
+      }
     }
 
     "return events linked to a place" in {
@@ -88,14 +98,14 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         List.empty, List.empty, List.empty, List.empty)
       val passedEventId = save(passedEvent).get
 
-      whenReady (Place.save(Place(None, "Name", Some("12345"), None, None, None, None, None, None, None)),
+      whenReady (Place.save(Place(None, "name", Some("12345"), None, None, None, None, None, None, None)),
         timeout(Span(2, Seconds))) { tryPlaceId =>
         val placeId = tryPlaceId.get.get
 
         Place.saveEventRelation(eventId, placeId) mustBe true
         Place.saveEventRelation(passedEventId, placeId) mustBe true
 
-        findAllByPlace(placeId).head.name mustBe "event name"
+        findAllByPlace(placeId).head.name mustBe "name"
         findAllPassedByPlace(placeId).head.name mustBe "passed event"
 
         Place.deleteEventRelation(eventId, placeId) mustBe Success(1)
