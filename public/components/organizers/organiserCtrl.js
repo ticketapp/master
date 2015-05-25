@@ -54,13 +54,13 @@ angular.module('claudeApp').
                         }
                     })
                 }
-            })
+            });
         });
         OrganizerFactory.getOrganizerEvents($routeParams.id).then(function (events) {
-            $scope.organizer.events = events;
+            $scope.events = events;
         });
         OrganizerFactory.getPassedEvents($routeParams.id).then(function (events) {
-            $scope.organizer.passedEvents = events;
+            $scope.passedEvents = events;
         });
         $scope.follow = function () {
             OrganizerFactory.followOrganizerByOrganizerId($scope.organizer.organizerId, $scope.organizer.name).

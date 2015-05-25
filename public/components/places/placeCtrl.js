@@ -43,10 +43,10 @@ angular.module('claudeApp').
                 })
             });
             PlaceFactory.getPlaceEvents($routeParams.id).then(function (events) {
-                $scope.place.events = events;
+                $scope.events = events;
             });
             PlaceFactory.getPassedEvents($routeParams.id).then(function (events) {
-                $scope.place.passedEvents = events;
+                $scope.passedEvents = events;
             });
             $scope.follow = function () {
                 PlaceFactory.followPlaceByPlaceId($scope.place.placeId,

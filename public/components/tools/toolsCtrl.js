@@ -71,6 +71,10 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     ToolsFactory.getEventsGenrePlaylist('hip-hop').then(function (playlist) {
         $scope.suggeredPlaylists.push(playlist)
     });
+
+    ToolsFactory.getEventsGenrePlaylist('chanson').then(function (playlist) {
+        $scope.suggeredPlaylists.push(playlist)
+    });
     $scope.getFavoritesTracks = function() {
         UserFactory.getFavoritesTracks().then(function (tracks) {
             $scope.favorites = {};

@@ -55,9 +55,11 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                 return deferred.promise;
             } else if ($rootScope.connected === true) {
                 factory.infos = [
-                    /*{
+                    {
                         id: 10,
                         displayIfConnected: true,
+                        title: 'Claude a besoin de vos suggestions',
+                        fixedTitle : false,
                         animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
                             'Poster vos messages dans la rubrique bug/FAQ' +
                             '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
@@ -70,12 +72,12 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                 'position: fixed;top: 110px;width: 25%;background: white;'
 
                         },
-                        content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Claude a besoin de vos suggestions</h3><p>' +
+                        content: $sce.trustAsHtml('<p>' +
                             '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
                             'Claude est en version Beta, aidez-le à s\'ammeliorer en reportant les bugs ou en laissant vos suggestions ' +
                             '</b>' +
                             '</p>')
-                    }*/
+                    }
                 ];
                 function pushConnectedInfo(info, title, artist, fixedTitle) {
                     factory.infos.push({content: $sce.trustAsHtml(info), title: title, artist: artist, fixedTitle: fixedTitle})
@@ -128,6 +130,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                     }
                                 }
                                 if (events[i].tracks.length > 0) {
+                                    events[i].tracks = $filter('orderBy')(events[i].tracks, 'confidence', true);
                                     var title = 'Ecouter la playliste des événements de ' + organizer.name + ' avec Claude';
                                     var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].eventId +'">'+ events[i].name + '</a>';
                                     events[i].name = 'La playlist de l\'événements';
@@ -154,6 +157,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                     }
                                 }
                                 if (events[i].tracks.length > 0) {
+                                    events[i].tracks = $filter('orderBy')(events[i].tracks, 'confidence', true);
                                     var title = 'Ecouter les playliste des événements de ' + place.name + ' avec Claude';
                                     var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].eventId +'">'+ events[i].name + '</a>';
                                     events[i].name = 'La playlist de l\'événements';

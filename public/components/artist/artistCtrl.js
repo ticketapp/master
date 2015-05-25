@@ -86,14 +86,14 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                         })
                     }
                 })
+                ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
+                    $scope.artist.events = events;
+                    if (events.length == 0) {
+                        $scope.selectedTab = 1;
+                    }
+                })
 
             });
-            ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
-                $scope.artist.events = events;
-                if (events.length == 0) {
-                    $scope.selectedTab = 1;
-                }
-            })
         } else {
             $scope.selectedTab = 1;
             ArtistsFactory.passArtisteToCreateToFalse();
