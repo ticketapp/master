@@ -21,27 +21,27 @@
            ng-click="signalTrack(track.trackId, $index)"
            style="line-height: 24.66px"
                 >
-            <md-track-tooltipe>
+            <md-track-tooltipe class="right">
                 Signaler
             </md-track-tooltipe>
         </i>
         <i class="fa fa-play column medium-12 padding0 pointer"
            ng-click="$root.addAndPlay([track], artist)"
            style="line-height: 24.66px">
-            <md-track-tooltipe>
+            <md-track-tooltipe class="right">
                 Lire
             </md-track-tooltipe>
         </i>
         <i class="fa fa-plus column medium-12 padding0 pointer"
            ng-click="$root.addToPlaylist([track], artist)"
            style="line-height: 24.66px">
-            <md-track-tooltipe>
+            <md-track-tooltipe class="right">
                 Ajouter à la lecture en cours
             </md-track-tooltipe>
         </i>
     </div>
     <div ng-if="track.thumbnailUrl != undefined"
-         class="img-circularPlayer"
+         class="img-circularPlayer zIndex1"
          style="background-image: url('{{track.thumbnailUrl}}');"
          ng-class="{'padding0 margin0': $root.window == 'small'}">
         <i class="fi-play playInImg"
@@ -51,10 +51,10 @@
             </md-track-tooltipe>
         </i>
     </div>
-    <a href="#/artists/{{track.artistFacebookUrl}}" style="font-size: 13.5px"">{{track.artistName}}</a>
-    <div style="overflow: hidden; height: 61px; font-size: 13.5px">
+    <a href="#/artists/{{track.artistFacebookUrl}}" style="font-size: 13.5px">{{track.artistName}}</a>
+    <div style="height: 61px; font-size: 13.5px">
         <b>
-            {{track.title}}
+            <span style="height: 100%; overflow: hidden;">{{track.title}}</span>
             <a target="_blank"
                href="http://{{track.redirectUrl}}"
                class="float-right"
@@ -63,7 +63,7 @@
                 <i style="display: block; margin: 5px;"
                    ng-class="{'float-right': $root.window == 'small'}"
                    class="fa fa-soundcloud">
-                    <md-track-tooltipe>
+                    <md-track-tooltipe class="right">
                         Ecouter sur Soundcloud
                     </md-track-tooltipe>
                 </i>
@@ -76,7 +76,7 @@
                target="_blank">
                 <i style="display: block; margin: 5px;" ng-class="{'float-right': $root.window == 'small'}"
                    class="fa fa-youtube">
-                    <md-track-tooltipe>
+                    <md-track-tooltipe class="right">
                         Ecouter sur Youtube
                     </md-track-tooltipe>
                 </i>

@@ -54,7 +54,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                 return deferred.promise;
             } else if ($rootScope.connected === true) {
                 factory.infos = [
-                    {
+                    /*{
                         id: 10,
                         displayIfConnected: true,
                         animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
@@ -74,7 +74,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                             'Claude est en version Beta, aidez-le à s\'ammeliorer en reportant les bugs ou en laissant vos suggestions ' +
                             '</b>' +
                             '</p>')
-                    }
+                    }*/
                 ];
                 function pushConnectedInfo(info, title, artist, fixedTitle) {
                     factory.infos.push({content: $sce.trustAsHtml(info), title: title, artist: artist, fixedTitle: fixedTitle})
@@ -127,8 +127,10 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                     }
                                 }
                                 if (events[i].tracks.length > 0) {
-                                    var title = 'Ecouter la playliste des événements avec Claude';
-                                    var info = events[i].name + 'organisé par ' + organizer.name
+                                    var title = 'Ecouter la playliste des événements de ' + organizer.name + ' avec Claude';
+                                    var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].eventId +'">'+ events[i].name + '</a>';
+                                    events[i].name = 'La playlist de l\'événements';
+                                    console.log(events[i]);
                                     pushConnectedInfo(info, title, events[i], true);
                                 }
                             }
