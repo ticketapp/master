@@ -2,7 +2,7 @@
     <input placeholder="Rechercher" ng-if="issues.length > 20" ng-model="newIssue.title"
            ng-change="getIssues(newIssue.title); selectedIssue = false"
            class="float-left height50">
-    <a class="button float-right height50" ng-click="addNewIssue = !addNewIssue; selectedIssue = false">Ajouter un sujet</a>
+    <a class="button height50" ng-click="addNewIssue = !addNewIssue; selectedIssue = false">Ajouter un sujet</a>
     <form ng-show="addNewIssue" name="formIssue" class="column large-12" ng-submit="addIssue()">
         <md-input-container flex>
             <input ng-model="newIssue.title"
