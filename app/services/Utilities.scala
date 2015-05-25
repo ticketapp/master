@@ -19,7 +19,7 @@ import scala.util.matching.Regex
 
 object Utilities {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
-  val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBY"
+  val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc"
   val echonestApiKey = "3ZYZKU3H3MKR2M59Z"
   val soundCloudClientId = "f297807e1780623645f8f858637d4abb"
 

@@ -20,7 +20,7 @@ object SearchArtistsController extends Controller {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
   val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-z@A-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
 
-  val facebookCallsFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
+  val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     getEventuallyFacebookArtists(pattern).map { artists =>
@@ -34,7 +34,7 @@ object SearchArtistsController extends Controller {
         "q" -> pattern,
         "type" -> "page",
         "limit" -> "400",
-        "fields" -> facebookCallsFields,
+        "fields" -> facebookArtistFields,
         "access_token" -> facebookToken)
       .get()
       .map { readFacebookArtists }
@@ -54,6 +54,7 @@ object SearchArtistsController extends Controller {
         case website if website contains "facebook" =>
           getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
         case website if website contains "soundcloud" =>
+          getMaybeFacebookUrlBySoundCloudUrl(website).map(println)
           getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
             case None =>
               Future { None }
@@ -68,6 +69,7 @@ object SearchArtistsController extends Controller {
 
   def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
+    println(soundCloudName)
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
@@ -81,10 +83,9 @@ object SearchArtistsController extends Controller {
       )((url: String, service: String) => (url, service))
 
     val collectOnlyFacebookUrls = Reads.seq(facebookUrlReads).map { urlService =>
-      urlService.collect {
-        case (url: String, "facebook") => normalizeUrl(url)
-      }
+      urlService.collect { case (url: String, "facebook") => normalizeUrl(url) }
     }
+
     soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
       case Some(facebookUrls: Seq[String]) if facebookUrls.length > 0 => Option(facebookUrls.head)
       case _ => None
@@ -94,7 +95,7 @@ object SearchArtistsController extends Controller {
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
     WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
       .withQueryString(
-        "fields" -> facebookCallsFields,
+        "fields" -> facebookArtistFields,
         "access_token" -> facebookToken)
       .get()
       .map { readFacebookArtist }
