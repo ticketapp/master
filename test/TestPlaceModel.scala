@@ -39,7 +39,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       followByPlaceId("userTestId", 1)
       followByPlaceId("userTestId", 1) match {
         case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
-        case _ => throw new Exception("folow a place twice didn't throw a PSQL UNIQUE_VIOLATION")
+        case _ => throw new Exception("follow a place twice didn't throw a PSQL UNIQUE_VIOLATION")
       }
       unfollowByPlaceId("userTestId", 1) mustBe Success(1)
     }

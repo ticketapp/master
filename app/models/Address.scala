@@ -11,7 +11,7 @@ import services.Utilities.{geographicPointToString, googleKey}
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
-import scala.util.{Failure, Try}
+import scala.util.{Success, Failure, Try}
 
 case class Address (addressId: Option[Long],
                     geographicPoint: Option[String],
@@ -84,28 +84,30 @@ object Address {
     case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
   }
   
-  def save(maybeAddress: Option[Address]): Option[Long] = maybeAddress match {
-    case None =>
-      None
-    case Some(address) =>
-      try {
-        DB.withConnection { implicit connection =>
-          SQL("""SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
-            .on(
-              'geographicPoint -> address.geographicPoint,
-              'city -> address.city,
-              'zip -> address.zip,
-              'street -> address.street)
-            .as(scalar[Long].singleOpt)
+  def save(maybeAddress: Option[Address]): Try[Option[Long]] = Try {
+    maybeAddress match {
+      case None =>
+        None
+      case Some(address) =>
+        if (address.geographicPoint.isEmpty && address.city.isEmpty && address.zip.isEmpty && address.street.isEmpty)
+          throw new EmptyAddress("Address.save: empty address")
+        else
+          DB.withConnection { implicit connection =>
+            SQL( """SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
+              .on(
+                'geographicPoint -> address.geographicPoint,
+                'city -> address.city,
+                'zip -> address.zip,
+                'street -> address.street)
+              .as(scalar[Long].singleOpt)
         }
-    } catch {
-      case e: Exception => throw new DAOException("Address.saveAddressAndEventRelation: " + e.getMessage)
     }
   }
 
   def saveAddressAndEventRelation(address: Address, eventId: Long): Try[Option[Long]] = save(Option(address)) match {
-    case None => Failure(DAOException("Address.saveAddressAndEventRelation: Address.save returned None"))
-    case Some(addressId) => saveEventAddressRelation(eventId, addressId)
+    case Success(Some(addressId)) => saveEventAddressRelation(eventId, addressId)
+    case Success(_) => Failure(DAOException("Address.saveAddressAndEventRelation: Address.save returned None"))
+    case Failure(exception) => throw exception
   }
 
   def saveEventAddressRelation(eventId: Long, addressId: Long): Try[Option[Long]] = Try {

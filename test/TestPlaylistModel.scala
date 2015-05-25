@@ -42,8 +42,8 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
       val track = Track(trackId, "title", "urlPlaylistTest", 's', "thumbnailUrl", "artistFacebookUrlTestPlaylistModel", "name")
       val trackId2 = randomUUID.toString
       val track2 = Track(trackId2, "title2", "urlPlaylistTest2", 's', "thumbnailUrl", "artistFacebookUrlTestPlaylistModel", "name")
-      val a = Track.save(track)
-      val b = Track.save(track2)
+      Track.save(track)
+      Track.save(track2)
 
       try {
 

@@ -28,13 +28,8 @@ CREATE OR REPLACE FUNCTION insertAddress(
   BEGIN
     INSERT INTO addresses (geographicPoint, city, zip, street)
       VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
-    RETURNING addressId INTO addressIdToReturn;;
-    RETURN addressIdToReturn;;
-    EXCEPTION WHEN unique_violation
-      THEN
-        SELECT addressId INTO addressIdToReturn FROM addresses
-          WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
-        RETURN addressIdToReturn;;
+      RETURNING addressId INTO addressIdToReturn;;
+      RETURN addressIdToReturn;;
   END;;
   $$
 LANGUAGE plpgsql;
@@ -53,7 +48,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 7 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 4 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -818,6 +813,47 @@ CREATE TABLE usersFavoriteTracks(
   trackId                 VARCHAR(255) REFERENCES tracks (trackId) NOT NULL
 );
 CREATE UNIQUE INDEX usersFavoriteTracksIndex ON usersFavoriteTracks (userId, trackId);
+
+CREATE OR REPLACE FUNCTION dropfunction(functionname text)
+  RETURNS text AS
+  $BODY$
+DECLARE
+    funcrow RECORD;;
+    numfunctions smallint := 0;;
+    numparameters int;;
+    i int;;
+    paramtext text;;
+BEGIN
+FOR funcrow IN SELECT proargtypes FROM pg_proc WHERE proname = functionname LOOP
+
+    --for some reason array_upper is off by one for the oidvector type, hence the +1
+    numparameters = array_upper(funcrow.proargtypes, 1) + 1;;
+
+    i = 0;;
+    paramtext = '';;
+
+    LOOP
+        IF i < numparameters THEN
+            IF i > 0 THEN
+                paramtext = paramtext || ', ';;
+            END IF;;
+            paramtext = paramtext || (SELECT typname FROM pg_type WHERE oid = funcrow.proargtypes[i]);;
+            i = i + 1;;
+        ELSE
+            EXIT;;
+        END IF;;
+    END LOOP;;
+
+    EXECUTE 'DROP FUNCTION ' || functionname || '(' || paramtext || ');;';;
+    numfunctions = numfunctions + 1;;
+
+END LOOP;;
+
+RETURN 'Dropped ' || numfunctions || ' functions';;
+END;;
+$BODY$
+LANGUAGE plpgsql VOLATILE
+COST 100;;
 
 # --- !Downs
 DROP TABLE IF EXISTS usersFavoriteTracks;

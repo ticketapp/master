@@ -41,3 +41,7 @@ case class ThereIsNoPlaceForThisFacebookIdException(message: String) extends Exc
 case class ThereIsNoOrganizerForThisFacebookIdException(message: String) extends Exception(message) {
   Logger.error("ThereIsNoOrganizerForThisFacebookIdException: " + message)
 }
+
+case class EmptyAddress(message: String) extends Exception(message) {
+  Logger.error("Empty address found: " + message)
+}
