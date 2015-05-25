@@ -99,9 +99,8 @@ object Place {
     }
   }
 
-
   def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Try[Option[Long]]] = placeAddress match {
-    case Some(address) if address.geographicPoint.nonEmpty =>
+    case Some(address) if address.geographicPoint.isEmpty =>
       Address.getGeographicPoint(address) map { addressWithGeoPoint => Address.save(Option(addressWithGeoPoint)) }
     case Some(addressWithGeoPoint) =>
       Future  { Address.save(Option(addressWithGeoPoint)) }

@@ -25,13 +25,12 @@ case class Address (addressId: Option[Long],
 object Address {
 
   private val AddressParser: RowParser[Address] = {
-    get[Long]("addressId") ~
-      get[Option[String]]("geographicPoint") ~
+    get[Option[String]]("geographicPoint") ~
       get[Option[String]]("city") ~
       get[Option[String]]("zip") ~
       get[Option[String]]("street") map {
-      case addressId ~ geographicPoint ~ city ~ zip ~ street =>
-        Address(Option(addressId), geographicPoint, city, zip, street)
+      case geographicPoint ~ city ~ zip ~ street =>
+        Address(None, geographicPoint, city, zip, street)
     }
   }
 

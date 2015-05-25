@@ -1,7 +1,7 @@
 import java.util.Date
 
 import models.Place._
-import models.{Event, Organizer, Place}
+import models.{Address, Event, Organizer, Place}
 import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -22,14 +22,30 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       Some("""<div class="column large-12">Ancienne usine destinée à l’origine au traitement des eaux...</div>"""),
       Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
 
-    "be able to be saved and deleted in database and return the new id" in {
+    "be saved and deleted in database and return the new id" in {
       whenReady(save(place), timeout(Span(2, Seconds))) { placeId =>
         find(placeId.get.get) mustBe Option(place.copy(placeId = placeId.get))
         delete(placeId.get.get) mustBe Success(1)
       }
     }
 
-    "be able to be followed and unfollowed by a user" in {
+    "be saved with its address and deleted in database" in {
+      val address = Address(None, None, Some("privas"), Some("07000"), Some("avignas"))
+      val place = Place(None, "test", None, None, None, None, Some(9099), None, None, address = Option(address))
+
+      whenReady(save(place), timeout(Span(2, Seconds))) { placeId =>
+        try {
+          find(placeId.get.get) mustBe
+            Option(place.copy(placeId = placeId.get, address = Option(address.copy(geographicPoint = Some("(4,5")))))
+        } catch {
+          case e: Exception => throw e
+        } finally {
+          delete(placeId.get.get)
+        }
+      }
+    }
+
+    "be followed and unfollowed by a user" in {
       followByPlaceId("userTestId", 1)
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
       unfollowByPlaceId("userTestId", 1) mustBe Success(1)
@@ -76,6 +92,28 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
         delete(placeId) mustBe Success(1)
         Event.delete(eventId) mustBe 1
+      }
+    }
+
+    "get the geoPoint" in {
+      val address1 = Address(None, Some("(1,1)"), None, None, None)
+      val address2 = None
+      val address3 = Address(None, None, Some("privas"), Some("07000"), Some("avignas"))
+
+      whenReady(saveAddressInFutureWithGeoPoint(Option(address1)), timeout(Span(5, Seconds))) {
+        case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe Some(address1)
+        case _ => throw new Exception("address not saved")
+      }
+
+      whenReady(saveAddressInFutureWithGeoPoint(address2), timeout(Span(5, Seconds))) {
+        case Success(None) =>
+        case _ => throw new Exception("address not saved")
+      }
+
+      whenReady(saveAddressInFutureWithGeoPoint(Option(address3)), timeout(Span(5, Seconds))) {
+        case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe
+          Some(address3.copy(geographicPoint = Some("(4,4)")))
+        case _ => throw new Exception("address not saved")
       }
     }
   }

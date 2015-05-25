@@ -34,24 +34,27 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
     "be followed and unfollowed by a user" in {
       val eventId = save(event).get
 
-      follow("userTestId", 1)
+      if (follow("userTestId", 1).isFailure)
+        throw new Exception("Event not followed")
+
       isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
       unfollow("userTestId", 1) mustBe Success(1)
 
-      delete(eventId) mustBe 1
+      delete(eventId)
     }
 
     "not be followed twice" in {
       val eventId = save(event).get
 
-      follow("userTestId", 1)
+      if (follow("userTestId", 1).isFailure)
+        throw new Exception("Event not followed")
       follow("userTestId", 1) match {
         case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
         case _ => throw new Exception("follow twice a user worked !")
       }
       unfollow("userTestId", 1) mustBe Success(1)
 
-      delete(eventId) mustBe 1
+      delete(eventId)
     }
 
     "be found on facebook by a facebookId" in {
@@ -145,7 +148,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         Option("description"), new Date(0), Option(new Date()), 16, None, None, None, List.empty, List.empty,
         List.empty, List.empty, List.empty, List.empty)).get
 
-      val organizerId = Organizer.save(Organizer(None, Option("facebookId"), "organizerTest")).get.get
+      val organizerId = Organizer.save(Organizer(None, Option("facebookId2"), "organizerTest2")).get.get
 
       Organizer.saveEventRelation(eventId, organizerId) mustBe true
       Organizer.saveEventRelation(passedEventId, organizerId) mustBe true

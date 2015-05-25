@@ -117,7 +117,7 @@ object Genre {
   def saveEventRelation(eventId: Long, genreId: Long): Int = try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO eventsGenres (eventId, genreId)
-            |  VALUES {eventId}, {genreId}""")
+            |  VALUES {eventId}, {genreId}""".stripMargin)
         .on(
           'eventId -> eventId,
           'genreId -> genreId)
