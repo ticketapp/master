@@ -161,4 +161,7 @@ object Utilities {
       case index => eventName.take(index).trim
     }
   }
+
+  def websiteSetToString(websites: Set[String]): Option[String] =
+    if (websites.isEmpty) None else Option(websites.mkString(","))
 }

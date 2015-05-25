@@ -52,4 +52,10 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
 
     eventsName map  { refactorEventOrPlaceName } mustBe expectedEventsName
   }
+
+  "render a string from a set of a websites" in {
+    websiteSetToString(Set.empty) mustBe None
+    websiteSetToString(Set("a")) mustBe Some("a")
+    websiteSetToString(Set("a", "b", "c")) mustBe Some("a,b,c")
+  }
 }
