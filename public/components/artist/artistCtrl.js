@@ -10,6 +10,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.isFollowed = false;
         $scope.showTop = false;
         $scope.numberOfTop = 0;
+        $scope.events = [];
         if ($localStorage.tracksSignaled == undefined) {
             $localStorage.tracksSignaled = [];
         }
@@ -85,11 +86,15 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                             }
                         })
                     }
-                })
+                });
                 ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
-                    $scope.artist.events = events;
+                    $scope.events = events;
                     if (events.length == 0) {
-                        $scope.selectedTab = 1;
+                        $timeout(function () {
+                            $scope.$apply(function () {
+                                $scope.selectedTab = 1;
+                            })
+                        }, 0)
                     }
                 })
 

@@ -31,6 +31,7 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
 '$http', 'InfoModal', 'UserFactory', 'ToolsFactory',
     function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, ToolsFactory) {
     $scope.suggeredPlaylists = [];
+    $scope.playlists = [];
     $scope.logout = function () {
         $http.get('/logout').
             success(function (data) {
