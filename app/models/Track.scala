@@ -161,22 +161,7 @@ object Track {
     }
   }
 
-  def savePlaylistTrackRelation(playlistId: Long, trackIdAndRank: TrackIdAndRank): Option[Long] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """INSERT INTO playlistsTracks (playlistId, trackId, trackRank)
-          | VALUES ({playlistId}, {trackId}, {trackRank})""".stripMargin)
-        .on(
-          'playlistId -> playlistId,
-          'trackId -> trackIdAndRank.id,
-          'trackRank -> trackIdAndRank.rank.bigDecimal)
-        .executeInsert()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Track.savePlaylistTrackRelation: " + e.getMessage)
-  }
-
-  def deletePlaylistTrackRelation(playlistId: Long, trackId: Long): Long = try {
+  def deletePlaylistTrackRelation(playlistId: Long, trackId: String): Long = try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM playlistsTracks

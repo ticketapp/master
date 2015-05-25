@@ -10,6 +10,8 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import json.JsonHelper._
 
+import scala.util.{Failure, Success}
+
 object PlaylistController extends Controller with securesocial.core.SecureSocial {
 
   def find(playlistId: Long) = Action { Ok(Json.toJson(Playlist.find(playlistId))) }
@@ -21,7 +23,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
   val playlistBindingForm = Form(mapping(
     "name" -> nonEmptyText,
     "tracksId" -> seq(mapping(
-      "trackId" -> longNumber,
+      "trackId" -> nonEmptyText,
       "trackRank" -> bigDecimal
     )(Playlist.idAndRankFormApply)(Playlist.idAndRankFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))
@@ -34,7 +36,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
       },
       playlistNameAndTracksId => {
         val userId = request.user.identityId.userId
-        val playlistId = Playlist.save(userId, playlistNameAndTracksId)
+        val playlistId = Playlist.saveWithTrackRelation(userId, playlistNameAndTracksId)
         Ok(Json.toJson(playlistId))
       }
     )
@@ -43,7 +45,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
   val updatePlaylistBindingForm = Form(mapping(
     "playlistId" -> longNumber,
     "tracksInfo" -> seq(mapping(
-      "trackId" -> longNumber,
+      "trackId" -> nonEmptyText,
       "action" -> nonEmptyText,
       "trackRank" -> optional(bigDecimal)
     )(Playlist.trackInfoFormApply)(Playlist.trackInfoFormUnapply))
@@ -64,6 +66,15 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
   }
 
   def delete(playlistId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Playlist.delete(request.user.identityId.userId, playlistId)))
+    Playlist.delete(request.user.identityId.userId, playlistId) match {
+      case Success(false) =>
+        Ok
+      case Failure(exception) =>
+        Logger.error("PlaylistController.delete: ", exception)
+        InternalServerError("PlaylistController.delete: unable to delete the playlist" + exception.getMessage)
+      case Success(_) =>
+        Logger.error("PlaylistController.delete: unable to delete the playlist")
+        InternalServerError("PlaylistController.delete: unable to delete the playlist")
+    }
   }
 }
