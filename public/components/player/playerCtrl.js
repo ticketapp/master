@@ -392,7 +392,6 @@ angular.module('claudeApp').
                                     $scope.$apply(function () {
                                         $scope.onPlay = true;
                                     });
-                                    document.getElementById('musicPlayer').addEventListener('error', error);
                                     $scope.insertVideo = function () {
                                         if ($scope.showVideo == true) {
                                             document.getElementById('minVideoPlayer').setAttribute('src', mp4.url);
@@ -471,7 +470,7 @@ angular.module('claudeApp').
                             document.getElementById('musicPlayer').duration * ((event.clientX - document.getElementById("progressBar").getBoundingClientRect().left)
                             / document.getElementById("progressBar").clientWidth)
                     };
-                    document.getElementById('musicPlayer').onError = error();
+                    document.getElementById('musicPlayer').addEventListener('error', error);
                     document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
                     document.getElementById('musicPlayer').play();
                 } else if ($rootScope.playlist.tracks[i].platform == 'y') {
