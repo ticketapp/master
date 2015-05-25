@@ -56,7 +56,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
 
     "get a geographicPoint" in {
       whenReady(getGeographicPoint(address.copy(geographicPoint = None)), timeout(Span(2, Seconds))) { address =>
-        address.geographicPoint mustBe "(44.7053439,4.596782999999999)"
+        address.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
       }
     }
   }
