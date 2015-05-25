@@ -64,6 +64,22 @@ object Track {
       get[String]("artistFacebookUrl") ~
       get[String]("artistName") ~
       get[Option[String]]("redirectUrl") ~
+      get[Double]("confidence") map {
+      case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ artistName ~ redirectUrl ~
+        confidence => Track(trackId, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName,
+        redirectUrl, Option(confidence))
+    }
+  }
+
+  private val trackWithPlaylistRankParser: RowParser[Track] = {
+    get[String]("trackId") ~
+      get[String]("title") ~
+      get[String]("url") ~
+      get[Char]("platform") ~
+      get[String]("thumbnailUrl") ~
+      get[String]("artistFacebookUrl") ~
+      get[String]("artistName") ~
+      get[Option[String]]("redirectUrl") ~
       get[Double]("confidence") ~
       get[Option[Double]]("trackRank") map {
       case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ artistName ~ redirectUrl ~
@@ -114,7 +130,7 @@ object Track {
           |  WHERE playlists.playlistId = {playlistId}
           |    ORDER BY trackRank""".stripMargin)
         .on('playlistId -> playlistId)
-        .as(trackParser.*)
+        .as(trackWithPlaylistRankParser.*)
     }
   } catch {
     case e: Exception => throw new DAOException("Track.findTracksIdByPlaylistId: " + e.getMessage)

@@ -30,9 +30,15 @@ case class Place (placeId: Option[Long],
 object Place {
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
-                imagePath: Option[String], street: Option[String], zip: Option[String], city: Option[String]): Place =
-    new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath,
-      Option(Address(None, None, city, zip, street)))
+                imagePath: Option[String], street: Option[String], zip: Option[String], city: Option[String]): Place = {
+    try {
+      val address = Option(Address(None, None, city, zip, street))
+      new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, address)
+    } catch {
+      case e: IllegalArgumentException =>
+        new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, None)
+    }
+  }
 
   def formUnapply(place: Place) =
     Some((place.name, place.facebookId, place.geographicPoint, place.description, place.webSites, place.capacity,
@@ -67,32 +73,38 @@ object Place {
 
   def save(place: Place): Future[Try[Option[Long]]] = {
     val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
-    eventuallyAddressId map { addressId =>
-      DB.withConnection { implicit connection =>
-        Try {
-          SQL(
-            s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
-               |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
-            .on(
-              'name -> place.name,
-              'geographicPoint -> place.geographicPoint,
-              'addressId -> addressId,
-              'facebookId -> place.facebookId,
-              'description -> place.description,
-              'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
-              'capacity -> place.capacity,
-              'openingHours -> place.openingHours,
-              'imagePath -> place.imagePath,
-              'organizerId -> Organizer.findIdByFacebookId(place.facebookId))
-            .as(scalar[Long].singleOpt)
+    eventuallyAddressId map {
+      case Success(addressId) =>
+        DB.withConnection { implicit connection =>
+          Try {
+            SQL(
+              s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
+                 |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
+              .on(
+                'name -> place.name,
+                'geographicPoint -> place.geographicPoint,
+                'addressId -> addressId,
+                'facebookId -> place.facebookId,
+                'description -> place.description,
+                'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
+                'capacity -> place.capacity,
+                'openingHours -> place.openingHours,
+                'imagePath -> place.imagePath,
+                'organizerId -> Organizer.findIdByFacebookId(place.facebookId))
+              .as(scalar[Long].singleOpt)
+          }
         }
-      }
+      case Failure(e) =>
+        throw e
     }
   }
+
 
   def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Try[Option[Long]]] = placeAddress match {
     case Some(address) if address.geographicPoint.nonEmpty =>
       Address.getGeographicPoint(address) map { addressWithGeoPoint => Address.save(Option(addressWithGeoPoint)) }
+    case Some(addressWithGeoPoint) =>
+      Future  { Address.save(Option(addressWithGeoPoint)) }
     case _ =>
       Future { Success(None) }
   }
