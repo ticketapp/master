@@ -22,6 +22,27 @@
     <b  ng-if="$root.connected == true" class="button column medium-3"
         ng-click="logout()"><i class="fa fa-sign-out"></i><b> Deconnexion</b></b>
     <div ng-if="viewPlaylists" class="column large-12">
+        <h2>Les playlists de Claude</h2>
+        <ul ng-repeat="playlist in suggeredPlaylists" class="column medium-6 margin0"
+            style=" box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);">
+            <div ng-if="playlist.tracks[0].thumbnailUrl != undefined"
+                 class="img-circularPlayer"
+                 style="background-image: url('{{playlist.tracks[0].thumbnailUrl}}');"
+                 ng-class="{'padding0 margin0': $root.window == 'small'}">
+                <i class="fi-play playInImg"
+                   ng-click="$root.loadPlaylist(playlist)">
+                    <md-track-tooltipe>
+                        Lire la playlist
+                    </md-track-tooltipe>
+                </i>
+            </div>
+            <b>
+                <a ng-click="$root.loadPlaylist(playlist)">
+                    {{playlist.name}} ({{playlist.tracks.length}}) morceaux
+                </a>
+            </b>
+        </ul>
+        <h2 class="column large-12">Vos Playlists</h2>
         <ul ng-repeat="playlist in playlists" class="column medium-6 margin0"
             style=" box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);">
             <div ng-if="playlist.tracks[0].thumbnailUrl != undefined"
@@ -49,8 +70,7 @@
                 </a>
             </div>
         </ul>
-        <b ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
-        <b ng-if="viewPlaylists && $root.connected == false">Vous devez vous connecter</b>
+        <b class="column large-12" ng-if="viewPlaylists && playlists.length == 0">Vous n'avez pas de playlists</b>
     </div>
     <div ng-if="viewFavorites">
         <div class="column large-12"
