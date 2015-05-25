@@ -1,8 +1,8 @@
 angular.module('claudeApp').
     controller('PlayerCtrl', ['$scope', '$rootScope', '$timeout', '$filter', 'EventsFactory',
-        '$modal', 'TracksRecommender', 'UserFactory', 'ArtistsFactory', '$localStorage',
+        '$modal', 'TracksRecommender', 'UserFactory', 'ArtistsFactory', '$localStorage', 'ArtistFactory',
         function ($scope, $rootScope, $timeout, $filter, EventsFactory, $modal, TracksRecommender,
-                  UserFactory, ArtistsFactory, $localStorage) {
+                  UserFactory, ArtistsFactory, $localStorage, ArtistFactory) {
             $rootScope.playlist = {
                 name : '',
                 genres: [],
@@ -95,6 +95,10 @@ angular.module('claudeApp').
                 $rootScope.playlist.genres.forEach(getEventsByGenre)
             }
 
+            function addGenres (genre) {
+                $rootScope.playlist.genres = $rootScope.playlist.genres.concat(genre.name);
+            }
+
             function pushTrack (track) {
                 $scope.newTrack = {};
                 if ($rootScope.favoritesTracks) {
@@ -116,8 +120,17 @@ angular.module('claudeApp').
                     facebookUrl: track.artistFacebookUrl};
                 $scope.newTrack.title = track.title;
                 $scope.newTrack.trackId = track.trackId;
-                $rootScope.playlist.tracks.push($scope.newTrack);
-                $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
+                ArtistFactory.getArtist(track.artistFacebookUrl).then(function (artist) {
+                    if (artist.genres) {
+                        artist.genres.forEach(addGenres)
+                    }
+                    ArtistFactory.getArtistEvents(track.artistFacebookUrl).then(function (events) {
+                        events = $filter('orderBy')(events, 'startTime', false);
+                        $scope.newTrack.netShow = events[0];
+                        $rootScope.playlist.tracks.push($scope.newTrack);
+                        $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
+                    });
+                });
             }
 
             function pushListOfTracks (tracks, play) {
@@ -151,10 +164,6 @@ angular.module('claudeApp').
                     addLotOfTracks(start, end);
 
                 }
-            }
-
-            function addGenres (genre) {
-                $rootScope.playlist.genres = $rootScope.playlist.genres.concat(genre.name);
             }
 
             $rootScope.addToPlaylist = function (tracks, artist) {
