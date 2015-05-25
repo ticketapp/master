@@ -10,6 +10,8 @@ import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
+import scala.util.Try
+
 case class Genre (genreId: Option[Long], name: String, icon: Option[String] = None)
 
 object Genre {
@@ -105,23 +107,31 @@ object Genre {
     case e: Exception => throw new DAOException("Event.findGenreId: " + e.getMessage)
   }
 
-  def saveWithEventRelation(genre: Genre, eventId: Long): Boolean = {
+  def saveWithEventRelation(genre: Genre, eventId: Long): Int = {
     save(genre) match {
       case Some(genreId: Long) => saveEventRelation(eventId, genreId)
-      case _ => false
+      case _ => 0
     }
   }
 
-  def saveEventRelation(eventId: Long, genreId: Long): Boolean = try {
+  def saveEventRelation(eventId: Long, genreId: Long): Int = try {
     DB.withConnection { implicit connection =>
-      SQL("""SELECT insertEventGenreRelation({eventId}, {genreId})""")
+      SQL("""INSERT INTO eventsGenres (eventId, genreId)
+            |  VALUES {eventId}, {genreId}""")
         .on(
           'eventId -> eventId,
           'genreId -> genreId)
-        .execute()
+        .executeUpdate()
     }
   } catch {
-    case e: Exception => throw new DAOException("Genre.saveEventGenreRelation: " + e.getMessage)
+    case e: Exception => throw new DAOException("Genre.saveEventRelation: " + e.getMessage)
+  }
+
+  def deleteEventRelation(eventId: Long, genreId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(s"""DELETE FROM eventsGenres WHERE eventId = $eventId AND genreId = $genreId""")
+        .executeUpdate()
+    }
   }
 
   def saveWithArtistRelation(genre: Genre, artistId: Long): Boolean = {
@@ -141,6 +151,13 @@ object Genre {
     }
   } catch {
     case e: Exception => throw new DAOException("Genre.saveArtistRelation: " + e.getMessage)
+  }
+
+  def deleteArtistRelation(artistId: Long, genreId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(s"""DELETE FROM artistsGenres WHERE artistId = $artistId AND genreId = $genreId""")
+        .executeUpdate()
+    }
   }
 
   def saveGenreForArtistInFuture(genreName: Option[String], artistId: Long): Unit = {

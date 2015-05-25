@@ -633,18 +633,7 @@ CREATE TABLE eventsGenres (
   genreId                 INT REFERENCES genres (genreId),
   PRIMARY KEY (eventId, genreId)
 );
-CREATE OR REPLACE FUNCTION insertEventGenreRelation(
-  eventIdValue            BIGINT,
-  genreIdValue            BIGINT)
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO eventsGenres (eventId, genreId)
-    VALUES (eventIdValue, genreIdValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
+
 
 CREATE TABLE eventsOrganizers (
   eventId                 INT REFERENCES events (eventId),

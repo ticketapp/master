@@ -24,7 +24,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
     "be able to be saved and deleted in database" in {
       val eventId = save(event).get
 
-      find(eventId).get.name mustBe "event name"
+      find(eventId).get.name mustBe "name"
 
       delete(eventId) mustBe 1
       //find(eventId) mustEqual Option(event.copy(eventId = Some(eventId)))
@@ -62,15 +62,16 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
     "return events found by genre" in {
       val eventId = save(event).get
-      val genre = Genre(None, "rock", Option("r"))
+      val genre = Genre(None, "rockiedockie", Option("r"))
       Genre.save(genre) match {
-        case Some(long: Long) =>
-
-          val eventRock = findAllByGenre("rock", GeographicPoint("(0,0)"), 0, 1)
+        case Some(genreId: Long) =>
+          Genre.saveEventRelation(eventId, genreId)
+          val eventRock = findAllByGenre("rockiedockie", GeographicPoint("(0,0)"), 0, 1)
           eventRock.get should not be empty
 
+          Genre.deleteEventRelation(eventId, genreId) mustBe Success(1)
           delete(eventId) mustBe 1
-          Genre.delete(long) mustBe 1
+          Genre.delete(genreId) mustBe 1
         case _ => throw new Exception("genre could not be saved")
       }
     }
@@ -129,7 +130,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       Artist.saveEventRelation(eventId, artistId) mustBe true
       Artist.saveEventRelation(passedEventId, artistId) mustBe true
 
-      findAllByArtist("facebookUrl").head.name mustBe "event name"
+      findAllByArtist("facebookUrl").head.name mustBe "name"
       findAllPassedByArtist(artistId).head.name mustBe "passed event"
 
       Artist.deleteEventRelation(eventId, artistId) mustBe Success(1)
@@ -149,7 +150,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       Organizer.saveEventRelation(eventId, organizerId) mustBe true
       Organizer.saveEventRelation(passedEventId, organizerId) mustBe true
 
-      findAllByOrganizer(organizerId).head.name mustBe "event name"
+      findAllByOrganizer(organizerId).head.name mustBe "name"
       findAllPassedByOrganizer(organizerId).head.name mustBe "passed event"
 
       Organizer.deleteEventRelation(eventId, organizerId) mustBe Success(1)

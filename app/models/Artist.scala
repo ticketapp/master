@@ -212,7 +212,7 @@ object Artist {
   }
 
   def update(artist: Artist): Int = try {
-    val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
+    val websites: Option[String] = Utilities.websiteSetToString(artist.websites)
     DB.withConnection { implicit connection =>
       SQL(
         """UPDATE artists
