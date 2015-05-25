@@ -79,10 +79,13 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
       addSoundCloudWebsiteIfMissing(maybeTrack, artistWithId)
 
-      val expectedArtist = Option(artistWithId.copy(websites = Set("website", "redirecturl")))
-
-      find(artistId.get) mustBe expectedArtist
-      delete(artistId.get) mustBe 1
+      try {
+        find(artistId.get) mustBe Option(artistWithId.copy(websites = Set("website", "redirecturl")))
+      } catch {
+        case e:Exception => throw e
+      } finally {
+        delete(artistId.get) mustBe 1
+      }
     }
   }
 }

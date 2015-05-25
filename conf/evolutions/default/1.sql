@@ -53,7 +53,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 13 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 's - 7 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -749,10 +749,10 @@ CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);
 
 
 CREATE TABLE playlistsTracks (
+  tableId                 SERIAL PRIMARY KEY,
   playlistId              BIGINT REFERENCES playlists (playlistId),
   trackId                 VARCHAR(255) REFERENCES tracks (trackId),
-  trackRank               FLOAT NOT NULL,
-  PRIMARY KEY (playlistId)
+  trackRank               FLOAT NOT NULL
 );
 CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId);
 

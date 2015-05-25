@@ -23,7 +23,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
       save(genre) match {
         case Some(genreId: Long) =>
           val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
-            "facebookUrl", Set("website"))
+            "facebookUrlGenre", Set("website"))
           Artist.save(artist) match {
             case None =>
               throw new DAOException("TestArtists, error while saving artist ")

@@ -77,12 +77,12 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
     "return events linked to a place" in {
       val eventId = save(event).get
-      whenReady (Place.save(Place(None, "Name", Some("12345"), None, None, None, None, None, None, None)),
+      whenReady (Place.save(Place(None, "name", Some("12345"), None, None, None, None, None, None, None)),
         timeout(Span(2, Seconds))) { tryPlaceId =>
         val placeId = tryPlaceId.get.get
 
         Place.saveEventRelation(eventId, placeId) mustBe true
-        findAllByPlace(placeId).head.name mustBe "event name"
+        findAllByPlace(placeId).head.name mustBe "name"
 
         Place.deleteEventRelation(eventId, placeId) mustBe Success(1)
         delete(eventId) mustBe 1

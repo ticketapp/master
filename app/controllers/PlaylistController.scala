@@ -67,7 +67,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
 
   def delete(playlistId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
     Playlist.delete(request.user.identityId.userId, playlistId) match {
-      case Success(false) =>
+      case Success(1) =>
         Ok
       case Failure(exception) =>
         Logger.error("PlaylistController.delete: ", exception)

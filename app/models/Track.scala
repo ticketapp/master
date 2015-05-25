@@ -161,27 +161,13 @@ object Track {
     }
   }
 
-  def deletePlaylistTrackRelation(playlistId: Long, trackId: String): Long = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """DELETE FROM playlistsTracks
-          | WHERE playlistId = {playlistId}""".stripMargin)
-        .on('playlistId -> playlistId)
-        .executeUpdate()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("savePlaylistTrackRelation: " + e.getMessage)
-  }
-
-  def delete(trackId: String): Int = try {
+  def delete(trackId: String): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM tracks WHERE trackId = {trackId}""".stripMargin)
         .on('trackId -> trackId)
         .executeUpdate()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Track.delete: " + e.getMessage)
   }
 
   def followTrack(userId : Long, trackId : String): Option[Long] = try {
@@ -265,7 +251,7 @@ object Track {
         throw exception
 
       case _ =>
-        Logger.error(s"Track.updateRating: error while updating with trackId: trackId")
+        Logger.error(s"Track.updateRating: error while updating with trackId: $trackId")
         throw new DAOException("Track.updateRating")
     }
   }

@@ -9,6 +9,7 @@ import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 import json.JsonHelper._
+import play.api.Logger
 
 import scala.util.{Try, Success, Failure}
 
@@ -34,13 +35,13 @@ object Playlist {
     }
   }
 
-  def find(playlistId: Long): Seq[Playlist] = try {
+  def find(playlistId: Long): Option[Playlist] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT * FROM playlists
           | WHERE playlistId = {playlistId}""".stripMargin)
         .on('playlistId -> playlistId)
-        .as(playlistParser.*)
+        .as(playlistParser.singleOpt)
         .map(playlist => playlist.copy(tracks = Track.findByPlaylistId(playlist.playlistId)))
     }
   } catch {
@@ -60,6 +61,37 @@ object Playlist {
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
   }
 
+  def delete(userId: String, playlistId: Long): Try[Int] = Try {
+    deleteTracksRelations(userId, playlistId) match {
+      case Success(_) =>
+        DB.withConnection { implicit connection =>
+          SQL(
+            """DELETE FROM playlists
+              |  WHERE userId = {userId}
+              |  AND playlistId = {playlistId}""".stripMargin)
+            .on(
+              'userId -> userId,
+              'playlistId -> playlistId)
+            .executeUpdate()
+        }
+      case Failure(exception) =>
+        Logger.error("Playlist.delete", exception)
+        throw exception
+    }
+  }
+
+  def deleteTracksRelations(userId: String, playlistId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """DELETE FROM playlistsTracks
+          |  WHERE playlistId = {playlistId}""".stripMargin)
+        .on(
+          'userId -> userId,
+          'playlistId -> playlistId)
+        .executeUpdate()
+    }
+  }
+
   def save(playlist: Playlist): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO playlists(userId, name) VALUES({userId}, {name})""")
@@ -74,14 +106,14 @@ object Playlist {
     save(Playlist(None, userId, playlistNameTracksIdAndRank.name, Seq.empty)) match {
       case Success(Some(playlistId: Long)) =>
         playlistNameTracksIdAndRank.tracksIdAndRank.foreach(trackIdAndRank =>
-          savePlaylistTrackRelation(playlistId, trackIdAndRank))
+          saveTrackRelation(playlistId, trackIdAndRank))
         playlistId
       case _ =>
         throw new DAOException("Playlist.saveWithTrackRelation")
       }
   }
 
-  def savePlaylistTrackRelation(playlistId: Long, trackIdAndRank: TrackIdAndRank): Option[Long] = try {
+  def saveTrackRelation(playlistId: Long, trackIdAndRank: TrackIdAndRank): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO playlistsTracks (playlistId, trackId, trackRank)
@@ -93,22 +125,19 @@ object Playlist {
         .executeInsert()
     }
   } catch {
-    case e: Exception => throw new DAOException("Track.savePlaylistTrackRelation: " + e.getMessage)
+    case e: Exception => throw new DAOException("Track.saveTrackRelation: " + e.getMessage)
   }
 
-  def delete(userId: String, playlistId: Long): Try[Boolean] = Try {
+  def deleteTrackRelation(playlistId: Long, trackId: String): Long = try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM playlistsTracks
-          |  WHERE playlistId = {playlistId};
-          |DELETE FROM playlists
-          |  WHERE userId = {userId}
-          |  AND playlistId = {playlistId}""".stripMargin)
-        .on(
-          'userId -> userId,
-          'playlistId -> playlistId)
-        .execute()
+          | WHERE playlistId = {playlistId}""".stripMargin)
+        .on('playlistId -> playlistId)
+        .executeUpdate()
     }
+  } catch {
+    case e: Exception => throw new DAOException("deleteTrackRelation: " + e.getMessage)
   }
 
   case class TrackInfo(trackId: String, action: String, trackRank: Option[BigDecimal])
@@ -127,7 +156,8 @@ object Playlist {
     SQL(
       """SELECT exists(SELECT 1 FROM playlists
         |  WHERE userId = {userId} AND playlistId = {playlistId})""".stripMargin)
-      .on("userId" -> userId,
+      .on(
+        "userId" -> userId,
         "playlistId" -> playlistId)
       .as(scalar[Boolean].single)
   } catch {
@@ -151,10 +181,10 @@ object Playlist {
     case trackToUpdate: TrackInfo if trackInfo.action == "M" =>
       updateTrackRank(playlistId, trackToUpdate)
     case trackToDelete: TrackInfo if trackInfo.action == "D" =>
-      Track.deletePlaylistTrackRelation(playlistId, trackToDelete.trackId)
+      deleteTrackRelation(playlistId, trackToDelete.trackId)
     case trackToAdd: TrackInfo if trackInfo.action == "A" =>
       try {
-        savePlaylistTrackRelation(playlistId, TrackIdAndRank(trackToAdd.trackId, trackToAdd.trackRank.get))
+        saveTrackRelation(playlistId, TrackIdAndRank(trackToAdd.trackId, trackToAdd.trackRank.get))
       } catch {
         case e: NoSuchElementException => PlaylistUpdateTrackWithoutRankException("Playlist.update")
       }
