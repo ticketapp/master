@@ -747,7 +747,7 @@ CREATE TABLE playlistsTracks (
   tableId                 SERIAL PRIMARY KEY,
   playlistId              BIGINT REFERENCES playlists (playlistId),
   trackId                 VARCHAR(255) REFERENCES tracks (trackId),
-  trackRank               FLOAT NOT NULL
+  trackRank               DOUBLE PRECISION NOT NULL
 );
 CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId);
 

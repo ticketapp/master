@@ -24,7 +24,7 @@ case class Track (trackId: String,
                   artistName: String,
                   redirectUrl: Option[String] = None,
                   confidence: Option[Double] = None,
-                  playlistRank: Option[Float] = None)
+                  playlistRank: Option[Double] = None)
 
 object Track {
 
@@ -64,10 +64,11 @@ object Track {
       get[String]("artistFacebookUrl") ~
       get[String]("artistName") ~
       get[Option[String]]("redirectUrl") ~
-      get[Double]("confidence") map {
+      get[Double]("confidence") ~
+      get[Option[Double]]("trackRank") map {
       case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ artistName ~ redirectUrl ~
-        confidence => Track(trackId, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName,
-        redirectUrl, Option(confidence))
+        confidence ~ trackRank => Track(trackId, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName,
+        redirectUrl, Option(confidence), trackRank)
     }
   }
 
@@ -110,7 +111,8 @@ object Track {
           |    ON tracks.trackId = playlistsTracks.trackId
           |  INNER JOIN playlists playlists
           |    ON playlists.playlistId = playlistsTracks.playlistId
-          |  WHERE playlists.playlistId = {playlistId}""".stripMargin)
+          |  WHERE playlists.playlistId = {playlistId}
+          |    ORDER BY trackRank""".stripMargin)
         .on('playlistId -> playlistId)
         .as(trackParser.*)
     }
