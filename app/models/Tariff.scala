@@ -18,10 +18,8 @@ case class Tariff (tariffId: Long,
                    eventId: Long)
 
 object Tariff {
-  def formApply(denomination: String,  nbTicketToSell: Int, price: scala.BigDecimal, startTime: Date, endTime: Date) = {
-    println("ok")
+  def formApply(denomination: String,  nbTicketToSell: Int, price: scala.BigDecimal, startTime: Date, endTime: Date) =
     new Tariff(-1L, denomination, nbTicketToSell, 0, price.bigDecimal, startTime, endTime, -1L)
-  }
   def formUnapply(tariff: Tariff) = Some((tariff.denomination, tariff.nbTicketToSell, scala.BigDecimal(tariff.price),
                                           tariff.startTime, tariff.endTime))
 
@@ -94,7 +92,7 @@ object Tariff {
           case prices => Option(prices.min.toString + "-" + prices.max.toString)
         }
       } catch {
-        case e: Exception => throw new Exception("Tarrif.findPrices: " + e.getMessage)
+        case e: Exception => throw new Exception("Tarriff.findPrices: " + e.getMessage)
       }
   }
 

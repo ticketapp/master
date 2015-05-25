@@ -54,7 +54,6 @@ object SearchArtistsController extends Controller {
         case website if website contains "facebook" =>
           getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
         case website if website contains "soundcloud" =>
-          getMaybeFacebookUrlBySoundCloudUrl(website).map(println)
           getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
             case None =>
               Future { None }
@@ -69,7 +68,6 @@ object SearchArtistsController extends Controller {
 
   def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
-    println(soundCloudName)
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
