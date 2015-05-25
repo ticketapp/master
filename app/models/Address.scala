@@ -143,20 +143,17 @@ object Address {
   }
 
   def getGeographicPoint(address: Address): Future[Address] = {
-    if (Vector(address.street, address.zip, address.city).flatten.length > 1) {
-      WS.url("https://maps.googleapis.com/maps/api/geocode/json")
-        .withQueryString(
-          "address" -> (address.street.getOrElse("") + address.zip.getOrElse("") + address.city.getOrElse("")),
-          "key" -> googleKey)
-        .get()
-        .map { response =>
-        readGoogleGeographicPoint(response)  match {
-          case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
-          case None => address
-        }
+    WS.url("https://maps.googleapis.com/maps/api/geocode/json")
+      .withQueryString(
+        "address" -> (address.street.getOrElse("") + " " + address.zip.getOrElse("") + " " + address.city.getOrElse("")),
+        "key" -> googleKey)
+      .get()
+      .map { response =>
+      readGoogleGeographicPoint(response)  match {
+        case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
+        case None => address
       }
-    } else
-      Future { address }
+    }
   }
 
   def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {

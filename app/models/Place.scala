@@ -91,10 +91,10 @@ object Place {
   }
 
   def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Try[Option[Long]]] = placeAddress match {
-    case None =>
-      Future { Success(None) }
-    case Some(address) =>
+    case Some(address) if address.geographicPoint.nonEmpty =>
       Address.getGeographicPoint(address) map { addressWithGeoPoint => Address.save(Option(addressWithGeoPoint)) }
+    case _ =>
+      Future { Success(None) }
   }
 
   def findIdByFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
