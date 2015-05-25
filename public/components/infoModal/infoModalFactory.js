@@ -2,25 +2,32 @@ angular.module('claudeApp').factory('InfoModal', ['$modal', '$mdToast',
     function ($modal, $mdToast) {
     var factory = {
         displayInfo : function (info, type) {
+            var toastPosition = {
+                bottom: false,
+                top: true,
+                left: false,
+                right: true                                                                                                                                                                                                                                                                                                                                                                                                         
+            };
+            var getToastPosition = function() {
+                return Object.keys(toastPosition)
+                    .filter(function(pos) { return toastPosition[pos]; })
+                    .join(' ');
+            };
             if (type == undefined || type != 'error') {
                 $mdToast.show(
                     $mdToast.simple()
                         .content(info)
-                        .position('true, true, false, false')
+                        .position(getToastPosition())
                         .hideDelay(3000)
                 );
             } else {
-                var modalInstance = $modal.open({
-                 templateUrl: 'assets/components/infoModal/infoModal.html',
-                 controller: 'infoModalCtrl',
-                 resolve: {
-                 info: function () {
-                 return info;
-                 }
-                 }
-                 });
-                 modalInstance.result.then(function () {
-                 });
+
+                $mdToast.show(
+                    $mdToast.simple()
+                        .content(info)
+                        .position(getToastPosition())
+                        .hideDelay(6000)
+                );
             }
         }
     };
