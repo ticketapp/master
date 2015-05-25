@@ -22,7 +22,6 @@ angular.module('claudeApp').
                     $scope.map = true;
                 } else if (event.geographicPoint !== undefined) {
                     $scope.geographicPoint = RefactorGeopoint.refactorGeopoint(event.geographicPoint);
-                    $scope.adresses = true;
                     $scope.mapHeight = '300px';
                     $scope.map = true;
                 }
