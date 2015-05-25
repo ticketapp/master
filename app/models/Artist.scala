@@ -187,10 +187,9 @@ object Artist {
   }
 
   def save(artist: Artist): Option[Long] = try {
-    val websites: Option[String] = if (artist.websites.isEmpty) None else Option(artist.websites.mkString(","))
+    val websites: Option[String] = Utilities.websiteSetToString(artist.websites)
     DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
+      SQL("""SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
         .on(
           'facebookId -> artist.facebookId,
           'name -> artist.name,

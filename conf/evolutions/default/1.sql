@@ -30,6 +30,10 @@ CREATE OR REPLACE FUNCTION insertAddress(
       VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
       RETURNING addressId INTO addressIdToReturn;;
       RETURN addressIdToReturn;;
+    EXCEPTION WHEN unique_violation
+    THEN
+      SELECT addressId INTO addressIdToReturn FROM artists WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+    RETURN addressIdToReturn;;
   END;;
   $$
 LANGUAGE plpgsql;
