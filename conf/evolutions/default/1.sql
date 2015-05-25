@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION insertAddress(
       RETURN addressIdToReturn;;
     EXCEPTION WHEN unique_violation
     THEN
-      SELECT addressId INTO addressIdToReturn FROM artists WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+      SELECT addressId INTO addressIdToReturn FROM addresses WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
     RETURN addressIdToReturn;;
   END;;
   $$
