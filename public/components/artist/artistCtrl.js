@@ -41,9 +41,9 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 }
             }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
-                $scope.artist = artist;
                 $timeout(function () {
                     $scope.$apply(function() {
+                        $scope.artist = artist;
                         $scope.tracks = artist.tracks.filter(signaledTrack);
                         var tracksLength = $scope.tracks.length;
                         for (var i = 0; i < tracksLength; i ++) {
@@ -52,6 +52,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                         }
                         $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
                         $scope.artist.tracks = $scope.tracks;
+                        console.log( $scope.artist.tracks);
                         $rootScope.loadingTracks = false;
                     })
                 }, 0);

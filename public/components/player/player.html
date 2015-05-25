@@ -41,7 +41,7 @@
            ng-show="showLecteur"
            ng-if="$root.window != 'small' && $root.window != 'medium'"
            ng-mouseover="$parent.showVol = true"></i>
-        <div style="padding-left: 50px; margin-left: 150px;" class="absolute" ng-if="showVol"
+        <div style="padding-left: 50px; margin-left: 160px; overflow: hidden;" class="absolute" ng-if="showVol"
              ng-mouseleave="$parent.showVol = false">
             <md-slider  flex ng-change="volume()"
                         ng-model="$parent.levelVol" min="0" max="100"

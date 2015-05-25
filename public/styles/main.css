@@ -16945,7 +16945,7 @@ Copyright (c) 2014 Daniel Eden
 }
 
 /* line 19, ../../public/styles/tools.scss */
-.active {
+.button.active {
   background: #007095;color: #ffffff!important;
 }
 .mapControls {
@@ -27607,7 +27607,6 @@ top-search-block > search-bar-contener {
 
 /* line 13, ../../public/components/large-home/largeHome.scss */
 .intro-text {
-  font-size: 50px;
   color: #fff;
   text-align: center;
 }
