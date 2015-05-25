@@ -17,7 +17,10 @@ case class Address (addressId: Option[Long],
                     geographicPoint: Option[String],
                     city: Option[String],
                     zip: Option[String],
-                    street: Option[String])
+                    street: Option[String]){
+  require(!(geographicPoint.isEmpty && city.isEmpty && zip.isEmpty && street.isEmpty),
+    "address must contain at least one field")
+}
 
 object Address {
 
@@ -89,17 +92,14 @@ object Address {
       case None =>
         None
       case Some(address) =>
-        if (address.geographicPoint.isEmpty && address.city.isEmpty && address.zip.isEmpty && address.street.isEmpty)
-          throw new EmptyAddress("Address.save: empty address")
-        else
-          DB.withConnection { implicit connection =>
-            SQL( """SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
-              .on(
-                'geographicPoint -> address.geographicPoint,
-                'city -> address.city,
-                'zip -> address.zip,
-                'street -> address.street)
-              .as(scalar[Long].singleOpt)
+        DB.withConnection { implicit connection =>
+          SQL( """SELECT insertAddress({geographicPoint}, {city}, {zip}, {street})""")
+            .on(
+              'geographicPoint -> address.geographicPoint,
+              'city -> address.city,
+              'zip -> address.zip,
+              'street -> address.street)
+            .as(scalar[Long].singleOpt)
         }
     }
   }

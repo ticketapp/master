@@ -2,7 +2,13 @@ import java.util.Date
 import controllers.{EmptyAddress, DAOException}
 import models.Address
 import models.Address._
+import models.Address.delete
+import models.Address.find
+import models.Address.save
+import models.Place
 import org.postgresql.util.PSQLException
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
@@ -23,7 +29,7 @@ import scala.util.{Failure, Success}
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
   "An address" must {
 
-    val address = Address(None, Option("(0.0,0.0)"), Option("city"), Option("zip"), Option("street"))
+    val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
 
     "be saved and deleted in database and return the new id" in {
       val addressId = save(Option(address)).get
@@ -44,10 +50,13 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       delete(addressId.get)
     }
 
-    "not be saved if empty" in {
-      save(Option(Address(None, None, None, None, None))) match {
-        case Failure(emptyAddress: EmptyAddress) =>
-        case _ => throw new Exception("Save an empty address didn't give a failure(EmptyAddress)")
+    "not be created if empty" in {
+      an [java.lang.IllegalArgumentException] should be thrownBy Option(Address(None, None, None, None, None))
+    }
+
+    "get a geographicPoint" in {
+      whenReady(getGeographicPoint(address.copy(geographicPoint = None)), timeout(Span(2, Seconds))) { address =>
+        address.geographicPoint mustBe "(5,4)"
       }
     }
   }
