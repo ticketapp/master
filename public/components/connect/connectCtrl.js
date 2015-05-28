@@ -451,10 +451,12 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
         }
 
         $scope.connectLink = function (url) {
-            var connectWin = window.open($location.host() + url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
+            console.log($location.host());
+            console.log(url);
+            var connectWin = window.open( url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
             var changePath = setInterval(function() {
-                console.log(connectWin.location);
-                if (connectWin.location == undefined && connectWin.location != {}) {
+                console.log(connectWin.location.href);
+                if (connectWin.location.href == undefined) {
                     clearInterval(changePath);
                     InfoModal.displayInfo('Une erreure c\'est produite', 'error')
                 }
