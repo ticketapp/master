@@ -54,7 +54,9 @@
     <a href="#/artists/{{track.artistFacebookUrl}}" style="font-size: 13.5px">{{track.artistName}}</a>
     <div style="height: 70px; font-size: 13.5px; overflow: hidden;">
         <b>
-            <span style="height: 100%; overflow: hidden;">{{track.title}}</span>
+            <span style="height: 100%; overflow: hidden;">{{track.title | limitTo: 40}}
+                <span ng-if="track.title.length > 40">...</span>
+            </span>
             <a target="_blank"
                href="http://{{track.redirectUrl}}"
                class="float-right"

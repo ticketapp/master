@@ -13,6 +13,7 @@ angular.module('claudeApp').
             if ($scope.organizer.geographicPoint != undefined) {
                 $scope.geographicPoint =
                     RefactorGeopoint.refactorGeopoint($scope.organizer.geographicPoint);
+                $scope.map = true;
             }
             if (organizer.websites != undefined) {
                 if (organizer.websites.indexOf(',') > -1) {

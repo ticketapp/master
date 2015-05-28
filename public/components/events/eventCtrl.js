@@ -24,6 +24,11 @@ angular.module('claudeApp').
                     $scope.geographicPoint = RefactorGeopoint.refactorGeopoint(event.geographicPoint);
                     $scope.mapHeight = '300px';
                     $scope.map = true;
+                } else if (event.addresses[0] !== undefined &&
+                    event.addresses[0].geographicPoint !== undefined) {
+                    $scope.geographicPoint = RefactorGeopoint.refactorGeopoint(event.addresses[0].geographicPoint);
+                    $scope.mapHeight = '300px';
+                    $scope.map = true;
                 }
 
                 function isFollowedOrganizer(i) {

@@ -39,12 +39,10 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             var deferred = $q.defer();
             if(factory.lastGetPlaces.offset >= offset &&
                 factory.lastGetPlaces.geoloc == geoLoc) {
-                console.log(factory.lastGetPlaces.places)
                 deferred.resolve(factory.lastGetPlaces.places);
             } else {
                 $http.get('/places?geographicPoint='+geoLoc+'&numberToReturn=12&offset='+offset)
                     .success(function(data, status) {
-                        console.log(factory.lastGetPlaces.offset)
                         if (offset > factory.lastGetPlaces.offset) {
                             factory.lastGetPlaces.places = factory.lastGetPlaces.places.concat(data);
                         } else {
@@ -54,7 +52,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         factory.lastGetPlaces.geoloc = geoLoc;
                         deferred.resolve(factory.lastGetPlaces.places);
                     }).error(function(data, status) {
-                        deferred.reject('erreur');
+                        deferred.reject('error');
                     });
             }
             return deferred.promise;
@@ -105,8 +103,11 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 .success(function(data, status) {
                     factory.places = data;
                     deferred.resolve(factory.places);
-                }).error(function(data, status) {
-                    deferred.resolve('error');
+                }).error(function (data, status) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
+                    }
+                    deferred.reject(status);
                 });
             return deferred.promise;
         },

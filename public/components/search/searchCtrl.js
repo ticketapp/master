@@ -50,7 +50,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     $timeout(function () {
                         $scope.$apply(function () {
                             scope.push(el);
-                        })
+                        });
                     }, 0);
                 }
             }

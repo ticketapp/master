@@ -148,8 +148,8 @@ margin-left: 5px;"
                  ng-model="limitedTracks">
                     <ng-playlist-track
                     style="margin-top: 5px;"
-                    ng-class="{onplay : track == trackActive}"
-                    class="column large-3 medium-4 small-12 paddingLeft0 fadeTrack trackContener float-left"
+                    ng-class="{onplay : track == trackActive, 'paddingLeft0': $root.window != 'small'}"
+                    class="column large-3 medium-4 small-12 fadeTrack trackContener float-left"
                     as-sortable-item
                     ng-repeat="track in limitedTracks">
                     </ng-playlist-track>

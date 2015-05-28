@@ -1,7 +1,7 @@
 <div class="parallax-background">
     <img class="width100p" ng-src="{{ organizer.imagePath }}"
          on-error-src="assets/images/caroussel1.png"/>
-    <div style="height: 100%;" ng-if="organizer.imagePath == undefined">
+    <div style="height: 100%;" ng-if="organizer.imagePath == undefined && map == true">
         <div class="column large-12 zIndex1 absolute paddingRight30 map-container">
             <div style="font-size: 12px;" class="column large-5">
                 {{organizer.addresses[0].street}}<br/>

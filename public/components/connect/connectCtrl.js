@@ -8,7 +8,8 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
 
         function followArtist (id, toCreate) {
             ArtistsFactory.followArtistByFacebookId(id).then(function (isFollowed) {
-                if (isFollowed == 'error' && toCreate == true) {
+            }, function (error) {
+                if (error !== 409 && toCreate == true) {
                     getArtistPage(id);
                 }
             })
@@ -16,21 +17,22 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
 
         function followOrganizer (id, toCreate) {
             OrganizerFactory.followOrganizerByFacebookId(id).then(function (isFollowed) {
-                if (isFollowed == 'error' && toCreate == true) {
+            }, function (error) {
+                if (error !== 409 && toCreate == true) {
                     getOrganizerPage(id);
-                    getOrganizerEvents(id);
                 }
             });
         }
 
         function followPlace (id, toCreate) {
             PlaceFactory.followPlaceByFacebookId(id).then(function (isFollowed) {
-                if (isFollowed == 'error' && toCreate == true) {
+            }, function (error) {
+                if (error !== 409 && toCreate == true) {
                     getPlacePage(id);
-                    getOrganizerEvents(id);
                 }
             });
         }
+
         function postArtist (artist) {
             if (artist.cover != undefined) {
                 artist.facebookUrl = artist.link.replace('https://www.facebook.com/', '').replace('pages').replace(/[/]/g, '');
@@ -79,6 +81,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 newOrganizer.imagePath = organizer.cover.source;
                 OrganizerFactory.createOrganizer(newOrganizer).then(function (isCreated) {
                     if (isCreated != 'error') {
+                        getOrganizerEvents(organizer.id);
                         followOrganizer(organizer.id, false)
                     }
                 });
@@ -138,6 +141,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                     };
                     PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                         if (isCreated != 'error') {
+                            getOrganizerEvents(newPlace.facebookId);
                             followPlace(newPlace.facebookId, false)
                         }
                     })
@@ -173,6 +177,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 };
                 PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                     if (isCreated != 'error') {
+                        getOrganizerEvents(newPlace.facebookId);
                         followPlace(newPlace.facebookId, false)
                     }
                 })
@@ -230,62 +235,161 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 })
         }
 
+        function getLikes (data) {
+            var pages;
+            var next;
+            var pagesLength;
+            if (data.likes != undefined) {
+                pages = data.likes.data;
+                if (data.likes.paging.next != undefined) {
+                    next = data.likes.paging.next
+                }
+                pagesLength = data.likes.data.length;
+            } else {
+                pages = data.data;
+                if (data.paging != undefined) {
+                    next = data.paging.next;
+                }
+                pagesLength = data.data.length;
+            }
+            for (var i = 0; i < pagesLength; i++) {
+                if (pages[i].category.toLowerCase() == 'concert tour') {
+                    //follow organizer
+                    //post if not exist
+                    followOrganizer(pages[i].id, true);
+                } else if (pages[i].category.toLowerCase() == "musician/band") {
+                    //followArtist
+                    // post if not exist
+                    followArtist(pages[i].id, true);
+                } else if (pages[i].category.toLowerCase() == "concert venue" ||
+                    pages[i].category.toLowerCase() == 'club' ||
+                    pages[i].category.toLowerCase() == 'bar' ||
+                    pages[i].category.toLowerCase() == 'arts/entertainment/nightlife') {
+                    //followPlace
+                    // post if not exist
+                    followPlace(pages[i].id, true);
+                } else if (pages[i].category_list != undefined) {
+                    for (var ii = 0; ii < pages[i].category_list.length; ii++) {
+                        if (pages[i].category_list[ii].name.toLowerCase() == 'concert venue' ||
+                            pages[i].category_list[ii].name.toLowerCase() == 'club' ||
+                            pages[i].category_list[ii].name.toLowerCase() == 'bar' ||
+                            pages[i].category_list[ii].name.toLowerCase() == "nightlife") {
+                            followPlace(pages[i].id, true);
+                        }
+                    }
+                }
+            }
+            if (next != undefined) {
+                $http.get(next).
+                    success(function (data) {
+                        getLikes(data)
+                    })
+            }
+        }
+
+        function getMusicPages (data) {
+            var pages;
+            var next;
+            var pagesLength;
+            if (data.music != undefined) {
+                pages = data.music.data;
+                if (data.music.paging.next != undefined) {
+                    next = data.music.paging.next
+                }
+                pagesLength = data.music.data.length;
+            } else {
+                pages = data.data;
+                if (data.paging != undefined) {
+                    next = data.paging.next;
+                }
+                pagesLength = data.data.length;
+            }
+            for (var i = 0; i < pagesLength; i++) {
+                if (pages[i].category.toLowerCase() == 'concert tour') {
+                    //follow organizer
+                    //post if not exist
+                    followOrganizer(pages[i].id, true);
+                } else if (pages[i].category.toLowerCase() == "musician/band") {
+                    //followArtist
+                    // post if not exist
+                    followArtist(pages[i].id, true);
+                } else if (pages[i].category.toLowerCase() == "concert venue" ||
+                    pages[i].category.toLowerCase() == 'club' ||
+                    pages[i].category.toLowerCase() == 'bar' ||
+                    pages[i].category.toLowerCase() == 'arts/entertainment/nightlife') {
+                    //followPlace
+                    // post if not exist
+                    followPlace(pages[i].id, true);
+                } else if (pages[i].category_list != undefined) {
+                    for (var ii = 0; ii < pages[i].category_list.length; ii++) {
+                        if (pages[i].category_list[ii].name.toLowerCase() == 'concert venue' ||
+                            pages[i].category_list[ii].name.toLowerCase() == 'club' ||
+                            pages[i].category_list[ii].name.toLowerCase() == 'bar' ||
+                            pages[i].category_list[ii].name.toLowerCase() == "nightlife") {
+                            followPlace(pages[i].id, true);
+                        }
+                    }
+                }
+            }
+            if (next != undefined) {
+                $http.get(next).
+                    success(function (data) {
+                        getMusicPages(data)
+                    })
+            }
+        }
+
+        function getEvents (data) {
+            var events;
+            var next;
+            var eventsLength;
+            if (data.events != undefined) {
+                events = data.events.data;
+                if (data.events.paging.next != undefined) {
+                    next = data.events.paging.next
+                }
+                eventsLength = data.events.data.length;
+            } else {
+                events = data.data;
+                if (data.paging != undefined) {
+                    next = data.paging.next;
+                }
+                eventsLength = data.data.length;
+            }
+            for (var i = 0; i < eventsLength; i++) {
+                if (events[i].owner !== undefined) {
+                    if (events[i].owner.id) {
+                        followOrganizer(events[i].owner.id, true);
+                    }
+                }
+                if (events[i].place !== undefined) {
+                    if (events[i].place.id) {
+                        followPlace(events[i].place.id, true);
+                    }
+                }
+                postEventId(events[i]);
+            }
+            if (next != undefined) {
+                $http.get(next).
+                    success(function (data) {
+                        getEvents(data)
+                    })
+            }
+        }
+
         function getFbPages (route) {
             $http.get(route).
                 success(function (data) {
-                    var pages;
-                    var next;
-                    var pagesLength;
-                    if (data.likes != undefined) {
-                        pages = data.likes.data;
-                        if (data.likes.paging.next != undefined) {
-                            next = data.likes.paging.next
-                        }
-                        pagesLength = data.likes.data.length;
-                    } else {
-                        pages = data.data;
-                        if (data.paging != undefined) {
-                            next = data.paging.next;
-                        }
-                        pagesLength = data.data.length;
-                    }
-                    for (var i = 0; i < pagesLength; i++) {
-                        if (pages[i].category == 'Concert tour') {
-                            //follow organizer
-                            //post if not exist
-                            //followOrganizer(pages[i].id, true);
-                        } else if (pages[i].category == "Musician/band") {
-                            //followArtist
-                            // post if not exist
-                            followArtist(pages[i].id, true);
-                        } else if (pages[i].category == "concert venue" ||
-                            pages[i].category == 'Club' ||
-                            pages[i].category == 'Bar' ||
-                            pages[i].category == 'Arts/entertainment/nightlife') {
-                            //followPlace
-                            // post if not exist
-                            followPlace(pages[i].id, true);
-                        } else if (pages[i].category_list != undefined) {
-                            for (var ii = 0; ii < pages[i].category_list.length; ii++) {
-                                if (pages[i].category_list[ii].name == 'Concert Venue' ||
-                                    pages[i].category_list[ii].name == 'Club' ||
-                                    pages[i].category_list[ii].name == 'Bar' ||
-                                    pages[i].category_list[ii].name == "Nightlife") {
-                                    followPlace(pages[i].id, true);
-                                }
-                            }
-                        }
-                    }
-                    if (next != undefined) {
-                        getFbPages(next)
-                    }
+                    getLikes(data);
+                    getMusicPages(data);
+                    getEvents(data)
                 })
         }
 
         function getUserToken() {
             UserFactory.getToken().then(function (newToken) {
                 token = newToken;
-                getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=' + token);
+                getFbPages('https://graph.facebook.com/v2.3/me?fields=id,name,music,events{place,owner,admins},likes&access_token=' + token);
             });
         }
 
@@ -345,6 +449,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 }
             }, 500);
         }
+
         $scope.connectLink = function (url) {
             var connectWin = window.open(url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
             var changePath = setInterval(function() {
