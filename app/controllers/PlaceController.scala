@@ -45,7 +45,7 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
         Conflict
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: there is no place with the id $placeId")
-        Conflict
+        NotFound
       case Failure(unknownException) =>
         Logger.error("PlaceController.followPlaceByPlaceId", unknownException)
         InternalServerError
@@ -59,7 +59,7 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the place (placeId: $placeId) or the place does not exist.")
-        Conflict
+        NotFound
       case Failure(unknownException) =>
         Logger.error("PlaceController.followPlaceByPlaceId", unknownException)
         InternalServerError
@@ -78,7 +78,7 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
         Conflict("This user already follows this place.")
       case Failure(thereIsNoPlaceForThisFacebookIdException: ThereIsNoPlaceForThisFacebookIdException) =>
         Logger.error(s"PlaceController.followPlaceByFacebookId : there is no place with the facebook id $facebookId")
-        Conflict
+        NotFound
       case Failure(unknownException) =>
         Logger.error("PlaceController.followPlaceByFacebookId", unknownException)
         InternalServerError

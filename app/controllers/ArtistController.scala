@@ -125,7 +125,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         Conflict("This user already follows this artist.")
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"ArtistController.followArtistByArtistId: there is no artist with the id $artistId")
-        Conflict("There is no artist with this id.")
+        NotFound
       case Failure(unknownException) =>
         Logger.error("ArtistController.followArtistByArtistId", unknownException)
         Status(INTERNAL_SERVER_ERROR)
@@ -139,7 +139,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the artist (artistId: $artistId) or the artist does not exist.")
-        Conflict
+        NotFound
       case Failure(unknownException) =>
         Logger.error("ArtistController.followArtistByArtistId", unknownException)
         InternalServerError
@@ -158,7 +158,7 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         Conflict("This user already follows this artist.")
       case Failure(thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException) =>
         Logger.error(s"ArtistController.followArtistByFacebookId : there is no artist with the facebook id $facebookId")
-        Conflict("There is no artist with this id.")
+        NotFound("There is no artist with this id.")
       case Failure(unknownException) =>
         Logger.error("ArtistController.followArtistByFacebookId", unknownException)
         Status(INTERNAL_SERVER_ERROR)

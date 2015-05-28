@@ -36,7 +36,7 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
         Conflict
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
-        Conflict
+        NotFound
       case Failure(unknownException) =>
         Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
         InternalServerError
@@ -50,7 +50,7 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the organizer (organizerId: $organizerId) or the organizer does not exist.")
-        Conflict
+        NotFound
       case Failure(unknownException) =>
         Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
         InternalServerError
@@ -66,7 +66,7 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
         Conflict("This user already follow this organizer.")
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error("OrganizerController.followOrganizerByFacebookId", psqlException)
-        Conflict("There is no organizer with this id.")
+        NotFound("There is no organizer with this id.")
       case Failure(unknownException) =>
         Logger.error("OrganizerController.followOrganizerByFacebookId", unknownException)
         InternalServerError
