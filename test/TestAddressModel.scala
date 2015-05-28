@@ -29,25 +29,37 @@ import scala.util.{Failure, Success}
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
   "An address" must {
 
-    val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
-
     "be saved and deleted in database and return the new id" in {
+      val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
       val addressId = save(Option(address)).get
 
-      find(addressId) mustEqual Option(address.copy(addressId = addressId))
+      find(addressId) mustEqual Option(address)
       delete(addressId.value) mustBe 1
     }
 
     "not be saved twice with same city, zip, street and return database addressId on unique violation" in {
+      val address = Address(None, None, Option("privas"), Option("07000"), Option("Avignas"))
       val addressId = save(Option(address)).get
 
-      save(Option(address))
-      save(Option(address)) match {
-        case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
-        case _ => throw new Exception("save an address twice didn't throw a PSQL UNIQUE_VIOLATION")
+      try {
+        save(Option(address)) mustBe Success(addressId)
+      } finally {
+        delete(addressId.get)
       }
+    }
 
-      delete(addressId.get)
+    "should update address" in {
+      val address = Address(None, None, Option("privas"), Option("07000"), Option("Avignas"))
+      val addressId = save(Option(address)).get
+
+      try {
+        val addressWithGeoPoint = address.copy(geographicPoint = Some("(0,0"))
+        save(Option(addressWithGeoPoint))
+
+        find(addressId) mustEqual Option(addressWithGeoPoint)
+      } finally {
+        delete(addressId.get)
+      }
     }
 
     "not be created if empty" in {
@@ -55,6 +67,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
     }
 
     "get a geographicPoint" in {
+      val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
       whenReady(getGeographicPoint(address.copy(geographicPoint = None)), timeout(Span(2, Seconds))) { address =>
         address.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
       }

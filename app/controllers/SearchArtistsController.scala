@@ -15,6 +15,8 @@ import models.Genre.genresStringToGenresSet
 import play.api.libs.json.Reads._
 import services.Utilities.{ normalizeUrl, getNormalizedWebsitesInText }
 
+import scala.language.postfixOps
+
 object SearchArtistsController extends Controller {
   val soundCloudClientId = "f297807e1780623645f8f858637d4abb"
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
@@ -144,12 +146,9 @@ object SearchArtistsController extends Controller {
   def readFacebookArtists(facebookResponse: Response): Seq[Artist] = {
     val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
-        case (name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
-        maybeDescription, maybeGenre, maybeLikes, maybeCountry) =>
-          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
-            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
-        case (name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
-        maybeDescription, maybeGenre, maybeLikes, maybeCountry) =>
+        case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
+        maybeDescription, maybeGenre, maybeLikes, maybeCountry)
+          if category.equalsIgnoreCase("Musician/band") | category.equalsIgnoreCase("Artist") =>
           makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
             maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
       }

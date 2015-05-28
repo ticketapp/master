@@ -1,4 +1,17 @@
 # --- !Ups
+CREATE TABLE infos (
+  infoId                    SERIAL PRIMARY KEY,
+  displayIfConnected        BOOLEAN NOT NULL DEFAULT TRUE,
+  title                     VARCHAR NOT NULL,
+  content                   VARCHAR,
+  animationContent          VARCHAR,
+  animationStyle            VARCHAR
+);
+INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 98 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
+INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
+INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
+
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
@@ -16,8 +29,7 @@ CREATE TABLE addresses (
 );
 CREATE INDEX geographicPointAdresses ON addresses USING GIST (geographicPoint);
 CREATE UNIQUE INDEX addressesIndex ON addresses (city, zip, street);
-
-CREATE OR REPLACE FUNCTION insertAddress(
+CREATE OR REPLACE FUNCTION upsertAddress(
   geographicPointValue      VARCHAR(63),
   cityValue                 VARCHAR(127),
   zipValue                  VARCHAR(15),
@@ -26,14 +38,23 @@ CREATE OR REPLACE FUNCTION insertAddress(
   $$
   DECLARE addressIdToReturn int;;
   BEGIN
-    INSERT INTO addresses (geographicPoint, city, zip, street)
-      VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
-      RETURNING addressId INTO addressIdToReturn;;
-      RETURN addressIdToReturn;;
-    EXCEPTION WHEN unique_violation
-    THEN
-      SELECT addressId INTO addressIdToReturn FROM addresses WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
-    RETURN addressIdToReturn;;
+    LOOP
+      UPDATE addresses
+        SET geographicPoint = POINT(geographicPointValue), city = cityValue, zip = zipValue, street = streetValue
+        WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+      IF found THEN
+        SELECT addressId INTO addressIdToReturn
+          FROM addresses
+          WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+      END IF;;
+      BEGIN
+        INSERT INTO addresses (geographicPoint, city, zip, street)
+          VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
+          RETURNING addressId INTO addressIdToReturn;;
+        RETURN addressIdToReturn;;
+      EXCEPTION WHEN unique_violation THEN
+      END;;
+    END LOOP;;
   END;;
   $$
 LANGUAGE plpgsql;
@@ -42,20 +63,6 @@ CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
   totalPrice                INT NOT NULL
 );
-
-CREATE TABLE infos (
-  infoId                    SERIAL PRIMARY KEY,
-  displayIfConnected        BOOLEAN NOT NULL DEFAULT TRUE,
-  title                     VARCHAR NOT NULL,
-  content                   VARCHAR,
-  animationContent          VARCHAR,
-  animationStyle            VARCHAR
-);
-
-INSERT INTO infos (title, content) VALUES ('Timeline', 's - 3 avant la bêta :) :)');
-INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
-INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,

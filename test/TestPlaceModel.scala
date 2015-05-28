@@ -112,7 +112,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
       whenReady(saveAddressInFutureWithGeoPoint(Option(address3)), timeout(Span(5, Seconds))) {
         case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe
-          Some(address3.copy(geographicPoint = Some("(4,4)")))
+          Some(address3.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))
         case _ => throw new Exception("address not saved")
       }
     }

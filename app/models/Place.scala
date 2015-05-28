@@ -105,10 +105,8 @@ object Place {
         println(addressWithGeoPoint)
         Address.save(Option(addressWithGeoPoint)) }
     case Some(addressWithGeoPoint) =>
-      println("wtf")
       Future  { Address.save(Option(addressWithGeoPoint)) }
     case _ =>
-      println("None")
       Future { Success(None) }
   }
 
