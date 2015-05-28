@@ -140,7 +140,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     facebookUrl: artist.facebookUrl,
                     artistName: artist.name,
                     facebookId: artist.facebookId,
-                    imagePath: artist.oldImagePath,
+                    imagePath: artist.imagePath,
                     websites: artist.websites,
                     description: artist.description,
                     genre: artist.genre

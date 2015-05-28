@@ -7,7 +7,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.get('/users/facebookAccessToken/')
                 .success(function(data, status){
-                    factory.user = data;
+                    factory.user = 'CAACEdEose0cBALAa19O7X004YOuxGFe2lqsX1xulrOa46qulSYkKKmiJvJWX8LTsbu5j7fAEz9oaWOls0N2I5Ujtl00TdgWybjMYy0ZCyGXZBqlPPZAOqJoxUbTWOhGmTy7thKoxPQrEU9qJtv6HeCEknB3I87bKvhesce2vUwzFRTt7AA8ifZB6LgzaesGBZC7nXwMidu91F0pWuKCElC4FD1r9u6joZD';
                     deferred.resolve(factory.user);
                 }).error(function(data, status){
                     deferred.reject('erreur');

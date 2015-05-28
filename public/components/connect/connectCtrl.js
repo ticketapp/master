@@ -230,62 +230,192 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 })
         }
 
-        function getFbPages (route) {
-            $http.get(route).
-                success(function (data) {
-                    var pages;
-                    var next;
-                    var pagesLength;
-                    if (data.likes != undefined) {
-                        pages = data.likes.data;
-                        if (data.likes.paging.next != undefined) {
-                            next = data.likes.paging.next
-                        }
-                        pagesLength = data.likes.data.length;
-                    } else {
-                        pages = data.data;
-                        if (data.paging != undefined) {
-                            next = data.paging.next;
-                        }
-                        pagesLength = data.data.length;
-                    }
-                    for (var i = 0; i < pagesLength; i++) {
-                        if (pages[i].category == 'Concert tour') {
-                            //follow organizer
-                            //post if not exist
-                            //followOrganizer(pages[i].id, true);
-                        } else if (pages[i].category == "Musician/band") {
-                            //followArtist
-                            // post if not exist
-                            followArtist(pages[i].id, true);
-                        } else if (pages[i].category == "concert venue" ||
-                            pages[i].category == 'Club' ||
-                            pages[i].category == 'Bar' ||
-                            pages[i].category == 'Arts/entertainment/nightlife') {
-                            //followPlace
-                            // post if not exist
+        function getLikes (data) {
+            var pages;
+            var next;
+            var pagesLength;
+            if (data.likes != undefined) {
+                pages = data.likes.data;
+                if (data.likes.paging.next != undefined) {
+                    next = data.likes.paging.next
+                }
+                pagesLength = data.likes.data.length;
+            } else {
+                pages = data.data;
+                if (data.paging != undefined) {
+                    next = data.paging.next;
+                }
+                pagesLength = data.data.length;
+            }
+            for (var i = 0; i < pagesLength; i++) {
+                if (pages[i].category == 'Concert Tour') {
+                    //follow organizer
+                    //post if not exist
+                    followOrganizer(pages[i].id, true);
+                } else if (pages[i].category == "Musician/Band") {
+                    //followArtist
+                    // post if not exist
+                    followArtist(pages[i].id, true);
+                } else if (pages[i].category == "concert venue" ||
+                    pages[i].category == 'Club' ||
+                    pages[i].category == 'Bar' ||
+                    pages[i].category == 'Arts/entertainment/nightlife') {
+                    //followPlace
+                    // post if not exist
+                    followPlace(pages[i].id, true);
+                } else if (pages[i].category_list != undefined) {
+                    for (var ii = 0; ii < pages[i].category_list.length; ii++) {
+                        if (pages[i].category_list[ii].name == 'Concert Venue' ||
+                            pages[i].category_list[ii].name == 'Club' ||
+                            pages[i].category_list[ii].name == 'Bar' ||
+                            pages[i].category_list[ii].name == "Nightlife") {
                             followPlace(pages[i].id, true);
-                        } else if (pages[i].category_list != undefined) {
-                            for (var ii = 0; ii < pages[i].category_list.length; ii++) {
-                                if (pages[i].category_list[ii].name == 'Concert Venue' ||
-                                    pages[i].category_list[ii].name == 'Club' ||
-                                    pages[i].category_list[ii].name == 'Bar' ||
-                                    pages[i].category_list[ii].name == "Nightlife") {
-                                    followPlace(pages[i].id, true);
-                                }
+                        }
+                    }
+                }
+            }
+            if (next != undefined) {
+                $http.get(next).
+                    success(function (data) {
+                        getLikes(data)
+                    })
+            }
+        }
+
+        function getMusicPages (data) {
+            var pages;
+            var next;
+            var pagesLength;
+            if (data.music != undefined) {
+                pages = data.music.data;
+                if (data.music.paging.next != undefined) {
+                    next = data.music.paging.next
+                }
+                pagesLength = data.music.data.length;
+            } else {
+                pages = data.data;
+                if (data.paging != undefined) {
+                    next = data.paging.next;
+                }
+                pagesLength = data.data.length;
+            }
+            for (var i = 0; i < pagesLength; i++) {
+                if (pages[i].category == 'Concert Tour') {
+                    //follow organizer
+                    //post if not exist
+                    followOrganizer(pages[i].id, true);
+                } else if (pages[i].category == "Musician/Band") {
+                    //followArtist
+                    // post if not exist
+                    followArtist(pages[i].id, true);
+                } else if (pages[i].category == "concert venue" ||
+                    pages[i].category == 'Club' ||
+                    pages[i].category == 'Bar' ||
+                    pages[i].category == 'Arts/entertainment/nightlife') {
+                    //followPlace
+                    // post if not exist
+                    followPlace(pages[i].id, true);
+                } else if (pages[i].category_list != undefined) {
+                    for (var ii = 0; ii < pages[i].category_list.length; ii++) {
+                        if (pages[i].category_list[ii].name == 'Concert Venue' ||
+                            pages[i].category_list[ii].name == 'Club' ||
+                            pages[i].category_list[ii].name == 'Bar' ||
+                            pages[i].category_list[ii].name == "Nightlife") {
+                            followPlace(pages[i].id, true);
+                        }
+                    }
+                }
+            }
+            if (next != undefined) {
+                $http.get(next).
+                    success(function (data) {
+                        getMusicPages(data)
+                    })
+            }
+        }
+
+        function getEvents (data) {
+            var events;
+            var next;
+            var eventsLength;
+            if (data.events != undefined) {
+                events = data.events.data;
+                if (data.events.paging.next != undefined) {
+                    next = data.events.paging.next
+                }
+                eventsLength = data.events.data.length;
+            } else {
+                events = data.data;
+                if (data.paging != undefined) {
+                    next = data.paging.next;
+                }
+                eventsLength = data.data.length;
+            }
+            for (var i = 0; i < eventsLength; i++) {
+                if (events[i].owner !== undefined) {
+                    if (events[i].owner.category == 'Concert Tour') {
+                        //follow organizer
+                        //post if not exist
+                        followOrganizer(events[i].owner.id, true);
+                    } else if (events[i].owner.category == "concert venue" ||
+                        events[i].owner.category == 'Club' ||
+                        events[i].owner.category == 'Bar' ||
+                        events[i].owner.category == 'Arts/entertainment/nightlife') {
+                        //followPlace
+                        // post if not exist
+                        followPlace(events[i].owner.id, true);
+                    } else if (events[i].owner.category_list != undefined) {
+                        for (var ii = 0; ii < events[i].owner.category_list.length; ii++) {
+                            if (events[i].owner.category_list[ii].name == 'Concert Venue' ||
+                                events[i].owner.category_list[ii].name == 'Club' ||
+                                events[i].owner.category_list[ii].name == 'Bar' ||
+                                events[i].owner.category_list[ii].name == "Nightlife") {
+                                followPlace(events[i].owner.id, true);
                             }
                         }
                     }
-                    if (next != undefined) {
-                        getFbPages(next)
+                }
+                if (events[i].place !== undefined) {
+                    if (events[i].place.category == "concert venue" ||
+                        events[i].place.category == 'Club' ||
+                        events[i].place.category == 'Bar' ||
+                        events[i].place.category == 'Arts/entertainment/nightlife') {
+                        //followPlace
+                        // post if not exist
+                        followPlace(events[i].place.id, true);
+                    } else if (events[i].place.category_list != undefined) {
+                        for (var ii = 0; ii < events[i].place.category_list.length; ii++) {
+                            if (events[i].place.category_list[ii].name == 'Concert Venue' ||
+                                events[i].place.category_list[ii].name == 'Club' ||
+                                events[i].place.category_list[ii].name == 'Bar' ||
+                                events[i].place.category_list[ii].name == "Nightlife") {
+                                followPlace(events[i].place.id, true);
+                            }
+                        }
                     }
+                }
+                postEventId(events[i]);
+            }
+            if (next != undefined) {
+                $http.get(next).
+                    success(function (data) {
+                        getEvents(data)
+                    })
+            }
+        }
+        function getFbPages (route) {
+            $http.get(route).
+                success(function (data) {
+                    getLikes(data);
+                    getMusicPages(data)
+                    getEvents(data)
                 })
         }
 
         function getUserToken() {
             UserFactory.getToken().then(function (newToken) {
                 token = newToken;
-                getFbPages('https://graph.facebook.com/v2.3/me?fields=likes&access_token=' + token);
+                getFbPages('https://graph.facebook.com/v2.3/me?fields=id,name,music,events{place,owner,admins},likes&access_token=' + token);
             });
         }
 
