@@ -1,8 +1,8 @@
 angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '$http',
     'ArtistsFactory', 'UserFactory', 'OrganizerFactory', 'EventsFactory', 'PlaceFactory',
-    'StoreRequest', '$timeout', 'InfoModal',
+    'StoreRequest', '$timeout', 'InfoModal', '$location',
     function ($scope, $rootScope, $http, ArtistsFactory, UserFactory, OrganizerFactory,
-              EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal) {
+              EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal, $location) {
 
         var token;
 
@@ -451,7 +451,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
         }
 
         $scope.connectLink = function (url) {
-            var connectWin = window.open(url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
+            var connectWin = window.open($location.host() + url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
             var changePath = setInterval(function() {
                 console.log(connectWin.location);
                 if (connectWin.location == undefined && connectWin.location != {}) {
