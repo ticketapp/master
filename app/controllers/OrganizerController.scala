@@ -27,6 +27,36 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
     Ok(Json.toJson(Organizer.findAllContaining(pattern)))
   }
 
+  val organizerBindingForm = Form(
+    mapping(
+      "facebookId" -> optional(nonEmptyText(2)),
+      "name" -> nonEmptyText(2),
+      "description" -> optional(nonEmptyText(2)),
+      "websites" -> optional(nonEmptyText(4)),
+      "imagePath" -> optional(nonEmptyText(2))
+    )(Organizer.formApply)(Organizer.formUnapply)
+  )
+
+  def createOrganizer = Action { implicit request =>
+    organizerBindingForm.bindFromRequest().fold(
+      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
+      organizer => {
+        Organizer.save(organizer) match {
+          case Success(maybeOrganizerId) => maybeOrganizerId match {
+            case None => Status(INTERNAL_SERVER_ERROR)
+            case Some(organizerId) => Ok(Json.toJson(Organizer.find(organizerId)))
+          }
+          case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+            Logger.error("OrganizerController.createOrganizer: Duplicate organizer", psqlException)
+            Status(CONFLICT)("OrganizerController.createOrganizer: Duplicate organizer")
+          case Failure(unknownException) =>
+            Logger.error("OrganizerController.createOrganizer: INTERNAL_SERVER_ERROR", unknownException)
+            Status(INTERNAL_SERVER_ERROR)
+        }
+      }
+    )
+  }
+
   def followOrganizerByOrganizerId(organizerId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
     Organizer.followByOrganizerId(request.user.identityId.userId, organizerId) match {
       case Success(_) =>
@@ -87,33 +117,6 @@ object OrganizerController extends Controller with securesocial.core.SecureSocia
     }
   }
 
-  val organizerBindingForm = Form(
-    mapping(
-      "facebookId" -> optional(nonEmptyText(2)),
-      "name" -> nonEmptyText(2),
-      "imagePath" -> optional(nonEmptyText(2))
-    )(Organizer.formApply)(Organizer.formUnapply)
-  )
-
-  def createOrganizer = Action { implicit request =>
-    organizerBindingForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
-      organizer => {
-        Organizer.save(organizer) match {
-          case Success(maybeOrganizerId) => maybeOrganizerId match {
-            case None => Status(INTERNAL_SERVER_ERROR)
-            case Some(organizerId) => Ok(Json.toJson(Organizer.find(organizerId)))
-          }
-          case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-            Logger.error("OrganizerController.createOrganizer: Duplicate organizer", psqlException)
-            Status(CONFLICT)("OrganizerController.createOrganizer: Duplicate organizer")
-          case Failure(unknownException) =>
-            Logger.error("OrganizerController.createOrganizer: INTERNAL_SERVER_ERROR", unknownException)
-            Status(INTERNAL_SERVER_ERROR)
-        }
-      }
-    )
-  }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
     Ok(Json.toJson(Organizer.findNearCity(city, numberToReturn, offset)))

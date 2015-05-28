@@ -34,10 +34,11 @@ case class Organizer (organizerId: Option[Long],
 
 object Organizer {
 
-  def formApply(facebookId: Option[String], name: String, imagePath: Option[String]): Organizer =
-    new Organizer(None, facebookId, name, imagePath)
-  def formUnapply(organizer: Organizer): Option[(Option[String], String, Option[String])] =
-    Some((organizer.facebookId, organizer.name, organizer.imagePath))
+  def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
+                imagePath: Option[String]): Organizer =
+    Organizer(None, facebookId, name, description = description, websites = websites, imagePath = imagePath)
+  def formUnapply(organizer: Organizer) =
+    Some((organizer.facebookId, organizer.name, organizer.description, organizer.websites, organizer.imagePath))
 
   private val OrganizerParser: RowParser[Organizer] = {
     get[Long]("organizerId") ~
