@@ -103,8 +103,11 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 .success(function(data, status) {
                     factory.places = data;
                     deferred.resolve(factory.places);
-                }).error(function(data, status) {
-                    deferred.resolve('error');
+                }).error(function (data, status) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
+                    }
+                    deferred.reject(status);
                 });
             return deferred.promise;
         },

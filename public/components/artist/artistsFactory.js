@@ -18,7 +18,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtist.url = url;
                         deferred.resolve(factory.lastGetArtist.artist);
                     }).error(function (data, status) {
-                        deferred.reject('erreur');
+                        deferred.reject('error');
                     });
             }
             return deferred.promise;
@@ -29,7 +29,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 .success(function(data, status){
                     deferred.resolve(data);
                 }).error(function(data, status){
-                    deferred.reject('erreur');
+                    deferred.reject('error');
                 });
             return deferred.promise;
         },
@@ -46,7 +46,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtists.offset = offset;
                         deferred.resolve(factory.lastGetArtists.artists);
                     }).error(function (data, status) {
-                        deferred.reject('erreur');
+                        deferred.reject('error');
                     });
             }
             return deferred.promise;
@@ -59,7 +59,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     factory.artists = data;
                     deferred.resolve(factory.artists);
                 }).error(function(data, status){
-                    deferred.reject('erreur');
+                    deferred.reject('error');
                 });
             return deferred.promise;
         },
@@ -82,7 +82,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtistByGenre.genre = genre;
                         deferred.resolve(factory.lastGetArtistByGenre.artists);
                     }).error(function(data, status){
-                        deferred.reject('erreur');
+                        deferred.reject('error');
                     });
             }
             return deferred.promise;
@@ -106,7 +106,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtistsFacebookByContaining.pattern = pattern;
                         deferred.resolve(factory.lastGetArtistsFacebookByContaining.artists);
                     }).error(function (data, status) {
-                        deferred.reject('erreur');
+                        deferred.reject('error');
                     });
             }
             return deferred.promise;
@@ -127,7 +127,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtistsByContainig.pattern = pattern;
                         deferred.resolve(factory.lastGetArtistsByContainig.artists);
                     }).error(function (data, status) {
-                        deferred.reject('erreur');
+                        deferred.reject('error');
                     });
             }
             return deferred.promise;
@@ -161,13 +161,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             $http.post('/artists/' + id +'/followByFacebookId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
+                }).error(function (data, status) {
                     if (data.error == 'Credentials required') {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
-                    } else {
-                        InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }
-                    deferred.resolve('error');
+                    deferred.reject(status);
                 });
             return deferred.promise;
         },

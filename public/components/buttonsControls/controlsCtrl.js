@@ -128,19 +128,19 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                 success(function (data, status, headers, config) {
                     data = data.data;
                     for (var iv = 0; iv < data.length; iv++) {
-                        if (data[iv].category == 'Concert venue' ||
-                            data[iv].category == 'Club' ||
-                            data[iv].category == 'Bar' ||
-                            data[iv].category == 'Arts/entertainment/nightlife') {
+                        if (data[iv].category.toLowerCase() == 'concert venue' ||
+                            data[iv].category.toLowerCase() == 'club' ||
+                            data[iv].category.toLowerCase() == 'bar' ||
+                            data[iv].category.toLowerCase() == 'arts/entertainment/nightlife') {
                             getPlacePage(data[iv].id);
                             //count = count + 1;
                             //
                         } else if (data[iv].category_list != undefined) {
                             for (var ii = 0; ii < data[iv].category_list.length; ii++) {
-                                if (data[iv].category_list[ii].name == 'Concert Venue' ||
-                                    data[iv].category_list[ii].name == 'Club' ||
-                                    data[iv].category_list[ii].name == 'Bar' ||
-                                    data[iv].category_list[ii].name == "Nightlife") {
+                                if (data[iv].category_list[ii].name.toLowerCase() == 'concert venue' ||
+                                    data[iv].category_list[ii].name.toLowerCase() == 'club' ||
+                                    data[iv].category_list[ii].name.toLowerCase() == 'bar' ||
+                                    data[iv].category_list[ii].name.toLowerCase() == "nightlife") {
                                     getPlacePage(data[iv].id);
                                     //count = count + 1;
                                     //

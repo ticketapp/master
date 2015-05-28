@@ -70,10 +70,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             $http.post('/organizers/' + id + '/followByFacebookId ').
                 success(function(data, status, headers, config) {
                     deferred.resolve(data);
-                }).
-                error(function (data) {
-                    deferred.resolve('error');
-                })
+                }).error(function (data, status) {
+                    if (data.error == 'Credentials required') {
+                        StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
+                    }
+                    deferred.reject(status);
+                });
             return deferred.promise;
         },
         followOrganizerByOrganizerId : function (id, organizerName) {
