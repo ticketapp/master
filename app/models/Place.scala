@@ -13,6 +13,7 @@ import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import scala.util.{Success, Failure, Try}
+import services.Utilities
 import services.Utilities.geographicPointPattern
 
 case class Place (placeId: Option[Long],
@@ -86,7 +87,7 @@ object Place {
                 'addressId -> addressId,
                 'facebookId -> place.facebookId,
                 'description -> place.description,
-                'webSites -> getNormalizedWebsitesInText(place.webSites).mkString(","),
+                'webSites -> Utilities.websiteSetToString(getNormalizedWebsitesInText(place.webSites)),
                 'capacity -> place.capacity,
                 'openingHours -> place.openingHours,
                 'imagePath -> place.imagePath,
@@ -102,7 +103,6 @@ object Place {
   def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Try[Option[Long]]] = placeAddress match {
     case Some(address) if address.geographicPoint.isEmpty =>
       Address.getGeographicPoint(address) map { addressWithGeoPoint =>
-        println(addressWithGeoPoint)
         Address.save(Option(addressWithGeoPoint)) }
     case Some(addressWithGeoPoint) =>
       Future  { Address.save(Option(addressWithGeoPoint)) }

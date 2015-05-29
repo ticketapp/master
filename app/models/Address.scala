@@ -91,7 +91,6 @@ object Address {
       case None =>
         None
       case Some(address) =>
-        println("address.geoPoint = " + address.geographicPoint)
         DB.withConnection { implicit connection =>
           SQL("""SELECT upsertAddress({geographicPoint}, {city}, {zip}, {street})""")
             .on(
