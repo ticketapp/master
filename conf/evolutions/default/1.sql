@@ -41,11 +41,10 @@ CREATE OR REPLACE FUNCTION upsertAddress(
     LOOP
       UPDATE addresses
         SET geographicPoint = POINT(geographicPointValue), city = cityValue, zip = zipValue, street = streetValue
-        WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+          WHERE city = cityValue AND zip = zipValue AND street = streetValue
+           RETURNING addressId INTO addressIdToReturn;;
       IF found THEN
-        SELECT addressId INTO addressIdToReturn
-          FROM addresses
-          WHERE city = cityValue AND zip = zipValue AND street = streetValue;;
+        RETURN addressIdToReturn;;
       END IF;;
       BEGIN
         INSERT INTO addresses (geographicPoint, city, zip, street)

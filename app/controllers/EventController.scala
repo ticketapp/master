@@ -172,11 +172,8 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def findEventOnFacebookByFacebookId(facebookId: String) = Action { try {
-      Event.saveFacebookEventByFacebookId(facebookId)
-      Ok
-    } catch {
-      case e: Exception => InternalServerError
-    }
+  def findEventOnFacebookByFacebookId(facebookId: String) = Action {
+    Event.saveFacebookEventByFacebookId(facebookId)
+    Ok
   }
 }
