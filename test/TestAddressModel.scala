@@ -29,16 +29,16 @@ import scala.util.{Failure, Success}
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
   "An address" must {
 
-    "be saved and deleted in database and return the new id" in {
+    "be saved in lowercase and deleted in database and return the new id" in {
       val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
       val addressId = save(Option(address)).get
 
-      find(addressId) mustEqual Option(address)
+      find(addressId) mustEqual Option(address.copy(street = Some("Avignas".toLowerCase)))
       delete(addressId.value) mustBe 1
     }
 
     "not be saved twice with same city, zip, street and return database addressId on unique violation" in {
-      val address = Address(None, None, Option("privas"), Option("07000"), Option("Avignas"))
+      val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
       val addressId = save(Option(address)).get
 
       try {
@@ -49,11 +49,11 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
     }
 
     "should update address" in {
-      val address = Address(None, None, Option("privas"), Option("07000"), Option("Avignas"))
+      val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
       val addressId = save(Option(address)).get
 
       try {
-        val addressWithGeoPoint = address.copy(geographicPoint = Some("(0,0"))
+        val addressWithGeoPoint = address.copy(geographicPoint = Some("(1.0,5.0)"))
         save(Option(addressWithGeoPoint))
 
         find(addressId) mustEqual Option(addressWithGeoPoint)
@@ -67,7 +67,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
     }
 
     "get a geographicPoint" in {
-      val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
+      val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("avignas"))
       whenReady(getGeographicPoint(address.copy(geographicPoint = None)), timeout(Span(2, Seconds))) { address =>
         address.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
       }

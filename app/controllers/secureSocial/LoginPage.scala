@@ -34,7 +34,7 @@ object LoginPage extends Controller
 
   def login = Action { implicit request =>
     if (SecureSocial.currentUser.isDefined)
-      Status(CONFLICT)("User already logged")
+      Conflict("User already logged")
     else
       Ok
   }

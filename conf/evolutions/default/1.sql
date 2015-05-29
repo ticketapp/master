@@ -38,22 +38,20 @@ CREATE OR REPLACE FUNCTION upsertAddress(
   $$
   DECLARE addressIdToReturn int;;
   BEGIN
-    LOOP
-      UPDATE addresses
-        SET geographicPoint = POINT(geographicPointValue), city = cityValue, zip = zipValue, street = streetValue
-          WHERE city = cityValue AND zip = zipValue AND street = streetValue
-           RETURNING addressId INTO addressIdToReturn;;
-      IF found THEN
-        RETURN addressIdToReturn;;
-      END IF;;
-      BEGIN
-        INSERT INTO addresses (geographicPoint, city, zip, street)
-          VALUES (POINT(geographicPointValue), cityValue, zipValue, streetValue)
-          RETURNING addressId INTO addressIdToReturn;;
-        RETURN addressIdToReturn;;
-      EXCEPTION WHEN unique_violation THEN
-      END;;
-    END LOOP;;
+    UPDATE addresses
+      SET geographicPoint = POINT(geographicPointValue), city = lower(cityValue), zip = lower(zipValue), street = lower(streetValue)
+        WHERE city = cityValue AND zip = zipValue AND street = streetValue
+         RETURNING addressId INTO addressIdToReturn;;
+    IF found THEN
+      RETURN addressIdToReturn;;
+    END IF;;
+    BEGIN
+      INSERT INTO addresses (geographicPoint, city, zip, street)
+        VALUES (POINT(geographicPointValue), lower(cityValue), lower(zipValue), lower(streetValue))
+        RETURNING addressId INTO addressIdToReturn;;
+      RETURN addressIdToReturn;;
+    EXCEPTION WHEN unique_violation THEN
+    END;;
   END;;
   $$
 LANGUAGE plpgsql;

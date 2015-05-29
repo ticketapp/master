@@ -93,7 +93,7 @@ object Address {
       case Some(address) =>
         println("address.geoPoint = " + address.geographicPoint)
         DB.withConnection { implicit connection =>
-          SQL( """SELECT upsertAddress({geographicPoint}, {city}, {zip}, {street})""")
+          SQL("""SELECT upsertAddress({geographicPoint}, {city}, {zip}, {street})""")
             .on(
               'geographicPoint -> address.geographicPoint,
               'city -> address.city,
