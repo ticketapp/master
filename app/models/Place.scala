@@ -31,7 +31,7 @@ case class Place (placeId: Option[Long],
 object Place {
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
-                imagePath: Option[String], street: Option[String], zip: Option[String], city: Option[String]): Place = {
+                imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
     try {
       val address = Option(Address(None, None, city, zip, street))
       println("formApply address" + address)

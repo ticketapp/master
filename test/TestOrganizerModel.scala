@@ -24,7 +24,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 
   "An Organizer" must {
 
-    "be able to be saved and deleted in database" in {
+    "be saved and deleted in database" in {
       val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
@@ -35,7 +35,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       delete(organizerId) mustBe 1
     }
 
-    "not be able to be saved twice" in {
+    "not be saved twice" in {
       val organizer = Organizer(None, Option("facebookId3"), "organizerTest3", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
@@ -51,18 +51,21 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "be able to be followed and unfollowed by a user" in {
+    "be followed and unfollowed by a user" in {
       val organizer = Organizer(None, Option("facebookId4"), "organizerTest4", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
       val organizerId = save(organizer).get.get
-
-      followByOrganizerId("userTestId", organizerId)
-      isFollowed(IdentityId("userTestId", "oauth2"), organizerId) mustBe true
-      unfollowByOrganizerId("userTestId", organizerId) mustBe Success(1)
+      try {
+        followByOrganizerId("userTestId", organizerId)
+        isFollowed(IdentityId("userTestId", "oauth2"), organizerId) mustBe true
+        unfollowByOrganizerId("userTestId", organizerId) mustBe Success(1)
+      } finally {
+        delete(organizerId)
+      }
     }
 
-    "not be able to be followed twice" in {
+    "not be followed twice" in {
       val organizer = Organizer(None, Option("facebookId5"), "organizerTest5", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
@@ -77,6 +80,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         }
       } finally {
         unfollowByOrganizerId("userTestId", organizerId)
+        delete(organizerId)
       }
     }
 

@@ -15,13 +15,16 @@ import play.api.Play.current
 import securesocial.core.IdentityId
 import scala.util.Success
 import scala.util.Failure
+import play.api.libs.concurrent.Execution.Implicits._
 
-class TestArtistController extends PlaySpecification {
+class TestArtistController extends PlaySpec with OneAppPerSuite {
+
+  "ArtistController" must {
 
     "be able to be followed by a user" in new WithApplication {
       val result = controllers.Application.index()(FakeRequest())
       println(result)
-      status(result) must equalTo(OK)
+      result map { a => a mustBe "Ok" }
     }
-
+  }
 }

@@ -36,7 +36,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       an [java.lang.IllegalArgumentException] should be thrownBy Option(Address(None, None, None, None, None))
     }
 
-    "be saved in lowercase and deleted in database and return the new id" in {
+    "be saved (in lowercase) in database and return the new id then be deleted" in {
       val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
       val addressId = save(Option(address)).get
 

@@ -7,7 +7,7 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
-INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 97 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 94 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -39,19 +39,17 @@ CREATE OR REPLACE FUNCTION upsertAddress(
   DECLARE addressIdToReturn int;;
   BEGIN
     UPDATE addresses
-      SET geographicPoint = POINT(geographicPointValue), city = lower(cityValue), zip = lower(zipValue), street = lower(streetValue)
-        WHERE city = cityValue AND zip = zipValue AND street = streetValue
-         RETURNING addressId INTO addressIdToReturn;;
+    SET geographicPoint = POINT(geographicPointValue), city = lower(cityValue), zip = lower(zipValue), street = lower(streetValue)
+    WHERE city = lower(cityValue) AND zip = lower(zipValue) AND street = lower(streetValue)
+    RETURNING addressId INTO addressIdToReturn;;
     IF found THEN
       RETURN addressIdToReturn;;
-    END IF;;
-    BEGIN
+    ELSE
       INSERT INTO addresses (geographicPoint, city, zip, street)
-        VALUES (POINT(geographicPointValue), lower(cityValue), lower(zipValue), lower(streetValue))
-        RETURNING addressId INTO addressIdToReturn;;
+      VALUES (POINT(geographicPointValue), lower(cityValue), lower(zipValue), lower(streetValue))
+      RETURNING addressId INTO addressIdToReturn;;
       RETURN addressIdToReturn;;
-    EXCEPTION WHEN unique_violation THEN
-    END;;
+    END IF;;
   END;;
   $$
 LANGUAGE plpgsql;
@@ -92,7 +90,7 @@ CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
     EXCEPTION WHEN unique_violation
     THEN
       SELECT artistId INTO artistIdToReturn FROM artists
-        WHERE facebookId = facebookIdValue || facebookUrl = facebookUrlValue;;
+        WHERE facebookId = facebookIdValue OR facebookUrl = facebookUrlValue;;
       RETURN artistIdToReturn;;
   END;;
   $$
