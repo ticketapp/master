@@ -48,7 +48,7 @@ object Artist {
       get[Option[String]]("country") map {
       case artistId ~ facebookId ~ name ~ imagePath ~ description ~ facebookUrl ~ websites ~ likes ~ country =>
         Artist(Option(artistId), facebookId, name, imagePath, description, facebookUrl,
-          websites.getOrElse("").split(",").toSet, Seq.empty, Seq.empty, likes, country)
+          Utilities.optionStringToSet(websites), Seq.empty, Seq.empty, likes, country)
     }
   }
 
@@ -187,7 +187,7 @@ object Artist {
   }
 
   def save(artist: Artist): Option[Long] = try {
-    val websites: Option[String] = Utilities.websiteSetToString(artist.websites)
+    val websites: Option[String] = Utilities.setToOptionString(artist.websites)
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
         .on(
@@ -211,7 +211,7 @@ object Artist {
   }
 
   def update(artist: Artist): Int = try {
-    val websites: Option[String] = Utilities.websiteSetToString(artist.websites)
+    val websites: Option[String] = Utilities.setToOptionString(artist.websites)
     DB.withConnection { implicit connection =>
       SQL(
         """UPDATE artists

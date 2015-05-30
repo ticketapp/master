@@ -162,6 +162,9 @@ object Utilities {
     }
   }
 
-  def websiteSetToString(websites: Set[String]): Option[String] =
-    if (websites.isEmpty) None else Option(websites.mkString(","))
+  def setToOptionString(set: Set[String]): Option[String] =
+    if (set.isEmpty) None else Option(set.mkString(","))
+
+  def optionStringToSet(maybeString: Option[String]): Set[String] =
+    if (maybeString.isEmpty) Set.empty else maybeString.get.split(",").toSet
 }

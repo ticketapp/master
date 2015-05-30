@@ -1,11 +1,12 @@
+import models.{Organizer, Place}
+import org.scalatest.Matchers._
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import models.{User, Organizer, Place}
 import securesocial.core.IdentityId
-import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
+
 import scala.util.Success
-import java.util.Date
+
 
 class TestUserModel extends PlaySpec with OneAppPerSuite {
 
@@ -17,19 +18,36 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
     }
 
     "be able to get his followed places" in {
-      Place.followByPlaceId("userTestId", 1)
+      val place = Place(None, "test", None, None, None, None, None, None, None)
 
-      Place.getFollowedPlaces(IdentityId("userTestId", "providerId")) should not be empty
+      whenReady(Place.save(place), timeout(Span(2, Seconds))) { tryPlaceId =>
+        val placeId = tryPlaceId.get.get
+        try {
+          Place.followByPlaceId("userTestId", placeId)
 
-      Place.unfollowByPlaceId("userTestId", 1) mustBe Success(1)
+          Place.getFollowedPlaces(IdentityId("userTestId", "providerId")) should not be empty
+
+          Place.unfollowByPlaceId("userTestId", placeId) mustBe Success(1)
+        } finally {
+          Place.delete(placeId)
+        }
+      }
     }
 
     "be able to get his followed organizers" in {
-      Organizer.followByOrganizerId("userTestId", 1)
+      val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option("(5.4,5.6)"))
+      val organizerId = Organizer.save(organizer).get.get
+      try {
+        Organizer.followByOrganizerId("userTestId", organizerId)
 
-      Organizer.getFollowedOrganizers(IdentityId("userTestId", "providerId")) should not be empty
+        Organizer.getFollowedOrganizers(IdentityId("userTestId", "providerId")) should not be empty
 
-      Organizer.unfollowByOrganizerId("userTestId", 1) mustBe Success(1)
+        Organizer.unfollowByOrganizerId("userTestId", organizerId) mustBe Success(1)
+      } finally {
+        Organizer.delete(organizerId)
+      }
     }
   }
 }

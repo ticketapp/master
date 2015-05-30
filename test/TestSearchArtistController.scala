@@ -26,7 +26,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "find one artist on facebook" in {
+    "find Rone (an artist) on facebook" in {
       whenReady (getFacebookArtistByFacebookUrl("djvadim"), timeout(Span(6, Seconds))) { artist =>
         artist shouldBe defined
       }

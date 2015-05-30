@@ -53,9 +53,15 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
     eventsName map  { refactorEventOrPlaceName } mustBe expectedEventsName
   }
 
-  "render a string from a set of a websites" in {
-    websiteSetToString(Set.empty) mustBe None
-    websiteSetToString(Set("a")) mustBe Some("a")
-    websiteSetToString(Set("a", "b", "c")) mustBe Some("a,b,c")
+  "return an optional string from a set" in {
+    setToOptionString(Set.empty) mustBe None
+    setToOptionString(Set("a")) mustBe Some("a")
+    setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
+  }
+
+  "return a set from an optional string" in {
+    optionStringToSet(None) mustBe Set.empty
+    optionStringToSet(Some("a")) mustBe Set("a")
+    optionStringToSet(Some("a,b,c")) mustBe Set("a", "b", "c")
   }
 }
