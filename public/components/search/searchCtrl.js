@@ -82,6 +82,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         function getArtistsFolowed () {
             ArtistsFactory.getFollowArtists().then(function (artists) {
                 updateScope(artists, $scope.artists, 'artistId');
+                if (artists.length < $scope.limit) {
+                    getArtists()
+                }
             })
         }
 
@@ -182,7 +185,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 if (_research.length == 0) {
                     if (offset == 0 && $rootScope.connected == true) {
                         getArtistsFolowed();
-                        getArtists()
                     } else {
                         getArtists()
                     }
@@ -311,8 +313,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     if (_research.length == 0) {
                         if ($rootScope.connected == true && offset == 0) {
                             getArtistsFolowed();
+                        } else {
+                            getArtists()
                         }
-                        getArtists()
                     } else {
                         getArtistsByContaining();
                         getArtistsByGenre();

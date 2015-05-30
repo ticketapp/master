@@ -27990,6 +27990,10 @@ artist-min, artist-facebook-min {
   transform: scale(1.2);
 }
 
+#infosTooltip {
+    font-family: 'Crafty Girls', cursive;
+}
+
 /* line 38, ../../public/styles/main.scss */
 .block_min {
   margin: 0 auto;

@@ -4,10 +4,24 @@ angular.module('claudeApp')
     function ($scope, $localStorage, $timeout, LargeHomeFactory, $rootScope, $location) {
 
     $scope.infos = [];
+    $scope.animateMsg = true;
+    function removeAnimations() {
+        if ($localStorage.removedInfosMsg != undefined) {
+            for (var j = 0; j < $scope.infos.length; j++) {
+                if ($localStorage.removedInfosMsg.indexOf($scope.infos[j].id) > -1) {
+                    $scope.infos[j].animation = '';
+                    console.log($localStorage.removedInfosMsg)
+                }
+            }
+        } else {
+            $localStorage.removedInfosMsg = [];
+        }
+    }
 
     function getInfos () {
         LargeHomeFactory.getInfos().then(function (infos) {
             $scope.infos = infos;
+            removeAnimations();
             $scope.elementEnCours = $scope.infos[0];
         });
     }
@@ -15,21 +29,6 @@ angular.module('claudeApp')
     $rootScope.$watch('connected', function () {
         getInfos();
     });
-
-    function removeAnimations() {
-        if ($localStorage.removedInfosMsg != undefined) {
-            for (var j = 0; j < $scope.infos.length; j++) {
-                for (var k = 0; k < $localStorage.removedInfosMsg.length; k++) {
-                    if ($scope.infos[j].id == $localStorage.removedInfosMsg[k]) {
-                        $scope.infos[j].animation = '';
-                        console.log($localStorage.removedInfosMsg[k])
-                    }
-                }
-            }
-        } else {
-            $localStorage.removedInfosMsg = [];
-        }
-    }
 
     function pushInfoIdToLocalStorage(i) {
         $localStorage.removedInfosMsg.push($scope.infos[i].id);
@@ -53,7 +52,13 @@ angular.module('claudeApp')
         }
         $timeout(function () {
             $scope.$apply(function () {
+                $scope.animateMsg = false;
+            })
+        }, 0);
+        $timeout(function () {
+            $scope.$apply(function () {
                 $scope.elementEnCours = $scope.infos[i];
+                $scope.animateMsg = true;
             })
         }, 0);
 
@@ -63,7 +68,6 @@ angular.module('claudeApp')
 
     }, 8000);
     updateInfo;
-    removeAnimations();
     $scope.$on('$locationChangeSuccess', function () {
         clearInterval(updateInfo)
     })

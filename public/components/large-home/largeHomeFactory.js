@@ -9,18 +9,12 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
             if ($rootScope.connected === false) {
                    factory.infos = [
                        {
-                           id: 20,
+                           id: 40,
                            displayIfConnected: true,
-                           animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
-                               'Poster vos messages dans la rubrique bug/FAQ' +
-                               '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
-                               'transparent;top: 20px;' +
-                               'width: 0;   height: 0;   border-top: 10px solid transparent;  ' +
-                               'border-bottom: 10px solid transparent;' +
-                               'border-left: 10px solid white;"></div>'),
-                               style : 'right: 80px;padding: 10px;' +
-                                   'box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);' +
-                                   'position: fixed;top: 110px;width: 25%;background: white;'
+                           animation: {content: $sce.trustAsHtml('<p style="color: white; text-align: center">' +
+                               'Poster vos messages dans la rubrique bug/FAQ'),
+                               style : 'right: 40px;padding: 10px;' +
+                                   'position: fixed;top: 22px;width: 25%;'
 
                            },
                            content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Claude a besoin de vos suggestions</h3><p>' +
@@ -30,18 +24,12 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                '</p>')
                        },
                        {
-                       id: 10,
+                       id: 30,
                        displayIfConnected: false,
-                       animation: {content: $sce.trustAsHtml('<p style="color: black; text-align: center">' +
-                           'Connectez-vous en un clic via Facebook' +
-                           '<div style="position: absolute;right: -10px;height: 20px;width: 20px;background: ' +
-                           'transparent;top: 20px;' +
-                           'width: 0;   height: 0;   border-top: 10px solid transparent;  ' +
-                           'border-bottom: 10px solid transparent;' +
-                           'border-left: 10px solid white;"></div>'),
-                           style : 'right: 80px;padding: 10px;' +
-                               'box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);' +
-                               'position: fixed;top: 180px;width: 25%;background: white;'
+                       animation: {content: $sce.trustAsHtml('<p style="color: white; text-align: center">' +
+                           'Connectez-vous en un clic via Facebook'),
+                           style : 'right: 40px;padding: 10px;' +
+                               'position: fixed;top: 80px;width: 25%;'
 
                        },
                        content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Connectez-vous</h3> <p>' +

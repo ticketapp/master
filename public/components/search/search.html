@@ -49,8 +49,9 @@
     <div layout="row" class="column large-12" layout-sm="column" layout-align="space-around" ng-if="loadingMore">
         <md-progress-circular md-mode="indeterminate"></md-progress-circular>
     </div>
-    <div class="column large-12" ng-show="events.length >= limit || artists.length >= limit ||
-    places.length >= limit || organizers.length >= limit || filtredEvents.length >= limit"
+    <div class="column large-12" ng-show="(events.length + filtredEvents.length >= limit && $root.activEvent ) || (artists.length >= limit && $root.activArtist)||
+    (places.length >= limit && $root.activPlace) || (organizers.length >= limit && $root.activUsr) ||
+     (artistsFb.length >= limit && $root.activArtist)"
          layout="row" layout-align="center center">
         <button ng-click="moreLimit()" class="column large-5">
             Voir plus

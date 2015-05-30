@@ -26,13 +26,22 @@
 </div>
 <div class="parallax-content ng-search padding0">
 </div>
-<div ng-if="elementEnCours.animation && $root.connected == false" id="infosTooltip"
+<div ng-if="elementEnCours.animation && animateMsg && $root.window != 'medium' && $root.connected == false" id="infosTooltip"
      class="animate-show animated">
-    <div style="{{elementEnCours.animation.style}}">
+    <div class="animate-show" style="{{elementEnCours.animation.style}}">
         <i ng-click="removeAnimation()" class="fi-x pointer" style="
     float: right;
-    color: rgba(0, 0, 0, 0.3);
+    color: white;
+    margin-right: 35px;
 "></i>
         <div ng-bind-html="elementEnCours.animation.content"></div>
+        <div style="  margin-top: -20px;
+  overflow: hidden;
+  height: 50px;">
+        <img src="assets/images/angle6.svg" style="  width: 100px;
+  -webkit-transform: rotate(90deg);
+  margin-left: 50%;
+  margin-top: -52px;"/>
+            </div>
     </div>
 </div>
