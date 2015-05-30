@@ -3,22 +3,38 @@
        style="border-radius: 0px;"
        class="column small-10 medium-3">
 <label class="inputName" ng-class="{active : $root.activEvent}" role="checkbox"
-       ng-click="$root.activEvent = !$root.activEvent; $root.selEvent($root.activEvent)"
+       ng-click="$root.activEvent = true;
+       $root.activArtist = false;
+       $root.activPlace = false;
+       $root.activUsr = false;
+       $root.selEvent($root.activEvent)"
        ng-model="$root.activEvent" ng-model-options="{ getterSetter: true }">
     Evenements
 </label>
 <label class="inputName" ng-class="{active : $root.activArtist}" role="checkbox"
-       ng-click="$root.activArtist = !$root.activArtist; $root.selArtist($root.activArtist)"
+       ng-click="$root.activArtist = true;
+       $root.activEvent = false;
+       $root.activPlace = false;
+       $root.activUsr = false;
+       $root.selArtist($root.activArtist)"
        ng-model="$root.activArtist" ng-model-options="{ getterSetter: true }">
     Artistes
 </label>
 <label class="inputName" ng-class="{active : $root.activPlace}" role="checkbox"
-       ng-click="$root.activPlace = !$root.activPlace; $root.selPlace($root.activPlace)"
+       ng-click="$root.activPlace = true;
+       $root.activEvent = false;
+       $root.activArtist = false;
+       $root.activUsr = false;
+       $root.selPlace($root.activPlace)"
        ng-model="$root.activPlace" ng-model-options="{ getterSetter: true }">
     Lieux
 </label>
 <label class="inputName" ng-class="{active : $root.activUsr}" role="checkbox"
-       ng-click="$root.activUsr = !$root.activUsr; $root.selUsr($root.activUsr)"
+       ng-click="$root.activUsr = true;
+       $root.activEvent = false;
+       $root.activArtist = false;
+       $root.activPlace = false;
+       $root.selUsr($root.activUsr)"
        ng-model="$root.activUsr" ng-model-options="{ getterSetter: true }">
     Organisateurs
 </label>
