@@ -7,7 +7,7 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
-INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 94 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 91 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -158,6 +158,7 @@ CREATE OR REPLACE FUNCTION insertGenre(nameValue VARCHAR(255), iconValue VARCHAR
   END;;
   $$
 LANGUAGE plpgsql;
+
 
 CREATE TABLE tracks (
   trackId                 VARCHAR(255) NOT NULL,
@@ -664,6 +665,7 @@ CREATE TABLE eventsAddresses (
   PRIMARY KEY (eventId, addressId)
 );
 
+
 CREATE TABLE usersOrganizers (
   tableId                 SERIAL PRIMARY KEY,
   userId                  VARCHAR(255) REFERENCES users_login (userId),
@@ -699,6 +701,32 @@ CREATE OR REPLACE FUNCTION insertEventArtistRelation(
     VALUES (eventIdValue, artistIdValue);;
     EXCEPTION WHEN unique_violation THEN RETURN;;
   END;;
+  $$
+LANGUAGE plpgsql;
+
+
+CREATE TABLE tracksGenres (
+  trackId                 VARCHAR REFERENCES tracks (trackId) NOT NULL,
+  genreId                 INT REFERENCES genres (genreId) NOT NULL,
+  weight                  BIGINT NOT NULL,
+  PRIMARY KEY (genreId)
+);
+CREATE UNIQUE INDEX tracksGenresIndex ON tracksGenres (trackId, genreId);
+CREATE OR REPLACE FUNCTION upsertTrackGenreRelation(trackIdValue VARCHAR, genreIdValue BIGINT, weightValue BIGINT) RETURNS VOID AS
+  $$
+    BEGIN
+      LOOP
+        UPDATE tracksGenres SET weight = weightValue WHERE trackId = trackIdValue AND genreId = genreIdValue;;
+        IF found THEN
+          RETURN;;
+        END IF;;
+        BEGIN
+          INSERT INTO tracksGenres(trackId, genreId, weight) VALUES (trackIdValue, genreIdValue, weightValue);;
+          RETURN;;
+        EXCEPTION WHEN unique_violation THEN
+        END;;
+      END LOOP;;
+    END;;
   $$
 LANGUAGE plpgsql;
 
@@ -860,6 +888,7 @@ DROP TABLE IF EXISTS eventsAddresses;
 DROP TABLE IF EXISTS usersOrganizers;
 DROP TABLE IF EXISTS eventsArtists;
 DROP TABLE IF EXISTS artistsGenres;
+DROP TABLE IF EXISTS tracksGenres;
 DROP TABLE IF EXISTS eventsFollowed;
 DROP TABLE IF EXISTS artistsFollowed;
 DROP TABLE IF EXISTS placesFollowed;

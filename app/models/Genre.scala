@@ -10,7 +10,7 @@ import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 case class Genre (genreId: Option[Long], name: String, icon: Option[String] = None)
 
@@ -166,6 +166,29 @@ object Genre {
         case Some(genreFound) if genreFound.nonEmpty =>
           saveWithArtistRelation(new Genre(None, genreFound), artistId)
       }
+    }
+  }
+
+  def saveWithTrackRelation(genre: Genre, trackId: String, weight: Long): Try[Boolean] = save(genre) match {
+    case Some(genreId: Long) => saveTrackRelation(trackId, genreId, weight)
+    case _ => Failure(new DAOException("Genre.saveWithTrackRelation"))
+  }
+
+  def saveTrackRelation(trackId: String, genreId: Long, weight: Long): Try[Boolean] = Try {
+    DB.withConnection { implicit connection =>
+      SQL("""SELECT upsertTrackGenreRelation({trackId}, {genreId}, {weight})""")
+        .on(
+          'trackId -> trackId,
+          'genreId -> genreId,
+          'weight -> weight)
+        .execute()
+    }
+  }
+
+  def deleteTrackRelation(trackId: String, genreId: Long): Try[Int] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(s"""DELETE FROM tracksGenres WHERE trackId = $trackId AND genreId = $genreId""")
+        .executeUpdate()
     }
   }
 

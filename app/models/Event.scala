@@ -426,7 +426,7 @@ object Event {
   }
 
   def saveFacebookEventByFacebookId(eventFacebookId: String): Unit = try {
-    findEventOnFacebookByFacebookId(eventFacebookId).map { save }
+    findEventOnFacebookByFacebookId(eventFacebookId) map { save }
   } catch {
     case e: Exception => throw new Exception("Event.saveFacebookEventByFacebookId")
   }

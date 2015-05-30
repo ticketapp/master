@@ -160,7 +160,21 @@ object Track {
   } catch {
     case e: Exception => throw new DAOException("Track.findAllContaining: " + e.getMessage)
   }
-
+  
+  def findByGenre(genre: String, numberToReturn: Int, offset: Int): Try[Seq[Track]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        s"""SELECT a.*
+           |FROM tracksGenres aG
+           |  INNER JOIN tracks a ON a.trackId = aG.trackId
+           |  INNER JOIN genres g ON g.genreId = aG.genreId
+           |WHERE g.name = {genre}
+           |LIMIT $numberToReturn OFFSET $offset""".stripMargin)
+        .on('genre -> genre)
+        .as(trackParser.*)
+    }
+  }
+  
   def save(track: Track): Try[Boolean] = Try {
     DB.withConnection { implicit connection =>
       SQL(
