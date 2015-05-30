@@ -175,6 +175,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                         street: place.location.street
                     }
                 };
+                console.log(newPlace)
                 PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                     if (isCreated != 'error') {
                         getOrganizerEvents(newPlace.facebookId);
@@ -349,7 +350,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                     next = data.events.paging.next
                 }
                 eventsLength = data.events.data.length;
-            } else {
+            } else if (data.data !== undefined) {
                 events = data.data;
                 if (data.paging != undefined) {
                     next = data.paging.next;

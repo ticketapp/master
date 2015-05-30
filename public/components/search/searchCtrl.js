@@ -304,6 +304,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 $scope.limit = 12;
                 offset = 0;
                 if (newName == true) {
+                    _selPlace = false;
+                    _selEvent = false;
+                    _selOrganizer = false;
                     $scope.loadingMore = true;
                     if (_research.length == 0) {
                         if ($rootScope.connected == true && offset == 0) {
@@ -340,6 +343,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 offset = 0;
                 if (newName == true) {
                     $scope.loadingMore = true;
+                    _selArtist = false;
+                    _selPlace = false;
+                    _selOrganizer = false;
                     if (_research.length == 0) {
                         $scope.initializeTime()
                         getEvents()
@@ -363,6 +369,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 offset = 0;
                 if (newName == true) {
                     $scope.loadingMore = true;
+                    _selArtist = false;
+                    _selEvent = false;
+                    _selOrganizer = false;
                     if (_research.length == 0) {
                         getPlaces()
                     } else {
@@ -381,6 +390,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 $scope.limit = 12;
                 offset = 0;
                 if (newName == true) {
+                    _selArtist = false;
+                    _selEvent = false;
+                    _selPlace = false;
                     $scope.loadingMore = true;
                     if (_research.length == 0) {
                         getOrganizers()
