@@ -33,28 +33,33 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
     "be followed and unfollowed by a user" in {
       val eventId = save(event).get
+      try {
+        if (follow("userTestId", eventId).isFailure)
+          throw new Exception("Event not followed")
 
-      if (follow("userTestId", 1).isFailure)
-        throw new Exception("Event not followed")
-
-      isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
-      unfollow("userTestId", 1) mustBe Success(1)
-
-      delete(eventId)
+        isFollowed(IdentityId("userTestId", "oauth2"), eventId) mustBe true
+        unfollow("userTestId", eventId) mustBe Success(1)
+      } finally {
+        delete(eventId)
+      }
     }
 
     "not be followed twice" in {
       val eventId = save(event).get
+      try {
 
-      if (follow("userTestId", 1).isFailure)
-        throw new Exception("Event not followed")
-      follow("userTestId", 1) match {
-        case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
-        case _ => throw new Exception("follow twice a user worked !")
+        if (follow("userTestId", eventId).isFailure)
+          throw new Exception("Event not followed")
+
+        follow("userTestId", eventId) match {
+          case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
+          case _ => throw new Exception("follow twice a user worked !")
+        }
+
+      } finally {
+        unfollow("userTestId", eventId)
+        delete(eventId)
       }
-      unfollow("userTestId", 1) mustBe Success(1)
-
-      delete(eventId)
     }
 
     "be found on facebook by a facebookId" in {
@@ -106,16 +111,18 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         timeout(Span(2, Seconds))) { tryPlaceId =>
         val placeId = tryPlaceId.get.get
 
-        Place.saveEventRelation(eventId, placeId) mustBe true
-        Place.saveEventRelation(passedEventId, placeId) mustBe true
+        try {
+          Place.saveEventRelation(eventId, placeId) mustBe true
+          Place.saveEventRelation(passedEventId, placeId) mustBe true
 
-        findAllByPlace(placeId).head.name mustBe "name"
-        findAllPassedByPlace(placeId).head.name mustBe "passed event"
-
-        Place.deleteEventRelation(eventId, placeId) mustBe Success(1)
-        Place.deleteEventRelation(passedEventId, placeId) mustBe Success(1)
-        delete(eventId) mustBe 1
-        delete(passedEventId) mustBe 1
+          findAllByPlace(placeId).head.name mustBe "name"
+          findAllPassedByPlace(placeId).head.name mustBe "passed event"
+        } finally {
+          Place.deleteEventRelation(eventId, placeId)
+          Place.deleteEventRelation(passedEventId, placeId)
+          delete(eventId)
+          delete(passedEventId)
+        }
       }
     }
 
@@ -148,7 +155,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         Option("description"), new Date(0), Option(new Date()), 16, None, None, None, List.empty, List.empty,
         List.empty, List.empty, List.empty, List.empty)).get
 
-      val organizerId = Organizer.save(Organizer(None, Option("facebookId2"), "organizerTest2")).get.get
+      val organizerId = Organizer.save(Organizer(None, Option("facebookId10"), "organizerTest2")).get.get
 
       Organizer.saveEventRelation(eventId, organizerId) mustBe true
       Organizer.saveEventRelation(passedEventId, organizerId) mustBe true

@@ -22,7 +22,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
   "An Artist" must {
 
     "be saved and deleted in database and return the new id" in {
-      val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+      val artist = Artist(None, Option("facebookIdArtistTest"), "artistTest", Option("imagePath"), Option("description"),
         "facebookUrl", Set("website"))
       save(artist) match {
         case None =>
@@ -34,28 +34,49 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "be followed and unfollowed by a user" in {
-      followByArtistId("userTestId", 1)
-      isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
-      unfollowByArtistId("userTestId", 1) mustBe Success(1)
+      val artist = Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
+        "facebookUrl3", Set("website"))
+      val artistId = Artist.save(artist).get
+
+      try {
+        followByArtistId("userTestId", artistId)
+        isFollowed(IdentityId("userTestId", "oauth2"), artistId) mustBe true
+        unfollowByArtistId("userTestId", artistId) mustBe Success(1)
+      } finally {
+        Artist.delete(artistId)
+      }
     }
 
     "not be followed twice" in {
-      followByArtistId("userTestId", 1)
-      followByArtistId("userTestId", 1) match {
-        case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
-        case _ => throw new Exception("follow twice an artist worked !")
+      val artist = Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
+        "facebookUrl3", Set("website"))
+      val artistId = Artist.save(artist).get
+
+      try {
+        followByArtistId("userTestId", artistId)
+        followByArtistId("userTestId", artistId) match {
+          case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
+          case _ => throw new Exception("follow twice an artist worked !")
+        }
+      } finally {
+        unfollowByArtistId("userTestId", artistId)
+        Artist.delete(artistId)
       }
-      unfollowByArtistId("userTestId", 1) mustBe Success(1)
     }
 
     "be updated" in {
-      val artistInDatabase = find(1)
-      val updatedArtist = artistInDatabase.get.copy(name = "updatedName")
-      update(updatedArtist)
+      val artist = Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
+        "facebookUrl3", Set("website"))
+      val artistId = Artist.save(artist)
 
-      find(1) mustBe Option(updatedArtist)
+      try {
+        val updatedArtist = artist.copy(artistId = artistId, name = "updatedName")
+        update(updatedArtist)
 
-      find(update(artistInDatabase.get)) mustBe artistInDatabase
+        find(artistId.get) mustBe Option(updatedArtist)
+      } finally {
+        Artist.delete(artistId.get)
+      }
     }
 
     "have his websites updated" in {
@@ -63,10 +84,14 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
         "facebookUrl2", Set("website"))
       val artistId = Artist.save(artist)
 
-      addWebsite(artistId, "normalizedUrl")
+      try {
+        addWebsite(artistId, "normalizedUrl")
 
-      find(artistId.get) mustBe Option(artist.copy(artistId = artistId, websites = Set("website", "normalizedUrl")))
-      delete(artistId.get) mustBe 1
+        find(artistId.get) mustBe Option(artist.copy(artistId = artistId, websites = Set("website", "normalizedUrl")))
+
+      } finally {
+        delete(artistId.get)
+      }
     }
 
     "have another website" in {

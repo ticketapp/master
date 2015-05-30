@@ -34,9 +34,11 @@ object Place {
                 imagePath: Option[String], street: Option[String], zip: Option[String], city: Option[String]): Place = {
     try {
       val address = Option(Address(None, None, city, zip, street))
+      println("formApply address" + address)
       new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, address)
     } catch {
       case e: IllegalArgumentException =>
+        println("empty address")
         new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, None)
     }
   }
@@ -73,9 +75,11 @@ object Place {
   }
 
   def save(place: Place): Future[Try[Option[Long]]] = {
+    println(place.address)
     val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
     eventuallyAddressId map {
       case Success(addressId) =>
+        println(addressId)
         DB.withConnection { implicit connection =>
           Try {
             SQL(
@@ -87,7 +91,7 @@ object Place {
                 'addressId -> addressId,
                 'facebookId -> place.facebookId,
                 'description -> place.description,
-                'webSites -> Utilities.websiteSetToString(getNormalizedWebsitesInText(place.webSites)),
+                'webSites -> Utilities.setToOptionString(getNormalizedWebsitesInText(place.webSites)),
                 'capacity -> place.capacity,
                 'openingHours -> place.openingHours,
                 'imagePath -> place.imagePath,
@@ -162,23 +166,14 @@ object Place {
     case e: Exception => throw new DAOException("Place.findAllByEvent: " + e.getMessage)
   }
 
-  def findAllAsTupleIdFacebookIdAndGeographicPoint: Seq[(Long, String, Option[String])] = try {
-    val placeIdFacebookIdParser = {
-      get[Long]("placeId") ~
-        get[String]("facebookId") ~
-        get[Option[String]]("geographicPoint") map {
-        case placeId ~ facebookId ~ geographicPoint => (placeId, facebookId, geographicPoint)
-      }
-    }
+  def findAllWithFacebookId: Try[List[Place]] = Try {
     DB.withConnection { implicit connection =>
       SQL(
-        """SELECT placeId, facebookId, geographicPoint 
-          |FROM places 
-          |WHERE facebookId IS NOT NULL""".stripMargin)
-        .as(placeIdFacebookIdParser.*)
+        """SELECT *
+          |  FROM places 
+          |  WHERE facebookId IS NOT NULL""".stripMargin)
+        .as(PlaceParser.*)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Place.findAllIdsAndFacebookIds: " + e.getMessage)
   }
 
   def findAllContaining(pattern: String): Seq[Place] = try {

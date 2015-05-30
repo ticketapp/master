@@ -29,6 +29,13 @@ import scala.util.{Failure, Success}
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
   "An address" must {
 
+    "not be created if empty" in {
+      Address(None, None, Some("jkl"), None, None)
+      Address(None, None, None, Some("jkl"), None)
+      Address(None, None, None, None, Some("jkl"))
+      an [java.lang.IllegalArgumentException] should be thrownBy Option(Address(None, None, None, None, None))
+    }
+
     "be saved in lowercase and deleted in database and return the new id" in {
       val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
       val addressId = save(Option(address)).get
@@ -62,13 +69,9 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "not be created if empty" in {
-      an [java.lang.IllegalArgumentException] should be thrownBy Option(Address(None, None, None, None, None))
-    }
-
     "get a geographicPoint" in {
-      val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("avignas"))
-      whenReady(getGeographicPoint(address.copy(geographicPoint = None)), timeout(Span(2, Seconds))) { address =>
+      val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
+      whenReady(getGeographicPoint(address), timeout(Span(2, Seconds))) { address =>
         address.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
       }
     }

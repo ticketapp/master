@@ -9,7 +9,6 @@ import play.api.libs.ws.Response
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import models._
-import models.Event.findEventOnFacebookByFacebookId
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import services.Utilities
@@ -23,17 +22,13 @@ object Scheduler {
   val token = play.Play.application.configuration.getString("facebook.token")
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
 
-  def start(): Unit = Place.findAllAsTupleIdFacebookIdAndGeographicPoint.map {
-    placeIdAndFacebookId: (Long, String, Option[String]) =>
-      saveEventsOfPlace(placeIdAndFacebookId._1, placeIdAndFacebookId._2, placeIdAndFacebookId._3)
-  }
-
-  def saveEventsOfPlace(placeId: Long, placeFacebookId: String, placeGeographicPoint: Option[String]): Unit
-  = getEventsIdsByPlace(placeFacebookId).map {
-    _.map { eventId =>
-      findEventOnFacebookByFacebookId(eventId) map { saveEvent(_, placeId, placeGeographicPoint) }
-    }
-  }
+  def start(): Unit = Place.findAllWithFacebookId map { _ map { place =>
+    getEventsIdsByPlace(place.facebookId.get) map { _.map { eventId =>
+      Event.findEventOnFacebookByFacebookId(eventId) map {
+        saveEvent(_, place.placeId.get, place.geographicPoint)
+      }
+    }}
+  }}
 
   def getEventsIdsByPlace(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
@@ -46,11 +41,12 @@ object Scheduler {
     val organizerAddressWithGeographicPoint = Address.getGeographicPoint(facebookEvent.organizers.head.address.get)
     organizerAddressWithGeographicPoint.map { organizerAddress =>
       val organizerWithGeographicPoint = facebookEvent.organizers.head.copy(address = Option(organizerAddress),
-          geographicPoint = organizerAddress.geographicPoint)
+        geographicPoint = organizerAddress.geographicPoint)
 
       Event.save(facebookEvent.copy(geographicPoint = placeGeographicPoint,
         organizers = List(organizerWithGeographicPoint))) match {
-        case None => Event.update(facebookEvent)
+        case None =>
+          Event.update(facebookEvent)
         case Some(eventId) =>
           Place.saveEventRelation(eventId, placeId)
           facebookEvent.addresses.map { address => Address.saveAddressAndEventRelation(address, eventId) }
