@@ -1,12 +1,14 @@
+import java.util.UUID._
+
 import controllers.DAOException
 import org.scalatest.Matchers
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import models.{Artist, Genre}
+import models.{Artist, Genre, Track}
 import models.Genre._
 import org.scalatestplus.play._
 import Matchers._
 
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 class TestGenreModel extends PlaySpec with OneAppPerSuite {
 
@@ -48,5 +50,30 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
+    "save and delete its relation with a track" in {
+      val genre = Genre(None, "rockadocka", Option("r"))
+      save(genre) match {
+        case Some(genreId: Long) =>
+          val trackId = randomUUID.toString
+          val track = Track(trackId, "title", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+
+          Track.save(track) match {
+            case Success(true) =>
+              try {
+
+                Genre.saveTrackRelation(trackId, genreId, 5) mustBe true
+                Track.findByGenre("rockadocka", 1, 0).get should not be empty
+                Genre.deleteTrackRelation(trackId, genreId) mustBe Success(0)
+
+              } finally {
+                Track.delete(trackId)
+                delete(genreId)
+              }
+            case _ => throw new Exception
+          }
+        case _ =>
+          throw new Exception("genre could not be saved")
+      }
+    }
   }
 }

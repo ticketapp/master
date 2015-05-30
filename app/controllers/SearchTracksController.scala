@@ -30,7 +30,7 @@ object SearchTracksController extends Controller {
     }
   }
 
-  def getYoutubeTrackInfos(youtubeId: String) = Action.async {
+  def getYoutubeTrackInfo(youtubeId: String) = Action.async {
     WS.url("http://www.youtube.com/get_video_info")
       .withQueryString(
         "video_id" -> youtubeId,

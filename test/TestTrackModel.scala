@@ -2,6 +2,7 @@ import org.postgresql.util.PSQLException
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import models._
 import models.Track._
+import play.api.Logger
 import securesocial.core.IdentityId
 import org.scalatestplus.play._
 import org.scalatest._
@@ -25,10 +26,10 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
   }
 
   "A track" must {
-
-    "be able to be saved and deleted" in {
+/*
+    "be saved and deleted" in {
       val trackId = randomUUID.toString
-      val track = Track(trackId, "title", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
 
       save(track) mustBe Success(true)
       find(trackId) mustEqual Success(Option(track.copy(trackId = trackId, confidence = Some(0))))
@@ -38,22 +39,24 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     "not be saved twice for same title and artistName" in {
       val trackId = randomUUID.toString
       val trackId2 = randomUUID.toString
-      val track = Track(trackId, "title", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-      val track2 = Track(trackId2, "title", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track = Track(trackId, "title2", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track2 = Track(trackId2, "title2", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
 
-      save(track)
-      save(track2) match {
-        case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-        case _ =>
-          throw new Exception("save twice a track with same title and artist name worked!")
+      try {
+        save(track)
+        save(track2) match {
+          case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+          case _ =>
+            throw new Exception("save twice a track with same title and artist name worked!")
+        }
+      } finally {
+        delete(trackId)
       }
-
-      delete(trackId)
     }
 
-    "be able to be rated up by a user" in {
+    "be rated up by a user" in {
       val trackId = randomUUID.toString
-      save(Track(trackId, "title", "url1", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
+      save(Track(trackId, "title4", "url1", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
 
       try {
         upsertRatingUp("userTestId", trackId, 1) mustBe Success(true)
@@ -63,16 +66,14 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         getRatingForUser("userTestId", trackId) mustBe Success(Some(3, 0))
 
         deleteRatingForUser("userTestId", trackId) mustBe Success(1)
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(trackId)
       }
     }
 
-    "be able to be rated down by a user" in {
+    "be rated down by a user" in {
       val trackId = randomUUID.toString
-      save(Track(trackId, "title", "url2", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
+      save(Track(trackId, "title5", "url2", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
 
       try {
         upsertRatingDown("userTestId", trackId, -1) mustBe Success(true)
@@ -82,24 +83,20 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         getRatingForUser("userTestId", trackId) mustBe Success(Some(0,3))
 
         deleteRatingForUser("userTestId", trackId) mustBe Success(1)
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(trackId)
       }
     }
 
-    "be able to be added to favorites and deleted from favorites" in {
+    "be added to favorites and deleted from favorites" in {
       val trackId = randomUUID.toString
-      val track = Track(trackId, "title", "url3", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track = Track(trackId, "title6", "url3", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       save(track)
 
       try {
         addToFavorites("userTestId", trackId) mustBe Success(1)
         findFavorites("userTestId") mustBe Success(Seq(track.copy(confidence = Some(0))))
         removeFromFavorites("userTestId", trackId) mustBe Success(1)
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(trackId)
       }
@@ -107,7 +104,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
 
     "update rating up&down and confidence" in {
       val newTrackId = randomUUID.toString
-      val track = Track(newTrackId, "title", "url5", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track = Track(newTrackId, "title7", "url5", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       save(track)
 
       try {
@@ -121,8 +118,6 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
 
         getRating(newTrackId) mustBe Success(Some(8, 7))
         find(newTrackId) mustEqual Success(Option(track.copy(confidence = Some(-15))))
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(newTrackId)
       }
@@ -130,7 +125,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
 
     "get ratings up and down" in {
       val trackId = randomUUID.toString
-      save(Track(trackId, "title", "url4", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
+      Logger.info("get ratings up and down " + save(Track(trackId, "title9", "url8", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")).toString)
 
       try {
         getRating(trackId) mustBe Success(Some((0,0)))
@@ -140,8 +135,6 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
 
         updateRating(trackId, -1000) mustBe Success(calculateConfidence(5,1000))
         getRating(trackId) mustBe Success(Some((5,1000)))
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(trackId)
       }
@@ -157,8 +150,8 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
 
     "have his confidence updated" in {
       val newTrackId = randomUUID.toString
-      val track = Track(newTrackId, "title", "url6", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-      save(track)
+      val track = Track(newTrackId, "title10", "url6", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      Logger.info("have his confidence updated " + save(track).toString)
 
       try {
         var confidence = calculateConfidence(5000, 0)
@@ -170,18 +163,18 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         updateRating(newTrackId, -2000) mustBe Success(confidence)
         find(newTrackId) mustEqual Success(Option(track.copy(confidence = Some(confidence))))
         getRating(newTrackId) mustBe Success(Some((5000, 2000)))
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(newTrackId)
       }
     }
 
     "find all tracks sorted by confidence for an artist" in {
+      val artist = Artist(None, None, "artistTest2", None, None, "artistFacebookUrlTestTrack2", Set("website"))
+      val artistId = Artist.save(artist).get
       val newTrackId = randomUUID.toString
       val newTrackId2 = randomUUID.toString
-      val track = Track(newTrackId, "title", "url7", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-      val track2 = Track(newTrackId2, "title2", "url8", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track = Track(newTrackId, "title11", "url7", 's', "thumbnailUrl", "artistFacebookUrlTestTrack2", "artistName")
+      val track2 = Track(newTrackId2, "title12", "url9", 's', "thumbnailUrl", "artistFacebookUrlTestTrack2", "artistName")
       save(track)
       save(track2)
 
@@ -190,29 +183,45 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
 
         findAllByArtist(artist.facebookUrl, 0, 0) should contain theSameElementsInOrderAs
           Seq(track.copy(confidence = Some(calculateConfidence(5000, 0))), track2.copy(confidence = Some(0)))
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(newTrackId)
         delete(newTrackId2)
+        Artist.delete(artistId)
       }
     }
 
     "find n (numberToReturn) tracks for an artist" in {
       val newTrackId = randomUUID.toString
       val newTrackId2 = randomUUID.toString
-      val track = Track(newTrackId, "title", "url7", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-      val track2 = Track(newTrackId2, "title2", "url8", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track = Track(newTrackId, "title13", "url7", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track2 = Track(newTrackId2, "title14", "url10", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       save(track)
       save(track2)
 
       try {
         findAllByArtist(artist.facebookUrl, 1, 1) should have length 1
-      } catch {
-        case e: Exception => throw e
       } finally {
         delete(newTrackId)
-        delete(newTrackId2)
+      }
+    }
+*/
+    "save and delete genre relation and find tracks by its genre" in {
+      val newTrackId = randomUUID.toString
+      val track = Track(newTrackId, "title15", "url11", 's', "thumbnailUrl", "artistFacebookUrlTestTrack",
+        "artistName", None, Some(0))
+      Logger.info("save and delete genre relation: save track " + save(track).toString)
+      val genre = Genre(None, "rockoudockou", Option("r"))
+      val genreId = Genre.save(genre).get
+
+      try {
+        Genre.saveTrackRelation(newTrackId, genreId, 100) mustBe Success(1)
+
+        findByGenre("rockoudockou", numberToReturn = 5, offset = 0) mustBe Success(Seq(track))
+
+        Genre.deleteTrackRelation(newTrackId, genreId) mustBe Success(1)
+      } finally {
+        Logger.info("save and delete genre relation: delete track " + delete(newTrackId).toString)
+        Logger.info("save and delete genre relation: delete genre " + Genre.delete(genreId).toString)
       }
     }
   }
