@@ -117,7 +117,7 @@ object SearchYoutubeTracks {
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
           if isArtistNameInTrackTitle(title, artist.name) =>
-          Track(randomUUID.toString, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl,
+          Track(randomUUID, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl,
             artist.name)
       }
     }

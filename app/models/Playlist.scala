@@ -1,6 +1,8 @@
 package models
 
 import java.sql.Connection
+import java.util.UUID
+import java.util.UUID._
 
 import anorm.SqlParser._
 import anorm._
@@ -17,12 +19,12 @@ case class Playlist(playlistId: Option[Long], userId: String, name: String, trac
 
 object Playlist {
 
-  case class TrackIdAndRank(id: String, rank: BigDecimal)
-  def idAndRankFormApply(id: String, rank: BigDecimal) = TrackIdAndRank(id, rank)
-  def idAndRankFormUnapply(trackIdAndRank: TrackIdAndRank) = Option((trackIdAndRank.id, trackIdAndRank.rank))
+  case class TrackUUIDAndRank(UUID: UUID, rank: BigDecimal)
+  def idAndRankFormApply(stringUUID: String, rank: BigDecimal) = TrackUUIDAndRank(UUID.fromString(stringUUID), rank)
+  def idAndRankFormUnapply(trackIdAndRank: TrackUUIDAndRank) = Option((trackIdAndRank.UUID.toString, trackIdAndRank.rank))
 
-  case class PlaylistNameTracksIdAndRank(name: String, tracksIdAndRank: Seq[TrackIdAndRank])
-  def formApply(name: String, tracksIdAndRank: Seq[TrackIdAndRank]) =
+  case class PlaylistNameTracksIdAndRank(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank])
+  def formApply(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank]) =
     PlaylistNameTracksIdAndRank(name, tracksIdAndRank)
   def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
     Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
@@ -113,14 +115,14 @@ object Playlist {
       }
   }
 
-  def saveTrackRelation(playlistId: Long, trackIdAndRank: TrackIdAndRank): Option[Long] = try {
+  def saveTrackRelation(playlistId: Long, trackIdAndRank: TrackUUIDAndRank): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """INSERT INTO playlistsTracks (playlistId, trackId, trackRank)
           |  VALUES ({playlistId}, {trackId}, {trackRank})""".stripMargin)
         .on(
           'playlistId -> playlistId,
-          'trackId -> trackIdAndRank.id,
+          'trackId -> trackIdAndRank.UUID,
           'trackRank -> trackIdAndRank.rank.bigDecimal)
         .executeInsert()
     }
@@ -128,7 +130,7 @@ object Playlist {
     case e: Exception => throw new DAOException("Track.saveTrackRelation: " + e.getMessage)
   }
 
-  def deleteTrackRelation(playlistId: Long, trackId: String): Long = try {
+  def deleteTrackRelation(playlistId: Long, trackId: UUID): Long = try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM playlistsTracks
@@ -140,11 +142,11 @@ object Playlist {
     case e: Exception => throw new DAOException("deleteTrackRelation: " + e.getMessage)
   }
 
-  case class TrackInfo(trackId: String, action: String, trackRank: Option[BigDecimal])
+  case class TrackInfo(trackId: UUID, action: String, trackRank: Option[BigDecimal])
   def trackInfoFormApply(trackId: String, action: String, trackRank: Option[BigDecimal]) =
-    TrackInfo(trackId, action, trackRank)
+    TrackInfo(UUID.fromString(trackId), action, trackRank)
   def trackInfoFormUnapply(trackInfo: TrackInfo) =
-    Option((trackInfo.trackId, trackInfo.action, trackInfo.trackRank))
+    Option((trackInfo.trackId.toString, trackInfo.action, trackInfo.trackRank))
 
   case class PlaylistIdAndTracksInfo(id: Long, tracksInfo: Seq[TrackInfo])
   def updateFormApply(id: Long, tracksInfo: Seq[TrackInfo]) =
@@ -184,7 +186,7 @@ object Playlist {
       deleteTrackRelation(playlistId, trackToDelete.trackId)
     case trackToAdd: TrackInfo if trackInfo.action == "A" =>
       try {
-        saveTrackRelation(playlistId, TrackIdAndRank(trackToAdd.trackId, trackToAdd.trackRank.get))
+        saveTrackRelation(playlistId, TrackUUIDAndRank(trackToAdd.trackId, trackToAdd.trackRank.get))
       } catch {
         case e: NoSuchElementException => PlaylistUpdateTrackWithoutRankException("Playlist.update")
       }

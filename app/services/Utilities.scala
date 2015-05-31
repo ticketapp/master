@@ -2,7 +2,7 @@ package services
 
 import java.sql.Connection
 import java.text.Normalizer
-import java.util.Date
+import java.util.{UUID, Date}
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
@@ -41,6 +41,19 @@ object Utilities {
       case d: Any => Right(d.toString)
       case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass +
         " to String for column " + qualified) )
+    }
+  }
+
+//  implicit def uuidToStatement = new ToStatement[UUID] {
+//    def set(s: java.sql.PreparedStatement, index: Int, aValue: UUID): Unit = s.setObject(index, aValue)
+//  }
+
+  implicit def rowToUUID: Column[UUID] = {
+    Column.nonNull[UUID] { (value, meta) =>
+      value match {
+        case v: UUID => Right(v)
+        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value:${value.asInstanceOf[AnyRef].getClass} to UUID for column ${meta.column}"))
+      }
     }
   }
 

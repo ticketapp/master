@@ -28,7 +28,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
   "A track" must {
 
     "be saved and deleted" in {
-      val trackId = randomUUID.toString
+      val trackId = randomUUID
       val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
 
       save(track) mustBe Success(true)
@@ -37,8 +37,8 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "not be saved twice for same title and artistName" in {
-      val trackId = randomUUID.toString
-      val trackId2 = randomUUID.toString
+      val trackId = randomUUID
+      val trackId2 = randomUUID
       val track = Track(trackId, "title2", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       val track2 = Track(trackId2, "title2", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
 
@@ -55,7 +55,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "be rated up by a user" in {
-      val trackId = randomUUID.toString
+      val trackId = randomUUID
       save(Track(trackId, "title4", "url1", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
 
       try {
@@ -72,7 +72,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "be rated down by a user" in {
-      val trackId = randomUUID.toString
+      val trackId = randomUUID
       save(Track(trackId, "title5", "url2", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
 
       try {
@@ -89,7 +89,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "be added to favorites and deleted from favorites" in {
-      val trackId = randomUUID.toString
+      val trackId = randomUUID
       val track = Track(trackId, "title6", "url3", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       save(track)
 
@@ -103,7 +103,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "update rating up&down and confidence" in {
-      val newTrackId = randomUUID.toString
+      val newTrackId = randomUUID
       val track = Track(newTrackId, "title7", "url5", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       save(track)
 
@@ -124,7 +124,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "get ratings up and down" in {
-      val trackId = randomUUID.toString
+      val trackId = randomUUID
       Logger.info("get ratings up and down " + save(Track(trackId, "title9", "url8", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")).toString)
 
       try {
@@ -149,7 +149,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "have his confidence updated" in {
-      val newTrackId = randomUUID.toString
+      val newTrackId = randomUUID
       val track = Track(newTrackId, "title10", "url6", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       Logger.info("have his confidence updated " + save(track).toString)
 
@@ -171,8 +171,8 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     "find all tracks sorted by confidence for an artist" in {
       val artist = Artist(None, None, "artistTest2", None, None, "artistFacebookUrlTestTrack2", Set("website"))
       val artistId = Artist.save(artist).get
-      val newTrackId = randomUUID.toString
-      val newTrackId2 = randomUUID.toString
+      val newTrackId = randomUUID
+      val newTrackId2 = randomUUID
       val track = Track(newTrackId, "title11", "url7", 's', "thumbnailUrl", "artistFacebookUrlTestTrack2", "artistName")
       val track2 = Track(newTrackId2, "title12", "url9", 's', "thumbnailUrl", "artistFacebookUrlTestTrack2", "artistName")
       save(track)
@@ -191,8 +191,8 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "find n (numberToReturn) tracks for an artist" in {
-      val newTrackId = randomUUID.toString
-      val newTrackId2 = randomUUID.toString
+      val newTrackId = randomUUID
+      val newTrackId2 = randomUUID
       val track = Track(newTrackId, "title13", "url7", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       val track2 = Track(newTrackId2, "title14", "url10", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       save(track)
@@ -202,26 +202,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         findAllByArtist(artist.facebookUrl, 1, 1) should have length 1
       } finally {
         delete(newTrackId)
-      }
-    }
-
-    "save and delete genre relation and find tracks by its genre" in {
-      val newTrackId = randomUUID.toString
-      val track = Track(newTrackId, "title15", "url11", 's', "thumbnailUrl", "artistFacebookUrlTestTrack",
-        "artistName", None, Some(0))
-      Logger.info("save and delete genre relation: save track " + save(track).toString)
-      val genre = Genre(None, "rockoudockou", Option("r"))
-      val genreId = Genre.save(genre).get
-
-      try {
-        Genre.saveTrackRelation(newTrackId, genreId, 100) mustBe Success(1)
-
-        findByGenre("rockoudockou", numberToReturn = 5, offset = 0) mustBe Success(Seq(track))
-
-        Genre.deleteTrackRelation(newTrackId, genreId) mustBe Success(1)
-      } finally {
-        Logger.info("save and delete genre relation: delete track " + delete(newTrackId).toString)
-        Logger.info("save and delete genre relation: delete genre " + Genre.delete(genreId).toString)
+        delete(newTrackId2)
       }
     }
   }

@@ -1,5 +1,7 @@
 package controllers
 
+import java.util.UUID
+
 import models.Track
 import org.postgresql.util.PSQLException
 import play.api.Logger
@@ -57,14 +59,15 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
 
   def upsertRatingForUser(trackId: String, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
+    val trackIdUUID = UUID.fromString(trackId)
     rating match {
       case ratingUp if ratingUp > 0 =>
-        Track.upsertRatingUp(userId, trackId, ratingUp) match {
+        Track.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
           case Success(true) => Ok
           case _ => InternalServerError
         }
       case ratingDown if ratingDown < 0 =>
-        Track.upsertRatingDown(userId, trackId, ratingDown) match {
+        Track.upsertRatingDown(userId, trackIdUUID, ratingDown) match {
           case Success(true) => Ok
           case _ => InternalServerError
         }
@@ -74,7 +77,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
 
   def getRatingForUser(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
-    Track.getRatingForUser(userId, trackId) match {
+    Track.getRatingForUser(userId, UUID.fromString(trackId)) match {
       case Success(Some(rating)) => Ok(Json.toJson(rating._1.toString + "," + rating._2.toString))
       case _ => InternalServerError
     }
@@ -82,7 +85,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
 
   def addToFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
-    Track.addToFavorites(userId, trackId) match {
+    Track.addToFavorites(userId, UUID.fromString(trackId)) match {
       case Success(1) =>
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
@@ -97,7 +100,7 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
 
   def removeFromFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
-    Track.removeFromFavorites(userId, trackId) match {
+    Track.removeFromFavorites(userId, UUID.fromString(trackId)) match {
       case Success(1) =>
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>

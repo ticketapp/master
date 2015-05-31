@@ -38,13 +38,13 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
     }
 
     "be able to be saved with its tracks, rendered sorted by rank and deleted" in {
-      val trackId1 = randomUUID.toString
+      val trackId1 = randomUUID
       val track1 = Track(trackId1, "title", "urlPlaylistTest", 's', "thumbnailUrl",
         "artistFacebookUrlTestPlaylistModel", "name", None)
-      val trackId2 = randomUUID.toString
+      val trackId2 = randomUUID
       val track2 = Track(trackId2, "title2", "urlPlaylistTest2", 's', "thumbnailUrl",
         "artistFacebookUrlTestPlaylistModel", "name", None, Some(0), Some(1))
-      val trackId3 = randomUUID.toString
+      val trackId3 = randomUUID
       val track3 = Track(trackId3, "title3", "urlPlaylistTest3", 's', "thumbnailUrl",
         "artistFacebookUrlTestPlaylistModel", "name", None, Some(0), Some(2))
       Track.save(track1)
@@ -55,7 +55,7 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
 
         val playlistId = Playlist.saveWithTrackRelation("userTestId",
           PlaylistNameTracksIdAndRank("name",
-            Seq(TrackIdAndRank(trackId1, 0), TrackIdAndRank(trackId2, 2), TrackIdAndRank(trackId3, 1))))
+            Seq(TrackUUIDAndRank(trackId1, 0), TrackUUIDAndRank(trackId2, 2), TrackUUIDAndRank(trackId3, 1))))
 
         Track.findByPlaylistId(Some(playlistId)) mustBe Seq(
           track1.copy(confidence = Some(0), playlistRank =  Some(0)),

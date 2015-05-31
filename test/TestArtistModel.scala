@@ -22,15 +22,12 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
   "An Artist" must {
 
     "be saved and deleted in database and return the new id" in {
-      val artist = Artist(None, Option("facebookIdArtistTest"), "artistTest", Option("imagePath"), Option("description"),
+      val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"), Option("description"),
         "facebookUrl", Set("website"))
-      save(artist) match {
-        case None =>
-          throw new DAOException("TestArtists, error while saving artist ")
-        case Some(artistId: Long) =>
-          find(artistId) mustEqual Option(artist.copy(artistId = Some(artistId)))
-          delete(artistId) mustBe 1
-      }
+      val artistId = save(artist).get
+
+      find(artistId) mustBe Option(artist.copy(artistId = Some(artistId)))
+      delete(artistId) mustBe 1
     }
 
     "be followed and unfollowed by a user" in {
@@ -97,7 +94,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     "have another website" in {
       val artist = Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
         "facebookUrl3", Set("website"))
-      val maybeTrack = Option(Track(randomUUID.toString, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
+      val maybeTrack = Option(Track(randomUUID, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
         Option("redirectUrl")))
       val artistId = Artist.save(artist)
       val artistWithId = artist.copy(artistId = artistId)

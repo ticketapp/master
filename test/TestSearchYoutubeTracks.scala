@@ -73,7 +73,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
         Option("description"), "facebookUrl3", Set("website"))
 
-      val expectedTrack = Track(randomUUID.toString, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
+      val expectedTrack = Track(randomUUID, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
           "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
       whenReady(getYoutubeTracksByTitleAndArtistName(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
@@ -87,7 +87,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
         Option("description"), "facebookUrl3", Set("website"))
       val tracksTitle = Set("Le poinçonneur des Lilas")
 
-      val expectedTrack = Track(randomUUID.toString, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y',
+      val expectedTrack = Track(randomUUID, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y',
         "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
       whenReady(getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>

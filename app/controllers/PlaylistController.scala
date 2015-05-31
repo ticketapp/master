@@ -23,7 +23,7 @@ object PlaylistController extends Controller with securesocial.core.SecureSocial
   val playlistBindingForm = Form(mapping(
     "name" -> nonEmptyText,
     "tracksId" -> seq(mapping(
-      "trackId" -> nonEmptyText,
+      "trackId" -> nonEmptyText(6),
       "trackRank" -> bigDecimal
     )(Playlist.idAndRankFormApply)(Playlist.idAndRankFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))

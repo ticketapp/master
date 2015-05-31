@@ -7,72 +7,54 @@ import models.{Artist, Genre, Track}
 import models.Genre._
 import org.scalatestplus.play._
 import Matchers._
+import play.api.Logger
 
 import scala.util.{Failure, Success}
+import services.Utilities._
 
 class TestGenreModel extends PlaySpec with OneAppPerSuite {
 
   "A genre" must {
 
     "saved and deleted" in {
-      val genre = Genre(None, "rockadocka", Option("r"))
-      save(genre) match {
-        case Some(long: Long) => delete(long) mustBe 1
-        case _ => throw new Exception("genre could not be saved")
-      }
+      val genreId = save(Genre(None, "rockadocka", Option("r"))).get
+      delete(genreId) mustBe 1
     }
 
     "save and delete its relation with an artist" in {
-      val genre = Genre(None, "rockadocka", Option("r"))
-      save(genre) match {
-        case Some(genreId: Long) =>
-          val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
-            "facebookUrlGenre", Set("website"))
-          Artist.save(artist) match {
-            case None =>
-              throw new DAOException("TestArtists, error while saving artist ")
-            case Some(artistId: Long) =>
-              try {
+      val genre = Genre(None, "rockiyadockia", Option("r"))
+      val genreId = save(genre).get
+      val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+        "artistFacebookUrlTestGenre", Set("website"))
+      val artistId = Artist.save(artist).get
 
-                saveArtistRelation(artistId, genreId) mustBe true
-                Artist.findByGenre("rockadocka", 1, 0) should not be empty
-                deleteArtistRelation(artistId, genreId) mustBe Success(1)
-
-              } catch {
-                case e:Exception => throw e
-              } finally {
-                Artist.delete(artistId)
-                delete(genreId)
-              }
-          }
-        case _ =>
-          throw new Exception("genre could not be saved")
+      try {
+        saveArtistRelation(artistId, genreId) mustBe true
+        Artist.findByGenre("rockiyadockia", 1, 0) should not be empty
+        deleteArtistRelation(artistId, genreId) mustBe Success(1)
+      } finally {
+        delete(genreId)
+        Artist.delete(artistId)
       }
     }
 
     "save and delete its relation with a track" in {
-      val genre = Genre(None, "rockadocka", Option("r"))
-      save(genre) match {
-        case Some(genreId: Long) =>
-          val trackId = randomUUID.toString
-          val track = Track(trackId, "title", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val genre = Genre(None, "rockerdocker", Option("r"))
+      val genreId = save(genre).get
+      val trackId = randomUUID
+      val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+        "artistFacebookUrlTestGenre2", Set("website"))
+      val artistId = Artist.save(artist).get
+      Track.save(Track(trackId, "titleTestGenreModel1", "url", 's', "thumbnailUrl", "artistFacebookUrlTestGenre2", "artistName"))
 
-          Track.save(track) match {
-            case Success(true) =>
-              try {
-
-                Genre.saveTrackRelation(trackId, genreId, 5) mustBe true
-                Track.findByGenre("rockadocka", 1, 0).get should not be empty
-                Genre.deleteTrackRelation(trackId, genreId) mustBe Success(0)
-
-              } finally {
-                Track.delete(trackId)
-                delete(genreId)
-              }
-            case _ => throw new Exception
-          }
-        case _ =>
-          throw new Exception("genre could not be saved")
+      try {
+        saveTrackRelation(trackId, genreId, 5) mustBe Success(true)
+        Track.findByGenre("rockerdocker", 1, 0).get should not be empty
+        deleteTrackRelation(trackId, genreId) mustBe Success(1)
+      } finally {
+        Track.delete(trackId)
+        Artist.delete(artistId)
+        delete(genreId)
       }
     }
   }

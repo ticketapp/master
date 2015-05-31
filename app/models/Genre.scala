@@ -1,5 +1,7 @@
 package models
 
+import java.util.UUID
+
 import anorm.SqlParser._
 import anorm._
 import controllers._
@@ -129,7 +131,10 @@ object Genre {
 
   def deleteEventRelation(eventId: Long, genreId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
-      SQL(s"""DELETE FROM eventsGenres WHERE eventId = $eventId AND genreId = $genreId""")
+      SQL("""DELETE FROM eventsGenres WHERE eventId = {eventId} AND genreId = {genreId}""")
+        .on(
+          'eventId -> eventId,
+          'genreId -> genreId)
         .executeUpdate()
     }
   }
@@ -155,7 +160,10 @@ object Genre {
 
   def deleteArtistRelation(artistId: Long, genreId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
-      SQL(s"""DELETE FROM artistsGenres WHERE artistId = $artistId AND genreId = $genreId""")
+      SQL("""DELETE FROM artistsGenres WHERE artistId = {artistId} AND genreId = {genreId}""")
+        .on(
+          'artistId -> artistId,
+          'genreId -> genreId)
         .executeUpdate()
     }
   }
@@ -169,12 +177,12 @@ object Genre {
     }
   }
 
-  def saveWithTrackRelation(genre: Genre, trackId: String, weight: Long): Try[Boolean] = save(genre) match {
+  def saveWithTrackRelation(genre: Genre, trackId: UUID, weight: Long): Try[Boolean] = save(genre) match {
     case Some(genreId: Long) => saveTrackRelation(trackId, genreId, weight)
     case _ => Failure(new DAOException("Genre.saveWithTrackRelation"))
   }
 
-  def saveTrackRelation(trackId: String, genreId: Long, weight: Long): Try[Boolean] = Try {
+  def saveTrackRelation(trackId: UUID, genreId: Long, weight: Long): Try[Boolean] = Try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT upsertTrackGenreRelation({trackId}, {genreId}, {weight})""")
         .on(
@@ -185,9 +193,12 @@ object Genre {
     }
   }
 
-  def deleteTrackRelation(trackId: String, genreId: Long): Try[Int] = Try {
+  def deleteTrackRelation(trackId: UUID, genreId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
-      SQL(s"""DELETE FROM tracksGenres WHERE trackId = $trackId AND genreId = $genreId""")
+      SQL("""DELETE FROM tracksGenres WHERE trackId = {trackId} AND genreId = {genreId}""")
+        .on(
+          'trackId -> trackId,
+          'genreId -> genreId)
         .executeUpdate()
     }
   }

@@ -7,7 +7,7 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
-INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 91 avant la bêta :) :)');
+INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 88 avant la bêta :) :)');
 INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
 INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
 INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
@@ -15,6 +15,7 @@ INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau,
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
+
   geographicPoint           POINT NOT NULL
 );
 CREATE INDEX frenchCityGeographicPoints ON frenchCities USING GIST (geographicPoint);
@@ -27,7 +28,7 @@ CREATE TABLE addresses (
   zip                       VARCHAR(15),
   street                    VARCHAR
 );
-CREATE INDEX geographicPointAdresses ON addresses USING GIST (geographicPoint);
+CREATE INDEX geographicPointAddresses ON addresses USING GIST (geographicPoint);
 CREATE UNIQUE INDEX addressesIndex ON addresses (city, zip, street);
 CREATE OR REPLACE FUNCTION upsertAddress(
   geographicPointValue      VARCHAR(63),
@@ -161,7 +162,7 @@ LANGUAGE plpgsql;
 
 
 CREATE TABLE tracks (
-  trackId                 VARCHAR(255) NOT NULL,
+  trackId                 UUID NOT NULL,
   title                   VARCHAR(255) NOT NULL,
   url                     VARCHAR NOT NULL,
   platform                CHAR NOT NULL,
@@ -178,7 +179,7 @@ CREATE UNIQUE INDEX trackId ON tracks(trackId);
 CREATE UNIQUE INDEX artistNameAndTitle ON tracks(title, artistName);
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
-CREATE OR REPLACE FUNCTION insertTrack(trackIdValue VARCHAR(255),
+CREATE OR REPLACE FUNCTION insertTrack(trackIdValue UUID,
                                        titleValue VARCHAR(255),
                                        urlValue VARCHAR,
                                        platformValue CHAR,
@@ -361,7 +362,7 @@ CREATE TABLE images (
   category                  VARCHAR(31),
   organizerId               BIGINT REFERENCES organizers(organizerId),
   infoId                    BIGINT REFERENCES infos(infoId),
-  trackId                   VARCHAR(255) REFERENCES tracks(trackId),
+  trackId                   UUID REFERENCES tracks(trackId),
   UNIQUE(path)
 );
 
@@ -706,26 +707,26 @@ LANGUAGE plpgsql;
 
 
 CREATE TABLE tracksGenres (
-  trackId                 VARCHAR REFERENCES tracks (trackId) NOT NULL,
+  trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
   genreId                 INT REFERENCES genres (genreId) NOT NULL,
   weight                  BIGINT NOT NULL,
   PRIMARY KEY (genreId)
 );
 CREATE UNIQUE INDEX tracksGenresIndex ON tracksGenres (trackId, genreId);
-CREATE OR REPLACE FUNCTION upsertTrackGenreRelation(trackIdValue VARCHAR, genreIdValue BIGINT, weightValue BIGINT) RETURNS VOID AS
+CREATE OR REPLACE FUNCTION upsertTrackGenreRelation(
+  trackIdValue UUID,
+  genreIdValue BIGINT,
+  weightValue BIGINT)
+  RETURNS VOID AS
   $$
     BEGIN
-      LOOP
-        UPDATE tracksGenres SET weight = weightValue WHERE trackId = trackIdValue AND genreId = genreIdValue;;
-        IF found THEN
-          RETURN;;
-        END IF;;
-        BEGIN
-          INSERT INTO tracksGenres(trackId, genreId, weight) VALUES (trackIdValue, genreIdValue, weightValue);;
-          RETURN;;
-        EXCEPTION WHEN unique_violation THEN
-        END;;
-      END LOOP;;
+      UPDATE tracksGenres SET weight = weightValue WHERE trackId = trackIdValue AND genreId = genreIdValue;;
+      IF found THEN
+        RETURN;;
+      ELSE
+        INSERT INTO tracksGenres(trackId, genreId, weight) VALUES (trackIdValue, genreIdValue, weightValue);;
+        RETURN;;
+      END IF;;
     END;;
   $$
 LANGUAGE plpgsql;
@@ -740,17 +741,13 @@ CREATE TABLE artistsGenres (
 CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(artistIdValue BIGINT, genreIdValue BIGINT) RETURNS VOID AS
   $$
     BEGIN
-      LOOP
-        UPDATE artistsGenres SET counter = counter + 1 WHERE artistId = artistIdValue AND genreId = genreIdValue;;
-        IF found THEN
-          RETURN;;
-        END IF;;
-        BEGIN
-          INSERT INTO artistsGenres(artistId, genreId, counter) VALUES (artistIdValue, genreIdValue, 1);;
-          RETURN;;
-        EXCEPTION WHEN unique_violation THEN
-        END;;
-      END LOOP;;
+      UPDATE artistsGenres SET counter = counter + 1 WHERE artistId = artistIdValue AND genreId = genreIdValue;;
+      IF found THEN
+        RETURN;;
+      ELSE
+        INSERT INTO artistsGenres(artistId, genreId, counter) VALUES (artistIdValue, genreIdValue, 1);;
+        RETURN;;
+      END IF;;
     END;;
   $$
 LANGUAGE plpgsql;
@@ -767,7 +764,7 @@ CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);
 CREATE TABLE playlistsTracks (
   tableId                 SERIAL PRIMARY KEY,
   playlistId              BIGINT REFERENCES playlists (playlistId),
-  trackId                 VARCHAR(255) REFERENCES tracks (trackId),
+  trackId                 UUID REFERENCES tracks (trackId),
   trackRank               DOUBLE PRECISION NOT NULL
 );
 CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId);
@@ -776,7 +773,7 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
   userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
-  trackId                 VARCHAR(255) REFERENCES tracks (trackId) NOT NULL,
+  trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
   ratingUp                INT,
   ratingDown              INT,
   reason                  CHAR
@@ -784,45 +781,37 @@ CREATE TABLE tracksRating (
 CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
 CREATE OR REPLACE FUNCTION upsertTrackRatingUp(
   userIdValue     VARCHAR(255),
-  trackIdValue    VARCHAR(255),
+  trackIdValue    UUID,
   ratingUpValue   INT)
   RETURNS VOID AS
   $$
     BEGIN
-      LOOP
-        UPDATE tracksRating SET ratingUp = ratingUp + ratingUpValue
-          WHERE trackId = trackIdValue AND userId = userIdValue;;
-        IF found THEN
-          RETURN;;
-        END IF;;
-        BEGIN
-          INSERT INTO tracksRating(trackId, userId, ratingUp) VALUES (trackIdValue, userIdValue, ratingUpValue);;
-          RETURN;;
-        EXCEPTION WHEN unique_violation THEN
-        END;;
-      END LOOP;;
+      UPDATE tracksRating SET ratingUp = ratingUp + ratingUpValue
+        WHERE trackId = trackIdValue AND userId = userIdValue;;
+      IF found THEN
+        RETURN;;
+      ELSE
+        INSERT INTO tracksRating(trackId, userId, ratingUp) VALUES (trackIdValue, userIdValue, ratingUpValue);;
+        RETURN;;
+      END IF;;
     END;;
   $$
 LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION upsertTrackRatingDown(
   userIdValue       VARCHAR(255),
-  trackIdValue      VARCHAR(255),
+  trackIdValue      UUID,
   ratingDownValue   INT)
   RETURNS VOID AS
   $$
     BEGIN
-      LOOP
-        UPDATE tracksRating SET ratingDown = ratingDown + ratingDownValue 
-          WHERE trackId = trackIdValue AND userId = userIdValue;;
-        IF found THEN
-          RETURN;;
-        END IF;;
-        BEGIN
-          INSERT INTO tracksRating(trackId, userId, ratingDown) VALUES (trackIdValue, userIdValue, ratingDownValue);;
-          RETURN;;
-        EXCEPTION WHEN unique_violation THEN
-        END;;
-      END LOOP;;
+      UPDATE tracksRating SET ratingDown = ratingDown + ratingDownValue
+        WHERE trackId = trackIdValue AND userId = userIdValue;;
+      IF found THEN
+        RETURN;;
+      ELSE
+        INSERT INTO tracksRating(trackId, userId, ratingDown) VALUES (trackIdValue, userIdValue, ratingDownValue);;
+        RETURN;;
+      END IF;;
     END;;
   $$
 LANGUAGE plpgsql;
@@ -831,7 +820,7 @@ LANGUAGE plpgsql;
 CREATE TABLE usersFavoriteTracks(
   tableId                 SERIAL PRIMARY KEY,
   userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
-  trackId                 VARCHAR(255) REFERENCES tracks (trackId) NOT NULL
+  trackId                 UUID REFERENCES tracks (trackId) NOT NULL
 );
 CREATE UNIQUE INDEX usersFavoriteTracksIndex ON usersFavoriteTracks (userId, trackId);
 

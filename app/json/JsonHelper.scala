@@ -1,6 +1,7 @@
 package json
 
-//import controllers.Test2.{YoutubeTrack, FacebookArtist, SoundCloudTrack}
+import java.util.UUID
+
 import models._
 import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
 import play.api.libs.json.JsNumber
@@ -9,15 +10,19 @@ import play.api.libs.functional.syntax._
 
 object JsonHelper {
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
-    def writes(o: java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(o))
+    def writes(bigDecimal: java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(bigDecimal))
   }
 
   implicit object FloatWrites extends AnyRef with Writes[Float] {
-    def writes(float : Float): JsNumber = JsNumber(BigDecimal(float))
+    def writes(float: Float): JsNumber = JsNumber(BigDecimal(float))
   }
 
   implicit object CharWrites extends AnyRef with Writes[Char] {
-    def writes(char : Char): JsString = JsString(char.toString)
+    def writes(char: Char): JsString = JsString(char.toString)
+  }
+
+  implicit object UUIDWrites extends AnyRef with Writes[UUID] {
+    def writes(UUID: UUID): JsString = JsString(UUID.toString)
   }
 
   implicit val oAuth1InfoWrites = Json.writes[OAuth1Info]
