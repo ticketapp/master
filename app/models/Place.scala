@@ -75,11 +75,9 @@ object Place {
   }
 
   def save(place: Place): Future[Try[Option[Long]]] = {
-    println(place.address)
     val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
     eventuallyAddressId map {
       case Success(addressId) =>
-        println(addressId)
         DB.withConnection { implicit connection =>
           Try {
             SQL(
