@@ -168,8 +168,8 @@ object Event {
            |  INNER JOIN genres g ON g.genreId = eG.genreId
            |    WHERE g.name = {genre}
            |  ORDER BY geographicPoint <-> point '$geographicPointString'
-                                                                          |LIMIT $numberToReturn
-            |OFFSET $offset""".stripMargin)
+           |LIMIT $numberToReturn
+           |OFFSET $offset""".stripMargin)
         .on('genre -> genre)
         .as(EventParser.*)
         .map(getPropertiesOfEvent)
@@ -485,7 +485,7 @@ object Event {
     try {
       eventFacebookResponse.json.as[Future[Event]](eventRead)
     } catch {
-      case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent")
+      case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent" + e.getMessage)
     }
   }
 

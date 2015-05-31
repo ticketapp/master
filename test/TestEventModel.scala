@@ -182,5 +182,11 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         _ should not be empty
       }
     }
+
+    "find a complete event by a facebookId" in {
+      whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
+        event.name mustBe "Mad Professor vs Prince Fatty - Dub Attack Tour"
+      }
+    }
   }
 }

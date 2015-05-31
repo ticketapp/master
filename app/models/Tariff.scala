@@ -83,16 +83,19 @@ object Tariff {
   def findPrices(description: Option[String]): Option[String] = description match {
     case None =>
       None
-    case Some(desc) =>
+    case Some(descriptionFound) =>
       try {
-        """(\d+[,.]?\d+)\s*€""".r.findAllIn(desc).matchData.map { priceMatcher =>
-          priceMatcher.group(1).replace(",", ".").toFloat
-        }.toList match {
-          case list: List[Float] if list.isEmpty => None
+        val descriptionWithoutComas = descriptionFound.replace(",", ".")
+        val tariffPattern = """(\d+|\d+\.?\d*)\s*€""".r
+        val tariffs: Set[Float] = tariffPattern.findAllIn(descriptionWithoutComas).matchData.map { priceMatcher =>
+          priceMatcher.group(1).toFloat
+        }.toSet
+        tariffs match {
+          case emptySet if emptySet.isEmpty => None
           case prices => Option(prices.min.toString + "-" + prices.max.toString)
         }
       } catch {
-        case e: Exception => throw new Exception("Tarriff.findPrices: " + e.getMessage)
+        case e: Exception => throw new Exception("Tariff.findPrices: " + e.getMessage)
       }
   }
 
