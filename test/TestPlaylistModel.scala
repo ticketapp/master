@@ -64,8 +64,6 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
 
         Playlist.delete("userTestId", playlistId) mustBe Success(1)
 
-      } catch {
-        case e: Exception => throw e
       } finally {
         Track.delete(trackId1)
         Track.delete(trackId2)

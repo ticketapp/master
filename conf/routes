@@ -50,7 +50,7 @@ POST    /places/:placeId/unfollowPlaceByPlaceId                   controllers.Pl
 POST    /places/:facebookId/followByFacebookId                    controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
 GET     /places/:placeId/isFollowed                               controllers.PlaceController.isPlaceFollowed(placeId: Long)
 GET     /places/containing/:pattern                               controllers.PlaceController.findPlacesContaining(pattern: String)
-POST    /places/create                                            controllers.PlaceController.createPlace
+POST    /places/create                                            controllers.PlaceController.create
 GET     /places/:placeId/events                                   controllers.EventController.findByPlace(placeId: Long)
 GET     /places/:placeId/passedEvents                             controllers.EventController.findPassedByPlace(placeId: Long)
 GET     /places/nearCity/:city                                    controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)

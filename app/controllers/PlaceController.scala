@@ -94,7 +94,7 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
 
   def getFollowedPlaces = UserAwareAction { implicit request =>
     request.user match {
-      case None => Ok(Json.toJson("User not connected"))
+      case None => Unauthorized
       case Some(identity: Identity) => Ok(Json.toJson(Place.getFollowedPlaces(identity.identityId)))
     }
   }
@@ -113,9 +113,14 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
     "street" -> optional(nonEmptyText(2))
   )(Place.formApply)(Place.formUnapply))
   
-  def createPlace = Action.async { implicit request =>
+  def create = Action.async { implicit request =>
     placeBindingForm.bindFromRequest().fold(
-      formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
+      formWithErrors => {
+        Logger.error(formWithErrors.errorsAsJson.toString(), new Exception("PlaceController.create"))
+        Future {
+          BadRequest(formWithErrors.errorsAsJson)
+        }
+      },
       place => {
         Place.save(place) map {
           case Success(Some(placeId)) =>

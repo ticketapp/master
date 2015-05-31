@@ -26,7 +26,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
   }
 
   "A track" must {
-/*
+
     "be saved and deleted" in {
       val trackId = randomUUID.toString
       val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
@@ -204,7 +204,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         delete(newTrackId)
       }
     }
-*/
+
     "save and delete genre relation and find tracks by its genre" in {
       val newTrackId = randomUUID.toString
       val track = Track(newTrackId, "title15", "url11", 's', "thumbnailUrl", "artistFacebookUrlTestTrack",
