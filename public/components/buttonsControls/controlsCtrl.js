@@ -13,11 +13,9 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                         description: place.description,
                         webSite: place.website,
                         imagePath: data.source,
-                        address: {
-                            city: place.location.city,
-                            zip: place.location.zip,
-                            street: place.location.street
-                        }
+                        city: place.location.city,
+                        zip: place.location.zip,
+                        street: place.location.street
                     };
                     PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                     })
@@ -29,11 +27,9 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                         capacity: place.checkins,
                         description: place.description,
                         webSite: place.website,
-                        address: {
-                            city: place.location.city,
-                            zip: place.location.zip,
-                            street: place.location.street
-                        }
+                        city: place.location.city,
+                        zip: place.location.zip,
+                        street: place.location.street
                     };
                     PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                     })
@@ -61,11 +57,9 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                     description: place.description,
                     webSite: place.website,
                     imagePath: place.cover.source,
-                    address: {
-                        city: place.location.city,
-                        zip: place.location.zip,
-                        street: place.location.street
-                    }
+                    city: place.location.city,
+                    zip: place.location.zip,
+                    street: place.location.street
                 };
                 PlaceFactory.postPlace(newPlace).then(function (isCreated) {
                 })

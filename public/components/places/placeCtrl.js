@@ -10,9 +10,14 @@ angular.module('claudeApp').
             PlaceFactory.getPlace($routeParams.id).then(function (place) {
                 $scope.place = place;
                 console.log(place);
-                if ($scope.place.geographicPoint != undefined) {
+                if ($scope.place.address !== undefined && $scope.place.address.geographicPoint !== undefined) {
+                    $scope.geographicPoint =
+                        RefactorGeopoint.refactorGeopoint($scope.place.address.geographicPoint);
+                    $scope.map = true;
+                } else if ($scope.place.geographicPoint !== undefined) {
                     $scope.geographicPoint =
                         RefactorGeopoint.refactorGeopoint($scope.place.geographicPoint);
+                    $scope.map = true;
                 }
                 if (place.websites != undefined) {
                     if (place.websites.indexOf(',') > -1) {
