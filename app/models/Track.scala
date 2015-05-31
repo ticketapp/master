@@ -353,8 +353,8 @@ object Track {
   }
 
   def calculateConfidence(actualRatingUp: Int, actualRatingDown: Int): Double = {
-    val up = actualRatingUp.toDouble
-    val down = actualRatingDown.toDouble
+    val up = actualRatingUp.toDouble / 1000
+    val down = actualRatingDown.toDouble / 1000
 
     if (up == 0)
       -down

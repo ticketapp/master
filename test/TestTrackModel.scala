@@ -141,11 +141,11 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     }
 
     "calculate confidence with rating up and down" in {
-      calculateConfidence(0, 15) mustBe -15
-      calculateConfidence(5000, 0) mustBe 0.9994591863331846
-      calculateConfidence(510, 500) mustBe 0.4790948314645526
-      calculateConfidence(500, 510) mustBe 0.46922029272774324
-      calculateConfidence(5000, 2000) mustBe 0.7053228985989436
+      calculateConfidence(0, 15) mustBe -0.015
+      calculateConfidence(5000, 0) mustBe 0.6488845039956165
+      calculateConfidence(510, 500) mustBe 0.0746875564598663
+      calculateConfidence(500, 510) mustBe 0.07199615149144027
+      calculateConfidence(5000, 2000) mustBe 0.4086681496298129
     }
 
     "have his confidence updated" in {
