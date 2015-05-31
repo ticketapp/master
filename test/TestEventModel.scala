@@ -137,16 +137,20 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         "facebookUrl")
       val artistId = Artist.save(artist).get
 
-      Artist.saveEventRelation(eventId, artistId) mustBe true
-      Artist.saveEventRelation(passedEventId, artistId) mustBe true
+      try {
+        Artist.saveEventRelation(eventId, artistId) mustBe true
+        Artist.saveEventRelation(passedEventId, artistId) mustBe true
 
-      findAllByArtist("facebookUrl").head.name mustBe "name"
-      findAllPassedByArtist(artistId).head.name mustBe "passed event"
+        findAllByArtist("facebookUrl").head.name mustBe "name"
+        findAllPassedByArtist(artistId).head.name mustBe "passed event"
 
-      Artist.deleteEventRelation(eventId, artistId) mustBe Success(1)
-      Artist.deleteEventRelation(passedEventId, artistId) mustBe Success(1)
-      delete(eventId) mustBe 1
-      delete(passedEventId) mustBe 1
+        Artist.deleteEventRelation(eventId, artistId) mustBe Success(1)
+        Artist.deleteEventRelation(passedEventId, artistId) mustBe Success(1)
+      } finally {
+        delete(eventId)
+        delete(passedEventId)
+        delete(artistId)
+      }
     }
 
     "return passed events for an organizer" in {
@@ -157,16 +161,26 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
       val organizerId = Organizer.save(Organizer(None, Option("facebookId10"), "organizerTest2")).get.get
 
-      Organizer.saveEventRelation(eventId, organizerId) mustBe true
-      Organizer.saveEventRelation(passedEventId, organizerId) mustBe true
+      try {
+        Organizer.saveEventRelation(eventId, organizerId) mustBe true
+        Organizer.saveEventRelation(passedEventId, organizerId) mustBe true
 
-      findAllByOrganizer(organizerId).head.name mustBe "name"
-      findAllPassedByOrganizer(organizerId).head.name mustBe "passed event"
+        findAllByOrganizer(organizerId).head.name mustBe "name"
+        findAllPassedByOrganizer(organizerId).head.name mustBe "passed event"
 
-      Organizer.deleteEventRelation(eventId, organizerId) mustBe Success(1)
-      Organizer.deleteEventRelation(passedEventId, organizerId) mustBe Success(1)
-      delete(eventId) mustBe 1
-      delete(passedEventId) mustBe 1
+        Organizer.deleteEventRelation(eventId, organizerId) mustBe Success(1)
+        Organizer.deleteEventRelation(passedEventId, organizerId) mustBe Success(1)
+      } finally {
+        delete(eventId) mustBe 1
+        delete(passedEventId) mustBe 1
+        Organizer.delete(organizerId)
+      }
+    }
+
+    "return events facebook id for a place facebook id" in {
+      whenReady(getEventsFacebookIdByPlace("117030545096697"), timeout(Span(2, Seconds))) {
+        _ should not be empty
+      }
     }
   }
 }

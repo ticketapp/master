@@ -38,8 +38,6 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
           find(placeId.get.get) mustBe
             Option(place.copy(placeId = placeId.get,
               address = Option(address.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))))
-        } catch {
-          case e: Exception => throw e
         } finally {
           delete(placeId.get.get)
         }
@@ -101,17 +99,17 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       val address2 = None
       val address3 = Address(None, None, Some("privas"), Some("07000"), Some("avignas"))
 
-      whenReady(saveAddressInFutureWithGeoPoint(Option(address1)), timeout(Span(5, Seconds))) {
+      whenReady(Address.saveAddressInFutureWithGeoPoint(Option(address1)), timeout(Span(5, Seconds))) {
         case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe Some(address1)
         case _ => throw new Exception("address not saved")
       }
 
-      whenReady(saveAddressInFutureWithGeoPoint(address2), timeout(Span(5, Seconds))) {
+      whenReady(Address.saveAddressInFutureWithGeoPoint(address2), timeout(Span(5, Seconds))) {
         case Success(None) =>
         case _ => throw new Exception("address not saved")
       }
 
-      whenReady(saveAddressInFutureWithGeoPoint(Option(address3)), timeout(Span(5, Seconds))) {
+      whenReady(Address.saveAddressInFutureWithGeoPoint(Option(address3)), timeout(Span(5, Seconds))) {
         case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe
           Some(address3.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))
         case _ => throw new Exception("address not saved")

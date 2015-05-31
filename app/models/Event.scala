@@ -341,6 +341,7 @@ object Event {
           event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
           event.artists.foreach { artist => Artist.saveWithEventRelation(artist, eventId) }
           event.genres.foreach { genre => Genre.saveWithEventRelation(genre, eventId) }
+          event.addresses.foreach { address => Address.saveAddressAndEventRelation(address, eventId) }
           Option(eventId)
       }
     }
@@ -463,7 +464,7 @@ object Event {
       val ticketSellers = Tariff.findTicketSellers(normalizedWebsites)
       val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(normalizedWebsites)
       val eventuallyMaybeArtistsFromTitle =
-        getEventuallyArtistsInEventTitle(splitArtistNamesInTitle(name), normalizedWebsites)
+        getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(name), normalizedWebsites)
 
       for {
         organizer <- eventuallyOrganizer
@@ -487,5 +488,17 @@ object Event {
     } catch {
       case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent")
     }
+  }
+
+  def getEventsFacebookIdByPlace(placeFacebookId: String): Future[Seq[String]] = {
+    WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
+      .withQueryString("access_token" -> facebookToken)
+      .get()
+      .map { readEventsIdsFromResponse }
+  }
+
+  def readEventsIdsFromResponse(resp: Response): Seq[String] = {
+    val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
+    (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
   }
 }

@@ -34,11 +34,9 @@ object Place {
                 imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
     try {
       val address = Option(Address(None, None, city, zip, street))
-      println("formApply address" + address)
       new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, address)
     } catch {
       case e: IllegalArgumentException =>
-        println("empty address")
         new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, None)
     }
   }
@@ -75,7 +73,7 @@ object Place {
   }
 
   def save(place: Place): Future[Try[Option[Long]]] = {
-    val eventuallyAddressId = saveAddressInFutureWithGeoPoint(place.address)
+    val eventuallyAddressId = Address.saveAddressInFutureWithGeoPoint(place.address)
     eventuallyAddressId map {
       case Success(addressId) =>
         DB.withConnection { implicit connection =>
@@ -98,18 +96,9 @@ object Place {
           }
         }
       case Failure(e) =>
+        Logger.error("Place.save: ", e)
         throw e
     }
-  }
-
-  def saveAddressInFutureWithGeoPoint(placeAddress: Option[Address]): Future[Try[Option[Long]]] = placeAddress match {
-    case Some(address) if address.geographicPoint.isEmpty =>
-      Address.getGeographicPoint(address) map { addressWithGeoPoint =>
-        Address.save(Option(addressWithGeoPoint)) }
-    case Some(addressWithGeoPoint) =>
-      Future  { Address.save(Option(addressWithGeoPoint)) }
-    case _ =>
-      Future { Success(None) }
   }
 
   def findIdByFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {

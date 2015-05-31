@@ -379,4 +379,7 @@ object Artist {
       .trim
       .replaceAll("""\s+""", " ")
   }
+
+  def splitArtistNamesInTitle(title: String): List[String] =
+    "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
 }

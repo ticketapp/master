@@ -103,6 +103,16 @@ object Address {
     }
   }
 
+  def saveAddressInFutureWithGeoPoint(address: Option[Address]): Future[Try[Option[Long]]] = address match {
+    case Some(addressWithoutGeographicPoint) if addressWithoutGeographicPoint.geographicPoint.isEmpty =>
+      Address.getGeographicPoint(addressWithoutGeographicPoint) map { addressWithGeoPoint =>
+        Address.save(Option(addressWithGeoPoint)) }
+    case Some(addressWithGeoPoint) =>
+      Future  { Address.save(Option(addressWithGeoPoint)) }
+    case _ =>
+      Future { Success(None) }
+  }
+
   def saveAddressAndEventRelation(address: Address, eventId: Long): Try[Option[Long]] = save(Option(address)) match {
     case Success(Some(addressId)) => saveEventAddressRelation(eventId, addressId)
     case Success(_) => Failure(DAOException("Address.saveAddressAndEventRelation: Address.save returned None"))
