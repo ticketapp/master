@@ -9,23 +9,21 @@ import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import services.SearchYoutubeTracks._
-import services.Utilities.{normalizeString, removeSpecialCharacters}
+import services.Utilities.{normalizeString, removeSpecialCharacters, googleKey}
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import play.api.libs.ws.Response
 
 object SearchTracksController extends Controller {
-  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
-  //save tracks
+
   def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) =
   Action.async {
-    getYoutubeTracksByTitleAndArtistName(Artist(None, None, artistName, None, None, artistFacebookUrl), trackTitle)
+    getYoutubeTracksByArtistAndTitle(Artist(None, None, artistName, None, None, artistFacebookUrl), trackTitle)
       .map { tracks =>
-        val tracksFiltered = tracks.filter(track =>
-          normalizeString(removeSpecialCharacters(track.title)).toLowerCase.contains(
-            normalizeString(removeSpecialCharacters(trackTitle)).toLowerCase
-          )
-        )
-        Future { tracksFiltered.map(Track.save)}
+        val tracksFiltered = Track.removeDuplicateByTitleAndArtistName(tracks.filterNot(track =>
+          removeSpecialCharacters(track.title).equalsIgnoreCase(removeSpecialCharacters(trackTitle))))
+
+        Future { tracksFiltered map Track.save }
         Ok(Json.toJson(tracksFiltered))
     }
   }
@@ -34,7 +32,7 @@ object SearchTracksController extends Controller {
     WS.url("http://www.youtube.com/get_video_info")
       .withQueryString(
         "video_id" -> youtubeId,
-        "access_token" -> youtubeKey)
+        "access_token" -> googleKey)
       .get()
       .map { youtubeResponse => Ok(youtubeResponse.body) }
   }

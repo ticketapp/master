@@ -13,6 +13,7 @@ import play.api.Play.current
 import java.util.{UUID, Date}
 import java.math.BigDecimal
 import anorm.Column.rowToBigDecimal
+import scala.collection.mutable.ListBuffer
 import scala.util.{Try, Success, Failure}
 import services.Utilities._
 
@@ -349,6 +350,17 @@ object Track {
           |WHERE usersFavoriteTracks.userId = {userId}""".stripMargin)
         .on('userId -> userId)
         .as(trackParser.*)
+    }
+  }
+
+  def removeDuplicateByTitleAndArtistName(tracks: Seq[Track]): Seq[Track] = {
+    var tupleArtistNameTitle = new ListBuffer[(String, String)]()
+    for {
+      track <- tracks
+      if !tupleArtistNameTitle.contains((track.artistName, track.title))
+    } yield {
+      tupleArtistNameTitle += ((track.artistName, track.title))
+      track
     }
   }
 

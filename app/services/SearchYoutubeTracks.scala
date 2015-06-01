@@ -91,10 +91,10 @@ object SearchYoutubeTracks {
 
   def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Future[Set[Track]] =
     Future.sequence(
-      tracksTitle.map { getYoutubeTracksByTitleAndArtistName(artist, _) }
+      tracksTitle.map { getYoutubeTracksByArtistAndTitle(artist, _) }
     ).map { nestedTracks => nestedTracks.flatten }
 
-  def getYoutubeTracksByTitleAndArtistName(artist: Artist, trackTitle: String): Future[Seq[Track]] = {
+  def getYoutubeTracksByArtistAndTitle(artist: Artist, trackTitle: String): Future[Seq[Track]] = {
     WS.url("https://www.googleapis.com/youtube/v3/search")
       .withQueryString(
         "part" -> "snippet",
@@ -230,7 +230,7 @@ object SearchYoutubeTracks {
   }
 
   def readEchonestTupleIdFacebookId(echonestResponse: Response): Seq[(String, String)] = {
-    //16 = "facebook:artist:".length
+    //                                                                  16 = "facebook:artist:".length
     def cleanFacebookId(implicit r: Reads[String]): Reads[String] = r.map(_.substring(16))
     val TupleEnIdFbIdReads = (
       (__ \ "id").read[String] and

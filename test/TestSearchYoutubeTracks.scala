@@ -76,7 +76,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       val expectedTrack = Track(randomUUID, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
           "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
-      whenReady(getYoutubeTracksByTitleAndArtistName(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
+      whenReady(getYoutubeTracksByArtistAndTitle(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
         tracks => val tracksTitle = tracks.map { track => track.title}
           tracksTitle should contain (expectedTrack.title)
       }

@@ -205,5 +205,19 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         delete(newTrackId2)
       }
     }
+
+    "remove duplicate with same title and artist name" in {
+      val trackId1 = randomUUID
+      val trackId2 = randomUUID
+      val tracks = Seq(
+        Track(trackId1, "titleNotduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
+        Track(trackId2, "titleduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
+        Track(randomUUID, "titleduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"))
+
+      val expectedTracks = Seq(
+        Track(trackId1, "titleNotduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
+        Track(trackId2, "titleduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"))
+      removeDuplicateByTitleAndArtistName(tracks) must contain theSameElementsAs expectedTracks
+    }
   }
 }
