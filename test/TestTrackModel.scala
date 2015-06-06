@@ -206,18 +206,27 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       }
     }
 
-    "remove duplicate with same title and artist name" in {
+    "remove duplicate with same title and artist name without taking account of accentuated letters" in {
       val trackId1 = randomUUID
       val trackId2 = randomUUID
       val tracks = Seq(
         Track(trackId1, "titleNotduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
-        Track(trackId2, "titleduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
+        Track(trackId2, "titleduplicaté", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
         Track(randomUUID, "titleduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"))
 
       val expectedTracks = Seq(
         Track(trackId1, "titleNotduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
-        Track(trackId2, "titleduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"))
+        Track(trackId2, "titleduplicaté", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"))
       removeDuplicateByTitleAndArtistName(tracks) must contain theSameElementsAs expectedTracks
+    }
+
+    "return true if artist name is in the title and vice-versa without taking account of accentuated letters" in {
+      isArtistNameInTrackTitle("brassens trackTitle", "brassens") mustBe true
+      isArtistNameInTrackTitle("brassens trackTitle", "Brassens") mustBe true
+      isArtistNameInTrackTitle("Brassens trackTitle", "brassens") mustBe true
+      isArtistNameInTrackTitle("Bràsséns trackTitle", "brassens") mustBe true
+      isArtistNameInTrackTitle("Brâssens trackTitle", "brassêns") mustBe true
+      isArtistNameInTrackTitle("Brassens trackTitle", "notRelatedArtist") mustBe false
     }
   }
 }

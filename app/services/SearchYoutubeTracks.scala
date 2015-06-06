@@ -116,7 +116,7 @@ object SearchYoutubeTracks {
     val collectOnlyValidTracks = Reads.seq(youtubeTrackReads) map { tracks =>
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
-          if isArtistNameInTrackTitle(title, artist.name) =>
+          if Track.isArtistNameInTrackTitle(title, artist.name) =>
           Track(randomUUID, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl,
             artist.name)
       }
@@ -126,9 +126,6 @@ object SearchYoutubeTracks {
       .asOpt[Seq[Track]](collectOnlyValidTracks)
       .getOrElse(Seq.empty)
   }
-
-  def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean =
-    trackTitle.toLowerCase contains artistName.toLowerCase
 
   def getMaybeEchonestArtistUrlsByFacebookId(facebookArtistId: String): Future[Option[(String, Set[String])]] = {
     WS.url("http://developer.echonest.com/api/v4/artist/urls")

@@ -18,7 +18,7 @@ GET     /events/inInterval/:hourInterval                                  contro
 GET     /events/passedInInterval/:hourInterval                            controllers.EventController.eventsPassedInHourInterval(hourInterval:        Int,        geographicPoint:        String,        offset:        Int,        numberToReturn:        Int)
 GET     /events/:id                                                       controllers.EventController.find(id:        Long)
 POST    /events/create                                                    controllers.EventController.createEvent
-POST    /events/create/:facebookId                                        controllers.EventController.findEventOnFacebookByFacebookId(facebookId:        String)
+POST    /events/create/:facebookId                                        controllers.EventController.createEventByFacebookId(facebookId:        String)
 POST    /events/:eventId/follow                                           controllers.EventController.followEvent(eventId:        Long)
 POST    /events/:eventId/unfollow                                         controllers.EventController.unfollowEvent(eventId:        Long)
 GET     /events/followed/                                                 controllers.EventController.getFollowedEvents

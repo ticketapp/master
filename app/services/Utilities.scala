@@ -44,10 +44,6 @@ object Utilities {
     }
   }
 
-//  implicit def uuidToStatement = new ToStatement[UUID] {
-//    def set(s: java.sql.PreparedStatement, index: Int, aValue: UUID): Unit = s.setObject(index, aValue)
-//  }
-
   implicit def rowToUUID: Column[UUID] = {
     Column.nonNull[UUID] { (value, meta) =>
       value match {
@@ -66,6 +62,9 @@ object Utilities {
   })
 
   def normalizeString(string: String): String = string //Should be replace accentued letters for example?
+
+  def replaceAccentuatedLetters(string: String): String =
+    Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
 
   def stripChars(s:String, ch:String)= s filterNot (ch contains _)
 

@@ -16,6 +16,7 @@ import anorm.Column.rowToBigDecimal
 import scala.collection.mutable.ListBuffer
 import scala.util.{Try, Success, Failure}
 import services.Utilities._
+import services.Utilities
 
 case class Track (trackId: UUID,
                   title: String, 
@@ -357,9 +358,11 @@ object Track {
     var tupleArtistNameTitle = new ListBuffer[(String, String)]()
     for {
       track <- tracks
-      if !tupleArtistNameTitle.contains((track.artistName, track.title))
+      artistName = Utilities.replaceAccentuatedLetters(track.artistName)
+      trackTitle = Utilities.replaceAccentuatedLetters(track.title)
+      if !tupleArtistNameTitle.contains((artistName, trackTitle))
     } yield {
-      tupleArtistNameTitle += ((track.artistName, track.title))
+      tupleArtistNameTitle += ((artistName, trackTitle))
       track
     }
   }
@@ -378,4 +381,8 @@ object Track {
       (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
     }
   }
+
+  def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean =
+    Utilities.replaceAccentuatedLetters(trackTitle.toLowerCase) contains
+      Utilities.replaceAccentuatedLetters(artistName.toLowerCase)
 }

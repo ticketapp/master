@@ -121,13 +121,15 @@ object EventController extends Controller with securesocial.core.SecureSocial {
 
   def createEvent = Action { implicit request =>
     eventBindingForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
-      event => {
+      formWithErrors => {
+        Logger.error("EventController.createEvent: " + formWithErrors.errorsAsJson)
+        BadRequest(formWithErrors.errorsAsJson)
+      },
+      event =>
         Event.save(event) match {
           case Some(eventId) => Ok(Json.toJson(Event.find(eventId)))
           case None => InternalServerError
         }
-      }
     )
   }
 
@@ -172,7 +174,7 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def findEventOnFacebookByFacebookId(facebookId: String) = Action {
+  def createEventByFacebookId(facebookId: String) = Action {
     Event.saveFacebookEventByFacebookId(facebookId)
     Ok
   }

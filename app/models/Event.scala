@@ -46,10 +46,9 @@ object Event {
 
   def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
                 endTime: Option[Date], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
-                imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event = {
+                imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event =
     new Event(None, None, true, true, name, geographicPoint, description, startTime, endTime, ageRestriction,
       tariffRange, ticketSellers, imagePath, List.empty, List.empty, tariffs, addresses)
-  }
 
   def formUnapply(event: Event) = {
     Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,

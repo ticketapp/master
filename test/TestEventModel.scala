@@ -21,7 +21,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       Option("description"), new Date(), Option(new Date(100000000000000L)), 16, None, None, None, List.empty,
       List.empty, List.empty, List.empty, List.empty, List.empty)
 
-    "be able to be saved and deleted in database" in {
+    "be saved and deleted in database" in {
       val eventId = save(event).get
 
       find(eventId).get.name mustBe "name"
@@ -59,12 +59,6 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       } finally {
         unfollow("userTestId", eventId)
         delete(eventId)
-      }
-    }
-
-    "be found on facebook by a facebookId" in {
-      whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
-        event.name mustBe "Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }
 
@@ -183,9 +177,10 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "find a complete event by a facebookId" in {
+    "find a complete event by facebookId" in {
       whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
-        event.name mustBe "Mad Professor vs Prince Fatty - Dub Attack Tour"
+        println(event.organizers)
+        event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }
   }
