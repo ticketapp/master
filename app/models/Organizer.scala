@@ -128,14 +128,15 @@ object Organizer {
         case Some(address) => Address.save(Option(address))
       }
       val placeIdWithSameFacebookId = Place.findIdByFacebookId(organizer.facebookId)
-      val phoneNumbers = Utilities.phoneNumbersSetToOptionString(Utilities.phoneNumbersStringToSet(organizer.phone)) 
+      val phoneNumbers = Utilities.phoneNumbersSetToOptionString(Utilities.phoneNumbersStringToSet(organizer.phone))
+      val description = Utilities.formatDescription(organizer.description)
       SQL(
         """SELECT insertOrganizer({facebookId}, {name}, {description}, {addressId}, {phone}, {publicTransit},
           |{websites}, {imagePath}, {geographicPoint}, {placeId})""".stripMargin)
         .on(
           'facebookId -> organizer.facebookId,
           'name -> organizer.name,
-          'description -> organizer.description,
+          'description -> description,
           'addressId -> addressId,
           'phone -> phoneNumbers,
           'publicTransit -> organizer.publicTransit,
@@ -205,14 +206,12 @@ object Organizer {
     }
   }
 
-  def delete(organizerId: Long): Int = try {
+  def delete(organizerId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL("DELETE FROM organizers WHERE organizerId = {organizerId}")
         .on('organizerId -> organizerId)
         .executeUpdate()
     }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.delete : " + e.getMessage)
   }
 
   def followByOrganizerId(userId : String, organizerId : Long): Try[Option[Long]] = Try {

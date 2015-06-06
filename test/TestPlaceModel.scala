@@ -19,13 +19,18 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
   "A place" must {
 
     val place = Place(None, "test", Some("123"), None,
-      Some("""<div class="column large-12">Ancienne usine destinée à l’origine au traitement des eaux...</div>"""),
+      Some("""Ancienne usine"""),
       Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
 
     "be saved and deleted in database and return the new id" in {
       whenReady(save(place), timeout(Span(2, Seconds))) { placeId =>
-        find(placeId.get.get) mustBe Option(place.copy(placeId = placeId.get))
-        delete(placeId.get.get) mustBe Success(1)
+        try {
+          find(placeId.get.get) mustBe Option(place.copy(placeId = placeId.get,
+            description = Some("<div class='column large-12'>Ancienne usine</div>")))
+          delete(placeId.get.get) mustBe Success(1)
+        } finally {
+          delete(placeId.get.get)
+        }
       }
     }
 
@@ -69,7 +74,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
         find(placeId).get.linkedOrganizerId mustBe organizerId
 
         delete(placeId) mustBe Success(1)
-        Organizer.delete(organizerId.get) mustBe 1
+        Organizer.delete(organizerId.get) mustBe Success(1)
       }
     }
 
@@ -80,17 +85,23 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
       whenReady(save(place), timeout(Span(2, Seconds))) { tryPlaceId =>
         val placeId = tryPlaceId.get.get
+        try {
+          find(placeId) shouldEqual Option(place.copy(placeId = Option(placeId),
+            description = Some("<div class='column large-12'>Ancienne usine</div>")))
 
-        find(placeId) shouldEqual Option(place.copy(placeId = Option(placeId)))
+          saveEventRelation(eventId, placeId) mustBe true
 
-        saveEventRelation(eventId, placeId) mustBe true
+          findAllByEvent(eventId) should not be empty
+          Event.findAllByPlace(placeId) should not be empty
+          deleteEventRelation(eventId, placeId) mustBe Success(1)
 
-        findAllByEvent(eventId) should not be empty
-        Event.findAllByPlace(placeId) should not be empty
-        deleteEventRelation(eventId, placeId) mustBe Success(1)
-
-        delete(placeId) mustBe Success(1)
-        Event.delete(eventId) mustBe 1
+          delete(placeId) mustBe Success(1)
+          Event.delete(eventId) mustBe 1
+        } finally {
+          deleteEventRelation(eventId, placeId)
+          delete(placeId)
+          Event.delete(eventId)
+        }
       }
     }
 

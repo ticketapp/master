@@ -20,21 +20,21 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
 
   "SearchArtistController" must {
 
-    "find a sequence of artists on facebook" in {
+    "find a sequence of artists on Facebook" in {
       whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
         artists should not be empty
       }
     }
 
-    "find Rone (an artist) on facebook" in {
-      whenReady (getFacebookArtistByFacebookUrl("djvadim"), timeout(Span(6, Seconds))) { artist =>
+    "find Rone (an artist) on Facebook" in {
+      whenReady (getFacebookArtistByFacebookUrl("rone"), timeout(Span(6, Seconds))) { artist =>
         artist shouldBe defined
       }
     }
 
-    "normalize facebook urls" in {
-      normalizeFacebookUrl("facebook.com/djvadim") mustBe "djvadim"
-      normalizeFacebookUrl("https://www.facebook.com/djvadim?_rdr") mustBe "djvadim"
+    "normalize Facebook urls" in {
+      normalizeFacebookUrl("Facebook.com/djvadim") mustBe "djvadim"
+      normalizeFacebookUrl("https://www.Facebook.com/djvadim?_rdr") mustBe "djvadim"
     }
 
     "remove useless words in a SoundCloudUrl (even if it contains uppercase letters)" in {

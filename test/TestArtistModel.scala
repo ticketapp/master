@@ -25,9 +25,13 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"), Option("description"),
         "facebookUrl", Set("website"))
       val artistId = save(artist).get
-
-      find(artistId) mustBe Option(artist.copy(artistId = Some(artistId)))
-      delete(artistId) mustBe 1
+      try {
+        find(artistId) mustBe Option(artist.copy(artistId = Some(artistId),
+          description = Some("<div class='column large-12'>description</div>")))
+        delete(artistId) mustBe 1
+      } finally {
+        delete(artistId)
+      }
     }
 
     "be followed and unfollowed by a user" in {
@@ -84,7 +88,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       try {
         addWebsite(artistId, "normalizedUrl")
 
-        find(artistId.get) mustBe Option(artist.copy(artistId = artistId, websites = Set("website", "normalizedUrl")))
+        find(artistId.get) mustBe Option(artist.copy(artistId = artistId, websites = Set("website", "normalizedUrl"),
+          description = Some("<div class='column large-12'>description</div>")))
 
       } finally {
         delete(artistId.get)
@@ -102,7 +107,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       addSoundCloudWebsiteIfMissing(maybeTrack, artistWithId)
 
       try {
-        find(artistId.get) mustBe Option(artistWithId.copy(websites = Set("website", "redirecturl")))
+        find(artistId.get) mustBe Option(artistWithId.copy(websites = Set("website", "redirecturl"),
+          description = Some("<div class='column large-12'>description</div>")))
       } catch {
         case e:Exception => throw e
       } finally {

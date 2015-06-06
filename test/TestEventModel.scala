@@ -141,6 +141,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         Artist.deleteEventRelation(eventId, artistId) mustBe Success(1)
         Artist.deleteEventRelation(passedEventId, artistId) mustBe Success(1)
       } finally {
+        Artist.deleteEventRelation(eventId, artistId)
+        Artist.deleteEventRelation(passedEventId, artistId)
         delete(eventId)
         delete(passedEventId)
         delete(artistId)
@@ -179,7 +181,6 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
     "find a complete event by facebookId" in {
       whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
-        println(event.organizers)
         event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }

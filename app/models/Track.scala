@@ -375,7 +375,7 @@ object Track {
       -down
     else {
       val n = up + down
-      val z= 1.64485
+      val z = 1.64485
       val phat = up / n
 
       (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)

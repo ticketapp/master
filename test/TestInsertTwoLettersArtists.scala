@@ -11,7 +11,7 @@ import java.util.UUID.randomUUID
 import scala.util.Success
 
 class TestInsertTwoLettersArtists extends PlaySpec with OneAppPerSuite {
-
+/*
   "Insert two letters artists" must {
 
     "list all combination of two chars" in {
@@ -23,5 +23,5 @@ class TestInsertTwoLettersArtists extends PlaySpec with OneAppPerSuite {
         }
       }
     }
-  }
+  }*/
 }

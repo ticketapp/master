@@ -29,10 +29,14 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
       val organizerId = save(organizer).get.get
+      try {
+      find(organizerId) mustEqual Option(organizer.copy(organizerId = Some(organizerId),
+        description = Some("<div class='column large-12'>description</div>")))
 
-      find(organizerId) mustEqual Option(organizer.copy(organizerId = Some(organizerId)))
-
-      delete(organizerId) mustBe 1
+      delete(organizerId) mustBe Success(1)
+      } finally {
+        delete(organizerId)
+      }
     }
 
     "not be saved twice" in {
@@ -93,8 +97,8 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         try {
           find(organizerId).get.linkedPlaceId mustBe placeId
         } finally {
-          delete(organizerId) mustBe 1
-          Place.delete(placeId.get) mustBe Success(1)
+          delete(organizerId)
+          Place.delete(placeId.get)
         }
       }
     }

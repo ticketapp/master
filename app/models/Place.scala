@@ -76,6 +76,7 @@ object Place {
     val eventuallyAddressId = Address.saveAddressInFutureWithGeoPoint(place.address)
     eventuallyAddressId map {
       case Success(addressId) =>
+        val description = Utilities.formatDescription(place.description)
         DB.withConnection { implicit connection =>
           Try {
             SQL(
@@ -86,7 +87,7 @@ object Place {
                 'geographicPoint -> place.geographicPoint,
                 'addressId -> addressId,
                 'facebookId -> place.facebookId,
-                'description -> place.description,
+                'description -> description,
                 'webSites -> Utilities.setToOptionString(getNormalizedWebsitesInText(place.webSites)),
                 'capacity -> place.capacity,
                 'openingHours -> place.openingHours,

@@ -188,6 +188,7 @@ object Artist {
 
   def save(artist: Artist): Option[Long] = try {
     val websites: Option[String] = Utilities.setToOptionString(artist.websites)
+    val description = Utilities.formatDescription(artist.description)
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertArtist({facebookId}, {name}, {imagePath}, {description}, {facebookUrl}, {websites})""")
         .on(
@@ -195,7 +196,7 @@ object Artist {
           'name -> artist.name,
           'imagePath -> artist.imagePath,
           'facebookUrl -> artist.facebookUrl,
-          'description -> artist.description,
+          'description -> description,
           'websites -> websites)
         .as(scalar[Long].singleOpt) match {
           case Some(artistId: Long) =>
