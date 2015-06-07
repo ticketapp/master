@@ -57,5 +57,30 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         delete(genreId)
       }
     }
+
+    "find all genres for a track" in {
+      val artist = Artist(None, Option("facebookIdTestGenreModel"), "artistTest", Option("imagePath"),
+        Option("description"), "artistFacebookUrlTestGenreModel", Set("website"))
+      val artistId = Artist.save(artist).get
+      val trackId = randomUUID
+      val track = Track(trackId, "titleTestUserModel", "url2", 's', "thumbnailUrl",
+        "artistFacebookUrlTestGenreModel", "artistName")
+
+      val genre = Genre(None, "pilipilipims", None)
+      val genreId = save(genre).get
+
+      try {
+        Track.save(track)
+        saveTrackRelation(trackId, genreId, 50)
+
+        findAllByTrack(trackId) mustBe Seq(genre.copy(genreId = Some(genreId)))
+
+      } finally {
+        deleteTrackRelation(trackId, genreId)
+        delete(genreId)
+        Track.delete(trackId)
+        Artist.delete(artistId)
+      }
+    }
   }
 }

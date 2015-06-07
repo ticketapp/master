@@ -22,8 +22,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
   "An Artist" must {
 
     "be saved and deleted in database and return the new id" in {
-      val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"), Option("description"),
-        "facebookUrl", Set("website"))
+      val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
+        Option("description"), "facebookUrl", Set("website"))
       val artistId = save(artist).get
       try {
         find(artistId) mustBe Option(artist.copy(artistId = Some(artistId),

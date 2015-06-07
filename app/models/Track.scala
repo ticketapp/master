@@ -27,7 +27,8 @@ case class Track (trackId: UUID,
                   artistName: String,
                   redirectUrl: Option[String] = None,
                   confidence: Option[Double] = None,
-                  playlistRank: Option[Double] = None)
+                  playlistRank: Option[Double] = None,
+                  genres: Seq[Genre] = Seq.empty)
 
 object Track {
 
@@ -70,7 +71,7 @@ object Track {
       get[Double]("confidence") map {
       case trackId ~ title ~ url ~ platform ~ thumbnailUrl ~ artistFacebookUrl ~ artistName ~ redirectUrl ~
         confidence => Track(trackId, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName,
-        redirectUrl, Option(confidence))
+        redirectUrl, Option(confidence), None, Genre.findAllByTrack(trackId))
     }
   }
 

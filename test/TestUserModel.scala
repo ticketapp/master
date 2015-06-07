@@ -53,13 +53,13 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
     "get tracks he had removed" in {
       val artist = Artist(None, Option("facebookIdTestUserModel"), "artistTest", Option("imagePath"),
         Option("description"), "artistFacebookUrlTestUserModel", Set("website"))
-      val artistId = Artist.save(artist)
+      val artistId = Artist.save(artist).get
       val trackId = randomUUID
       val track = Track(trackId, "titleTestUserModel", "url2", 's', "thumbnailUrl",
         "artistFacebookUrlTestUserModel", "artistName")
 
       try {
-        println(Track.save(track))
+        Track.save(track)
         Track.upsertRatingDown("userTestId", trackId, -2, Some('r'))
 
         getTracksRemoved("userTestId") mustBe Seq(track.copy(confidence = Some(-0.002)))
@@ -67,6 +67,7 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
       } finally {
         Track.deleteRatingForUser("userTestId", trackId)
         Track.delete(trackId)
+        Artist.delete(artistId)
       }
     }
   }

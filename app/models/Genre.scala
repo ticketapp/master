@@ -5,6 +5,7 @@ import java.util.UUID
 import anorm.SqlParser._
 import anorm._
 import controllers._
+import play.api.Logger
 import play.api.db.DB
 import play.api.Play.current
 import services.Utilities._
@@ -63,6 +64,21 @@ object Genre {
     }
   } catch {
     case e: Exception => throw new DAOException("Genre.findAllByArtist: " + e.getMessage)
+  }
+  
+  def findAllByTrack(trackId: UUID): Seq[Genre] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT * FROM tracksGenres aG
+          | INNER JOIN genres g ON g.genreId = aG.genreId
+          |   WHERE aG.trackId = {trackId}""".stripMargin)
+        .on('trackId -> trackId)
+        .as(GenreParser.*)
+    }
+  } catch {
+    case e: Exception => 
+      Logger.error("Genre.findAllByTrack: ", e)
+      Seq.empty
   }
 
   def find(genreId: Long): Option[Genre] = try {
