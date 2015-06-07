@@ -58,7 +58,7 @@ object Track {
     Some((track.trackId.toString, track.title, track.url, track.platform.toString, track.thumbnailUrl,
       track.artistFacebookUrl, track.artistName, track.redirectUrl))
 
-  private val trackParser: RowParser[Track] = {
+  val trackParser: RowParser[Track] = {
     get[UUID]("trackId") ~
       get[String]("title") ~
       get[String]("url") ~
@@ -230,15 +230,16 @@ object Track {
     }
   }
 
-  def upsertRatingDown(userId: String, trackId: UUID, rating: Int): Try[Boolean] = Try {
+  def upsertRatingDown(userId: String, trackId: UUID, rating: Int, reason: Option[Char]): Try[Boolean] = Try {
     updateRating(trackId, rating)
 
     DB.withConnection { implicit connection =>
-      SQL("SELECT upsertTrackRatingDown({userId}, {trackId}, {rating})")
+      SQL("SELECT upsertTrackRatingDown({userId}, {trackId}, {rating}, {reason})")
         .on(
           'userId -> userId,
           'trackId -> trackId,
-          'rating -> math.abs(rating))
+          'rating -> math.abs(rating),
+          'reason -> reason)
         .execute()
     }
   }

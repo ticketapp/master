@@ -10,6 +10,7 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import models.{Tool, User}
 import play.api.libs.concurrent.Execution.Implicits._
+import json.JsonHelper._
 
 object UserController extends Controller with securesocial.core.SecureSocial {
   def users = Action {
@@ -61,5 +62,9 @@ object UserController extends Controller with securesocial.core.SecureSocial {
       .map { response =>
       Ok(Json.toJson(response.json))
     }
+  }
+
+  def getTracksRemoved = SecuredAction(ajaxCall = true) { implicit request =>
+    Ok(Json.toJson(User.getTracksRemoved(request.user.identityId.userId)))
   }
 }

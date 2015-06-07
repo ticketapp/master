@@ -14,8 +14,7 @@ class TestEventController extends PlaySpec with OneAppPerSuite  {
         "name" -> "name",
         "startTime" -> 5,
         "ageRestriction" -> 16,
-        "startTime" -> "2015-06-30 14:00"
-      ))).get
+        "startTime" -> "2015-06-30 14:00"))).get
 
       status(eventuallyResult) mustBe 200
     }

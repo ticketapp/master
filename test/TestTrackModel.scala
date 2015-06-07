@@ -67,6 +67,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
 
         deleteRatingForUser("userTestId", trackId) mustBe Success(1)
       } finally {
+        deleteRatingForUser("userTestId", trackId)
         delete(trackId)
       }
     }
@@ -76,14 +77,15 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       save(Track(trackId, "title5", "url2", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
 
       try {
-        upsertRatingDown("userTestId", trackId, -1) mustBe Success(true)
+        upsertRatingDown("userTestId", trackId, -1, None) mustBe Success(true)
         getRatingForUser("userTestId", trackId) mustBe Success(Some(0,1))
 
-        upsertRatingDown("userTestId", trackId, -2) mustBe Success(true)
+        upsertRatingDown("userTestId", trackId, -2, Some('r')) mustBe Success(true)
         getRatingForUser("userTestId", trackId) mustBe Success(Some(0,3))
 
         deleteRatingForUser("userTestId", trackId) mustBe Success(1)
       } finally {
+        deleteRatingForUser("userTestId", trackId)
         delete(trackId)
       }
     }

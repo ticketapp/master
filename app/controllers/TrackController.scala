@@ -57,22 +57,44 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(Track.findAllByArtist(artistFacebookUrl, numberToReturn, offset)))
   }
 
-  def upsertRatingForUser(trackId: String, rating: Int) = SecuredAction(ajaxCall = true) { implicit request =>
+  val trackRatingBindingForm = Form(mapping(
+    "trackId" -> nonEmptyText(8),
+    "rating" -> number,
+    "reason" -> optional(nonEmptyText)
+  )(trackRatingFormApply)(trackRatingFormUnapply))
+
+  case class TrackRating(trackId: String, rating: Int, reason: Option[Char])
+
+  def trackRatingFormApply(trackId: String, rating: Int, reason: Option[String]): TrackRating =
+    new TrackRating(trackId, rating, reason match { case None => None; case Some(string) => Option(string(0)) } )
+  def trackRatingFormUnapply(trackRating: TrackRating) =
+    Some((trackRating.trackId, trackRating.rating,
+      trackRating.reason match { case None => None; case Some(char) => Option(char.toString) }))
+
+  def upsertRatingForUser = SecuredAction(ajaxCall = true) { implicit request =>
     val userId = request.user.identityId.userId
-    val trackIdUUID = UUID.fromString(trackId)
-    rating match {
-      case ratingUp if ratingUp > 0 =>
-        Track.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
-          case Success(true) => Ok
-          case _ => InternalServerError
+    trackRatingBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        Logger.error(formWithErrors.errorsAsJson.toString())
+        BadRequest(formWithErrors.errorsAsJson)
+      },
+      trackRating => {
+        val trackIdUUID = UUID.fromString(trackRating.trackId)
+        trackRating.rating match {
+          case ratingUp if ratingUp > 0 =>
+            Track.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
+              case Success(true) => Ok
+              case _ => InternalServerError
+            }
+          case ratingDown if ratingDown < 0 =>
+            Track.upsertRatingDown(userId, trackIdUUID, ratingDown, trackRating.reason) match {
+              case Success(true) => Ok
+              case _ => InternalServerError
+            }
+          case _ => BadRequest
         }
-      case ratingDown if ratingDown < 0 =>
-        Track.upsertRatingDown(userId, trackIdUUID, ratingDown) match {
-          case Success(true) => Ok
-          case _ => InternalServerError
-        }
-      case _ => BadRequest
-    }
+      }
+    )
   }
 
   def getRatingForUser(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>

@@ -3,6 +3,7 @@ package models
 import anorm.SqlParser._
 import anorm._
 import controllers.{UserOAuth2InfoWronglyFormatted, DAOException}
+import play.api.Logger
 import play.api.db.DB
 import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
@@ -119,5 +120,21 @@ object User {
     }
   } catch {
     case e: Exception => throw new DAOException("User.findFacebookAccessToken: " + e.getMessage)
+  }
+
+  def getTracksRemoved(userId: String): Seq[Track] = try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT * FROM tracksRating tracksRating
+          |  INNER JOIN tracks tracks
+          |    ON tracks.trackId = tracksRating.trackId
+          |    WHERE tracksRating.userId = {userId} AND tracksRating.reason IS NOT NULL""".stripMargin)
+        .on('userId -> userId)
+        .as(Track.trackParser *)
+    }
+  } catch {
+    case e: Exception =>
+      Logger.error("User.getTracksRemoved: ", e)
+      Seq.empty
   }
 }

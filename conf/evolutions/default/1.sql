@@ -800,16 +800,19 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION upsertTrackRatingDown(
   userIdValue       VARCHAR(255),
   trackIdValue      UUID,
-  ratingDownValue   INT)
+  ratingDownValue   INT,
+  reasonValue       CHAR)
   RETURNS VOID AS
   $$
     BEGIN
-      UPDATE tracksRating SET ratingDown = ratingDown + ratingDownValue
+      UPDATE tracksRating
+        SET ratingDown = ratingDown + ratingDownValue, reason = reasonValue
         WHERE trackId = trackIdValue AND userId = userIdValue;;
       IF found THEN
         RETURN;;
       ELSE
-        INSERT INTO tracksRating(trackId, userId, ratingDown) VALUES (trackIdValue, userIdValue, ratingDownValue);;
+        INSERT INTO tracksRating(trackId, userId, ratingDown, reason)
+          VALUES (trackIdValue, userIdValue, ratingDownValue, reasonValue);;
         RETURN;;
       END IF;;
     END;;
