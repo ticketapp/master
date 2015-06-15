@@ -55,7 +55,9 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             var deferred = $q.defer();
             $http.get('/artists/followed/')
                 .success(function(data, status){
+                    console.log('yo')
                     data.forEach(ImagesFactory);
+                    console.log('yo')
                     factory.artists = data;
                     deferred.resolve(factory.artists);
                 }).error(function(data, status){
@@ -256,13 +258,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     /*function pushTrack(track) {
                         $timeout(function () {
                             $rootScope.$apply(function () {
-                                track.artistName = artist.name;
                                 $rootScope.artist.tracks.push(track);
                                 $rootScope.tracks.push(track);
+                                $rootScope.loadingTracks = false;
                             });
                         }, 0);
                     }
-                    value.forEach(pushTrack);*/
+                    value.forEach(pushTrack);*/         
                     $timeout(function () {
                         $rootScope.$apply(function () {
                             $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);

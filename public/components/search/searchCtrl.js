@@ -31,6 +31,22 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 place.geographicPoint = RefactorGeopoint.refactorGeopoint(place.geographicPoint)
             }
         }
+        function arrayUnique(array) {
+            var a = array.concat();
+            for(var i=0; i<a.length; ++i) {
+                for(var j=i+1; j<a.length; ++j) {
+                    if(a[i] === a[j])
+                        a.splice(j--, 1);
+                }
+            }
+            $timeout(function () {
+                $scope.$apply(function () {
+                    $scope.loadingMore = false;
+                });
+            },0);
+            return a;
+        }
+
         function updateScope (data, scope, idName, otherScopeToCheck) {
             var scopeIdList = [];
             function getId(el, index, array) {
@@ -75,13 +91,16 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         }
         function getArtists () {
             ArtistsFactory.getArtists(offset).then(function (artists) {
-                updateScope(artists, $scope.artists, 'artistId');
+                $scope.artists = arrayUnique($scope.artists.concat(artists));
+                //updateScope(artists, $scope.artists, 'artistId');
             });
         }
 
         function getArtistsFolowed () {
+            console.log('yo');
             ArtistsFactory.getFollowArtists().then(function (artists) {
-                updateScope(artists, $scope.artists, 'artistId');
+                $scope.artists = arrayUnique($scope.artists.concat(artists));
+                //updateScope(artists, $scope.artists, 'artistId');
                 if (artists.length < $scope.limit) {
                     getArtists()
                 }
@@ -90,12 +109,14 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getArtistsByGenre () {
             ArtistsFactory.getArtistsByGenre(offset, _research).then(function (artists) {
-                updateScope(artists, $scope.artists, 'artistId');
+                $scope.artists = arrayUnique($scope.artists.concat(artists));
+                //updateScope(artists, $scope.artists, 'artistId');
             })
         }
         function getArtistsByContaining () {
             ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
-                updateScope(artists, $scope.artists, 'artistId');
+                $scope.artists = arrayUnique($scope.artists.concat(artists));
+                //updateScope(artists, $scope.artists, 'artistId');
             });
         }
 
@@ -109,26 +130,30 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getEventsArtistByContaining() {
             EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                $scope.events = arrayUnique($scope.events.concat(events));
+                //updateScope(events, $scope.events, 'eventId');
             });
         }
 
         function getEventsByGenre() {
             EventsFactory.getEventsByGenre(_research, offset, $rootScope.geoLoc).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                $scope.events = arrayUnique($scope.events.concat(events));
+                //updateScope(events, $scope.events, 'eventId');
                 console.log(events)
             });
         }
 
         function getPlacesEventsByContaining() {
             EventsFactory.getPlacesEventsByContaining(_research).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                $scope.events = arrayUnique($scope.events.concat(events));
+                //updateScope(events, $scope.events, 'eventId');
             });
         }
 
         function getEventsByCity() {
             EventsFactory.getEventsByCity(_research, offset).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                $scope.events = arrayUnique($scope.events.concat(events));
+                //updateScope(events, $scope.events, 'eventId');
             });
         }
 
@@ -144,32 +169,37 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getOrganizersByContaining() {
             OrganizerFactory.getOrganizersByContaining(_research).then(function (organizers) {
-                updateScope(organizers, $scope.organizers, 'organizerId');
+                $scope.organizers = arrayUnique($scope.organizers.concat(organizers));
+                //updateScope(organizers, $scope.organizers, 'organizerId');
             });
         }
 
         function getOrganizers() {
             OrganizerFactory.getOrganizers(offset).then(function (organizers) {
-                updateScope(organizers, $scope.organizers, 'organizerId');
+                $scope.organizers = arrayUnique($scope.organizers.concat(organizers));
+                //updateScope(organizers, $scope.organizers, 'organizerId');
             });
         }
 
         function getPlaces() {
             PlaceFactory.getPlaces(offset, $rootScope.geoLoc).then(function (places) {
                 places.forEach(refactorGeopoint);
-                updateScope(places, $scope.places, 'placeId');
+                $scope.places = arrayUnique($scope.places.concat(places));
+                //updateScope(places, $scope.places, 'placeId');
             });
         }
 
         function getPlacesByContaining() {
             PlaceFactory.getPlacesByContaining(_research).then(function (places) {
-                updateScope(places, $scope.places, 'placeId');
+                $scope.places = arrayUnique($scope.places.concat(places));
+                //updateScope(places, $scope.places, 'placeId');
             });
         }
 
         function getPlacesByCity() {
             PlaceFactory.getPlacesByCity(_research, offset).then(function (places) {
-                updateScope(places, $scope.places, 'placeId');
+                $scope.places = arrayUnique($scope.places.concat(places));
+                //updateScope(places, $scope.places, 'placeId');
             });
         }
 

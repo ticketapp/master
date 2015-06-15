@@ -100,18 +100,14 @@ angular.module('claudeApp').
             }
 
             function getNextShow (track) {
-                ArtistsFactory.getArtist(track.artist.facebookUrl).then(function (artist) {
-                    if (artist.genres) {
-                        artist.genres.forEach(addGenres)
-                    }
-                    ArtistsFactory.getArtistEvents(track.artist.facebookUrl).then(function (events) {
-                        events = $filter('orderBy')(events, 'startTime', false);
-                        track.nextShow = events[0];
-                    });
+                ArtistsFactory.getArtistEvents(track.artist.facebookUrl).then(function (events) {
+                    events = $filter('orderBy')(events, 'startTime', false);
+                    track.nextShow = events[0];
                 });
             }
 
             function pushTrack (track) {
+                track.genres.forEach(addGenres);
                 $scope.newTrack = {};
                 if ($rootScope.favoritesTracks) {
                     if ($rootScope.favoritesTracks.indexOf(track.trackId) > -1) {
@@ -438,7 +434,6 @@ angular.module('claudeApp').
                     } else {
                         $scope.nextTrack();
                     }
-                    document.getElementById('musicPlayer').addEventListener("contextmenu", function (e) { e.preventDefault(); e.stopPropagation(); }, false);
 
                     // hide the controls if they're visible
                     if (document.getElementById('musicPlayer').hasAttribute("controls")) {

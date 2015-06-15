@@ -34,11 +34,11 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             }
             return deferred.promise;
         },
-        lastGetPlaces: {offset: -1, geoloc: 0, places: []},
+        lastGetPlaces: {offset: -1, geoloc: 0, timestamp: 0, places: []},
         getPlaces : function (offset, geoLoc) {
             var deferred = $q.defer();
             if(factory.lastGetPlaces.offset >= offset &&
-                factory.lastGetPlaces.geoloc == geoLoc) {
+                factory.lastGetPlaces.geoloc == geoLoc && new Date() < factory.lastGetPlaces.timestamp + 180000) {
                 deferred.resolve(factory.lastGetPlaces.places);
             } else {
                 $http.get('/places?geographicPoint='+geoLoc+'&numberToReturn=12&offset='+offset)
@@ -50,6 +50,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         }
                         factory.lastGetPlaces.offset = offset;
                         factory.lastGetPlaces.geoloc = geoLoc;
+                        factory.lastGetPlaces.timestamp = new Date();
                         deferred.resolve(factory.lastGetPlaces.places);
                     }).error(function(data, status) {
                         deferred.reject('error');
