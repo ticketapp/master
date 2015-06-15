@@ -1,12 +1,12 @@
 angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '$http',
     'ArtistsFactory', 'UserFactory', 'OrganizerFactory', 'EventsFactory', 'PlaceFactory',
-    'StoreRequest', '$timeout', 'InfoModal', '$location',
+    'StoreRequest', '$timeout', 'InfoModal', '$location', '$localStorage', 'TracksRecommender',
     function ($scope, $rootScope, $http, ArtistsFactory, UserFactory, OrganizerFactory,
-              EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal, $location) {
+              EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal, $location, $localStorage, TracksRecommender) {
 
         var token;
 
-        function refactorDescription(data) {
+        /*function refactorDescription(data) {
             var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;
             if (data.description != undefined) {
                 data.description = '<div class="column large-12">' + data.description + '</div>';
@@ -25,7 +25,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                     }
                 }
             }
-        }
+        }*/
 
         function followArtist (id, toCreate) {
             ArtistsFactory.followArtistByFacebookId(id).then(function (isFollowed) {
@@ -72,7 +72,6 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 if (artist.genre == undefined) {
                     artist.genre = "";
                 }
-                refactorDescription(artist);
                 ArtistsFactory.postArtist(artist.name, artist).then(function (isCreated) {
                     if (isCreated != 'error') {
                         followArtist(artist.id, false)
@@ -101,7 +100,6 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 newOrganizer.description = organizer.about;
                 newOrganizer.websites = organizer.website;
                 newOrganizer.imagePath = organizer.cover.source;
-                refactorDescription(newOrganizer);
                 OrganizerFactory.createOrganizer(newOrganizer).then(function (isCreated) {
                     if (isCreated != 'error') {
                         getOrganizerEvents(organizer.id);
@@ -216,7 +214,6 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                         flag = 1;
                     }
                     if (flag == 0) {
-                        refactorDescription(data);
                         getPositionAndCreate(data);
                     }
                 }).
@@ -425,6 +422,26 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
             }
         }
 
+        $scope.updateRemoveTracks = function () {
+            UserFactory.getRemovedTracks().then(function (tracks) {
+                if ($localStorage.tracksSignaled == undefined) {
+                    $localStorage.tracksSignaled = [];
+                }
+                var tracksLength = tracks.length;
+                for (var i = 0; i < tracksLength; i++) {
+                    if ($localStorage.tracksSignaled.indexOf(tracks[i].trackId) == -1) {
+                        $localStorage.tracksSignaled.push(tracks[i].trackId)
+                    }
+                }
+                var localStorageRemovedTracksLength = $localStorage.tracksSignaled.length;
+                for (var j = 0; j < localStorageRemovedTracksLength; j++) {
+                    if (tracks.indexOf($localStorage.tracksSignaled[j]) == -1) {
+                        TracksRecommender.UpsertTrackRate(false, $localStorage.tracksSignaled[j])
+                    }
+                }
+            })
+        };
+
         function getConnected (connectWin) {
             var waitForConnected = setInterval(function () {
                 if (connectWin.document.getElementById('top') != undefined &&
@@ -441,6 +458,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                         }, 0);
                         UserFactory.makeFavoriteTracksRootScope();
                         getUserToken();
+                        $scope.updateRemoveTracks();
                         if ($rootScope.lastReq != {} && $rootScope.lastReq != undefined) {
                             applyLastRequest();
                         }

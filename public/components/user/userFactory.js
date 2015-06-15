@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreRequest', 'InfoModal',
-    'TracksRecommender', '$rootScope',
-    function ($http, $q, StoreRequest, InfoModal, TracksRecommender, $rootScope){
+    'TracksRecommender', '$rootScope', 'RoutesFactory',
+    function ($http, $q, StoreRequest, InfoModal, TracksRecommender, $rootScope, RoutesFactory){
     var factory = {
         user : false,
         getToken : function () {
@@ -204,6 +204,13 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     }
                     deferred.resolve('error');
                 });
+            return deferred.promise;
+        },
+        getRemovedTracks : function () {
+            var deferred = $q.defer();
+            $http.get(RoutesFactory.user.getRemovedTracks()).success(function (tracks) {
+                deferred.resolve(tracks)
+            });
             return deferred.promise;
         }
     };

@@ -1,4 +1,4 @@
-'use strict';
+/*'use strict';
 describe('Factory: DetectPath', function () {
     var DetectPath, $rootScope, $location;
 
@@ -13,4 +13,4 @@ describe('Factory: DetectPath', function () {
     it('should return pathName', function () {
         expect($rootScope.path).toBe(false);
     });
-});
+});*/

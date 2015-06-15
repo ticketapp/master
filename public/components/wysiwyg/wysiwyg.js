@@ -42,7 +42,7 @@ angular.module('claudeApp').directive('Wysiwygcontent', ['$sce', function($sce) 
     };
 }]);
 
-app.controller('wysiwygCtrl', function($scope, $timeout, $location){
+angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout, $location){
     $scope.styles = [
         {
             'type':'button',

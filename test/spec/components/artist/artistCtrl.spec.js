@@ -1,4 +1,4 @@
-'use strict';
+/*'use strict';
 
 describe('Controller: ArtistCtrl', function () {
     var $ctrl,
@@ -96,4 +96,4 @@ describe('Controller: ArtistCtrl', function () {
 
         expect($scope.websites).toEqual(expectedWebsites);
     })
-});
+});*/

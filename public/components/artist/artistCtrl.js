@@ -1,8 +1,8 @@
 angular.module('claudeApp').
 controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout', '$filter',
-        '$modal', '$rootScope', '$routeParams', 'WebsitesFactory', 'InfoModal',
+        '$modal', '$rootScope', '$routeParams', 'WebsitesFactory', 'InfoModal', 'UserFactory',
     function ($scope, $localStorage, ArtistsFactory, $timeout, $filter, $modal, $rootScope,
-              $routeParams, WebsitesFactory, InfoModal) {
+              $routeParams, WebsitesFactory, InfoModal, UserFactory) {
         $scope.trackLimit = 12;
         $scope.trackTitle = '';
         $scope.showDesc = false;
@@ -13,6 +13,14 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.events = [];
         if ($localStorage.tracksSignaled == undefined) {
             $localStorage.tracksSignaled = [];
+            if ($rootScope.connected == true) {
+                UserFactory.getRemovedTracks().then(function (tracks) {
+                    var tracksLength = tracks.length;
+                    for (var i = 0; i < tracksLength; i++) {
+                        $localStorage.tracksSignaled.push(tracks[i].trackId)
+                    }
+                })
+            }
         }
         if ($rootScope.artisteToCreate != true) {
             $scope.tracks = [];
@@ -102,10 +110,6 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         } else {
             $scope.selectedTab = 1;
             ArtistsFactory.passArtisteToCreateToFalse();
-        }
-
-        if ($localStorage.tracksSignaled == undefined) {
-            $localStorage.tracksSignaled = [];
         }
 
         $scope.follow = function () {

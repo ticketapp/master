@@ -27,8 +27,10 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                 controller: 'SignalTrackCtrl'
             });
             modalInstance.result.then(function () {
-                $localStorage.tracksSignaled.push(trackId);
-                TracksRecommender.UpsertTrackRate(false, trackId);
+                if (trackId != null && trackId != undefined) {
+                    $localStorage.tracksSignaled.push(trackId);
+                    TracksRecommender.UpsertTrackRate(false, trackId);
+                }
                 $scope.closeTrack(index);
             }, function () {
             });

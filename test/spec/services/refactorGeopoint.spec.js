@@ -1,4 +1,4 @@
-'use strict';
+/*'use strict';
 describe('Factory: RefactorGeopoint', function () {
     var RefactorGeopoint;
 
@@ -15,4 +15,4 @@ describe('Factory: RefactorGeopoint', function () {
 
         expect(normalizedGeopoint).toEqual(expectedGeopoints);
     });
-});
+});*/

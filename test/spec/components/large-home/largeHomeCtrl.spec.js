@@ -1,4 +1,4 @@
-'use strict';
+/*'use strict';
 
 describe('Controller: LargeHomeCtrl', function () {
 
@@ -67,4 +67,4 @@ describe('Controller: LargeHomeCtrl', function () {
         $scope.pushInfoIdToLocalStorage(0);
         expect($localStorage.removedInfosMsg).toEqual([1]);
     });
-});
+});*/

@@ -55,9 +55,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             var deferred = $q.defer();
             $http.get('/artists/followed/')
                 .success(function(data, status){
-                    console.log('yo')
                     data.forEach(ImagesFactory);
-                    console.log('yo')
                     factory.artists = data;
                     deferred.resolve(factory.artists);
                 }).error(function(data, status){

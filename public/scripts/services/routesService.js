@@ -15,6 +15,11 @@ angular.module('claudeApp').factory('RoutesFactory', function () {
             getFollowedOrganizers: function () {
                 return '/organizers/followed/';
             }
+        },
+        user : {
+            getRemovedTracks : function () {
+                return '/users/tracksRemoved/'
+            }
         }
     };
     return factory;
