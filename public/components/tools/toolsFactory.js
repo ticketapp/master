@@ -45,7 +45,7 @@ angular.module('claudeApp').factory('ToolsFactory', ['$http', '$q', '$rootScope'
             var deferred = $q.defer();
             if ($rootScope.geoLoc == factory.eventsGenrePlaylist.geopoint &&
                 genre == factory.eventsGenrePlaylist.genre) {
-                deferred.resolve(factory.eventsGenrePlaylist.playlist)
+                deferred.resolve(angular.copy(factory.eventsGenrePlaylist.playlist))
             } else {
                 EventsFactory.getEventsByGenre(genre, 0, $rootScope.geoLoc).then(function(events) {
                     events = $filter('orderBy')(events, 'startTime', false);
@@ -67,7 +67,7 @@ angular.module('claudeApp').factory('ToolsFactory', ['$http', '$q', '$rootScope'
                         factory.eventsGenrePlaylist.geopoint = $rootScope.geoLoc;
                         factory.eventsGenrePlaylist.genre = genre;
                         factory.eventsGenrePlaylist.playlist.name = 'Playlist des evénéments ' + genre;
-                        deferred.resolve(factory.eventsGenrePlaylist.playlist)
+                        deferred.resolve(angular.copy(factory.eventsGenrePlaylist.playlist))
                     } else {
                         deferred.reject()
                     }

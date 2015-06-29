@@ -61,7 +61,6 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                         }
                         $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
                         $scope.artist.tracks = $scope.tracks;
-                        console.log( $scope.artist.tracks);
                         $rootScope.loadingTracks = false;
                     })
                 }, 0);

@@ -39,11 +39,11 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 if (otherScopeToCheck !== undefined) {
                     var otherScopeToCheckLength = otherScopeToCheck.length;
                     for (var i = 0; i < otherScopeToCheckLength; i++) {
-                        var idOtherScopeDictionary = {'artistId': otherScopeToCheckLength[i].artistId,
-                            'eventId': otherScopeToCheckLength[i].eventId,
-                            'organizerId': otherScopeToCheckLength[i].organizerId,
-                            'placeId': otherScopeToCheckLength[i].placeId,
-                            'facebookId': otherScopeToCheckLength[i].facebookId};
+                        var idOtherScopeDictionary = {'artistId': otherScopeToCheck[i].artistId,
+                            'eventId': otherScopeToCheck[i].eventId,
+                            'organizerId': otherScopeToCheck[i].organizerId,
+                            'placeId': otherScopeToCheck[i].placeId,
+                            'facebookId': otherScopeToCheck[i].facebookId};
                         if (idDictionary[idName] == idOtherScopeDictionary[idName]) {
                             return true;
                         }
@@ -65,15 +65,11 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
             function pushEl (el, index, array) {
                 if (isInScope(el) == false) {
-                    $timeout(function () {
-                        $scope.$apply(function () {
-                            scope.push(el);
-                        });
-                    }, 0);
+                    scope.push(el);
                 }
             }
-            data.forEach(pushEl);
             $scope.loadingMore = false;
+            data.forEach(pushEl);
         }
 
         function filterEventsByTime() {
@@ -114,6 +110,15 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         function getArtistsByContaining () {
             ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
                 console.log($scope.artists);
+                var artistsFacebookInScope = $scope.artistsFb.map(function (artist) {
+                    return artist.artistId
+                });
+                var artistLength = artists.length;
+                for (var i = 0; i < artistLength; i++) {
+                    if (artistsFacebookInScope.indexOf(artists[i].artistId) > -1) {
+                        $scope.artistsFb.splice(artistsFacebookInScope.indexOf(artists[i].artistId), 1)
+                    }
+                }
                 updateScope(artists, $scope.artists, 'artistId');
             });
         }

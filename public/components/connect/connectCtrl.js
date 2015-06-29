@@ -1,8 +1,9 @@
 angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '$http',
     'ArtistsFactory', 'UserFactory', 'OrganizerFactory', 'EventsFactory', 'PlaceFactory',
-    'StoreRequest', '$timeout', 'InfoModal', '$location', '$localStorage', 'TracksRecommender',
+    'StoreRequest', '$timeout', 'InfoModal', '$location', '$localStorage', 'TracksRecommender', '$filter',
     function ($scope, $rootScope, $http, ArtistsFactory, UserFactory, OrganizerFactory,
-              EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal, $location, $localStorage, TracksRecommender) {
+              EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal, $location, $localStorage,
+              TracksRecommender, $filter) {
 
         var token;
 
@@ -424,19 +425,21 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
 
         $scope.updateRemoveTracks = function () {
             UserFactory.getRemovedTracks().then(function (tracks) {
+                console.log(tracks);
+                console.log($localStorage.tracksSignaled)
                 if ($localStorage.tracksSignaled == undefined) {
                     $localStorage.tracksSignaled = [];
                 }
                 var tracksLength = tracks.length;
                 for (var i = 0; i < tracksLength; i++) {
-                    if ($localStorage.tracksSignaled.indexOf(tracks[i].trackId) == -1) {
+                    if ($filter('filter')($localStorage.tracksSignaled, 'trackId', tracks[i].trackId).length == 0) {
                         $localStorage.tracksSignaled.push(tracks[i].trackId)
                     }
                 }
                 var localStorageRemovedTracksLength = $localStorage.tracksSignaled.length;
                 for (var j = 0; j < localStorageRemovedTracksLength; j++) {
                     if (tracks.indexOf($localStorage.tracksSignaled[j]) == -1) {
-                        TracksRecommender.UpsertTrackRate(false, $localStorage.tracksSignaled[j])
+                        TracksRecommender.UpsertTrackRate(false, $localStorage.tracksSignaled[j].trackId,  $localStorage.tracksSignaled[j].reason)
                     }
                 }
             })

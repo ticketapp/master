@@ -1,9 +1,9 @@
 angular.module('claudeApp').factory('TracksRecommender', ['$http', '$rootScope',
     function ($http, $rootScope) {
     var factory = {
-        postTrackRate: function (trackId, rate) {
+        postTrackRate: function (trackId, rate, reason) {
             console.log(rate);
-            $http.post('/tracks/'+ trackId + '/' + rate + '/rating')
+            $http.post('/tracks/rating', {trackId: trackId, rating: rate, reason: reason})
         },
         trackRateByTime : function (duration, time, trackId) {
             var rate;
@@ -19,13 +19,13 @@ angular.module('claudeApp').factory('TracksRecommender', ['$http', '$rootScope',
                 factory.postTrackRate(trackId, rate)
             }
         },
-        UpsertTrackRate : function (isPositive, trackId) {
+        UpsertTrackRate : function (isPositive, trackId, reason) {
             if ($rootScope.connected == true) {
                 var rate = 1000;
                 if (isPositive == false) {
                     rate = -1000
                 }
-                factory.postTrackRate(trackId, rate)
+                factory.postTrackRate(trackId, rate, reason)
             }
         }
     };

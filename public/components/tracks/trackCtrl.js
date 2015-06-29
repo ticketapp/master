@@ -26,10 +26,10 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                     '</form>',
                 controller: 'SignalTrackCtrl'
             });
-            modalInstance.result.then(function () {
+            modalInstance.result.then(function (reason) {
                 if (trackId != null && trackId != undefined) {
-                    $localStorage.tracksSignaled.push(trackId);
-                    TracksRecommender.UpsertTrackRate(false, trackId);
+                    $localStorage.tracksSignaled.push({trackId: trackId, reason: reason});
+                    TracksRecommender.UpsertTrackRate(false, trackId, reason);
                 }
                 $scope.closeTrack(index);
             }, function () {
@@ -43,7 +43,7 @@ angular.module('claudeApp').controller('SignalTrackCtrl', ['$scope', '$modalInst
     function ($scope, $modalInstance) {
         $scope.ok = function (reason) {
             if (reason != undefined) {
-                $modalInstance.close();
+                $modalInstance.close(reason);
             } else {
                 $scope.error = 'veuyez renseigner ce champs'
             }
