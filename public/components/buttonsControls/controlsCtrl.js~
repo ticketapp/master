@@ -189,7 +189,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                 });
         }
 
-        var txtFile = new XMLHttpRequest();
+        /*var txtFile = new XMLHttpRequest();
         txtFile.open("GET", "/assets/salles.txt", true);
         txtFile.onreadystatechange = function () {
             if (txtFile.readyState === 4) {  // document is ready to parse.
@@ -215,7 +215,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                 }
             }
         };
-        txtFile.send(null);
+        txtFile.send(null);*/
 		var cnvList = [];
 		var pageNumber = 0;
 		var page = '';

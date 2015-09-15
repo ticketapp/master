@@ -24,7 +24,7 @@ angular.module('claudeApp').factory('InfoModal', ['$modal', '$mdToast',
 
                 $mdToast.show(
                     $mdToast.simple()
-                        .content(info)
+                        .content('une erreure s\'est produite'                                                                                                                                                                                                                                                                                                                                                                                                                                                                             )
                         .position(getToastPosition())
                         .hideDelay(6000)
                 );

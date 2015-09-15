@@ -7,9 +7,9 @@ md-tabs > .md-header { background: #2DAAE1!important;}
 md-tab-label { color: white;
   font-weight: bold;}
 md-tabs-ink-bar {background: #a0d3e8!important;}
-/*artist-min, artist-facebook-min {
+artist-min, artist-facebook-min {
   overflow: hidden;
-}*/
+}
 
 .arTrack {
   box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);

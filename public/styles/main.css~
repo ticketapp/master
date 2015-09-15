@@ -27965,7 +27965,7 @@ md-tabs-ink-bar {
 
 /* line 8, ../../public/components/artist/artist.scss */
 artist-min, artist-facebook-min {
-  /*overflow: hidden;*/
+  overflow: hidden;
 }
 
 /* line 12, ../../public/components/artist/artist.scss */
