@@ -220,16 +220,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         },
         getNewArtistTrack : function (artistName, trackTitle, artistFacebookUrl) {
             var deferred = $q.defer();
-            if(factory.artists == true) {
-                deferred.resolve(factory.artists);
-            } else {
-                $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
-                    success(function (data) {
-                        deferred.resolve(data);
-                    }).error(function (data) {
-                        deferred.resolve('error');
-                    })
-            }
+            $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
+                success(function (data) {
+                    deferred.resolve(data);
+                }).error(function (data) {
+                    deferred.resolve('error');
+                });
+
             return deferred.promise;
         },
         createNewArtistAndPassItToRootScope : function (artist) {

@@ -77,3 +77,4 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
     }
   }
 }
+

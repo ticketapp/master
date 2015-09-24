@@ -1,27 +1,32 @@
-/*'use strict';
+'use strict';
 
 describe('Controller: ArtistCtrl', function () {
     var $ctrl,
         $scope,
+        $timeout,
         $httpBackend,
-        artistHandler,
-        eventsHandler;
+        isFollowed;
     // load the controller's module
     beforeEach(module('claudeApp'));
 
-    beforeEach(inject(function ($controller, _$rootScope_, _$routeParams_, _ArtistsFactory_, _$httpBackend_) {
+    beforeEach(inject(function ($controller, _$rootScope_, _$routeParams_, _ArtistsFactory_, _$httpBackend_, _$timeout_) {
         $httpBackend = _$httpBackend_;
-        // backend definition common for all tests
-        artistHandler = $httpBackend.when('GET', '/artists/klklklkl')
+        $timeout = _$timeout_;
+
+        $httpBackend.when('GET', '/artists/klklklkl')
             .respond({
                 name: 'jhjhjh',
                 artistId: 1,
                 facebookUrl: 'klklklkl',
                 websites : ['www.jkjkjk/facebook.com', 'www.jljl/twitter.fr', 'http://abc/soundcloud.com', 'www.hjhhjh.com'],
-                tracks : ['fgfgfgfgfm', 'gfgfggfg', 'fgfgffgfgf', 'dfdfdfdff']
+                tracks : [{name: 'fgfgfgfgfm', url: 'aa'}]
             });
-        eventsHandler = $httpBackend.when('GET', '/artists/1/events')
-            .respond(['event1', 'event2']);
+        $httpBackend.when('GET', '/artists/klklklkl/events')
+            .respond([]);
+        $httpBackend.when('GET', '/artists/1/isFollowed')
+            .respond(true);
+        $httpBackend.when('GET', '/tracks/jhjhjh/klklklkl/trackTitle')
+            .respond([{name: 'fgfgfgfgfm', url: 'aa'}, {name: 'aaaaa', url: 'aaaa'}]);
 
         _$routeParams_.facebookUrl = 'klklklkl';
         _$rootScope_.artisteToCreate = false;
@@ -37,7 +42,7 @@ describe('Controller: ArtistCtrl', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should return $scope.artist with events', function () {
+    /*it('should return $scope.artist with events', function () {
         $httpBackend.flush();
         var expectedArtist = {
             name: 'jhjhjh',
@@ -61,8 +66,8 @@ describe('Controller: ArtistCtrl', function () {
                     name : 'website'
                 }
             ],
-            tracks : ['fgfgfgfgfm', 'gfgfggfg', 'fgfgffgfgf', 'dfdfdfdff'],
-            events : ['event1', 'event2']
+            tracks : [{name: 'fgfgfgfgfm', url: 'aa'}],
+            events : []
         };
 
         expect($scope.artist).toEqual(expectedArtist);
@@ -95,5 +100,17 @@ describe('Controller: ArtistCtrl', function () {
         };
 
         expect($scope.websites).toEqual(expectedWebsites);
+    });*/
+
+    it('should return suggested tracks without duplicate', function () {
+        $httpBackend.flush();
+        $timeout.flush();
+        $scope.suggestQuery('trackTitle', 'jhjhjh', 'klklklkl');
+        $httpBackend.flush();
+        var expectedTracks = [
+            {name: 'fgfgfgfgfm', url: 'aa'},
+            {name: 'aaaaa', url: 'aaaa'}
+        ];
+        expect($scope.artist.tracks).toEqual(expectedTracks);
     })
-});*/
+});

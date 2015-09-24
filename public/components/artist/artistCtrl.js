@@ -120,7 +120,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                             $scope.isFollowed = true;
                             InfoModal.displayInfo('Vous suivez ' + $scope.artist.name)
                         })
-                    },0);
+                    }, 0);
                 }
             })
         };
@@ -133,7 +133,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                             $scope.isFollowed = false;
                             InfoModal.displayInfo('Vous ne suivez plus ' + $scope.artist.name)
                         })
-                    },0);
+                    }, 0);
                 }
             })
         };
@@ -185,8 +185,15 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 ArtistsFactory.getNewArtistTrack(artistName, trackTitle, artistFacebookUrl).then(
                     function (tracks) {
                         for (var i = 0; i < tracks.length; i++) {
-                            $scope.artist.tracks.push(tracks[i]);
-                            $scope.tracks.push(tracks[i])
+                            if ($filter('filter')($scope.tracks, tracks[i].url, 'url').length === 0) {
+                                $scope.tracks.push(tracks[i])
+                                $timeout(function () {
+                                    $scope.$apply(function(){
+                                        $scope.artist.tracks = $filter('filter')($scope.tracks,
+                                            {title: $scope.trackTitle})
+                                    })
+                                }, 0)
+                            }
                         }
                         if (tracks.length == 0) {
                             InfoModal.displayInfo('Nous n\'avons pas trouvé "' + trackTitle + '"', 'error');
@@ -194,7 +201,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     }
                 );
             } else {
-                InfoModal.displayInfo('le nom de la track doit faire plus de deux lettres');
+                InfoModal.displayInfo('Le nom du morceau doit faire plus de deux lettres.');
             }
         };
 
