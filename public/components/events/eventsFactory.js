@@ -47,8 +47,9 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 } else {
                     event.tariffRange = tariffs[0].replace('.0', '') + '€';
                 }
-                event.priceColor = 'rgb(' + tariffs[0]*2 + ',' + (200 - (tariffs[0]*4 ) )+
-                    ',' + tariffs[0]*4 + ')'
+                tariffs[0] = parseInt(tariffs[0]);
+                event.priceColor = 'rgb(' + Math.round(tariffs[0]*2) + ',' + (Math.round(200 - (tariffs[0]*4 )) )+
+                    ',' + Math.round(tariffs[0]*4) + ')'
             }
         },
         lastGetEvents : {
