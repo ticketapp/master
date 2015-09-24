@@ -456,7 +456,7 @@ object Event {
          city: Option[String], maybeOwnerId: Option[String]) => {
 
       val eventuallyOrganizer = Organizer.getOrganizerInfo(maybeOwnerId)
-      val address = new Address(None, None, city, zip, street)
+      val address = Address(None, None, city, zip, street)
 
       val normalizedWebsites: Set[String] = getNormalizedWebsitesInText(description)
       val ticketSellers = Tariff.findTicketSellers(normalizedWebsites)
@@ -473,9 +473,11 @@ object Event {
         val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
         Artist.saveArtistsAndTheirTracks(nonEmptyArtists)
 
-        val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
+        val eventGenres = nonEmptyArtists.flatMap(_.genres).distinct
+        println("facebookId:" + facebookId)
+        println("yo:" + eventGenres)
 
-        new Event(None, facebookId, true, true, Utilities.refactorEventOrPlaceName(name), None,
+        Event(None, facebookId, isPublic = true, isActive = true, Utilities.refactorEventOrPlaceName(name), None,
           Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
           formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
           nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
