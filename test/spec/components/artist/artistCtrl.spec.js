@@ -44,8 +44,9 @@ describe('Controller: ArtistCtrl', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    /*it('should return $scope.artist with events', function () {
+    it('should return $scope.artist with events', function () {
         $httpBackend.flush();
+        $timeout.flush();
         var expectedArtist = {
             name: 'jhjhjh',
             artistId: 1,
@@ -68,8 +69,7 @@ describe('Controller: ArtistCtrl', function () {
                     name : 'website'
                 }
             ],
-            tracks : [{name: 'fgfgfgfgfm', url: 'aa'}],
-            events : []
+            tracks : [{name: 'fgfgfgfgfm', url: 'aa'}]
         };
 
         expect($scope.artist).toEqual(expectedArtist);
@@ -77,6 +77,7 @@ describe('Controller: ArtistCtrl', function () {
 
     it('should return $scope.website normalized', function () {
         $httpBackend.flush();
+        $timeout.flush();
         var expectedWebsites = {
             iconWebsites : [
                 {
@@ -102,7 +103,7 @@ describe('Controller: ArtistCtrl', function () {
         };
 
         expect($scope.websites).toEqual(expectedWebsites);
-    });*/
+    });
 
     it('should return suggested tracks without duplicate', function () {
         $httpBackend.flush();
