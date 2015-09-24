@@ -83,7 +83,7 @@ object SearchArtistsController extends Controller {
     }
 
     soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
-      case Some(facebookUrls: Seq[String]) if facebookUrls.length > 0 => Option(facebookUrls.head)
+      case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
       case _ => None
     }
   }
@@ -146,7 +146,7 @@ object SearchArtistsController extends Controller {
         maybeDescription, maybeGenre, maybeLikes, maybeCountry)
           if category.equalsIgnoreCase("Musician/band") | category.equalsIgnoreCase("Artist") =>
           makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
-            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten)
       }
     }
     (facebookResponse.json \ "data")
@@ -162,11 +162,11 @@ object SearchArtistsController extends Controller {
         case Some((name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
             link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
           Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
         case Some((name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
             link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
           Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
         case _ => None
       }
   }
