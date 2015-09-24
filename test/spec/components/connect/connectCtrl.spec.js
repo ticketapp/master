@@ -41,10 +41,19 @@ describe('Controller: ConnectCtrl', function () {
     });
 
     it('should rate new signaled tracks', function () {
-        var expectedSignaledTracks = [1, 2, 3];
-        $localStorage.tracksSignaled = [1, 2, 3, 4];
+        var expectedSignaledTracks = [
+            {trackId: 1},
+            {trackId: 2},
+            {trackId: 3},
+            {trackId: 4}
+        ];
+        $localStorage.tracksSignaled = [
+            {trackId: 1},
+            {trackId: 2},
+            {trackId: 3},
+            {trackId: 4}
+        ];
         $scope.updateRemoveTracks();
-
         $httpBackend.flush();
 
         expect($localStorage.tracksSignaled).toEqual(expectedSignaledTracks);

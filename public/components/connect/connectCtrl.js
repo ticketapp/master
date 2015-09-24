@@ -425,20 +425,20 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
 
         $scope.updateRemoveTracks = function () {
             UserFactory.getRemovedTracks().then(function (tracks) {
-                console.log(tracks);
-                console.log($localStorage.tracksSignaled)
                 if ($localStorage.tracksSignaled == undefined) {
                     $localStorage.tracksSignaled = [];
                 }
                 var tracksLength = tracks.length;
                 for (var i = 0; i < tracksLength; i++) {
-                    if ($filter('filter')($localStorage.tracksSignaled, 'trackId', tracks[i].trackId).length == 0) {
+                    if ($filter('filter')($localStorage.tracksSignaled, tracks[i].trackId, 'trackId').length == 0) {
                         $localStorage.tracksSignaled.push(tracks[i].trackId)
                     }
                 }
                 var localStorageRemovedTracksLength = $localStorage.tracksSignaled.length;
                 for (var j = 0; j < localStorageRemovedTracksLength; j++) {
-                    if (tracks.indexOf($localStorage.tracksSignaled[j]) == -1) {
+                    console.log('AA',$localStorage.tracksSignaled[j]);
+                    if ($filter('filter')(tracks, $localStorage.tracksSignaled[j].trackId).length === 0) {
+                        console.log('BB', $localStorage.tracksSignaled);
                         TracksRecommender.UpsertTrackRate(false, $localStorage.tracksSignaled[j].trackId,  $localStorage.tracksSignaled[j].reason)
                     }
                 }
