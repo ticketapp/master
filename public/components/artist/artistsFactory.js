@@ -274,6 +274,21 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         },
         passArtisteToCreateToFalse : function () {
             $rootScope.artisteToCreate = false;
+        },
+        refactorArtistName : function (artistName) {
+            artistName = artistName
+                .toLowerCase()
+                .replace('officiel', '')
+                .replace('official', '')
+                .replace('music', '')
+                .replace('musique', '')
+                .replace('musik', '')
+                .replace('fanpage', '')
+                .replace(/[^\w\s']/, ' ')
+                .replace('   ', ' ')
+                .replace('  ', ' ')
+                .trim();
+            return artistName;
         }
     };
     return factory;

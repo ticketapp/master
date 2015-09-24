@@ -11,6 +11,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.showTop = false;
         $scope.numberOfTop = 0;
         $scope.events = [];
+
         if ($localStorage.tracksSignaled == undefined) {
             $localStorage.tracksSignaled = [];
             if ($rootScope.connected == true) {
@@ -171,22 +172,17 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 $rootScope.addAndPlay(tracksToPlay, $scope.artist)
             }
         };
+
         $scope.suggestQuery = function (trackTitle, artistName, artistFacebookUrl) {
             $scope.suggest = false;
             if (trackTitle.length > 2) {
-                artistName = artistName.toLowerCase().replace('officiel', '');
-                artistName = artistName.toLowerCase().replace('official', '');
-                artistName = artistName.toLowerCase().replace('music', '');
-                artistName = artistName.toLowerCase().replace('musique', '');
-                artistName = artistName.toLowerCase().replace('musik', '');
-                artistName = artistName.toLowerCase().replace('fanpage', '');
-                artistName = artistName.toLowerCase().replace(/[^\w\s-].*/, '');
+                artistName = ArtistsFactory.refactorArtistName(artistName);
                 console.log(artistName, trackTitle, artistFacebookUrl);
                 ArtistsFactory.getNewArtistTrack(artistName, trackTitle, artistFacebookUrl).then(
                     function (tracks) {
                         for (var i = 0; i < tracks.length; i++) {
                             if ($filter('filter')($scope.tracks, tracks[i].url, 'url').length === 0) {
-                                $scope.tracks.push(tracks[i])
+                                $scope.tracks.push(tracks[i]);
                                 $timeout(function () {
                                     $scope.$apply(function(){
                                         $scope.artist.tracks = $filter('filter')($scope.tracks,

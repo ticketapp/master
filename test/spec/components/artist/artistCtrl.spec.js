@@ -5,6 +5,7 @@ describe('Controller: ArtistCtrl', function () {
         $scope,
         $timeout,
         $httpBackend,
+        ArtistsFactory,
         isFollowed;
     // load the controller's module
     beforeEach(module('claudeApp'));
@@ -12,6 +13,7 @@ describe('Controller: ArtistCtrl', function () {
     beforeEach(inject(function ($controller, _$rootScope_, _$routeParams_, _ArtistsFactory_, _$httpBackend_, _$timeout_) {
         $httpBackend = _$httpBackend_;
         $timeout = _$timeout_;
+        ArtistsFactory = _ArtistsFactory_;
 
         $httpBackend.when('GET', '/artists/klklklkl')
             .respond({
@@ -112,5 +114,42 @@ describe('Controller: ArtistCtrl', function () {
             {name: 'aaaaa', url: 'aaaa'}
         ];
         expect($scope.artist.tracks).toEqual(expectedTracks);
-    })
+    });
+
+    it('should refactor artist name', function () {
+        $httpBackend.flush();
+        $timeout.flush();
+        var names = [
+            "lkjlkj officiel",
+            "lkjlkj official",
+            "lkjlkj fanpage",
+            "lkjlkj music",
+            "lkjlkj musik",
+            "lkjlkj musique",
+            "lkjlkj / lkjlkj",
+            "lkjlkj * lkjlkj",
+            "lkjlkj - lkjlkj",
+            "lkjlkj*lkjlkj",
+            "l'kjlkj"
+        ];
+        var expectedRefactoredNames = [
+            "lkjlkj",
+            "lkjlkj",
+            "lkjlkj",
+            "lkjlkj",
+            "lkjlkj",
+            "lkjlkj",
+            "lkjlkj lkjlkj",
+            "lkjlkj lkjlkj",
+            "lkjlkj lkjlkj",
+            "lkjlkj lkjlkj",
+            "l'kjlkj"
+        ];
+
+        names = names.map(function (name) {
+            return ArtistsFactory.refactorArtistName(name);
+        });
+
+        expect(names).toEqual(expectedRefactoredNames);
+    });
 });
