@@ -284,7 +284,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 .replace('musique', '')
                 .replace('musik', '')
                 .replace('fanpage', '')
-                .replace(/[^\w\s']/, ' ')
+                .replace(/[^\w\s'éèàâûùê]/, ' ')
                 .replace('   ', ' ')
                 .replace('  ', ' ')
                 .trim();

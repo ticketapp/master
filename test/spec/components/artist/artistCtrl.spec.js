@@ -130,7 +130,8 @@ describe('Controller: ArtistCtrl', function () {
             "lkjlkj * lkjlkj",
             "lkjlkj - lkjlkj",
             "lkjlkj*lkjlkj",
-            "l'kjlkj"
+            "l'kjlkj",
+            "lékjlkj"
         ];
         var expectedRefactoredNames = [
             "lkjlkj",
@@ -143,7 +144,8 @@ describe('Controller: ArtistCtrl', function () {
             "lkjlkj lkjlkj",
             "lkjlkj lkjlkj",
             "lkjlkj lkjlkj",
-            "l'kjlkj"
+            "l'kjlkj",
+            "lékjlkj"
         ];
 
         names = names.map(function (name) {
