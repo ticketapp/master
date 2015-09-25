@@ -27847,6 +27847,31 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     line-height: 40px;
     margin-top: 2.5px;
 }
+.hideControls {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: -70px;
+}
+
+.controlsArrow.hidden {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: -20px;
+}
 .close-modal {
     top: -17.5px;
     right: -10px;
@@ -27864,6 +27889,7 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
     padding: 5px 12px;
     width: 100%;
     text-align: center;
+
 }
 /* line 12, ../../public/components/buttonsControls/controls.scss */
 .ng-controls {
@@ -27874,10 +27900,32 @@ md-slider#timeSearchSliderPhone > .md-thumb-container > .md-thumb > b {
   position: fixed;
 }
 
-/* line 19, ../../public/components/buttonsControls/controls.scss */
-.ng-controls:hover {
-  margin-right: 0 !important;
+.showControls, .controlsArrow.show {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: 0;
 }
+/* line 19, ../../public/components/buttonsControls/controls.scss */
+.hideControls:hover, .ng-controls:hover > .hideControls, .generalControlsContener:hover >  .controlsArrow {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: 0;
+}
+
 
 /* line 23, ../../public/components/buttonsControls/controls.scss */
 .generalControls > button, .generalControls > .button {

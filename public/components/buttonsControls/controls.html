@@ -1,9 +1,16 @@
 <div class="zIndex1 generalControlsContener" id="generalControlsContener" ng-if="$root.window != 'small'">
-    <ul class="float-right">
+    <li ng-if="$root.path != 'iframe'"
+        class="generalControls float-right controlsArrow"
+        ng-class="{'hidden': hide, 'show': !hide}"
+        data-ng-click="$parent.hide = !$parent.hide">
+        <a><i class="fa" ng-class="{'fa-chevron-right': !hide, 'fa-chevron-left': hide}"></i></a>
+    </li>
+    <ul class="float-right " ng-class="{'hideControls': hide, 'showControls': !hide}">
         <li ng-if="$root.path != 'iframe' && $root.path != 'home'"
             class="generalControls float-right marginBottom10" >
             <b><a href="#/" class="fi-claude width100p"></a></b>
-        </li><!--
+        </li>
+        <!--
         <li ng-if="!$root.home" class="generalControls float-right">
             <button ng-click="back()" class="alert"><i class="fi-x"></i></button>
         </li>-->

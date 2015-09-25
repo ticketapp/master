@@ -11,6 +11,55 @@
   margin-top: 2.5px;
 }
 
+.hideControls {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: -60px;
+}
+
+.showControls, .controlsArrow.show {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: 0;
+}
+.controlsArrow.hidden {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: -20px;
+}
+.hideControls:hover, .ng-controls:hover > .hideControls, .generalControlsContener:hover >  .controlsArrow {
+  -moz-animation-duration: .5s;
+  -moz-animation-fill-mode: both;
+  -webkit-animation-duration: .5s;
+  -webkit-animation-fill-mode: both;
+  -ms-animation-duration: .5s;
+  -ms-animation-fill-mode: both;
+  -o-animation-duration: .5s;
+  -o-animation-fill-mode: both;
+  transition: 0.5s linear all;
+  margin-right: 0;
+}
 
 .generalControls > a {
   border-radius: 3px 0 0 3px;
@@ -27,7 +76,7 @@
   margin-top: 100px;
   position: fixed;
 }
-.ng-controls:hover {
+.generalControlsContener:hover, .ng-controls:hover {
   margin-right: 0!important;
 }
 
