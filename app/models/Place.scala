@@ -8,7 +8,7 @@ import play.api.Logger
 import play.api.db.DB
 import play.api.Play.current
 import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
-import securesocial.core.IdentityId
+
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future

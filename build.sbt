@@ -2,13 +2,18 @@ name := "Claude"
 
 version := "1.0-SNAPSHOT"
 
+scalaVersion := "2.11.6"
+
 libraryDependencies ++= Seq(
   jdbc,
-  anorm,
+  "com.typesafe.play" %% "anorm" % "2.4.0",
   cache,
-  "ws.securesocial" %% "securesocial" % "2.1.4",
+  evolutions,
   "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
-  "org.scalatestplus" % "play_2.10" % "1.0.0" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.1" % "test",
+  "org.scalatestplus" %% "play" % "1.4.0-M3" % "test"
 )
 
-play.Project.playScalaSettings
+routesGenerator := InjectedRoutesGenerator
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala)

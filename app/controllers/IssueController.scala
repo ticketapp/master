@@ -9,7 +9,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import json.JsonHelper._
 
-object IssueController extends Controller with securesocial.core.SecureSocial {
+object IssueController extends Controller {
   def issues = Action { Ok(Json.toJson(Issue.findAll)) }
 
   def commentsForIssue(issueId: Long) = Action {

@@ -12,7 +12,7 @@ import models.{Tool, User}
 import play.api.libs.concurrent.Execution.Implicits._
 import json.JsonHelper._
 
-object UserController extends Controller with securesocial.core.SecureSocial {
+object UserController extends Controller {
   def users = Action {
     Ok(Json.toJson(User.findAll()))
   }

@@ -19,7 +19,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import java.util.UUID.randomUUID
 
-object ArtistController extends Controller with securesocial.core.SecureSocial {
+object ArtistController extends Controller {
   def artists = Action { Ok(Json.toJson(Artist.findAll)) }
 
   def artistsSinceOffsetBy(number: Int, offset: Int) = Action {

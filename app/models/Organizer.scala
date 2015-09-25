@@ -7,7 +7,7 @@ import anorm._
 import controllers.{ThereIsNoOrganizerForThisFacebookIdException, DAOException}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, Response}
-import securesocial.core.IdentityId
+
 import services.Utilities
 import play.api.db.DB
 import play.api.Play.current

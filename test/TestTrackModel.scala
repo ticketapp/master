@@ -3,7 +3,7 @@ import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import models._
 import models.Track._
 import play.api.Logger
-import securesocial.core.IdentityId
+
 import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._

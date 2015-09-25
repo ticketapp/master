@@ -9,7 +9,7 @@ import anorm.SqlParser._
 import java.util.Date
 import play.api.libs.json._
 import play.api.libs.ws.{Response, WS}
-import securesocial.core.IdentityId
+
 import services.Utilities
 import services.Utilities._
 import jobs.Scheduler._

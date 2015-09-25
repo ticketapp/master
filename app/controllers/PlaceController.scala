@@ -18,7 +18,7 @@ import scala.util.matching.Regex
 import play.api.libs.concurrent.Execution.Implicits._
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION, geographicPointPattern}
 
-object PlaceController extends Controller with securesocial.core.SecureSocial {
+object PlaceController extends Controller {
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action {
     geographicPoint match {

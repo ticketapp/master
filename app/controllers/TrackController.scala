@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
 import json.JsonHelper._
 import play.api.libs.json.DefaultWrites
 
-object TrackController extends Controller with securesocial.core.SecureSocial {
+object TrackController extends Controller {
   val trackBindingForm = Form(mapping(
     "trackId" -> nonEmptyText(8),
     "title" -> nonEmptyText(2),

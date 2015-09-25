@@ -8,7 +8,7 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import securesocial.core.IdentityId
+
 import services.Utilities.UNIQUE_VIOLATION
 import play.api.libs.concurrent.Execution.Implicits._
 

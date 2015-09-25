@@ -11,12 +11,11 @@ import anorm._
 import play.api.mvc._
 import play.api.libs.json.Json
 import json.JsonHelper.organizerWrites
-import securesocial.core.Identity
 
 import scala.util.{Try, Failure, Success}
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 
-object OrganizerController extends Controller with securesocial.core.SecureSocial {
+object OrganizerController extends Controller {
   def organizers(numberToReturn: Int, offset: Int) = Action {
     Ok(Json.toJson(Organizer.findAll(numberToReturn: Int, offset: Int)))
   }

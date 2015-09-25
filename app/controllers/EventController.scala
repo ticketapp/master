@@ -13,7 +13,7 @@ import scala.util.matching.Regex
 import scala.util.{Success, Failure}
 import services.Utilities._
 
-object EventController extends Controller with securesocial.core.SecureSocial {
+object EventController extends Controller {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
   def events(offset: Int, numberToReturn: Int, geographicPoint: String) = Action {

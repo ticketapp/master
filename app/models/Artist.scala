@@ -7,7 +7,7 @@ import anorm._
 import controllers.SearchArtistsController._
 import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, WebServiceException}
 import play.api.libs.iteratee.{Enumerator, Enumeratee, Iteratee}
-import securesocial.core.IdentityId
+
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import services.{SearchSoundCloudTracks, Utilities}

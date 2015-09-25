@@ -7,7 +7,7 @@ import models.{Info, Ticket}
 import json.JsonHelper._
 import play.api.libs.concurrent.Execution.Implicits._
 
-object Application extends Controller with securesocial.core.SecureSocial {
+object Application extends Controller {
   def index = UserAwareAction { implicit request =>
     val userConnected: Boolean = request.user match {
       case Some(userConnectedValue) => true

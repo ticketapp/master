@@ -9,7 +9,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import json.JsonHelper._
 
-object MailController extends Controller with securesocial.core.SecureSocial {
+object MailController extends Controller {
   def mails = Action { Ok(Json.toJson(Mail.findAll)) }
 
   private val mailBindingForm = Form(mapping(

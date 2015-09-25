@@ -12,7 +12,7 @@ import json.JsonHelper._
 
 import scala.util.{Failure, Success}
 
-object PlaylistController extends Controller with securesocial.core.SecureSocial {
+object PlaylistController extends Controller {
 
   def find(playlistId: Long) = Action { Ok(Json.toJson(Playlist.find(playlistId))) }
 
