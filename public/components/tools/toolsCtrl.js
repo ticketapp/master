@@ -28,8 +28,9 @@ angular.module('claudeApp').controller('toolsCtrl', ['$scope', '$modal', '$log',
 // It is not the same as the $modal service used above.
 
 angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalInstance', '$rootScope',
-'$http', 'InfoModal', 'UserFactory', 'ToolsFactory',
-    function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, ToolsFactory) {
+'$http', 'InfoModal', 'UserFactory', 'ToolsFactory', 'ArtistsFactory', 'PlaceFactory', 'OrganizerFactory',
+    function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, ToolsFactory, ArtistsFactory, PlaceFactory,
+              OrganizerFactory) {
     $scope.suggeredPlaylists = [];
     $scope.playlists = [];
     $scope.logout = function () {
@@ -76,14 +77,24 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     ToolsFactory.getEventsGenrePlaylist('chanson').then(function (playlist) {
         $scope.suggeredPlaylists.push(playlist)
     });
-    $scope.getFavoritesTracks = function() {
+
+    $scope.favorites = {};
+    $scope.getFavorites = function() {
+        $scope.favorites.name = 'favories';
         UserFactory.getFavoritesTracks().then(function (tracks) {
-            $scope.favorites = {};
-            $scope.favorites.name = 'favories';
             $scope.favorites.tracks = tracks;
             $scope.closeTrack = function (index) {
-                $scope.favorites.splice(index, 1);
+                $scope.favorites.tracks.tracks.splice(index, 1);
             };
+        });
+        ArtistsFactory.getFollowArtists().then(function (artists) {
+            $scope.favorites.artists = artists;
+        });
+        PlaceFactory.getFollowedPlaces().then(function (places) {
+            $scope.favorites.places = places;
+        });
+        OrganizerFactory.getFollowedOrganizers().then(function (organizers) {
+            $scope.favorites.organizers = organizers;
         })
     };
     $scope.deletePlaylist = function (playlistId, index) {

@@ -2,13 +2,13 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
     'TracksRecommender', '$rootScope', 'RoutesFactory',
     function ($http, $q, StoreRequest, InfoModal, TracksRecommender, $rootScope, RoutesFactory){
     var factory = {
-        user : false,
+        user : {},
         getToken : function () {
             var deferred = $q.defer();
             $http.get('/users/facebookAccessToken/')
                 .success(function(data, status){
-                    factory.user = data;
-                    deferred.resolve(factory.user);
+                    factory.user.facebookAccessToken = data;
+                    deferred.resolve(factory.user.facebookAccessToken);
                 }).error(function(data, status){
                     deferred.reject('erreur');
                 });
@@ -18,8 +18,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.delete('/playlists/' + id).
                 success(function (data) {
-                    factory.user = data;
-                    deferred.resolve(factory.user);
+                    factory.user.deletePlaylistResponse = data;
+                    deferred.resolve(factory.user.deletePlaylistResponse);
                 }).
                 error (function (data) {
             });
@@ -29,8 +29,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.get('/artists/' + id + '/isFollowed').
                 success(function (data) {
-                    factory.user = data;
-                    deferred.resolve(factory.user);
+                    factory.user.ArtistIsFollowedResponse = data;
+                    deferred.resolve(factory.user.ArtistIsFollowedResponse);
                 }).
                 error (function (data) {
                 deferred.resolve(data)
@@ -60,6 +60,15 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.post('/tracks/' + trackId + '/removeFromFavorites').
                 success(function () {
                     TracksRecommender.UpsertTrackRate(false, trackId);
+                    if (factory.user.favoritesTracks) {
+                        var FavoritesTracksLength = factory.user.favoritesTracks.length;
+                        for (var i = 0; i < FavoritesTracksLength; i++) {
+                            if (factory.user.favoritesTracks[i].trackId === trackId) {
+                                factory.user.favoritesTracks.splice(i, 1);
+                                return;
+                            }
+                        }
+                    }
                 }).
                 error(function (data) {
                     if (data.error == 'Credentials required') {
@@ -73,8 +82,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.get('/tracks/favorites').
                 success(function (data) {
-                    factory.user = data;
-                    deferred.resolve(factory.user);
+                    factory.user.favoritesTracks = data;
+                    deferred.resolve(factory.user.favoritesTracks);
                 }).
                 error (function (data) {
             });
@@ -125,7 +134,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.get('/places/' + id + '/isFollowed')
                 .success(function(data, status){
-                    factory.events = data;
+                    factory.user.isFollowedPlace = data;
                     deferred.resolve(factory.events);
                 }).error(function(data, status){
                     deferred.reject('erreur');
@@ -168,7 +177,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.get('/organizers/' + id + '/isFollowed')
                 .success(function(data, status){
-                    factory.events = data;
+                    factory.isFollowOrganizer = data;
                     deferred.resolve(factory.events);
                 }).error(function(data, status){
                     deferred.reject('erreur');

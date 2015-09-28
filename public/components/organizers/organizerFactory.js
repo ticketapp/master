@@ -162,6 +162,13 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                     })
             }
             return deferred.promise;
+        },
+        getFollowedOrganizers : function () {
+            var defered = $q.defer();
+            $http.get('/organizers/followed/ ').success(function (data) {
+                defered.resolve(data);
+            });
+            return defered.promise;
         }
     };
     return factory;

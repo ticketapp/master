@@ -17,8 +17,8 @@
     <b class="button column"
        ng-class="{'medium-4': $root.connected == false, 'medium-3': $root.connected == true,
        'active': viewFavorites == true}"
-       ng-click="getFavoritesTracks(); viewIssues = false; viewPlaylists = false;
-    viewFavorites = true"><i class="fa fa-star"></i><b> Morceaux favoris</b></b>
+       ng-click="getFavorites(); viewIssues = false; viewPlaylists = false;
+    viewFavorites = true"><i class="fa fa-star"></i><b>Favoris</b></b>
     <b  ng-if="$root.connected == true" class="button column medium-3"
         ng-click="logout()"><i class="fa fa-sign-out"></i><b> Deconnexion</b></b>
     <div ng-if="viewPlaylists" class="column large-12">
@@ -75,28 +75,60 @@
             </div>
         </ul>
     </div>
+
     <div ng-if="viewFavorites">
-        <div class="column large-12"
-             ng-show="viewFavorites && $root.connected == true && favorites.tracks.length > 0">
-            <a class="button column medium-4" ng-click="$root.loadPlaylist(favorites)">
-                <i class="fi-play">
-                    <md-track-tooltipe>
-                        Lire tout les favoris
-                    </md-track-tooltipe>
-                </i>
-            </a>
+        <div class="column large-12 float-left">
             <input type="text"
                    class="column medium-8"
                    placeholder="Filtrer"
-                   ng-model="filterFavorites"/>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+                   ng-model="filterFavorites"/>
         </div>
-        <ul ng-repeat="track in favorites.tracks | filter: filterFavorites" ng-if="$root.connected == true" ng-init="track.isFavorite = true">
-            <ng-track class="column large-6"></ng-track>
-        </ul>
-        <b ng-if="viewFavorites && favorites.length == 0 && $root.connected == true">
-            Vous n'avez pas de favoris
-        </b>
-        <b ng-if="viewFavorites && $root.connected == false">Vous devez vous connecter</b>
+        <md-content class="column">
+            <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
+                <md-tab label="Tracks">
+                    <md-content>
+                        <div class="column large-12"
+                             ng-show="viewFavorites && $root.connected == true && favorites.tracks.length > 0">
+                            <a class="button column medium-4" ng-click="$root.loadPlaylist(favorites)">
+                                <i class="fi-play">
+                                    <md-track-tooltipe>
+                                        Lire tout les favoris
+                                    </md-track-tooltipe>
+                                </i>
+                            </a>
+                        </div>
+                        <ul ng-repeat="track in favorites.tracks | filter: filterFavorites" ng-if="$root.connected == true"
+                            ng-init="track.isFavorite = true">
+                            <ng-track class="column large-6"></ng-track>
+                        </ul>
+                        <b ng-if="viewFavorites && favorites.tracks.length == 0 && $root.connected == true">
+                            Vous n'avez pas de morceaux favoris
+                        </b>
+                    </md-content>
+                </md-tab>
+                <md-tab label="Artists">
+                    <md-content>
+                        <artist-min ng-repeat="artist in favorites.artists | filter: filterFavorites"
+                                    class="column large-6 small-12 marginBottom40 marginTop30 float-left"></artist-min>
+                    </md-content>
+                </md-tab>
+                <md-tab label="Places">
+                    <md-content>
+                        <place-min ng-repeat="place in favorites.places | filter: filterFavorites"
+                                   class="column large-6 small-12 marginBottom40 marginTop30 float-left">
+                        </place-min>
+                    </md-content>
+                </md-tab>
+                <md-tab label="Organizers">
+                    <md-content>
+                        <organizer-min ng-repeat="organizer in favorites.organizers | filter: filterFavorites"
+                                       class="column large-6 small-12 marginBottom40 marginTop30 float-left">
+                        </organizer-min>
+                    </md-content>
+                </md-tab>
+            </md-tabs>
+            <b ng-if="viewFavorites && $root.connected == false">Vous devez vous connecter</b>
+        </md-content>
     </div>
     <div ng-if="viewIssues" ng-issues></div>
     <ng-connect ng-if="$root.connected == false">

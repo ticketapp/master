@@ -184,6 +184,14 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                     })
             }
             return defered.promise;
+        },
+        getFollowedPlaces : function () {
+            var defered = $q.defer();
+            $http.get('/places/followed/ ').success(function (data) {
+                factory.places = data;
+                defered.resolve(factory.places);
+            });
+            return defered.promise;
         }
     };
     return factory;
