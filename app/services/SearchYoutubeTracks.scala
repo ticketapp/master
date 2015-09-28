@@ -101,6 +101,7 @@ object SearchYoutubeTracks {
         "q" -> (artist.name + " " + trackTitle),
         "type" -> "video",
         "videoCategoryId" -> "10",
+        "maxResults" -> "20",
         "key" -> youtubeKey)
       .get()
       .map { readYoutubeTracks(_, artist) }
