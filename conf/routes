@@ -1,142 +1,142 @@
 # Home page
-GET     /                                                                 controllers.Application.index
+GET     /                                                                 @controllers.Application.index
 
-GET     /test                                                             controllers.Test.test1
+GET     /test                                                             @controllers.Test.test1
 
 ################################## fill database ################################################
-GET     /insertFrenchCities                                               fillDatabase.InsertFrenchCities.insertFrenchCities
-GET     /insertGenres                                                     fillDatabase.InsertGenres.insertGenres
-GET     /insertTwoLettersArtists                                          fillDatabase.InsertTwoLettersArtists.insertTwoLettersArtists
+GET     /insertFrenchCities                                               @fillDatabase.InsertFrenchCities.insertFrenchCities
+GET     /insertGenres                                                     @fillDatabase.InsertGenres.insertGenres
+GET     /insertTwoLettersArtists                                          @fillDatabase.InsertTwoLettersArtists.insertTwoLettersArtists
 
 ################################## Admin ################################################
-GET     /admin                                                            controllers.Admin.indexAdmin
-#POST     /admin/createTariff            controllers.Admin.createTariff
+#GET     /admin                                                            @controllers.Admin.indexAdmin
+##POST     /admin/createTariff           @controllers.Admin.createTariff
+#
+################################### Events ###############################################
+GET     /events                                                          @controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
+GET     /events/inInterval/:hourInterval                                 @controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET     /events/passedInInterval/:hourInterval                           @controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET     /events/:id                                                      @controllers.EventController.find(id: Long)
+#POST    /events/create                                                   @controllers.EventController.createEvent
+POST    /events/create/:facebookId                                       @controllers.EventController.createEventByFacebookId(facebookId: String)
+#POST    /events/:eventId/follow                                          @controllers.EventController.followEvent(eventId: Long)
+#POST    /events/:eventId/unfollow                                        @controllers.EventController.unfollowEvent(eventId: Long)
+#GET     /events/followed/                                                @controllers.EventController.getFollowedEvents
+#GET     /events/:eventId/isEventFollowed                                 @controllers.EventController.isEventFollowed(eventId: Long)
+GET     /events/containing/:pattern                                      @controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
+GET     /events/city/:pattern                                            @controllers.EventController.findByCityPattern(pattern: String)
+GET     /events/nearCity/:city                                           @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
-################################## Events ###############################################
-GET     /events                                                           controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
-GET     /events/inInterval/:hourInterval                                  controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET     /events/passedInInterval/:hourInterval                            controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET     /events/:id                                                       controllers.EventController.find(id: Long)
-POST    /events/create                                                    controllers.EventController.createEvent
-POST    /events/create/:facebookId                                        controllers.EventController.createEventByFacebookId(facebookId: String)
-POST    /events/:eventId/follow                                           controllers.EventController.followEvent(eventId: Long)
-POST    /events/:eventId/unfollow                                         controllers.EventController.unfollowEvent(eventId: Long)
-GET     /events/followed/                                                 controllers.EventController.getFollowedEvents
-GET     /events/:eventId/isEventFollowed                                  controllers.EventController.isEventFollowed(eventId: Long)
-GET     /events/containing/:pattern                                       controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
-GET     /events/city/:pattern                                             controllers.EventController.findByCityPattern(pattern: String)
-GET     /events/nearCity/:city                                            controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
-
-################################## Artists ##############################################
-GET     /artists                                                          controllers.ArtistController.artists
-GET     /artists/since/:offset/:number                                    controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
-GET     /artists/:facebookUrl                                             controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
-GET     /artists/:facebookUrl/tracks                                      controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
-GET     /artists/byId/:id                                                 controllers.ArtistController.artist(id: Long)
-POST    /artists/createArtist                                             controllers.ArtistController.createArtist
-POST    /artists/:artistId/followByArtistId                               controllers.ArtistController.followArtistByArtistId(artistId: Long)
-POST    /artists/:artistId/unfollowArtistByArtistId                       controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
-POST    /artists/:facebookId/followByFacebookId                           controllers.ArtistController.followArtistByFacebookId(facebookId: String)
-GET     /artists/followed/                                                controllers.ArtistController.getFollowedArtists
-GET     /artists/:artistId/isFollowed                                     controllers.ArtistController.isArtistFollowed(artistId: Long)
-DELETE  /artists/:artistId                                                controllers.ArtistController.deleteArtist(artistId: Long)
-GET     /artists/:facebookUrl/events                                      controllers.EventController.findByArtist(facebookUrl: String)
-GET     /artists/:artistId/passedEvents                                   controllers.EventController.findPassedByArtist(artistId: Long)
-GET     /artists/containing/:pattern                                      controllers.ArtistController.findArtistsContaining(pattern: String)
-GET     /artists/facebookContaining/:pattern                              controllers.SearchArtistsController.getFacebookArtistsContaining(pattern: String)
-
-################################## Places ###############################################
-GET     /places                                                           controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
-GET     /places/:id                                                       controllers.PlaceController.place(id: Long)
-POST    /places/:placeId/followByPlaceId                                  controllers.PlaceController.followPlaceByPlaceId(placeId: Long)
-POST    /places/:placeId/unfollowPlaceByPlaceId                           controllers.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
-POST    /places/:facebookId/followByFacebookId                            controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
-GET     /places/:placeId/isFollowed                                       controllers.PlaceController.isPlaceFollowed(placeId: Long)
-GET     /places/containing/:pattern                                       controllers.PlaceController.findPlacesContaining(pattern: String)
-POST    /places/create                                                    controllers.PlaceController.create
-GET     /places/:placeId/events                                           controllers.EventController.findByPlace(placeId: Long)
-GET     /places/:placeId/passedEvents                                     controllers.EventController.findPassedByPlace(placeId: Long)
-GET     /places/nearCity/:city                                            controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
-GET     /places/followed/                                                 controllers.PlaceController.getFollowedPlaces
+################################### Artists ##############################################
+#GET     /artists                                                          @controllers.ArtistController.artists
+#GET     /artists/since/:offset/:number                                    @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
+#GET     /artists/:facebookUrl                                             @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
+#GET     /artists/:facebookUrl/tracks                                      @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
+#GET     /artists/byId/:id                                                 @controllers.ArtistController.artist(id: Long)
+#POST    /artists/createArtist                                             @controllers.ArtistController.createArtist
+#POST    /artists/:artistId/followByArtistId                               @controllers.ArtistController.followArtistByArtistId(artistId: Long)
+#POST    /artists/:artistId/unfollowArtistByArtistId                       @controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
+#POST    /artists/:facebookId/followByFacebookId                           @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
+#GET     /artists/followed/                                                @controllers.ArtistController.getFollowedArtists
+#GET     /artists/:artistId/isFollowed                                     @controllers.ArtistController.isArtistFollowed(artistId: Long)
+#DELETE  /artists/:artistId                                                @controllers.ArtistController.deleteArtist(artistId: Long)
+#GET     /artists/:facebookUrl/events                                      @controllers.EventController.findByArtist(facebookUrl: String)
+#GET     /artists/:artistId/passedEvents                                   @controllers.EventController.findPassedByArtist(artistId: Long)
+#GET     /artists/containing/:pattern                                      @controllers.ArtistController.findArtistsContaining(pattern: String)
+#GET     /artists/facebookContaining/:pattern                              @controllers.ArtistController.getFacebookArtistsContaining(pattern: String)
+#
+################################### Places ###############################################
+#GET     /places                                                           @controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
+#GET     /places/:id                                                       @controllers.PlaceController.place(id: Long)
+#POST    /places/:placeId/followByPlaceId                                  @controllers.PlaceController.followPlaceByPlaceId(placeId: Long)
+#POST    /places/:placeId/unfollowPlaceByPlaceId                           @controllers.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
+#POST    /places/:facebookId/followByFacebookId                            @controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
+#GET     /places/:placeId/isFollowed                                       @controllers.PlaceController.isPlaceFollowed(placeId: Long)
+#GET     /places/containing/:pattern                                       @controllers.PlaceController.findPlacesContaining(pattern: String)
+#POST    /places/create                                                    @controllers.PlaceController.create
+#GET     /places/:placeId/events                                          @controllers.EventController.findByPlace(placeId: Long)
+#GET     /places/:placeId/passedEvents                                    @controllers.EventController.findPassedByPlace(placeId: Long)
+#GET     /places/nearCity/:city                                            @controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
+#GET     /places/followed/                                                 @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
-GET     /organizers                                                       controllers.OrganizerController.organizers(numberToReturn: Int, offset: Int)
-GET     /organizers/:id                                                   controllers.OrganizerController.organizer(id: Long)
-POST    /organizers/:organizerId/followByOrganizerId                      controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
-POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId           controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
-POST    /organizers/:facebookId/followByFacebookId                        controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
-GET     /organizers/:organizerId/isFollowed                               controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
-GET     /organizers/containing/:pattern                                   controllers.OrganizerController.findOrganizersContaining(pattern: String)
-POST    /organizers/create                                                controllers.OrganizerController.createOrganizer
-GET     /organizers/:organizerId/events                                   controllers.EventController.findByOrganizer(organizerId: Long)
-GET     /organizers/:organizerId/passedEvents                             controllers.EventController.findPassedByOrganizer(organizerId: Long)
-GET     /organizers/findNearCity/:city                                    controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
-GET     /organizers/followed/                                             controllers.OrganizerController.getFollowedOrganizers
-
-################################# Playlists ############################################
-GET     /playlists                                                        controllers.PlaylistController.findByUser
-POST    /playlists                                                        controllers.PlaylistController.create
-PUT     /playlists                                                        controllers.PlaylistController.update
-GET     /playlists/:playlistId                                            controllers.PlaylistController.find(playlistId: Long)
-DELETE  /playlists/:playlistId                                            controllers.PlaylistController.delete(playlistId: Long)
-
-################################# Genres ############################################
-GET     /genres/:genre/artists                                            controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
-GET     /genres/:genre/events                                             controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET     /organizers                                                      @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)
+GET     /organizers/:id                                                  @controllers.OrganizerController.findById(id: Long)
+#POST    /organizers/:organizerId/followByOrganizerId                     @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
+#POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId          @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
+#POST    /organizers/:facebookId/followByFacebookId                       @controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
+#GET     /organizers/:organizerId/isFollowed                              @controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
+GET     /organizers/containing/:pattern                                  @controllers.OrganizerController.findOrganizersContaining(pattern: String)
+POST    /organizers/create                                               @controllers.OrganizerController.createOrganizer
+#GET     /organizers/:organizerId/events                                  @controllers.EventController.findByOrganizer(organizerId: Long)
+#GET     /organizers/:organizerId/passedEvents                            @controllers.EventController.findPassedByOrganizer(organizerId: Long)
+#GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+#GET     /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
+#
+################################## Playlists ############################################
+#GET     /playlists                                                       @controllers.PlaylistController.findByUser
+#POST    /playlists                                                       @controllers.PlaylistController.create
+#PUT     /playlists                                                       @controllers.PlaylistController.update
+#GET     /playlists/:playlistId                                           @controllers.PlaylistController.find(playlistId: Long)
+#DELETE  /playlists/:playlistId                                           @controllers.PlaylistController.delete(playlistId: Long)
+#
+################################## Genres ############################################
+#GET     /genres/:genre/artists                                            @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+#GET     /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################
-POST    /tracks/create                                                    controllers.TrackController.createTrack
-GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle                controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
-GET     /tracks/youtubeTrackInfo/:youtubeId                               controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
-GET     /tracks/:trackId/rating                                           controllers.TrackController.getRatingForUser(trackId: String)
-POST    /tracks/rating                                                    controllers.TrackController.upsertRatingForUser
-POST    /tracks/:trackId/addToFavorites                                   controllers.TrackController.addToFavorites(trackId: String)
-POST    /tracks/:trackId/removeFromFavorites                              controllers.TrackController.removeFromFavorites(trackId: String)
-GET     /tracks/favorites                                                 controllers.TrackController.findFavorites
-
-################################## Infos ################################################
-GET     /infos                                                            controllers.Application.infos
+#POST    /tracks/create                                                    @controllers.TrackController.createTrack
+#GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle               @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
+#GET     /tracks/youtubeTrackInfo/:youtubeId                              @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
+#GET     /tracks/:trackId/rating                                           @controllers.TrackController.getRatingForUser(trackId: String)
+#POST    /tracks/rating                                                    @controllers.TrackController.upsertRatingForUser
+#POST    /tracks/:trackId/addToFavorites                                   @controllers.TrackController.addToFavorites(trackId: String)
+#POST    /tracks/:trackId/removeFromFavorites                              @controllers.TrackController.removeFromFavorites(trackId: String)
+#GET     /tracks/favorites                                                 @controllers.TrackController.findFavorites
+#
+################################### Infos ################################################
+#GET     /infos                                                            @controllers.Application.infos
 
 ################################# Issues ################################################
-GET     /issues                                                           controllers.IssueController.issues
-POST    /issues                                                           controllers.IssueController.create
-GET     /issues/:issueId/comments                                         controllers.IssueController.commentsForIssue(issueId: Long)
-POST    /issues/:issueId/comments                                         controllers.IssueController.createComment(issueId: Long)
-
-################################# Mails ################################################
-GET     /mails                                                            controllers.MailController.mails
-POST    /mails                                                            controllers.MailController.create
-
-################################## Users ################################################
-GET     /users                                                            controllers.UserController.users
-GET     /users/:id                                                        controllers.UserController.user(id: Long)
-GET     /users/containing/:pattern                                        controllers.UserController.findUsersContaining(pattern: String)
-GET     /users/:userId/tools                                              controllers.UserController.findToolsByUserId(userId: Long)
-GET     /users/geographicPoint/                                           controllers.UserController.getUserGeographicPoint
-GET     /users/facebookAccessToken/                                       controllers.UserController.findFacebookAccessToken
-GET     /users/tracksRemoved/                                             controllers.UserController.getTracksRemoved
+#GET     /issues                                                          @controllers.IssueController.issues
+#POST    /issues                                                          @controllers.IssueController.create
+#GET     /issues/:issueId/comments                                        @controllers.IssueController.commentsForIssue(issueId: Long)
+#POST    /issues/:issueId/comments                                        @controllers.IssueController.createComment(issueId: Long)
+#
+################################## Mails ################################################
+#GET     /mails                                                            @controllers.MailController.mails
+#POST    /mails                                                            @controllers.MailController.create
+#
+################################### Users ################################################
+#GET     /users                                                            @controllers.UserController.users
+#GET     /users/:id                                                        @controllers.UserController.user(id: Long)
+#GET     /users/containing/:pattern                                        @controllers.UserController.findUsersContaining(pattern: String)
+#GET     /users/:userId/tools                                              @controllers.UserController.findToolsByUserId(userId: Long)
+#GET     /users/geographicPoint/                                           @controllers.UserController.getUserGeographicPoint
+#GET     /users/facebookAccessToken/                                       @controllers.UserController.findFacebookAccessToken
+#GET     /users/tracksRemoved/                                             @controllers.UserController.getTracksRemoved
 
 ################################## Buy ticket ###########################################
-GET     /buyTicket        controllers.TicketController.buyTicket
+GET     /buyTicket       @controllers.TicketController.buyTicket
 
 ################################## Accounting ###########################################
-GET     /orgaPayment        controllers.AccountingController.orgaPayment
-GET     /totalToPay        controllers.AccountingController.totalToPay
-GET     /account708        controllers.AccountingController.account708
-GET     /account413        controllers.AccountingController.account413
-GET     /account60        controllers.AccountingController.account60
-GET     /account63        controllers.AccountingController.account63
-GET     /account627        controllers.AccountingController.account627
-GET     /account623        controllers.AccountingController.account623
-GET     /account626        controllers.AccountingController.account626
+#GET     /orgaPayment       @controllers.AccountingController.orgaPayment
+#GET     /totalToPay       @controllers.AccountingController.totalToPay
+#GET     /account708       @controllers.AccountingController.account708
+#GET     /account413       @controllers.AccountingController.account413
+#GET     /account60       @controllers.AccountingController.account60
+#GET     /account63       @controllers.AccountingController.account63
+#GET     /account627       @controllers.AccountingController.account627
+#GET     /account623       @controllers.AccountingController.account623
+#GET     /account626       @controllers.AccountingController.account626
 
 ################################## Upload #################################################
-POST    /upload        controllers.Admin.upload
+#POST    /upload        @controllers.Admin.upload
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file        controllers.Assets.at(path="/public", file)
+GET     /assets/*file       @controllers.Assets.at(path="/public", file)
 
 
-#GET /*any controllers.Application.index(any)
+#GET /*any@controllers.Application.index(any)
 

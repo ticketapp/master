@@ -1,11 +1,13 @@
+/*
 package models
 
-import anorm.SqlParser._
-import anorm._
-import play.api.db.DB
+
+
+
 import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
+import scala.language.postfixOps
 
 case class Order (orderId: Long,
                   totalPrice: Int)
@@ -46,8 +48,7 @@ object Order {
           """).on(
           'totalPrice ->
             totalPrice
-        ).
-          executeInsert().get
+        ).executeInsert().get
       }
     } catch {
       case e: Exception => throw new DAOException("Cannot save order: " + e.getMessage)
@@ -55,3 +56,4 @@ object Order {
   }
 
 }
+*/

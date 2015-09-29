@@ -1,319 +1,391 @@
 package models
 
+import java.sql.Timestamp
+import java.util.UUID
+import javax.inject.Inject
+
 import controllers.DAOException
-import controllers.SearchArtistsController._
-import play.api.db._
+import org.joda.time.DateTime
 import play.api.Play.current
-import anorm._
-import anorm.SqlParser._
-import java.util.Date
-import play.api.libs.json._
-import play.api.libs.ws.{Response, WS}
-
-import services.Utilities
-import services.Utilities._
-import jobs.Scheduler._
-import models.Tariff.{findPrices, findTicketSellers}
-import scala.concurrent.Future
-import scala.util.Try
-import scala.util.matching.Regex
-import play.api.libs.concurrent.Execution.Implicits._
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import play.api.libs.functional.syntax._
-import Utilities.GeographicPoint
-import Utilities.{ geographicPointPattern, facebookToken }
+import play.api.libs.json._
+import play.api.libs.ws.{WS, WSResponse}
+import services.{MyPostgresDriver, Utilities}
+import com.vividsolutions.jts.geom.{GeometryFactory, Point}
+import silhouette.DBTableDefinitions
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.language.postfixOps
+import scala.util.Try
+import services.MyPostgresDriver.api._
+import json.JsonHelper._
 
-case class Event(eventId: Option[Long],
+case class Event(id: Option[Long],
                  facebookId: Option[String],
                  isPublic: Boolean,
                  isActive: Boolean,
                  name: String,
-                 geographicPoint: Option[String],
+                 geographicPoint: Option[Point],
                  description: Option[String],
-                 startTime: Date,
-                 endTime: Option[Date],
+                 startTime: DateTime,
+                 endTime: Option[DateTime],
                  ageRestriction: Int,
                  tariffRange: Option[String],
                  ticketSellers: Option[String],
-                 imagePath: Option[String],
-                 organizers: List[Organizer],
+                 imagePath: Option[String])/*,
+                 organizers: List[OrganizerWithAddress],
                  artists: List[Artist],
                  tariffs: List[Tariff],
                  addresses: List[Address],
                  places: List[Place] = List.empty,
-                 genres: Seq[Genre] = Seq.empty)
+                 genres: Seq[Genre] = Seq.empty)*/
 
-object Event {
 
-  def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: Date,
-                endTime: Option[Date], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
-                imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event =
-    new Event(None, None, true, true, name, geographicPoint, description, startTime, endTime, ageRestriction,
-      tariffRange, ticketSellers, imagePath, List.empty, List.empty, tariffs, addresses)
+class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
+                             val organizerMethods: OrganizerMethods,
+                             val placeMethods: PlaceMethods,
+                             val artistMethods: ArtistMethods,
+                             val genreMethods: GenreMethods,
+                             val tariffMethods: TariffMethods,
+                             val addressMethods: AddressMethods,
+                             val userMethods: UserMethods,
+                             val utilities: Utilities)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions {
 
-  def formUnapply(event: Event) = {
-    Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,
-      event.tariffRange, event.ticketSellers, event.imagePath, event.tariffs, event.addresses))
+  val places = placeMethods.places
+  val organizers = organizerMethods.organizers
+  val artists = artistMethods.artists
+  val genres = genreMethods.genres
+  val addresses = addressMethods.addresses
+  val geometryFactory = new GeometryFactory()
+
+  implicit val jodaDateTimeMapping = {
+    MappedColumnType.base[DateTime, Timestamp](
+      dt => new Timestamp(dt.getMillis),
+      ts => new DateTime(ts))
   }
 
-  private val EventParser: RowParser[Event] = {
-    get[Long]("eventId") ~
-      get[Option[String]]("facebookId") ~
-      get[Boolean]("isPublic") ~
-      get[Boolean]("isActive") ~
-      get[String]("name") ~
-      get[Option[String]]("geographicPoint") ~
-      get[Option[String]]("description") ~
-      get[Date]("startTime") ~
-      get[Option[Date]]("endTime") ~
-      get[Int]("ageRestriction") ~
-      get[Option[String]]("tariffRange") ~
-      get[Option[String]]("ticketSellers") ~
-      get[Option[String]]("imagePath") map {
-      case eventId ~ facebookId ~ isPublic ~ isActive ~ name ~ geographicPoint ~ description ~
-        startTime ~ endTime ~ ageRestriction ~ tariffRange ~ ticketSellers ~ imagePath =>
-        Event.apply(Some(eventId), facebookId, isPublic, isActive, name, geographicPoint, description, startTime,
-          endTime, ageRestriction, tariffRange, ticketSellers, imagePath, List.empty, List.empty, List.empty, List.empty)
-    }
+  class Events(tag: Tag) extends Table[Event](tag, "events") {
+    def id = column[Long]("organizerId", O.PrimaryKey, O.AutoInc)
+    def facebookId = column[Option[String]]("facebookid")
+    def isPublic = column[Boolean]("ispublic")
+    def isActive = column[Boolean]("isactive")
+    def name = column[String]("name")
+    def geographicPoint = column[Option[Point]]("geographicpoint")
+    def description = column[Option[String]]("description")
+    def startTime = column[DateTime]("starttime")
+    def endTime = column[Option[DateTime]]("endtime")
+    def ageRestriction = column[Int]("agerestriction")
+    def tariffRange = column[Option[String]]("tariffrange")
+    def ticketSellers = column[Option[String]]("ticketsellers")
+    def imagePath = column[Option[String]]("imagepath")
+
+    def * = (id.?, facebookId, isPublic, isActive, name, geographicPoint, description, startTime, endTime,
+      ageRestriction, tariffRange, ticketSellers, imagePath) <> ((Event.apply _).tupled, Event.unapply)
   }
 
-  def getPropertiesOfEvent(event: Event): Event = event.eventId match {
-    case None => throw new DAOException("Event.getPropertiesOfEvent: event without id has been found")
-    case Some(eventId) => event.copy(
-      organizers = Organizer.findAllByEvent(event),
-      artists = Artist.findAllByEvent(event),
-      tariffs = Tariff.findAllByEvent(event),
-      places = Place.findAllByEvent(eventId),
-      genres = Genre.findAllByEvent(eventId),
-      addresses = Address.findAllByEvent(event))
+  lazy val events = TableQuery[Events]
+
+  case class UserEventRelation(userId: String, eventId: Long)
+
+  class EventsFollowed(tag: Tag) extends Table[UserEventRelation](tag, "eventsfollowed") {
+    def userId = column[String]("userid")
+    def eventId = column[Long]("eventid")
+
+    def * = (userId, eventId) <> ((UserEventRelation.apply _).tupled, UserEventRelation.unapply)
+
+    def aFK = foreignKey("userid", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  def find(eventId: Long): Option[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM events WHERE eventId = {eventId}")
-        .on('eventId -> eventId)
-        .as(EventParser.singleOpt)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.eventId: " + e.getMessage)
+  lazy val eventsFollowed = TableQuery[EventsFollowed]
+
+  case class EventPlaces(userId: String, eventId: Long)
+
+  class EventsPlaces(tag: Tag) extends Table[(Long, Long)](tag, "eventsPlaces") {
+    def eventId = column[Long]("eventid")
+    def placeId = column[Long]("placeid")
+
+    def * = (eventId, placeId) //<> ((EventPlaces.apply _).tupled, EventPlaces.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("placeid", placeId, places)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT * FROM events
-           |  WHERE endTime IS NOT NULL AND endTime > CURRENT_TIMESTAMP
-           |        OR endTime IS NULL AND startTime > CURRENT_TIMESTAMP - interval '12 hour'
-           |  ORDER BY geographicPoint <-> point '$geographicPoint'
-           |LIMIT $numberToReturn
-           |OFFSET $offset""".stripMargin)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findNear: " + e.getMessage)
+  lazy val eventsPlaces = TableQuery[EventsPlaces]  
+  
+   class EventsAddresses(tag: Tag) extends Table[(Long, Long)](tag, "eventsaddresses") {
+    def eventId = column[Long]("eventid")
+    def addressId = column[Long]("addressid")
+
+    def * = (eventId, addressId) //<> ((EventAddresss.apply _).tupled, EventAddresss.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("addressid", addressId, addresses)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Event] = try {
-    Address.findGeographicPointOfCity(city) match {
-      case None => Seq.empty
+  lazy val eventsAddresses = TableQuery[EventsAddresses]
+
+  case class EventGenreRelation(eventId: Long, genreId: Int)
+  
+  class EventsGenres(tag: Tag) extends Table[EventGenreRelation](tag, "eventsgenres") {
+    def eventId = column[Long]("eventid")
+    def genreId = column[Int]("genreid")
+
+    def * = (eventId, genreId) <> ((EventGenreRelation.apply _).tupled, EventGenreRelation.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
+  lazy val eventsGenres = TableQuery[EventsGenres]
+
+  case class EventOrganizer(eventId: Long, organizerId: Long)
+
+  class EventsOrganizers(tag: Tag) extends Table[EventOrganizer](tag, "eventsorganizers") {
+    def eventId = column[Long]("eventid")
+    def organizerId = column[Long]("organizerid")
+
+    def * = (eventId, organizerId) <> ((EventOrganizer.apply _).tupled, EventOrganizer.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("organizerid", organizerId, organizers)(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
+  lazy val eventsOrganizers = TableQuery[EventsOrganizers]
+
+  case class EventArtistRelation(eventId: Long, artistId: Long)
+
+  class EventsArtists(tag: Tag) extends Table[EventArtistRelation](tag, "eventsartists") {
+    def eventId = column[Long]("eventid")
+    def artistId = column[Long]("artistid")
+
+    def * = (eventId, artistId) <> ((EventArtistRelation.apply _).tupled, EventArtistRelation.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("artistid", artistId, artists)(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
+  lazy val eventsArtists = TableQuery[EventsArtists]
+
+//  def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: DateTime,
+//                endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
+//                imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event =
+//    new Event(None, None, true, true, name, geographicPoint, description, startTime, endTime, ageRestriction,
+//      tariffRange, ticketSellers, imagePath)//, List.empty, List.empty, tariffs, addresses)
+//
+//  def formUnapply(event: Event) = {
+//    Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,
+//      event.tariffRange, event.ticketSellers, event.imagePath, event.tariffs, event.addresses))
+//  }
+
+//  def getPropertiesOfEvent(event: Event): Event = event.eventId match {
+//    case None => throw new DAOException("Event.getPropertiesOfEvent: event without id has been found")
+//    case Some(eventId) => event.copy(
+////      organizers = organizerMethods.findAllByEvent(event),
+//      artists = Artist.findAllByEvent(event),
+//      tariffs = Tariff.findAllByEvent(event),
+//      places = placeMethods.findAllByEvent(eventId),
+//      genres = Genre.findAllByEvent(eventId),
+//      addresses = Address.findAllByEvent(event))
+//  }
+
+  def find(id: Long): Future[Option[Event]] = {
+    val query = events.filter(_.id === id)
+    db.run(query.result.headOption)
+  }
+
+  def findNear(geographicPoint: Point, numberToReturn: Int, offset: Int): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+    val query = events
+      .filter(event =>
+        (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+      .sortBy(_.geographicPoint <-> geographicPoint)
+      .drop(numberToReturn)
+      .take(offset)
+    db.run(query.result)
+  }
+
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Event]] =
+    addressMethods.findGeographicPointOfCity(city) flatMap {
+      case None => Future { Seq.empty }
       case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findNearCity: " + e.getMessage)
+
+  def findInPeriodNear(hourInterval: Int, geographicPoint: Point, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+
+    val query = events
+      .filter(event =>
+      (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+      .sortBy(_.geographicPoint <-> geographicPoint)
+      .drop(numberToReturn)
+      .take(offset)
+    db.run(query.result)
   }
 
-  def findInHourIntervalNear(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): Seq[Event]
-  = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT * FROM events
-           |  WHERE startTime < (CURRENT_TIMESTAMP + interval '$hourInterval hours')
-           |    AND (endTime IS NOT NULL AND endTime > CURRENT_TIMESTAMP
-           |        OR endTime IS NULL AND startTime > CURRENT_TIMESTAMP - interval '12 hour')
-           |ORDER BY geographicPoint <-> point '$geographicPoint'
-           |LIMIT $numberToReturn OFFSET $offset""".stripMargin)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
+    def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+      val now = DateTime.now()
+      val xHoursAgo = now.minusHours(hourInterval)
+
+      val query = events
+        .filter(event => (event.startTime < now) || (event.startTime > xHoursAgo))
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(numberToReturn)
+        .take(offset)
+      db.run(query.result)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Event.find20SinceStartingInInterval: " + e.getMessage)
-  }  
-  
-  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): Seq[Event]
-  = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT * FROM events
-           |  WHERE startTime < CURRENT_TIMESTAMP AND startTime > CURRENT_TIMESTAMP - interval '$hourInterval hour'
-           |ORDER BY geographicPoint <-> point '$geographicPoint'
-           |LIMIT $numberToReturn OFFSET $offset""".stripMargin)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findPassedInHourIntervalNear: " + e.getMessage)
+
+  def findAllByGenre(genreName: String, geographicPoint: Point, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+
+    val query = for {
+      genre <- genres if genre.name === genreName
+      eventGenre <- eventsGenres
+      event <- events if event.id === eventGenre.eventId &&
+      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+    } yield event
+
+    //getEventProperties
+    db.run(query.sortBy(_.geographicPoint <-> geographicPoint)
+      .drop(numberToReturn)
+      .take(offset).result)
   }
 
-  def findAllByGenre(genre: String, geographicPoint: GeographicPoint, offset: Int, numberToReturn: Int): Try[Seq[Event]]
-  = Try {
-    val geographicPointString = geographicPoint.toString()
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT e.* FROM eventsGenres eG
-           |  INNER JOIN events e ON e.eventId = eG.eventId AND
-           |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
-           |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
-           |  INNER JOIN genres g ON g.genreId = eG.genreId
-           |    WHERE g.name = {genre}
-           |  ORDER BY geographicPoint <-> point '$geographicPointString'
-           |LIMIT $numberToReturn
-           |OFFSET $offset""".stripMargin)
-        .on('genre -> genre)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
+  def findAllByPlace(placeId: Long): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+
+    val query = for {
+      place <- places if place.id === placeId
+      eventPlace <- eventsPlaces
+      event <- events if event.id === eventPlace.eventId &&
+        ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+    } yield event
+
+    //getEventProperties
+    db.run(query.sortBy(_.startTime.desc).result)
   }
 
-  def findAllByPlace(placeId: Long): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT event.* FROM eventsPlaces eP
-          | INNER JOIN events event ON event.eventId = eP.eventId
-          |   WHERE eP.placeId = {placeId}
-          |     AND (endTime IS NOT NULL AND endTime > CURRENT_TIMESTAMP
-          |        OR endTime IS NULL AND startTime > CURRENT_TIMESTAMP - interval '12 hour')
-          |ORDER BY event.creationDateTime DESC""".stripMargin)
-        .on('placeId -> placeId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
-  }
-  
-  def findAllPassedByPlace(placeId: Long): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT event.* FROM eventsPlaces eP
-          | INNER JOIN events event ON event.eventId = eP.eventId
-          |   WHERE eP.placeId = {placeId}
-          |     AND startTime < CURRENT_TIMESTAMP
-          |ORDER BY event.creationDateTime DESC""".stripMargin)
-        .on('placeId -> placeId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllByPlace: " + e.getMessage)
-  }
 
-  def findAllByOrganizer(organizerId: Long): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT e.* FROM eventsOrganizers eO
-          | INNER JOIN events e ON e.eventId = eO.eventId AND
-          |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
-          |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
-          |   WHERE eO.organizerId = {organizerId}
-          |ORDER BY e.creationDateTime DESC""".stripMargin)
-        .on('organizerId -> organizerId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllByOrganizer: " + e.getMessage)
+  def findAllPassedByPlace(placeId: Long): Future[Seq[Event]] = {
+    val now = DateTime.now()
+
+    val query = for {
+      place <- places if place.id === placeId
+      eventPlace <- eventsPlaces
+      event <- events if event.id === eventPlace.eventId && event.startTime < now
+    } yield event
+
+    //getEventProperties
+    db.run(query.sortBy(_.startTime.desc).result)
   }
   
-  def findAllPassedByOrganizer(organizerId: Long): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT event.* FROM eventsOrganizers eP
-          | INNER JOIN events event ON event.eventId = eP.eventId
-          |   WHERE eP.organizerId = {organizerId}
-          |     AND startTime < CURRENT_TIMESTAMP
-          |ORDER BY event.creationDateTime DESC""".stripMargin)
-        .on('organizerId -> organizerId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
+    def findAllByOrganizer(organizerId: Long): Future[Seq[Event]] = {
+      val now = DateTime.now()
+      val twelveHoursAgo = now.minusHours(12)
+
+      val query = for {
+        organizer <- organizers if organizer.id === organizerId
+        eventOrganizer <- eventsOrganizers
+        event <- events if event.id === eventOrganizer.eventId &&
+        ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+      } yield event
+
+      //getEventProperties
+      db.run(query.sortBy(_.startTime.desc).result)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllByOrganizer: " + e.getMessage)
+
+  def findAllPassedByOrganizer(organizerId: Long): Future[Seq[Event]] = {
+    val now = DateTime.now()
+
+    val query = for {
+      organizer <- organizers if organizer.id === organizerId
+      eventOrganizer <- eventsOrganizers
+      event <- events if event.id === eventOrganizer.eventId && event.startTime < now
+    } yield event
+
+    //getEventProperties
+    db.run(query.sortBy(_.startTime.desc).result)
   }
 
-  def findAllByArtist(facebookUrl: String): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT e.* FROM eventsArtists eA
-          | INNER JOIN events e ON e.eventId = eA.eventId AND
-          |   (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
-          |     OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
-          | INNER JOIN artists a ON a.artistId = eA.artistId
-          |   WHERE a.facebookUrl = {facebookUrl}
-          |ORDER BY e.creationDateTime DESC""".stripMargin)
-        .on('facebookUrl -> facebookUrl)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllByArtist: " + e.getMessage)
+  def findAllByArtist(facebookUrl: String): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+
+    val query = for {
+      artist <- artists if artist.facebookUrl === facebookUrl
+      eventArtist <- eventsArtists
+      event <- events if event.id === eventArtist.eventId &&
+      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+    } yield event
+
+    //getEventProperties
+    db.run(query.sortBy(_.startTime.desc).result)
   }
 
-  def findAllPassedByArtist(artistId: Long): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT event.* FROM eventsArtists eP
-          | INNER JOIN events event ON event.eventId = eP.eventId
-          |   WHERE eP.artistId = {artistId}
-          |     AND startTime < CURRENT_TIMESTAMP
-          |ORDER BY event.creationDateTime DESC""".stripMargin)
-        .on('artistId -> artistId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllByArtist: " + e.getMessage)
+  def findAllPassedByArtist(artistId: Long): Future[Seq[Event]] = {
+    val now = DateTime.now()
+
+    val query = for {
+      artist <- artists if artist.id === artistId
+      eventArtist <- eventsArtists
+      event <- events if event.id === eventArtist.eventId && event.startTime < now
+    } yield event
+
+    //getEventProperties
+    db.run(query.sortBy(_.startTime.desc).result)
   }
 
-  def findAllContaining(pattern: String, geographicPoint: String): Seq[Event] = geographicPoint match {
-    case geographicPointPattern(_) =>
-      try {
-        DB.withConnection { implicit connection =>
-          SQL(
-            s"""SELECT * FROM events
-               |  WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' AND
-               |  (endTime IS NOT NULL AND endTime > CURRENT_TIMESTAMP
-               |    OR endTime IS NULL AND startTime > CURRENT_TIMESTAMP - interval '12 hour')
-               |ORDER BY geographicPoint <-> point '$geographicPoint'
-               |LIMIT 20""".stripMargin)
-            .on('patternLowCase -> pattern.toLowerCase)
-            .as(EventParser.*)
-            .map(getPropertiesOfEvent)
-        }
-      } catch {
-        case e: Exception => throw new DAOException("Event.findAllContaining: " + e.getMessage)
-      }
-    case _ => Seq.empty
+  def findAllContaining(pattern: String): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+    val lowercasePattern = pattern.toLowerCase
+    val query = for {
+      event <- events if (event.name.toLowerCase like s"%$lowercasePattern%") &&
+      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+    } yield event
+
+    db.run(query.take(20).result)
   }
 
-  def findAllByCityPattern(cityPattern: String): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT e.* FROM eventsAddresses eA
-          | INNER JOIN events e ON e.eventId = eA.eventId AND
-          |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
-          |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
-          | INNER JOIN addresses a ON a.addressId = eA.addressId
-          |   WHERE a.city LIKE '%'||{patternLowCase}||'%'
-          |LIMIT 50""".stripMargin)
-        .on('patternLowCase -> cityPattern.toLowerCase)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.findAllContaining: " + e.getMessage)
+  def findAllContaining(pattern: String, geographicPoint: Point): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+    val lowercasePattern = pattern.toLowerCase
+    val query = for {
+      event <- events if (event.name.toLowerCase like s"%$lowercasePattern%") &&
+      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+    } yield event
+
+    db.run(query.sortBy(_.geographicPoint <-> geographicPoint).take(20).result)
   }
 
+
+  def findAllByCityPattern(cityPattern: String): Future[Seq[Event]] = {
+//        """SELECT e.* FROM eventsAddresses eA
+//          | INNER JOIN events e ON e.eventId = eA.eventId AND
+//          |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
+//          |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
+//          | INNER JOIN addresses a ON a.addressId = eA.addressId
+//          |   WHERE a.city LIKE '%'||{patternLowCase}||'%'
+//          |LIMIT 50""".stripMargin)
+//        .on('patternLowCase -> cityPattern.toLowerCase)
+//
+//    val query =
+    //    .map(getPropertiesOfEvent)
+    Future { Seq.empty }
+  }
+
+  def save(event: Event): Future[Event] = {
+    val query = events returning events.map(_.id) into ((event, id) => event.copy(id = Some(id))) += event
+    db.run(query)
+  }
+  /*
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -335,7 +407,7 @@ object Event {
         .as(scalar[Option[Long]].single) match {
         case None => None
         case Some(eventId: Long) =>
-          event.organizers.foreach { organizer => Organizer.saveWithEventRelation(organizer, eventId) }
+//          event.organizers.foreach { organizer => organizerMethods.saveWithEventRelation(organizer, eventId) }
           event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
           event.artists.foreach { artist => Artist.saveWithEventRelation(artist, eventId) }
           event.genres.foreach { genre => Genre.saveWithEventRelation(genre, eventId) }
@@ -346,158 +418,102 @@ object Event {
   } catch {
     case e: Exception => throw new DAOException("Event.save: " + e.getMessage)
   }
+*/
+  def delete(id: Long): Future[Int] = db.run(events.filter(_.id === id).delete)
 
-  def delete(eventId: Long): Long = try {
-    DB.withConnection { implicit connection =>
-      SQL("DELETE FROM events WHERE eventId = {eventId}")
-        .on('eventId -> eventId)
-        .executeUpdate()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.delete : " + e.getMessage)
+  def update(event: Event): Future[Int] = db.run(events.filter(_.id === event.id).update(event))
+
+  def follow(userEventRelation: UserEventRelation): Future[Int] = db.run(eventsFollowed += userEventRelation)
+
+  def unfollow(userEventRelation: UserEventRelation): Future[Int] = db.run(
+   eventsFollowed
+     .filter(eventFollowed =>
+        eventFollowed.userId === userEventRelation.userId && eventFollowed.eventId === userEventRelation.eventId)
+     .delete)
+
+  def getFollowedEvents(userId: String): Future[Seq[Event] ]= {
+    val query = for {
+      eventFollowed <- eventsFollowed if eventFollowed.userId === userId
+      event <- events if event.id === eventFollowed.eventId
+    } yield event
+
+    db.run(query.result)
   }
 
-  def update(event: Event): Unit = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """UPDATE events
-          | SET name = {name}, description = {description}, startTime = {startTime}, endTime = {endTime}
-          | WHERE facebookId = {facebookId}""".stripMargin)
-        .on(
-          'facebookId -> event.facebookId,
-          'name -> event.name,
-          'description -> event.description,
-          'startTime -> event.startTime,
-          'endTime -> event.endTime)
-        .executeUpdate()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.update: " + e.getMessage)
+  def isFollowed(userId: String, eventId: Long): Future[Boolean] = {
+    val query = sql"""SELECT exists(SELECT 1 FROM eventsFollowed WHERE userId = $userId AND eventId = $eventId)"""
+      .as[Boolean]
+    db.run(query.head)
   }
 
-  def follow(userId: String, eventId: Long): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """INSERT INTO eventsFollowed(userId, eventId)
-          | VALUES ({userId}, {eventId})""".stripMargin)
-        .on(
-          'userId -> userId,
-          'eventId -> eventId)
-        .executeInsert()
-    }
-  }
+  def saveFacebookEventByFacebookId(eventFacebookId: String): Future[Event] =
+    findEventOnFacebookByFacebookId(eventFacebookId) flatMap { save }
 
-  def unfollow(userId: String, eventId: Long): Try[Int] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """DELETE FROM eventsFollowed
-          | WHERE userId = {userId} AND eventId = {eventId}""".stripMargin)
-        .on('userId -> userId,
-            'eventId -> eventId)
-        .executeUpdate()
-    }
-  }
-
-  def getFollowedEvents(userId: IdentityId): Seq[Event] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT e.* FROM events e
-            |  INNER JOIN eventsFollowed ef ON e.eventId = ef.eventId
-            |WHERE ef.userId = {userId}""".stripMargin)
-        .on('userId -> userId.userId)
-        .as(EventParser.*)
-        .map(getPropertiesOfEvent)
-      }
-  } catch {
-    case e: Exception => throw new DAOException("Event.getFollowedEvents: " + e.getMessage)
-  }
-
-  def isFollowed(userId: IdentityId, eventId: Long): Boolean = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT exists(SELECT 1 FROM eventsFollowed
-           |  WHERE userId = {userId} AND eventId = {eventId})""".stripMargin)
-        .on("userId" -> userId.userId,
-            "eventId" -> eventId)
-        .as(scalar[Boolean].single)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.isEventFollowed: " + e.getMessage)
-  }
-
-  def saveFacebookEventByFacebookId(eventFacebookId: String): Unit = try {
-    findEventOnFacebookByFacebookId(eventFacebookId) map { save }
-  } catch {
-    case e: Exception => throw new Exception("Event.saveFacebookEventByFacebookId")
-  }
-
-  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Event] = {
+  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Event] =
     WS.url("https://graph.facebook.com/v2.2/" + eventFacebookId)
       .withQueryString(
         "fields" -> "cover,description,name,start_time,end_time,owner,venue",
-        "access_token" -> facebookToken)
+        "access_token" -> utilities.facebookToken)
       .get()
       .flatMap { readFacebookEvent }
-  }
 
-  def readFacebookEvent(eventFacebookResponse: Response): Future[Event] = {
-    val eventRead = (
-      (__ \ "description").readNullable[String] and
-        (__ \ "cover" \ "source").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "id").readNullable[String] and
-        (__ \ "start_time").readNullable[String] and
-        (__ \ "endTime").readNullable[String] and
-        (__ \ "venue" \ "street").readNullable[String] and
-        (__ \ "venue" \ "zip").readNullable[String] and
-        (__ \ "venue" \ "city").readNullable[String] and
-        (__ \ "owner" \ "id").readNullable[String]
-      )((description: Option[String], source: String, name: String, facebookId: Option[String],
-         startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
-         city: Option[String], maybeOwnerId: Option[String]) => {
+  def readFacebookEvent(eventFacebookWSResponse: WSResponse): Future[Event] = {
+   val eventRead = (
+     (__ \ "description").readNullable[String] and
+       (__ \ "cover" \ "source").read[String] and
+       (__ \ "name").read[String] and
+       (__ \ "id").readNullable[String] and
+       (__ \ "start_time").readNullable[String] and
+       (__ \ "endTime").readNullable[String] and
+       (__ \ "venue" \ "street").readNullable[String] and
+       (__ \ "venue" \ "zip").readNullable[String] and
+       (__ \ "venue" \ "city").readNullable[String] and
+       (__ \ "owner" \ "id").readNullable[String]
+     )((description: Option[String], source: String, name: String, facebookId: Option[String],
+        startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
+        city: Option[String], maybeOwnerId: Option[String]) => {
 
-      val eventuallyOrganizer = Organizer.getOrganizerInfo(maybeOwnerId)
-      val address = Address(None, None, city, zip, street)
+     val eventuallyOrganizer = organizerMethods.getOrganizerInfo(maybeOwnerId)
+     val address = Address(None, None, city, zip, street)
 
-      val normalizedWebsites: Set[String] = getNormalizedWebsitesInText(description)
-      val ticketSellers = Tariff.findTicketSellers(normalizedWebsites)
-      val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(normalizedWebsites)
-      val eventuallyMaybeArtistsFromTitle =
-        getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(name), normalizedWebsites)
+     val normalizedWebsites: Set[String] = utilities.getNormalizedWebsitesInText(description)
+     val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
+     val eventuallyMaybeArtistsFromDescription = artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
+     val eventuallyMaybeArtistsFromTitle =
+       artistMethods.getEventuallyArtistsInEventTitle(artistMethods.splitArtistNamesInTitle(name), normalizedWebsites)
 
-      for {
-        organizer <- eventuallyOrganizer
-        artistsFromDescription <- eventuallyMaybeArtistsFromDescription
-        artistsFromTitle <- eventuallyMaybeArtistsFromTitle
-      } yield {
+     for {
+       organizer <- eventuallyOrganizer
+       artistsFromDescription <- eventuallyMaybeArtistsFromDescription
+       artistsFromTitle <- eventuallyMaybeArtistsFromTitle
+     } yield {
 
-        val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
-        Artist.saveArtistsAndTheirTracks(nonEmptyArtists)
+       val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
+       artistMethods.saveArtistsAndTheirTracks(nonEmptyArtists)
 
-        val eventGenres = nonEmptyArtists.flatMap(_.genres).distinct
-        println("facebookId:" + facebookId)
-        println("yo:" + eventGenres)
+//       val eventGenres = nonEmptyArtists.flatMap(_.genres).distinct
 
-        Event(None, facebookId, isPublic = true, isActive = true, Utilities.refactorEventOrPlaceName(name), None,
-          Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
-          formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
-          nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
-      }
-    })
-    try {
-      eventFacebookResponse.json.as[Future[Event]](eventRead)
-    } catch {
-      case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent" + e.getMessage)
-    }
+       Event(None, facebookId, isPublic = true, isActive = true, utilities.refactorEventOrPlaceName(name), None,
+         utilities.formatDescription(description), new DateTime()/*utilities.formatDate(startTime).getOrElse(new DateTime())*/, Option(new DateTime())
+         /*utilities.formatDate(endTime)*/, 16, tariffMethods.findPrices(description), ticketSellers, Option(source)/*, List(organizer).flatten,
+         nonEmptyArtists, List.empty, List(address), List.empty, eventGenres*/)
+     }
+   })
+   try {
+     eventFacebookWSResponse.json.as[Future[Event]](eventRead)
+   } catch {
+     case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent" + e.getMessage)
+   }
   }
 
   def getEventsFacebookIdByPlace(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
-      .withQueryString("access_token" -> facebookToken)
+      .withQueryString("access_token" -> utilities.facebookToken)
       .get()
-      .map { readEventsIdsFromResponse }
+      .map { readEventsIdsFromWSResponse }
   }
 
-  def readEventsIdsFromResponse(resp: Response): Seq[String] = {
+  def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = {
     val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
     (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
   }

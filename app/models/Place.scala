@@ -1,22 +1,25 @@
 package models
 
-import java.sql.Connection
+import java.sql.Timestamp
+import java.util.UUID
+import javax.inject.Inject
 
-import anorm.SqlParser._
-import anorm._
+
+
+import controllers.{DAOException, ThereIsNoPlaceForThisFacebookIdException}
+import org.joda.time.DateTime
 import play.api.Logger
-import play.api.db.DB
-import play.api.Play.current
-import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
-
-import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
+import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits._
-import scala.concurrent.Future
-import scala.util.{Success, Failure, Try}
 import services.Utilities
-import services.Utilities.geographicPointPattern
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
-case class Place (placeId: Option[Long],
+import scala.concurrent.Future
+import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
+
+case class Place (id: Option[Long],
                   name: String,
                   facebookId: Option[String] = None,
                   geographicPoint: Option[String],
@@ -25,89 +28,121 @@ case class Place (placeId: Option[Long],
                   capacity: Option[Int] = None,
                   openingHours: Option[String] = None,
                   imagePath: Option[String] = None,
-                  address : Option[Address] = None,
+                  /*address : Option[Address] = None,*/
                   linkedOrganizerId: Option[Long] = None)
 
-object Place {
-  def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
-                webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
-                imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
-    try {
-      val address = Option(Address(None, None, city, zip, street))
-      new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, address)
-    } catch {
-      case e: IllegalArgumentException =>
-        new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, None)
-    }
+class PlaceMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                             val organizerMethods: OrganizerMethods,
+                             val utilities: Utilities) {
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
+  import dbConfig._
+
+  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
+    dt => new Timestamp(dt.getMillis),
+    ts => new DateTime(ts.getTime))
+
+  class Places(tag: Tag) extends Table[Place](tag, "places") {
+    def id = column[Long]("placeid", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("name")
+    def facebookId = column[Option[String]]("facebookid")
+    def geographicPoint = column[Option[String]]("geographicpoint")
+    def description = column[Option[String]]("description")
+    def websites = column[Option[String]]("websites")
+    def capacity = column[Option[Int]]("capacity")
+    def openingHours = column[Option[String]]("openinghours")
+    def imagePath = column[Option[String]]("imagepath")
+    def linkedOrganizerId = column[Option[Long]]("linkedorganizerid")
+
+    def * = (id.?, name, facebookId, geographicPoint, description, websites, capacity, openingHours,
+      imagePath, linkedOrganizerId) <> ((Place.apply _).tupled, Place.unapply)
   }
 
-  def formUnapply(place: Place) =
-    Some((place.name, place.facebookId, place.geographicPoint, place.description, place.webSites, place.capacity,
-      place.openingHours, place.imagePath, place.address.get.city, place.address.get.zip, place.address.get.street))
+  lazy val places = TableQuery[Places]
 
-  private val PlaceParser: RowParser[Place] = {
-    get[Long]("placeId") ~
-      get[String]("name") ~
-      get[Option[String]]("facebookId") ~
-      get[Option[String]]("geographicPoint") ~
-      get[Option[String]]("description") ~
-      get[Option[String]]("webSites") ~
-      get[Option[Int]]("capacity") ~
-      get[Option[String]]("openingHours") ~
-      get[Option[Long]]("addressId") ~
-      get[Option[String]]("imagePath") ~
-      get[Option[Long]]("organizerId") map {
-      case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
-        addressId  ~ imagePath ~ organizerId =>
-          Place(Option(placeId), name, facebookId, geographicPoint, description, webSites, capacity, openingHours,
-            imagePath, Address.find(addressId), organizerId)
-    }
+//  def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
+//                webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
+//                imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
+//    try {
+//      val address = Option(Address(None, None, city, zip, street))
+//      new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, address)
+//    } catch {
+//      case e: IllegalArgumentException =>
+//        new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, None)
+//    }
+//  }
+//
+//  def formUnapply(place: Place) =
+//    Some((place.name, place.facebookId, place.geographicPoint, place.description, place.webSites, place.capacity,
+//      place.openingHours, place.imagePath, place.address.get.city, place.address.get.zip, place.address.get.street))
+//
+//  private val PlaceParser: RowParser[Place] = {
+//    get[Long]("placeId") ~
+//      get[String]("name") ~
+//      get[Option[String]]("facebookId") ~
+//      get[Option[String]]("geographicPoint") ~
+//      get[Option[String]]("description") ~
+//      get[Option[String]]("webSites") ~
+//      get[Option[Int]]("capacity") ~
+//      get[Option[String]]("openingHours") ~
+//      get[Option[Long]]("addressId") ~
+//      get[Option[String]]("imagePath") ~
+//      get[Option[Long]]("organizerId") map {
+//      case placeId ~ name ~ facebookId ~ geographicPoint ~ description ~ webSites ~ capacity ~ openingHours ~
+//        addressId  ~ imagePath ~ organizerId =>
+//          Place(Option(placeId), name, facebookId, geographicPoint, description, webSites, capacity, openingHours,
+//            imagePath, Address.find(addressId), organizerId)
+//    }
+//  }
+
+  def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
+
+  def save(place: Place): Future[Place] = {
+//      val eventuallyAddressId = Address.saveAddressInFutureWithGeoPoint(place.address)
+    val query = places returning places.map(_.id) into ((place, id) => place.copy(id = Option(id))) +=
+      place.copy(description =  utilities.formatDescription(place.description))
+
+    db.run(query)
   }
 
-  def delete(placeId: Long): Try[Int] = Try {
+//  def save(place: Place): Future[Try[Option[Long]]] = {
+//    val eventuallyAddressId = Address.saveAddressInFutureWithGeoPoint(place.address)
+//    eventuallyAddressId map {
+//      case Success(addressId) =>
+//        val description = Utilities.formatDescription(place.description)
+//        DB.withConnection { implicit connection =>
+//          Try {
+//            SQL(
+//              s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
+//                 |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
+//              .on(
+//                'name -> place.name,
+//                'geographicPoint -> place.geographicPoint,
+//                'addressId -> addressId,
+//                'facebookId -> place.facebookId,
+//                'description -> description,
+//                'webSites -> Utilities.setToOptionString(getNormalizedWebsitesInText(place.webSites)),
+//                'capacity -> place.capacity,
+//                'openingHours -> place.openingHours,
+//                'imagePath -> place.imagePath,
+//                'organizerId -> organizerMethods.findIdByFacebookId(place.facebookId))
+//              .as(scalar[Long].singleOpt)
+//          }
+//        }
+//      case Failure(e) =>
+//        Logger.error("Place.save: ", e)
+//        throw e
+//    }
+//  }
+/*
+  def findIdByFacebookId(placeFacebookId: Option[String]): Future[Option[Long]] = {
+    val query =
     DB.withConnection { implicit connection =>
-      SQL("DELETE FROM places WHERE placeId = {placeId}")
-        .on('placeId -> placeId)
-        .executeUpdate()
-    }
-  }
-
-  def save(place: Place): Future[Try[Option[Long]]] = {
-    val eventuallyAddressId = Address.saveAddressInFutureWithGeoPoint(place.address)
-    eventuallyAddressId map {
-      case Success(addressId) =>
-        val description = Utilities.formatDescription(place.description)
-        DB.withConnection { implicit connection =>
-          Try {
-            SQL(
-              s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
-                 |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
-              .on(
-                'name -> place.name,
-                'geographicPoint -> place.geographicPoint,
-                'addressId -> addressId,
-                'facebookId -> place.facebookId,
-                'description -> description,
-                'webSites -> Utilities.setToOptionString(getNormalizedWebsitesInText(place.webSites)),
-                'capacity -> place.capacity,
-                'openingHours -> place.openingHours,
-                'imagePath -> place.imagePath,
-                'organizerId -> Organizer.findIdByFacebookId(place.facebookId))
-              .as(scalar[Long].singleOpt)
-          }
-        }
-      case Failure(e) =>
-        Logger.error("Place.save: ", e)
-        throw e
-    }
-  }
-
-  def findIdByFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
-    SQL(
-      """SELECT placeId FROM places
+      SQL(
+        """SELECT placeId FROM places
         | WHERE facebookId = {facebookId}""".stripMargin)
-      .on("facebookId" -> placeFacebookId)
-      .as(scalar[Long].singleOpt)
+        .on("facebookId" -> placeFacebookId)
+        .as(scalar[Long].singleOpt)
+    }
   }
 
   def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Place] = try {
@@ -192,7 +227,7 @@ object Place {
     }
   }
 
-  def followByPlaceId(userId : String, placeId : Long): Try[Option[Long]] = Try {
+  def followByPlaceId(userId : UUID, placeId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO placesFollowed(userId, placeId) VALUES({userId}, {placeId})""")
         .on(
@@ -202,7 +237,7 @@ object Place {
     }
   }
 
-  def unfollowByPlaceId(userId: String, placeId: Long): Try[Int] = Try {
+  def unfollowByPlaceId(userId: UUID, placeId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM placesFollowed
@@ -213,19 +248,19 @@ object Place {
     }
   }
 
-  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
+  def followByFacebookId(userId : UUID, facebookId: String): Try[Option[Long]] =
     findIdByFacebookId(facebookId) match {
       case Success(Some(placeId)) => followByPlaceId(userId, placeId)
       case Success(None)=> Failure(ThereIsNoPlaceForThisFacebookIdException("Place.followByFacebookId"))
       case failure => failure
     }
 
-  def isFollowed(userId: IdentityId, placeId: Long): Boolean = try {
+  def isFollowed(userId: UUID, placeId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM placesFollowed
           |  WHERE userId = {userId} AND placeId = {placeId})""".stripMargin)
-        .on("userId" -> userId.userId,
+        .on("userId" -> userId,
           "placeId" -> placeId)
         .as(scalar[Boolean].single)
     }
@@ -233,12 +268,12 @@ object Place {
     case e: Exception => throw new DAOException("Place.isPlaceFollowed: " + e.getMessage)
   }
 
-  def getFollowedPlaces(userId: IdentityId): Seq[Place] = try {
+  def getFollowedPlaces(userId: UUID): Seq[Place] = try {
     DB.withConnection { implicit connection =>
       SQL("""select a.* from places a
             |  INNER JOIN placesFollowed af ON a.placeId = af.placeId
             |WHERE af.userId = {userId}""".stripMargin)
-        .on('userId -> userId.userId)
+        .on('userId -> userId)
         .as(PlaceParser.*)
     }
   } catch {
@@ -264,5 +299,5 @@ object Place {
       SQL(s"""DELETE FROM eventsPlaces WHERE eventId = $eventId AND placeId = $placeId""")
         .executeUpdate()
     }
-  }
+  }*/
 }

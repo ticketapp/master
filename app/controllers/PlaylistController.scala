@@ -5,19 +5,31 @@ import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
+import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, Controller}
 import play.api.libs.concurrent.Execution.Implicits._
+import javax.inject.Inject
 import scala.concurrent.Future
 import json.JsonHelper._
 
 import scala.util.{Failure, Success}
+import javax.inject.Inject
+import com.mohiva.play.silhouette.api.{ Environment, LogoutEvent, Silhouette }
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import models.User
+import play.api.i18n.MessagesApi
 
-object PlaylistController extends Controller {
-
+class PlaylistController @Inject() (ws: WSClient,
+                                 val messagesApi: MessagesApi,
+                                 val env: Environment[User, CookieAuthenticator],
+                                 socialProviderRegistry: SocialProviderRegistry)
+  extends Silhouette[User, CookieAuthenticator] {
+/*
   def find(playlistId: Long) = Action { Ok(Json.toJson(Playlist.find(playlistId))) }
 
-  def findByUser = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(Playlist.findByUserId(request.user.identityId.userId)))
+  def findByUser = SecuredAction { implicit request =>
+    Ok(Json.toJson(Playlist.findByUserId(request.identity.UUID)))
   }
 
   val playlistBindingForm = Form(mapping(
@@ -28,14 +40,14 @@ object PlaylistController extends Controller {
     )(Playlist.idAndRankFormApply)(Playlist.idAndRankFormUnapply))
   )(Playlist.formApply)(Playlist.formUnapply))
 
-  def create = SecuredAction(ajaxCall = true) { implicit request =>
+  def create = SecuredAction { implicit request =>
     playlistBindingForm.bindFromRequest().fold(
       formWithErrors => {
         Logger.error(formWithErrors.errorsAsJson.toString())
         BadRequest(formWithErrors.errorsAsJson)
       },
       playlistNameAndTracksId => {
-        val userId = request.user.identityId.userId
+        val userId = request.identity.UUID
         val playlistId = Playlist.saveWithTrackRelation(userId, playlistNameAndTracksId)
         Ok(Json.toJson(playlistId))
       }
@@ -51,22 +63,22 @@ object PlaylistController extends Controller {
     )(Playlist.trackInfoFormApply)(Playlist.trackInfoFormUnapply))
   )(Playlist.updateFormApply)(Playlist.updateFormUnapply))
 
-  def update() = SecuredAction(ajaxCall = true) { implicit request =>
+  def update() = SecuredAction { implicit request =>
     updatePlaylistBindingForm.bindFromRequest().fold(
       formWithErrors => {
         Logger.error("PlaylistController.update:" + formWithErrors.errorsAsJson)
         BadRequest(formWithErrors.errorsAsJson)
       },
       playlistIdAndTracksInfo => {
-        val userId = request.user.identityId.userId
+        val userId = request.identity.UUID
         Future { Playlist.update(userId, playlistIdAndTracksInfo) }
         Ok
       }
     )
   }
 
-  def delete(playlistId: Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Playlist.delete(request.user.identityId.userId, playlistId) match {
+  def delete(playlistId: Long) = SecuredAction { implicit request =>
+    Playlist.delete(request.identity.UUID, playlistId) match {
       case Success(1) =>
         Ok
       case Failure(exception) =>
@@ -76,5 +88,5 @@ object PlaylistController extends Controller {
         Logger.error("PlaylistController.delete: unable to delete the playlist")
         InternalServerError("PlaylistController.delete: unable to delete the playlist")
     }
-  }
+  }*/
 }

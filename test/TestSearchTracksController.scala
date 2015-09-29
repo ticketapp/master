@@ -11,9 +11,9 @@ import Matchers._
 import play.api.libs.json._
 import play.api.test.{WithApplication, PlaySpecification, FakeRequest}
 import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
+
+
+
 import play.api.Play.current
 
 import scala.language.postfixOps

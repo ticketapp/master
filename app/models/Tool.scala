@@ -1,8 +1,8 @@
 package models
 
-import anorm.SqlParser._
-import anorm._
-import play.api.db.DB
+
+
+
 import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
@@ -27,7 +27,7 @@ object Tool {
   def formApply(tools: String, userId: Long): Tool = new Tool(tools, userId)
 
   def formUnapply(tool: Tool): Option[(String, Long)] = Some((tool.tools, tool.userId))
-
+/*
   def findByUserId(userId: Long): String = {
     DB.withConnection { implicit connection =>
       SQL( """SELECT tools
@@ -52,5 +52,5 @@ object Tool {
     } catch {
       case e: Exception => throw new DAOException("Cannot save tool: " + e.getMessage)
     }
-  }
+  }*/
 }

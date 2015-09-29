@@ -1,14 +1,17 @@
+/*
 package controllers
 
 
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.mvc._
-import models._
-import play.api.libs.json.Json
 import java.io.File
+import javax.inject.Inject
 
-object Admin extends Controller {
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.mvc._
+import services.Utilities
+
+class Admin @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                      val orderMethods: OrderMethods,
+                      val utilities: Utilities) extends Controller {
 
   def indexAdmin = Action {
     Ok(views.html.admin.indexAdmin())
@@ -21,14 +24,14 @@ object Admin extends Controller {
 
   def upload = Action(parse.multipartFormData) { request =>
     request.body.file("picture").map { picture =>
-      val filename = picture.filename
+      val fileName = picture.filename
       val contentType = picture.contentType
       picture.ref.moveTo(new File("/tmp/picture"))
       Ok("File uploaded")
     }.getOrElse {
-      Redirect(routes.Application.index).flashing(
+      Redirect(routes.Application.index()).flashing(
         "error" -> "Missing file"
       )
     }
   }
-}
+}*/

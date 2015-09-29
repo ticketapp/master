@@ -1,21 +1,8 @@
 package models
 
-import java.sql.Connection
 import java.util.UUID
-import java.util.UUID._
 
-import anorm.SqlParser._
-import anorm._
-import controllers.{PlaylistUpdateTrackWithoutRankException, PlaylistDoesNotExistException, DAOException}
-import play.api.db.DB
-import play.api.libs.json.Json
-import play.api.Play.current
-import json.JsonHelper._
-import play.api.Logger
-
-import scala.util.{Try, Success, Failure}
-
-case class Playlist(playlistId: Option[Long], userId: String, name: String, tracks: Seq[Track])
+case class Playlist(playlistId: Option[Long], userId: UUID, name: String, tracks: Seq[Track])
 
 object Playlist {
 
@@ -29,14 +16,7 @@ object Playlist {
   def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
     Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
 
-  private val playlistParser: RowParser[Playlist] = {
-    get[Long]("playlistId") ~
-      get[String]("userId") ~
-      get[String]("name") map {
-      case playlistId ~ userId ~ name => Playlist(Option(playlistId), userId, name, Seq.empty)
-    }
-  }
-
+/*
   def find(playlistId: Long): Option[Playlist] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -50,12 +30,12 @@ object Playlist {
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
   }
 
-  def findByUserId(userId: String): Seq[Playlist] = try {
+  def findByUserId(userUUID: UUID): Seq[Playlist] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT * FROM playlists
           | WHERE userId = {userId}""".stripMargin)
-      .on('userId -> userId)
+      .on('userId -> userUUID)
       .as(playlistParser.*)
       .map(playlist => playlist.copy(tracks = Track.findByPlaylistId(playlist.playlistId)))
     }
@@ -63,7 +43,7 @@ object Playlist {
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
   }
 
-  def delete(userId: String, playlistId: Long): Try[Int] = Try {
+  def delete(userId: UUID, playlistId: Long): Try[Int] = Try {
     deleteTracksRelations(userId, playlistId) match {
       case Success(_) =>
         DB.withConnection { implicit connection =>
@@ -82,7 +62,7 @@ object Playlist {
     }
   }
 
-  def deleteTracksRelations(userId: String, playlistId: Long): Try[Int] = Try {
+  def deleteTracksRelations(userId: UUID, playlistId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM playlistsTracks
@@ -104,7 +84,7 @@ object Playlist {
     }
   }
 
-  def saveWithTrackRelation(userId: String, playlistNameTracksIdAndRank: PlaylistNameTracksIdAndRank): Long = {
+  def saveWithTrackRelation(userId: UUID, playlistNameTracksIdAndRank: PlaylistNameTracksIdAndRank): Long = {
     save(Playlist(None, userId, playlistNameTracksIdAndRank.name, Seq.empty)) match {
       case Success(Some(playlistId: Long)) =>
         playlistNameTracksIdAndRank.tracksIdAndRank.foreach(trackIdAndRank =>
@@ -130,7 +110,7 @@ object Playlist {
     case e: Exception => throw new DAOException("Track.saveTrackRelation: " + e.getMessage)
   }
 
-  def deleteTrackRelation(playlistId: Long, trackId: UUID): Long = try {
+  def deleteTrackRelation(playlistId: Long, trackId: UUID): Int = try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM playlistsTracks
@@ -154,7 +134,7 @@ object Playlist {
   def updateFormUnapply(playlistIdAndTracksInfo: PlaylistIdAndTracksInfo) =
     Option((playlistIdAndTracksInfo.id, playlistIdAndTracksInfo.tracksInfo))
 
-  def existsPlaylistForUser(userId: String, playlistId: Long)(implicit connection: Connection): Boolean = try {
+  def existsPlaylistForUser(userId: UUID, playlistId: Long)(implicit connection: Connection): Boolean = try {
     SQL(
       """SELECT exists(SELECT 1 FROM playlists
         |  WHERE userId = {userId} AND playlistId = {playlistId})""".stripMargin)
@@ -166,7 +146,7 @@ object Playlist {
     case e: Exception => throw new DAOException("Artist.isArtistFollowed: " + e.getMessage)
   }
 
-  def update(userId: String, playlistIdAndTracksInfo: PlaylistIdAndTracksInfo): Unit = try {
+  def update(userId: UUID, playlistIdAndTracksInfo: PlaylistIdAndTracksInfo): Unit = try {
     DB.withConnection { implicit connection =>
       if (existsPlaylistForUser(userId, playlistIdAndTracksInfo.id)) {
         for (trackInfo <- playlistIdAndTracksInfo.tracksInfo)
@@ -206,7 +186,7 @@ object Playlist {
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.updateTrackRank: " + e.getMessage)
-  }
+  }*/
 /*
   def addTracksInPlaylist(userId: String, playlistIdAndTracksId: PlaylistIdAndTracksId): Unit = {
     playlistIdAndTracksId.tracksId.foreach(trackId =>

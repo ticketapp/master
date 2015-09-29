@@ -5,11 +5,11 @@ import java.math.MathContext
 import java.text.Normalizer
 import java.util.Date
 import java.util.regex.Pattern
-import anorm._
-import play.api.db.DB
+
+
 import play.api.libs.iteratee.{Concurrent, Iteratee, Enumerator}
 import play.api.libs.ws.WS
-import play.api.libs.ws.Response
+import play.api.libs.ws.WSResponse
 import play.api.mvc._
 import play.libs.F.Promise
 import scala.collection.mutable.ListBuffer
@@ -20,11 +20,10 @@ import models.{Track, Artist, Event}
 import scala.io.Source
 import play.api.mvc.Results._
 import scala.util.{Success, Failure}
-import services.Utilities._
 import play.api.libs.functional.syntax._
 import play.api.Play.current
 
-object Test extends Controller {
+class Test extends Controller {
   /*def test1 = WebSocket.using[String] { request =>
     //Concurrent.broadcast returns (Enumerator, Concurrent.Channel)
     val (out,channel) = Concurrent.broadcast[String]

@@ -1,19 +1,23 @@
 package models
 
-import anorm.SqlParser._
-import anorm._
-import controllers._
-import play.api.db.DB
-import play.api.Play.current
-import play.api.libs.ws.{Response, WS}
-import services.Utilities.{geographicPointToString, googleKey}
+import javax.inject.Inject
 
+import com.vividsolutions.jts.geom.Point
+import org.joda.time.DateTime
+import play.api.Logger
+
+import play.api.Play.current
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
+import play.api.libs.ws.{WSResponse, WS}
+import services.{MyPostgresDriver, Utilities, SearchYoutubeTracks, SearchSoundCloudTracks}
+import scala.language.postfixOps
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
-
 import scala.util.{Success, Failure, Try}
+import services.MyPostgresDriver.api._
+import scala.language.postfixOps
 
-case class Address (addressId: Option[Long],
+case class Address (id: Option[Long],
                     geographicPoint: Option[String],
                     city: Option[String],
                     zip: Option[String],
@@ -22,140 +26,130 @@ case class Address (addressId: Option[Long],
     "address must contain at least one field")
 }
 
-object Address {
+class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
+                              val organizerMethods: OrganizerMethods,
+                              val placeMethods: PlaceMethods,
+                              val eventMethods: EventMethods,
+                              val searchSoundCloudTracks: SearchSoundCloudTracks,
+                              val searchYoutubeTracks: SearchYoutubeTracks,
+                              val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
-  private val AddressParser: RowParser[Address] = {
-    get[Option[String]]("geographicPoint") ~
-      get[Option[String]]("city") ~
-      get[Option[String]]("zip") ~
-      get[Option[String]]("street") map {
-      case geographicPoint ~ city ~ zip ~ street =>
-        Address(None, geographicPoint, city, zip, street)
-    }
+  val events = eventMethods.events
+  val eventsAddresses = eventMethods.eventsAddresses
+
+  class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
+    def id = column[Long]("organizerId", O.PrimaryKey)
+    def geographicPoint = column[Option[String]]("geographicPoint")
+    def city = column[Option[String]]("city")
+    def zip = column[Option[String]]("zip")
+    def street = column[Option[String]]("street")
+    def * = (id.?, geographicPoint, city, zip, street) <>
+      ((Address.apply _).tupled, Address.unapply)
   }
+
+  lazy val addresses = TableQuery[Addresses]
+
+  case class FrenchCity(city: String, geographicPoint: Point)
+
+  class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
+    def id = column[Long]("cityid", O.PrimaryKey)
+    def city = column[String]("city")
+    def geographicPoint = column[Point]("geographicpoint")
+    def * = (city, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
+  }
+
+  lazy val frenchCities = TableQuery[FrenchCities]
 
   def formApply(city: Option[String], zip: Option[String], street: Option[String]) =
     new Address(None, None, city, zip, street)
   def formUnapply(address: Address): Option[(Option[String], Option[String], Option[String])] =
     Some((address.city, address.zip, address.street))
 
-  def findAll: List[Address] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM addresses").as(AddressParser.*)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Address.findAll: " + e.getMessage)
+  def findAll: Future[Seq[Address]] = db.run(addresses.result)
+
+  def findAllByEvent(event: Event): Future[Seq[Address]] = {
+    val query = for {
+      event <- events if event.id === event.id
+      eventAddress <- eventsAddresses
+      address <- addresses if address.id === eventAddress.addressId
+    } yield address
+
+    db.run(query.result)
   }
 
-  def findAllByEvent(event: Event): List[Address] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT * FROM eventsAddresses eA
-          | INNER JOIN addresses a ON a.addressId = eA.addressId
-          | WHERE eA.eventId = {eventId}""".stripMargin)
-        .on('eventId -> event.eventId)
-        .as(AddressParser.*)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Address.findAllByEvent: " + e.getMessage)
+  def find(id: Long): Future[Option[Address]] = db.run(addresses.filter(_.id === id).result.headOption)
+
+  def findAllContaining(cityPattern: String): Future[Seq[Address]] = {
+    val lowercasePattern = cityPattern.toLowerCase
+    val query = for {
+      address <- addresses if address.city.toLowerCase like s"%$lowercasePattern%"
+    } yield address
+
+    db.run(query.result)
   }
 
-  def find(addressId: Option[Long]): Option[Address] = addressId match {
-    case None => None
-    case Some(id) => try {
-      DB.withConnection { implicit connection =>
-        SQL("SELECT * FROM addresses WHERE addressId = {id}")
-          .on('id -> id)
-          .as(AddressParser.singleOpt)
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Address.find: " + e.getMessage)
-    }
-  }
+  def save(address: Address): Future[Address] = {
+//    val query3 = for {
+//      existing <- addresses
+//        .filter(a => a.street === address.street && a.zip === address.zip && a.city === address.city)
+//        .result
+//        .headOption
+//      row = existing getOrElse address
+//      result <- (addresses returning addresses.map(_.id) into ((address, id) => address.copy(id = Some(id)))).insertOrUpdate(row)
+//      toBeReturned <- result getOrElse existing.get
+//    } yield toBeReturned
+//
+//    db.run(query3)
+//
 
-  def findAllContaining(pattern: String): Seq[Address] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT * FROM addresses
-          |  WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
-          |LIMIT 10""".stripMargin)
-        .on('patternLowCase -> pattern.toLowerCase)
-        .as(AddressParser.*)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Problem with the method Address.findAllContaining: " + e.getMessage)
-  }
-  
-  def save(maybeAddress: Option[Address]): Try[Option[Long]] = Try {
-    maybeAddress match {
+
+/*    val query = (addresses returning addresses.map(_.id) into ((address, id) => address.copy(id = Some(id)))) insertOrUpdate address
+    db.run(query)
+*/
+    val query2 = (addresses returning addresses.map(_.id)) insertOrUpdate address
+    db.run(query2) flatMap {
       case None =>
-        None
-      case Some(address) =>
-        DB.withConnection { implicit connection =>
-          SQL("""SELECT upsertAddress({geographicPoint}, {city}, {zip}, {street})""")
-            .on(
-              'geographicPoint -> address.geographicPoint,
-              'city -> address.city,
-              'zip -> address.zip,
-              'street -> address.street)
-            .as(scalar[Long].singleOpt)
-        }
+        db.run(addresses
+          .filter(a => a.street === address.street && a.zip === address.zip && a.city === address.city)
+          .result
+          .head)
+      case Some(addressId) =>
+        Future { address.copy(id = Option(addressId)) }
     }
   }
 
-  def saveAddressInFutureWithGeoPoint(address: Option[Address]): Future[Try[Option[Long]]] = address match {
-    case Some(addressWithoutGeographicPoint) if addressWithoutGeographicPoint.geographicPoint.isEmpty =>
-      Address.getGeographicPoint(addressWithoutGeographicPoint) map { addressWithGeoPoint =>
-        Address.save(Option(addressWithGeoPoint)) }
-    case Some(addressWithGeoPoint) =>
-      Future  { Address.save(Option(addressWithGeoPoint)) }
-    case _ =>
-      Future { Success(None) }
+  def saveAddressInFutureWithGeoPoint(address: Address): Future[Address] = address match {
+    case addressWithoutGeographicPoint if addressWithoutGeographicPoint.geographicPoint.isEmpty =>
+      getGeographicPoint(addressWithoutGeographicPoint) flatMap { save }
+    case addressWithGeoPoint =>
+      save(addressWithGeoPoint)
   }
 
-  def saveAddressAndEventRelation(address: Address, eventId: Long): Try[Option[Long]] = save(Option(address)) match {
-    case Success(Some(addressId)) => saveEventAddressRelation(eventId, addressId)
-    case Success(_) => Failure(DAOException("Address.saveAddressAndEventRelation: Address.save returned None"))
-    case Failure(exception) => throw exception
-  }
-
-  def saveEventAddressRelation(eventId: Long, addressId: Long): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """INSERT INTO eventsAddresses (eventId, addressId)
-          | VALUES ({eventId}, {addressId})""".stripMargin)
-        .on(
-          'eventId -> eventId,
-          'addressId -> addressId)
-        .executeInsert()
+  def saveAddressAndEventRelation(address: Address, eventId: Long): Future[Int] = save(address) flatMap { a =>
+    a.id match {
+      case None =>
+        Logger.error("Address.saveAddressAndEventRelation: address saved did not return an id")
+        Future(0)
+      case Some(id) =>
+      saveEventAddressRelation(eventId, id)
     }
   }
 
-  def delete(addressId: Long): Long = try {
-    DB.withConnection { implicit connection =>
-      SQL("""DELETE FROM addresses WHERE addressId = {addressId}""")
-        .on('addressId -> addressId)
-        .executeUpdate()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
-  }
+  def saveEventAddressRelation(eventId: Long, addressId: Long): Future[Int] =
+    db.run(eventsAddresses += ((eventId, addressId)))
 
-  def findGeographicPointOfCity(city: String): Option[String] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT geographicPoint FROM frenchcities WHERE name = {city}""")
-        .on('city -> city)
-        .as(scalar[String].singleOpt)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
+  def delete(id: Long): Future[Int] = db.run(addresses.filter(_.id === id).delete)
+
+  def findGeographicPointOfCity(city: String): Future[Option[Point]] = {
+    val query = frenchCities.filter(_.city === city) map (_.geographicPoint)
+    db.run(query.result.headOption)
   }
 
   def getGeographicPoint(address: Address): Future[Address] = {
     WS.url("https://maps.googleapis.com/maps/api/geocode/json")
       .withQueryString(
         "address" -> (address.street.getOrElse("") + " " + address.zip.getOrElse("") + " " + address.city.getOrElse("")),
-        "key" -> googleKey)
+        "key" -> utilities.googleKey)
       .get()
       .map { response =>
       readGoogleGeographicPoint(response)  match {
@@ -165,8 +159,8 @@ object Address {
     }
   }
 
-  def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {
-    val googleGeoCodeJson = googleGeoCodeResponse.json
+  def readGoogleGeographicPoint(googleGeoCodeWSResponse: WSResponse): Option[String] = {
+    val googleGeoCodeJson = googleGeoCodeWSResponse.json
     val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
     val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
     latitude match {
@@ -178,14 +172,15 @@ object Address {
     }
   }
 
-  def readFacebookGeographicPoint() = {
-    /*val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
-      case Some(latitude) =>
-        (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
-          case Some(longitude) => Some(s"($latitude,$longitude)")
-          case _ => None
-        }
-      case _ => None
-    }*/
-  }
+
+ def readFacebookGeographicPoint() = {
+//   val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
+//     case Some(latitude) =>
+//       (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
+//         case Some(longitude) => Some(s"($latitude,$longitude)")
+//         case _ => None
+//       }
+//     case _ => None
+//   }
+ }
 }

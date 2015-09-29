@@ -1,7 +1,5 @@
 package jobs
 
-import play.api.libs.ws.WS
-import play.api.libs.concurrent.Execution.Implicits._
 import scala.io.Source
 
 object savePlacesFromTextFiles {

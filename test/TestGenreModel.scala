@@ -73,7 +73,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         Track.save(track)
         saveTrackRelation(trackId, genreId, 50)
 
-        findAllByTrack(trackId) mustBe Seq(genre.copy(genreId = Some(genreId)))
+        findAllByTrack(trackId) mustBe Seq(genre.copy(id = Some(genreId)))
 
       } finally {
         deleteTrackRelation(trackId, genreId)

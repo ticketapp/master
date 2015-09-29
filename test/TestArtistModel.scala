@@ -7,9 +7,9 @@ import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
 import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
+
+
+
 import play.api.Play.current
 
 import scala.util.Success
@@ -26,7 +26,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
         Option("description"), "facebookUrl", Set("website"))
       val artistId = save(artist).get
       try {
-        find(artistId) mustBe Option(artist.copy(artistId = Some(artistId),
+        find(artistId) mustBe Option(artist.copy(id = Some(artistId),
           description = Some("<div class='column large-12'>description</div>")))
         delete(artistId) mustBe 1
       } finally {
@@ -71,7 +71,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       val artistId = Artist.save(artist)
 
       try {
-        val updatedArtist = artist.copy(artistId = artistId, name = "updatedName")
+        val updatedArtist = artist.copy(id = artistId, name = "updatedName")
         update(updatedArtist)
 
         find(artistId.get) mustBe Option(updatedArtist)
@@ -88,7 +88,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       try {
         addWebsite(artistId, "normalizedUrl")
 
-        find(artistId.get) mustBe Option(artist.copy(artistId = artistId, websites = Set("website", "normalizedUrl"),
+        find(artistId.get) mustBe Option(artist.copy(id = artistId, websites = Set("website", "normalizedUrl"),
           description = Some("<div class='column large-12'>description</div>")))
 
       } finally {
@@ -102,7 +102,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       val maybeTrack = Option(Track(randomUUID, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
         Option("redirectUrl")))
       val artistId = Artist.save(artist)
-      val artistWithId = artist.copy(artistId = artistId)
+      val artistWithId = artist.copy(id = artistId)
 
       addSoundCloudWebsiteIfMissing(maybeTrack, artistWithId)
 

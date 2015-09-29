@@ -1,14 +1,16 @@
 package services
 
-import java.sql.Connection
+import java.sql.{Timestamp, Connection}
 import java.text.Normalizer
 import java.util.{UUID, Date}
-import anorm.SqlParser._
-import anorm._
+import javax.inject.Inject
+
+
 import controllers.DAOException
 import models._
-import play.api.db.DB
-import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
+import org.joda.time.DateTime
+import play.api.db.slick.DatabaseConfigProvider
+
 import play.api.libs.json.JsNumber
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -16,8 +18,12 @@ import play.api.Play.current
 
 import scala.collection.mutable.ListBuffer
 import scala.util.matching.Regex
+import slick.driver.PostgresDriver.api._
 
-object Utilities {
+import scala.util.{Try, Failure, Success}
+import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Point}
+
+class Utilities @Inject()(dbConfigProvider: DatabaseConfigProvider) {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
   val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc"
   val echonestApiKey = "3ZYZKU3H3MKR2M59Z"
@@ -30,36 +36,19 @@ object Utilities {
   val UNIQUE_VIOLATION = "23505"
   val FOREIGN_KEY_VIOLATION = "23503"
 
-  case class GeographicPoint(geoPoint: String) {
-    require(geographicPointPattern.pattern.matcher(geoPoint).matches, "Invalid geographicPoint")
-    override def toString() = geoPoint
-  }
+  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
+    dt => new Timestamp(dt.getMillis),
+    ts => new DateTime(ts.getTime))
 
-  implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case d: Any => Right(d.toString)
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass +
-        " to String for column " + qualified) )
+  val geometryFactory = new GeometryFactory()
+
+  def stringToGeographicPoint(string: String): Try[Point] = {
+    val latitudeAndLongitude: Array[String] = string.split(",")
+    Try {
+      val coordinate= new Coordinate(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble)
+      geometryFactory.createPoint(coordinate)
     }
   }
-
-  implicit def rowToUUID: Column[UUID] = {
-    Column.nonNull[UUID] { (value, meta) =>
-      value match {
-        case v: UUID => Right(v)
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value:${value.asInstanceOf[AnyRef].getClass} to UUID for column ${meta.column}"))
-      }
-    }
-  }
-
-  implicit def columnToChar: Column[Char] = Column[Char](transformer = { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case ch: String => Right(ch.head)
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + " to Char for column " + qualified))
-    }
-  })
 
   def normalizeString(string: String): String = string //Should be replace accentued letters for example?
 
@@ -72,25 +61,6 @@ object Utilities {
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
 
   def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
-
-  def testIfExist(table: String, fieldName: String, valueAnyType: Any)(implicit connection: Connection): Boolean = {
-    val value = valueAnyType match {
-      case Some(v: Int) => v
-      case Some(v: String) => v
-      case v: Int => v
-      case v: String => v
-      case _ => None
-    }
-    try {
-      DB.withConnection { implicit connection =>
-        SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName = {value} LIMIT 1)""")
-          .on("value" -> value)
-          .as(scalar[Boolean].single)
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Utilities.testIfExistById: " + e.getMessage)
-    }
-  }
 
   def getNormalizedWebsitesInText(maybeDescription: Option[String]): Set[String] = maybeDescription match {
     case None =>
