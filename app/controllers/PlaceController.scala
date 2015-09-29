@@ -1,43 +1,51 @@
 package controllers
 
-import models.Place
+import javax.inject.Inject
+
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import json.JsonHelper.placeWrites
+import models.{PlaceMethods, Place, User}
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.db._
-import play.api.Play.current
-import anorm._
-import play.api.mvc._
+import play.api.i18n.MessagesApi
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
-import json.JsonHelper.placeWrites
-import securesocial.core.Identity
+import play.api.libs.ws.WSClient
+import play.api.mvc._
+import services.Utilities.{FOREIGN_KEY_VIOLATION, UNIQUE_VIOLATION, geographicPointPattern}
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import scala.util.matching.Regex
-import play.api.libs.concurrent.Execution.Implicits._
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION, geographicPointPattern}
 
-object PlaceController extends Controller {
+class PlaceController @Inject() (ws: WSClient,
+                                 val messagesApi: MessagesApi,
+                                 val env: Environment[User, CookieAuthenticator],
+                                 socialProviderRegistry: SocialProviderRegistry,
+                                  val placeMethods: PlaceMethods)
+  extends Silhouette[User, CookieAuthenticator] {
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action {
     geographicPoint match {
-      case geographicPointPattern(_) => Ok(Json.toJson(Place.findNear(geographicPoint, numberToReturn, offset)))
+      case geographicPointPattern(_) => Ok(Json.toJson(placeMethods.findNear(geographicPoint, numberToReturn, offset)))
       case _ => Ok(Json.toJson("Invalid geographicPoint"))
     }
   }
 
-  def place(id: Long) = Action { Ok(Json.toJson(Place.find(id))) }
+  def place(id: Long) = Action { Ok(Json.toJson(placeMethods.find(id))) }
 
-  def findPlacesContaining(pattern: String) = Action { Ok(Json.toJson(Place.findAllContaining(pattern))) }
+  def findPlacesContaining(pattern: String) = Action { Ok(Json.toJson(placeMethods.findAllContaining(pattern))) }
 
   def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
-    Ok(Json.toJson(Place.findNearCity(city, numberToReturn, offset)))
+    Ok(Json.toJson(placeMethods.findNearCity(city, numberToReturn, offset)))
   }
 
-  def followPlaceByPlaceId(placeId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Place.followByPlaceId(userId, placeId) match {
+  def followPlaceByPlaceId(placeId : Long) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
+    placeMethods.followByPlaceId(userId, placeId) match {
       case Success(_) =>
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
@@ -52,9 +60,9 @@ object PlaceController extends Controller {
     }
   }
 
-  def unfollowPlaceByPlaceId(placeId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Place.unfollowByPlaceId(userId, placeId) match {
+  def unfollowPlaceByPlaceId(placeId : Long) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
+    placeMethods.unfollowByPlaceId(userId, placeId) match {
       case Success(1) =>
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
@@ -66,9 +74,9 @@ object PlaceController extends Controller {
     }
   }
 
-  def followPlaceByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Place.followByFacebookId(userId, facebookId) match {
+  def followPlaceByFacebookId(facebookId : String) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
+    placeMethods.followByFacebookId(userId, facebookId) match {
       case Success(_) =>
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
@@ -86,17 +94,14 @@ object PlaceController extends Controller {
   }
   
   def isPlaceFollowed(placeId: Long) = UserAwareAction { implicit request =>
-    request.user match {
+    request.identity match {
       case None => Ok(Json.toJson("User not connected"))
-      case Some(identity: Identity) => Ok(Json.toJson(Place.isFollowed(identity.identityId, placeId)))
+      case Some(user: User) => Ok(Json.toJson(placeMethods.isFollowed(user.UUID, placeId)))
     }
   }
 
-  def getFollowedPlaces = UserAwareAction { implicit request =>
-    request.user match {
-      case None => Unauthorized
-      case Some(identity: Identity) => Ok(Json.toJson(Place.getFollowedPlaces(identity.identityId)))
-    }
+  def getFollowedPlaces = SecuredAction { implicit request =>
+    Ok(Json.toJson(placeMethods.getFollowedPlaces(request.identity.UUID)))
   }
 
   val placeBindingForm = Form(mapping(
@@ -111,7 +116,7 @@ object PlaceController extends Controller {
     "city" -> optional(nonEmptyText(2)),
     "zip" -> optional(nonEmptyText(3)),
     "street" -> optional(nonEmptyText(2))
-  )(Place.formApply)(Place.formUnapply))
+  )(placeMethods.formApply)(placeMethods.formUnapply))
   
   def create = Action.async { implicit request =>
     placeBindingForm.bindFromRequest().fold(
@@ -122,9 +127,9 @@ object PlaceController extends Controller {
         }
       },
       place => {
-        Place.save(place) map {
+        placeMethods.save(place) map {
           case Success(Some(placeId)) =>
-            Ok(Json.toJson(Place.find(placeId)))
+            Ok(Json.toJson(placeMethods.find(placeId)))
           case Success(None) =>
             Logger.error("PlaceController.createPlace")
             Status(INTERNAL_SERVER_ERROR)

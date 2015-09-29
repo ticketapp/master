@@ -3,7 +3,7 @@ package models
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
-import play.api.db.DB
+
 import play.api.libs.json.Json
 import play.api.Play.current
 import services.Utilities
@@ -88,7 +88,9 @@ object Image {
 
   def save(image: Image): Option[Long] = try {
     DB.withConnection { implicit connection =>
-      Utilities.testIfExist("images", "path", image.path) match {
+      SQL(s"""SELECT exists(SELECT 1 FROM images where path = {imagePath} LIMIT 1)""")
+        .on('imagePath -> image.path)
+        .as(scalar[Boolean].single) match {
         case true =>
           println("Image path already in database")
           None

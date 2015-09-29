@@ -1,18 +1,27 @@
 package controllers
 
+import javax.inject.Inject
+
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import json.JsonHelper._
+import models.{Tool, User}
+import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.db._
-import play.api.Play.current
-import anorm._
-import play.api.libs.ws.WS
-import play.api.mvc._
-import play.api.libs.json.Json
-import models.{Tool, User}
+import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits._
-import json.JsonHelper._
+import play.api.libs.json.Json
+import play.api.libs.ws.{WS, WSClient}
+import play.api.mvc._
 
-object UserController extends Controller {
+class UserController @Inject() (ws: WSClient,
+                                val messagesApi: MessagesApi,
+                                val env: Environment[User, CookieAuthenticator],
+                                socialProviderRegistry: SocialProviderRegistry)
+  extends Silhouette[User, CookieAuthenticator] {
+
   def users = Action {
     Ok(Json.toJson(User.findAll()))
   }
@@ -52,8 +61,8 @@ object UserController extends Controller {
     )
   }*/
 
-  def findFacebookAccessToken = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(User.findFacebookAccessToken(request.user.identityId.userId)))
+  def findFacebookAccessToken = SecuredAction { implicit request =>
+    Ok(Json.toJson(User.findFacebookAccessToken(request.identity.UUID)))
   }
 
   def getUserGeographicPoint = Action.async { request =>
@@ -64,7 +73,7 @@ object UserController extends Controller {
     }
   }
 
-  def getTracksRemoved = SecuredAction(ajaxCall = true) { implicit request =>
-    Ok(Json.toJson(User.getTracksRemoved(request.user.identityId.userId)))
+  def getTracksRemoved = SecuredAction { implicit request =>
+    Ok(Json.toJson(User.getTracksRemoved(request.identity.UUID)))
   }
 }

@@ -1,25 +1,38 @@
 package controllers
 
+import javax.inject.Inject
+
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import json.JsonHelper._
+import models._
 import org.postgresql.util.PSQLException
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.Logger
-import play.api.mvc._
+import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
-import models.{Image, Tariff, Event, Address}
-import json.JsonHelper._
-import securesocial.core.Identity
-import scala.util.matching.Regex
-import scala.util.{Success, Failure}
+import play.api.libs.ws.WSClient
+import play.api.mvc._
 import services.Utilities._
+import scala.concurrent.ExecutionContext.Implicits.global
 
-object EventController extends Controller {
+import scala.util.{Failure, Success}
+
+class EventController @Inject()(ws: WSClient,
+                                val messagesApi: MessagesApi,
+                                val env: Environment[User, CookieAuthenticator],
+                                socialProviderRegistry: SocialProviderRegistry,
+                                val eventMethods: EventMethods)
+  extends Silhouette[User, CookieAuthenticator] {
+
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
   def events(offset: Int, numberToReturn: Int, geographicPoint: String) = Action {
     geographicPoint match {
       case geographicPointPattern(_) =>
-        Ok(Json.toJson(Event.findNear(geographicPoint, numberToReturn: Int, offset: Int)))
+        Ok(Json.toJson(eventMethods.findNear(geographicPoint, numberToReturn: Int, offset: Int)))
       case _ =>
         Ok(Json.toJson("Invalid geographicPoint"))
     }
@@ -29,7 +42,7 @@ object EventController extends Controller {
     geographicPoint match {
       case geographicPointPattern(_) =>
         Ok(Json.toJson(
-          Event.findInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
+          eventMethods.findInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
       case _ =>
         BadRequest("Invalid geographicPoint")
     }
@@ -40,34 +53,34 @@ object EventController extends Controller {
     geographicPoint match {
       case geographicPointPattern(_) =>
         Ok(Json.toJson(
-          Event.findPassedInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
+          eventMethods.findPassedInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn)))
       case _ =>
         BadRequest
     }
   }
 
   def find(id: Long) = Action {
-    Event.find(id) match {
+    eventMethods.find(id) match {
       case Some(event) => Ok(Json.toJson(event))
       case None => NotFound
     }
   }
 
-  def findByPlace(placeId: Long) = Action { Ok(Json.toJson(Event.findAllByPlace(placeId))) }
+  def findByPlace(placeId: Long) = Action { Ok(Json.toJson(eventMethods.findAllByPlace(placeId))) }
   
-  def findPassedByPlace(placeId: Long) = Action { Ok(Json.toJson(Event.findAllPassedByPlace(placeId))) }
+  def findPassedByPlace(placeId: Long) = Action { Ok(Json.toJson(eventMethods.findAllPassedByPlace(placeId))) }
 
-  def findByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(Event.findAllByOrganizer(organizerId))) }
+  def findByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(eventMethods.findAllByOrganizer(organizerId))) }
   
-  def findPassedByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(Event.findAllPassedByOrganizer(organizerId))) }
+  def findPassedByOrganizer(organizerId: Long) = Action { Ok(Json.toJson(eventMethods.findAllPassedByOrganizer(organizerId))) }
 
-  def findByArtist(facebookUrl: String) = Action { Ok(Json.toJson(Event.findAllByArtist(facebookUrl))) }
+  def findByArtist(facebookUrl: String) = Action { Ok(Json.toJson(eventMethods.findAllByArtist(facebookUrl))) }
   
-  def findPassedByArtist(artistId: Long) = Action { Ok(Json.toJson(Event.findAllPassedByArtist(artistId))) }
+  def findPassedByArtist(artistId: Long) = Action { Ok(Json.toJson(eventMethods.findAllPassedByArtist(artistId))) }
 
   def findByGenre(genre: String, geographicPointString: String, offset: Int , numberToReturn: Int) = Action {
     try {
-      Event.findAllByGenre(genre, GeographicPoint(geographicPointString), offset, numberToReturn) match {
+      eventMethods.findAllByGenre(genre, GeographicPoint(geographicPointString), offset, numberToReturn) match {
         case Success(events) =>
           Ok(Json.toJson(events))
         case Failure(throwable) =>
@@ -80,15 +93,15 @@ object EventController extends Controller {
   }
 
   def findAllContaining(pattern: String, center: String) = Action {
-    Ok(Json.toJson(Event.findAllContaining(pattern, center)))
+    Ok(Json.toJson(eventMethods.findAllContaining(pattern, center)))
   }
 
   def findByCityPattern(pattern: String) = Action {
-    Ok(Json.toJson(Event.findAllByCityPattern(pattern)))
+    Ok(Json.toJson(eventMethods.findAllByCityPattern(pattern)))
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
-    Ok(Json.toJson(Event.findNearCity(city, numberToReturn, offset)))
+    Ok(Json.toJson(eventMethods.findNearCity(city, numberToReturn, offset)))
   }
 
   val eventBindingForm = Form(
@@ -116,7 +129,7 @@ object EventController extends Controller {
           "zip" -> optional(text(2)),
           "street" -> optional(text(2))
         )(Address.formApply)(Address.formUnapply))
-    )(Event.formApply)(Event.formUnapply)
+    )(eventMethods.formApply)(eventMethods.formUnapply)
   )
 
   def createEvent = Action { implicit request =>
@@ -126,15 +139,15 @@ object EventController extends Controller {
         BadRequest(formWithErrors.errorsAsJson)
       },
       event =>
-        Event.save(event) match {
-          case Some(eventId) => Ok(Json.toJson(Event.find(eventId)))
+        eventMethods.save(event) match {
+          case Some(eventId) => Ok(Json.toJson(eventMethods.find(eventId)))
           case None => InternalServerError
         }
     )
   }
 
-  def followEvent(eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    Event.follow(request.user.identityId.userId, eventId) match {
+  def followEvent(eventId : Long) = SecuredAction { implicit request =>
+    eventMethods.follow(request.identity.UUID, eventId) match {
       case Success(_) =>
         Created
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
@@ -146,9 +159,9 @@ object EventController extends Controller {
     }
   }
 
-  def unfollowEvent(eventId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Event.unfollow(userId, eventId) match {
+  def unfollowEvent(eventId : Long) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
+    eventMethods.unfollow(userId, eventId) match {
       case Success(1) =>
         Ok
       case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
@@ -160,22 +173,21 @@ object EventController extends Controller {
     }
   }
 
-  def getFollowedEvents = UserAwareAction { implicit request =>
-    request.user match {
-      case None => Ok(Json.toJson("User not connected"))
-      case Some(identity: Identity) => Ok(Json.toJson(Event.getFollowedEvents(identity.identityId)))
-    }
+  def getFollowedEvents = SecuredAction { implicit request =>
+      Ok(Json.toJson(eventMethods.getFollowedEvents(request.identity.UUID)))
   }
 
-  def isEventFollowed(eventId: Long) = UserAwareAction { implicit request =>
-    request.user match {
-      case None => Ok(Json.toJson("User not connected"))
-      case Some(identity: Identity) => Ok(Json.toJson(Event.isFollowed(identity.identityId, eventId)))
-    }
+  def isEventFollowed(eventId: Long) = SecuredAction { implicit request =>
+    Ok(Json.toJson(eventMethods.isFollowed(request.identity.UUID, eventId)))
   }
 
-  def createEventByFacebookId(facebookId: String) = Action {
-    Event.saveFacebookEventByFacebookId(facebookId)
-    Ok
+  def createEventByFacebookId(facebookId: String) = Action.async {
+    eventMethods.saveFacebookEventByFacebookId(facebookId) map {
+      case Some(res: Long) =>
+        Ok(Json.toJson(res))
+      case None =>
+        Logger.error("EventController.createEventByFacebookId: nothing saved")
+        Ok(Json.toJson("EventController.createEventByFacebookId: nothing saved"))
+    }
   }
 }

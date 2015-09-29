@@ -2,17 +2,15 @@ package models
 
 import anorm.SqlParser._
 import anorm._
-import play.api.db.DB
+
 import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
 import java.util.Date
 
 import scala.util.Random
+import scala.language.postfixOps
 
-/**
- * Created by sim on 03/10/14.
- */
 case class Ticket (ticketId: Long,
                    isValid: Boolean = true,
                    qrCode: String,
@@ -94,11 +92,10 @@ object Ticket {
       SQL( """SELECT *
            FROM Tickets
            WHERE userId = {userId}""")
-        .on('userId -> user.userId)
+        .on('userId -> user.UUID)
         .as(TicketParser *)
     }
   }
-  
   
   def save(ticket: Ticket) = {
     try {

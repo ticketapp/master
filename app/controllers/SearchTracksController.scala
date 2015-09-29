@@ -12,9 +12,10 @@ import services.SearchYoutubeTracks._
 import services.Utilities.{normalizeString, removeSpecialCharacters, googleKey}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
-import play.api.libs.ws.Response
+import play.api.libs.ws.WSResponse
+import play.api.Play.current
 
-object SearchTracksController extends Controller {
+class SearchTracksController extends Controller {
 
   def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) =
   Action.async {
@@ -34,6 +35,6 @@ object SearchTracksController extends Controller {
         "video_id" -> youtubeId,
         "access_token" -> googleKey)
       .get()
-      .map { youtubeResponse => Ok(youtubeResponse.body) }
+      .map { youtubeWSResponse => Ok(youtubeWSResponse.body) }
   }
 }

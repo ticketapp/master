@@ -16,7 +16,6 @@ INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau,
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
-
   geographicPoint           POINT NOT NULL
 );
 CREATE INDEX frenchCityGeographicPoints ON frenchCities USING GIST (geographicPoint);

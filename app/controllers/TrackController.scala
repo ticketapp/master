@@ -8,13 +8,25 @@ import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
+import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import scala.util.{Failure, Success}
 import json.JsonHelper._
 import play.api.libs.json.DefaultWrites
+import javax.inject.Inject
+import com.mohiva.play.silhouette.api.{ Environment, LogoutEvent, Silhouette }
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import models.User
+import play.api.i18n.MessagesApi
 
-object TrackController extends Controller {
+class TrackController @Inject() (ws: WSClient,
+                                 val messagesApi: MessagesApi,
+                                 val env: Environment[User, CookieAuthenticator],
+                                 socialProviderRegistry: SocialProviderRegistry)
+    extends Silhouette[User, CookieAuthenticator] {
+
   val trackBindingForm = Form(mapping(
     "trackId" -> nonEmptyText(8),
     "title" -> nonEmptyText(2),
@@ -71,8 +83,8 @@ object TrackController extends Controller {
     Some((trackRating.trackId, trackRating.rating,
       trackRating.reason match { case None => None; case Some(char) => Option(char.toString) }))
 
-  def upsertRatingForUser = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def upsertRatingForUser = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     trackRatingBindingForm.bindFromRequest().fold(
       formWithErrors => {
         Logger.error(formWithErrors.errorsAsJson.toString())
@@ -97,16 +109,16 @@ object TrackController extends Controller {
     )
   }
 
-  def getRatingForUser(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def getRatingForUser(trackId: String) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     Track.getRatingForUser(userId, UUID.fromString(trackId)) match {
       case Success(Some(rating)) => Ok(Json.toJson(rating._1.toString + "," + rating._2.toString))
       case _ => InternalServerError
     }
   }
 
-  def addToFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def addToFavorites(trackId: String) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     Track.addToFavorites(userId, UUID.fromString(trackId)) match {
       case Success(1) =>
         Ok
@@ -120,8 +132,8 @@ object TrackController extends Controller {
     }
   }
 
-  def removeFromFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def removeFromFavorites(trackId: String) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     Track.removeFromFavorites(userId, UUID.fromString(trackId)) match {
       case Success(1) =>
         Ok
@@ -132,8 +144,8 @@ object TrackController extends Controller {
     }
   }
 
-  def findFavorites = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def findFavorites = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     Track.findFavorites(userId) match {
       case Success(tracks) =>
         Ok(Json.toJson(tracks))

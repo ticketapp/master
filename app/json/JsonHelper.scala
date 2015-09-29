@@ -2,20 +2,18 @@ package json
 
 import java.util.UUID
 
+import models.Accounting._
 import models._
-import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
-import play.api.libs.json.JsNumber
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import play.api.libs.json.{JsNumber, _}
 
 object JsonHelper {
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
     def writes(bigDecimal: java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(bigDecimal))
   }
 
-  implicit object FloatWrites extends AnyRef with Writes[Float] {
-    def writes(float: Float): JsNumber = JsNumber(BigDecimal(float))
-  }
+//  implicit object FloatWrites extends AnyRef with Writes[Float] {
+//    def writes(float: Float): JsNumber = JsNumber(BigDecimal(float))
+//  }
 
   implicit object CharWrites extends AnyRef with Writes[Char] {
     def writes(char: Char): JsString = JsString(char.toString)
@@ -25,12 +23,6 @@ object JsonHelper {
     def writes(UUID: UUID): JsString = JsString(UUID.toString)
   }
 
-  implicit val oAuth1InfoWrites = Json.writes[OAuth1Info]
-  implicit val oAuth2InfoWrites = Json.writes[OAuth2Info]
-  implicit val passwordInfoWrites = Json.writes[PasswordInfo]
-  implicit val oAuth1InfoReads = Json.reads[OAuth1Info]
-  implicit val oAuth2InfoReads = Json.reads[OAuth2Info]
-  implicit val passwordInfoReads = Json.reads[PasswordInfo]
   implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
   implicit val account63Writes: Writes[Account63] = Json.writes[Account63]
   implicit val account403Writes: Writes[Account403] = Json.writes[Account403]
@@ -49,6 +41,7 @@ object JsonHelper {
   implicit val addressWrites = Json.writes[Address]
   implicit val placeWrites = Json.writes[Place]
   implicit val organizerWrites = Json.writes[Organizer]
+  implicit val organizerWithAddressWrites = Json.writes[OrganizerWithAddress]
   implicit val eventWrites = Json.writes[Event]
   implicit val infoWrites: Writes[Info] = Json.writes[Info]
   implicit val issueWrites: Writes[Issue] = Json.writes[Issue]

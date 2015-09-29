@@ -4,24 +4,26 @@ import java.sql.Connection
 
 import anorm.SqlParser._
 import anorm._
-import controllers.SearchArtistsController._
 import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, WebServiceException}
+import models.Genre._
 import play.api.libs.iteratee.{Enumerator, Enumeratee, Iteratee}
 
 import services.SearchSoundCloudTracks._
 import services.SearchYoutubeTracks._
 import services.{SearchSoundCloudTracks, Utilities}
-import play.api.db.DB
-import play.api.libs.json.{JsValue, Json}
+
+import play.api.libs.json._
 import play.api.Play.current
-import java.util.Date
-import play.api.libs.ws.Response
+import java.util.{UUID, Date}
+import play.api.libs.ws.WSResponse
 import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WS
 import scala.util.{Try, Failure, Success}
 import services.Utilities.facebookToken
+import scala.language.postfixOps
+import play.api.libs.functional.syntax._
 
 case class Artist (artistId: Option[Long],
                    facebookId: Option[String],
@@ -200,7 +202,7 @@ object Artist {
           'websites -> websites)
         .as(scalar[Long].singleOpt) match {
           case Some(artistId: Long) =>
-            artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
+            artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId) }
             artist.tracks.foreach { Track.save }
             Option(artistId)
           case None =>
@@ -314,40 +316,40 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.delete : " + e.getMessage)
   }
 
-  def followByArtistId(userId : String, artistId : Long): Try[Option[Long]] = Try {
+  def followByArtistId(userUUID : UUID, artistId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO artistsFollowed(userId, artistId) VALUES({userId}, {artistId})""")
         .on(
-          'userId -> userId,
+          'userId -> userUUID,
           'artistId -> artistId)
         .executeInsert()
     }
   }
 
-  def unfollowByArtistId(userId: String, artistId: Long): Try[Int] = Try {
+  def unfollowByArtistId(userUUID: UUID, artistId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM artistsFollowed
           | WHERE userId = {userId} AND artistId = {artistId}""".stripMargin)
-        .on('userId -> userId,
+        .on('userId -> userUUID,
             'artistId -> artistId)
         .executeUpdate()
     }
   }
 
-  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
+  def followByFacebookId(userUUID : UUID, facebookId: String): Try[Option[Long]] =
     findIdByFacebookId(facebookId) match {
         case Success(None) => Failure(ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId"))
-        case Success(Some(artistId)) => followByArtistId(userId, artistId)
+        case Success(Some(artistId)) => followByArtistId(userUUID, artistId)
         case failure => failure
     }
 
-  def getFollowedArtists(userId: IdentityId): Seq[Artist] = try {
+  def getFollowedArtists(userUUID : UUID): Seq[Artist] = try {
     DB.withConnection { implicit connection =>
       SQL("""select a.* from artists a
             |  INNER JOIN artistsFollowed af ON a.artistId = af.artistId
             |WHERE af.userId = {userId}""".stripMargin)
-        .on('userId -> userId.userId)
+        .on('userId -> userUUID)
         .as(ArtistParser.*)
         .map(getArtistProperties)
     }
@@ -355,12 +357,12 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.getFollowedArtists: " + e.getMessage)
   }
 
-  def isFollowed(userId: IdentityId, artistId: Long): Boolean = try {
+  def isFollowed(userUUID : UUID, artistId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM artistsFollowed
           |  WHERE userId = {userId} AND artistId = {artistId})""".stripMargin)
-        .on("userId" -> userId.userId,
+        .on("userId" -> userUUID,
           "artistId" -> artistId)
         .as(scalar[Boolean].single)
     }
@@ -383,4 +385,168 @@ object Artist {
 
   def splitArtistNamesInTitle(title: String): List[String] =
     "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
+
+  val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
+
+
+  def getEventuallyFacebookArtists(pattern: String): Future[Seq[Artist]] = {
+    WS.url("https://graph.facebook.com/v2.2/search")
+      .withQueryString(
+        "q" -> pattern,
+        "type" -> "page",
+        "limit" -> "400",
+        "fields" -> facebookArtistFields,
+        "access_token" -> facebookToken)
+      .get()
+      .map { readFacebookArtists }
+  }
+
+  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] = {
+    Future.sequence(
+      artistsNameInTitle.map {
+        getEventuallyFacebookArtists(_).map { artists => artists }
+      }
+    ).map { _.flatten collect { case artist: Artist if (artist.websites intersect webSites).nonEmpty => artist } }
+  }
+
+  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
+    Future.sequence(
+      websites.map {
+        case website if website contains "facebook" =>
+          getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
+        case website if website contains "soundcloud" =>
+          getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
+            case None =>
+              Future { None }
+            case Some(facebookUrl) =>
+              getFacebookArtistByFacebookUrl(facebookUrl).map { maybeFacebookArtist => maybeFacebookArtist }
+          }
+        case _ =>
+          Future { None }
+      }
+    )
+  }
+
+  def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
+    val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
+    WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
+      .withQueryString("client_id" -> soundCloudClientId)
+      .get()
+      .map { readMaybeFacebookUrl }
+  }
+
+  def readMaybeFacebookUrl(soundCloudWebProfilesWSResponse: WSResponse): Option[String] = {
+    val facebookUrlReads = (
+      (__ \ "url").read[String] and
+        (__ \ "service").read[String]
+      )((url: String, service: String) => (url, service))
+
+    val collectOnlyFacebookUrls = Reads.seq(facebookUrlReads).map { urlService =>
+      urlService.collect { case (url: String, "facebook") => normalizeUrl(url) }
+    }
+
+    soundCloudWebProfilesWSResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
+      case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
+      case _ => None
+    }
+  }
+
+  def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
+    WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
+      .withQueryString(
+        "fields" -> facebookArtistFields,
+        "access_token" -> facebookToken)
+      .get()
+      .map { readFacebookArtist }
+  }
+
+  def normalizeFacebookUrl(facebookUrl: String): String = {
+    val firstNormalization = facebookUrl.drop(facebookUrl.lastIndexOf("/") + 1) match {
+      case urlWithProfile: String if urlWithProfile contains "profile.php?id=" =>
+        urlWithProfile.substring(urlWithProfile.lastIndexOf("=") + 1)
+      case alreadyNormalizedUrl: String =>
+        alreadyNormalizedUrl
+    }
+    firstNormalization match {
+      case urlWithArguments if urlWithArguments contains "?" =>
+        urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?"))
+      case urlWithoutArguments =>
+        urlWithoutArguments
+    }
+  }
+
+  val readArtist = (
+    (__ \ "name").read[String] and
+      (__ \ "category").read[String] and
+      (__ \ "id").read[String] and
+      (__ \ "cover").readNullable[String](
+        (__ \ "source").read[String]
+      ) and
+      (__ \ "cover").readNullable[Int](
+        (__ \ "offset_x").read[Int]
+      ) and
+      (__ \ "cover").readNullable[Int](
+        (__ \ "offset_y").read[Int]
+      ) and
+      (__ \ "website").readNullable[String] and
+      (__ \ "link").read[String] and
+      (__ \ "description").readNullable[String] and
+      (__ \ "genre").readNullable[String] and
+      (__ \ "likes").readNullable[Int] and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "country").readNullable[String]
+      )
+    ).apply((name: String, category: String, id: String, maybeCover: Option[String], maybeOffsetX: Option[Int],
+             maybeOffsetY: Option[Int], websites: Option[String], link: String, maybeDescription: Option[String],
+             maybeGenre: Option[String], maybeLikes: Option[Int], maybeCountry: Option[Option[String]]) =>
+    (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
+      maybeLikes, maybeCountry))
+
+  def readFacebookArtists(facebookWSResponse: WSResponse): Seq[Artist] = {
+    val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
+      artists.collect {
+        case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
+        maybeDescription, maybeGenre, maybeLikes, maybeCountry)
+          if category.equalsIgnoreCase("Musician/band") | category.equalsIgnoreCase("Artist") =>
+          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten)
+      }
+    }
+    (facebookWSResponse.json \ "data")
+      .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
+      .getOrElse(Seq.empty)
+  }
+
+  def readFacebookArtist(facebookWSResponse: WSResponse): Option[Artist] = {
+    facebookWSResponse.json
+      .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String],
+      String, Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
+    match {
+      case Some((name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
+      link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
+        Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
+          link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
+      case Some((name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
+      link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
+        Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
+          link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
+      case _ => None
+    }
+  }
+
+  def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
+                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
+                 maybeCountry: Option[String]): Artist = {
+    val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
+    val websitesSet = getNormalizedWebsitesInText(maybeWebsites)
+      .filterNot(_.contains("facebook.com"))
+      .filterNot(_ == "")
+    val description = Utilities.formatDescription(maybeDescription)
+    val genres = genresStringToGenresSet(maybeGenre)
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq,
+      Seq.empty, maybeLikes, maybeCountry)
+  }
+
+  def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =
+    imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
 }

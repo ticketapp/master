@@ -2,19 +2,17 @@ package models
 
 import models.Playlist.TrackUUIDAndRank
 import play.api.Logger
-import services.Utilities.{columnToChar}
 import json.JsonHelper.trackWrites
 import play.api.libs.json.DefaultWrites
 import anorm.SqlParser._
 import anorm._
 import controllers.DAOException
-import play.api.db.DB
+
 import play.api.Play.current
 import java.util.{UUID, Date}
 import java.math.BigDecimal
-import anorm.Column.rowToBigDecimal
 import scala.collection.mutable.ListBuffer
-import scala.util.{Try, Success, Failure}
+import scala.util.{ Try, Success, Failure }
 import services.Utilities._
 import services.Utilities
 
@@ -218,7 +216,7 @@ object Track {
     case e: Exception => throw new DAOException("Cannot follow track: " + e.getMessage)
   }
 
-  def upsertRatingUp(userId: String, trackId: UUID, rating: Int): Try[Boolean] = Try {
+  def upsertRatingUp(userId: UUID, trackId: UUID, rating: Int): Try[Boolean] = Try {
     updateRating(trackId, rating)
 
     DB.withConnection { implicit connection =>
@@ -231,7 +229,7 @@ object Track {
     }
   }
 
-  def upsertRatingDown(userId: String, trackId: UUID, rating: Int, reason: Option[Char]): Try[Boolean] = Try {
+  def upsertRatingDown(userId: UUID, trackId: UUID, rating: Int, reason: Option[Char]): Try[Boolean] = Try {
     updateRating(trackId, rating)
 
     DB.withConnection { implicit connection =>
@@ -305,7 +303,7 @@ object Track {
     }
   }
 
-  def getRatingForUser(userId: String, trackId: UUID): Try[Option[(Int, Int)]] = Try {
+  def getRatingForUser(userId: UUID, trackId: UUID): Try[Option[(Int, Int)]] = Try {
     DB.withConnection { implicit connection =>
       SQL("SELECT ratingUp, ratingDown FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
         .on(
@@ -315,7 +313,7 @@ object Track {
     }
   }
 
-  def deleteRatingForUser(userId: String, trackId: UUID): Try[Int] = Try {
+  def deleteRatingForUser(userId: UUID, trackId: UUID): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}""".stripMargin)
@@ -325,7 +323,7 @@ object Track {
     }
   }
 
-  def addToFavorites(userId: String, trackId: UUID): Try[Int] = Try {
+  def addToFavorites(userId: UUID, trackId: UUID): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL("INSERT INTO usersFavoriteTracks(userId, trackId) VALUES({userId}, {trackId})")
         .on(
@@ -335,7 +333,7 @@ object Track {
     }
   }
 
-  def removeFromFavorites(userId: String, trackId: UUID): Try[Int] = Try {
+  def removeFromFavorites(userId: UUID, trackId: UUID): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL("""DELETE FROM usersFavoriteTracks WHERE userId = {userId} AND trackId = {trackId}""")
         .on('userId -> userId,
@@ -344,7 +342,7 @@ object Track {
     }
   }
 
-  def findFavorites(userId: String): Try[Seq[Track]] = Try {
+  def findFavorites(userId: UUID): Try[Seq[Track]] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT tracks.* FROM tracks tracks

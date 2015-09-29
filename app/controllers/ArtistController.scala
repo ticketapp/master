@@ -1,25 +1,41 @@
 package controllers
 
+import javax.inject.Inject
+
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
 import models.Artist.PatternAndArtist
-import models._
+import models.{Artist, Genre, User, _}
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.iteratee.{Iteratee, Enumeratee, Enumerator}
-import play.api.mvc._
+import play.api.i18n.MessagesApi
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.iteratee.{Enumeratee, Iteratee}
 import play.api.libs.json._
-import play.api.libs.concurrent.Execution.Implicits._
-import securesocial.core.Identity
-import services.SearchSoundCloudTracks.getSoundCloudTracksForArtist
-import services.SearchYoutubeTracks.getYoutubeTracksForArtist
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
-import java.util.UUID.randomUUID
+import play.api.libs.ws.WSClient
+import play.api.mvc._
+import services.Utilities.{FOREIGN_KEY_VIOLATION, UNIQUE_VIOLATION}
 
-object ArtistController extends Controller {
+import scala.concurrent.Future
+import scala.language.postfixOps
+import scala.util.{Failure, Success}
+
+class ArtistController @Inject() (ws: WSClient,
+                                  val messagesApi: MessagesApi,
+                                  val env: Environment[User, CookieAuthenticator],
+                                  socialProviderRegistry: SocialProviderRegistry)
+  extends Silhouette[User, CookieAuthenticator] {
+
+  def getFacebookArtistsContaining(pattern: String) = Action.async {
+    Artist.getEventuallyFacebookArtists(pattern).map { artists =>
+      Ok(Json.toJson(artists))
+    }
+  }
+
   def artists = Action { Ok(Json.toJson(Artist.findAll)) }
 
   def artistsSinceOffsetBy(number: Int, offset: Int) = Action {
@@ -115,8 +131,8 @@ object ArtistController extends Controller {
     Redirect(routes.Admin.indexAdmin())
   }
 
-  def followArtistByArtistId(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def followArtistByArtistId(artistId : Long) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     Artist.followByArtistId(userId, artistId) match {
       case Success(_) =>
         Created
@@ -132,8 +148,8 @@ object ArtistController extends Controller {
     }
   }
 
-  def unfollowArtistByArtistId(artistId : Long) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def unfollowArtistByArtistId(artistId : Long) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     Artist.unfollowByArtistId(userId, artistId) match {
       case Success(1) =>
         Ok
@@ -146,8 +162,8 @@ object ArtistController extends Controller {
     }
   }
   
-  def followArtistByFacebookId(facebookId : String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
+  def followArtistByFacebookId(facebookId : String) = SecuredAction { implicit request =>
+    val userId = request.identity.UUID
     Artist.followByFacebookId(userId, facebookId) match {
       case Success(_) =>
         Created
@@ -165,17 +181,11 @@ object ArtistController extends Controller {
     }
   }
 
-  def getFollowedArtists = UserAwareAction { implicit request =>
-    request.user match {
-      case None => Ok(Json.toJson("User not connected"))
-      case Some(identity: Identity) => Ok(Json.toJson(Artist.getFollowedArtists(identity.identityId)))
-    }
+  def getFollowedArtists = SecuredAction { implicit request =>
+    Ok(Json.toJson(Artist.getFollowedArtists(request.identity.UUID)))
   }
 
-  def isArtistFollowed(artistId: Long) = UserAwareAction { implicit request =>
-    request.user match {
-      case None => Ok(Json.toJson("User not connected"))
-      case Some(identity: Identity) => Ok(Json.toJson(Artist.isFollowed(identity.identityId, artistId)))
-    }
+  def isArtistFollowed(artistId: Long) = SecuredAction { implicit request =>
+    Ok(Json.toJson(Artist.isFollowed(request.identity.UUID, artistId)))
   }
 }

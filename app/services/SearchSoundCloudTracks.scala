@@ -1,19 +1,18 @@
 package services
 
-import controllers.DAOException
-import controllers.SearchArtistsController._
-import models.{Genre, Artist, Track}
-import play.api.libs.json._
-import play.api.libs.ws.{WS, Response}
-import play.api.libs.concurrent.Execution.Implicits._
-import scala.concurrent.Future
-import play.api.libs.functional.syntax._
-import services.Utilities.normalizeUrl
-import scala.util.matching._
-import java.util.regex.Pattern
-import models.Genre.saveGenreForArtistInFuture
-import Utilities.soundCloudClientId
 import java.util.UUID.randomUUID
+import java.util.regex.Pattern
+
+import models.Genre.saveGenreForArtistInFuture
+import models.{Artist, Track}
+import play.api.Play.current
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import play.api.libs.ws.{WS, WSResponse}
+import services.Utilities.{normalizeUrl, soundCloudClientId}
+
+import scala.concurrent.Future
 
 object SearchSoundCloudTracks {
 
@@ -54,15 +53,15 @@ object SearchSoundCloudTracks {
         WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles")
           .withQueryString("client_id" -> soundCloudClientId)
           .get()
-          .map { soundCloudResponse => (id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
+          .map { soundCloudWSResponse => (id, readSoundCloudWebsites(soundCloudWSResponse).map { normalizeUrl })
         }
       }
     )
   }
 
-  def readSoundCloudWebsites(soundCloudResponse: Response): Seq[String] = {
+  def readSoundCloudWebsites(soundCloudWSResponse: WSResponse): Seq[String] = {
     val readSoundCloudUrls: Reads[Seq[String]] = Reads.seq((__ \ "url").read[String])
-    soundCloudResponse.json
+    soundCloudWSResponse.json
       .asOpt[Seq[String]](readSoundCloudUrls)
       .getOrElse(Seq.empty)
   }
@@ -76,9 +75,9 @@ object SearchSoundCloudTracks {
       .map { readSoundCloudIds }
   }
 
-  def readSoundCloudIds(soundCloudResponse: Response): Seq[Long] = {
+  def readSoundCloudIds(soundCloudWSResponse: WSResponse): Seq[Long] = {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
-    soundCloudResponse.json
+    soundCloudWSResponse.json
       .asOpt[Seq[Long]](readSoundCloudIds)
       .getOrElse(Seq.empty)
   }
@@ -90,7 +89,7 @@ object SearchSoundCloudTracks {
       .map { response => readSoundCloudTracks(response.json, artist) }
   }
 
-  def readSoundCloudTracks(soundCloudJsonResponse: JsValue, artist: Artist): Seq[Track] = {
+  def readSoundCloudTracks(soundCloudJsonWSResponse: JsValue, artist: Artist): Seq[Track] = {
     val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
@@ -105,7 +104,7 @@ object SearchSoundCloudTracks {
     val onlyTracksWithUrlTitleAndThumbnail =
       Reads.seq(soundCloudTrackReads).map { collectOnlyValidTracksAndSaveArtistGenres(_, artist) }
 
-    soundCloudJsonResponse
+    soundCloudJsonWSResponse
       .asOpt[Seq[Track]](onlyTracksWithUrlTitleAndThumbnail)
       .getOrElse(Seq.empty)
   }
@@ -114,11 +113,11 @@ object SearchSoundCloudTracks {
     Option[String], Option[String], Option[String])], artist: Artist): Seq[Track] = {
     tracks.collect {
       case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl, genre) =>
-        saveGenreForArtistInFuture(genre, artist.artistId.getOrElse(-1L).toInt)
+        saveGenreForArtistInFuture(genre, artist.artistId.getOrElse(-1L))
         Track(randomUUID, normalizeTrackTitle(title, artist.name), url, 's', thumbnailUrl, artist.facebookUrl, artist.name,
           redirectUrl)
       case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String), genre) =>
-        saveGenreForArtistInFuture(genre, artist.artistId.getOrElse(-1L).toInt)
+        saveGenreForArtistInFuture(genre, artist.artistId.getOrElse(-1L))
         Track(randomUUID, normalizeTrackTitle(title, artist.name), url, 's', avatarUrl, artist.facebookUrl, artist.name,
           redirectUrl)
     }
@@ -140,5 +139,14 @@ object SearchSoundCloudTracks {
           Artist.addWebsite(artist.artistId, normalizedUrl)
         }
     }
+  }
+
+  def removeUselessInSoundCloudWebsite(website: String): String = website match {
+    case soundCloudWebsite if soundCloudWebsite contains "soundcloud" =>
+      if (soundCloudWebsite.count(_ == '/') > 1)
+        soundCloudWebsite.take(soundCloudWebsite.lastIndexOf('/'))
+      else
+        soundCloudWebsite
+    case _ => website
   }
 }

@@ -1,43 +1,48 @@
 package models
 
 import java.util.UUID
+import javax.inject.Inject
 
 import anorm.SqlParser._
 import anorm._
-import controllers._
+import controllers.DAOException
+import org.joda.time.DateTime
 import play.api.Logger
-import play.api.db.DB
-import play.api.Play.current
-import services.Utilities._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.libs.concurrent.Execution.Implicits._
+import services.Utilities
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits._
-
+import scala.language.postfixOps
 import scala.util.{Failure, Try}
 
-case class Genre (genreId: Option[Long], name: String, icon: Option[String] = None)
+case class Genre (id: Option[Long], name: String, icon: Char = 'a')
 
-object Genre {
+class GenreMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                      val organizerMethods: OrganizerMethods,
+                      val placeMethods: PlaceMethods,
+                      val utilities: Utilities) {
+
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
+  import dbConfig._
+
+  class Genres(tag: Tag) extends Table[Genre](tag, "genres") {
+    def id = column[Long]("genreid", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("name")
+    def icon = column[Char]("icon")
+
+    def * = (id.?, name, icon) <> ((Genre.apply _).tupled, Genre.unapply)
+  }
+
+  lazy val genres = TableQuery[Genres]
+  
   def formApply(name: String) = new Genre(None, name)
   def formUnapply(genre: Genre) = Some(genre.name)
 
-  def genresStringToGenresSets(l: Option[String]) = l
-
-  private val GenreParser: RowParser[Genre] = {
-    get[Long]("genreId") ~
-      get[String]("name") ~
-      get[Option[String]]("icon") map {
-      case genreId ~ name ~ icon => Genre(Option(genreId), name, icon)
-    }
-  }
-
-  def findAll: Seq[Genre] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM genres")
-        .as(GenreParser.*)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Genre.findAll: " + e.getMessage)
+  def findAll: Future[Seq[Genre]] = {
+    db.run(genres.result)
   }
 
   def findAllByEvent(eventId: Long): Seq[Genre] = try {
@@ -81,28 +86,26 @@ object Genre {
       Seq.empty
   }
 
-  def find(genreId: Long): Option[Genre] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM genres WHERE genreId = {genreId}")
-        .on('genreId -> genreId)
-        .as(GenreParser.singleOpt)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Genre.find: " + e.getMessage)
-  }
+  def findById(id: Long): Future[Option[Genre]] = {
+    val query = genres.filter(_.id === id)
+    db.run(query.result.headOption)
+  } 
 
-  def findAllContaining(pattern: String): Seq[Genre] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT * FROM genres
-          | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
-          | LIMIT 12""".stripMargin)
-        .on('patternLowCase -> pattern.toLowerCase)
-        .as(GenreParser.*)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Genre.findAllContaining: " + e.getMessage)
-  }
+//  def findContaining(pattern: String): Future[Seq[Genre]] = {
+//    val lowercasePattern = pattern.toLowerCase
+//    val query = for {
+//      genre <- genres if genre.name.toLowerCase like s"%$lowercasePattern%"
+//    } yield genre
+//
+//    db.run(query.take(12).result)
+//
+////        """SELECT * FROM genres
+////          | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
+////          | LIMIT 12""".stripMargin)
+////        .on('patternLowCase -> pattern.toLowerCase)
+////        .as(GenreParser.*)
+////    }
+//  }
   
   def save(genre: Genre): Option[Long] = try {
     DB.withConnection { implicit connection =>
@@ -157,7 +160,7 @@ object Genre {
 
   def saveWithArtistRelation(genre: Genre, artistId: Long): Boolean = {
     save(genre) match {
-      case Some(genreId: Long) => saveArtistRelation(artistId, genreId.toInt)
+      case Some(genreId: Long) => saveArtistRelation(artistId, genreId)
       case _ => false
     }
   }
@@ -247,7 +250,7 @@ object Genre {
       val lowercaseGenres = genres.toLowerCase
       val genresSplitByCommas = lowercaseGenres.split(",")
       if (genresSplitByCommas.length > 1) {
-        genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim, None) }.toSet
+        genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim) }.toSet
       } else {
         """([%/+\.;]|& )""".r
           .split(lowercaseGenres)

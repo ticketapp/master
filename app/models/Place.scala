@@ -1,20 +1,26 @@
 package models
 
-import java.sql.Connection
+import java.sql.{Timestamp, Connection}
+import java.util.UUID
+import javax.inject.Inject
 
 import anorm.SqlParser._
 import anorm._
+import org.joda.time.DateTime
 import play.api.Logger
-import play.api.db.DB
 import play.api.Play.current
 import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
+import play.api.db.slick.DatabaseConfigProvider
 
-import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
+import services.Utilities.{getNormalizedWebsitesInText}
 import play.api.libs.concurrent.Execution.Implicits._
+import slick.driver.JdbcProfile
 import scala.concurrent.Future
 import scala.util.{Success, Failure, Try}
 import services.Utilities
 import services.Utilities.geographicPointPattern
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
 case class Place (placeId: Option[Long],
                   name: String,
@@ -28,7 +34,15 @@ case class Place (placeId: Option[Long],
                   address : Option[Address] = None,
                   linkedOrganizerId: Option[Long] = None)
 
-object Place {
+class PlaceMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                             val organizerMethods: OrganizerMethods) {
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
+  import dbConfig._
+
+  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
+    dt => new Timestamp(dt.getMillis),
+    ts => new DateTime(ts.getTime))
+
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
                 imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
@@ -92,7 +106,7 @@ object Place {
                 'capacity -> place.capacity,
                 'openingHours -> place.openingHours,
                 'imagePath -> place.imagePath,
-                'organizerId -> Organizer.findIdByFacebookId(place.facebookId))
+                'organizerId -> organizerMethods.findIdByFacebookId(place.facebookId))
               .as(scalar[Long].singleOpt)
           }
         }
@@ -102,12 +116,14 @@ object Place {
     }
   }
 
-  def findIdByFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
-    SQL(
-      """SELECT placeId FROM places
+  def findIdByFacebookId(placeFacebookId: Option[String]): Option[Long] = {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT placeId FROM places
         | WHERE facebookId = {facebookId}""".stripMargin)
-      .on("facebookId" -> placeFacebookId)
-      .as(scalar[Long].singleOpt)
+        .on("facebookId" -> placeFacebookId)
+        .as(scalar[Long].singleOpt)
+    }
   }
 
   def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Place] = try {
@@ -192,7 +208,7 @@ object Place {
     }
   }
 
-  def followByPlaceId(userId : String, placeId : Long): Try[Option[Long]] = Try {
+  def followByPlaceId(userId : UUID, placeId : Long): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
       SQL("""INSERT INTO placesFollowed(userId, placeId) VALUES({userId}, {placeId})""")
         .on(
@@ -202,7 +218,7 @@ object Place {
     }
   }
 
-  def unfollowByPlaceId(userId: String, placeId: Long): Try[Int] = Try {
+  def unfollowByPlaceId(userId: UUID, placeId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
         """DELETE FROM placesFollowed
@@ -213,19 +229,19 @@ object Place {
     }
   }
 
-  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] =
+  def followByFacebookId(userId : UUID, facebookId: String): Try[Option[Long]] =
     findIdByFacebookId(facebookId) match {
       case Success(Some(placeId)) => followByPlaceId(userId, placeId)
       case Success(None)=> Failure(ThereIsNoPlaceForThisFacebookIdException("Place.followByFacebookId"))
       case failure => failure
     }
 
-  def isFollowed(userId: IdentityId, placeId: Long): Boolean = try {
+  def isFollowed(userId: UUID, placeId: Long): Boolean = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT exists(SELECT 1 FROM placesFollowed
           |  WHERE userId = {userId} AND placeId = {placeId})""".stripMargin)
-        .on("userId" -> userId.userId,
+        .on("userId" -> userId,
           "placeId" -> placeId)
         .as(scalar[Boolean].single)
     }
@@ -233,12 +249,12 @@ object Place {
     case e: Exception => throw new DAOException("Place.isPlaceFollowed: " + e.getMessage)
   }
 
-  def getFollowedPlaces(userId: IdentityId): Seq[Place] = try {
+  def getFollowedPlaces(userId: UUID): Seq[Place] = try {
     DB.withConnection { implicit connection =>
       SQL("""select a.* from places a
             |  INNER JOIN placesFollowed af ON a.placeId = af.placeId
             |WHERE af.userId = {userId}""".stripMargin)
-        .on('userId -> userId.userId)
+        .on('userId -> userId)
         .as(PlaceParser.*)
     }
   } catch {

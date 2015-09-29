@@ -2,7 +2,7 @@ package models
 
 import anorm.SqlParser._
 import anorm._
-import play.api.db.DB
+
 import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException

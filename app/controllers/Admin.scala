@@ -1,14 +1,12 @@
 package controllers
 
 
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.mvc._
-import models._
-import play.api.libs.json.Json
 import java.io.File
 
-object Admin extends Controller {
+import models._
+import play.api.mvc._
+
+class Admin extends Controller {
 
   def indexAdmin = Action {
     Ok(views.html.admin.indexAdmin())
@@ -26,7 +24,7 @@ object Admin extends Controller {
       picture.ref.moveTo(new File("/tmp/picture"))
       Ok("File uploaded")
     }.getOrElse {
-      Redirect(routes.Application.index).flashing(
+      Redirect(routes.Application.index()).flashing(
         "error" -> "Missing file"
       )
     }

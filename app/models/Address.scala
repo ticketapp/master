@@ -3,17 +3,22 @@ package models
 import anorm.SqlParser._
 import anorm._
 import controllers._
-import play.api.db.DB
-import play.api.Play.current
-import play.api.libs.ws.{Response, WS}
-import services.Utilities.{geographicPointToString, googleKey}
 
+import play.api.Play.current
+import play.api.libs.ws.{WSResponse, WS}
+import services.Utilities.googleKey
+import slick.model.ForeignKeyAction
+import scala.language.postfixOps
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.util.{Success, Failure, Try}
+import slick.driver.PostgresDriver.api._
+import slick.model.ForeignKeyAction
+import scala.language.postfixOps
 
-case class Address (addressId: Option[Long],
+
+case class Address (id: Option[Long],
                     geographicPoint: Option[String],
                     city: Option[String],
                     zip: Option[String],
@@ -23,6 +28,17 @@ case class Address (addressId: Option[Long],
 }
 
 object Address {
+  class Addresses(tag: Tag) extends Table[Address](tag, "organizers") {
+    def id = column[Long]("organizerId", O.PrimaryKey)
+    def geographicPoint = column[Option[String]]("geographicPoint")
+    def city = column[Option[String]]("city")
+    def zip = column[Option[String]]("zip")
+    def street = column[Option[String]]("street")
+    def * = (id.?, geographicPoint, city, zip, street) <>
+      ((Address.apply _).tupled, Address.unapply)
+  }
+
+  lazy val addresses = TableQuery[Addresses]
 
   private val AddressParser: RowParser[Address] = {
     get[Option[String]]("geographicPoint") ~
@@ -131,7 +147,7 @@ object Address {
     }
   }
 
-  def delete(addressId: Long): Long = try {
+  def delete(addressId: Long): Int = try {
     DB.withConnection { implicit connection =>
       SQL("""DELETE FROM addresses WHERE addressId = {addressId}""")
         .on('addressId -> addressId)
@@ -165,8 +181,8 @@ object Address {
     }
   }
 
-  def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {
-    val googleGeoCodeJson = googleGeoCodeResponse.json
+  def readGoogleGeographicPoint(googleGeoCodeWSResponse: WSResponse): Option[String] = {
+    val googleGeoCodeJson = googleGeoCodeWSResponse.json
     val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
     val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
     latitude match {

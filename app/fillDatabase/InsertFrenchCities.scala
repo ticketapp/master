@@ -3,12 +3,12 @@ package fillDatabase
 import anorm._
 import play.api.Logger
 import play.api.Play.current
-import play.api.db.DB
+
 import play.api.mvc._
 
 import scala.io.Source
 
-object InsertFrenchCities extends Controller {
+class InsertFrenchCities extends Controller {
   def insertFrenchCities() = Action {
       val lines = Source.fromFile("textFiles/villes_france.sql").getLines()
       DB.withConnection { implicit connection =>

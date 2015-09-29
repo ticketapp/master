@@ -1,22 +1,23 @@
 package models
 
+import java.util.UUID
+
 import anorm.SqlParser._
 import anorm._
 import controllers._
-import play.api.db.DB
+
 import play.api.Play.current
-import services.Utilities.geographicPointToString
 
-case class Issue(issueId: Option[Long], title: String, content: String, userId: String, fixed: Boolean)
+case class Issue(issueId: Option[Long], title: String, content: String, userUUID: UUID, fixed: Boolean)
 
-case class IssueComment(content: String, userId: String, issueId: Long)
+case class IssueComment(content: String, userId: UUID, issueId: Long)
 
 object Issue {
   private val issueParser = {
     get[Long]("issueId") ~
       get[String]("title") ~
       get[String]("content") ~
-      get[String]("userId") ~
+      get[UUID]("userId") ~
       get[Boolean]("fixed") map {
       case issueId ~ title ~ content ~ userId ~ fixed =>
         Issue(Option(issueId), title, content, userId, fixed)
@@ -25,7 +26,7 @@ object Issue {
 
   private val issueCommentParser = {
       get[String]("content") ~
-      get[String]("userId") ~
+      get[UUID]("userId") ~
       get[Long]("issueId") map {
       case content ~ userId ~ issueId => IssueComment(content, userId, issueId)
     }
@@ -67,7 +68,7 @@ object Issue {
         .on(
           'title -> issue.title,
           'content -> issue.content,
-          'userId -> issue.userId)
+          'userId -> issue.userUUID)
         .executeInsert()
     }
   } catch {
