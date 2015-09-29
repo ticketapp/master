@@ -250,7 +250,18 @@ object Artist {
     val youtubeTracksEnumerator =
       getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
 
-    Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator).andThen(Enumerator.eof)
+    val youtubeTracksFromChannel = Enumerator.flatten(getYoutubeTracksByChannel(patternAndArtist.artist) map { a =>
+      println(a)
+      Enumerator(a)
+    })
+
+    val youtubeTracksFromYoutubeUser = Enumerator.flatten(getYoutubeTracksByYoutubeUser(patternAndArtist.artist) map { a =>
+      println(a)
+      Enumerator(a)
+    })
+
+    Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator, youtubeTracksFromChannel,
+      youtubeTracksFromYoutubeUser).andThen(Enumerator.eof)
   }
 
   def addWebsite(artistId: Option[Long], normalizedUrl: String): Int = {

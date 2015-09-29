@@ -15,6 +15,7 @@ import services.SearchSoundCloudTracks.normalizeTrackTitle
 import models.Genre.saveGenreForArtistInFuture
 import scala.language.postfixOps
 import services.Utilities._
+import scala.util.{Success, Failure}
 
 object SearchYoutubeTracks {
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
@@ -25,6 +26,36 @@ object SearchYoutubeTracks {
     case None => getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist, pattern)
     }
   )
+
+  def getYoutubeTracksByChannel(artist: Artist): Future[Set[Track]] = Future.sequence (
+    getYoutubeChannelId(artist.websites) map {
+      getYoutubeTracksByChannelId(artist, _)
+    }
+  ).map { _.flatten.toSet }
+
+  def getYoutubeTracksByYoutubeUser(artist: Artist): Future[Set[Track]] = {
+    val youtubeUserNames = getYoutubeUserNames(artist.websites)
+    val eventuallyYoutubeChannelIds = Future.sequence(youtubeUserNames map {
+      getYoutubeChannelIdsByUserName(artist, _)
+    }).map(_.flatten)
+    val eventuallyNestedTracks = eventuallyYoutubeChannelIds map { youtubeChannelIds =>
+      youtubeChannelIds map { id => getYoutubeTracksByChannelId(artist, id) }
+    }
+
+    eventuallyNestedTracks flatMap { c => Future.sequence(c) } map { _.flatten }
+  }
+
+
+  def getYoutubeChannelId(artistWebsites: Set[String]): Set[String] = {
+    artistWebsites.filter(_.indexOf("youtube.com/channel/") > -1) map {
+      _.replaceAll(".*channel/", "")
+    }
+  }
+
+  def getYoutubeUserNames(artistWebsites: Set[String]): Set[String] = {
+    val userNames = artistWebsites.filter(_.indexOf("youtube.com/") > -1)
+    userNames map { name => name.stripSuffix("/").substring(name.lastIndexOf("/") + 1) }
+  }
 
   def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Enumerator[Set[Track]] = {
     val facebookId = artist.facebookId.get //.get is sure while called by getYoutubeTracksForArtist
@@ -104,7 +135,44 @@ object SearchYoutubeTracks {
         "maxResults" -> "20",
         "key" -> youtubeKey)
       .get()
-      .map { readYoutubeTracks(_, artist) }
+      .map { response => removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track:Track =>
+        track.copy(title = normalizeTrackTitle(track.title, artist.name))
+      }
+    }
+  }
+
+  def getYoutubeTracksByChannelId(artist: Artist, channelId: String): Future[Set[Track]] = {
+    WS.url("https://www.googleapis.com/youtube/v3/search")
+      .withQueryString(
+        "part" -> "snippet",
+        "channelId" -> channelId,
+        "type" -> "video",
+        "maxResults" -> "50",
+        "key" -> youtubeKey)
+      .get()
+      .map { readYoutubeTracks(_, artist).toSet map { track:Track =>
+        track.copy(title = normalizeTrackTitle(track.title, artist.name))
+      }
+    }
+  }
+
+  def getYoutubeChannelIdsByUserName(artist: Artist, userName: String): Future[Set[String]] = {
+    WS.url("https://www.googleapis.com/youtube/v3/channels")
+      .withQueryString(
+        "part" -> "contentDetails",
+        "forUsername" -> userName,
+        "type" -> "video",
+        "maxResults" -> "50",
+        "key" -> youtubeKey)
+      .get()
+      .map { readYoutubeUser }
+  }
+
+  def readYoutubeUser(youtubeResponse: Response): Set[String] = {
+    val channelIds: Reads[Option[String]] = (__ \\ "id").readNullable[String]
+    (youtubeResponse.json \ "items")
+      .as[Set[Option[String]]](Reads.set(channelIds))
+      .flatten
   }
 
   def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
@@ -116,9 +184,8 @@ object SearchYoutubeTracks {
       (title, url, thumbnailUrl))
     val collectOnlyValidTracks = Reads.seq(youtubeTrackReads) map { tracks =>
       tracks.collect {
-        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String))
-          if Track.isArtistNameInTrackTitle(title, artist.name) =>
-          Track(randomUUID, normalizeTrackTitle(title, artist.name), url, 'y', thumbnailUrl, artist.facebookUrl,
+        case (Some(title: String), Some(url: String), Some(thumbnailUrl: String)) =>
+          Track(randomUUID, title, url, 'y', thumbnailUrl, artist.facebookUrl,
             artist.name)
       }
     }
@@ -126,6 +193,10 @@ object SearchYoutubeTracks {
     (youtubeResponse.json \ "items")
       .asOpt[Seq[Track]](collectOnlyValidTracks)
       .getOrElse(Seq.empty)
+  }
+
+  def removeTracksWithoutArtistName(tracks: Seq[Track], artistName: String): Seq[Track] = tracks collect {
+    case (track: Track) if Track.isArtistNameInTrackTitle(track.title, artistName) => track
   }
 
   def getMaybeEchonestArtistUrlsByFacebookId(facebookArtistId: String): Future[Option[(String, Set[String])]] = {

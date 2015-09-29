@@ -1,5 +1,4 @@
-import java.util.Date
-import java.util.UUID._
+import java.util.{UUID, Date}
 import controllers.DAOException
 import models.{Track, Artist}
 import models.Artist._
@@ -73,7 +72,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
         Option("description"), "facebookUrl3", Set("website"))
 
-      val expectedTrack = Track(randomUUID, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
+      val expectedTrack = Track(UUID.randomUUID, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
           "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
       whenReady(getYoutubeTracksByArtistAndTitle(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
@@ -87,7 +86,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
         Option("description"), "facebookUrl3", Set("website"))
       val tracksTitle = Set("Le poinçonneur des Lilas")
 
-      val expectedTrack = Track(randomUUID, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y',
+      val expectedTrack = Track(UUID.randomUUID, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y',
         "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
       whenReady(getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>
@@ -107,6 +106,54 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       })
 
       whenReady(enumerateYoutubeTracks |>> iteratee, timeout(Span(10, Seconds))) { any => any }
+    }
+
+    "return a list of the Youtube channel Ids" in {
+      val websites = Set("www.qds.com", "https://www.youtube.com/user/TheOfficialSkrillex",
+        "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA")
+
+
+      val expectedIds = Set("UCGWpjrgMylyGVRIKQdazrPA")
+
+      getYoutubeChannelId(websites) mustBe expectedIds
+    }
+
+    "return names of user youtube" in {
+      val websites = Set("youtube.com/theofficialskrillex")
+
+      val expectedNames = Set("theofficialskrillex")
+
+      getYoutubeUserNames(websites) mustBe expectedNames
+
+    }
+    "return ids of user youtube" in {
+      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
+        Option("description"), "facebookUrl3", Set("website"))
+
+      val userNames = "theofficialskrillex"
+
+      val expectedIds = Set("UC_TVqp_SyG6j5hG-xVRy95A")
+      val eventuallyYoutubeId = getYoutubeChannelIdsByUserName(artist, userNames)
+      whenReady(eventuallyYoutubeId, timeout(Span(10, Seconds))) {_ mustBe expectedIds }
+
+    }
+
+    "return set of youtube tracks" in {
+      val youtubeChannel = "UCGWpjrgMylyGVRIKQdazrPA"
+
+      val artist = Artist(None, Option("139247202797113"), "Skrillex", Option("imagePath"),
+        Option("description"), "facebookUrl3", Set("website"))
+
+      val uuid = UUID.fromString("04d64aef-2baa-42b3-a0dc-07f77da9303d")
+
+      val oneExpectedTrack = Track(uuid, "Welcome to Topsify", "ISo15c2zKa4", 'y',
+        "https://i.ytimg.com/vi/ISo15c2zKa4/default.jpg", "facebookUrl3", "Skrillex", None, None, None, List())
+
+      val eventuallyYoutubeTracks = getYoutubeTracksByChannelId(artist, youtubeChannel)
+
+      whenReady(eventuallyYoutubeTracks, timeout(Span(10, Seconds))) { tracks =>
+        tracks.map { _.copy(trackId = uuid) } should contain (oneExpectedTrack)
+      }
     }
   }
 }
