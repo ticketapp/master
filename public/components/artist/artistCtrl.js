@@ -109,6 +109,10 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             });
         } else {
             $scope.selectedTab = 1;
+            if ($rootScope.artist.websites != undefined) {
+                $scope.websites = WebsitesFactory.normalizeWebsitesObject($rootScope.artist.websites,
+                    $routeParams.facebookUrl);
+            }
             ArtistsFactory.passArtisteToCreateToFalse();
         }
 

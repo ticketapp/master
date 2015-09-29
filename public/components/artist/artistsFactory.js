@@ -235,6 +235,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             $rootScope.artist = artist;
             $rootScope.tracks = [];
             $rootScope.loadingTracks = true;
+            console.log(artist);
             oboe.post('artists/createArtist', {
                 searchPattern: searchPattern,
                 artist: {
