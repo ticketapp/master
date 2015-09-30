@@ -102,5 +102,18 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         }
       }
     }
+
+    "save organizer with event relation" in {
+      val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option("(5.4,5.6)"))
+      val eventId = 1
+
+      saveWithEventRelation(organizer, eventId) mustBe "kjqkjskqjk"
+    }
+
+    "get the info about the organizer on Facebook" in {
+      /*getOrganizerInfo() */
+    }
   }
 }

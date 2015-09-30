@@ -1,6 +1,6 @@
 package controllers
 
-import models.Place
+import models.{Address, Place}
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
@@ -8,15 +8,17 @@ import play.api.data.Forms._
 import play.api.db._
 import play.api.Play.current
 import anorm._
+import play.api.libs.ws.{Response, WS}
 import play.api.mvc._
-import play.api.libs.json.Json
+import play.api.libs.json._
 import json.JsonHelper.placeWrites
 import securesocial.core.Identity
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Try, Failure, Success}
 import scala.util.matching.Regex
 import play.api.libs.concurrent.Execution.Implicits._
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION, geographicPointPattern}
+import play.api.libs.functional.syntax._
+import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION, geographicPointPattern, facebookToken}
 
 object PlaceController extends Controller with securesocial.core.SecureSocial {
 
@@ -98,6 +100,7 @@ object PlaceController extends Controller with securesocial.core.SecureSocial {
       case Some(identity: Identity) => Ok(Json.toJson(Place.getFollowedPlaces(identity.identityId)))
     }
   }
+
 
   val placeBindingForm = Form(mapping(
     "name" -> nonEmptyText(2),

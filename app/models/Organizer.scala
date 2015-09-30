@@ -295,7 +295,7 @@ object Organizer {
     organizer.json.asOpt[Organizer](readOrganizer)
   }
 
-  def getOrganizerInfo(maybeOrganizerId: Option[String]): Future[Option[Organizer]] = maybeOrganizerId match {
+  def getOrganizerInfo(maybeOrganizerFacebookId: Option[String]): Future[Option[Organizer]] = maybeOrganizerFacebookId match {
     case None => Future { None }
     case Some(organizerId) =>
       WS.url("https://graph.facebook.com/v2.2/" + organizerId)

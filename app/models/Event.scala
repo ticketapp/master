@@ -1,6 +1,6 @@
 package models
 
-import controllers.DAOException
+import controllers.{PlaceController, DAOException}
 import controllers.SearchArtistsController._
 import play.api.db._
 import play.api.Play.current
@@ -16,10 +16,12 @@ import jobs.Scheduler._
 import models.Tariff.{findPrices, findTicketSellers}
 import scala.concurrent.Future
 import scala.util.Try
+import scala.util.{ Success, Failure }
 import scala.util.matching.Regex
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import Utilities.GeographicPoint
+import play.api.Logger
 import Utilities.{ geographicPointPattern, facebookToken }
 
 case class Event(eventId: Option[Long],
@@ -333,8 +335,11 @@ object Event {
           'tariffRange -> event.tariffRange,
           'ticketSellers -> event.ticketSellers)
         .as(scalar[Option[Long]].single) match {
-        case None => None
+        case None =>
+          Logger.error("Event.save: event could not be saved")
+          None
         case Some(eventId: Long) =>
+          println(event)
           event.organizers.foreach { organizer => Organizer.saveWithEventRelation(organizer, eventId) }
           event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
           event.artists.foreach { artist => Artist.saveWithEventRelation(artist, eventId) }
@@ -424,16 +429,14 @@ object Event {
     case e: Exception => throw new DAOException("Event.isEventFollowed: " + e.getMessage)
   }
 
-  def saveFacebookEventByFacebookId(eventFacebookId: String): Unit = try {
+  def saveFacebookEventByFacebookId(eventFacebookId: String): Try[Future[Option[Long]]] = Try {
     findEventOnFacebookByFacebookId(eventFacebookId) map { save }
-  } catch {
-    case e: Exception => throw new Exception("Event.saveFacebookEventByFacebookId")
   }
 
   def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Event] = {
-    WS.url("https://graph.facebook.com/v2.2/" + eventFacebookId)
+    WS.url("https://graph.facebook.com/v2.4/" + eventFacebookId)
       .withQueryString(
-        "fields" -> "cover,description,name,start_time,end_time,owner,venue",
+        "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
         "access_token" -> facebookToken)
       .get()
       .flatMap { readFacebookEvent }
@@ -450,10 +453,11 @@ object Event {
         (__ \ "venue" \ "street").readNullable[String] and
         (__ \ "venue" \ "zip").readNullable[String] and
         (__ \ "venue" \ "city").readNullable[String] and
-        (__ \ "owner" \ "id").readNullable[String]
+        (__ \ "owner" \ "id").readNullable[String] and
+        (__ \ "place" \ "id").readNullable[String]
       )((description: Option[String], source: String, name: String, facebookId: Option[String],
          startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
-         city: Option[String], maybeOwnerId: Option[String]) => {
+         city: Option[String], maybeOwnerId: Option[String], maybePlaceId: Option[String]) => {
 
       val eventuallyOrganizer = Organizer.getOrganizerInfo(maybeOwnerId)
       val address = new Address(None, None, city, zip, street)
@@ -463,28 +467,46 @@ object Event {
       val eventuallyMaybeArtistsFromDescription = getFacebookArtistsByWebsites(normalizedWebsites)
       val eventuallyMaybeArtistsFromTitle =
         getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(name), normalizedWebsites)
+      val eventuallyTryPlace = Place.getPlaceByFacebookId(maybePlaceId)
 
       for {
         organizer <- eventuallyOrganizer
         artistsFromDescription <- eventuallyMaybeArtistsFromDescription
         artistsFromTitle <- eventuallyMaybeArtistsFromTitle
+        optionPlace <- eventuallyTryPlace
       } yield {
 
         val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
         Artist.saveArtistsAndTheirTracks(nonEmptyArtists)
 
-        val eventGenres = nonEmptyArtists.map(_.genres).flatten.distinct
+        val eventGenres = nonEmptyArtists.flatMap(_.genres).distinct
 
-        new Event(None, facebookId, true, true, Utilities.refactorEventOrPlaceName(name), None,
-          Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
-          formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
-          nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
+        val event = Event(None, facebookId, isPublic = true, isActive = true, Utilities.refactorEventOrPlaceName(name), None,
+        Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),
+        formatDate(endTime), 16, findPrices(description), ticketSellers, Option(source), List(organizer).flatten,
+        nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
+
+        savePlaceEventRelationIfPossible(optionPlace, event)
+
+        event
       }
     })
     try {
       eventFacebookResponse.json.as[Future[Event]](eventRead)
     } catch {
       case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent" + e.getMessage)
+    }
+  }
+
+  def savePlaceEventRelationIfPossible(optionPlace: Option[Place], event: Event): Unit = {
+    optionPlace match {
+      case Some(place) =>
+        place.placeId match {
+          case Some(id) => saveEventWithGeographicPointAndPlaceRelation(event, id, place.geographicPoint)
+          case None => Logger.error("Event.readFacebookEvent: place without id found")
+        }
+      case None =>
+        Logger.error("Event.readFacebookEvent: the place is in error")
     }
   }
 

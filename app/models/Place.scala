@@ -8,12 +8,16 @@ import play.api.Logger
 import play.api.db.DB
 import play.api.Play.current
 import controllers.{ThereIsNoPlaceForThisFacebookIdException, DAOException}
+import play.api.libs.json._
+import play.api.libs.ws.{Response, WS}
 import securesocial.core.IdentityId
 import services.Utilities.{geographicPointToString, getNormalizedWebsitesInText}
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import scala.util.{Success, Failure, Try}
 import services.Utilities
+import play.api.libs.functional.syntax._
+import services.Utilities.{facebookToken}
 import services.Utilities.geographicPointPattern
 
 case class Place (placeId: Option[Long],
@@ -102,7 +106,62 @@ object Place {
     }
   }
 
-  def findIdByFacebookId(placeFacebookId: Option[String])(implicit connection: Connection): Option[Long] = {
+  def getPlaceByFacebookId(placeFacebookId : Option[String]) : Future[Option[Place]] = {
+    findIdByFacebookId(placeFacebookId) match {
+      case Some(id) =>
+        find(id) match {
+          case Some(place) =>
+            Future { Option(place) }
+          case None =>
+            getPlaceOnFacebook(placeFacebookId)
+        }
+      case None =>
+        getPlaceOnFacebook(placeFacebookId)
+    }
+  }
+
+  def getPlaceOnFacebook(placeFacebookId: Option[String]): Future[Option[Place]] = placeFacebookId match {
+    case Some(id) =>
+      WS.url("https://graph.facebook.com/v2.4/" + id)
+        .withQueryString(
+          "fields" -> "about,location,website,hours,cover,name",
+          "access_token" -> facebookToken)
+        .get()
+        .flatMap { readFacebookPlace }
+    case None =>
+      Logger.error("Place.getPlaceOnFacebook: no placeFacebookId")
+      Future { None }
+  }
+
+  def readFacebookPlace (placeFacebookResponse: Response): Future[Option[Place]] = {
+    val placeRead = (
+      (__ \ "about").readNullable[String] and
+        (__ \ "cover" \ "source").readNullable[String] and
+        (__ \ "name").read[String] and
+        (__ \ "id").readNullable[String] and
+        (__ \ "location" \ "street").readNullable[String] and
+        (__ \ "location" \ "zip").readNullable[String] and
+        (__ \ "location" \ "city").readNullable[String] and
+        (__ \ "location" \ "country").readNullable[String] and
+        (__ \ "website").readNullable[String]
+      ).apply((about: Option[String], source: Option[String], name: String, facebookId: Option[String],
+               street: Option[String], zip: Option[String], city: Option[String], country: Option[String],
+               website: Option[String]) => {
+      val address = Address(None, None, city, zip, street)
+      val newPlace = Place(None, name, facebookId, None, about, website, None, None, source, Option(address))
+      save(newPlace) map {
+        case Success(Some(id)) =>
+          find(id)
+        case _ =>
+          Logger.error("Place.readFacebookPlace: place could not be saved")
+          None
+      }
+    })
+
+    placeFacebookResponse.json.as[Future[Option[Place]]](placeRead)
+  }
+
+  def findIdByFacebookId(placeFacebookId: Option[String]): Option[Long] = DB.withConnection { implicit connection =>
     SQL(
       """SELECT placeId FROM places
         | WHERE facebookId = {facebookId}""".stripMargin)

@@ -1,17 +1,19 @@
 package controllers
 
+import json.JsonHelper._
+import models.{Address, Event, Tariff}
 import org.postgresql.util.PSQLException
+import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.Logger
-import play.api.mvc._
 import play.api.libs.json.Json
-import models.{Image, Tariff, Event, Address}
-import json.JsonHelper._
+import play.api.mvc._
 import securesocial.core.Identity
-import scala.util.matching.Regex
-import scala.util.{Success, Failure}
 import services.Utilities._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object EventController extends Controller with securesocial.core.SecureSocial {
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
@@ -174,8 +176,13 @@ object EventController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  def createEventByFacebookId(facebookId: String) = Action {
-    Event.saveFacebookEventByFacebookId(facebookId)
-    Ok
+  def createEventByFacebookId(facebookId: String) = Action.async {
+    Event.saveFacebookEventByFacebookId(facebookId) match {
+      case Success(eventuallyMaybeId) =>
+        eventuallyMaybeId map { maybeId => Ok(Json.toJson(maybeId)) }
+      case Failure(exception) =>
+        Logger.error("EventController.createEventByFacebookId: event could not be saved")
+        Future { InternalServerError("EventController.createEventByFacebookId: event could not be saved") }
+    }
   }
 }

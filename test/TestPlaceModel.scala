@@ -9,6 +9,7 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import securesocial.core.IdentityId
+import services.Utilities
 import services.Utilities.UNIQUE_VIOLATION
 import play.api.libs.concurrent.Execution.Implicits._
 
@@ -124,6 +125,42 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
         case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe
           Some(address3.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))
         case _ => throw new Exception("address not saved")
+      }
+    }
+
+    "get a new place by facebookId" in {
+      getPlaceByFacebookId(Option("836137029786070")) map {
+        case Some(placeFound) => Place.delete(placeFound.placeId.get)
+        case None =>
+      }
+
+      val maybeFacebookId = Option("836137029786070")
+
+      val expectedPlace = Place(None, "Akwaba Coop Culturelle", Some("836137029786070"), None,
+        Utilities.formatDescription(Some(
+          """Lieu atypique, vivant et vivace, programmation indisciplinée, formes artistiques non-identifiées, ,découvertes excitantes, public excité""")),
+        Some(Utilities.normalizeUrl("http://akwaba.coop")), None, None,
+        Some("https://scontent.xx.fbcdn.net/hphotos-xtp1/v/t1.0-9/s720x720/12074633_957584020974703_292685474037804" +
+          "3281_n.jpg?oh=32879078efc1d52962a1e592d8cb7fbf&oe=56A17586"), Some(Address(None, Some("(43.9308729,4.9536721)"),
+          Some("châteauneuf-de-gadagne"), Some("84470"), Some("500 chemin des matouses"))), None)
+
+      whenReady(getPlaceByFacebookId(maybeFacebookId), timeout(Span(5, Seconds)))  { place =>
+        val placeIdSaved = place.get.placeId
+        try {
+          place.get.copy(placeId = None) mustBe expectedPlace
+        } finally {
+          Place.delete(placeIdSaved.get)
+        }
+      }
+    }
+
+    "get an exiting place by facebookId" in {
+      val maybeFacebookId = Option("117030545096697")
+
+      val placeName = "Le transbordeur"
+
+      whenReady(getPlaceByFacebookId(maybeFacebookId), timeout(Span(5, Seconds))) {
+        _.get.name mustBe placeName
       }
     }
   }
