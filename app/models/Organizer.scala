@@ -78,6 +78,16 @@ object Organizer {
     case e: Exception => throw new DAOException("Organizer.findAll: " + e.getMessage)
   }
 
+  def findAllWithFacebookId: Try[List[Organizer]] = Try {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """SELECT *
+          |  FROM organizers
+          |  WHERE facebookId IS NOT NULL""".stripMargin)
+        .as(OrganizerParser.*)
+    }
+  }
+
   def findAllByEvent(event: Event): List[Organizer] = try {
     DB.withConnection { implicit connection =>
       SQL(

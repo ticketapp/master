@@ -508,7 +508,7 @@ object Event {
     }
   }
 
-  def getEventsFacebookIdByPlace(placeFacebookId: String): Future[Seq[String]] = {
+  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(placeFacebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/v2.2/" + placeFacebookId + "/events/")
       .withQueryString("access_token" -> facebookToken)
       .get()

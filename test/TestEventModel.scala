@@ -174,7 +174,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
     }
 
     "return events facebook id for a place facebook id" in {
-      whenReady(getEventsFacebookIdByPlace("117030545096697"), timeout(Span(2, Seconds))) {
+      whenReady(getEventsFacebookIdByPlaceOrOrganizerFacebookId("117030545096697"), timeout(Span(2, Seconds))) {
         _ should not be empty
       }
     }

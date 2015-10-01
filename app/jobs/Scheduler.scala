@@ -21,13 +21,37 @@ import services.Utilities.{ facebookToken, googleKey }
 
 object Scheduler {
 
-  def start(): Unit = Place.findAllWithFacebookId map { _ map { place =>
-    Event.getEventsFacebookIdByPlace(place.facebookId.get) map { _.map { eventId =>
-      Event.findEventOnFacebookByFacebookId(eventId) map {
-        saveEventWithGeographicPointAndPlaceRelation(_, place.placeId.get, place.geographicPoint)
+  def start(): Unit = {
+    findEventsForPlaces
+    findEventsForOrganizers
+  }
+  
+  def findEventsForOrganizers: Unit = {
+    Organizer.findAllWithFacebookId map {
+      _ map { organizer =>
+        Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId(organizer.facebookId.get) map {
+          _.map { eventId =>
+            Event.findEventOnFacebookByFacebookId(eventId)
+          }
+        }
+        
       }
-    }}
-  }}
+    }
+  }
+
+  def findEventsForPlaces: Unit = {
+    Place.findAllWithFacebookId map {
+      _ map { place =>
+        Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId(place.facebookId.get) map {
+          _.map { eventId =>
+            Event.findEventOnFacebookByFacebookId(eventId) map {
+              saveEventWithGeographicPointAndPlaceRelation(_, place.placeId.get, place.geographicPoint)
+            }
+          }
+        }
+      }
+    }
+  }
 
   def saveEventWithGeographicPointAndPlaceRelation(facebookEvent: Event, placeId: Long,
                                                    placeGeographicPoint: Option[String]): Unit = {
