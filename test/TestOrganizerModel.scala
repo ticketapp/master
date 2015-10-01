@@ -1,6 +1,11 @@
 import java.util.Date
 import controllers.DAOException
-import models.{Address, Place, Organizer}
+import models.Event._
+import models.Organizer.delete
+import models.Organizer.find
+import models.Organizer.isFollowed
+import models.Organizer.save
+import models.{Event, Address, Place, Organizer}
 import models.Organizer._
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
@@ -39,19 +44,16 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "not be saved twice" in {
+    "not be saved twice and return the organizerId" in {
       val organizer = Organizer(None, Option("facebookId3"), "organizerTest3", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
-      val organizerId = save(organizer).get.get
+      val organizerId = save(organizer)
 
       try {
-        save(organizer) match {
-          case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
-          case _ => throw new Exception("save an organizer twice didn't throw a PSQL UNIQUE_VIOLATION")
-        }
+        save(organizer) mustBe organizerId
       } finally {
-        delete(organizerId)
+        delete(organizerId.get.get)
       }
     }
 
@@ -104,16 +106,33 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
     }
 
     "save organizer with event relation" in {
-      val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
+      val organizer = Organizer(Option(666), Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
-      val eventId = 1
 
-      saveWithEventRelation(organizer, eventId) mustBe "kjqkjskqjk"
+      val event = Event(None, None, isPublic = true, isActive = true, "name", Option("(5.4,5.6)"),
+        Option("description"), new Date(), Option(new Date(100000000000000L)), 16, None, None, None, List.empty,
+        List.empty, List.empty, List.empty, List.empty, List.empty)
+
+      val eventId = Event.save(event).get
+
+      try {
+        saveWithEventRelation(organizer, eventId) match {
+          case Some(organizerId) =>
+            Organizer.deleteEventRelation(eventId, organizerId)
+            delete(organizerId)
+          case _ =>
+            throw new Exception("TestOrganizerModel: saveWithEventRelation didn't work")
+        }
+      } finally {
+          Event.delete(eventId)
+      }
     }
 
     "get the info about the organizer on Facebook" in {
-      /*getOrganizerInfo() */
+      whenReady (getOrganizerInfo(Option("164354640267171")), timeout(Span(5, Seconds))) { organizerInfos =>
+        organizerInfos.get.name mustBe "Le Transbordeur"
+      }
     }
   }
 }

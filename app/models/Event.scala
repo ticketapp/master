@@ -339,7 +339,6 @@ object Event {
           Logger.error("Event.save: event could not be saved")
           None
         case Some(eventId: Long) =>
-          println(event)
           event.organizers.foreach { organizer => Organizer.saveWithEventRelation(organizer, eventId) }
           event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
           event.artists.foreach { artist => Artist.saveWithEventRelation(artist, eventId) }
@@ -487,7 +486,6 @@ object Event {
         nonEmptyArtists, List.empty, List(address), List.empty, eventGenres)
 
         savePlaceEventRelationIfPossible(optionPlace, event)
-
         event
       }
     })

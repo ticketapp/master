@@ -128,7 +128,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "get a new place by facebookId" in {
+    "get a new place by facebookId when saving new event by facebookId" in {
       getPlaceByFacebookId(Option("836137029786070")) map {
         case Some(placeFound) => Place.delete(placeFound.placeId.get)
         case None =>
@@ -154,7 +154,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "get an exiting place by facebookId" in {
+    "get an exiting place by facebookId when saving new event by facebookId" in {
       val maybeFacebookId = Option("117030545096697")
 
       val placeName = "Le transbordeur"

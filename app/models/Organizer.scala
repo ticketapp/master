@@ -5,6 +5,7 @@ import java.sql.Connection
 import anorm.SqlParser._
 import anorm._
 import controllers.{ThereIsNoOrganizerForThisFacebookIdException, DAOException}
+import play.api.Logger
 import play.api.libs.json._
 import play.api.libs.ws.{WS, Response}
 import securesocial.core.IdentityId
@@ -123,9 +124,15 @@ object Organizer {
 
   def save(organizer: Organizer): Try[Option[Long]] = Try {
     DB.withConnection { implicit connection =>
-      val addressId = organizer.address match {
+      val maybeAddressId = organizer.address match {
         case None => None
-        case Some(address) => Address.save(Option(address))
+        case Some(address) => Address.save(Option(address)) match {
+          case Success(Some(addressId)) =>
+            addressId
+          case _ =>
+            Logger.error("Organizer.save: address could not be saved")
+            None
+        }
       }
       val placeIdWithSameFacebookId = Place.findIdByFacebookId(organizer.facebookId)
       val phoneNumbers = Utilities.phoneNumbersSetToOptionString(Utilities.phoneNumbersStringToSet(organizer.phone))
@@ -137,7 +144,7 @@ object Organizer {
           'facebookId -> organizer.facebookId,
           'name -> organizer.name,
           'description -> description,
-          'addressId -> addressId,
+          'addressId -> maybeAddressId,
           'phone -> phoneNumbers,
           'publicTransit -> organizer.publicTransit,
           'websites -> organizer.websites,
@@ -179,11 +186,16 @@ object Organizer {
     case e: Exception => throw new DAOException("Organizer.findNearCity: " + e.getMessage)
   }
 
-  def saveWithEventRelation(organizer: Organizer, eventId: Long): Boolean = {
+  def saveWithEventRelation(organizer: Organizer, eventId: Long): Option[Long] = {
     save(organizer) match {
-      case Success(Some(organizerId)) => saveEventRelation(eventId, organizerId)
-      case Success(None) => false
-      case Failure(_) => false
+      case Success(Some(organizerId)) =>
+        saveEventRelation(eventId, organizerId)
+        Option(organizerId)
+      case Success(None) =>
+        None
+      case Failure(e) =>
+        Logger.error("Organizer.saveWithEventRelation: " + e.getMessage)
+        None
     }
   }
 
