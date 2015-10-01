@@ -66,7 +66,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       val eventId = save(event).get
       val genre = Genre(None, "rockiedockie", "r")
       Genre.save(genre) match {
-        case Success(genreId: Long) =>
+        case Success(genreId: Int) =>
           Genre.saveEventRelation(eventId, genreId)
           val eventRock = findAllByGenre("rockiedockie", GeographicPoint("(0,0)"), 0, 1)
           eventRock.get should not be empty
