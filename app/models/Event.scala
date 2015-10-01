@@ -478,7 +478,8 @@ object Event {
         val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
         Artist.saveArtistsAndTheirTracks(nonEmptyArtists)
 
-        val eventGenres = nonEmptyArtists.flatMap(_.genres).distinct
+        val eventGenres = (nonEmptyArtists.flatMap(_.genres) ++
+                          nonEmptyArtists.flatMap(artist => Genre.findOverGenres(artist.genres))).distinct
 
         val event = Event(None, facebookId, isPublic = true, isActive = true, Utilities.refactorEventOrPlaceName(name), None,
         Utilities.formatDescription(description), formatDate(startTime).getOrElse(new Date()),

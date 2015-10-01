@@ -13,11 +13,14 @@ import services.Utilities._
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Try, Success}
 
-case class Genre (genreId: Option[Long], name: String, icon: Option[String] = None)
+case class Genre (genreId: Option[Long], name: String, icon: String = "a") {
+  require(name.nonEmpty, "It is forbidden to create a genre without a name.")
+}
 
 object Genre {
+
   def formApply(name: String) = new Genre(None, name)
   def formUnapply(genre: Genre) = Some(genre.name)
 
@@ -26,7 +29,7 @@ object Genre {
   private val GenreParser: RowParser[Genre] = {
     get[Long]("genreId") ~
       get[String]("name") ~
-      get[Option[String]]("icon") map {
+      get[String]("icon") map {
       case genreId ~ name ~ icon => Genre(Option(genreId), name, icon)
     }
   }
@@ -104,22 +107,20 @@ object Genre {
     case e: Exception => throw new DAOException("Genre.findAllContaining: " + e.getMessage)
   }
   
-  def save(genre: Genre): Option[Long] = try {
+  def save(genre: Genre): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL("""SELECT insertGenre({name}, {icon})""")
         .on('name -> genre.name,
             'icon -> genre.icon)
-        .as(scalar[Option[Long]].single)
+        .as(scalar[Int].single)
     }
-  } catch {
-    case e: Exception => throw new DAOException("Genre.save: " + e.getMessage)
   }
 
   def findGenreId(genreName: String): Option[Long] = try {
     DB.withConnection { implicit connection =>
         SQL( """SELECT genreId FROM genres WHERE name = {name}""")
           .on('name -> genreName)
-          .as(scalar[Option[Long]].single)
+          .as(scalar[Long].singleOpt)
     }
   } catch {
     case e: Exception => throw new DAOException("Event.findGenreId: " + e.getMessage)
@@ -127,8 +128,11 @@ object Genre {
 
   def saveWithEventRelation(genre: Genre, eventId: Long): Int = {
     save(genre) match {
-      case Some(genreId: Long) => saveEventRelation(eventId, genreId)
-      case _ => 0
+      case Success(genreId: Int) =>
+        saveEventRelation(eventId, genreId)
+      case _ =>
+        Logger.error("Genre.saveWithEventRelation: genre could not be saved")
+        0
     }
   }
 
@@ -155,11 +159,12 @@ object Genre {
     }
   }
 
-  def saveWithArtistRelation(genre: Genre, artistId: Long): Boolean = {
-    save(genre) match {
-      case Some(genreId: Long) => saveArtistRelation(artistId, genreId.toInt)
-      case _ => false
-    }
+  def saveWithArtistRelation(genre: Genre, artistId: Long): Boolean = save(genre) match {
+    case Success(genreId: Int) =>
+      saveArtistRelation(artistId, genreId.toInt)
+    case Failure(e) =>
+      Logger.error("Genre.saveWithArtistRelation: cannot save genre " + genre, e)
+      false
   }
 
   def saveArtistRelation(artistId: Long, genreId: Long): Boolean = try {
@@ -189,13 +194,18 @@ object Genre {
       genreName match {
         case Some(genreFound) if genreFound.nonEmpty =>
           saveWithArtistRelation(new Genre(None, genreFound), artistId)
+          val overGenre = findOverGenres(Seq(Genre(None, genreFound)))
+          overGenre.foreach(genre => saveWithArtistRelation(genre, artistId))
       }
     }
   }
 
   def saveWithTrackRelation(genre: Genre, trackId: UUID, weight: Long): Try[Boolean] = save(genre) match {
-    case Some(genreId: Long) => saveTrackRelation(trackId, genreId, weight)
-    case _ => Failure(new DAOException("Genre.saveWithTrackRelation"))
+    case Success(genreId: Int) =>
+      saveTrackRelation(trackId, genreId, weight)
+    case Failure(e) =>
+      Logger.error("Genre.saveWithTrackRelation: cannot save genre" + genre, e)
+      Failure(e)
   }
 
   def saveTrackRelation(trackId: UUID, genreId: Long, weight: Long): Try[Boolean] = Try {
@@ -241,13 +251,48 @@ object Genre {
     case e: Exception => throw new DAOException("Genre.followGenre: " + e.getMessage)
   }
 
+  def findOverGenres(genres: Seq[Genre]): Seq[Genre] = genres flatMap { genre: Genre =>
+    Genre.findGenreId(genre.name) match {
+      case Some(genreId) =>
+        Genre.find(genreId) match {
+          case Some(genreFound) if genreFound.icon == "g" =>
+            Option(Genre(None, "reggae"))
+          case Some(genreFound) if genreFound.icon == "e" =>
+            Option(Genre(None, "electro"))
+          case Some(genreFound) if genreFound.icon == "h" =>
+            Option(Genre(None, "hip-hop"))
+          case Some(genreFound) if genreFound.icon == "j" =>
+            Option(Genre(None, "jazz"))
+          case Some(genreFound) if genreFound.icon == "s" =>
+            Option(Genre(None, "classique"))
+          case Some(genreFound) if genreFound.icon == "l" =>
+            Option(Genre(None, "musiques latines"))
+          case Some(genreFound) if genreFound.icon == "r" =>
+            Option(Genre(None, "rock"))
+          case Some(genreFound) if genreFound.icon == "c" =>
+            Option(Genre(None, "chanson"))
+          case Some(genreFound) if genreFound.icon == "m" =>
+            Option(Genre(None, "musiques du monde"))
+          case Some(genreFound) if genreFound.icon == "a" =>
+            Option(Genre(None, ""))
+          case None =>
+            Logger.error("Artist.findOverGenres: no genre found for this id")
+            None
+        }
+      case _ =>
+        Logger.error("Artist.findOverGenres: no genre found for this name")
+        None
+    }
+  }
+
+
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
     case None => Set.empty
     case Some(genres: String) =>
       val lowercaseGenres = genres.toLowerCase
       val genresSplitByCommas = lowercaseGenres.split(",")
       if (genresSplitByCommas.length > 1) {
-        genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim, None) }.toSet
+        genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim) }.toSet
       } else {
         """([%/+\.;]|& )""".r
           .split(lowercaseGenres)

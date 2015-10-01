@@ -12,9 +12,9 @@ object InsertGenres extends Controller {
     while (lines.hasNext) {
       val line = lines.next()
       try {
-        Genre.save(new Genre(None, line.split("  ")(0), Option(line.split("  ")(1))))
+        Genre.save(new Genre(None, line.split("  ")(0), line.split("  ")(1)))
       } catch {
-        case e: Exception =>  Logger.warn(line + e)
+        case e: Exception => Logger.warn(line + e)
       }
     }
     Ok

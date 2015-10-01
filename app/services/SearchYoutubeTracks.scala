@@ -2,7 +2,7 @@ package services
 
 import java.util.UUID._
 
-import models.{Artist, Track}
+import models.{Genre, Artist, Track}
 import play.api.libs.iteratee.{Enumeratee, Iteratee, Enumerator}
 import play.api.libs.iteratee.Input.EOF
 import play.api.libs.ws.{WS, Response}
@@ -333,7 +333,7 @@ object SearchYoutubeTracks {
   def saveArtistGenres(tupleArtistIdGenres: Future[(Long, Array[String])]): Unit = {
     tupleArtistIdGenres.map { artistIdGenres =>
       artistIdGenres._2.foreach { genre =>
-        saveGenreForArtistInFuture(Option(genre), artistIdGenres._1.toInt)
+        Genre.saveGenreForArtistInFuture(Option(genre), artistIdGenres._1.toInt)
       }
     }
   }

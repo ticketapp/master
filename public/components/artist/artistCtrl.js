@@ -52,6 +52,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             }
             ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
                 $timeout(function () {
+                    console.log(artist);
                     $scope.$apply(function() {
                         $scope.artist = artist;
                         $scope.tracks = artist.tracks.filter(signaledTrack);

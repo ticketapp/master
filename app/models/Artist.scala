@@ -6,6 +6,7 @@ import anorm.SqlParser._
 import anorm._
 import controllers.SearchArtistsController._
 import controllers.{ThereIsNoArtistForThisFacebookIdException, DAOException, WebServiceException}
+import play.api.Logger
 import play.api.libs.iteratee.{Enumerator, Enumeratee, Iteratee}
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks._
@@ -186,6 +187,7 @@ object Artist {
     case e: Exception => throw new DAOException("Artist.findIdByFacebookUrl: " + e.getMessage)
   }
 
+
   def save(artist: Artist): Option[Long] = try {
     val websites: Option[String] = Utilities.setToOptionString(artist.websites)
     val description = Utilities.formatDescription(artist.description)
@@ -200,7 +202,11 @@ object Artist {
           'websites -> websites)
         .as(scalar[Long].singleOpt) match {
           case Some(artistId: Long) =>
-            artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
+            val genresWithOverGenres = (artist.genres ++ Genre.findOverGenres(artist.genres)).distinct
+            println(artist)
+            println(artist.genres)
+            println(genresWithOverGenres)
+            genresWithOverGenres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
             artist.tracks.foreach { Track.save }
             Option(artistId)
           case None =>
