@@ -69,7 +69,7 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
 
   "return a list of normalized websites from a text" in {
 
-    val expectedWebsites = Set("@gmail.com",
+    val expectedWebsites = Set(
       "facebook.com/cruelhand",
       "facebook.com/alexsmokemusic",
       "facebook.com/nemo.nebbia",
