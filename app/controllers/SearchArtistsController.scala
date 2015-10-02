@@ -16,6 +16,7 @@ import play.api.libs.json.Reads._
 import services.Utilities.{ normalizeUrl, getNormalizedWebsitesInText, facebookToken, soundCloudClientId, linkPattern }
 
 import scala.language.postfixOps
+import scala.util.matching.Regex
 
 object SearchArtistsController extends Controller {
   val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
@@ -89,7 +90,7 @@ object SearchArtistsController extends Controller {
   }
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
-    WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
+    WS.url("https://graph.facebook.com/v2.4/" + normalizeFacebookUrl(url))
       .withQueryString(
         "fields" -> facebookArtistFields,
         "access_token" -> facebookToken)
@@ -98,16 +99,32 @@ object SearchArtistsController extends Controller {
   }
 
   def normalizeFacebookUrl(facebookUrl: String): String = {
-    val firstNormalization = facebookUrl.drop(facebookUrl.lastIndexOf("/") + 1) match {
+    val firstNormalization = facebookUrl.toLowerCase match {
       case urlWithProfile: String if urlWithProfile contains "profile.php?id=" =>
-        urlWithProfile.substring(urlWithProfile.lastIndexOf("=") + 1)
+        Option(urlWithProfile.substring(urlWithProfile.lastIndexOf("=") + 1))
       case alreadyNormalizedUrl: String =>
-        alreadyNormalizedUrl
+        if (alreadyNormalizedUrl.indexOf("facebook.com/") > -1) {
+          val normalizedUrl = alreadyNormalizedUrl.substring(alreadyNormalizedUrl.indexOf("facebook.com/") + 13)
+          if (normalizedUrl.indexOf("pages/") > -1) {
+            val idRegex = new Regex("/[0-9]+")
+            val a = idRegex.findAllIn(normalizedUrl).toSeq.headOption match {
+              case Some(id) => Option(id.replace("/", ""))
+              case None => None
+            }
+            a
+          } else if (normalizedUrl.indexOf("/") > -1) {
+            Option(normalizedUrl.take(normalizedUrl.indexOf("/")))
+          } else {
+            Option(normalizedUrl)
+          }
+        } else {
+          Option(alreadyNormalizedUrl)
+        }
     }
     firstNormalization match {
-      case urlWithArguments if urlWithArguments contains "?" =>
+      case Some(urlWithArguments) if urlWithArguments contains "?" =>
         urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?"))
-      case urlWithoutArguments =>
+      case Some(urlWithoutArguments) =>
         urlWithoutArguments
     }
   }
@@ -146,7 +163,7 @@ object SearchArtistsController extends Controller {
         maybeDescription, maybeGenre, maybeLikes, maybeCountry)
           if category.equalsIgnoreCase("Musician/band") | category.equalsIgnoreCase("Artist") =>
           makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
-            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption)
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten)
       }
     }
     (facebookResponse.json \ "data")
@@ -155,18 +172,21 @@ object SearchArtistsController extends Controller {
   }
   
   def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
+    println(facebookResponse.json)
     facebookResponse.json
       .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String],
         String, Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
       match {
-        case Some((name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
+        case Some((name, facebookId, "Musician/Band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
             link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
+          println("musisician")
           Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
         case Some((name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
             link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
+          println("artist ")
           Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten.headOption))
+            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
         case _ => None
       }
   }
