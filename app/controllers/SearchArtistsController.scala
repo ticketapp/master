@@ -177,16 +177,11 @@ object SearchArtistsController extends Controller {
       .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String],
         String, Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
       match {
-        case Some((name, facebookId, "Musician/Band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
-          println("musisician")
-          Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
-        case Some((name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
-          println("artist ")
-          Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-            link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
+      case Some((name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
+      maybeDescription, maybeGenre, maybeLikes, maybeCountry))
+        if category.equalsIgnoreCase("Musician/band") | category.equalsIgnoreCase("Artist") =>
+        Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
+          maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
         case _ => None
       }
   }
