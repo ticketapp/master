@@ -1,4 +1,5 @@
 import controllers.SearchArtistsController._
+import models.Artist
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
@@ -166,6 +167,21 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "facebook.com/paulatempleofficial")
       whenReady(getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
         _.size mustBe 20
+      }
+    }
+
+    "find artists in event's title" in {
+      val title =
+        """DON'T MESS - !!! (CHK CHK CHK) + BALLADUR ENCORE w/ SHXCXCHCXSH live — KANGDING RAY live set —
+          |RITUAL djset ENCORE w/ OSUNLADE 3hrs set — LOTFI""".stripMargin
+      val websites = Set(
+        "facebook.com/lotfilafaceb",
+        "mixcloud.com/la_face_b",
+        "yorubarecords.net",
+        "soundcloud.com/osunlade"
+      )
+      whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
+        _.size mustBe 7
       }
     }
   }
