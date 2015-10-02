@@ -71,6 +71,10 @@ object Utilities {
   def normalizeUrl(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
 
+  def removeMailFromListOfWebsites(websites: Set[String]): Set[String] = {
+    websites.filter(website => website.indexOf("@") == -1)
+  }
+
   def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
 
   def testIfExist(table: String, fieldName: String, valueAnyType: Any)(implicit connection: Connection): Boolean = {
@@ -96,7 +100,7 @@ object Utilities {
     case None =>
       Set.empty
     case Some(description) =>
-      linkPattern.findAllIn(description).toSet.map { normalizeUrl }
+      removeMailFromListOfWebsites(linkPattern.findAllIn(description).toSet).map { normalizeUrl }
   }
 
   def phoneNumbersStringToSet(phoneNumbers: Option[String]): Set[String] = phoneNumbers match {

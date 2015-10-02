@@ -203,9 +203,6 @@ object Artist {
         .as(scalar[Long].singleOpt) match {
           case Some(artistId: Long) =>
             val genresWithOverGenres = (artist.genres ++ Genre.findOverGenres(artist.genres)).distinct
-            println(artist)
-            println(artist.genres)
-            println(genresWithOverGenres)
             genresWithOverGenres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
             artist.tracks.foreach { Track.save }
             Option(artistId)
@@ -257,12 +254,10 @@ object Artist {
       getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
 
     val youtubeTracksFromChannel = Enumerator.flatten(getYoutubeTracksByChannel(patternAndArtist.artist) map { a =>
-      println(a)
       Enumerator(a)
     })
 
     val youtubeTracksFromYoutubeUser = Enumerator.flatten(getYoutubeTracksByYoutubeUser(patternAndArtist.artist) map { a =>
-      println(a)
       Enumerator(a)
     })
 
