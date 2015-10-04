@@ -185,7 +185,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       "discogs.com/label/447040-clft"
       )
       whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
-        _ mustBe 15
+        _.size mustBe 4
       }
     }
   }

@@ -208,7 +208,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 success(function(data, status, headers, config) {
                     var flag = 0;
                     if (data.location != undefined) {
-                        if (data.location.country == undefined || data.location.country != 'France') {
+                        if (data.location.country == undefined) {
                             flag = 1;
                         }
                     } else {
@@ -378,7 +378,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
             $http.get(route).
                 success(function (data) {
                     getLikes(data);
-                    getMusicPages(data);
+                    //getMusicPages(data);
                     getEvents(data)
                 })
         }
