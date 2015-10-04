@@ -103,25 +103,25 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
 
     "find over genres in genre set" in {
 
-      val genreId1 = save(Genre(None, "ragga", "g")).get
-      val genreId2 = save(Genre(None, "punk chrétien", "r")).get
-      val genreId3 = save(Genre(None, "rabiz", "m")).get
-      val genreId4 = save(Genre(None, "rapcore", "h")).get
-      val genreId5 = save(Genre(None, "rave", "e")).get
-      val genreId6 = save(Genre(None, "rhythm and blues", "j")).get
-      val genreId7 = save(Genre(None, "quiet storm", "s")).get
-      val genreId8 = save(Genre(None, "punto guajiro", "l")).get
-      val genreId9 = save(Genre(None, "Ballade", "c")).get
+      val genreId1 = save(Genre(None, "genreTest1", "g")).get
+      val genreId2 = save(Genre(None, "genreTest2", "r")).get
+      val genreId3 = save(Genre(None, "genreTest3", "m")).get
+      val genreId4 = save(Genre(None, "genreTest4", "h")).get
+      val genreId5 = save(Genre(None, "genreTest5", "e")).get
+      val genreId6 = save(Genre(None, "genreTest6", "j")).get
+      val genreId7 = save(Genre(None, "genreTest7", "s")).get
+      val genreId8 = save(Genre(None, "genreTest8", "l")).get
+      val genreId9 = save(Genre(None, "genreTest9", "c")).get
 
-      val genres = Seq(Genre(None, "ragga"),
-        Genre(None, "punk chrétien"),
-        Genre(None, "rabiz"),
-        Genre(None, "rapcore"),
-        Genre(None, "rave"),
-        Genre(None, "rhythm and blues"),
-        Genre(None, "quiet storm"),
-        Genre(None, "punto guajiro"),
-        Genre(None, "Ballade")
+      val genres = Seq(Genre(None, "genreTest1"),
+        Genre(None, "genreTest2"),
+        Genre(None, "genreTest3"),
+        Genre(None, "genreTest4"),
+        Genre(None, "genreTest5"),
+        Genre(None, "genreTest6"),
+        Genre(None, "genreTest7"),
+        Genre(None, "genreTest8"),
+        Genre(None, "genreTest9")
       )
 
       val expectedGenres = Seq(Genre(None, "reggae"),
@@ -144,15 +144,15 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         Genre(None, "classique"),
         Genre(None, "musiques latines"),
         Genre(None, "chanson"),
-        Genre(None, "ragga"),
-        Genre(None, "punk chrétien"),
-        Genre(None, "rabiz"),
-        Genre(None, "rapcore"),
-        Genre(None, "rave"),
-        Genre(None, "rhythm and blues"),
-        Genre(None, "quiet storm"),
-        Genre(None, "punto guajiro"),
-        Genre(None, "Ballade"))
+        Genre(None, "genreTest1"),
+        Genre(None, "genreTest2"),
+        Genre(None, "genreTest3"),
+        Genre(None, "genreTest4"),
+        Genre(None, "genreTest5"),
+        Genre(None, "genreTest6"),
+        Genre(None, "genreTest7"),
+        Genre(None, "genreTest8"),
+        Genre(None, "genreTest9"))
 
       try {
         Genre.findOverGenres(genres) mustBe expectedGenres

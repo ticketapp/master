@@ -139,6 +139,7 @@ object Utilities {
     case None =>
       None
     case Some(desc) =>
+      val newDesc = desc.replaceAll("""<""", "&lt;").replaceAll( """>""", "&gt;")
       def stringToLinks(matcher: Regex.Match): String = {
         val phoneNumberPattern = """([\d\.]+)""".r
         val matcherString = matcher.toString()
@@ -154,10 +155,10 @@ object Utilities {
         }
       }
       Option("<div class='column large-12'>" +
-        linkPattern.replaceAllIn(desc.replaceAll("""<""", "&lt;").replaceAll( """>""", "&gt;"), m => stringToLinks(m))
+        linkPattern.replaceAllIn(newDesc, m => stringToLinks(m))
           .replaceAll( """\n\n""", "<br/><br/></div><div class='column large-12'>")
           .replaceAll( """\n""", "<br/>")
-          .replaceAll( """\t""", "    ") +
+          .replaceAll( """\t""", "    ").trim +
         "</div>")
   }
 

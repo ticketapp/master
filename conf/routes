@@ -4,6 +4,7 @@ GET     /                                                                 contro
 GET     /test                                                             controllers.Test.test1
 
 ################################## fill database ################################################
+GET     /initDatabase                                                     controllers.InitController.init
 GET     /insertFrenchCities                                               fillDatabase.InsertFrenchCities.insertFrenchCities
 GET     /insertGenres                                                     fillDatabase.InsertGenres.insertGenres
 GET     /insertTwoLettersArtists                                          fillDatabase.InsertTwoLettersArtists.insertTwoLettersArtists

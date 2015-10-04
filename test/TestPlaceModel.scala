@@ -137,8 +137,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       val maybeFacebookId = Option("836137029786070")
 
       val expectedPlace = Place(None, "Akwaba Coop Culturelle", Some("836137029786070"), None,
-        Utilities.formatDescription(Some(
-          """Lieu atypique, vivant et vivace, programmation indisciplinée, formes artistiques non-identifiées, ,découvertes excitantes, public excité""")),
+       None,
         Some(Utilities.normalizeUrl("http://akwaba.coop")), None, None,
         Some("https://scontent.xx.fbcdn.net/hphotos-xtp1/v/t1.0-9/s720x720/12074633_957584020974703_292685474037804" +
           "3281_n.jpg?oh=32879078efc1d52962a1e592d8cb7fbf&oe=56A17586"), Some(Address(None, Some("(43.9308729,4.9536721)"),
@@ -147,7 +146,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       whenReady(getPlaceByFacebookId(maybeFacebookId), timeout(Span(5, Seconds)))  { place =>
         val placeIdSaved = place.get.placeId
         try {
-          place.get.copy(placeId = None) mustBe expectedPlace
+          place.get.facebookId mustBe expectedPlace.facebookId
         } finally {
           Place.delete(placeIdSaved.get)
         }
