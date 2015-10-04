@@ -1,0 +1,7 @@
+CREATE MACHINES
+docker run --name pg -p 5433:5432 -d postgres:9.4.4
+docker run --name myjenkins -p 8080:8080 -v ~/dev/docker/jenkins_home:/var/jenkins_home jenkins
+
+START 
+docker start pg myjenkins
+docker stop pg myjenkins
