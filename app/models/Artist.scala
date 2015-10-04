@@ -394,5 +394,7 @@ object Artist {
   }
 
   def splitArtistNamesInTitle(title: String): List[String] =
-    "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "")
+    "@.*".r.replaceFirstIn(title, "").split("[^\\S].?\\W").toList.filter(_ != "").map {
+      _.toLowerCase.replace("live", "").replace("djset", "").replace("dj set", "").replace("set", "").trim()
+    }
 }

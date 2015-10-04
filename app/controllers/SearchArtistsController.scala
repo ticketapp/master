@@ -38,13 +38,39 @@ object SearchArtistsController extends Controller {
       .get()
       .map { readFacebookArtists }
   }
-  
-  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] = {
+
+  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] =
     Future.sequence(
-      artistsNameInTitle.map {
-        getEventuallyFacebookArtists(_).map { artists => artists }
+      artistsNameInTitle.map { name =>
+        checkArtistsForEvents(name, webSites)
       }
-    ).map { _.flatten collect { case artist: Artist if (artist.websites intersect webSites).nonEmpty => artist } }
+    ).map { _.flatten }
+
+  def checkArtistsForEvents(name: String, webSites: Set[String]): Future[Seq[Artist]] = {
+    getEventuallyFacebookArtists(name).flatMap {
+      case noArtist if noArtist.isEmpty && name.split("\\W+").size >= 2 =>
+        val nestedEventuallyArtists = name.split("\\W+").toSeq.map {
+          checkArtistsForEvents(_, webSites)
+        }
+        Future.sequence(nestedEventuallyArtists) map {
+          _.flatten
+        }
+      case onlyOneArtist: Seq[Artist] if onlyOneArtist.size == 1 && onlyOneArtist.head.name.toLowerCase == name =>
+        Future {
+          onlyOneArtist
+        }
+      case otherCase: Seq[Artist] =>
+        val artists = otherCase.flatMap { artist: Artist =>
+          if ((artist.websites intersect webSites).nonEmpty) {
+            Option(artist)
+          }
+          else
+            None
+        }
+        Future {
+          artists
+        }
+    }
   }
 
   def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
@@ -172,7 +198,6 @@ object SearchArtistsController extends Controller {
   }
   
   def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
-    println(facebookResponse.json)
     facebookResponse.json
       .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String],
         String, Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
