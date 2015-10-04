@@ -21,7 +21,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
 
   "SearchArtistController" must {
 
-    /*"find a sequence of artists on Facebook" in {
+    "find a sequence of artists on Facebook" in {
       whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
         artists should not be empty
       }
@@ -168,7 +168,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       whenReady(getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
         _.size mustBe 20
       }
-    }*/
+    }
 
     "find artists in event's title" in {
       val title =
