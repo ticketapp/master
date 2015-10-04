@@ -21,7 +21,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
 
   "SearchArtistController" must {
 
-    "find a sequence of artists on Facebook" in {
+    /*"find a sequence of artists on Facebook" in {
       whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
         artists should not be empty
       }
@@ -168,20 +168,24 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       whenReady(getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
         _.size mustBe 20
       }
-    }
+    }*/
 
     "find artists in event's title" in {
       val title =
         """DON'T MESS - !!! (CHK CHK CHK) + BALLADUR ENCORE w/ SHXCXCHCXSH live — KANGDING RAY live set —
-          |RITUAL djset ENCORE w/ OSUNLADE 3hrs set — LOTFI""".stripMargin
+          |RITUAL djset ENCORE w/ OSUNLADE 3hrs set — LOTFI CLFT MILITIA invite LEE HOLMAN & BINNY TOKYO LEGENDS
+          |#1 Feat. SHUYA OKINO & JUN MATUOKA SOPHIE HUNGER + MARTIN MEY + HEIN COOPER""".stripMargin
       val websites = Set(
         "facebook.com/lotfilafaceb",
         "mixcloud.com/la_face_b",
         "yorubarecords.net",
-        "soundcloud.com/osunlade"
+        "soundcloud.com/osunlade",
+      "discogs.com/artist/1156643-lee-holman",
+      "discogs.com/artist/2922409-binny-2",
+      "discogs.com/label/447040-clft"
       )
       whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
-        _.size mustBe 7
+        _ mustBe 15
       }
     }
   }
