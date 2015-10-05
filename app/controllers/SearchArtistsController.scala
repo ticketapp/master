@@ -42,15 +42,15 @@ object SearchArtistsController extends Controller {
   def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] =
     Future.sequence(
       artistsNameInTitle.map { name =>
-        checkArtistsForEvents(name, webSites)
+        checkEventuallyArtistsForEvents(name, webSites)
       }
     ).map { _.flatten }
 
-  def checkArtistsForEvents(name: String, webSites: Set[String]): Future[Seq[Artist]] = {
+  def checkEventuallyArtistsForEvents(name: String, webSites: Set[String]): Future[Seq[Artist]] = {
     getEventuallyFacebookArtists(name).flatMap {
       case noArtist if noArtist.isEmpty && name.split("\\W+").size >= 2 =>
         val nestedEventuallyArtists = name.split("\\W+").toSeq.map {
-          checkArtistsForEvents(_, webSites)
+          checkEventuallyArtistsForEvents(_, webSites)
         }
         Future.sequence(nestedEventuallyArtists) map {
           _.flatten

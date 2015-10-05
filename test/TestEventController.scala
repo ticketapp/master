@@ -1,3 +1,5 @@
+import controllers.EventController
+import models.Event
 import org.scalatestplus.play._
 import play.api.libs.json._
 import play.api.test.FakeRequest

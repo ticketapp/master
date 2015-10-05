@@ -30,10 +30,9 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
 
     "find soundCloud websites for a list of soundCloud ids" in {
       whenReady(getTupleIdAndSoundCloudWebsitesForIds(List(68442, 4329372, 13302835, 97091845, 129311935, 366396)),
-        timeout(Span(2, Seconds))) { tupleSounCloudIdWebsites =>
-        tupleSounCloudIdWebsites should contain (366396,
-          List("shop.ticketscript.com/channel/web2/start-order/rid/6rfq8stj/language/nl",
-            "facebook.com/events/1567964680141717"))
+        timeout(Span(2, Seconds))) { tupleSoundCloudIdWebsites =>
+        tupleSoundCloudIdWebsites should contain
+        (68442, Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls", "facebook.com/worakls"))
       }
     }
   }
