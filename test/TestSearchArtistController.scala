@@ -192,11 +192,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       )
       val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "Hein Cooper")
       whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
-<<<<<<< HEAD
-        _.size mustBe 4
-=======
         _.map{ artist => artist.name } mustBe expectedArtists
->>>>>>> review
       }
     }
   }
