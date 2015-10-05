@@ -29,6 +29,7 @@ object Utilities {
 
   val UNIQUE_VIOLATION = "23505"
   val FOREIGN_KEY_VIOLATION = "23503"
+  val facebookApiVersion = "2.4"
 
   case class GeographicPoint(geoPoint: String) {
     require(geographicPointPattern.pattern.matcher(geoPoint).matches, "Invalid geographicPoint")

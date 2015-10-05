@@ -28,7 +28,7 @@ object SearchArtistsController extends Controller {
   }
 
   def getEventuallyFacebookArtists(pattern: String): Future[Seq[Artist]] = {
-    WS.url("https://graph.facebook.com/v2.2/search")
+    WS.url("https://graph.facebook.com/" + Utilities.facebookApiVersion + "/search")
       .withQueryString(
         "q" -> pattern,
         "type" -> "page",
@@ -116,7 +116,7 @@ object SearchArtistsController extends Controller {
   }
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
-    WS.url("https://graph.facebook.com/v2.4/" + normalizeFacebookUrl(url))
+    WS.url("https://graph.facebook.com/" + Utilities.facebookApiVersion + "/" + normalizeFacebookUrl(url))
       .withQueryString(
         "fields" -> facebookArtistFields,
         "access_token" -> facebookToken)
