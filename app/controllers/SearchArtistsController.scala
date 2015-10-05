@@ -28,7 +28,7 @@ object SearchArtistsController extends Controller {
   }
 
   def getEventuallyFacebookArtists(pattern: String): Future[Seq[Artist]] = {
-    WS.url("https://graph.facebook.com/v2.2/search")
+    WS.url("https://graph.facebook.com/" + Utilities.facebookApiVersion + "/search")
       .withQueryString(
         "q" -> pattern,
         "type" -> "page",
@@ -42,35 +42,30 @@ object SearchArtistsController extends Controller {
   def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] =
     Future.sequence(
       artistsNameInTitle.map { name =>
-        checkEventuallyArtistsForEvents(name, webSites)
+        getArtistsForAnEvent(name, webSites)
       }
     ).map { _.flatten }
 
-  def checkEventuallyArtistsForEvents(name: String, webSites: Set[String]): Future[Seq[Artist]] = {
-    getEventuallyFacebookArtists(name).flatMap {
-      case noArtist if noArtist.isEmpty && name.split("\\W+").size >= 2 =>
-        val nestedEventuallyArtists = name.split("\\W+").toSeq.map {
-          checkEventuallyArtistsForEvents(_, webSites)
-        }
-        Future.sequence(nestedEventuallyArtists) map {
-          _.flatten
-        }
-      case onlyOneArtist: Seq[Artist] if onlyOneArtist.size == 1 && onlyOneArtist.head.name.toLowerCase == name =>
-        Future {
-          onlyOneArtist
-        }
-      case otherCase: Seq[Artist] =>
-        val artists = otherCase.flatMap { artist: Artist =>
-          if ((artist.websites intersect webSites).nonEmpty) {
-            Option(artist)
-          }
-          else
-            None
-        }
-        Future {
-          artists
-        }
+  def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[Artist]] = {
+    getEventuallyFacebookArtists(artistName).flatMap {
+      case noArtist if noArtist.isEmpty && artistName.split("\\W+").size >= 2 =>
+        val nestedEventuallyArtists = artistName.split("\\W+").toSeq.map { getArtistsForAnEvent(_, eventWebSites) }
+        Future.sequence(nestedEventuallyArtists) map { _.flatten }
+      case artists =>
+        Future  { filterFacebookArtistsForEvent(artists, artistName, eventWebSites)}
     }
+  }
+  
+  def filterFacebookArtistsForEvent(artists: Seq[Artist], artistName: String, eventWebsites: Set[String]): Seq[Artist] = 
+    artists match {
+    case onlyOneArtist: Seq[Artist] if onlyOneArtist.size == 1 && onlyOneArtist.head.name.toLowerCase == artistName =>
+      onlyOneArtist
+    case otherCase: Seq[Artist] =>
+      val artists = otherCase.flatMap { artist: Artist =>
+        if ((artist.websites intersect eventWebsites).nonEmpty) Option(artist)
+        else None
+      }
+      artists 
   }
 
   def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
@@ -116,7 +111,7 @@ object SearchArtistsController extends Controller {
   }
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
-    WS.url("https://graph.facebook.com/v2.4/" + normalizeFacebookUrl(url))
+    WS.url("https://graph.facebook.com/" + Utilities.facebookApiVersion + "/" + normalizeFacebookUrl(url))
       .withQueryString(
         "fields" -> facebookArtistFields,
         "access_token" -> facebookToken)
@@ -133,11 +128,10 @@ object SearchArtistsController extends Controller {
           val normalizedUrl = alreadyNormalizedUrl.substring(alreadyNormalizedUrl.indexOf("facebook.com/") + 13)
           if (normalizedUrl.indexOf("pages/") > -1) {
             val idRegex = new Regex("/[0-9]+")
-            val a = idRegex.findAllIn(normalizedUrl).toSeq.headOption match {
+            idRegex.findAllIn(normalizedUrl).toSeq.headOption match {
               case Some(id) => Option(id.replace("/", ""))
               case None => None
             }
-            a
           } else if (normalizedUrl.indexOf("/") > -1) {
             Option(normalizedUrl.take(normalizedUrl.indexOf("/")))
           } else {

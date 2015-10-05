@@ -320,7 +320,7 @@ object Organizer {
   def getOrganizerInfo(maybeOrganizerFacebookId: Option[String]): Future[Option[Organizer]] = maybeOrganizerFacebookId match {
     case None => Future { None }
     case Some(organizerId) =>
-      WS.url("https://graph.facebook.com/v2.2/" + organizerId)
+      WS.url("https://graph.facebook.com/"+ Utilities.facebookApiVersion +"/" + organizerId)
         .withQueryString(
           "fields" -> "name,description,cover{source},location,phone,public_transit,website",
           "access_token" -> facebookToken)

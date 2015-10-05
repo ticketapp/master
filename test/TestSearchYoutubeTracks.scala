@@ -108,7 +108,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       whenReady(enumerateYoutubeTracks |>> iteratee, timeout(Span(10, Seconds))) { any => any }
     }
 
-    "return a list of the Youtube channel Ids" in {
+    "return a set of the Youtube channel Ids" in {
       val websites = Set("www.qds.com", "https://www.youtube.com/user/TheOfficialSkrillex",
         "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA")
 
@@ -124,8 +124,8 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       val expectedNames = Set("theofficialskrillex")
 
       getYoutubeUserNames(websites) mustBe expectedNames
-
     }
+
     "return ids of user youtube" in {
       val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
         Option("description"), "facebookUrl3", Set("website"))
@@ -134,8 +134,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
       val expectedIds = Set("UC_TVqp_SyG6j5hG-xVRy95A")
       val eventuallyYoutubeId = getYoutubeChannelIdsByUserName(artist, userNames)
-      whenReady(eventuallyYoutubeId, timeout(Span(10, Seconds))) {_ mustBe expectedIds }
-
+      whenReady(eventuallyYoutubeId, timeout(Span(10, Seconds))) { _ mustBe expectedIds }
     }
 
     "return set of youtube tracks" in {
@@ -146,13 +145,13 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
       val uuid = UUID.fromString("04d64aef-2baa-42b3-a0dc-07f77da9303d")
 
-      val oneExpectedTrack = Track(uuid, "Welcome to Topsify", "ISo15c2zKa4", 'y',
+      val expectedTrack = Track(uuid, "Welcome to Topsify", "ISo15c2zKa4", 'y',
         "https://i.ytimg.com/vi/ISo15c2zKa4/default.jpg", "facebookUrl3", "Skrillex", None, None, None, List())
 
       val eventuallyYoutubeTracks = getYoutubeTracksByChannelId(artist, youtubeChannel)
 
       whenReady(eventuallyYoutubeTracks, timeout(Span(10, Seconds))) { tracks =>
-        tracks.map { _.copy(trackId = uuid) } should contain (oneExpectedTrack)
+        tracks.map { _.copy(trackId = uuid) } should contain (expectedTrack)
       }
     }
   }

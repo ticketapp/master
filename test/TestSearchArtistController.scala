@@ -54,7 +54,9 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "facebook.com/theamityafflictionofficial",
         "facebook.com/defeaterband",
         "facebook.com/musicseptembre?fref=ts",
-        "facebook.com/paulatempleofficial")
+        "facebook.com/paulatempleofficial",
+        "Facebook.com/djvadim",
+        "https://www.Facebook.com/djvadim?_rdr")
 
       val normalizedUrls = Set("fitforakingband",
         "loheem",
@@ -75,11 +77,11 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "monoofjapan",
         "jp-manova",
         "nemo.nebbia",
-        "kunamaze")
+        "kunamaze",
+        "djvadim",
+        "djvadim")
 
-      websites.map{normalizeFacebookUrl(_)} mustBe normalizedUrls
-      normalizeFacebookUrl("Facebook.com/djvadim") mustBe "djvadim"
-      normalizeFacebookUrl("https://www.Facebook.com/djvadim?_rdr") mustBe "djvadim"
+      websites.map{ normalizeFacebookUrl } mustBe normalizedUrls
     }
 
     "remove useless words in a SoundCloudUrl (even if it contains uppercase letters)" in {
@@ -165,9 +167,13 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "soundcloud.com/paulatemple",
         "facebook.com/musicseptembre?fref=ts",
         "facebook.com/paulatempleofficial")
+
+      val expectedArtists = Set("The Amity Affliction", "Kuna Maze", "Being As An Ocean", "Nemo Nebbia", "Fit For A King",
+        "Defeater", "BURNING DOWN ALASKA", "Nosaj Thing", "Mono (Japan)", "SÓLSTAFIR", "The Ocean Collective", "LOHEEM"
+      ,"woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
+
       whenReady(getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
-        _.size mustBe 20
-      }
+        _.flatten.map{ artist => artist.name } mustBe expectedArtists      }
     }
 
     "find artists in event's title" in {
@@ -184,8 +190,13 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       "discogs.com/artist/2922409-binny-2",
       "discogs.com/label/447040-clft"
       )
+      val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "Hein Cooper")
       whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
+<<<<<<< HEAD
         _.size mustBe 4
+=======
+        _.map{ artist => artist.name } mustBe expectedArtists
+>>>>>>> review
       }
     }
   }

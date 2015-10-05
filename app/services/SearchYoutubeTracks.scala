@@ -135,7 +135,7 @@ object SearchYoutubeTracks {
         "maxResults" -> "20",
         "key" -> youtubeKey)
       .get()
-      .map { response => removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track:Track =>
+      .map { response => removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
         track.copy(title = normalizeTrackTitle(track.title, artist.name))
       }
     }
