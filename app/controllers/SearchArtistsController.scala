@@ -105,7 +105,7 @@ object SearchArtistsController extends Controller {
     }
 
     soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
-      case Some(facebookUrls: Seq[String]) if facebookUrls.length > 0 => Option(facebookUrls.head)
+      case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
       case _ => None
     }
   }
