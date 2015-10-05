@@ -54,7 +54,9 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "facebook.com/theamityafflictionofficial",
         "facebook.com/defeaterband",
         "facebook.com/musicseptembre?fref=ts",
-        "facebook.com/paulatempleofficial")
+        "facebook.com/paulatempleofficial",
+        "Facebook.com/djvadim",
+        "https://www.Facebook.com/djvadim?_rdr")
 
       val normalizedUrls = Set("fitforakingband",
         "loheem",
@@ -75,11 +77,11 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "monoofjapan",
         "jp-manova",
         "nemo.nebbia",
-        "kunamaze")
+        "kunamaze",
+        "djvadim",
+        "djvadim")
 
-      websites.map{normalizeFacebookUrl(_)} mustBe normalizedUrls
-      normalizeFacebookUrl("Facebook.com/djvadim") mustBe "djvadim"
-      normalizeFacebookUrl("https://www.Facebook.com/djvadim?_rdr") mustBe "djvadim"
+      websites.map{ normalizeFacebookUrl } mustBe normalizedUrls
     }
 
     "remove useless words in a SoundCloudUrl (even if it contains uppercase letters)" in {

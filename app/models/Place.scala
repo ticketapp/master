@@ -122,7 +122,7 @@ object Place {
 
   def getPlaceOnFacebook(placeFacebookId: Option[String]): Future[Option[Place]] = placeFacebookId match {
     case Some(id) =>
-      WS.url("https://graph.facebook.com/v2.4/" + id)
+      WS.url("https://graph.facebook.com/" + Utilities.facebookApiVersion +"/" + id)
         .withQueryString(
           "fields" -> "about,location,website,hours,cover,name",
           "access_token" -> facebookToken)
