@@ -29,7 +29,7 @@ object Utilities {
 
   val UNIQUE_VIOLATION = "23505"
   val FOREIGN_KEY_VIOLATION = "23503"
-  val facebookApiVersion = "2.4"
+  val facebookApiVersion = "v2.4"
 
   case class GeographicPoint(geoPoint: String) {
     require(geographicPointPattern.pattern.matcher(geoPoint).matches, "Invalid geographicPoint")
@@ -72,9 +72,9 @@ object Utilities {
   def normalizeUrl(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
 
-  def removeMailFromListOfWebsites(websites: Set[String]): Set[String] = {
-    websites.filter(website => website.indexOf("@") == -1)
-  }
+  def removeMailFromListOfWebsites(websites: Set[String]): Set[String] = websites.filter(website =>
+    website.indexOf("@") == -1)
+
 
   def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
 

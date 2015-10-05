@@ -154,7 +154,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "get an exiting place by facebookId when saving new event by facebookId" in {
+    "get an exiting place by facebookId" in {
       val maybeFacebookId = Option("117030545096697")
 
       val placeName = "Le transbordeur"
