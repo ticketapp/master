@@ -35,5 +35,23 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
         (68442, Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls", "facebook.com/worakls"))
       }
     }
+
+    "compute the confidence of an souncloud with websites" in {
+      val artistWebsites = Set("hungrymusic.fr",  "youtube.com/user/worakls/videos", "twitter.com/worakls")
+      val facebookId = Some("100297159501")
+      val facebookUrl = "worakls"
+      val SCId1 = 124
+      val SCId2 = 1234
+      val SCId3 = 12345
+      val listWebsitesSc1 = Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls",
+        "facebook.com/worakls")
+      val listWebsitesSc2 = Seq("facebook.com/pages/nto/50860802143", "hungrymusic.fr", "youtube.com/user/ntotunes",
+        "twitter.com/#!/ntohungry")
+      val listWebsitesSc3 = Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls")
+
+      computationScConfidence(artistWebsites, listWebsitesSc1, facebookUrl, facebookId, SCId1) mustBe (124, 1.0)
+      computationScConfidence(artistWebsites, listWebsitesSc2, facebookUrl, facebookId, SCId2) mustBe (1234, 0.07826595210746258.toFloat)
+      computationScConfidence(artistWebsites, listWebsitesSc3, facebookUrl, facebookId, SCId3) mustBe (12345, 0.5258055254220182.toFloat)
+    }
   }
 }
