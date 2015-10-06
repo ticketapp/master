@@ -12,6 +12,7 @@ import anorm.SqlParser._
 import play.api.db.DB
 import play.api.Play.current
 import securesocial.core.IdentityId
+import services.SearchSoundCloudTracks
 import scala.util.Success
 import scala.util.Failure
 import play.api.libs.concurrent.Execution.Implicits._
@@ -25,6 +26,13 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
         artists should not be empty
       }
+
+      whenReady (getEventuallyFacebookArtists("worakls"), timeout(Span(6, Seconds))) { artists =>
+        artists.foreach(artist =>
+          whenReady(SearchSoundCloudTracks.getSoundCloudTracksNotDefinedInFb(artist), timeout(Span(5, Seconds))) {
+                 _ mustBe 1
+               })
+           }
     }
 
     "find Rone (an artist) on Facebook" in {
