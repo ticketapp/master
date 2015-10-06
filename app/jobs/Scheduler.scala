@@ -4,6 +4,7 @@ import java.util.Date
 import controllers.SchedulerException
 import models.Genre._
 import play.api.Logger
+import play.api.libs.iteratee.Iteratee
 import play.api.libs.ws.WS
 import play.api.libs.ws.Response
 import play.api.libs.json._
@@ -22,11 +23,12 @@ import services.Utilities.{ facebookToken, googleKey }
 object Scheduler {
 
   def start(): Unit = {
-    findEventsForPlaces
-    findEventsForOrganizers
+    findEventsForPlaces()
+    findEventsForOrganizers()
+    findTracksForArtists()
   }
   
-  def findEventsForOrganizers: Unit = {
+  def findEventsForOrganizers(): Unit = {
     Organizer.findAllWithFacebookId map {
       _ map { organizer =>
         Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId(organizer.facebookId.get) map {
@@ -39,18 +41,24 @@ object Scheduler {
     }
   }
 
-  def findEventsForPlaces: Unit = {
-    Place.findAllWithFacebookId map {
-      _ map { place =>
-        Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId(place.facebookId.get) map {
-          _.map { eventId =>
-            Event.findEventOnFacebookByFacebookId(eventId) map {
-              saveEventWithGeographicPointAndPlaceRelation(_, place.placeId.get, place.geographicPoint)
-            }
+  def findEventsForPlaces(): Unit = Place.findAllWithFacebookId map {
+    _ map { place =>
+      Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId(place.facebookId.get) map {
+        _.map { eventId =>
+          Event.findEventOnFacebookByFacebookId(eventId) map {
+            saveEventWithGeographicPointAndPlaceRelation(_, place.placeId.get, place.geographicPoint)
           }
         }
       }
     }
+  }
+
+  def findTracksForArtists(): Unit = Artist.findAll map { artist =>
+    println(Artist.PatternAndArtist(artist.name, artist))
+    Artist.getArtistTracks(Artist.PatternAndArtist(artist.name, artist)) |>> Iteratee.foreach{ a =>
+      println(a)
+      a.map { Track.save }
+  }
   }
 
   def saveEventWithGeographicPointAndPlaceRelation(facebookEvent: Event, placeId: Long,
