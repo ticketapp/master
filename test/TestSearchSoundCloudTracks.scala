@@ -1,4 +1,7 @@
-import models.Artist
+import java.util.UUID
+
+import controllers.SearchArtistsController._
+import models.{Artist, Track}
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import services.SearchSoundCloudTracks._
@@ -52,6 +55,19 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
       computationScConfidence(artistWebsites, listWebsitesSc1, facebookUrl, facebookId, SCId1) mustBe (124, 1.0)
       computationScConfidence(artistWebsites, listWebsitesSc2, facebookUrl, facebookId, SCId2) mustBe (1234, 0.07826595210746258.toFloat)
       computationScConfidence(artistWebsites, listWebsitesSc3, facebookUrl, facebookId, SCId3) mustBe (12345, 0.5258055254220182.toFloat)
+    }
+
+    "save soundcloud websites for an artist" in {
+      val track = Track(UUID.fromString("9a9ca254-0245-4a69-b66c-494f3a0ced3e"),"Toi (Snippet)",
+      "https://api.soundcloud.com/tracks/190465678/stream","s".charAt(0),
+      "https://i1.sndcdn.com/artworks-000106271172-2q3z78-large.jpg","worakls","Worakls",
+      Some("http://soundcloud.com/worakls/toi-snippet"),None,None,List())
+      val artist = Artist(Option(26.toLong), Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
+        Option("description"), "facebookUrl", Set("website"))
+      whenReady(addSoundCloudWebsitesIfNotInWebsites(Some(track), artist), timeout(Span(6, Seconds))) {
+        _ mustBe List("http://www.hungrymusic.fr", "https://www.youtube.com/user/worakls/videos",
+          "https://twitter.com/worakls", "https://www.facebook.com/worakls/")
+      }
     }
   }
 }

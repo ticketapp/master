@@ -33,7 +33,8 @@ object SearchSoundCloudTracks {
           computationScConfidence(artist.websites, tuple._2, artist.facebookUrl, artist.facebookId, tuple._1)
         }
         Future.sequence(
-        listOfScWithConfidence.filter(_._2 == listOfScWithConfidence.head._2).sortWith(_._2 > _._2).map { verifiedSC =>
+        listOfScWithConfidence.sortWith(_._2 > _._2).filter(_._2 == listOfScWithConfidence.head._2).filter(_._2 > 0).map
+        { verifiedSC =>
           getSoundCloudTracksWithLink(verifiedSC._1.toString, artist)
         }).map {_.flatten}
       }
@@ -60,7 +61,7 @@ object SearchSoundCloudTracks {
       }
     }
   }
-  
+
 
   def getTupleIdAndSoundCloudWebsitesForIds(ids: Seq[Long]): Future[Seq[(Long, Seq[String])]] = Future.sequence(
     ids.map { id =>
@@ -142,15 +143,25 @@ object SearchSoundCloudTracks {
         .replaceFirstIn(title, ""),
       "")
 
-  def addSoundCloudWebsiteIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Unit = maybeTrack match {
-    case None =>
+  def addSoundCloudWebsitesIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Future[Seq[String]] =
+     maybeTrack match {
+    case None => Future(Seq("none"))
     case Some(track: Track) => track.redirectUrl match {
-      case None =>
-      case Some(redirectUrl) => val normalizedUrl = normalizeUrl(redirectUrl)
-        if (!artist.websites.contains(
-          normalizeUrl(normalizedUrl).dropRight(normalizedUrl.length - normalizedUrl.lastIndexOf("/")))) {
-          Artist.addWebsite(artist.artistId, normalizedUrl)
-        }
+      case None => Future(Seq("none"))
+      case Some(redirectUrl) => val normalizedUrl = removeUselessInSoundCloudWebsite(normalizeUrl(redirectUrl)).
+        substring("soundcloud.com/".length)
+        WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
+          .withQueryString("client_id" -> soundCloudClientId)
+          .get()
+          .map { soundCloudResponse =>
+          readSoundCloudWebsites(soundCloudResponse).map { website =>
+            val normalizedWebsite = normalizeUrl(website)
+            if (!artist.websites.contains(normalizedWebsite)) {
+              Artist.addWebsite(artist.artistId, normalizedWebsite)
+            }
+            }
+          readSoundCloudWebsites(soundCloudResponse)
+          }
     }
   }
 }

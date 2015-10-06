@@ -1,21 +1,35 @@
 import java.util.Date
 import controllers.DAOException
-import models.{Track, Artist}
+import models.Artist.delete
+import models.Artist.find
+import models.Artist.isFollowed
+import models.Artist.save
+import models.Artist.update
+import models.{Genre, Track, Artist}
 import models.Artist._
 import org.postgresql.util.PSQLException
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
+import play.api.libs
+import play.api.libs.iteratee.Step.Done
 import securesocial.core.Identity
 import anorm._
 import anorm.SqlParser._
 import play.api.db.DB
 import play.api.Play.current
 import securesocial.core.IdentityId
+import scala.concurrent.ExecutionContext
 import scala.util.Success
 import scala.util.Failure
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import java.util.UUID.randomUUID
+import play.api.libs.iteratee.{Done, Enumeratee, Enumerator, Iteratee}
+import ExecutionContext.Implicits.global
+
+
 
 class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
@@ -24,7 +38,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     "be saved and deleted in database and return the new id" in {
       val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
         Option("description"), "facebookUrl", Set("website"))
-      val artistId = save(artist).get
+      val artistId = Artist.save(artist).get
       try {
         find(artistId) mustBe Option(artist.copy(artistId = Some(artistId),
           description = Some("<div class='column large-12'>description</div>")))
@@ -113,6 +127,20 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
         case e:Exception => throw e
       } finally {
         delete(artistId.get) mustBe 1
+      }
+    }
+
+    "get tracks for an artist" in {
+      val patternAndArtist = PatternAndArtist("Feu! Chatterton",
+        Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
+          Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
+            "youtube.com/user/feuchatterton", "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"),
+          List(),List(),None,None))
+      val enumerateTracks = getArtistTracks(patternAndArtist)
+      val iteratee = Iteratee.foreach[Set[Track]]{a => println("a = " + a)}
+
+      whenReady(enumerateTracks |>> iteratee, timeout(Span(6, Seconds))) {
+          a=> a
       }
     }
   }
