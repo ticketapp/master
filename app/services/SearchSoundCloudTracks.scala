@@ -152,15 +152,25 @@ object SearchSoundCloudTracks {
         .replaceFirstIn(title, ""),
       "")
 
-  def addSoundCloudWebsiteIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Unit = maybeTrack match {
-    case None =>
+  def addSoundCloudWebsitesIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Future[Seq[String]] =
+     maybeTrack match {
+    case None => Future(Seq.empty)
     case Some(track: Track) => track.redirectUrl match {
-      case None =>
-      case Some(redirectUrl) => val normalizedUrl = normalizeUrl(redirectUrl)
-        if (!artist.websites.contains(
-          normalizeUrl(normalizedUrl).dropRight(normalizedUrl.length - normalizedUrl.lastIndexOf("/")))) {
-          Artist.addWebsite(artist.artistId, normalizedUrl)
-        }
+      case None => Future(Seq.empty)
+      case Some(redirectUrl) => val normalizedUrl = removeUselessInSoundCloudWebsite(normalizeUrl(redirectUrl)).
+        substring("soundcloud.com/".length)
+        WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
+          .withQueryString("client_id" -> soundCloudClientId)
+          .get()
+          .map { soundCloudResponse =>
+            readSoundCloudWebsites(soundCloudResponse).map { website =>
+              val normalizedWebsite = normalizeUrl(website)
+              if (!artist.websites.contains(normalizedWebsite)) {
+                Artist.addWebsite(artist.artistId, normalizedWebsite)
+              }
+            }
+            readSoundCloudWebsites(soundCloudResponse)
+          }
     }
   }
 }

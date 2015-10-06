@@ -76,7 +76,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
           "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
 
       whenReady(getYoutubeTracksByArtistAndTitle(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
-        tracks => val tracksTitle = tracks.map { track => track.title}
+        tracks => val tracksTitle = tracks.map { track => track.title }
           tracksTitle should contain (expectedTrack.title)
       }
     }
@@ -101,9 +101,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
       val enumerateYoutubeTracks = getYoutubeTracksByEchonestId(artist, "ARNJ7441187B999AFD")
 
-      val iteratee = Iteratee.foreach[Set[Track]](a => {
-        a should not be empty
-      })
+      val iteratee = Iteratee.foreach[Set[Track]](_ should not be empty)
 
       whenReady(enumerateYoutubeTracks |>> iteratee, timeout(Span(10, Seconds))) { any => any }
     }
@@ -115,15 +113,26 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
       val expectedIds = Set("UCGWpjrgMylyGVRIKQdazrPA")
 
-      getYoutubeChannelId(websites) mustBe expectedIds
+      filterAndNormalizeYoutubeChannelIds(websites) mustBe expectedIds
     }
 
     "return names of user youtube" in {
-      val websites = Set("youtube.com/theofficialskrillex")
+      val websites = Set("youtube.com/user/theofficialskrillex/videos")
 
       val expectedNames = Set("theofficialskrillex")
 
       getYoutubeUserNames(websites) mustBe expectedNames
+    }
+
+    "return tracks for YT User" in {
+      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
+        Option("description"), "facebookUrl3", Set("hungrymusic.fr","soundcloud.com/worakls","hungrymusic.fr",
+          "youtube.com/user/worakls/videos","twitter.com/worakls","facebook.com/worakls","hungrymusic.fr",
+          "youtube.com/user/worakls/videos","twitter.com/worakls","facebook.com/worakls"))
+      whenReady(getYoutubeTracksByYoutubeUser(artist), timeout(Span(5, Seconds))) {tracks =>
+        tracks shouldBe a [Set[Track]]
+        tracks should not be empty
+      }
     }
 
     "return ids of user youtube" in {
@@ -152,6 +161,26 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
       whenReady(eventuallyYoutubeTracks, timeout(Span(10, Seconds))) { tracks =>
         tracks.map { _.copy(trackId = uuid) } should contain (expectedTrack)
+      }
+    }
+
+    "return set of youtube tracks by websites" in {
+      val artist = Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
+        Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
+          "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"),List(),List(),None,None)
+      whenReady(getYoutubeTracksByYoutubeUser(artist), timeout(Span(5, Seconds))) {
+        _ shouldBe a [Set[Track]]
+      }
+    }
+
+    "return set of youtube tracks by websites with channel id" in {
+      val artist = Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
+        Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
+          "youtube.com/user/feuchatterton", "youtube.com/user/feuchatterton",
+          "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"),List(),List(),None,None)
+      whenReady(getYoutubeTracksByChannel(artist), timeout(Span(5, Seconds))) { tracks =>
+        tracks shouldBe a [Set[Track]]
+        tracks should not be empty
       }
     }
   }
