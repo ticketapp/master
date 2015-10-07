@@ -92,18 +92,16 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
 
         val tracksEnumerator = Artist.getArtistTracks(patternAndArtistWithArtistId)
-        val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
-          val filteredTracks: Set[Track] = tracks.flatMap { track =>
-            Track.save(track)
-            Some(track)
-          }
-          Json.toJson(filteredTracks)
+
+        val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]] { tracks => 
+          Json.toJson(tracks)
         }
+
         val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
 
         Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { Track.save }) }
 
-        Ok.chunked(tracksJsonEnumerator)
+        Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
       }
     )
   }
