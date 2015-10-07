@@ -29,16 +29,13 @@ object SearchYoutubeTracks {
   )
 
   def getYoutubeTracksByChannel(artist: Artist): Future[Set[Track]] = Future.sequence (
-      filterAndNormalizeYoutubeChannelIds(artist.websites) map {a =>
-        println("a = " + a)
-         getYoutubeTracksByChannelId(artist, a)
+      filterAndNormalizeYoutubeChannelIds(artist.websites) map {
+         getYoutubeTracksByChannelId(artist, _)
     }
   ).map { _.flatten.toSet }
 
   def getYoutubeTracksByYoutubeUser(artist: Artist): Future[Set[Track]] = {
     val youtubeUserNames = getYoutubeUserNames(artist.websites)
-
-    println("youtubeUserNames = " + youtubeUserNames)
 
     val eventuallyYoutubeChannelIds = Future.sequence(youtubeUserNames map { userName =>
       getYoutubeChannelIdsByUserName(artist, userName)

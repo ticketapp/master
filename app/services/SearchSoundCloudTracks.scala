@@ -28,18 +28,30 @@ object SearchSoundCloudTracks {
 
   def getSoundCloudTracksNotDefinedInFb(artist: Artist): Future[Seq[Track]] =
     getSoundCloudIdsForName(artist.name) flatMap {
-      getTupleIdAndSoundCloudWebsitesForIds(_) flatMap {listOfTupleIdScAndWebsite =>
-        val listOfScWithConfidence = listOfTupleIdScAndWebsite.map { tuple =>
+      getTupleIdAndSoundCloudWebsitesForIds(_) flatMap { listOfTupleIdScAndWebsite =>
+        val listOfSCIdsWithConfidence = listOfTupleIdScAndWebsite.map { tuple =>
           computationScConfidence(artist.websites, tuple._2, artist.facebookUrl, artist.facebookId, tuple._1)
         }
         Future.sequence(
-        listOfScWithConfidence.sortWith(_._2 > _._2).filter(_._2 == listOfScWithConfidence.head._2).filter(_._2 > 0).map
-        { verifiedSC =>
-          getSoundCloudTracksWithLink(verifiedSC._1.toString, artist)
-        }).map {_.flatten}
+          listOfSCIdsWithConfidence.filter(_._2 > 0).sortWith(_._2 > _._2).filter(_._2 == listOfSCIdsWithConfidence.head._2).map { verifiedSC =>
+            getSoundCloudTracksWithLink(verifiedSC._1.toString, artist)
+          }
+        ).map {_.flatten}
       }
     }
+  /*
+    def getSoundCloudTracksNotDefinedInFb(artist: Artist): Future[Seq[Track]] =
 
+          Future.sequence(
+            val soundcloudIdWithBestConfidence = listOfSCIdsWithConfidence.maxBy(_._2)
+            val b = listOfSCIdsWithConfidence.filter(_._2 == soundcloudIdWithBestConfidence._2)
+          b map { verifiedSC =>
+              getSoundCloudTracksWithLink(verifiedSC._1.toString, artist)
+            }
+          ).map {_.flatten}
+        }
+      }
+   */
   def computationScConfidence(artistWebsites: Set[String], SCWebsites: Seq[String], facebookArtistUrl: String,
                          facebookArtistId: Option[String], ScId: Long): (Long, Float) = {
     if(SCWebsites.filter(_ contains "facebook.com/").exists(_ contains facebookArtistUrl) ||
@@ -156,7 +168,7 @@ object SearchSoundCloudTracks {
           .map { soundCloudResponse =>
           readSoundCloudWebsites(soundCloudResponse).map { website =>
             val normalizedWebsite = normalizeUrl(website)
-            if (!artist.websites.contains(normalizedWebsite)) {
+            if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1) {
               Artist.addWebsite(artist.artistId, normalizedWebsite)
             }
             }
