@@ -94,10 +94,8 @@ object ArtistController extends Controller with securesocial.core.SecureSocial {
         val tracksEnumerator = Artist.getArtistTracks(patternAndArtistWithArtistId)
         val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
           val filteredTracks: Set[Track] = tracks.flatMap { track =>
-            Track.save(track) match {
-              case Success(true) => Some(track)
-              case _ => None
-            }
+            Track.save(track)
+            Some(track)
           }
           Json.toJson(filteredTracks)
         }

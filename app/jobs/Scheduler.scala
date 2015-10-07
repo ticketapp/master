@@ -23,9 +23,9 @@ import services.Utilities.{ facebookToken, googleKey }
 object Scheduler {
 
   def start(): Unit = {
-    findEventsForPlaces()
+    /*findEventsForPlaces()
     findEventsForOrganizers()
-    findTracksForArtists()
+    findTracksForArtists()*/
   }
   
   def findEventsForOrganizers(): Unit = {
@@ -54,9 +54,7 @@ object Scheduler {
   }
 
   def findTracksForArtists(): Unit = Artist.findAll map { artist =>
-    println(Artist.PatternAndArtist(artist.name, artist))
     Artist.getArtistTracks(Artist.PatternAndArtist(artist.name, artist)) |>> Iteratee.foreach{ a =>
-      println(a)
       a.map { Track.save }
   }
   }
