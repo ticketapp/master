@@ -260,7 +260,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             });
                         }, 0);
                     }
-                    value.forEach(pushTrack);*/         
+                    value.forEach(pushTrack);*/
                     $timeout(function () {
                         $rootScope.$apply(function () {
                             $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);

@@ -247,18 +247,19 @@ object Artist {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
         Artist.addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
-        Enumerator(soundCloudTracks.toSet)
+        addSoundCloudWebsitesIfNotInWebsites(soundCloudTracks.headOption, patternAndArtist.artist)
+        Enumerator(soundCloudTracks.toSet).andThen(Enumerator.eof)
       })
 
     val youtubeTracksEnumerator =
-      getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern)
+      getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern).andThen(Enumerator.eof)
 
-    val youtubeTracksFromChannel = Enumerator.flatten(getYoutubeTracksByChannel(patternAndArtist.artist) map { track =>
-      Enumerator(track)
-    })
+   val youtubeTracksFromChannel = Enumerator.flatten(getYoutubeTracksByChannel(patternAndArtist.artist) map { track =>
+     Enumerator(track).andThen(Enumerator.eof)
+   } )
 
     val youtubeTracksFromYoutubeUser = Enumerator.flatten(getYoutubeTracksByYoutubeUser(patternAndArtist.artist) map { track =>
-      Enumerator(track)
+      Enumerator(track).andThen(Enumerator.eof)
     })
 
     Enumerator.interleave(soundCloudTracksEnumerator, youtubeTracksEnumerator, youtubeTracksFromChannel,
