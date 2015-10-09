@@ -23,9 +23,9 @@ import services.Utilities.{ facebookToken, googleKey }
 object Scheduler {
 
   def start(): Unit = {
-    /*findEventsForPlaces()
+    findEventsForPlaces()
     findEventsForOrganizers()
-    findTracksForArtists()*/
+    findTracksForArtists()
   }
   
   def findEventsForOrganizers(): Unit = {

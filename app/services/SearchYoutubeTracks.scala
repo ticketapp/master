@@ -74,9 +74,8 @@ object SearchYoutubeTracks {
         val nameWithoutUser = name.substring(name.indexOf("youtube.com/") + 12)
         if (nameWithoutUser.indexOf("/") > -1) {
           nameWithoutUser.substring(0, nameWithoutUser.lastIndexOf("/") + 1).stripSuffix("/")
-        } else {
+        } else
           nameWithoutUser
-        }
       }
     }
   }

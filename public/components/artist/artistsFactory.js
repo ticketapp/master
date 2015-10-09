@@ -263,7 +263,9 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     value.forEach(pushTrack);*/
                     console.log(value)
                     if (value == "end") {
-                        $rootScope.loadingTracks = false;
+                        $rootScope.$apply(function () {
+                            $rootScope.loadingTracks = false;
+                        });
                     } else {
                         $timeout(function () {
                             $rootScope.$apply(function () {

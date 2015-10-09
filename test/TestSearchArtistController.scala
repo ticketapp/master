@@ -189,8 +189,8 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "soundcloud.com/osunlade",
       "discogs.com/artist/1156643-lee-holman",
       "discogs.com/artist/2922409-binny-2",
-      "discogs.com/label/447040-clft"
-      )
+      "discogs.com/label/447040-clft")
+      
       val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "Hein Cooper")
       whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
         _.map{ artist => artist.name } mustBe expectedArtists
