@@ -56,7 +56,7 @@ object Scheduler {
   def findTracksForArtists(): Unit = Artist.findAll map { artist =>
     Artist.getArtistTracks(Artist.PatternAndArtist(artist.name, artist)) |>> Iteratee.foreach{ tracks =>
       tracks.map { Track.save }
-  }
+    }
   }
 
   def saveEventWithGeographicPointAndPlaceRelation(facebookEvent: Event, placeId: Long,

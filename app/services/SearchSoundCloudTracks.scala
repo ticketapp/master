@@ -59,7 +59,6 @@ object SearchSoundCloudTracks {
     }
   }
 
-
   def calculateConfidence(numberScWebsites: Int, numberSameWebsites: Int): Float = {
     val up = numberSameWebsites.toDouble
     val down = (numberScWebsites - numberSameWebsites).toDouble
@@ -163,13 +162,13 @@ object SearchSoundCloudTracks {
           .withQueryString("client_id" -> soundCloudClientId)
           .get()
           .map { soundCloudResponse =>
-            readSoundCloudWebsites(soundCloudResponse).map { website =>
-              val normalizedWebsite = normalizeUrl(website)
-              if (!artist.websites.contains(normalizedWebsite)) {
-                Artist.addWebsite(artist.artistId, normalizedWebsite)
-              }
+          readSoundCloudWebsites(soundCloudResponse).map { website =>
+            val normalizedWebsite = normalizeUrl(website)
+            if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1) {
+              Artist.addWebsite(artist.artistId, normalizedWebsite)
             }
-            readSoundCloudWebsites(soundCloudResponse)
+            }
+          readSoundCloudWebsites(soundCloudResponse)
           }
     }
   }
