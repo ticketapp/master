@@ -28,46 +28,56 @@ object SearchSoundCloudTracks {
 
   def getSoundCloudTracksNotDefinedInFb(artist: Artist): Future[Seq[Track]] =
     getSoundCloudIdsForName(artist.name) flatMap {
-      getTupleIdAndSoundCloudWebsitesForIds(_) flatMap {listOfTupleIdScAndWebsite =>
+      getSoundcloudWebsites(_) flatMap { listOfTupleIdScAndWebsite =>
         val listOfScWithConfidence = listOfTupleIdScAndWebsite.map { tuple =>
-          computationScConfidence(artist.websites, tuple._2, artist.facebookUrl, artist.facebookId, tuple._1)
+          computationScConfidence(artist, tuple.websites, tuple.soundcloudId)
         }
         Future.sequence(
-        listOfScWithConfidence.filter(_._2 == listOfScWithConfidence.head._2).sortWith(_._2 > _._2).map { verifiedSC =>
-          getSoundCloudTracksWithLink(verifiedSC._1.toString, artist)
-        }).map { _.flatten}
+        listOfScWithConfidence.sortWith(_.confidence > _.confidence)
+          .filter(a => a.confidence == listOfScWithConfidence.head.confidence && a.confidence > 0)
+          .map { verifiedSC =>
+          getSoundCloudTracksWithLink(verifiedSC.soundcloudId.toString, artist)
+        }).map { _.flatten }
       }
     }
 
-  def computationScConfidence(artistWebsites: Set[String], SCWebsites: Seq[String], facebookArtistUrl: String,
-                         facebookArtistId: Option[String], ScId: Long): (Long, Float) = {
-    if(SCWebsites.filter(_ contains "facebook.com/").exists(_ contains facebookArtistUrl) ||
-      SCWebsites.filter(_ contains "facebook.com/").exists(_ contains Some(facebookArtistId))) {
-      (ScId, 1.toFloat)
+  case class SoundCloudArtistConfidence(artistId: Option[Long], soundcloudId: Long, confidence: Float)
+
+  def computationScConfidence(artist: Artist, soundCloudWebsites: Seq[String], soundCloudId: Long): SoundCloudArtistConfidence = {
+    if(soundCloudWebsites.filter(_ contains "facebook.com/").exists(_ contains artist.facebookUrl) ||
+      soundCloudWebsites.filter(_ contains "facebook.com/").exists(_ contains Some(artist.facebookId))) {
+      SoundCloudArtistConfidence(artist.artistId, soundCloudId, 1.toFloat)
     } else {
-      val SCWebsitesWithoutFacebook =  SCWebsites.filterNot(_ contains "facebook.com/")
+      val SCWebsitesWithoutFacebook = soundCloudWebsites.filterNot(_ contains "facebook.com/")
       val numberScWebsites = SCWebsitesWithoutFacebook.size
-      val numberSameWebsites = numberScWebsites - SCWebsitesWithoutFacebook.filterNot(artistWebsites).size
+      val numberSameWebsites = numberScWebsites - SCWebsitesWithoutFacebook.filterNot(artist.websites).size
       if (numberSameWebsites == 0) {
-        (ScId, 0)
+        SoundCloudArtistConfidence(artist.artistId, soundCloudId, 0)
       } else {
-        val up = numberSameWebsites.toDouble
-        val down = (numberScWebsites - numberSameWebsites).toDouble
-        val n = up + down
-        val z = 1.64485
-        val phat = up / n
-        (ScId, ((phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)).toFloat)
+        SoundCloudArtistConfidence(artist.artistId, soundCloudId,calculateConfidence(numberScWebsites, numberSameWebsites))
       }
     }
   }
-  
 
-  def getTupleIdAndSoundCloudWebsitesForIds(ids: Seq[Long]): Future[Seq[(Long, Seq[String])]] = Future.sequence(
-    ids.map { id =>
+
+  def calculateConfidence(numberScWebsites: Int, numberSameWebsites: Int): Float = {
+    val up = numberSameWebsites.toDouble
+    val down = (numberScWebsites - numberSameWebsites).toDouble
+    val n = up + down
+    val z = 1.64485
+    val phat = up / n
+    ((phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)).toFloat
+  }
+
+  case class WebsitesForSoundcloudId(soundcloudId: Long, websites: Seq[String])
+
+  def getSoundcloudWebsites(soundcloudIds: Seq[Long]): Future[Seq[WebsitesForSoundcloudId]] = Future.sequence(
+    soundcloudIds.map { id =>
       WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles")
         .withQueryString("client_id" -> soundCloudClientId)
         .get()
-        .map { soundCloudResponse => (id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
+        .map { soundCloudResponse =>
+        WebsitesForSoundcloudId(id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
       }
     }
   )

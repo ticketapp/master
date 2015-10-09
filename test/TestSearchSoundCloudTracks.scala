@@ -29,7 +29,7 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
     }
 
     "find soundCloud websites for a list of soundCloud ids" in {
-      whenReady(getTupleIdAndSoundCloudWebsitesForIds(List(68442, 4329372, 13302835, 97091845, 129311935, 366396)),
+      whenReady(getSoundcloudWebsites(List(68442, 4329372, 13302835, 97091845, 129311935, 366396)),
         timeout(Span(2, Seconds))) { tupleSoundCloudIdWebsites =>
         tupleSoundCloudIdWebsites should contain
         (68442, Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls", "facebook.com/worakls"))
@@ -37,21 +37,20 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
     }
 
     "compute the confidence of an souncloud with websites" in {
-      val artistWebsites = Set("hungrymusic.fr",  "youtube.com/user/worakls/videos", "twitter.com/worakls")
-      val facebookId = Some("100297159501")
-      val facebookUrl = "worakls"
-      val SCId1 = 124
-      val SCId2 = 1234
-      val SCId3 = 12345
+      val artist = Artist(Some(1), Option("100297159501"), "worakls", Option("imagePath"), Option("description"),
+        "worakls", Set("hungrymusic.fr",  "youtube.com/user/worakls/videos", "twitter.com/worakls"))
+      val soundCloudId1 = 124
+      val soundCloudId2 = 1234
+      val soundCloudId3 = 12345
       val listWebsitesSc1 = Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls",
         "facebook.com/worakls")
       val listWebsitesSc2 = Seq("facebook.com/pages/nto/50860802143", "hungrymusic.fr", "youtube.com/user/ntotunes",
         "twitter.com/#!/ntohungry")
       val listWebsitesSc3 = Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls")
 
-      computationScConfidence(artistWebsites, listWebsitesSc1, facebookUrl, facebookId, SCId1) mustBe (124, 1.0)
-      computationScConfidence(artistWebsites, listWebsitesSc2, facebookUrl, facebookId, SCId2) mustBe (1234, 0.07826595210746258.toFloat)
-      computationScConfidence(artistWebsites, listWebsitesSc3, facebookUrl, facebookId, SCId3) mustBe (12345, 0.5258055254220182.toFloat)
+      computationScConfidence(artist, listWebsitesSc1, soundCloudId1) mustBe SoundCloudArtistConfidence(Some(1), 124, 1.0.toFloat)
+      computationScConfidence(artist, listWebsitesSc2, soundCloudId2) mustBe SoundCloudArtistConfidence(Some(1), 1234, 0.07826595210746258.toFloat)
+      computationScConfidence(artist, listWebsitesSc3, soundCloudId3) mustBe SoundCloudArtistConfidence(Some(1), 12345, 0.5258055254220182.toFloat)
     }
   }
 }
