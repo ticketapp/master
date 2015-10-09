@@ -12,6 +12,7 @@ import anorm.SqlParser._
 import play.api.db.DB
 import play.api.Play.current
 import securesocial.core.IdentityId
+import services.SearchSoundCloudTracks
 import scala.util.Success
 import scala.util.Failure
 import play.api.libs.concurrent.Execution.Implicits._

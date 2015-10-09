@@ -16,6 +16,7 @@ import models.Genre.saveGenreForArtistInFuture
 import scala.language.postfixOps
 import services.Utilities._
 import scala.util.{Success, Failure}
+import play.api.Logger
 
 object SearchYoutubeTracks {
   val youtubeKey = play.Play.application.configuration.getString("youtube.key")
@@ -28,15 +29,16 @@ object SearchYoutubeTracks {
   )
 
   def getYoutubeTracksByChannel(artist: Artist): Future[Set[Track]] = Future.sequence (
-    getYoutubeChannelId(artist.websites) map {
-      getYoutubeTracksByChannelId(artist, _)
+      filterAndNormalizeYoutubeChannelIds(artist.websites) map {youtubeId =>
+         getYoutubeTracksByChannelId(artist, youtubeId)
     }
   ).map { _.flatten.toSet }
 
   def getYoutubeTracksByYoutubeUser(artist: Artist): Future[Set[Track]] = {
     val youtubeUserNames = getYoutubeUserNames(artist.websites)
-    val eventuallyYoutubeChannelIds = Future.sequence(youtubeUserNames map {
-      getYoutubeChannelIdsByUserName(artist, _)
+
+    val eventuallyYoutubeChannelIds = Future.sequence(youtubeUserNames map { userName =>
+      getYoutubeChannelIdsByUserName(artist, userName)
     }).map(_.flatten)
     val eventuallyNestedTracks = eventuallyYoutubeChannelIds map { youtubeChannelIds =>
       youtubeChannelIds map { id => getYoutubeTracksByChannelId(artist, id) }
@@ -45,8 +47,7 @@ object SearchYoutubeTracks {
     eventuallyNestedTracks flatMap { c => Future.sequence(c) } map { _.flatten }
   }
 
-
-  def getYoutubeChannelId(artistWebsites: Set[String]): Set[String] = {
+  def filterAndNormalizeYoutubeChannelIds(artistWebsites: Set[String]): Set[String] = {
     artistWebsites.filter(_.indexOf("youtube.com/channel/") > -1) map {
       _.replaceAll(".*channel/", "")
     }
@@ -54,7 +55,27 @@ object SearchYoutubeTracks {
 
   def getYoutubeUserNames(artistWebsites: Set[String]): Set[String] = {
     val userNames = artistWebsites.filter(_.indexOf("youtube.com/") > -1)
-    userNames map { name => name.stripSuffix("/").substring(name.lastIndexOf("/") + 1) }
+    userNames map { name =>
+      if (name.indexOf("user/") > -1) {
+        val nameWithoutUser = name.substring(name.indexOf("user/") + 5)
+        if (nameWithoutUser.indexOf("/") > -1)
+          nameWithoutUser.substring(0, nameWithoutUser.lastIndexOf("/") + 1).stripSuffix("/")
+        else
+          nameWithoutUser
+      } else if (name.indexOf("channel/") > -1) {
+        val nameWithoutUser = name.substring(name.indexOf("channel/") + 8)
+        if (nameWithoutUser.indexOf("/") > -1)
+          nameWithoutUser.substring(0, nameWithoutUser.lastIndexOf("/") + 1).stripSuffix("/")
+        else
+          nameWithoutUser
+      } else {
+        val nameWithoutUser = name.substring(name.indexOf("youtube.com/") + 12)
+        if (nameWithoutUser.indexOf("/") > -1)
+          nameWithoutUser.substring(0, nameWithoutUser.lastIndexOf("/") + 1).stripSuffix("/")
+        else
+          nameWithoutUser
+      }
+    }
   }
 
   def getYoutubeTracksIfEchonestIdNotFoundByFacebookId(artist: Artist, pattern: String): Enumerator[Set[Track]] = {
