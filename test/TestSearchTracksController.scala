@@ -12,8 +12,6 @@ import play.api.libs.json._
 import play.api.test.{WithApplication, PlaySpecification, FakeRequest}
 import securesocial.core.Identity
 
-
-
 import play.api.Play.current
 
 import scala.language.postfixOps

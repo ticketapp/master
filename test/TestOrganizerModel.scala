@@ -10,8 +10,6 @@ import org.scalatest._
 import Matchers._
 import securesocial.core.Identity
 
-
-
 import play.api.Play.current
 
 import scala.util.Success

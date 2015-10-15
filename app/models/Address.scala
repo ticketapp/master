@@ -17,6 +17,7 @@ import scala.util.{Success, Failure, Try}
 import services.MyPostgresDriver.api._
 import scala.language.postfixOps
 
+
 case class Address (id: Option[Long],
                     geographicPoint: Option[String],
                     city: Option[String],

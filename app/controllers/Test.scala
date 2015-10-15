@@ -6,7 +6,6 @@ import java.text.Normalizer
 import java.util.Date
 import java.util.regex.Pattern
 
-
 import play.api.libs.iteratee.{Concurrent, Iteratee, Enumerator}
 import play.api.libs.ws.WS
 import play.api.libs.ws.WSResponse

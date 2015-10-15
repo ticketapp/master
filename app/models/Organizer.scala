@@ -160,7 +160,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
         Future { Seq.empty }
       case Some(geographicPoint) =>
         findNear(geographicPoint, numberToReturn, offset)
-    }
+  }
+
 
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Int] = save(organizer) flatMap {
     case organizer: Organizer => saveEventRelation(eventId, organizer.id.get)

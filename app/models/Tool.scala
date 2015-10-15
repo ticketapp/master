@@ -1,8 +1,6 @@
 package models
 
 
-
-
 import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException

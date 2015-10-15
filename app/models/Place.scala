@@ -41,6 +41,18 @@ class PlaceMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
     dt => new Timestamp(dt.getMillis),
     ts => new DateTime(ts.getTime))
 
+  def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
+                webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
+                imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
+    try {
+      val address = Option(Address(None, None, city, zip, street))
+      new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath/*, address*/)
+    } catch {
+      case e: IllegalArgumentException =>
+        new Place(None, name, facebookId, geographicPoint, description, webSite, capacity, openingHours, imagePath, None)
+    }
+  }
+
   class Places(tag: Tag) extends Table[Place](tag, "places") {
     def id = column[Long]("placeid", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
@@ -136,6 +148,39 @@ class PlaceMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
 /*
   def findIdByFacebookId(placeFacebookId: Option[String]): Future[Option[Long]] = {
     val query =
+=======
+  def save(place: Place): Future[Try[Option[Long]]] = {
+    val eventuallyAddressId = Address.saveAddressInFutureWithGeoPoint(place.address)
+    eventuallyAddressId map {
+      case Success(addressId) =>
+        val description = Utilities.formatDescription(place.description)
+        DB.withConnection { implicit connection =>
+          Try {
+            SQL(
+              s"""SELECT insertPlace({name}, {geographicPoint}, {addressId}, {facebookId}, {description},
+                 |{webSites}, {capacity}, {openingHours}, {imagePath}, {organizerId})""".stripMargin)
+              .on(
+                'name -> place.name,
+                'geographicPoint -> place.geographicPoint,
+                'addressId -> addressId,
+                'facebookId -> place.facebookId,
+                'description -> description,
+                'webSites -> Utilities.setToOptionString(getNormalizedWebsitesInText(place.webSites)),
+                'capacity -> place.capacity,
+                'openingHours -> place.openingHours,
+                'imagePath -> place.imagePath,
+                'organizerId -> organizerMethods.findIdByFacebookId(place.facebookId))
+              .as(scalar[Long].singleOpt)
+          }
+        }
+      case Failure(e) =>
+        Logger.error("Place.save: ", e)
+        throw e
+    }
+  }
+
+  def findIdByFacebookId(placeFacebookId: Option[String]): Option[Long] = {
+>>>>>>> master
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT placeId FROM places

@@ -2,6 +2,16 @@ package models
 
 import java.util.UUID
 
+import controllers.{PlaylistUpdateTrackWithoutRankException, PlaylistDoesNotExistException, DAOException}
+
+import play.api.libs.json.Json
+import play.api.Play.current
+import json.JsonHelper._
+import play.api.Logger
+
+import scala.util.{Try, Success, Failure}
+
+
 case class Playlist(playlistId: Option[Long], userId: UUID, name: String, tracks: Seq[Track])
 
 object Playlist {
@@ -17,6 +27,15 @@ object Playlist {
     Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
 
 /*
+  private val playlistParser: RowParser[Playlist] = {
+    get[Long]("playlistId") ~
+      get[UUID]("userId") ~
+      get[String]("name") map {
+      case playlistId ~ userId ~ name => Playlist(Option(playlistId), userId, name, Seq.empty)
+    }
+  }
+
+>>>>>>> master
   def find(playlistId: Long): Option[Playlist] = try {
     DB.withConnection { implicit connection =>
       SQL(

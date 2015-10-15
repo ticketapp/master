@@ -14,6 +14,8 @@ import play.api.db.slick.DatabaseConfigProvider
 
 import play.api.libs.json.Json
 import services.Utilities
+
+import play.api.libs.json.Json
 import slick.driver.PostgresDriver.api._
 import slick.model.ForeignKeyAction
 import scala.language.postfixOps
@@ -43,9 +45,26 @@ class UserMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
                              val tariffMethods: TariffMethods,
                              val utilities: Utilities) {
 
-  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
-    dt => new Timestamp(dt.getMillis),
-    ts => new DateTime(ts.getTime))
+
+  implicit def dateTime =
+    MappedColumnType.base[DateTime, Timestamp](
+      dt => new Timestamp(dt.getMillis),
+      ts => new DateTime(ts.getTime)
+    )
+//
+//  class Users(tag: Tag) extends Table[User](tag, "users") {
+//    def UUID = column[UUID]("userId", O.PrimaryKey, O.AutoInc)
+//    def creationDateTime = column[DateTime]("creationDateTime")
+//    def email = column[String]("email")
+//    def nickname = column[String]("nickname")
+//    def password = column[String]("password")
+//    def profile = column[String]("profile")
+//    def * = (UUID, creationDateTime, email, nickname, password, profile) <> ((User.apply _).tupled, User.unapply)
+//  }
+//
+//  val users = TableQuery[Users]
+
+  implicit val userWrites = Json.writes[User]
 
   case class User(userID: UUID,
                    loginInfo: LoginInfo,

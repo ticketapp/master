@@ -13,8 +13,6 @@ import play.api.libs.json.Json
 import play.api.test.{WithApplication, PlaySpecification, FakeRequest}
 import securesocial.core.Identity
 
-
-
 import play.api.Play.current
 
 import scala.util.Success

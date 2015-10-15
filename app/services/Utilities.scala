@@ -5,25 +5,19 @@ import java.text.Normalizer
 import java.util.{UUID, Date}
 import javax.inject.Inject
 
-
-import controllers.DAOException
-import models._
+import models.PlaceMethods
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
-
-import play.api.libs.json.JsNumber
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import play.api.Play.current
+import slick.driver.PostgresDriver.api._
 
 import scala.collection.mutable.ListBuffer
 import scala.util.matching.Regex
-import slick.driver.PostgresDriver.api._
-
 import scala.util.{Try, Failure, Success}
 import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Point}
 
-class Utilities @Inject()(dbConfigProvider: DatabaseConfigProvider) {
+
+class Utilities @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                           val placeMethods: PlaceMethods) {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
   val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc"
   val echonestApiKey = "3ZYZKU3H3MKR2M59Z"

@@ -11,8 +11,13 @@ import Matchers._
 import play.api.libs.json.Json
 import play.api.test.{WithApplication, PlaySpecification, FakeRequest}
 import securesocial.core.Identity
+<<<<<<< HEAD
 
 
+=======
+import anorm._
+import anorm.SqlParser._
+>>>>>>> master
 
 import play.api.Play.current
 

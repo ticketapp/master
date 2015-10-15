@@ -12,8 +12,13 @@ import Matchers._
 import play.api.libs.iteratee.{Enumeratee, Enumerator, Iteratee}
 import play.api.libs.json.{Json, JsValue}
 import securesocial.core.Identity
+<<<<<<< HEAD
 
 
+=======
+import anorm._
+import anorm.SqlParser._
+>>>>>>> master
 
 import play.api.Play.current
 

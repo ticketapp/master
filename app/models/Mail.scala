@@ -3,8 +3,13 @@ package models
 
 import java.util.UUID
 
+<<<<<<< HEAD
 
 
+=======
+import anorm.SqlParser._
+import anorm._
+>>>>>>> master
 import controllers._
 
 import play.api.Play.current

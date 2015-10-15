@@ -170,7 +170,6 @@ class SearchYoutubeTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
       .map { echonestWSResponse => getEchonestIdIfSameName(echonestWSResponse.json, artist.name) }
   }
 
-
   def getEchonestIdIfSameName(echonestWSResponse: JsValue, artistName: String): Option[String] = {
     val echonestName = (echonestWSResponse \ "response" \ "artist" \ "name")
       .asOpt[String]

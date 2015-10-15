@@ -356,6 +356,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     soundCloudWebProfilesWSResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
      case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
      case _ => None
+
     }
   }
 

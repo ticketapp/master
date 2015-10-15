@@ -1,6 +1,5 @@
 package controllers
 
-
 import models._
 import play.api.Play.current
 

@@ -1,8 +1,13 @@
 /*
 package models
 
+<<<<<<< HEAD
 
 
+=======
+import anorm.SqlParser._
+import anorm._
+>>>>>>> master
 
 import play.api.libs.json.Json
 import play.api.Play.current

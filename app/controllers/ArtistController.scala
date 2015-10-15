@@ -6,7 +6,6 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
-//import models.Artist.PatternAndArtist
 import models.{Artist, Genre, User, _}
 import org.postgresql.util.PSQLException
 import play.api.Logger
@@ -18,11 +17,11 @@ import play.api.libs.iteratee.{Enumeratee, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
-//import services.Utilities.{FOREIGN_KEY_VIOLATION, UNIQUE_VIOLATION}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
+
 
 class ArtistController @Inject()(ws: WSClient,
                                  val messagesApi: MessagesApi,

@@ -6,7 +6,10 @@ import javax.inject.Inject
 
 
 import controllers.DAOException
+<<<<<<< HEAD
 import play.api.db.slick.DatabaseConfigProvider
+=======
+>>>>>>> master
 
 import play.api.libs.json.Json
 import play.api.Play.current

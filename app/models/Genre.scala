@@ -44,6 +44,13 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   lazy val genres = TableQuery[Genres]
 
+  def formApply(name: String) = new Genre(None, name)
+  def formUnapply(genre: Genre) = Some(genre.name)
+
+  def findAll: Future[Seq[Genre]] = {
+    db.run(genres.result)
+  }
+
   case class UserGenreRelation(userId: String, genreId: Long)
 
   class GenresFollowed(tag: Tag) extends Table[UserGenreRelation](tag, "genresfollowed") {
@@ -55,12 +62,22 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   lazy val genresFollowed = TableQuery[GenresFollowed]
 
-  def formApply(name: String) = new Genre(None, name)
-  def formUnapply(genre: Genre) = Some(genre.name)
+//  def findContaining(pattern: String): Future[Seq[Genre]] = {
+//    val lowercasePattern = pattern.toLowerCase
+//    val query = for {
+//      genre <- genres if genre.name.toLowerCase like s"%$lowercasePattern%"
+//    } yield genre
+//
+//    db.run(query.take(12).result)
+//
+////        """SELECT * FROM genres
+////          | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
+////          | LIMIT 12""".stripMargin)
+////        .on('patternLowCase -> pattern.toLowerCase)
+////        .as(GenreParser.*)
+////    }
+//  }
 
-  def findAll: Future[Seq[Genre]] = {
-    db.run(genres.result)
-  }
 
   def findById(id: Int): Future[Option[Genre]] = {
     val query = genres.filter(_.id === id)

@@ -1,17 +1,16 @@
 package controllers
 
+import play.api.libs.json.Json
+import json.JsonHelper._
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.mvc._
+import play.api.libs.ws._
 import javax.inject.Inject
-
 import com.mohiva.play.silhouette.api.{ Environment, LogoutEvent, Silhouette }
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import models.User
 import play.api.i18n.MessagesApi
-import play.api.libs.ws.WSClient
-import play.api.mvc.Action
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import scala.concurrent.Future
 
 class Application @Inject()(ws: WSClient,
                             val messagesApi: MessagesApi,

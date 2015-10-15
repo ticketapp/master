@@ -17,7 +17,6 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
-//import services.Utilities.{FOREIGN_KEY_VIOLATION, UNIQUE_VIOLATION, geographicPointPattern}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}

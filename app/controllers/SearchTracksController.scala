@@ -16,6 +16,7 @@ import scala.concurrent.Future
 import play.api.libs.ws.WSResponse
 import play.api.Play.current
 
+
 class SearchTracksController @Inject()(val utilities: Utilities,
                                         val trackMethods: TrackMethods,
                                         val searchYoutubeTracks: SearchYoutubeTracks) extends Controller {

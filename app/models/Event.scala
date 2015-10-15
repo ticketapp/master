@@ -449,6 +449,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def saveFacebookEventByFacebookId(eventFacebookId: String): Future[Event] =
     findEventOnFacebookByFacebookId(eventFacebookId) flatMap { save }
 
+
   def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Event] =
     WS.url("https://graph.facebook.com/v2.2/" + eventFacebookId)
       .withQueryString(

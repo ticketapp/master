@@ -22,6 +22,7 @@ class UserController @Inject() (ws: WSClient,
                                 socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, CookieAuthenticator] {
 /*
+
   def users = Action {
     Ok(Json.toJson(User.findAll()))
   }
@@ -50,7 +51,7 @@ class UserController @Inject() (ws: WSClient,
     "profile" -> nonEmptyText(2)
   )(User.formApply)(User.formUnapply)
   )
-/*
+
   def createUser = Action { implicit request =>
     userBindingForm.bindFromRequest().fold(
       formWithErrors => BadRequest(formWithErrors.errorsAsJson),
@@ -59,7 +60,7 @@ class UserController @Inject() (ws: WSClient,
         Redirect(routes.UserController.user(1))
       }
     )
-  }*/
+  }
 
   def findFacebookAccessToken = SecuredAction { implicit request =>
     Ok(Json.toJson(User.findFacebookAccessToken(request.identity.UUID)))
@@ -75,5 +76,5 @@ class UserController @Inject() (ws: WSClient,
 
   def getTracksRemoved = SecuredAction { implicit request =>
     Ok(Json.toJson(User.getTracksRemoved(request.identity.UUID)))
-  }*/
+   }*/
 }
