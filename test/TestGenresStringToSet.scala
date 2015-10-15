@@ -1,10 +1,7 @@
 import models.Genre
-import org.scalatestplus.play._
+import org.scalatest.Matchers._
 import org.scalatest._
-import Matchers._
-import play.api.libs.json.{JsValue, Json}
-import models.Genre.genresStringToGenresSet
-import play.api.test.FakeApplication
+import org.scalatestplus.play._
 
 class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
 

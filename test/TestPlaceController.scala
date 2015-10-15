@@ -1,32 +1,8 @@
-import java.util.Date
-import controllers.DAOException
-import models.{Place, Artist, Event}
-import models.Artist._
-import org.postgresql.util.PSQLException
-import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.time.{Seconds, Span}
+import models.Place
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
 import play.api.libs.json.Json
-import play.api.test.{WithApplication, PlaySpecification, FakeRequest}
-import securesocial.core.Identity
-<<<<<<< HEAD
-
-
-=======
-import anorm._
-import anorm.SqlParser._
->>>>>>> master
-
-import play.api.Play.current
-
-import scala.util.Success
-import scala.util.Failure
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.test._
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import json.JsonHelper._
 
 class TestPlaceController extends PlaySpec with OneAppPerSuite {
 

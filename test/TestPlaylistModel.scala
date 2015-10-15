@@ -1,12 +1,9 @@
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import models._
-import models.Playlist._
-import models.Track
-
-import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
 import java.util.UUID.randomUUID
+
+import models.Playlist._
+import models.{Track, _}
+import org.scalatest._
+import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 
 import scala.util.Success
 

@@ -1,14 +1,9 @@
 import java.util.UUID
 
-import controllers.SearchArtistsController._
 import models.{Artist, Track}
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import services.SearchSoundCloudTracks._
-import play.api.libs.json.{JsValue, Json}
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
 
 class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
 

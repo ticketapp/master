@@ -1,6 +1,4 @@
 import org.scalatestplus.play._
-import org.scalatest._
-import services.Utilities.formatDescription
 
 class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
 

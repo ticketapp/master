@@ -1,16 +1,9 @@
 import java.util.UUID._
 
-import controllers.DAOException
-import org.scalatest.Matchers
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import models.{Artist, Genre, Track}
-import models.Genre._
-import org.scalatestplus.play._
-import Matchers._
-import play.api.Logger
+import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 
-import scala.util.{Failure, Success}
-import services.Utilities._
+import scala.util.Success
 
 class TestGenreModel extends PlaySpec with OneAppPerSuite {
 

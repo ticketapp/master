@@ -1,11 +1,4 @@
-import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.time.{Seconds, Span}
-import services.Utilities._
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import play.api.libs.json.{JsValue, Json}
-import models.Artist._
 
 class TestUtilities extends PlaySpec with OneAppPerSuite {
 

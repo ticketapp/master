@@ -1,19 +1,4 @@
-import java.util.Date
-import controllers.DAOException
-import models.{Track, Artist, Tariff}
-import models.Tariff._
-import org.postgresql.util.PSQLException
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import securesocial.core.Identity
-
-import play.api.Play.current
-
-import scala.util.Success
-import scala.util.Failure
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
-import java.util.UUID.randomUUID
 
 class TestTariffModel extends PlaySpec with OneAppPerSuite {
 

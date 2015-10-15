@@ -8,13 +8,6 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-<<<<<<< HEAD
-import securesocial.core.IdentityId
-import services.Utilities
-=======
-
->>>>>>> Play2.4AndSlickMigrationResolvingConflicts
-import services.Utilities.UNIQUE_VIOLATION
 import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.util.{Failure, Success}

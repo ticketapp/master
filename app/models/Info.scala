@@ -1,12 +1,15 @@
-/*
 package models
+
+import javax.inject.Inject
 
 import controllers.DAOException
 import play.api.db._
 import play.api.Play.current
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 
 
 import play.api.libs.json.Json
+import services.{MyPostgresDriver, Utilities}
 
 /*
   infoId                    SERIAL PRIMARY KEY,
@@ -23,37 +26,31 @@ case class Info(id: Long,
                 animationContent: Option[String],
                 animationStyle: Option[String])
 
-object Info {
-  private val InfoParser: RowParser[Info] = {
-    get[Long]("infoId") ~
-    get[Boolean]("displayIfConnected") ~
-    get[String]("title") ~
-    get[String]("content") ~
-    get[Option[String]]("animationContent") ~
-    get[Option[String]]("animationStyle") map {
-      case infoId ~ displayIfConnected ~ title ~ content ~ animationContent ~ animationStyle =>
-        Info(infoId, displayIfConnected, title, content, animationContent, animationStyle)
-    }
-  }
+class InfoMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
+                             val organizerMethods: OrganizerMethods,
+                             val placeMethods: PlaceMethods,
+                             val utilities: Utilities)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
-  def findAll(): Seq[Info] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT * FROM infos""")
-        .as(InfoParser.*)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Info.findAll: " + e.getMessage)
-  }
-
-  def find(id: Long): Option[Info] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM infos WHERE id = {id}")
-        .on('id -> id)
-        .as(InfoParser.singleOpt)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Info.find: " + e.getMessage)
-  }
+//
+//  def findAll(): Seq[Info] = try {
+//    DB.withConnection { implicit connection =>
+//      SQL("""SELECT * FROM infos""")
+//        .as(InfoParser.*)
+//    }
+//  } catch {
+//    case e: Exception => throw new DAOException("Info.findAll: " + e.getMessage)
+//  }
+//
+//  def find(id: Long): Option[Info] = try {
+//    DB.withConnection { implicit connection =>
+//      SQL("SELECT * FROM infos WHERE id = {id}")
+//        .on('id -> id)
+//        .as(InfoParser.singleOpt)
+//    }
+//  } catch {
+//    case e: Exception => throw new DAOException("Info.find: " + e.getMessage)
+//  }
   /*
     def save(name: String) {
       DB.withConnection { implicit connection =>
@@ -68,4 +65,3 @@ object Info {
 }
 
 
-*/

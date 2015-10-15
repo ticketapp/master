@@ -1,8 +1,4 @@
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import models.Artist._
-import models.Genre
 
 class TestNormalizeArtistName extends PlaySpec with OneAppPerSuite {
 

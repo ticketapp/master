@@ -1,30 +1,13 @@
-import java.util.Date
-import controllers.DAOException
-import models.Artist.delete
-import models.Artist.find
-import models.Artist.isFollowed
-import models.Artist.save
-import models.Artist.update
-import models.{Genre, Track, Artist}
-import models.Artist._
+import java.util.UUID.randomUUID
+
+import models.{Artist, Track}
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import play.api.libs
-import play.api.libs.iteratee.Step.Done
-import securesocial.core.Identity
+import play.api.libs.iteratee.Iteratee
 
-import play.api.Play.current
-
-import scala.util.Success
-import scala.util.Failure
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
-import java.util.UUID.randomUUID
-import play.api.libs.iteratee.{Done, Enumeratee, Enumerator, Iteratee}
-import ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 class TestArtistModel extends PlaySpec with OneAppPerSuite {
 

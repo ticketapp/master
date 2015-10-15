@@ -1,31 +1,14 @@
-import java.util.{UUID, Date}
-import controllers.DAOException
-import models.{Track, Artist}
-import models.Artist._
-import org.postgresql.util.PSQLException
+import java.util.UUID
+
+import models.{Artist, Track}
+import org.scalatest.Matchers._
+import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import play.api.libs.iteratee.{Enumeratee, Enumerator, Iteratee}
-import play.api.libs.json.{Json, JsValue}
-import securesocial.core.Identity
-<<<<<<< HEAD
-
-
-=======
-import anorm._
-import anorm.SqlParser._
->>>>>>> master
-
-import play.api.Play.current
-
-import scala.concurrent.{Promise, Future}
-import scala.util.Success
-import scala.util.Failure
-import services.SearchYoutubeTracks._
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.iteratee.Iteratee
+import play.api.libs.json.{JsValue, Json}
 
 class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 

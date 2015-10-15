@@ -1,16 +1,12 @@
-import org.postgresql.util.PSQLException
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import java.util.UUID.randomUUID
+
 import models._
-import models.Track._
+import org.postgresql.util.PSQLException
+import org.scalatest._
+import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.Logger
 
-import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import java.util.UUID.randomUUID
-import services.Utilities.UNIQUE_VIOLATION
-
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
 class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
   var artistId = -1L

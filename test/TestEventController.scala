@@ -1,10 +1,8 @@
-import controllers.EventController
-import models.Event
 import org.scalatestplus.play._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.libs.concurrent.Execution.Implicits._
+
 import scala.language.postfixOps
 
 class TestEventController extends PlaySpec with OneAppPerSuite  {

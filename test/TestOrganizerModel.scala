@@ -1,27 +1,12 @@
 import java.util.Date
-import controllers.DAOException
-import models.Event._
-import models.Organizer.delete
-import models.Organizer.find
-import models.Organizer.isFollowed
-import models.Organizer.save
-import models.{Event, Address, Place, Organizer}
-import models.Organizer._
+
+import models.{Event, Organizer, Place}
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import securesocial.core.Identity
 
-import play.api.Play.current
-
-import scala.util.Success
-import scala.util.Failure
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import scala.util.{Failure, Success}
-import play.api.libs.concurrent.Execution.Implicits._
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 

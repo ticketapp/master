@@ -1,6 +1,5 @@
 import java.util.Date
 
-import models.Event.{delete, find, isFollowed, save, _}
 import models.Place._
 import models._
 import org.postgresql.util.PSQLException
@@ -10,8 +9,6 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 
-import services.Utilities.GeographicPoint
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import scala.util.{Failure, Success}
 
 class TestEventModel extends PlaySpec with OneAppPerSuite {
