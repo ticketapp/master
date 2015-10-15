@@ -1,19 +1,23 @@
 package controllers
 
-import anorm._
 import models._
-import json.JsonHelper._
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.db.DB
+
 import play.api.libs.json.Json
 import play.api.mvc._
-import play.api.Play.current
+import javax.inject.Inject
 
-object AddressController extends Controller {
-  val addressBindingForm = Form(mapping(
-    "city" -> optional(text(2)),
-    "zip" -> optional(text(2)),
-    "street" -> optional(text(2))
-  )(Address.formApply)(Address.formUnapply))
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.mvc._
+import services.Utilities
+
+class AddressController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                      val addressMethods: AddressMethods,
+                      val utilities: Utilities) extends Controller {
+//  val addressBindingForm = Form(mapping(
+//    "city" -> optional(text(2)),
+//    "zip" -> optional(text(2)),
+//    "street" -> optional(text(2))
+//  )(addressMethods.formApply)(addressMethods.formUnapply))
 }

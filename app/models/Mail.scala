@@ -1,12 +1,20 @@
+/*
 package models
 
+import java.util.UUID
+
+<<<<<<< HEAD
+
+
+=======
 import anorm.SqlParser._
 import anorm._
+>>>>>>> master
 import controllers._
-import play.api.db.DB
+
 import play.api.Play.current
 
-case class Mail(id: Option[Long], subject: String, message: String, read: Boolean, userId: Option[String])
+case class Mail(id: Option[Long], subject: String, message: String, read: Boolean, userId: Option[UUID])
 
 object Mail {
   private val mailParser = {
@@ -14,7 +22,7 @@ object Mail {
       get[String]("subject") ~
       get[String]("message") ~
       get[Boolean]("read") ~
-      get[String]("userId") map {
+      get[UUID]("userId") map {
       case id ~ subject ~ message ~ read ~ userId=>
         Mail(Option(id), subject, message, read, Option(userId))
     }
@@ -45,3 +53,4 @@ object Mail {
     case e: Exception => throw new DAOException("Mail.save: " + e.getMessage)
   }
 }
+*/

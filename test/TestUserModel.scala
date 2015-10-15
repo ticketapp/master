@@ -3,7 +3,7 @@ import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import securesocial.core.IdentityId
+
 import java.util.UUID.randomUUID
 import scala.util.Success
 import models.User._

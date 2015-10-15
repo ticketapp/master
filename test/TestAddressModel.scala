@@ -13,11 +13,10 @@ import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
 import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
+
+
 import play.api.Play.current
-import securesocial.core.IdentityId
+
 import scala.util.Success
 import scala.util.Failure
 import org.scalatest.OptionValues._

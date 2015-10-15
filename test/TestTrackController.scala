@@ -12,11 +12,9 @@ import Matchers._
 import play.api.libs.json.Json
 import play.api.test.{WithApplication, PlaySpecification, FakeRequest}
 import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
+
 import play.api.Play.current
-import securesocial.core.IdentityId
+
 import scala.util.Success
 import scala.util.Failure
 import play.api.libs.concurrent.Execution.Implicits._

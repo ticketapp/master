@@ -3,7 +3,7 @@ import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import models._
 import models.Track._
 import play.api.Logger
-import securesocial.core.IdentityId
+
 import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
@@ -32,7 +32,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
 
       save(track) mustBe Success(true)
-      find(trackId) mustEqual Success(Option(track.copy(trackId = trackId, confidence = Some(0))))
+      find(trackId) mustEqual Success(Option(track.copy(uuid = trackId, confidence = Some(0))))
       delete(trackId) mustBe Success(1)
     }
 

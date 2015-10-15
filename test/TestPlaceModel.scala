@@ -8,8 +8,12 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
+<<<<<<< HEAD
 import securesocial.core.IdentityId
 import services.Utilities
+=======
+
+>>>>>>> Play2.4AndSlickMigrationResolvingConflicts
 import services.Utilities.UNIQUE_VIOLATION
 import play.api.libs.concurrent.Execution.Implicits._
 
@@ -26,7 +30,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
     "be saved and deleted in database and return the new id" in {
       whenReady(save(place), timeout(Span(2, Seconds))) { placeId =>
         try {
-          find(placeId.get.get) mustBe Option(place.copy(placeId = placeId.get,
+          find(placeId.get.get) mustBe Option(place.copy(id = placeId.get,
             description = Some("<div class='column large-12'>Ancienne usine</div>")))
           delete(placeId.get.get) mustBe Success(1)
         } finally {
@@ -42,7 +46,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       whenReady(save(place), timeout(Span(5, Seconds))) { placeId =>
         try {
           find(placeId.get.get) mustBe
-            Option(place.copy(placeId = placeId.get,
+            Option(place.copy(id = placeId.get,
               address = Option(address.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))))
         } finally {
           delete(placeId.get.get)
@@ -87,7 +91,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       whenReady(save(place), timeout(Span(2, Seconds))) { tryPlaceId =>
         val placeId = tryPlaceId.get.get
         try {
-          find(placeId) shouldEqual Option(place.copy(placeId = Option(placeId),
+          find(placeId) shouldEqual Option(place.copy(id = Option(placeId),
             description = Some("<div class='column large-12'>Ancienne usine</div>")))
 
           saveEventRelation(eventId, placeId) mustBe true

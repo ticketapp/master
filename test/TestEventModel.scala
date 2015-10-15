@@ -9,7 +9,7 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import securesocial.core.IdentityId
+
 import services.Utilities.GeographicPoint
 import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
 import scala.util.{Failure, Success}
@@ -19,16 +19,18 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
   "An event" must {
     val event = Event(None, None, isPublic = true, isActive = true, "name", Option("(5.4,5.6)"),
       Option("description"), new Date(), Option(new Date(100000000000000L)), 16, None, None, None, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)
+      List.empty, List.empty, List.empty, List.empty, List.empty))
 
     "be saved and deleted in database" in {
-      val eventId = save(event).get
+      val eventId = save(event.copy(genres = List(Genre(None, "rock", None)))).get
 
-      find(eventId).get.name mustBe "name"
+      try {
+        find(eventId).get.copy(startTime = new Date(), endTime = None) mustEqual
+          event.copy(eventId = Some(eventId), startTime = new Date(), endTime = None)
 
-      delete(eventId) mustBe 1
-      //find(eventId) mustEqual Option(event.copy(eventId = Some(eventId)))
-      //pb with dates
+      } finally {
+        delete(eventId) mustBe 1
+      }
     }
 
     "be followed and unfollowed by a user" in {
@@ -180,8 +182,14 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
     }
 
     "find a complete event by facebookId" in {
-      whenReady (findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
+      whenReady(findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
         event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
+      }
+    }
+
+    "have the genre of its artists" in {
+      whenReady(Event.findEventOnFacebookByFacebookId("758796230916379"), timeout(Span(5, Seconds))) { event =>
+        event.genres should contain allOf (Genre(None, "hip", None), Genre(None, "hop", None))
       }
     }
   }

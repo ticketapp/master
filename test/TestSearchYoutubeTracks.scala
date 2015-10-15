@@ -11,11 +11,16 @@ import Matchers._
 import play.api.libs.iteratee.{Enumeratee, Enumerator, Iteratee}
 import play.api.libs.json.{Json, JsValue}
 import securesocial.core.Identity
+<<<<<<< HEAD
+
+
+=======
 import anorm._
 import anorm.SqlParser._
-import play.api.db.DB
+>>>>>>> master
+
 import play.api.Play.current
-import securesocial.core.IdentityId
+
 import scala.concurrent.{Promise, Future}
 import scala.util.Success
 import scala.util.Failure
@@ -36,11 +41,11 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
     }
 
     "return an artist name" in {
-      val echonestResponse: JsValue = Json.parse(
+      val echonestWSResponse: JsValue = Json.parse(
         """{"response":{"status":{"version":"4.2","code":0,"message":"Success"},
           |"artist":{"id":"ARNJ7441187B999AFD","name":"Serge Gainsbourg"}}}""".stripMargin)
 
-      getEchonestIdIfSameName(echonestResponse, "serge gainsbourg") mustBe Option("ARNJ7441187B999AFD")
+      getEchonestIdIfSameName(echonestWSResponse, "serge gainsbourg") mustBe Option("ARNJ7441187B999AFD")
     }
 
     "return echonestId" in {

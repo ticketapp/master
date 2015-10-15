@@ -1,7 +1,6 @@
 import java.util.UUID._
 
 import controllers.DAOException
-import fillDatabase.InsertGenres
 import org.scalatest.Matchers
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import models.{Artist, Genre, Track}
@@ -91,7 +90,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         Track.save(track)
         saveTrackRelation(trackId, genreId, 50)
 
-        findAllByTrack(trackId) mustBe Seq(genre.copy(genreId = Some(genreId)))
+        findAllByTrack(trackId) mustBe Seq(genre.copy(id = Some(genreId)))
 
       } finally {
         deleteTrackRelation(trackId, genreId)

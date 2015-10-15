@@ -14,12 +14,11 @@ INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau,
 
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
-  name                      VARCHAR(255) NOT NULL,
-
+  city                      VARCHAR(255) NOT NULL,
   geographicPoint           POINT NOT NULL
 );
 CREATE INDEX frenchCityGeographicPoints ON frenchCities USING GIST (geographicPoint);
-CREATE INDEX frenchCityNames ON frenchCities (name);
+CREATE INDEX frenchCityNames ON frenchCities (city);
 
 CREATE TABLE addresses (
   addressId                 SERIAL PRIMARY KEY,
@@ -622,7 +621,7 @@ CREATE TABLE organizersFollowed (
 CREATE UNIQUE INDEX organizersFollowedIndex ON organizersFollowed (userId, organizerId);
 
 CREATE TABLE eventsPlaces (
-  eventId                 INT REFERENCES events (eventId),
+  eventId                 BIGINT REFERENCES events (eventId),
   placeId                 INT REFERENCES places (placeId),
   PRIMARY KEY (eventId, placeId)
 );

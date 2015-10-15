@@ -2,12 +2,12 @@ package controllers
 
 import java.io.{IOException, FileNotFoundException}
 import java.util.Date
-import anorm._
+
 import play.api.data._
 import play.api.data.Forms._
-import play.api.db.DB
+
 import play.api.libs.ws.WS
-import play.api.libs.ws.Response
+import play.api.libs.ws.WSResponse
 import play.api.mvc._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future

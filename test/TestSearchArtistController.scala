@@ -7,12 +7,14 @@ import org.scalatestplus.play._
 import org.scalatest._
 import Matchers._
 import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
+
 import play.api.Play.current
+<<<<<<< HEAD
 import securesocial.core.IdentityId
 import services.SearchSoundCloudTracks
+=======
+
+>>>>>>> Play2.4AndSlickMigrationResolvingConflicts
 import scala.util.Success
 import scala.util.Failure
 import play.api.libs.concurrent.Execution.Implicits._
