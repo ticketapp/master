@@ -108,17 +108,15 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
  
-    def findAllByTrack(trackId: UUID): Future[Seq[Genre]] = {
-      val query = for {
-        track <- tracks if track.uuid === trackId
-        trackGenre <- tracksGenres
-        genre <- genres if genre.id === trackGenre.genreId
-      } yield genre
-      
-      db.run(query.result)
-    }
-  
-  
+  def findAllByTrack(trackId: UUID): Future[Seq[Genre]] = {
+    val query = for {
+      track <- tracks if track.uuid === trackId
+      trackGenre <- tracksGenres
+      genre <- genres if genre.id === trackGenre.genreId
+    } yield genre
+
+    db.run(query.result)
+  }
   /*
    def findContaining(pattern: String): Future[Seq[Genre]] = {
          """SELECT * FROM genres

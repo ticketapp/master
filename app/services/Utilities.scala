@@ -7,6 +7,7 @@ import javax.inject.Inject
 
 import models.PlaceMethods
 import org.joda.time.DateTime
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.PostgresDriver.api._
 
@@ -43,6 +44,19 @@ class Utilities @Inject()(dbConfigProvider: DatabaseConfigProvider,
       val coordinate= new Coordinate(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble)
       geometryFactory.createPoint(coordinate)
     }
+  }
+
+  def optionStringToOptionPoint(maybeGeographicPoint: Option[String]) = maybeGeographicPoint match {
+    case None =>
+      None
+    case Some(geoPoint) =>
+      stringToGeographicPoint(geoPoint) match {
+        case Failure(exception) =>
+          Logger.error("Utilities.optionStringToPoint: ", exception)
+          None
+        case Success(validPoint) =>
+          Some(validPoint)
+      }
   }
 
   def normalizeString(string: String): String = string //Should be replace accentued letters for example?

@@ -1,14 +1,10 @@
 package models
 
-import java.util.UUID
 import javax.inject.Inject
 
-import controllers._
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import services.MyPostgresDriver.api._
-
-import play.api.Play.current
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
-import services.{MyPostgresDriver, Utilities, SearchYoutubeTracks, SearchSoundCloudTracks}
+import services.{MyPostgresDriver, SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
 import silhouette.DBTableDefinitions
 
 import scala.concurrent.Future
@@ -30,13 +26,9 @@ class IssueMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   class Issues(tag: Tag) extends Table[Issue](tag, "issues") {
     def id = column[Long]("issueid")
-
     def title = column[String]("title")
-
     def content = column[String]("content")
-
     def userId = column[String]("userid")
-
     def fixed = column[Boolean]("fixed")
 
     def * = (id.?, title, content, userId, fixed) <> ((Issue.apply _).tupled, Issue.unapply)
@@ -48,15 +40,12 @@ class IssueMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   class IssuesComments(tag: Tag) extends Table[IssueComment](tag, "issuescomments") {
     def content = column[String]("content")
-
     def userId = column[String]("useruuid")
-
     def issueId = column[Long]("issueid")
 
     def * = (content, userId, issueId) <>((IssueComment.apply _).tupled, IssueComment.unapply)
 
     def aFK = foreignKey("userid", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
-
     def bFK = foreignKey("issueid", issueId, issues)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 

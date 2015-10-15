@@ -4,7 +4,6 @@ import java.sql.Connection
 import java.util.UUID
 import javax.inject.Inject
 
-
 import com.vividsolutions.jts.geom.Point
 import controllers.{DAOException, ThereIsNoArtistForThisFacebookIdException}
 import org.joda.time.DateTime
@@ -16,7 +15,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.iteratee.{Enumerator, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
-import services.{MyPostgresDriver, SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
+import services.{SearchSoundCloudTracks, MyPostgresDriver, SearchYoutubeTracks, Utilities}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
