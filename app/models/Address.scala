@@ -1,6 +1,6 @@
 package models
 
-<<<<<<< HEAD
+
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Point
