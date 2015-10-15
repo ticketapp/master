@@ -3,15 +3,15 @@ package models
 import anorm.SqlParser._
 import anorm._
 import controllers._
-import play.api.db.DB
+import play.api.Logger
 import play.api.Play.current
+import play.api.db.DB
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.{Response, WS}
 import services.Utilities.{geographicPointToString, googleKey}
-
+import play.api.http.Status
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits._
-
-import scala.util.{Success, Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 case class Address (addressId: Option[Long],
                     geographicPoint: Option[String],
@@ -105,8 +105,8 @@ object Address {
 
   def saveAddressInFutureWithGeoPoint(address: Option[Address]): Future[Try[Option[Long]]] = address match {
     case Some(addressWithoutGeographicPoint) if addressWithoutGeographicPoint.geographicPoint.isEmpty =>
-      Address.getGeographicPoint(addressWithoutGeographicPoint) map { addressWithGeoPoint =>
-        Address.save(Option(addressWithGeoPoint)) }
+      Address.getGeographicPoint(addressWithoutGeographicPoint, retry = 3) map { addressWithGeoPoint =>
+        Address.save(addressWithGeoPoint) }
     case Some(addressWithGeoPoint) =>
       Future  { Address.save(Option(addressWithGeoPoint)) }
     case _ =>
@@ -151,30 +151,43 @@ object Address {
     case e: Exception => throw new DAOException("Cannot delete address: " + e.getMessage)
   }
 
-  def getGeographicPoint(address: Address): Future[Address] = {
-    WS.url("https://maps.googleapis.com/maps/api/geocode/json")
-      .withQueryString(
-        "address" -> (address.street.getOrElse("") + " " + address.zip.getOrElse("") + " " + address.city.getOrElse("")),
-        "key" -> googleKey)
-      .get()
-      .map { response =>
-      readGoogleGeographicPoint(response)  match {
-        case Some(geographicPoint) => address.copy(geographicPoint = Option(geographicPoint))
-        case None => address
-      }
+  def getGeographicPoint(address: Address, retry: Int): Future[Option[Address]] = WS
+    .url("https://maps.googleapis.com/maps/api/geocode/json")
+    .withQueryString(
+      "address" -> (address.street.getOrElse("") + " " + address.zip.getOrElse("") + " " + address.city.getOrElse("")),
+      "key" -> googleKey)
+    .get()
+    .flatMap { readGoogleGeographicPoint(_) match {
+      case Success(Some(geographicPoint)) =>
+        Future { Option(address.copy(geographicPoint = Option(geographicPoint))) }
+      case Success(None) =>
+        Future { Option(address) }
+      case Failure(e: OverQueryLimit) if retry > 0 =>
+        Logger.info("Address.getGeographicPoint: retry: " + retry + " ", e)
+        getGeographicPoint(address, retry - 1)
+      case Failure(e: Exception) =>
+        Logger.error("Address.getGeographicPoint: ", e)
+        Future { Option(address) }
     }
   }
 
-  def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Option[String] = {
-    val googleGeoCodeJson = googleGeoCodeResponse.json
-    val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
-    val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
-    latitude match {
-      case None => None
-      case Some(lat) => longitude match {
-        case None => None
-        case Some(lng) => Option("(" + lat + "," + lng + ")")
-      }
+  def readGoogleGeographicPoint(googleGeoCodeResponse: Response): Try[Option[String]] = {
+    googleGeoCodeResponse.statusText match {
+      case "OK" =>
+        val googleGeoCodeJson = googleGeoCodeResponse.json
+        val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
+        val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
+        latitude match {
+          case None => Success(None)
+          case Some(lat) => longitude match {
+            case None => Success(None)
+            case Some(lng) => Success(Option("(" + lat + "," + lng + ")"))
+          }
+        }
+      case "OVER_QUERY_LIMIT" =>
+        Failure(OverQueryLimit("Address.readGoogleGeographicPoint"))
+      case otherStatus =>
+        Failure(new Exception(otherStatus))
     }
   }
 

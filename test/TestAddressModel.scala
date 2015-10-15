@@ -71,8 +71,10 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
 
     "get a geographicPoint" in {
       val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
-      whenReady(getGeographicPoint(address), timeout(Span(2, Seconds))) { address =>
+      whenReady(getGeographicPoint(address), timeout(Span(2, Seconds))) {
+        case Some(address) =>
         address.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
+        case _ => None
       }
     }
   }

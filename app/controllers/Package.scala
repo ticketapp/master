@@ -45,3 +45,7 @@ case class ThereIsNoOrganizerForThisFacebookIdException(message: String) extends
 case class EmptyAddress(message: String) extends Exception(message) {
   Logger.error("Empty address found: " + message)
 }
+
+case class OverQueryLimit(message: String) extends Exception(message) {
+  Logger.error("Over Query Limit: " + message)
+}
