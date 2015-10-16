@@ -247,7 +247,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.sortBy(_.geographicPoint <-> geographicPoint).take(20).result)
   }
 
-
   def findAllByCityPattern(cityPattern: String): Future[Seq[Event]] = {
 //        """SELECT e.* FROM eventsAddresses eA
 //          | INNER JOIN events e ON e.eventId = eA.eventId AND
