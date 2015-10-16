@@ -1,29 +1,9 @@
-import java.util.Date
-import controllers.{EmptyAddress, DAOException}
 import models.Address
-import models.Address._
-import models.Address.delete
-import models.Address.find
-import models.Address.save
-import models.Place
-import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import securesocial.core.Identity
-
-
-import play.api.Play.current
 
 import scala.util.Success
-import scala.util.Failure
-import org.scalatest.OptionValues._
-import services.Utilities.UNIQUE_VIOLATION
-import play.api.libs.concurrent.Execution.Implicits._
-
-import scala.util.{Failure, Success}
 
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
   "An address" must {
