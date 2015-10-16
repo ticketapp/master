@@ -1,6 +1,5 @@
 package models
 
-<<<<<<< HEAD
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Point
@@ -26,34 +25,8 @@ case class Address (id: Option[Long],
 }
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                              val eventMethods: EventMethods,
-                              val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver] {
-
-  val events = eventMethods.events
-  val eventsAddresses = eventMethods.eventsAddresses
-
-  class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
-    def id = column[Long]("organizerId", O.PrimaryKey)
-    def geographicPoint = column[Option[String]]("geographicPoint")
-    def city = column[Option[String]]("city")
-    def zip = column[Option[String]]("zip")
-    def street = column[Option[String]]("street")
-    def * = (id.?, geographicPoint, city, zip, street) <>
-      ((Address.apply _).tupled, Address.unapply)
-  }
-
-  lazy val addresses = TableQuery[Addresses]
-
-  case class FrenchCity(city: String, geographicPoint: Point)
-
-  class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
-    def id = column[Long]("cityid", O.PrimaryKey)
-    def city = column[String]("city")
-    def geographicPoint = column[Point]("geographicpoint")
-    def * = (city, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
-  }
-
-  lazy val frenchCities = TableQuery[FrenchCities]
+                              val utilities: Utilities)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApply(city: Option[String], zip: Option[String], street: Option[String]) =
     new Address(None, None, city, zip, street)

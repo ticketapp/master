@@ -34,49 +34,8 @@ case class Place (id: Option[Long],
 
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val addressMethods: AddressMethods,
-                             val eventMethods: EventMethods,
                              val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions {
-
-  val eventsPlaces = eventMethods.eventsPlaces
-  val events = eventMethods.events
-  import eventMethods.EventPlaceRelation
-
-  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
-    dt => new Timestamp(dt.getMillis),
-    ts => new DateTime(ts.getTime))
-
-  class Places(tag: Tag) extends Table[Place](tag, "places") {
-    def id = column[Long]("placeid", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
-    def facebookId = column[Option[String]]("facebookid")
-    def geographicPoint = column[Option[Point]]("geographicpoint")
-    def description = column[Option[String]]("description")
-    def websites = column[Option[String]]("websites")
-    def capacity = column[Option[Int]]("capacity")
-    def openingHours = column[Option[String]]("openinghours")
-    def imagePath = column[Option[String]]("imagepath")
-    def linkedOrganizerId = column[Option[Long]]("linkedorganizerid")
-
-    def * = (id.?, name, facebookId, geographicPoint, description, websites, capacity, openingHours,
-      imagePath, linkedOrganizerId) <> ((Place.apply _).tupled, Place.unapply)
-  }
-
-  lazy val places = TableQuery[Places]
-
-  case class UserPlaceRelation(userId: String, placeId: Long)
-
-  class PlacesFollowed(tag: Tag) extends Table[UserPlaceRelation](tag, "placesfollowed") {
-    def userId = column[String]("userid")
-    def placeId = column[Long]("placeid")
-
-    def * = (userId, placeId) <> ((UserPlaceRelation.apply _).tupled, UserPlaceRelation.unapply)
-
-    def aFK = foreignKey("userid", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
-    def bFK = foreignKey("placeid", placeId, places)(_.id, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val placesFollowed = TableQuery[PlacesFollowed]
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions with MyDBTableDefinitions {
 
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],

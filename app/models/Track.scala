@@ -32,7 +32,8 @@ case class Track (uuid: UUID,
 
 class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val utilities: Utilities,
-                             val addressMethods: AddressMethods) extends HasDatabaseConfigProvider[MyPostgresDriver] {
+                             val addressMethods: AddressMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApplyForTrackCreatedWithArtist(trackId: String, title: String, url: String, platform: String,
                                          thumbnailUrl: Option[String], userThumbnailUrl: Option[String],
@@ -49,39 +50,6 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       }
     }
   }
-
-  class Tracks(tag: Tag) extends Table[Track](tag, "tracks") {
-    def id = column[Long]("organizerid", O.PrimaryKey, O.AutoInc)
-    def uuid = column[UUID]("uuid")
-    def url = column[String]("url")
-    def title = column[String]("title")
-    def platform = column[Char]("platform")
-    def thumbnailUrl = column[String]("thumbnailurl")
-    def artistFacebookUrl = column[String]("artistfacebookurl")
-    def artistName = column[String]("artistname")
-    def redirectUrl = column[Option[String]]("redirecturl")
-    def confidence = column[Option[Double]]("confidence")
-    def playlistRank = column[Option[Double]]("playlistrank")
-    def ratingUp = column[Int]("ratingup")
-    def ratingDown = column[Int]("ratingdown")
-
-    def * = (uuid, url, title, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence,
-      playlistRank) <> ((Track.apply _).tupled, Track.unapply)
-  }
-
-  lazy val tracks = TableQuery[Tracks]
-
-  case class TrackGenreRelation(trackId: UUID, genreId: Int)
-
-  class TracksGenres(tag: Tag) extends Table[TrackGenreRelation](tag, "tracksgenres") {
-    def trackId = column[UUID]("trackid")
-    def genreId = column[Int]("genreid")
-    def weight = column[Long]("weight")
-
-    def * = (trackId, genreId) <> ((TrackGenreRelation.apply _).tupled, TrackGenreRelation.unapply)
-  }
-
-  lazy val tracksGenres = TableQuery[TracksGenres]
 
   def formUnapplyForTrackCreatedWithArtist(track: Track) = Some((track.uuid.toString, track.title, track.url,
     track.platform.toString, Some(track.thumbnailUrl), None, track.artistFacebookUrl, track.artistName: String,
