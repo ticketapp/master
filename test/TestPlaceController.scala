@@ -19,7 +19,7 @@ t;
 name: "Akwaba Coop Culturelle"
 webSite: "http://akwaba.coop";
  */
-    "save a place and delete it" in {
+    /*"save a place and delete it" in {
 
       val eventuallyResult = route(FakeRequest(controllers.routes.PlaceController.create())
         .withBody(Json.obj("name" -> "bob"))).get
@@ -47,6 +47,6 @@ webSite: "http://akwaba.coop";
     /*  println(contentAsJson(eventuallyResult))
 //      eventuallyResult should not be empty
       contentAsJson(eventuallyResult) mustBe Json.toJson(place)*/
-    }
+    }*/
   }
 }

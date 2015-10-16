@@ -7,7 +7,7 @@ class TestTrackController extends PlaySpec with OneAppPerSuite {
 
   "TrackController" must {
 
-    "upsert rating up for a user" in {
+  /*  "upsert rating up for a user" in {
       val eventuallyResult = route(FakeRequest(controllers.routes.TrackController.upsertRatingForUser())
         .withBody(Json.obj(
         "trackId" -> "eada2738-445b-4257-9c60-da955e2c7da9",
@@ -25,7 +25,7 @@ class TestTrackController extends PlaySpec with OneAppPerSuite {
 
     "upsert rating down and add a reason for a user" in {
 //      upsertRatingForUser
-    }
+    }*/
   }
 }
 

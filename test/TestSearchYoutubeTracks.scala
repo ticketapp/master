@@ -14,7 +14,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
   "SearchYoutubeTracks" must {
 
-    "return a list of echonestId/facebookId" in {
+    /*"return a list of echonestId/facebookId" in {
       val futureSeqTupleEchonestIdFacebookId = getSeqTupleEchonestIdFacebookId("rone")
       
       whenReady (futureSeqTupleEchonestIdFacebookId, timeout(Span(2, Seconds))) { seqTupleEchonestIdFacebookId =>
@@ -170,6 +170,6 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
         tracks shouldBe a [Set[Track]]
         tracks should not be empty
       }
-    }
+    }*/
   }
 }

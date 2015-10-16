@@ -16,7 +16,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
   "A place" must {
 
-    val place = Place(None, "test", Some("123"), None,
+    /*val place = Place(None, "test", Some("123"), None,
       Some("""Ancienne usine"""),
       Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
 
@@ -158,6 +158,6 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       whenReady(getPlaceByFacebookId(maybeFacebookId), timeout(Span(5, Seconds))) {
         _.get.name mustBe placeName
       }
-    }
+    }*/
   }
 }

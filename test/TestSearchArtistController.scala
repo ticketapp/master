@@ -7,7 +7,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
 
   "SearchArtistController" must {
 
-    "find a sequence of artists on Facebook" in {
+    /*"find a sequence of artists on Facebook" in {
       whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
         artists should not be empty
       }
@@ -180,7 +180,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
         _.map{ artist => artist.name } mustBe expectedArtists
       }
-    }
+    }*/
   }
 }
 

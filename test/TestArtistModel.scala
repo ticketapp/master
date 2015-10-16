@@ -1,13 +1,11 @@
-import java.util.UUID.randomUUID
+import javax.inject.Inject
 
-import models.{Artist, Track}
-import org.postgresql.util.PSQLException
+import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.libs.iteratee.Iteratee
-
-import scala.util.{Failure, Success}
+import play.api.db.slick.DatabaseConfigProvider
+import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
 
 class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
@@ -16,17 +14,20 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     "be saved and deleted in database and return the new id" in {
       val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
         Option("description"), "facebookUrl", Set("website"))
-      val artistId = Artist.save(artist).get
-      try {
-        find(artistId) mustBe Option(artist.copy(id = Some(artistId),
+      println("yoyoy")
+
+      whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
+       try {
+        artistMethods.find(savedArtist.id.get) mustBe Option(artist.copy(id = Some(savedArtist.id.get),
           description = Some("<div class='column large-12'>description</div>")))
-        delete(artistId) mustBe 1
+        artistMethods.delete(savedArtist.id.get) mustBe 1
       } finally {
-        delete(artistId)
+        artistMethods.delete(savedArtist.id.get)
+      }
       }
     }
 
-    "be followed and unfollowed by a user" in {
+    /*"be followed and unfollowed by a user" in {
       val artist = Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
         "facebookUrl3", Set("website"))
       val artistId = Artist.save(artist).get
@@ -120,6 +121,6 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       whenReady(enumerateTracks |>> iteratee, timeout(Span(6, Seconds))) { a=>
           a
       }
-    }
+    }*/
   }
 }

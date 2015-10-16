@@ -9,7 +9,7 @@ import play.api.Logger
 import scala.util.{Failure, Success}
 
 class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
-  var artistId = -1L
+  /*var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestTrack", Set("website"))
 
@@ -226,5 +226,5 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       isArtistNameInTrackTitle("Brâssens trackTitle", "brassêns") mustBe true
       isArtistNameInTrackTitle("Brassens trackTitle", "notRelatedArtist") mustBe false
     }
-  }
+  }*/
 }

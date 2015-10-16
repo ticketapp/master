@@ -14,7 +14,7 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
 
   "SearchSoundCloudTracks" must {
 
-    "find tracks on SoundCloud" in {
+    /*"find tracks on SoundCloud" in {
       whenReady(getSoundCloudTracksForArtist(ninaKraviz), timeout(Span(3, Seconds))) { tracks =>
         tracks should not be empty
       }
@@ -62,6 +62,6 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
         _ mustBe List("http://www.hungrymusic.fr", "https://www.youtube.com/user/worakls/videos",
           "https://twitter.com/worakls", "https://www.facebook.com/worakls/")
       }
-    }
+    }*/
   }
 }

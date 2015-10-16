@@ -12,7 +12,7 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
 
   "A user" must {
 
-    "be saved and deleted" in {
+   /* "be saved and deleted" in {
 //      val user = User("userTestId", new Date(), "email", "nickName", "password", "profile")
 //      save()
     }
@@ -69,6 +69,6 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
         Track.delete(trackId)
         Artist.delete(artistId)
       }
-    }
+    }*/
   }
 }

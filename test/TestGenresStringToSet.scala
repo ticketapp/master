@@ -7,7 +7,7 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
 
   "A sequence of genres as a string" must {
 
-    "return an empty set for None" in {
+    /*"return an empty set for None" in {
       val genres = List(None, None)
 
       val genresSets: List[Set[Genre]] = genres.map { genresStringToGenresSet }
@@ -59,7 +59,7 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
       val expectedResult = List(Set(Genre(None, "hip-hop")), Set(Genre(None, "indie"), Genre(None, "pop-folk")))
 
       genresSets should contain theSameElementsAs expectedResult
-    }
+    }*/
   }
 }
 /*

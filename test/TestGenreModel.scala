@@ -9,7 +9,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
 
   "A genre" must {
 
-    "be saved and deleted" in {
+    /*"be saved and deleted" in {
       val genreId = save(Genre(None, "rockadocka", "r")).get
       delete(genreId) mustBe 1
     }
@@ -160,6 +160,6 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         delete(genreId8)
         delete(genreId9)
       }
-    }
+    }*/
   }
 }

@@ -13,7 +13,7 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
 
   "SearchTracksController" must {
 
-    val tupleTitleArtistNameReads =
+    /*val tupleTitleArtistNameReads =
       Reads.seq((__ \ "title").read[String] and (__ \ "artistName").read[String] tupled)
 
     "find tracks on Youtube by a title and an artist" in {
@@ -30,6 +30,6 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
       println(seqTitleArtistName)
       seqTitleArtistName should not be empty
       seqTitleArtistName.toSet.size mustBe seqTitleArtistName.size
-    }
+    }*/
   }
 }

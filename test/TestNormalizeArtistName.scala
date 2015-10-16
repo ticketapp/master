@@ -4,7 +4,7 @@ class TestNormalizeArtistName extends PlaySpec with OneAppPerSuite {
 
   "A sequence of artists names (strings)" must {
 
-    "return artists name lowercase" in {
+    /*"return artists name lowercase" in {
       val artistsName = List("Brassens", "BREL", "Serge gainsbourg", "dutronc")
 
       val normalizedArtistsName: List[String] = artistsName.map { normalizeArtistName }
@@ -32,6 +32,6 @@ class TestNormalizeArtistName extends PlaySpec with OneAppPerSuite {
       val expectedResult = List("bukowski street team - france", "cookie monsta")
 
       normalizedArtistsName mustBe expectedResult
-    }
+    }*/
   }
 }

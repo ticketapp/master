@@ -9,10 +9,10 @@ class TestArtistController extends PlaySpec with OneAppPerSuite {
 
   "ArtistController" must {
 
-    "be followed by a user" in {
+    /*"be followed by a user" in {
       val eventuallyResult = controllers.EventController.findNearCity("abc", 1, 0)(FakeRequest())
       status(eventuallyResult) mustBe 200
       contentAsJson(eventuallyResult) mustBe Json.toJson(Seq.empty[Event])
-    }
+    }*/
   }
 }
