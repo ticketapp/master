@@ -1,7 +1,5 @@
 package controllers
 
-import json.JsonHelper._
-import models.{Address, Event, Tariff}
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
@@ -9,20 +7,16 @@ import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
 import models._
-import org.postgresql.util.PSQLException
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-import scala.util.{Try, Failure, Success}
-import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Point}
+import scala.util.{Failure, Success}
 
 class EventController @Inject()(ws: WSClient,
                                 val messagesApi: MessagesApi,

@@ -1,26 +1,23 @@
 package models
 
 import java.sql.Timestamp
-import java.util.{Date, UUID}
 import javax.inject.Inject
 
-import controllers.DAOException
+import com.vividsolutions.jts.geom.{GeometryFactory, Point}
+import json.JsonHelper._
 import org.joda.time.DateTime
-import play.api.Logger
 import play.api.Play.current
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
+import services.MyPostgresDriver.api._
 import services.{MyPostgresDriver, Utilities}
-import com.vividsolutions.jts.geom.{GeometryFactory, Point}
 import silhouette.DBTableDefinitions
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.Try
-import services.MyPostgresDriver.api._
-import json.JsonHelper._
 
 case class Event(id: Option[Long],
                  facebookId: Option[String],
@@ -102,13 +99,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   lazy val eventsFollowed = TableQuery[EventsFollowed]
 
-  case class EventPlaces(userId: String, eventId: Long)
+  case class EventPlaceRelation(eventId: Long, placeId: Long)
 
-  class EventsPlaces(tag: Tag) extends Table[(Long, Long)](tag, "eventsPlaces") {
+  class EventsPlaces(tag: Tag) extends Table[EventPlaceRelation](tag, "eventsPlaces") {
     def eventId = column[Long]("eventid")
     def placeId = column[Long]("placeid")
 
-    def * = (eventId, placeId) //<> ((EventPlaces.apply _).tupled, EventPlaces.unapply)
+    def * = (eventId, placeId) <> ((EventPlaceRelation.apply _).tupled, EventPlaceRelation.unapply)
 
     def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
     def bFK = foreignKey("placeid", placeId, places)(_.id, onDelete = ForeignKeyAction.Cascade)
@@ -116,14 +113,14 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   lazy val eventsPlaces = TableQuery[EventsPlaces]  
   
-   class EventsAddresses(tag: Tag) extends Table[(Long, Long)](tag, "eventsaddresses") {
-    def eventId = column[Long]("eventid")
-    def addressId = column[Long]("addressid")
+  class EventsAddresses(tag: Tag) extends Table[(Long, Long)](tag, "eventsaddresses") {
+  def eventId = column[Long]("eventid")
+  def addressId = column[Long]("addressid")
 
-    def * = (eventId, addressId) //<> ((EventAddresss.apply _).tupled, EventAddresss.unapply)
+  def * = (eventId, addressId) //<> ((EventAddresss.apply _).tupled, EventAddresss.unapply)
 
-    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
-    def bFK = foreignKey("addressid", addressId, addresses)(_.id, onDelete = ForeignKeyAction.Cascade)
+  def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
+  def bFK = foreignKey("addressid", addressId, addresses)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
   lazy val eventsAddresses = TableQuery[EventsAddresses]
@@ -221,7 +218,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val query = events
       .filter(event =>
-      (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
+        (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
       .sortBy(_.geographicPoint <-> geographicPoint)
       .drop(numberToReturn)
       .take(offset)
@@ -434,7 +431,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         eventFollowed.userId === userEventRelation.userId && eventFollowed.eventId === userEventRelation.eventId)
      .delete)
 
-  def getFollowedEvents(userId: String): Future[Seq[Event] ]= {
+  def getFollowed(userId: String): Future[Seq[Event] ]= {
     val query = for {
       eventFollowed <- eventsFollowed if eventFollowed.userId === userId
       event <- events if event.id === eventFollowed.eventId
@@ -443,8 +440,10 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-  def isFollowed(userId: String, eventId: Long): Future[Boolean] = {
-    val query = sql"""SELECT exists(SELECT 1 FROM eventsFollowed WHERE userId = $userId AND eventId = $eventId)"""
+  def isFollowed(userEventRelation: UserEventRelation): Future[Boolean] = {
+    val query =
+      sql"""SELECT exists(
+           |  SELECT 1 FROM eventsFollowed WHERE userId = ${userEventRelation.userId} AND eventId = ${userEventRelation.eventId})"""
       .as[Boolean]
     db.run(query.head)
   }

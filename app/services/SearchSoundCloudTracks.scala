@@ -3,10 +3,11 @@ package services
 import java.util.UUID.randomUUID
 import java.util.regex.Pattern
 import javax.inject.Inject
+import services.MyPostgresDriver.api._
 
-import models.{ArtistMethods, GenreMethods, Artist, Track}
+import models._
 import play.api.Play.current
-import play.api.db.slick.DatabaseConfigProvider
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -14,10 +15,11 @@ import play.api.libs.ws.{WS, WSResponse}
 
 import scala.concurrent.Future
 
-class SearchSoundCloudTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
+class SearchSoundCloudTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                         val utilities: Utilities,
-                                        val artistMethods: ArtistMethods,
-                                        val genreMethods: GenreMethods) {
+                                        val trackMethods: TrackMethods,
+                                        val genreMethods: GenreMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper {
 
   def getSoundCloudTracksForArtist(artist: Artist): Future[Seq[Track]] =
     artist.websites find (_ contains "soundcloud.com") match {
@@ -83,13 +85,6 @@ class SearchSoundCloudTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
     }
   )
 
-  def readSoundCloudWebsites(soundCloudResponse: WSResponse): Seq[String] = {
-    val readSoundCloudUrls: Reads[Seq[String]] = Reads.seq((__ \ "url").read[String])
-    soundCloudResponse.json
-      .asOpt[Seq[String]](readSoundCloudUrls)
-      .getOrElse(Seq.empty)
-  }
-
   def getSoundCloudIdsForName(namePattern: String): Future[Seq[Long]] = {
     WS.url("http://api.soundcloud.com/users")
       .withQueryString(
@@ -138,49 +133,12 @@ class SearchSoundCloudTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
     tracks.collect {
       case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl, genre) =>
         genreMethods.saveGenreForArtistInFuture(genre, artist.id.getOrElse(-1L))
-        Track(randomUUID, normalizeTrackTitle(title, artist.name), url, 's', thumbnailUrl, artist.facebookUrl, artist.name,
+        Track(randomUUID, trackMethods.normalizeTrackTitle(title, artist.name), url, 's', thumbnailUrl, artist.facebookUrl, artist.name,
           redirectUrl)
       case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String), genre) =>
         genreMethods.saveGenreForArtistInFuture(genre, artist.id.getOrElse(-1L))
-        Track(randomUUID, normalizeTrackTitle(title, artist.name), url, 's', avatarUrl, artist.facebookUrl, artist.name,
+        Track(randomUUID, trackMethods.normalizeTrackTitle(title, artist.name), url, 's', avatarUrl, artist.facebookUrl, artist.name,
           redirectUrl)
     }
-  }
-
-  def normalizeTrackTitle(title: String, artistName: String): String =
-    ("""(?i)""" + Pattern.quote(artistName) + """\s*[:/-]?\s*""").r.replaceFirstIn(
-      """(?i)(\.wm[a|v]|\.ogc|\.amr|\.wav|\.flv|\.mov|\.ram|\.mp[3-5]|\.pcm|\.alac|\.eac-3|\.flac|\.vmd)\s*$""".r
-        .replaceFirstIn(title, ""),
-      "")
-
-  def addSoundCloudWebsitesIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Future[Seq[String]] =
-     maybeTrack match {
-    case None => Future(Seq.empty)
-    case Some(track: Track) => track.redirectUrl match {
-      case None => Future(Seq.empty)
-      case Some(redirectUrl) => val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).
-        substring("soundcloud.com/".length)
-        WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
-          .withQueryString("client_id" -> utilities.soundCloudClientId)
-          .get()
-          .map { soundCloudResponse =>
-          readSoundCloudWebsites(soundCloudResponse).map { website =>
-            val normalizedWebsite = utilities.normalizeUrl(website)
-            if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty) {
-              artistMethods.addWebsite(artist.id.get, normalizedWebsite)
-            }
-          }
-          readSoundCloudWebsites(soundCloudResponse)
-          }
-    }
-  }
-
-  def removeUselessInSoundCloudWebsite(website: String): String = website match {
-    case soundCloudWebsite if soundCloudWebsite contains "soundcloud" =>
-      if (soundCloudWebsite.count(_ == '/') > 1)
-        soundCloudWebsite.take(soundCloudWebsite.lastIndexOf('/'))
-      else
-        soundCloudWebsite
-    case _ => website
   }
 }

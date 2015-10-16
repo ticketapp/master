@@ -21,18 +21,18 @@ class SearchTracksController @Inject()(val utilities: Utilities,
                                         val trackMethods: TrackMethods,
                                         val searchYoutubeTracks: SearchYoutubeTracks) extends Controller {
   val googleKey = utilities.googleKey
-//
-//  def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) =
-//  Action.async {
-//    searchYoutubeTracks.getYoutubeTracksByArtistAndTitle(Artist(None, None, artistName, None, None, artistFacebookUrl), trackTitle)
-//      .map { tracks =>
-//        val tracksFiltered = trackMethods.removeDuplicateByTitleAndArtistName(tracks.filterNot(track =>
-//          utilities.removeSpecialCharacters(track.title).equalsIgnoreCase(utilities.removeSpecialCharacters(trackTitle))))
-//
-//        Future { tracksFiltered map trackMethods.save }
-//        Ok(Json.toJson(tracksFiltered))
-//    }
-//  }
+
+  def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) =
+  Action.async {
+    searchYoutubeTracks.getYoutubeTracksByArtistAndTitle(Artist(None, None, artistName, None, None, artistFacebookUrl), trackTitle)
+      .map { tracks =>
+        val tracksFiltered = trackMethods.removeDuplicateByTitleAndArtistName(tracks.filterNot(track =>
+          utilities.removeSpecialCharacters(track.title).equalsIgnoreCase(utilities.removeSpecialCharacters(trackTitle))))
+
+        Future { tracksFiltered map trackMethods.save }
+        Ok(Json.toJson(tracksFiltered))
+    }
+  }
 
   def getYoutubeTrackInfo(youtubeId: String) = Action.async {
     WS.url("http://www.youtube.com/get_video_info")
