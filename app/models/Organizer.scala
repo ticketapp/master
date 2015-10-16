@@ -38,45 +38,9 @@ case class OrganizerFollowed(userId: String, Organizer: Long)
 
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,
-                                 val eventMethods: EventMethods,
                                  val utilities: Utilities,
-                                 val addressMethods: AddressMethods) extends HasDatabaseConfigProvider[MyPostgresDriver] {
-
-  val addresses = addressMethods.addresses
-  val events = eventMethods.events
-  val eventsOrganizers = eventMethods.eventsOrganizers
-  import eventMethods.EventOrganizer
-
-  class Organizers(tag: Tag) extends Table[Organizer](tag, "organizers") {
-    def id = column[Long]("organizerid", O.PrimaryKey, O.AutoInc)
-    def facebookId = column[Option[String]]("facebookid")
-    def name = column[String]("name")
-    def description = column[Option[String]]("description")
-    def addressId = column[Option[Long]]("addressid")
-    def phone = column[Option[String]]("phone")
-    def publicTransit = column[Option[String]]("publictransit")
-    def websites = column[Option[String]]("websites")
-    def verified = column[Boolean]("verified")
-    def imagePath = column[Option[String]]("imagepath")
-    def geographicPoint = column[Option[Point]]("geographicpoint")
-    def linkedPlaceId = column[Option[Long]]("placeid")
-
-    def * = (id.?, facebookId, name, description, addressId, phone, publicTransit, websites, verified, imagePath, geographicPoint, linkedPlaceId) <>
-      ((Organizer.apply _).tupled, Organizer.unapply)
-
-    def address = foreignKey("addressFk", addressId, addresses)(_.id.?, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val organizers = TableQuery[Organizers]
-
-  class OrganizersFollowed(tag: Tag) extends Table[OrganizerFollowed](tag, "organizersfollowed") {
-    def userId = column[String]("userid")
-    def organizerId = column[Long]("organizerid")
-
-    def * = (userId, organizerId) <> ((OrganizerFollowed.apply _).tupled, OrganizerFollowed.unapply)
-  }
-
-  lazy val organizersFollowed = TableQuery[OrganizersFollowed]
+                                 val addressMethods: AddressMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
                 imagePath: Option[String]): Organizer =

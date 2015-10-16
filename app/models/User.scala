@@ -46,12 +46,6 @@ class UserMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
                              val utilities: Utilities) {
 
 
-  implicit def dateTime =
-    MappedColumnType.base[DateTime, Timestamp](
-      dt => new Timestamp(dt.getMillis),
-      ts => new DateTime(ts.getTime)
-    )
-//
 //  class Users(tag: Tag) extends Table[User](tag, "users") {
 //    def UUID = column[UUID]("userId", O.PrimaryKey, O.AutoInc)
 //    def creationDateTime = column[DateTime]("creationDateTime")
