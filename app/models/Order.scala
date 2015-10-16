@@ -13,7 +13,7 @@ import scala.language.postfixOps
 case class Order (orderId: Long,
                   totalPrice: Int)
 
-class SearchSoundCloudTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
+class OrderMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
                                        val utilities: Utilities,
                                        val artistMethods: ArtistMethods,
                                        val genreMethods: GenreMethods) {

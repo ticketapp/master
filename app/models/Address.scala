@@ -4,18 +4,15 @@ package models
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Point
-import org.joda.time.DateTime
 import play.api.Logger
-
 import play.api.Play.current
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
-import play.api.libs.ws.{WSResponse, WS}
-import services.{MyPostgresDriver, Utilities, SearchYoutubeTracks, SearchSoundCloudTracks}
-import scala.language.postfixOps
-import scala.concurrent.Future
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
-import scala.util.{Success, Failure, Try}
+import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
+import services.{MyPostgresDriver, Utilities}
+
+import scala.concurrent.Future
 import scala.language.postfixOps
 
 
@@ -29,11 +26,7 @@ case class Address (id: Option[Long],
 }
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                              val organizerMethods: OrganizerMethods,
-                              val placeMethods: PlaceMethods,
                               val eventMethods: EventMethods,
-                              val searchSoundCloudTracks: SearchSoundCloudTracks,
-                              val searchYoutubeTracks: SearchYoutubeTracks,
                               val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
   val events = eventMethods.events

@@ -4,7 +4,7 @@ import java.util.UUID._
 import javax.inject.Inject
 
 import models._
-import play.api.db.slick.DatabaseConfigProvider
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import play.api.libs.iteratee.{Enumeratee, Iteratee, Enumerator}
 import play.api.libs.iteratee.Input.EOF
 import play.api.libs.ws.{WS, WSResponse}
@@ -16,12 +16,11 @@ import scala.language.postfixOps
 import play.api.Play.current
 
 
-class SearchYoutubeTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                     val placeMethods: PlaceMethods,
+class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                      val genreMethods: GenreMethods,
                                      val utilities: Utilities,
-                                     val searchSoundCloudTracks: SearchSoundCloudTracks,
-                                     val trackMethods: TrackMethods) {
+                                     val trackMethods: TrackMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
   val youtubeKey = utilities.googleKey
   val echonestApiKey = utilities.echonestApiKey
@@ -162,7 +161,7 @@ class SearchYoutubeTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
         "key" -> youtubeKey)
       .get()
       .map { response => removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
-        track.copy(title = searchSoundCloudTracks.normalizeTrackTitle(track.title, artist.name))
+        track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
       }
     }
   }
@@ -177,7 +176,7 @@ class SearchYoutubeTracks @Inject()(dbConfigProvider: DatabaseConfigProvider,
         "key" -> youtubeKey)
       .get()
       .map { readYoutubeTracks(_, artist).toSet map { track:Track =>
-        track.copy(title = searchSoundCloudTracks.normalizeTrackTitle(track.title, artist.name))
+        track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
       }
     }
   }

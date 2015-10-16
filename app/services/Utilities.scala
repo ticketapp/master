@@ -5,9 +5,8 @@ import java.text.Normalizer
 import java.util.{UUID, Date}
 import javax.inject.Inject
 
-import models.PlaceMethods
 import org.joda.time.DateTime
-import play.api.db.slick.DatabaseConfigProvider
+import play.api.Logger
 import slick.driver.PostgresDriver.api._
 
 import scala.collection.mutable.ListBuffer
@@ -16,8 +15,7 @@ import scala.util.{Try, Failure, Success}
 import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Point}
 
 
-class Utilities @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                           val placeMethods: PlaceMethods) {
+class Utilities @Inject()() {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
   val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc"
   val echonestApiKey = "3ZYZKU3H3MKR2M59Z"
@@ -43,6 +41,19 @@ class Utilities @Inject()(dbConfigProvider: DatabaseConfigProvider,
       val coordinate= new Coordinate(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble)
       geometryFactory.createPoint(coordinate)
     }
+  }
+
+  def optionStringToOptionPoint(maybeGeographicPoint: Option[String]) = maybeGeographicPoint match {
+    case None =>
+      None
+    case Some(geoPoint) =>
+      stringToGeographicPoint(geoPoint) match {
+        case Failure(exception) =>
+          Logger.error("Utilities.optionStringToPoint: ", exception)
+          None
+        case Success(validPoint) =>
+          Some(validPoint)
+      }
   }
 
   def normalizeString(string: String): String = string //Should be replace accentued letters for example?
