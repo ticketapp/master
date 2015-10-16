@@ -30,6 +30,7 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
 
+
   def formApply(city: Option[String], zip: Option[String], street: Option[String]) =
     new Address(None, None, city, zip, street)
   def formUnapply(address: Address): Option[(Option[String], Option[String], Option[String])] =

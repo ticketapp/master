@@ -1,20 +1,34 @@
-import java.util.UUID._
-
-import models.{Artist, Genre, Track}
+import models.{Genre, GenreMethods}
+import org.scalatest.time.{Span, Seconds}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.Utilities
+import org.scalatest.concurrent.ScalaFutures._
 
-import scala.util.Success
 
 class TestGenreModel extends PlaySpec with OneAppPerSuite {
 
   "A genre" must {
 
+    val appBuilder = new GuiceApplicationBuilder()
+    val injector = appBuilder.injector()
+    val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+    val utilities = new Utilities()
+    val genreMethods = new GenreMethods(dbConfProvider, utilities)
+
     "be saved and deleted" in {
-      val genreId = save(Genre(None, "rockadocka", "r")).get
-      delete(genreId) mustBe 1
+      whenReady(genreMethods.save(Genre(None, "rockadocka", 'r')), timeout(Span(5,Seconds))) { genreSaved =>
+        whenReady(genreMethods.findById(genreSaved.id.get), timeout(Span(5,Seconds))) { genreFind =>
+          genreFind.get mustBe Genre(Option(genreSaved.id.get), "rockadocka", 'r')
+          whenReady(genreMethods.delete(genreSaved.id.get), timeout(Span(5, Seconds))) {
+            _ mustBe 1
+          }
+        }
+      }
     }
 
-    "not be created if empty" in {
+    /*"not be created if empty" in {
       Genre(None, "abc")
       an [java.lang.IllegalArgumentException] should be thrownBy Option(Genre(None, ""))
     }
@@ -160,6 +174,6 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         delete(genreId8)
         delete(genreId9)
       }
-    }
+    }*/
   }
 }
