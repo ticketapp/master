@@ -1,6 +1,7 @@
 package models
 
 import java.util.UUID
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -260,4 +261,10 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean =
     utilities.replaceAccentuatedLetters(trackTitle.toLowerCase) contains
       utilities.replaceAccentuatedLetters(artistName.toLowerCase)
+
+  def normalizeTrackTitle(title: String, artistName: String): String =
+    ("""(?i)""" + Pattern.quote(artistName) + """\s*[:/-]?\s*""").r.replaceFirstIn(
+      """(?i)(\.wm[a|v]|\.ogc|\.amr|\.wav|\.flv|\.mov|\.ram|\.mp[3-5]|\.pcm|\.alac|\.eac-3|\.flac|\.vmd)\s*$""".r
+        .replaceFirstIn(title, ""),
+      "")
 }

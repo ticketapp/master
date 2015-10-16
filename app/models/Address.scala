@@ -9,7 +9,7 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
-import services.{MyPostgresDriver, SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
+import services.{MyPostgresDriver, Utilities}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -25,11 +25,7 @@ case class Address (id: Option[Long],
 }
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                              val organizerMethods: OrganizerMethods,
-                              val placeMethods: PlaceMethods,
                               val eventMethods: EventMethods,
-                              val searchSoundCloudTracks: SearchSoundCloudTracks,
-                              val searchYoutubeTracks: SearchYoutubeTracks,
                               val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
   val events = eventMethods.events

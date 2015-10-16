@@ -15,7 +15,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.iteratee.{Enumerator, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
-import services.{SearchSoundCloudTracks, MyPostgresDriver, SearchYoutubeTracks, Utilities}
+import services._
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -35,15 +35,14 @@ case class Artist (id: Option[Long],
 //                   country: Option[String] = None)
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                       val organizerMethods: OrganizerMethods,
-                       val placeMethods: PlaceMethods,
                        val eventMethods: EventMethods,
                        val genreMethods: GenreMethods,
                        val artistMethods: ArtistMethods,
                        val searchSoundCloudTracks: SearchSoundCloudTracks,
                        val searchYoutubeTracks: SearchYoutubeTracks,
                        val trackMethods: TrackMethods,
-                       val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver] {
+                       val utilities: Utilities)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper {
 
   import eventMethods.EventArtistRelation
 
@@ -217,7 +216,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val soundCloudTracksEnumerator = Enumerator.flatten(
       searchSoundCloudTracks.getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
         artistMethods.addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
-        searchSoundCloudTracks.addSoundCloudWebsitesIfNotInWebsites(soundCloudTracks.headOption, patternAndArtist.artist)
+        addSoundCloudWebsitesIfNotInWebsites(soundCloudTracks.headOption, patternAndArtist.artist)
         Enumerator(soundCloudTracks.toSet).andThen(Enumerator.eof)
       })
 
@@ -254,7 +253,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       soundCloudTrack.redirectUrl match {
         case None =>
         case Some(redirectUrl) =>
-          val refactoredRedirectUrl = searchSoundCloudTracks.removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl))
+          val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl))
           if (!artist.websites.contains(refactoredRedirectUrl) && artist.id.nonEmpty)
             addWebsite(artist.id.get, refactoredRedirectUrl)
       }
@@ -485,4 +484,27 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =
     imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
+
+
+  def addSoundCloudWebsitesIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Future[Seq[String]] =
+    maybeTrack match {
+      case None => Future(Seq.empty)
+      case Some(track: Track) => track.redirectUrl match {
+        case None => Future(Seq.empty)
+        case Some(redirectUrl) => val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).
+          substring("soundcloud.com/".length)
+          WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
+            .withQueryString("client_id" -> utilities.soundCloudClientId)
+            .get()
+            .map { soundCloudResponse =>
+            readSoundCloudWebsites(soundCloudResponse).map { website =>
+              val normalizedWebsite = utilities.normalizeUrl(website)
+              if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty) {
+                artistMethods.addWebsite(artist.id.get, normalizedWebsite)
+              }
+            }
+            readSoundCloudWebsites(soundCloudResponse)
+          }
+      }
+    }
 }

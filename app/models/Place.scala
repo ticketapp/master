@@ -33,10 +33,8 @@ case class Place (id: Option[Long],
                   linkedOrganizerId: Option[Long] = None)
 
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val organizerMethods: OrganizerMethods,
                              val addressMethods: AddressMethods,
                              val eventMethods: EventMethods,
-                             val placeMethods: PlaceMethods,
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions {
 

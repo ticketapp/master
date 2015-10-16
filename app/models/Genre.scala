@@ -21,8 +21,6 @@ case class Genre (id: Option[Int], name: String, icon: Char = 'a') {
 }
 
 class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                      val organizerMethods: OrganizerMethods,
-                      val placeMethods: PlaceMethods,
                       val eventMethods: EventMethods,
                       val artistMethods: ArtistMethods,
                       val trackMethods: TrackMethods,
