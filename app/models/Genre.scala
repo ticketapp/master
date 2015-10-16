@@ -3,17 +3,14 @@ package models
 import java.util.UUID
 import javax.inject.Inject
 
-import controllers.DAOException
-import org.joda.time.DateTime
 import play.api.Logger
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
-
-import services.{MyPostgresDriver, Utilities}
 import services.MyPostgresDriver.api._
+import services.{MyPostgresDriver, Utilities}
+
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.{Failure, Try}
 
 
 case class Genre (id: Option[Int], name: String, icon: Char = 'a') {
@@ -21,30 +18,8 @@ case class Genre (id: Option[Int], name: String, icon: Char = 'a') {
 }
 
 class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                      val eventMethods: EventMethods,
-                      val artistMethods: ArtistMethods,
-                      val trackMethods: TrackMethods,
-                      val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver]  {
-  
-  import eventMethods.EventGenreRelation
-  import artistMethods.ArtistGenreRelation
-  import trackMethods.TrackGenreRelation
-  val events = eventMethods.events
-  val eventsGenres = eventMethods.eventsGenres
-  val artists = artistMethods.artists
-  val artistsGenres = artistMethods.artistsGenres
-  val tracks = trackMethods.tracks
-  val tracksGenres = trackMethods.tracksGenres
-
-  class Genres(tag: Tag) extends Table[Genre](tag, "genres") {
-    def id = column[Int]("genreid", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
-    def icon = column[Char]("icon")
-
-    def * = (id.?, name, icon) <> ((Genre.apply _).tupled, Genre.unapply)
-  }
-
-  lazy val genres = TableQuery[Genres]
+                             val utilities: Utilities)
+  extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApply(name: String) = new Genre(None, name)
   def formUnapply(genre: Genre) = Some(genre.name)
@@ -52,34 +27,6 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def findAll: Future[Seq[Genre]] = {
     db.run(genres.result)
   }
-
-  case class UserGenreRelation(userId: String, genreId: Long)
-
-  class GenresFollowed(tag: Tag) extends Table[UserGenreRelation](tag, "genresfollowed") {
-    def userId = column[String]("userid")
-    def genreId = column[Long]("genreid")
-
-    def * = (userId, genreId) <> ((UserGenreRelation.apply _).tupled, UserGenreRelation.unapply)
-  }
-
-  lazy val genresFollowed = TableQuery[GenresFollowed]
-
-//  def findContaining(pattern: String): Future[Seq[Genre]] = {
-//    val lowercasePattern = pattern.toLowerCase
-//    val query = for {
-//      genre <- genres if genre.name.toLowerCase like s"%$lowercasePattern%"
-//    } yield genre
-//
-//    db.run(query.take(12).result)
-//
-////        """SELECT * FROM genres
-////          | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
-////          | LIMIT 12""".stripMargin)
-////        .on('patternLowCase -> pattern.toLowerCase)
-////        .as(GenreParser.*)
-////    }
-//  }
-
 
   def findById(id: Int): Future[Option[Genre]] = {
     val query = genres.filter(_.id === id)
@@ -115,16 +62,23 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     db.run(query.result)
   }
-  /*
-   def findContaining(pattern: String): Future[Seq[Genre]] = {
-         """SELECT * FROM genres
-           | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
-           | LIMIT 12""".stripMargin)
-         .on('patternLowCase -> pattern.toLowerCase)
-         .as(GenreParser.*)
-     }
-   }
-     */
+
+  //  def findContaining(pattern: String): Future[Seq[Genre]] = {
+  //    val lowercasePattern = pattern.toLowerCase
+  //    val query = for {
+  //      genre <- genres if genre.name.toLowerCase like s"%$lowercasePattern%"
+  //    } yield genre
+  //
+  //    db.run(query.take(12).result)
+  //
+  ////        """SELECT * FROM genres
+  ////          | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
+  ////          | LIMIT 12""".stripMargin)
+  ////        .on('patternLowCase -> pattern.toLowerCase)
+  ////        .as(GenreParser.*)
+  ////    }
+  //  }
+
   def save(genre: Genre): Future[Genre] =
     db.run(genres returning genres.map(_.id) into ((genre, id) => genre.copy(id = Option(id))) += genre)
 

@@ -35,66 +35,13 @@ case class Artist (id: Option[Long],
 //                   country: Option[String] = None)
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                       val eventMethods: EventMethods,
                        val genreMethods: GenreMethods,
-                       val artistMethods: ArtistMethods,
                        val searchSoundCloudTracks: SearchSoundCloudTracks,
                        val searchYoutubeTracks: SearchYoutubeTracks,
                        val trackMethods: TrackMethods,
                        val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper with MyDBTableDefinitions {
 
-  import eventMethods.EventArtistRelation
-
-  class Artists(tag: Tag) extends Table[Artist](tag, "artists") {
-    def id = column[Long]("organizerId", O.PrimaryKey, O.AutoInc)
-    def facebookId = column[Option[String]]("facebookid")
-    def name = column[String]("name")
-    def imagePath = column[Option[String]]("imagepath")
-    def description = column[Option[String]]("description")
-    def facebookUrl = column[String]("facebookurl")
-    def websites = column[Option[String]]("websites")
-
-    def * = (id.?, facebookId, name, imagePath, description, facebookUrl, websites).shaped <> (
-      { case (id, facebookId, name, imagePath, description, facebookUrl, websites) =>
-      Artist(id, facebookId, name, imagePath, description, facebookUrl, utilities.optionStringToSet(websites))
-    }, { artist: Artist =>
-      Some((artist.id, artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
-        Option(artist.websites.mkString(","))))
-    })
-//    def * = (id.?, facebookId, name, imagePath, description, facebookUrl, websites, likes, country) <>
-//      ((Artist.apply _).tupled, Artist.unapply)
-  }
-
-  case class UserArtistRelation(userId: String, artistId: Long)
-
-  class ArtistsFollowed(tag: Tag) extends Table[UserArtistRelation](tag, "artistsfollowed") {
-    def userId = column[String]("userid")
-    def artistId = column[Long]("artistid")
-
-    def * = (userId, artistId) <> ((UserArtistRelation.apply _).tupled, UserArtistRelation.unapply)
-  }
-
-  lazy val artistsFollowed = TableQuery[ArtistsFollowed]
-
-  case class ArtistGenreRelation(artistId: Long, genreId: Int)
-
-  class ArtistsGenres(tag: Tag) extends Table[ArtistGenreRelation](tag, "artistsGenres") {
-    def artistId = column[Long]("artistid")
-    def genreId = column[Int]("genreid")
-
-    def * = (artistId, genreId) <> ((ArtistGenreRelation.apply _).tupled, ArtistGenreRelation.unapply)
-
-    def aFK = foreignKey("artistid", artistId, artists)(_.id, onDelete=ForeignKeyAction.Cascade)
-    def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete=ForeignKeyAction.Cascade)
-  }
-
-  lazy val artistsGenres = TableQuery[ArtistsGenres]
-
-  lazy val artists = TableQuery[Artists]
-  val events = eventMethods.events
-  val eventsArtists = eventMethods.eventsArtists
-  val genres = genreMethods.genres
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
 
@@ -215,7 +162,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def getArtistTracks(patternAndArtist: PatternAndArtist): Enumerator[Set[Track]] = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       searchSoundCloudTracks.getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        artistMethods.addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
+        addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
         addSoundCloudWebsitesIfNotInWebsites(soundCloudTracks.headOption, patternAndArtist.artist)
         Enumerator(soundCloudTracks.toSet).andThen(Enumerator.eof)
       })
@@ -453,10 +400,10 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
 
   def readFacebookArtist(facebookWSResponse: WSResponse): Option[Artist] = {
-   facebookWSResponse.json
+    facebookWSResponse.json
      .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
      Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
-   match {
+    match {
      case Some((name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
      link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
        Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
@@ -466,7 +413,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
        Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
          link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))
      case _ => None
-   }
+    }
   }
 
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
@@ -485,7 +432,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =
     imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
 
-
   def addSoundCloudWebsitesIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Future[Seq[String]] =
     maybeTrack match {
       case None => Future(Seq.empty)
@@ -500,7 +446,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
             readSoundCloudWebsites(soundCloudResponse).map { website =>
               val normalizedWebsite = utilities.normalizeUrl(website)
               if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty) {
-                artistMethods.addWebsite(artist.id.get, normalizedWebsite)
+                addWebsite(artist.id.get, normalizedWebsite)
               }
             }
             readSoundCloudWebsites(soundCloudResponse)

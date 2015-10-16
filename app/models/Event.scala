@@ -44,128 +44,12 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val organizerMethods: OrganizerMethods,
                              val placeMethods: PlaceMethods,
                              val artistMethods: ArtistMethods,
-                             val genreMethods: GenreMethods,
                              val tariffMethods: TariffMethods,
                              val addressMethods: AddressMethods,
-                             val userMethods: UserMethods,
                              val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions with MyDBTableDefinitions {
 
-  val places = placeMethods.places
-  val organizers = organizerMethods.organizers
-  val artists = artistMethods.artists
-  val genres = genreMethods.genres
-  val addresses = addressMethods.addresses
   val geometryFactory = new GeometryFactory()
-
-  implicit val jodaDateTimeMapping = {
-    MappedColumnType.base[DateTime, Timestamp](
-      dt => new Timestamp(dt.getMillis),
-      ts => new DateTime(ts))
-  }
-
-  class Events(tag: Tag) extends Table[Event](tag, "events") {
-    def id = column[Long]("organizerId", O.PrimaryKey, O.AutoInc)
-    def facebookId = column[Option[String]]("facebookid")
-    def isPublic = column[Boolean]("ispublic")
-    def isActive = column[Boolean]("isactive")
-    def name = column[String]("name")
-    def geographicPoint = column[Option[Point]]("geographicpoint")
-    def description = column[Option[String]]("description")
-    def startTime = column[DateTime]("starttime")
-    def endTime = column[Option[DateTime]]("endtime")
-    def ageRestriction = column[Int]("agerestriction")
-    def tariffRange = column[Option[String]]("tariffrange")
-    def ticketSellers = column[Option[String]]("ticketsellers")
-    def imagePath = column[Option[String]]("imagepath")
-
-    def * = (id.?, facebookId, isPublic, isActive, name, geographicPoint, description, startTime, endTime,
-      ageRestriction, tariffRange, ticketSellers, imagePath) <> ((Event.apply _).tupled, Event.unapply)
-  }
-
-  lazy val events = TableQuery[Events]
-
-  case class UserEventRelation(userId: String, eventId: Long)
-
-  class EventsFollowed(tag: Tag) extends Table[UserEventRelation](tag, "eventsfollowed") {
-    def userId = column[String]("userid")
-    def eventId = column[Long]("eventid")
-
-    def * = (userId, eventId) <> ((UserEventRelation.apply _).tupled, UserEventRelation.unapply)
-
-    def aFK = foreignKey("userid", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
-    def bFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val eventsFollowed = TableQuery[EventsFollowed]
-
-  case class EventPlaceRelation(eventId: Long, placeId: Long)
-
-  class EventsPlaces(tag: Tag) extends Table[EventPlaceRelation](tag, "eventsPlaces") {
-    def eventId = column[Long]("eventid")
-    def placeId = column[Long]("placeid")
-
-    def * = (eventId, placeId) <> ((EventPlaceRelation.apply _).tupled, EventPlaceRelation.unapply)
-
-    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
-    def bFK = foreignKey("placeid", placeId, places)(_.id, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val eventsPlaces = TableQuery[EventsPlaces]  
-  
-  class EventsAddresses(tag: Tag) extends Table[(Long, Long)](tag, "eventsaddresses") {
-  def eventId = column[Long]("eventid")
-  def addressId = column[Long]("addressid")
-
-  def * = (eventId, addressId) //<> ((EventAddresss.apply _).tupled, EventAddresss.unapply)
-
-  def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
-  def bFK = foreignKey("addressid", addressId, addresses)(_.id, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val eventsAddresses = TableQuery[EventsAddresses]
-
-  case class EventGenreRelation(eventId: Long, genreId: Int)
-  
-  class EventsGenres(tag: Tag) extends Table[EventGenreRelation](tag, "eventsgenres") {
-    def eventId = column[Long]("eventid")
-    def genreId = column[Int]("genreid")
-
-    def * = (eventId, genreId) <> ((EventGenreRelation.apply _).tupled, EventGenreRelation.unapply)
-
-    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
-    def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val eventsGenres = TableQuery[EventsGenres]
-
-  case class EventOrganizer(eventId: Long, organizerId: Long)
-
-  class EventsOrganizers(tag: Tag) extends Table[EventOrganizer](tag, "eventsorganizers") {
-    def eventId = column[Long]("eventid")
-    def organizerId = column[Long]("organizerid")
-
-    def * = (eventId, organizerId) <> ((EventOrganizer.apply _).tupled, EventOrganizer.unapply)
-
-    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
-    def bFK = foreignKey("organizerid", organizerId, organizers)(_.id, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val eventsOrganizers = TableQuery[EventsOrganizers]
-
-  case class EventArtistRelation(eventId: Long, artistId: Long)
-
-  class EventsArtists(tag: Tag) extends Table[EventArtistRelation](tag, "eventsartists") {
-    def eventId = column[Long]("eventid")
-    def artistId = column[Long]("artistid")
-
-    def * = (eventId, artistId) <> ((EventArtistRelation.apply _).tupled, EventArtistRelation.unapply)
-
-    def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
-    def bFK = foreignKey("artistid", artistId, artists)(_.id, onDelete = ForeignKeyAction.Cascade)
-  }
-
-  lazy val eventsArtists = TableQuery[EventsArtists]
 
 //  def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: DateTime,
 //                endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
