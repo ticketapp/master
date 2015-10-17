@@ -18,34 +18,36 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
     val genreMethods = new GenreMethods(dbConfProvider, utilities)
 
     "be saved and deleted" in {
-      whenReady(genreMethods.save(Genre(None, "rockadocka", 'r')), timeout(Span(5,Seconds))) { genreSaved =>
-        whenReady(genreMethods.findById(genreSaved.id.get), timeout(Span(5,Seconds))) { genreFind =>
-          genreFind.get mustBe Genre(Option(genreSaved.id.get), "rockadocka", 'r')
-          whenReady(genreMethods.delete(genreSaved.id.get), timeout(Span(5, Seconds))) {
-            _ mustBe 1
+      val genre = Genre(None, "rockadocka", 'r')
+      whenReady(genreMethods.save(genre), timeout(Span(5,Seconds))) { genreSaved =>
+        whenReady(genreMethods.findById(genreSaved.id.get), timeout(Span(5,Seconds))) { genreFound =>
+
+          genreFound.get mustBe genre.copy(id = Option(genreSaved.id.get))
+          whenReady(genreMethods.delete(genreSaved.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+        }
+      }
+    }
+
+    "not be created if empty" in {
+      Genre(None, "abc")
+      an [java.lang.IllegalArgumentException] should be thrownBy Option(Genre(None, ""))
+    }
+
+    "return the already existing genre when there was a unique violation" in {
+      val genre = Genre(None, "rockadockaa")
+      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { genreFound =>
+        whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { secondGenreFound =>
+          try {
+            genreFound mustBe secondGenreFound
+          } finally {
+            whenReady(genreMethods.delete(genreFound.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+            whenReady(genreMethods.delete(secondGenreFound.id.get), timeout(Span(5, Seconds))) { _ mustBe 0 }
           }
         }
       }
     }
 
-    /*"not be created if empty" in {
-      Genre(None, "abc")
-      an [java.lang.IllegalArgumentException] should be thrownBy Option(Genre(None, ""))
-    }
-
-    "return genreId if try to save existing genre" in {
-      val genreId = save(Genre(None, "rockadocka")).get
-      val genreId2 = save(Genre(None, "rockadocka")).get
-      try {
-        assert(genreId > 0)
-        genreId mustBe genreId2
-      } finally {
-        delete(genreId)
-        delete(genreId2)
-      }
-    }
-
-    "save and delete its relation with an artist" in {
+/*    "save and delete its relation with an artist" in {
       val genre = Genre(None, "rockiyadockia")
       val genreId = save(genre).get
       val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
