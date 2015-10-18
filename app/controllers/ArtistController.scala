@@ -27,6 +27,7 @@ class ArtistController @Inject()(ws: WSClient,
                                  val messagesApi: MessagesApi,
                                  val env: Environment[User, CookieAuthenticator],
                                  val artistMethods: ArtistMethods,
+                                 val trackMethods: TrackMethods,
                                  socialProviderRegistry: SocialProviderRegistry)
     extends Silhouette[User, CookieAuthenticator] {
 
@@ -42,14 +43,11 @@ class ArtistController @Inject()(ws: WSClient,
     }
   }
 
-
-
   def artistsSinceOffsetBy(number: Int, offset: Int) =  Action.async {
     artistMethods.findSinceOffset(number, offset).map { artists =>
       Ok(Json.toJson(artists))
     }
   } 
-
 
   def artist(id: Long) = Action.async {
     artistMethods.find(id).map { artist =>
@@ -73,68 +71,70 @@ class ArtistController @Inject()(ws: WSClient,
     artistMethods.findAllContaining(pattern) map { artists =>
       Ok(Json.toJson(artists)) }
   }
-  /*
-    val artistBindingForm = Form(
-      mapping(
-        "searchPattern" -> nonEmptyText(3),
-        "artist" -> mapping(
-          "facebookId" -> optional(nonEmptyText(2)),
-          "artistName" -> nonEmptyText(2),
-          "imagePath" -> optional(nonEmptyText(2)),
-          "description" -> optional(nonEmptyText),
-          "facebookUrl" -> nonEmptyText,
-          "websites" -> seq(nonEmptyText(4)),
-          "genres" -> seq(
-            mapping(
-              "name" -> nonEmptyText
-            )(Genre.formApply)(Genre.formUnapply)),
-          "tracks" -> seq(
-            mapping(
-              "trackId" -> nonEmptyText(8),
-              "title" -> nonEmptyText,
-              "url" -> nonEmptyText,
-              "platform" -> nonEmptyText,
-              "thumbnail" -> optional(nonEmptyText),
-              "avatarUrl" -> optional(nonEmptyText),
-              "artistName" -> nonEmptyText(2),
-              "artistFacebookUrl" -> nonEmptyText(2),
-              "redirectUrl" -> optional(nonEmptyText(2))
-            )(Track.formApplyForTrackCreatedWithArtist)(Track.formUnapplyForTrackCreatedWithArtist)
-          ),
-          "likes" -> optional(number),
-          "country" -> optional(nonEmptyText)
-        )(Artist.formApply)(Artist.formUnapply)
-      )(Artist.formWithPatternApply)(Artist.formWithPatternUnapply)
-    )
 
-    def createArtist = Action { implicit request =>
-    artistBindingForm.bindFromRequest().fold(
+  val artistBindingForm = Form(
+    mapping(
+      "searchPattern" -> nonEmptyText(3),
+      "artist" -> mapping(
+        "facebookId" -> optional(nonEmptyText(2)),
+        "artistName" -> nonEmptyText(2),
+        "imagePath" -> optional(nonEmptyText(2)),
+        "description" -> optional(nonEmptyText),
+        "facebookUrl" -> nonEmptyText,
+        "websites" -> seq(nonEmptyText(4)),
+        /*"genres" -> seq(
+          mapping(
+            "name" -> nonEmptyText
+          )(Genre.formApply)(Genre.formUnapply)),
+        "tracks" -> seq(
+          mapping(
+            "trackId" -> nonEmptyText(8),
+            "title" -> nonEmptyText,
+            "url" -> nonEmptyText,
+            "platform" -> nonEmptyText,
+            "thumbnail" -> optional(nonEmptyText),
+            "avatarUrl" -> optional(nonEmptyText),
+            "artistName" -> nonEmptyText(2),
+            "artistFacebookUrl" -> nonEmptyText(2),
+            "redirectUrl" -> optional(nonEmptyText(2))
+          )(Track.formApplyForTrackCreatedWithArtist)(Track.formUnapplyForTrackCreatedWithArtist)
+        ),*/
+        "likes" -> optional(number),
+        "country" -> optional(nonEmptyText)
+      )(artistMethods.formApply)(artistMethods.formUnapply)
+    )(artistMethods.formWithPatternApply)(artistMethods.formWithPatternUnapply)
+  )
+
+  def createArtist = Action.async { implicit request =>
+  artistBindingForm.bindFromRequest()
+    .fold(
       formWithErrors => {
-        Logger.error(formWithErrors.errorsAsJson.toString())
-        BadRequest(formWithErrors.errorsAsJson)
+       Logger.error(formWithErrors.errorsAsJson.toString())
+       Future(BadRequest(formWithErrors.errorsAsJson))
       },
 
       patternAndArtist => {
-        val artistId = Artist.save(patternAndArtist.artist)
-        val artistWithArtistId = patternAndArtist.artist.copy(artistId = artistId)
-        val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
+        artistMethods.save(patternAndArtist.artist) map { artist =>
+         val artistId = artist.id
+         val artistWithArtistId = patternAndArtist.artist.copy(id = artistId)
+         val patternAndArtistWithArtistId = PatternAndArtist(patternAndArtist.searchPattern, artistWithArtistId)
+         val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
+         val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
+           val filteredTracks: Set[Track] = tracks.flatMap { track =>
+             trackMethods.save(track)
+             Some(track)
+           }
+           Json.toJson(filteredTracks)
+         }
+         val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
 
-        val tracksEnumerator = Artist.getArtistTracks(patternAndArtistWithArtistId)
-        val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
-          val filteredTracks: Set[Track] = tracks.flatMap { track =>
-            Track.save(track)
-            Some(track)
-          }
-          Json.toJson(filteredTracks)
+         Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { trackMethods.save }) }
+         Ok.chunked(tracksJsonEnumerator)
         }
-        val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
-
-        Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { Track.save }) }
-        Ok.chunked(tracksJsonEnumerator)
       }
     )
   }
-  */
+
     def deleteArtist(artistId: Long) = Action.async {
       artistMethods.delete(artistId) map { result =>
         Ok(Json.toJson(result))

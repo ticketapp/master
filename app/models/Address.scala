@@ -2,20 +2,18 @@ package models
 
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.Point
 import controllers.OverQueryLimit
-import org.joda.time.DateTime
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, MyPostgresDriver, Utilities}
+import services.{MyPostgresDriver, Utilities}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.{Try, Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 
 case class Address (id: Option[Long],
@@ -28,39 +26,9 @@ case class Address (id: Option[Long],
 }
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                              val organizerMethods: OrganizerMethods,
-                              val placeMethods: PlaceMethods,
-                              val eventMethods: EventMethods,
-                              val searchSoundCloudTracks: SearchSoundCloudTracks,
-                              val searchYoutubeTracks: SearchYoutubeTracks,
-                              val overQueryLimit: OverQueryLimit,
-                              val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver] {
+                               val utilities: Utilities)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
-  val events = eventMethods.events
-  val eventsAddresses = eventMethods.eventsAddresses
-
-  class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
-    def id = column[Long]("organizerId", O.PrimaryKey)
-    def geographicPoint = column[Option[String]]("geographicPoint")
-    def city = column[Option[String]]("city")
-    def zip = column[Option[String]]("zip")
-    def street = column[Option[String]]("street")
-    def * = (id.?, geographicPoint, city, zip, street) <>
-      ((Address.apply _).tupled, Address.unapply)
-  }
-
-  lazy val addresses = TableQuery[Addresses]
-
-  case class FrenchCity(city: String, geographicPoint: Point)
-
-  class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
-    def id = column[Long]("cityid", O.PrimaryKey)
-    def city = column[String]("city")
-    def geographicPoint = column[Point]("geographicpoint")
-    def * = (city, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
-  }
-
-  lazy val frenchCities = TableQuery[FrenchCities]
 
   def formApply(city: Option[String], zip: Option[String], street: Option[String]) =
     new Address(None, None, city, zip, street)
@@ -141,11 +109,6 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     db.run(eventsAddresses += ((eventId, addressId)))
 
   def delete(id: Long): Future[Int] = db.run(addresses.filter(_.id === id).delete)
-
-  def findGeographicPointOfCity(city: String): Future[Option[Point]] = {
-    val query = frenchCities.filter(_.city === city) map (_.geographicPoint)
-    db.run(query.result.headOption)
-  }
 
   def getGeographicPoint(address: Address, retry: Int): Future[Address] = WS
     .url("https://maps.googleapis.com/maps/api/geocode/json")

@@ -6,12 +6,15 @@ import java.util.UUID
 import com.vividsolutions.jts.geom.Point
 import org.joda.time.DateTime
 import services.MyPostgresDriver.api._
-import services.Utilities
 import silhouette.DBTableDefinitions
 import slick.model.ForeignKeyAction
 
 trait MyDBTableDefinitions extends DBTableDefinitions {
-  protected val utilities: Utilities
+
+  def optionStringToSet(maybeString: Option[String]): Set[String] = maybeString match {
+    case None => Set.empty
+    case Some(string) => string.split(",").toSet
+  }
 
   implicit val jodaDateTimeMapping = {
     MappedColumnType.base[DateTime, Timestamp](
@@ -30,7 +33,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
     def * = (id.?, facebookId, name, imagePath, description, facebookUrl, websites).shaped <> (
       { case (id, facebookId, name, imagePath, description, facebookUrl, websites) =>
-        Artist(id, facebookId, name, imagePath, description, facebookUrl, utilities.optionStringToSet(websites))
+        Artist(id, facebookId, name, imagePath, description, facebookUrl, optionStringToSet(websites))
       }, { artist: Artist =>
       Some((artist.id, artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
         Option(artist.websites.mkString(","))))
@@ -221,25 +224,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def * = (userId, organizerId) <> ((OrganizerFollowed.apply _).tupled, OrganizerFollowed.unapply)
   }
 
-  class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
-    def id = column[Long]("organizerId", O.PrimaryKey)
-    def geographicPoint = column[Option[String]]("geographicPoint")
-    def city = column[Option[String]]("city")
-    def zip = column[Option[String]]("zip")
-    def street = column[Option[String]]("street")
-    def * = (id.?, geographicPoint, city, zip, street) <>
-      ((Address.apply _).tupled, Address.unapply)
-  }
-
-  case class FrenchCity(city: String, geographicPoint: Point)
-
-  class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
-    def id = column[Long]("cityid", O.PrimaryKey)
-    def city = column[String]("city")
-    def geographicPoint = column[Point]("geographicpoint")
-    def * = (city, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
-  }
-
   class Tracks(tag: Tag) extends Table[Track](tag, "tracks") {
     def id = column[Long]("organizerid", O.PrimaryKey, O.AutoInc)
     def uuid = column[UUID]("uuid")
@@ -268,6 +252,26 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
     def * = (trackId, genreId) <> ((TrackGenreRelation.apply _).tupled, TrackGenreRelation.unapply)
   }
+
+  class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
+    def id = column[Long]("organizerId", O.PrimaryKey)
+    def geographicPoint = column[Option[String]]("geographicPoint")
+    def city = column[Option[String]]("city")
+    def zip = column[Option[String]]("zip")
+    def street = column[Option[String]]("street")
+    def * = (id.?, geographicPoint, city, zip, street) <>
+      ((Address.apply _).tupled, Address.unapply)
+  }
+
+  case class FrenchCity(city: String, geographicPoint: Point)
+
+  class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
+    def id = column[Long]("cityid", O.PrimaryKey)
+    def city = column[String]("city")
+    def geographicPoint = column[Point]("geographicpoint")
+    def * = (city, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
+  }
+
 
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]
   lazy val genres = TableQuery[Genres]

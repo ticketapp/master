@@ -39,7 +39,7 @@ case class OrganizerFollowed(userId: String, Organizer: Long)
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,
                                  val utilities: Utilities,
-                                 val addressMethods: AddressMethods)
+                                 val geographicPointMethods: GeographicPointMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
@@ -154,14 +154,13 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] =
-    addressMethods.findGeographicPointOfCity(city) flatMap {
+    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
       case None =>
         Logger.info("Organizer.findNearCity: no city found with this name")
         Future { Seq.empty }
       case Some(geographicPoint) =>
         findNear(geographicPoint, numberToReturn, offset)
   }
-
 
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Int] = save(organizer) flatMap {
     case organizer: Organizer => saveEventRelation(eventId, organizer.id.get)

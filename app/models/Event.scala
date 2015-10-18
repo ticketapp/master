@@ -45,7 +45,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val placeMethods: PlaceMethods,
                              val artistMethods: ArtistMethods,
                              val tariffMethods: TariffMethods,
-                             val addressMethods: AddressMethods,
+                             val geographicPointMethods: GeographicPointMethods,
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions with MyDBTableDefinitions {
 
@@ -91,7 +91,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Event]] =
-    addressMethods.findGeographicPointOfCity(city) flatMap {
+    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
       case None => Future { Seq.empty }
       case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
     }
