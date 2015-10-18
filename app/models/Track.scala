@@ -31,8 +31,7 @@ case class Track (uuid: UUID,
                   genres: Seq[Genre] = Seq.empty*/)
 
 class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val utilities: Utilities,
-                             val addressMethods: AddressMethods)
+                             val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApplyForTrackCreatedWithArtist(trackId: String, title: String, url: String, platform: String,

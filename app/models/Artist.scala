@@ -28,11 +28,13 @@ case class Artist (id: Option[Long],
                    imagePath: Option[String] = None,
                    description: Option[String] = None,
                    facebookUrl: String,
-                   websites: Set[String] = Set.empty)
+                   websites: Set[String] = Set.empty,
 //                   genres: Seq[Genre] = Seq.empty,
 //                   tracks: Seq[Track] = Seq.empty,
-//                   likes: Option[Int] = None,
-//                   country: Option[String] = None)
+                   likes: Option[Int] = None,
+                   country: Option[String] = None)
+
+case class PatternAndArtist (searchPattern: String, artist: Artist)
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                        val genreMethods: GenreMethods,
@@ -45,15 +47,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
 
-//  def formApply(facebookId: Option[String], name: String, imagePath: Option[String], description: Option[String],
-//                facebookUrl: String, websites: Seq[String], genres: Seq[Genre], tracks: Seq[Track], likes: Option[Int],
-//                country: Option[String]): Artist =
-//    Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet, genres, tracks, likes, country)
-//  def formUnapply(artist: Artist) =
-//    Option((artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
-//      artist.websites.toSeq, artist.genres, artist.tracks, artist.likes, artist.country))
+  def formApply(facebookId: Option[String], name: String, imagePath: Option[String], description: Option[String],
+                facebookUrl: String, websites: Seq[String]/*, genres: Seq[Genre], tracks: Seq[Track]*/, likes: Option[Int],
+                country: Option[String]): Artist =
+    Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet/*, genres, tracks*/, likes, country)
+  def formUnapply(artist: Artist) =
+    Option((artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
+      artist.websites.toSeq/*, artist.genres, artist.tracks*/, artist.likes, artist.country))
 
-  case class PatternAndArtist (searchPattern: String, artist: Artist)
   def formWithPatternApply(searchPattern: String, artist: Artist) =
     new PatternAndArtist(searchPattern, artist)
   def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =

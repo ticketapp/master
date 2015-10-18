@@ -33,7 +33,7 @@ case class Place (id: Option[Long],
                   linkedOrganizerId: Option[Long] = None)
 
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val addressMethods: AddressMethods,
+                             val geographicPointMethods: GeographicPointMethods,
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions with MyDBTableDefinitions {
 
@@ -118,7 +118,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Place]] =
-    addressMethods.findGeographicPointOfCity(city) flatMap {
+    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
       case None => Future(Seq.empty)
       case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
   }
