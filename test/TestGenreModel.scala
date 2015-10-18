@@ -1,5 +1,6 @@
+import java.util.UUID
+
 import akka.actor.Status.Success
-import models.MyDBTableDefinitions.ArtistGenreRelation
 import models._
 import org.scalatest.time.{Span, Seconds}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
@@ -17,19 +18,12 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
     val injector = appBuilder.injector()
     val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
     val utilities = new Utilities()
-    val tariffMethods = new TariffMethods(dbConfProvider, utilities)
     val genreMethods = new GenreMethods(dbConfProvider, utilities)
+    val trackMethods = new TrackMethods(dbConfProvider, utilities)
     val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
     val searchYoutubeTracks = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-    val addressMethods = new AddressMethods(dbConfProvider, organizerMethods, placeMethods, eventMethods,
-      searchSoundCloudTracks, searchYoutubeTracks, utilities)
-    val trackMethods = new TrackMethods(dbConfProvider, utilities, addressMethods)
-    val placeMethods = new PlaceMethods(dbConfProvider, addressMethods, utilities)
-    val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, addressMethods)
     val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTracks,
       trackMethods, utilities)
-    val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
-      addressMethods, utilities)
 
     "be saved and deleted" in {
       val genre = Genre(None, "rockadocka", 'r')
@@ -72,7 +66,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
               timeout(Span(5, Seconds))) { artistGenreRelation =>
               artistGenreRelation mustBe true
               whenReady(artistMethods.findAllByGenre("rockiyadockia", 1, 0), timeout(Span(5, Seconds))) { artistsSet =>
-                artistsSet should not be empty
+                assert(artistsSet.nonEmpty)
                 whenReady(genreMethods.deleteArtistRelation(genreMethods.ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
                 timeout(Span(5, Seconds))) { _ mustBe Success(1) }
               }
@@ -85,118 +79,141 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    /*   "save and delete its relation with a track" in {
-         val genre = Genre(None, "rockerdocker")
-         val genreId = save(genre).get
-         val trackId = randomUUID
-         val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
-           "artistFacebookUrlTestGenre2", Set("website"))
-         val artistId = Artist.save(artist).get
-         Track.save(Track(trackId, "titleTestGenreModel1", "url", 's', "thumbnailUrl", "artistFacebookUrlTestGenre2", "artistName"))
-
-         try {
-           saveTrackRelation(trackId, genreId, 5) mustBe Success(true)
-           Track.findByGenre("rockerdocker", 1, 0).get should not be empty
-           deleteTrackRelation(trackId, genreId) mustBe Success(1)
-         } finally {
-           Track.delete(trackId)
-           Artist.delete(artistId)
-           delete(genreId)
+    "save and delete its relation with a track" in {
+     val genre = Genre(None, "rockerdocker")
+     val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+       "artistFacebookUrlTestGenre2", Set("website"))
+     val trackId = UUID.randomUUID
+     val track = Track(trackId, "titleTestGenreModel1", "url", 's', "thumbnailUrl", "artistFacebookUrlTestGenre2", "artistName")
+     whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
+       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
+         whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
+           try {
+             whenReady(genreMethods.saveTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+               timeout(Span(5, Seconds))) { trackGenreRelation =>
+               trackGenreRelation mustBe Success(true)
+               whenReady(trackMethods.findByGenre("rockerdocker", 1, 0), timeout(Span(5, Seconds))) { tracksSet =>
+                 assert(tracksSet.nonEmpty)
+                 whenReady(genreMethods.deleteTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+                   timeout(Span(5, Seconds))) { _ mustBe Success(1) }
+               }
+             }
+           } finally {
+             trackMethods.delete(trackId)
+             artistMethods.delete(savedArtist.id.get)
+             genreMethods.delete(savedGenre.id.get)
+           }
          }
        }
+     }
+    }
 
-       "find all genres for a track" in {
-         val artist = Artist(None, Option("facebookIdTestGenreModel"), "artistTest", Option("imagePath"),
-           Option("description"), "artistFacebookUrlTestGenreModel", Set("website"))
-         val artistId = Artist.save(artist).get
-         val trackId = randomUUID
-         val track = Track(trackId, "titleTestUserModel", "url2", 's', "thumbnailUrl",
-           "artistFacebookUrlTestGenreModel", "artistName")
+    "find all genres for a track" in {
+      val artist = Artist(None, Option("facebookIdTestGenreModel"), "artistTest", Option("imagePath"),
+        Option("description"), "artistFacebookUrlTestGenreModel", Set("website"))
+      val trackId = UUID.randomUUID
+      val track = Track(trackId, "titleTestUserModel", "url2", 's', "thumbnailUrl",
+        "artistFacebookUrlTestGenreModel", "artistName")
+      val genre = Genre(None, "pilipilipims")
+      whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
+        whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
+          try {
+            whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
+              whenReady(genreMethods.saveTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+              timeout(Span(5, Seconds))) { genreTrackRelation =>
+                whenReady(genreMethods.findAllByTrack(trackId), timeout(Span(5, Seconds))) { tracksSeq =>
+                  tracksSeq mustBe Seq(genre.copy(id = Some(savedGenre.id.get)))
+                  whenReady(genreMethods.deleteTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+                    timeout(Span(5, Seconds))) { _ mustBe Success(1) }
+                }
+              }
+            }
+          } finally {
+              genreMethods.delete(savedGenre.id.get)
+              trackMethods.delete(trackId)
+              artistMethods.delete(savedArtist.id.get)
+          }
+        }
+      }
+    }
 
-         val genre = Genre(None, "pilipilipims")
-         val genreId = save(genre).get
+    "find over genres in genre set" in {
 
-         try {
-           Track.save(track)
-           saveTrackRelation(trackId, genreId, 50)
+      val genres = Seq(Genre(None, "genreTest1"),
+        Genre(None, "genreTest2"),
+        Genre(None, "genreTest3"),
+        Genre(None, "genreTest4"),
+        Genre(None, "genreTest5"),
+        Genre(None, "genreTest6"),
+        Genre(None, "genreTest7"),
+        Genre(None, "genreTest8"),
+        Genre(None, "genreTest9")
+      )
 
-           findAllByTrack(trackId) mustBe Seq(genre.copy(id = Some(genreId)))
+      val expectedGenres = Seq(Genre(None, "reggae"),
+        Genre(None, "rock"),
+        Genre(None, "musiques du monde"),
+        Genre(None, "hip-hop"),
+        Genre(None, "electro"),
+        Genre(None, "jazz"),
+        Genre(None, "classique"),
+        Genre(None, "musiques latines"),
+        Genre(None, "chanson")
+      )
 
-         } finally {
-           deleteTrackRelation(trackId, genreId)
-           delete(genreId)
-           Track.delete(trackId)
-           Artist.delete(artistId)
-         }
-       }
+      val allGenres = Seq(Genre(None, "reggae"),
+        Genre(None, "rock"),
+        Genre(None, "musiques du monde"),
+        Genre(None, "hip-hop"),
+        Genre(None, "electro"),
+        Genre(None, "jazz"),
+        Genre(None, "classique"),
+        Genre(None, "musiques latines"),
+        Genre(None, "chanson"),
+        Genre(None, "genreTest1"),
+        Genre(None, "genreTest2"),
+        Genre(None, "genreTest3"),
+        Genre(None, "genreTest4"),
+        Genre(None, "genreTest5"),
+        Genre(None, "genreTest6"),
+        Genre(None, "genreTest7"),
+        Genre(None, "genreTest8"),
+        Genre(None, "genreTest9"))
 
-       "find over genres in genre set" in {
-
-         val genreId1 = save(Genre(None, "genreTest1", "g")).get
-         val genreId2 = save(Genre(None, "genreTest2", "r")).get
-         val genreId3 = save(Genre(None, "genreTest3", "m")).get
-         val genreId4 = save(Genre(None, "genreTest4", "h")).get
-         val genreId5 = save(Genre(None, "genreTest5", "e")).get
-         val genreId6 = save(Genre(None, "genreTest6", "j")).get
-         val genreId7 = save(Genre(None, "genreTest7", "s")).get
-         val genreId8 = save(Genre(None, "genreTest8", "l")).get
-         val genreId9 = save(Genre(None, "genreTest9", "c")).get
-
-         val genres = Seq(Genre(None, "genreTest1"),
-           Genre(None, "genreTest2"),
-           Genre(None, "genreTest3"),
-           Genre(None, "genreTest4"),
-           Genre(None, "genreTest5"),
-           Genre(None, "genreTest6"),
-           Genre(None, "genreTest7"),
-           Genre(None, "genreTest8"),
-           Genre(None, "genreTest9")
-         )
-
-         val expectedGenres = Seq(Genre(None, "reggae"),
-           Genre(None, "rock"),
-           Genre(None, "musiques du monde"),
-           Genre(None, "hip-hop"),
-           Genre(None, "electro"),
-           Genre(None, "jazz"),
-           Genre(None, "classique"),
-           Genre(None, "musiques latines"),
-           Genre(None, "chanson")
-         )
-
-         val allGenres = Seq(Genre(None, "reggae"),
-           Genre(None, "rock"),
-           Genre(None, "musiques du monde"),
-           Genre(None, "hip-hop"),
-           Genre(None, "electro"),
-           Genre(None, "jazz"),
-           Genre(None, "classique"),
-           Genre(None, "musiques latines"),
-           Genre(None, "chanson"),
-           Genre(None, "genreTest1"),
-           Genre(None, "genreTest2"),
-           Genre(None, "genreTest3"),
-           Genre(None, "genreTest4"),
-           Genre(None, "genreTest5"),
-           Genre(None, "genreTest6"),
-           Genre(None, "genreTest7"),
-           Genre(None, "genreTest8"),
-           Genre(None, "genreTest9"))
-
-         try {
-           Genre.findOverGenres(genres) mustBe expectedGenres
-           Genre.findOverGenres(genres) ++ genres mustBe allGenres
-         } finally {
-           delete(genreId1)
-           delete(genreId2)
-           delete(genreId3)
-           delete(genreId4)
-           delete(genreId5)
-           delete(genreId6)
-           delete(genreId7)
-           delete(genreId8)
-           delete(genreId9)
-         }
-       }*/
+      whenReady(genreMethods.save(Genre(None, "genreTest1", 'g')), timeout(Span(5, Seconds))) { genre1 =>
+        whenReady(genreMethods.save(Genre(None, "genreTest2", 'r')), timeout(Span(5, Seconds))) { genre2 =>
+          whenReady(genreMethods.save(Genre(None, "genreTest3", 'm')), timeout(Span(5, Seconds))) { genre3 =>
+            whenReady(genreMethods.save(Genre(None, "genreTest4", 'h')), timeout(Span(5, Seconds))) { genre4 =>
+              whenReady(genreMethods.save(Genre(None, "genreTest5", 'e')), timeout(Span(5, Seconds))) { genre5 =>
+                whenReady(genreMethods.save(Genre(None, "genreTest6", 'j')), timeout(Span(5, Seconds))) { genre6 =>
+                  whenReady(genreMethods.save(Genre(None, "genreTest7", 's')), timeout(Span(5, Seconds))) { genre7 =>
+                    whenReady(genreMethods.save(Genre(None, "genreTest8", 'l')), timeout(Span(5, Seconds))) { genre8 =>
+                      whenReady(genreMethods.save(Genre(None, "genreTest9", 'c')), timeout(Span(5, Seconds))) { genre9 =>
+                        try {
+                          whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { _ mustBe expectedGenres }
+                          whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { foundGenres =>
+                            foundGenres ++ genres mustBe allGenres
+                          }
+                        } finally {
+                          genreMethods.delete(genre1.id.get)
+                          genreMethods.delete(genre2.id.get)
+                          genreMethods.delete(genre3.id.get)
+                          genreMethods.delete(genre4.id.get)
+                          genreMethods.delete(genre5.id.get)
+                          genreMethods.delete(genre6.id.get)
+                          genreMethods.delete(genre7.id.get)
+                          genreMethods.delete(genre8.id.get)
+                          genreMethods.delete(genre9.id.get)
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

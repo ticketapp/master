@@ -167,7 +167,7 @@ LANGUAGE plpgsql;
 
 
 CREATE TABLE tracks (
-  trackId                 UUID NOT NULL,
+  trackId                 UUID PRIMARY KEY NOT NULL,
   title                   VARCHAR(255) NOT NULL,
   url                     VARCHAR NOT NULL,
   platform                CHAR NOT NULL,
@@ -180,7 +180,6 @@ CREATE TABLE tracks (
   ratingDown              INT NOT NULL DEFAULT 0,
   UNIQUE(url)
 );
-CREATE UNIQUE INDEX trackId ON tracks(trackId);
 CREATE UNIQUE INDEX artistNameAndTitle ON tracks(title, artistName);
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 

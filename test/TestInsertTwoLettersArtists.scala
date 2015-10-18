@@ -1,3 +1,4 @@
+/*
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import models._
 import models.Playlist._
@@ -25,3 +26,4 @@ class TestInsertTwoLettersArtists extends PlaySpec with OneAppPerSuite {
     }
   }*/
 }
+*/

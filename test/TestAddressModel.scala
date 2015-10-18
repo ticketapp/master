@@ -1,3 +1,4 @@
+/*
 import models.Address
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
@@ -8,7 +9,7 @@ import scala.util.Success
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
   "An address" must {
 
-    "not be created if empty" in {
+  /*  "not be created if empty" in {
       Address(None, None, Some("jkl"), None, None)
       Address(None, None, None, Some("jkl"), None)
       Address(None, None, None, None, Some("jkl"))
@@ -55,7 +56,8 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
         address.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
         case _ => None
       }
-    }
+    }*/
   }
 }
 
+*/

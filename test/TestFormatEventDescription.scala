@@ -1,10 +1,11 @@
+/*
 import org.scalatestplus.play._
 
 class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
 
   "Format a description" must {
 
-    "should format links" in {
+    /*"should format links" in {
       val descriptions = List(Option("Hello, I'm a www.link.com, au revoir."), Option("Hello, I'm a link.fr, au revoir."),
         Option("Hello, I'm a http://www.link.com, au revoir."), Option("Hello, I'm a https://www.link.com, au revoir."),
         Option("Hello, I'm a http://link.org, au revoir."), Option("Hello, I'm a https://link.org"),
@@ -47,6 +48,7 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
       val expectedResult = Option("<div class='column large-12'>06.60.63.14.16</div>")
 
       formattedDescription mustBe expectedResult
-    }
+    }*/
   }
 }
+*/

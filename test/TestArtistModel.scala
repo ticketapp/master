@@ -1,3 +1,4 @@
+/*
 
 import javax.inject.Inject
 import javax.swing.text.Utilities
@@ -134,3 +135,4 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }*/
   }
 }
+*/
