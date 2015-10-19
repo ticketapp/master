@@ -234,11 +234,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def artistFacebookUrl = column[String]("artistfacebookurl")
     def artistName = column[String]("artistname")
     def redirectUrl = column[Option[String]]("redirecturl")
-    def confidence = column[Option[Double]]("confidence")
+    def confidence = column[Double]("confidence")
     def ratingUp = column[Int]("ratingup")
     def ratingDown = column[Int]("ratingdown")
 
-    def * = (uuid, url, title, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence) <>
+    def * = (uuid, url, title, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence.?) <>
       ((Track.apply _).tupled, Track.unapply)
   }
 

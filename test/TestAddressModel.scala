@@ -26,7 +26,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       an [java.lang.IllegalArgumentException] should be thrownBy Option(Address(None, None, None, None, None))
     }
 
-    "be saved (in lowercase) in database and return the new id then be deleted" in {
+/*    "be saved (in lowercase) in database and return the new id then be deleted" in {
       val address = Address(None, Option("(0.0,0.0)"), Option("privas"), Option("07000"), Option("Avignas"))
 
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
@@ -64,7 +64,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
      whenReady(addressMethods.getGeographicPoint(address, 3), timeout(Span(2, Seconds))) { addressWithGeoPoint =>
        addressWithGeoPoint.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
      }
-    }
+    }*/
   }
 }
 
