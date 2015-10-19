@@ -1,15 +1,26 @@
-/*
+
 import java.util.Date
 
-import models.{Event, Organizer, Place}
+import models._
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.Utilities
 
 import scala.util.{Failure, Success}
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
+
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities()
+  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
+  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
 
   "An Organizer" must {
 
@@ -120,4 +131,4 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
     }*/
   }
 }
-*/
+

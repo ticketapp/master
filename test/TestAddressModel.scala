@@ -1,3 +1,4 @@
+/*
 import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
@@ -69,3 +70,4 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
 }
 
 
+*/
