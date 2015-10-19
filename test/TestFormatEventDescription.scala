@@ -9,19 +9,7 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
   val appBuilder = new GuiceApplicationBuilder()
   val injector = appBuilder.injector()
   val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
-  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
-  val tariffMethods = new TariffMethods(dbConfProvider, utilities)
-  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
-  val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
-    geographicPointMethods, utilities)
+  val utilities = new Utilities()
 
   "Format a description" must {
 
