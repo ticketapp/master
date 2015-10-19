@@ -1,4 +1,3 @@
-/*
 package controllers
 
 
@@ -10,17 +9,16 @@ import play.api.mvc._
 import services.Utilities
 
 class Admin @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                      val orderMethods: OrderMethods,
                       val utilities: Utilities) extends Controller {
 
   def indexAdmin = Action {
     Ok(views.html.admin.indexAdmin())
   }
 
-  def createOrder(totalPrice: Int): Long = {
-    Order.save(totalPrice)
-    //Redirect(routes.Admin.indexAdmin())
-  }
+//  def createOrder(totalPrice: Int): Long = {
+//    Order.save(totalPrice)
+//    //Redirect(routes.Admin.indexAdmin())
+//  }
 
   def upload = Action(parse.multipartFormData) { request =>
     request.body.file("picture").map { picture =>
@@ -34,4 +32,4 @@ class Admin @Inject()(dbConfigProvider: DatabaseConfigProvider,
       )
     }
   }
-}*/
+}
