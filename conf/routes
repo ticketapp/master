@@ -1,29 +1,34 @@
 # Home page
-GET     /                                                                 @controllers.Application.index
+GET         /                                             @controllers.Application.index
 
-GET     /test                                                             @controllers.Test.test1
+GET         /test                                         @controllers.Test.test1
+
+POST        /signUp                                       @controllers.SignUpController.signUp
+POST        /signIn                                       @controllers.Application.signIn
+POST        /authenticateByCredentials                    @controllers.CredentialsAuthController.authenticate
+GET         /signOut                                      @controllers.Application.signOut
 
 ################################## fill database ################################################
-GET     /initDatabase                                                     @fillDatabase.InitController.init
+GET         /initDatabase                                 @fillDatabase.InitController.init
 
 ################################## Admin ################################################
-#GET     /admin                                                            @controllers.Admin.indexAdmin
+GET         /admin                                        @controllers.Admin.indexAdmin
 ##POST     /admin/createTariff           @controllers.Admin.createTariff
 #
 ################################### Events ###############################################
-GET     /events                                                          @controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
-GET     /events/inInterval/:hourInterval                                 @controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET     /events/passedInInterval/:hourInterval                           @controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET     /events/:id                                                      @controllers.EventController.find(id: Long)
+GET         /events                                       @controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
+GET         /events/inInterval/:hourInterval              @controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET         /events/passedInInterval/:hourInterval        @controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET         /events/:id                                   @controllers.EventController.find(id: Long)
 #POST    /events/create                                                   @controllers.EventController.createEvent
-POST    /events/create/:facebookId                                       @controllers.EventController.createEventByFacebookId(facebookId: String)
+POST        /events/create/:facebookId                    @controllers.EventController.createEventByFacebookId(facebookId: String)
 #POST    /events/:eventId/follow                                          @controllers.EventController.followEvent(eventId: Long)
 #POST    /events/:eventId/unfollow                                        @controllers.EventController.unfollowEvent(eventId: Long)
 #GET     /events/followed/                                                @controllers.EventController.getFollowedEvents
 #GET     /events/:eventId/isEventFollowed                                 @controllers.EventController.isEventFollowed(eventId: Long)
-GET     /events/containing/:pattern                                      @controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
-GET     /events/city/:pattern                                            @controllers.EventController.findByCityPattern(pattern: String)
-GET     /events/nearCity/:city                                           @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+GET         /events/containing/:pattern                   @controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
+GET         /events/city/:pattern                         @controllers.EventController.findByCityPattern(pattern: String)
+GET         /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################### Artists ##############################################
 #GET     /artists                                                          @controllers.ArtistController.artists
@@ -58,14 +63,14 @@ GET     /events/nearCity/:city                                           @contro
 #GET     /places/followed/                                                 @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
-GET     /organizers                                                      @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)
-GET     /organizers/:id                                                  @controllers.OrganizerController.findById(id: Long)
+GET         /organizers                                   @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)
+GET         /organizers/:id                               @controllers.OrganizerController.findById(id: Long)
 #POST    /organizers/:organizerId/followByOrganizerId                     @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
 #POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId          @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
 #POST    /organizers/:facebookId/followByFacebookId                       @controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
 #GET     /organizers/:organizerId/isFollowed                              @controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
-GET     /organizers/containing/:pattern                                  @controllers.OrganizerController.findOrganizersContaining(pattern: String)
-POST    /organizers/create                                               @controllers.OrganizerController.createOrganizer
+GET         /organizers/containing/:pattern               @controllers.OrganizerController.findOrganizersContaining(pattern: String)
+POST        /organizers/create                            @controllers.OrganizerController.createOrganizer
 #GET     /organizers/:organizerId/events                                  @controllers.EventController.findByOrganizer(organizerId: Long)
 #GET     /organizers/:organizerId/passedEvents                            @controllers.EventController.findPassedByOrganizer(organizerId: Long)
 #GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
@@ -115,7 +120,7 @@ POST    /organizers/create                                               @contro
 #GET     /users/tracksRemoved/                                             @controllers.UserController.getTracksRemoved
 
 ################################## Buy ticket ###########################################
-GET     /buyTicket       @controllers.TicketController.buyTicket
+GET         /buyTicket                                    @controllers.TicketController.buyTicket
 
 ################################## Accounting ###########################################
 #GET     /orgaPayment       @controllers.AccountingController.orgaPayment
@@ -133,7 +138,7 @@ GET     /buyTicket       @controllers.TicketController.buyTicket
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file       @controllers.Assets.at(path="/public", file)
+GET         /assets/*file                                 @controllers.Assets.at(path="/public", file)
 
 
 #GET /*any@controllers.Application.index(any)

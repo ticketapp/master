@@ -135,11 +135,11 @@ class ArtistController @Inject()(ws: WSClient,
     )
   }
 
-    def deleteArtist(artistId: Long) = Action.async {
-      artistMethods.delete(artistId) map { result =>
-        Ok(Json.toJson(result))
-      }
+  def deleteArtist(artistId: Long) = Action.async {
+    artistMethods.delete(artistId) map { result =>
+      Ok(Json.toJson(result))
     }
+  }
   
     def followArtistByArtistId(artistId : Long) = SecuredAction { implicit request =>
       val userId = request.identity.userID
