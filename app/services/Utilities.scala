@@ -31,29 +31,6 @@ class Utilities @Inject()() {
     dt => new Timestamp(dt.getMillis),
     ts => new DateTime(ts.getTime))
 
-  val geometryFactory = new GeometryFactory()
-
-  def stringToGeographicPoint(string: String): Try[Point] = {
-    val latitudeAndLongitude: Array[String] = string.split(",")
-    Try {
-      val coordinate= new Coordinate(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble)
-      geometryFactory.createPoint(coordinate)
-    }
-  }
-
-  def optionStringToOptionPoint(maybeGeographicPoint: Option[String]) = maybeGeographicPoint match {
-    case None =>
-      None
-    case Some(geoPoint) =>
-      stringToGeographicPoint(geoPoint) match {
-        case Failure(exception) =>
-          Logger.error("Utilities.optionStringToPoint: ", exception)
-          None
-        case Success(validPoint) =>
-          Some(validPoint)
-      }
-  }
-
   def normalizeString(string: String): String = string //Should be replace accentued letters for example?
 
   def replaceAccentuatedLetters(string: String): String =

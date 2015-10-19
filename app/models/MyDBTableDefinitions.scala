@@ -254,7 +254,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
   class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
     def id = column[Long]("addressid", O.PrimaryKey)
-    def geographicPoint = column[Option[String]]("geographicpoint")
+    def geographicPoint = column[Option[Point]]("geographicpoint")
     def city = column[Option[String]]("city")
     def zip = column[Option[String]]("zip")
     def street = column[Option[String]]("street")

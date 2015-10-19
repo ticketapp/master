@@ -6,7 +6,7 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper.placeWrites
-import models.{PlaceMethods, Place, User}
+import models.{GeographicPointMethods, PlaceMethods, Place, User}
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
@@ -24,13 +24,14 @@ import scala.util.{Failure, Success}
 class PlaceController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
                                  val utilities: Utilities,
+                                 val geographicPointMethods: GeographicPointMethods,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry,
                                   val placeMethods: PlaceMethods)
   extends Silhouette[User, CookieAuthenticator] {
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
-    utilities.stringToGeographicPoint(geographicPoint) match {
+    geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
       case Failure(exception) =>
         Logger.error("EventController.events: ", exception)
         Future { BadRequest(Json.toJson("Invalid geographicPoint")) }

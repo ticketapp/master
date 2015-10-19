@@ -41,7 +41,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
                 imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
     val address = Option(Address(None, None, city, zip, street))
-    val point = utilities.optionStringToOptionPoint(geographicPoint)
+    val point = geographicPointMethods.optionStringToOptionPoint(geographicPoint)
 
     Place(None, name, facebookId, point, description, webSite, capacity, openingHours, imagePath/*, address*/)
   }
