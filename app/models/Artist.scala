@@ -187,11 +187,11 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def addWebsite(artistId: Long, normalizedUrl: String): Future[Int] = {
 //    val query = artists.filter(_.id == artistId).map(_.update()
     val query = sqlu"""UPDATE artists
-          |  SET websites = case
-          |    WHEN websites IS NULL THEN $normalizedUrl
-          |    ELSE websites || ',' || $normalizedUrl
-          |  END
-          |WHERE artistId = $artistId"""
+            SET websites = case
+              WHEN websites IS NULL THEN $normalizedUrl
+              ELSE websites || ',' || $normalizedUrl
+            END
+          WHERE artistId = $artistId"""
     db.run(query)
   }
 

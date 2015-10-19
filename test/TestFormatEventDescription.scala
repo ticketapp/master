@@ -1,11 +1,19 @@
-/*
 import org.scalatestplus.play._
+import models._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
 
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities()
+
   "Format a description" must {
 
-    /*"should format links" in {
+    "should format links" in {
       val descriptions = List(Option("Hello, I'm a www.link.com, au revoir."), Option("Hello, I'm a link.fr, au revoir."),
         Option("Hello, I'm a http://www.link.com, au revoir."), Option("Hello, I'm a https://www.link.com, au revoir."),
         Option("Hello, I'm a http://link.org, au revoir."), Option("Hello, I'm a https://link.org"),
@@ -15,7 +23,7 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
             |go to the line
           """.stripMargin))
 
-      val formattedDescriptions = descriptions.map { formatDescription }
+      val formattedDescriptions = descriptions.map { utilities.formatDescription }
 
       val expectedResult = List(
         Option("<div class='column large-12'>Hello, I'm a <a href='http://link.com'>link.com</a>, au revoir.</div>"),
@@ -33,7 +41,7 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
     "should not format mail addresses as a link" in {
       val description = Option("roman.trystram@caa.com")
 
-      val formattedDescription = formatDescription(description)
+      val formattedDescription = utilities.formatDescription(description)
 
       val expectedResult = Option("<div class='column large-12'>roman.trystram@caa.com</div>")
 
@@ -43,12 +51,12 @@ class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
     "should not format phone numbers as a link" in {
       val description = Option("06.60.63.14.16")
 
-      val formattedDescription = formatDescription(description)
+      val formattedDescription = utilities.formatDescription(description)
 
       val expectedResult = Option("<div class='column large-12'>06.60.63.14.16</div>")
 
       formattedDescription mustBe expectedResult
-    }*/
+    }
   }
 }
-*/
+

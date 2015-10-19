@@ -1,4 +1,4 @@
-import com.vividsolutions.jts.geom.Point
+/*
 import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
@@ -60,7 +60,10 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
        }
       }
     }
-  }
-}
 
-
+    "get a geographicPoint" in {
+     val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
+     whenReady(addressMethods.getGeographicPoint(address, 3), timeout(Span(2, Seconds))) { addressWithGeoPoint =>
+       addressWithGeoPoint.geographicPoint mustBe Some("(44.7053439,4.596782999999999)")
+     }
+    }*/

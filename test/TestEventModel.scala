@@ -8,13 +8,34 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 import scala.util.{Failure, Success}
 
 class TestEventModel extends PlaySpec with OneAppPerSuite {
 
+
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities
+  val trackMethods = new TrackMethods(dbConfProvider, utilities)
+  val genreMethods = new GenreMethods(dbConfProvider, utilities)
+  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
+  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
+  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
+    trackMethods, utilities)
+  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
+  val tariffMethods = new TariffMethods(dbConfProvider, utilities)
+  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
+  val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
+    geographicPointMethods, utilities)
+
   "An event" must {
-  /*  val event = Event(None, None, isPublic = true, isActive = true, "name", Option("(5.4,5.6)"),
+    /*val event = Event(None, None, isPublic = true, isActive = true, "name", Option("(5.4,5.6)"),
       Option("description"), new Date(), Option(new Date(100000000000000L)), 16, None, None, None, List.empty,
       List.empty, List.empty, List.empty, List.empty, List.empty))
 
