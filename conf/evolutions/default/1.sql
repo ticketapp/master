@@ -15,14 +15,14 @@ INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau,
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   city                      VARCHAR(255) NOT NULL,
-  geographicPoint           POINT NOT NULL
+  geographicPoint           GEOMETRY NOT NULL
 );
 CREATE INDEX frenchCityGeographicPoints ON frenchCities USING GIST (geographicPoint);
 CREATE INDEX frenchCityNames ON frenchCities (city);
 
 CREATE TABLE addresses (
   addressId                 SERIAL PRIMARY KEY,
-  geographicPoint           POINT,
+  geographicPoint           GEOMETRY,
   city                      VARCHAR(127),
   zip                       VARCHAR(15),
   street                    VARCHAR
@@ -107,7 +107,7 @@ CREATE TABLE organizers (
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   imagePath               VARCHAR,
-  geographicPoint         POINT,
+  geographicPoint         GEOMETRY,
   placeId                 BIGINT,
   UNIQUE(facebookId)
 );
@@ -267,7 +267,7 @@ CREATE TABLE events (
   isActive                  BOOLEAN NOT NULL,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           POINT,
+  geographicPoint           GEOMETRY,
   description               VARCHAR,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP,
@@ -315,7 +315,7 @@ LANGUAGE plpgsql;
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           POINT,
+  geographicPoint           GEOMETRY,
   addressId                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
   description               VARCHAR,

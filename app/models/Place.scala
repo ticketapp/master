@@ -3,7 +3,7 @@ package models
 import java.sql.Timestamp
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.{Geometry, Point}
 import json.JsonHelper._
 import org.joda.time.DateTime
 import play.api.Logger
@@ -23,7 +23,7 @@ import scala.language.postfixOps
 case class Place (id: Option[Long],
                   name: String,
                   facebookId: Option[String] = None,
-                  geographicPoint: Option[Point],
+                  geographicPoint: Option[Geometry],
                   description: Option[String] = None,
                   webSites: Option[String] = None,
                   capacity: Option[Int] = None,
@@ -109,7 +109,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
    placeFacebookResponse.json.as[Future[Place]](placeRead)
  }
 
-  def findNear(geographicPoint: Point, numberToReturn: Int, offset: Int): Future[Seq[Place]] = {
+  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Place]] = {
    val query = places
      .sortBy(_.geographicPoint <-> geographicPoint)
      .drop(numberToReturn)

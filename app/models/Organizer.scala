@@ -2,7 +2,7 @@ package models
 
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.{Geometry, Point}
 import json.JsonHelper._
 import org.joda.time.DateTime
 import play.api.Logger
@@ -29,7 +29,7 @@ case class Organizer (id: Option[Long],
                       websites: Option[String] = None,
                       verified: Boolean = false,
                       imagePath: Option[String] = None,
-                      geographicPoint: Option[Point] = None,
+                      geographicPoint: Option[Geometry] = None,
                       linkedPlaceId: Option[Long] = None)
 
 case class OrganizerWithAddress(organizer: Organizer, address: Option[Address])
@@ -111,7 +111,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     db.run(query.result.headOption)
   }
 
-  def findNear(geographicPoint: Point, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] = {
+  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] = {
     val query = organizers
       .sortBy(_.geographicPoint <-> geographicPoint)
       .drop(numberToReturn)
