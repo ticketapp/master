@@ -20,9 +20,9 @@ import scala.util.{Failure, Success}
 
 class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                val messagesApi: MessagesApi,
-                               val issueMethods: IssueMethods,
                                val genreMethods: GenreMethods,
                                val artistMethods: ArtistMethods,
+                               val geographicPointMethods: GeographicPointMethods,
                                val utilities: Utilities,
                                val env: Environment[User, CookieAuthenticator],
                                socialProviderRegistry: SocialProviderRegistry)
@@ -57,7 +57,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
           val cityName: String = splitedLine(4).replaceAll("'", "").trim
           val geographicPoint: String = splitedLine(19).trim + "," + splitedLine(20).trim
 
-          utilities.stringToGeographicPoint(geographicPoint) match {
+          geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
             case Success(point) =>
               db.run(frenchCities += FrenchCity(cityName, point))
             case Failure(e) =>

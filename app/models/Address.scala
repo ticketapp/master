@@ -2,6 +2,7 @@ package models
 
 import javax.inject.Inject
 
+import com.vividsolutions.jts.geom.Point
 import controllers.OverQueryLimit
 import play.api.Logger
 import play.api.Play.current
@@ -17,7 +18,7 @@ import scala.util.{Failure, Success, Try}
 
 
 case class Address (id: Option[Long],
-                    geographicPoint: Option[String],
+                    geographicPoint: Option[Point],
                     city: Option[String],
                     zip: Option[String],
                     street: Option[String]){
@@ -26,7 +27,8 @@ case class Address (id: Option[Long],
 }
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                               val utilities: Utilities)
+                               val utilities: Utilities,
+                               val geographicPointMethods: GeographicPointMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
 
@@ -91,7 +93,7 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   def saveAddressWithGeoPoint(address: Address): Future[Address] = address match {
     case addressWithoutGeographicPoint if addressWithoutGeographicPoint.geographicPoint.isEmpty =>
-      getGeographicPoint(addressWithoutGeographicPoint, retry = 3) flatMap { save }
+      geographicPointMethods.getGeographicPoint(addressWithoutGeographicPoint, retry = 3) flatMap { save }
     case addressWithGeoPoint =>
       save(addressWithGeoPoint)
   }
@@ -110,56 +112,4 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     db.run(eventsAddresses += ((eventId, addressId)))
 
   def delete(id: Long): Future[Int] = db.run(addresses.filter(_.id === id).delete)
-
-  def getGeographicPoint(address: Address, retry: Int): Future[Address] = WS
-    .url("https://maps.googleapis.com/maps/api/geocode/json")
-    .withQueryString(
-      "address" -> (address.street.getOrElse("") + " " + address.zip.getOrElse("") + " " + address.city.getOrElse("")),
-      "key" -> utilities.googleKey)
-    .get()
-    .flatMap { readGoogleGeographicPoint(_) match {
-      case Success(Some(geographicPoint)) =>
-        Future { address.copy(geographicPoint = Option(geographicPoint)) }
-      case Success(None) =>
-        Future { address }
-      case Failure(e: OverQueryLimit) if retry > 0 =>
-        Logger.info("Address.getGeographicPoint: retry: " + retry + " ", e)
-        getGeographicPoint(address, retry - 1)
-      case Failure(e: Exception) =>
-        Logger.error("Address.getGeographicPoint: ", e)
-        Future { address }
-    }
-  }
-
-  def readGoogleGeographicPoint(googleGeoCodeResponse: WSResponse): Try[Option[String]] = {
-    googleGeoCodeResponse.statusText match {
-      case "OK" =>
-        val googleGeoCodeJson = googleGeoCodeResponse.json
-        val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[BigDecimal]
-        val longitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lng").asOpt[BigDecimal]
-        latitude match {
-          case None => Success(None)
-          case Some(lat) => longitude match {
-            case None => Success(None)
-            case Some(lng) => Success(Option("(" + lat + "," + lng + ")"))
-          }
-        }
-      case "OVER_QUERY_LIMIT" =>
-        Failure(OverQueryLimit("Address.readGoogleGeographicPoint"))
-      case otherStatus =>
-        Failure(new Exception(otherStatus))
-    }
-  }
-
-
- def readFacebookGeographicPoint() = {
-//   val geographicPoint = (eventJson \ "venue" \ "latitude").as[Option[Float]] match {
-//     case Some(latitude) =>
-//       (eventJson \ "venue" \ "longitude").as[Option[Float]] match {
-//         case Some(longitude) => Some(s"($latitude,$longitude)")
-//         case _ => None
-//       }
-//     case _ => None
-//   }
- }
 }

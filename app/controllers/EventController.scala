@@ -21,6 +21,7 @@ import scala.util.{Failure, Success}
 class EventController @Inject()(ws: WSClient,
                                 val messagesApi: MessagesApi,
                                 val utilities: Utilities,
+                                val geographicPointMethods: GeographicPointMethods,
                                 val env: Environment[User, CookieAuthenticator],
                                 socialProviderRegistry: SocialProviderRegistry,
                                 val eventMethods: EventMethods)
@@ -29,7 +30,7 @@ class EventController @Inject()(ws: WSClient,
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
   def events(offset: Int, numberToReturn: Int, geographicPoint: String) = Action.async {
-    utilities.stringToGeographicPoint(geographicPoint) match {
+    geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
       case Failure(exception) =>
         Logger.error("EventController.events: ", exception)
         Future { BadRequest(Json.toJson("Invalid geographicPoint")) }
@@ -44,7 +45,7 @@ class EventController @Inject()(ws: WSClient,
   }
 
   def eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int) = Action.async {
-    utilities.stringToGeographicPoint(geographicPoint) match {
+    geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
       case Success(point) =>
         eventMethods.findInPeriodNear(hourInterval, point, offset, numberToReturn) map { events =>
           Ok(Json.toJson(events))
@@ -56,7 +57,7 @@ class EventController @Inject()(ws: WSClient,
 
   def eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
   = Action.async {
-    utilities.stringToGeographicPoint(geographicPoint) match {
+    geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
       case Success(point) =>
         eventMethods.findPassedInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn) map { events =>
           Ok(Json.toJson(events))
@@ -106,7 +107,7 @@ class EventController @Inject()(ws: WSClient,
   }
 
   def findByGenre(genre: String, geographicPointString: String, offset: Int , numberToReturn: Int) = Action.async {
-    utilities.stringToGeographicPoint(geographicPointString) match {
+    geographicPointMethods.stringToGeographicPoint(geographicPointString) match {
       case Success(point) =>
         eventMethods.findAllByGenre(genre, point, offset, numberToReturn) map { events =>
           Ok(Json.toJson(events))
@@ -117,7 +118,7 @@ class EventController @Inject()(ws: WSClient,
   }
 
   def findAllContaining(pattern: String, center: String) = Action.async {
-    utilities.stringToGeographicPoint(center) match {
+    geographicPointMethods.stringToGeographicPoint(center) match {
       case Success(point) =>
         eventMethods.findAllContaining(pattern, point) map { events =>
           Ok(Json.toJson(events)) }

@@ -4,7 +4,7 @@ import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
+import services.Utilities
 
 import scala.util.Success
 
@@ -13,7 +13,9 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
   val appBuilder = new GuiceApplicationBuilder()
   val injector = appBuilder.injector()
   val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val addressMethods = new AddressMethods(dbConfProvider, new Utilities)
+  val utilities = new Utilities()
+  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
+  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
 
   "An address" must {
 
