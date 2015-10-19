@@ -1,3 +1,4 @@
+/*
 import java.util.Date
 
 import models.{Event, Organizer, Place}
@@ -12,7 +13,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 
   "An Organizer" must {
 
-    "be saved and deleted in database" in {
+    /*"be saved and deleted in database" in {
       val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option("(5.4,5.6)"))
@@ -116,6 +117,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       whenReady (getOrganizerInfo(Option("164354640267171")), timeout(Span(5, Seconds))) { organizerInfos =>
         organizerInfos.get.name mustBe "Le Transbordeur"
       }
-    }
+    }*/
   }
 }
+*/

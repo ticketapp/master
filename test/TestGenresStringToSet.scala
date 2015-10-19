@@ -1,3 +1,4 @@
+/*
 import models.Genre
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -7,7 +8,7 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
 
   "A sequence of genres as a string" must {
 
-    "return an empty set for None" in {
+    /*"return an empty set for None" in {
       val genres = List(None, None)
 
       val genresSets: List[Set[Genre]] = genres.map { genresStringToGenresSet }
@@ -59,7 +60,7 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
       val expectedResult = List(Set(Genre(None, "hip-hop")), Set(Genre(None, "indie"), Genre(None, "pop-folk")))
 
       genresSets should contain theSameElementsAs expectedResult
-    }
+    }*/
   }
 }
 /*
@@ -89,4 +90,5 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
    Some("A mix of post-rock, ambient, post-prog, and space-rock."),
    Some("Soirée fetichiste"),
    Some("""UK Garage, House N Garage, Bass Music, Jackin House, ("2 Step, 4 to the floor/4x4")  and Bassline from the past, present and future..."""))
+*/
 */

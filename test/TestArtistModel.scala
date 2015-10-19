@@ -1,4 +1,8 @@
-import java.util.UUID.randomUUID
+/*
+
+import javax.inject.Inject
+import javax.swing.text.Utilities
+
 
 import models.{Artist, Track}
 import org.postgresql.util.PSQLException
@@ -11,9 +15,17 @@ import scala.util.{Failure, Success}
 
 class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
+  /*val utilities = new Utilities()
+  val organiserMethods
+  val addressMethods = new AddressMethods(DatabaseConfigProvider)
+  val trackMethods = new TrackMethods(DatabaseConfigProvider, utilities)
+  val searchSoundCloudTracks = new SearchSoundCloudTracks(DatabaseConfigProvider, utilities)
+  val genreMethods = new GenreMethods(DatabaseConfigProvider, utilities)
+  val artistMethods = new ArtistMethods(DatabaseConfigProvider, genreMethods, )*/
+
   "An Artist" must {
 
-    "be saved and deleted in database and return the new id" in {
+    /*"be saved and deleted in database and return the new id" in {
       val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
         Option("description"), "facebookUrl", Set("website"))
       val artistId = Artist.save(artist).get
@@ -120,6 +132,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       whenReady(enumerateTracks |>> iteratee, timeout(Span(6, Seconds))) { a=>
           a
       }
-    }
+    }*/
   }
 }
+*/

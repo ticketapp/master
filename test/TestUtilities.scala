@@ -1,13 +1,21 @@
 import org.scalatestplus.play._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.Utilities
 
 class TestUtilities extends PlaySpec with OneAppPerSuite {
+
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities()
 
   "A utilities" must {
 
     "normalize string with the method normalizeString" in {
       val strings = List("éh'=)àç_è-(aék", "abc de#f")
 
-      val normalizedString: List[String] = strings.map { normalizeString }
+      val normalizedString: List[String] = strings.map { utilities.normalizeString }
 
       val expectedResult = List("éh'=)àç_è-(aék", "abc de#f")
 
@@ -21,44 +29,29 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
 
     val expectedUrls = Seq("abc.fr", "abc.com", "cde.org", "jkl.wtf", "claude.cool", "claude.music")
 
-    val normalizedUrls = urls map { normalizeUrl }
+    val normalizedUrls = urls map { utilities.normalizeUrl }
 
     normalizedUrls mustBe expectedUrls
-  }
-
-  "create a new instance of GeographicPoints" in {
-    GeographicPoint("(0,0)")
-    GeographicPoint("(0.4,0)")
-    GeographicPoint("(0.4,0.5784)")
-    GeographicPoint("(9,0.5784)")
-    GeographicPoint("(-9,0.5784)")
-    GeographicPoint("(-9,-0.5784)")
-    GeographicPoint("(9,-0.5784)")
-    GeographicPoint("(-48.87965412354687,-145.5754545484)")
-  }
-
-  "throw exceptions while instantiating these geographicPoints" in {
-    an [IllegalArgumentException] should be thrownBy GeographicPoint("0,0")
   }
 
   "refactor events or places names" in {
     val eventsName = Seq("abc", "abcdef @transbordeur abc", "abcdef@hotmail.fr")
     val expectedEventsName = Seq("abc", "abcdef", "abcdef@hotmail.fr")
 
-    eventsName map  { refactorEventOrPlaceName } mustBe expectedEventsName
+    eventsName map  { utilities.refactorEventOrPlaceName } mustBe expectedEventsName
   }
 
   "return an optional string from a set" in {
-    setToOptionString(Set.empty) mustBe None
-    setToOptionString(Set("a")) mustBe Some("a")
-    setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
+    utilities.setToOptionString(Set.empty) mustBe None
+    utilities.setToOptionString(Set("a")) mustBe Some("a")
+    utilities.setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
   }
 
-  "return a set from an optional string" in {
+  /*"return a set from an optional string" in {
     optionStringToSet(None) mustBe Set.empty
     optionStringToSet(Some("a")) mustBe Set("a")
     optionStringToSet(Some("a,b,c")) mustBe Set("a", "b", "c")
-  }
+  }*/
 
   "return a list of normalized websites from a text" in {
 
@@ -294,6 +287,6 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
         |         Facebook : facebook.com/burningdownalaska    Phantoms : youtube.com/watch?v=jesdtqr3cko
         |         -----------------------------------------------------------------------""".stripMargin
 
-    getNormalizedWebsitesInText(Option(exampleDescription)) mustBe expectedWebsites
+    utilities.getNormalizedWebsitesInText(Option(exampleDescription)) mustBe expectedWebsites
   }
 }

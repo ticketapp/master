@@ -1,4 +1,4 @@
-import org.scalatestplus.play._
+/*import org.scalatestplus.play._
 
 class TestTariffModel extends PlaySpec with OneAppPerSuite {
 
@@ -15,4 +15,4 @@ class TestTariffModel extends PlaySpec with OneAppPerSuite {
       findPrices(Some("ion no no 6.8 € jlk ljk klj klj 3.11 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.11-6.8")
     }
   }
-}
+}*/

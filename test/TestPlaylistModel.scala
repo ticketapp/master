@@ -8,7 +8,7 @@ import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import scala.util.Success
 
 class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
-  var artistId = -1L
+/*  var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website"))
 
@@ -67,5 +67,5 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
         Track.delete(trackId3)
       }
     }
-  }
+  }*/
 }

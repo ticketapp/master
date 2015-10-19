@@ -23,7 +23,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
 
   class Artists(tag: Tag) extends Table[Artist](tag, "artists") {
-    def id = column[Long]("organizerId", O.PrimaryKey, O.AutoInc)
+    def id = column[Long]("artistid", O.PrimaryKey, O.AutoInc)
     def facebookId = column[Option[String]]("facebookid")
     def name = column[String]("name")
     def imagePath = column[Option[String]]("imagepath")
@@ -53,7 +53,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
   case class ArtistGenreRelation(artistId: Long, genreId: Int)
 
-  class ArtistsGenres(tag: Tag) extends Table[ArtistGenreRelation](tag, "artistsGenres") {
+  class ArtistsGenres(tag: Tag) extends Table[ArtistGenreRelation](tag, "artistsgenres") {
     def artistId = column[Long]("artistid")
     def genreId = column[Int]("genreid")
 
@@ -81,7 +81,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
 
   class Events(tag: Tag) extends Table[Event](tag, "events") {
-    def id = column[Long]("organizerId", O.PrimaryKey, O.AutoInc)
+    def id = column[Long]("eventid", O.PrimaryKey, O.AutoInc)
     def facebookId = column[Option[String]]("facebookid")
     def isPublic = column[Boolean]("ispublic")
     def isActive = column[Boolean]("isactive")
@@ -225,8 +225,8 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
 
   class Tracks(tag: Tag) extends Table[Track](tag, "tracks") {
-    def id = column[Long]("organizerid", O.PrimaryKey, O.AutoInc)
-    def uuid = column[UUID]("uuid")
+    /*def id = column[Long]("trackid", O.PrimaryKey, O.AutoInc)*/
+    def uuid = column[UUID]("trackid", O.PrimaryKey)
     def url = column[String]("url")
     def title = column[String]("title")
     def platform = column[Char]("platform")
@@ -235,12 +235,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def artistName = column[String]("artistname")
     def redirectUrl = column[Option[String]]("redirecturl")
     def confidence = column[Option[Double]]("confidence")
-    def playlistRank = column[Option[Double]]("playlistrank")
     def ratingUp = column[Int]("ratingup")
     def ratingDown = column[Int]("ratingdown")
 
-    def * = (uuid, url, title, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence,
-      playlistRank) <> ((Track.apply _).tupled, Track.unapply)
+    def * = (uuid, url, title, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence) <>
+      ((Track.apply _).tupled, Track.unapply)
   }
 
   case class TrackGenreRelation(trackId: UUID, genreId: Int)
@@ -254,8 +253,8 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
 
   class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
-    def id = column[Long]("organizerId", O.PrimaryKey)
-    def geographicPoint = column[Option[String]]("geographicPoint")
+    def id = column[Long]("addressid", O.PrimaryKey)
+    def geographicPoint = column[Option[String]]("geographicpoint")
     def city = column[Option[String]]("city")
     def zip = column[Option[String]]("zip")
     def street = column[Option[String]]("street")

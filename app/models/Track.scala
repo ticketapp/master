@@ -26,8 +26,8 @@ case class Track (uuid: UUID,
                   artistFacebookUrl: String,
                   artistName: String,
                   redirectUrl: Option[String] = None,
-                  confidence: Option[Double] = None,
-                  playlistRank: Option[Double] = None/*,
+                  confidence: Option[Double] = None/*,
+                  playlistRank: Option[Double] = None,
                   genres: Seq[Genre] = Seq.empty*/)
 
 class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
