@@ -209,8 +209,9 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
     case None => Set.empty
     case Some(genres: String) =>
-      val lowercaseGenres = genres.toLowerCase
-      val genresSplitByCommas = lowercaseGenres.split(",")
+      val lowercaseGenres = genres.toLowerCase.replace("\n", "").filter(_ >= ' ')
+      val genresSplitByCommas = lowercaseGenres.trim.split(",").flatMap { _.trim.split("/") }
+        .flatMap { _.trim.split(":") }.flatMap { _.trim.split(";") }.filter(_.nonEmpty)
       if (genresSplitByCommas.length > 1) {
         genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim) }.toSet
       } else {

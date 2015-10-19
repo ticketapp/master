@@ -19,6 +19,7 @@ import services._
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 import services.MyPostgresDriver.api._
 
@@ -277,57 +278,106 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .get()
      .map { readFacebookArtists }
   }
- 
-  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] = {
+
+  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] =
     Future.sequence(
-     artistsNameInTitle.map {
-       getEventuallyFacebookArtists(_).map { artists => artists }
-     }
-    ).map { _.flatten collect { case artist: Artist if (artist.websites intersect webSites).nonEmpty => artist } }
+      artistsNameInTitle.map { name => getArtistsForAnEvent(name, webSites) }
+    ).map { _.flatten }
+
+  def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[Artist]] = {
+    getEventuallyFacebookArtists(artistName).flatMap {
+      case noArtist if noArtist.isEmpty && artistName.split("\\W+").size >= 2 =>
+        val nestedEventuallyArtists = artistName.split("\\W+").toSeq.map { getArtistsForAnEvent(_, eventWebSites) }
+        Future.sequence(nestedEventuallyArtists) map { _.flatten }
+      case artists =>
+        Future  { filterFacebookArtistsForEvent(artists, artistName, eventWebSites)}
+    }
+  }
+
+  def filterFacebookArtistsForEvent(artists: Seq[Artist], artistName: String, eventWebsites: Set[String]): Seq[Artist] =
+    artists match {
+    case onlyOneArtist: Seq[Artist] if onlyOneArtist.size == 1 && onlyOneArtist.head.name.toLowerCase == artistName =>
+      onlyOneArtist
+    case otherCase: Seq[Artist] =>
+      val artists = otherCase.flatMap { artist: Artist =>
+        if ((artist.websites intersect eventWebsites).nonEmpty) Option(artist)
+        else None
+      }
+      artists
   }
 
   def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
     Future.sequence(
-     websites.map {
-       case website if website contains "facebook" =>
-         getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
-       case website if website contains "soundcloud" =>
-         getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
-           case None =>
-             Future { None }
-           case Some(facebookUrl) =>
-             getFacebookArtistByFacebookUrl(facebookUrl).map { maybeFacebookArtist => maybeFacebookArtist }
-         }
-       case _ =>
-         Future { None }
-     }
+      websites.map {
+        case website if website contains "facebook" =>
+          getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
+        case website if website contains "soundcloud" =>
+          getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
+            case None =>
+              Future { None }
+            case Some(facebookUrl) =>
+              getFacebookArtistByFacebookUrl(facebookUrl).map { maybeFacebookArtist => maybeFacebookArtist }
+          }
+        case _ =>
+          Future { None }
+      }
     )
   }
 
   def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
-     .withQueryString("client_id" -> soundCloudClientId)
-     .get()
-     .map { readMaybeFacebookUrl }
+      .withQueryString("client_id" -> utilities.soundCloudClientId)
+      .get()
+      .map { readMaybeFacebookUrl }
   }
 
-  def readMaybeFacebookUrl(soundCloudWebProfilesWSResponse: WSResponse): Option[String] = {
+  def readMaybeFacebookUrl(soundCloudWebProfilesResponse: WSResponse): Option[String] = {
     val facebookUrlReads = (
-     (__ \ "url").read[String] and
-       (__ \ "service").read[String]
-     )((url: String, service: String) => (url, service))
+      (__ \ "url").read[String] and
+        (__ \ "service").read[String]
+      )((url: String, service: String) => (url, service))
 
     val collectOnlyFacebookUrls = Reads.seq(facebookUrlReads).map { urlService =>
-     urlService.collect { case (url: String, "facebook") => utilities.normalizeUrl(url) }
+      urlService.collect { case (url: String, "facebook") => utilities.normalizeUrl(url) }
     }
 
-    soundCloudWebProfilesWSResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
-     case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
-     case _ => None
-
+    soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
+      case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
+      case _ => None
     }
   }
+
+  def normalizeFacebookUrl(facebookUrl: String): String = {
+    val firstNormalization = facebookUrl.toLowerCase match {
+      case urlWithProfile: String if urlWithProfile contains "profile.php?id=" =>
+        Option(urlWithProfile.substring(urlWithProfile.lastIndexOf("=") + 1))
+      case alreadyNormalizedUrl: String =>
+        if (alreadyNormalizedUrl.indexOf("facebook.com/") > -1) {
+          val normalizedUrl = alreadyNormalizedUrl.substring(alreadyNormalizedUrl.indexOf("facebook.com/") + 13)
+          if (normalizedUrl.indexOf("pages/") > -1) {
+            val idRegex = new Regex("/[0-9]+")
+            idRegex.findAllIn(normalizedUrl).toSeq.headOption match {
+              case Some(id) => Option(id.replace("/", ""))
+              case None => None
+            }
+          } else if (normalizedUrl.indexOf("/") > -1) {
+            Option(normalizedUrl.take(normalizedUrl.indexOf("/")))
+          } else {
+            Option(normalizedUrl)
+          }
+        } else {
+          Option(alreadyNormalizedUrl)
+        }
+    }
+    firstNormalization match {
+      case Some(urlWithArguments) if urlWithArguments contains "?" =>
+        urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?"))
+      case Some(urlWithoutArguments) =>
+        urlWithoutArguments
+    }
+  }
+
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
     WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
@@ -338,20 +388,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .map { readFacebookArtist }
   }
 
-  def normalizeFacebookUrl(facebookUrl: String): String = {
-    val firstNormalization = facebookUrl.drop(facebookUrl.lastIndexOf("/") + 1) match {
-     case urlWithProfile: String if urlWithProfile contains "profile.php?id=" =>
-       urlWithProfile.substring(urlWithProfile.lastIndexOf("=") + 1)
-     case alreadyNormalizedUrl: String =>
-       alreadyNormalizedUrl
-    }
-    firstNormalization match {
-     case urlWithArguments if urlWithArguments contains "?" =>
-       urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?"))
-     case urlWithoutArguments =>
-       urlWithoutArguments
-    }
-  }
 
   val readArtist = (
    (__ \ "name").read[String] and
@@ -385,7 +421,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      artists.collect {
        case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
        maybeDescription, maybeGenre, maybeLikes, maybeCountry)
-         if category.equalsIgnoreCase("Musician/band") | category.equalsIgnoreCase("Artist") =>
+         if category.equalsIgnoreCase("Musician/Band") | category.equalsIgnoreCase("Artist") =>
          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten)
      }
@@ -405,7 +441,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
      Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
     match {
-     case Some((name, facebookId, "Musician/band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
+     case Some((name, facebookId, "Musician/Band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
      link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
        Option(makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
          link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten))

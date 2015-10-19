@@ -1,22 +1,35 @@
-/*
-import models.Artist
+import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
+
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities()
+  val trackMethods = new TrackMethods(dbConfProvider, utilities)
+  val genreMethods = new GenreMethods(dbConfProvider, utilities)
+  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
+  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
+  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
+    trackMethods, utilities)
 
   "SearchArtistController" must {
 
     "find a sequence of artists on Facebook" in {
-      whenReady (getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
-        artists should not be empty
+      whenReady (artistMethods.getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
+        assert(artists.nonEmpty)
       }
     }
 
     "find Rone (an artist) on Facebook" in {
-      whenReady (getFacebookArtistByFacebookUrl("roneofficial"), timeout(Span(6, Seconds))) { artist =>
-        artist shouldBe defined
+      whenReady (artistMethods.getFacebookArtistByFacebookUrl("roneofficial"), timeout(Span(6, Seconds))) { artist =>
+        assert(artist.isDefined)
       }
     }
 
@@ -68,16 +81,16 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "djvadim",
         "djvadim")
 
-      websites.map{ normalizeFacebookUrl } mustBe normalizedUrls
+      websites.map{ artistMethods.normalizeFacebookUrl } mustBe normalizedUrls
     }
 
     "remove useless words in a SoundCloudUrl (even if it contains uppercase letters)" in {
-      val refactoredSoundCloudWebsite1 = removeUselessInSoundCloudWebsite(
-        normalizeUrl("https://sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
-      val refactoredSoundCloudWebsite2 = removeUselessInSoundCloudWebsite(
-        normalizeUrl("sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
-      val refactoredSoundCloudWebsite3 = removeUselessInSoundCloudWebsite(
-        normalizeUrl("sounDcloud.com/nina-kraviz"))
+      val refactoredSoundCloudWebsite1 = artistMethods.removeUselessInSoundCloudWebsite(
+        utilities.normalizeUrl("https://sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
+      val refactoredSoundCloudWebsite2 = artistMethods.removeUselessInSoundCloudWebsite(
+        utilities.normalizeUrl("sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
+      val refactoredSoundCloudWebsite3 = artistMethods.removeUselessInSoundCloudWebsite(
+        utilities.normalizeUrl("sounDcloud.com/nina-kraviz"))
 
       refactoredSoundCloudWebsite1 mustBe "soundcloud.com/nina-kraviz"
       refactoredSoundCloudWebsite2 mustBe "soundcloud.com/nina-kraviz"
@@ -85,16 +98,16 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
     }
 
     "remove nothing in a non-soundCloud website" in {
-      val refactoredSoundCloudWebsite = removeUselessInSoundCloudWebsite(
-        normalizeUrl("https://facebook.com/nina-kraviz/live-at-space-closing-fiesta"))
+      val refactoredSoundCloudWebsite = artistMethods.removeUselessInSoundCloudWebsite(
+        utilities.normalizeUrl("https://facebook.com/nina-kraviz/live-at-space-closing-fiesta"))
       refactoredSoundCloudWebsite mustBe "facebook.com/nina-kraviz/live-at-space-closing-fiesta"
     }
 
     "aggregate the image path url with its offsets" in {
-      aggregateImageAndOffset("imageUrl", Option(1), Option(200)) mustBe """imageUrl\1\200"""
-      aggregateImageAndOffset("imageUrl", None, Option(200)) mustBe """imageUrl\0\200"""
-      aggregateImageAndOffset("imageUrl", Option(1), None) mustBe """imageUrl\1\0"""
-      aggregateImageAndOffset("imageUrl", None, None) mustBe """imageUrl\0\0"""
+      artistMethods.aggregateImageAndOffset("imageUrl", Option(1), Option(200)) mustBe """imageUrl\1\200"""
+      artistMethods.aggregateImageAndOffset("imageUrl", None, Option(200)) mustBe """imageUrl\0\200"""
+      artistMethods.aggregateImageAndOffset("imageUrl", Option(1), None) mustBe """imageUrl\1\0"""
+      artistMethods.aggregateImageAndOffset("imageUrl", None, None) mustBe """imageUrl\0\0"""
     }
 
     "find facebook artists in set of website" in {
@@ -159,7 +172,7 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "Defeater", "BURNING DOWN ALASKA", "Nosaj Thing", "Mono (Japan)", "SÓLSTAFIR", "The Ocean Collective", "LOHEEM"
       ,"woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
 
-      whenReady(getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
+      whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
         _.flatten.map{ artist => artist.name } mustBe expectedArtists      }
     }
 
@@ -177,11 +190,12 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       "discogs.com/artist/2922409-binny-2",
       "discogs.com/label/447040-clft"
       )
-      val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "Hein Cooper")
-      whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
+      val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "CLFT", "Hein Cooper")
+      whenReady(artistMethods.getEventuallyArtistsInEventTitle(artistMethods.splitArtistNamesInTitle(title), websites),
+        timeout(Span(5, Seconds))) {
         _.map{ artist => artist.name } mustBe expectedArtists
       }
     }
   }
 }
-*/
+
