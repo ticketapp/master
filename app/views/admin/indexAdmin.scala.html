@@ -1,5 +1,24 @@
 <h1>Index Administrateurs</h1>
 
+
+    <h2>Test sign-up</h2>
+    <form method="post" action="/signUp">
+        firstName: <input type="text" name="firstName"> <br>
+        lastName: <input type="text" name="lastName"> <br>
+        email: <input type="email" name="email"> <br>
+        password: <input type="text" name="password"> <br>
+        <input type="submit" value="submit"/>
+    </form>
+
+    <h2>Test sign-in</h2>
+    <form method="post" action="/authenticateByCredentials">
+        email: <input type="email" name="email"> <br>
+        password: <input type="text" name="password"> <br>
+        rememberMe: <input type="checkbox" name="rememberMe" checked> <br>
+        <input type="submit" value="submit"/>
+    </form>
+
+
     <h2>test nested form</h2>
     <form method="post" action="/admin/test2">
         first name : <input type="text" name="firstname"> <br>

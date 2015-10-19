@@ -39,14 +39,14 @@ CREATE OR REPLACE FUNCTION upsertAddress(
   DECLARE addressIdToReturn int;;
   BEGIN
     UPDATE addresses
-    SET geographicPoint = POINT(geographicPointValue), city = lower(cityValue), zip = lower(zipValue), street = lower(streetValue)
+    SET geographicPoint = GEOMETRY(geographicPointValue), city = lower(cityValue), zip = lower(zipValue), street = lower(streetValue)
     WHERE city = lower(cityValue) AND zip = lower(zipValue) AND street = lower(streetValue)
     RETURNING addressId INTO addressIdToReturn;;
     IF found THEN
       RETURN addressIdToReturn;;
     ELSE
       INSERT INTO addresses (geographicPoint, city, zip, street)
-      VALUES (POINT(geographicPointValue), lower(cityValue), lower(zipValue), lower(streetValue))
+      VALUES (GEOMETRY(geographicPointValue), lower(cityValue), lower(zipValue), lower(streetValue))
       RETURNING addressId INTO addressIdToReturn;;
       RETURN addressIdToReturn;;
     END IF;;
@@ -130,7 +130,7 @@ CREATE OR REPLACE FUNCTION insertOrganizer(
     INSERT INTO organizers (facebookId, name, description, addressId, phone, publicTransit, websites, imagePath,
                             geographicPoint, placeId)
     VALUES (facebookIdValue, nameValue, descriptionValue, addressIdValue, phoneValue, publicTransitValue,
-            websitesValue, imagePathValue, POINT(geographicPointValue), placeIdValue)
+            websitesValue, imagePathValue, GEOMETRY(geographicPointValue), placeIdValue)
     RETURNING organizerId
       INTO organizerIdToReturn;;
     RETURN organizerIdToReturn;;
@@ -201,63 +201,83 @@ CREATE OR REPLACE FUNCTION insertTrack(trackIdValue UUID,
   $$
 LANGUAGE plpgsql;
 
-CREATE TABLE users_login (
-  id                        SERIAL PRIMARY KEY,
-  userId                    VARCHAR(255) NOT NULL,
-  providerId                VARCHAR(255) NOT NULL,
-  firstName                 VARCHAR(255) NOT NULL,
-  lastName                  VARCHAR(255) NOT NULL,
-  fullName                  VARCHAR(255) NOT NULL,
-  email                     VARCHAR(255),
-  avatarUrl                 VARCHAR,
-  authMethod                VARCHAR(255) NOT NULL,
-  oAuth1Info                VARCHAR,
-  oAuth2Info                VARCHAR,
-  passwordInfo              VARCHAR(255),
-  UNIQUE(userId)
-);
-INSERT INTO users_login(userId, providerId, firstName, lastName, fullName, authMethod)
-VALUES ('userTestId', 'providerId', 'firstName', 'lastName', 'fullName', 'oauth2');
+create table users (
+  userID VARCHAR NOT NULL PRIMARY KEY,
+  firstName VARCHAR,
+  lastName VARCHAR,
+  fullName VARCHAR,
+  email VARCHAR,
+  avatarURL VARCHAR);
 
-CREATE OR REPLACE FUNCTION insertUser(
-  userIdValue         VARCHAR(255),
-  providerIdValue     VARCHAR(255),
-  firstNameValue      VARCHAR(255),
-  lastNameValue       VARCHAR(255),
-  fullNameValue       VARCHAR(255),
-  emailValue          VARCHAR(255),
-  avatarUrlValue      VARCHAR,
-  authMethodValue     VARCHAR(255),
-  oAuth1InfoValue     VARCHAR,
-  oAuth2InfoValue     VARCHAR,
-  passwordInfoValue   VARCHAR(255))
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO users_login (userId, providerId, firstName, lastName, fullName, email, avatarUrl, authMethod,
-                             oAuth1Info, oAuth2Info, passwordInfo)
-      VALUES (userIdValue, providerIdValue, firstNameValue, lastNameValue, fullNameValue, emailValue, avatarUrlValue,
-              authMethodValue, oAuth1InfoValue, oAuth2InfoValue, passwordInfoValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
+create table logininfo (
+  id SERIAL PRIMARY KEY,
+  providerID VARCHAR NOT NULL,
+  providerKey VARCHAR NOT NULL);
 
+create table userlogininfo (userID VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
+create table passwordinfo (hasher VARCHAR NOT NULL,password VARCHAR NOT NULL,salt VARCHAR,loginInfoId BIGINT NOT NULL);
+create table oauth1info (id SERIAL PRIMARY KEY,token VARCHAR NOT NULL,secret VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
+create table oauth2info (id SERIAL PRIMARY KEY,accesstoken VARCHAR NOT NULL,tokentype VARCHAR,expiresin INTEGER,refreshtoken VARCHAR,logininfoid BIGINT NOT NULL);
+create table openidinfo (id VARCHAR NOT NULL PRIMARY KEY,logininfoid BIGINT NOT NULL);
+create table openidattributes (id VARCHAR NOT NULL,key VARCHAR NOT NULL,value VARCHAR NOT NULL);
 
-CREATE TABLE users_token (
-  id                        VARCHAR(36) NOT NULL,
-  email                     VARCHAR(255) NOT NULL,
-  creationTime              TIMESTAMP NOT NULL,
-  expirationTime            TIMESTAMP NOT NULL,
-  isSignUp                  BOOLEAN NOT NULL
-);
+-- CREATE TABLE users (
+--   id                        SERIAL PRIMARY KEY,
+--   userId                    VARCHAR(255) NOT NULL,
+--   providerId                VARCHAR(255) NOT NULL,
+--   firstName                 VARCHAR(255) NOT NULL,
+--   lastName                  VARCHAR(255) NOT NULL,
+--   fullName                  VARCHAR(255) NOT NULL,
+--   email                     VARCHAR(255),
+--   avatarUrl                 VARCHAR,
+--   authMethod                VARCHAR(255) NOT NULL,
+--   oAuth1Info                VARCHAR,
+--   oAuth2Info                VARCHAR,
+--   passwordInfo              VARCHAR(255),
+--   UNIQUE(userId)
+-- );
+-- INSERT INTO users(userId, providerId, firstName, lastName, fullName, authMethod)
+-- VALUES ('userTestId', 'providerId', 'firstName', 'lastName', 'fullName', 'oauth2');
+--
+-- CREATE OR REPLACE FUNCTION insertUser(
+--   userIdValue         VARCHAR(255),
+--   providerIdValue     VARCHAR(255),
+--   firstNameValue      VARCHAR(255),
+--   lastNameValue       VARCHAR(255),
+--   fullNameValue       VARCHAR(255),
+--   emailValue          VARCHAR(255),
+--   avatarUrlValue      VARCHAR,
+--   authMethodValue     VARCHAR(255),
+--   oAuth1InfoValue     VARCHAR,
+--   oAuth2InfoValue     VARCHAR,
+--   passwordInfoValue   VARCHAR(255))
+--   RETURNS VOID AS
+--   $$
+--   BEGIN
+--     INSERT INTO users (userId, providerId, firstName, lastName, fullName, email, avatarUrl, authMethod,
+--                              oAuth1Info, oAuth2Info, passwordInfo)
+--       VALUES (userIdValue, providerIdValue, firstNameValue, lastNameValue, fullNameValue, emailValue, avatarUrlValue,
+--               authMethodValue, oAuth1InfoValue, oAuth2InfoValue, passwordInfoValue);;
+--     EXCEPTION WHEN unique_violation THEN RETURN;;
+--   END;;
+--   $$
+-- LANGUAGE plpgsql;
+--
+--
+-- CREATE TABLE users_token (
+--   id                        VARCHAR(36) NOT NULL,
+--   email                     VARCHAR(255) NOT NULL,
+--   creationTime              TIMESTAMP NOT NULL,
+--   expirationTime            TIMESTAMP NOT NULL,
+--   isSignUp                  BOOLEAN NOT NULL
+-- );
 
 CREATE TABLE receivedMails (
   id                        SERIAL PRIMARY KEY,
   subject                   VARCHAR NOT NULL,
   message                   VARCHAR NOT NULL,
   read                      BOOLEAN NOT NULL DEFAULT FALSE,
-  userId                    VARCHAR(255) REFERENCES users_login(userId)
+  userId                    VARCHAR(255) REFERENCES users(userId)
 );
 
 CREATE TABLE events (
@@ -297,7 +317,7 @@ CREATE OR REPLACE FUNCTION insertEvent(
   BEGIN
     INSERT INTO events (facebookid, ispublic, isactive, name, geographicpoint, description, starttime,
                         endtime, imagePath, agerestriction, tariffRange, ticketSellers)
-    VALUES (facebookidValue, ispublicValue, isactiveValue, nameValue, POINT(geographicpointValue),
+    VALUES (facebookidValue, ispublicValue, isactiveValue, nameValue, GEOMETRY (geographicpointValue),
             descriptionValue, starttimeValue, endtimeValue, imagePathValue, agerestrictionValue::SMALLINT,
             tariffRangeValue, ticketSellersValue)
     RETURNING eventId INTO eventIdToReturn;;
@@ -330,7 +350,7 @@ CREATE TABLE places (
 );
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
 INSERT into places(name, geographicPoint, facebookId)
-values ('Le transbordeur', POINT('(45.783808,4.860598)'), '117030545096697');
+values ('Le transbordeur', ST_GeomFromText('POINT(45.783808 4.860598)', 4326), '117030545096697');
 
 CREATE OR REPLACE FUNCTION insertPlace(
   nameValue                      VARCHAR(255),
@@ -349,7 +369,7 @@ DECLARE placeIdToReturn int;;
   BEGIN
     INSERT INTO places (name, geographicPoint, addressId, facebookId, description, webSites,
                         capacity, openingHours, imagePath, organizerId)
-    VALUES (nameValue, POINT(geographicPointValue), addressIdValue, facebookIdValue, descriptionValue,
+    VALUES (nameValue, GEOMETRY(geographicPointValue), addressIdValue, facebookIdValue, descriptionValue,
             webSitesValue, capacityValue, openingHoursValue, imagePathValue, organizerIdValue)
     RETURNING placeId INTO placeIdToReturn;;
     RETURN placeIdToReturn;;
@@ -402,21 +422,21 @@ CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
   content                   VARCHAR,
-  userId                    VARCHAR(255) REFERENCES users_login (userId),
+  userId                    VARCHAR(255) REFERENCES users (userId),
   fixed                     BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE issuesComments (
   commentId                 SERIAL PRIMARY KEY,
   content                   VARCHAR,
-  userId                    VARCHAR(255) REFERENCES users_login (userId),
+  userId                    VARCHAR(255) REFERENCES users (userId),
   issueId                   BIGINT REFERENCES issues(issueId)
 );
 
 CREATE TABLE usersTools (
   tableId                   SERIAL PRIMARY KEY,
   tools                     VARCHAR(255) NOT NULL,
-  userId                    VARCHAR(255) REFERENCES users_login (userId)
+  userId                    VARCHAR(255) REFERENCES users (userId)
 );
 
 ---############################## ACCOUNTING ###################################
@@ -528,7 +548,7 @@ CREATE TABLE account403 (
   date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
   amount                  NUMERIC NOT NULL,
   debit                   BOOLEAN NOT NULL, --#sinon debit
-  userId                  VARCHAR(255) REFERENCES users_login(userId),
+  userId                  VARCHAR(255) REFERENCES users(userId),
   account60Id             BIGINT REFERENCES account60(id)
 );
 
@@ -574,14 +594,14 @@ CREATE TABLE account623 (
 
 CREATE TABLE eventsFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   VARCHAR REFERENCES users_login(userId),
+  userId                   VARCHAR REFERENCES users(userId),
   eventId                  BIGINT REFERENCES events(eventId)
 );
 CREATE UNIQUE INDEX eventsFollowedIndex ON eventsFollowed (userId, eventId);
 
 CREATE TABLE artistsFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   VARCHAR REFERENCES users_login(userId),
+  userId                   VARCHAR REFERENCES users(userId),
   artistId                 INT REFERENCES artists(artistId)
 );
 CREATE UNIQUE INDEX artistsFollowedIndex ON artistsFollowed (userId, artistId);
@@ -600,21 +620,21 @@ LANGUAGE plpgsql;
 
 CREATE TABLE placesFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   VARCHAR REFERENCES users_login(userId) NOT NULL,
+  userId                   VARCHAR REFERENCES users(userId) NOT NULL,
   placeId                  INT REFERENCES places(placeId)  NOT NULL
 );
 CREATE UNIQUE INDEX placesFollowedIndex ON placesFollowed (userId, placeId);
 
 CREATE TABLE usersFollowed (
   tableId                 SERIAL PRIMARY KEY,
-  userIdFollower          VARCHAR REFERENCES users_login(userId)  NOT NULL,
-  userIdFollowed          VARCHAR REFERENCES users_login(userId)  NOT NULL
+  userIdFollower          VARCHAR REFERENCES users(userId)  NOT NULL,
+  userIdFollowed          VARCHAR REFERENCES users(userId)  NOT NULL
 );
 CREATE UNIQUE INDEX usersFollowedIndex ON usersFollowed (userIdFollower, userIdFollowed);
 
 CREATE TABLE organizersFollowed (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR REFERENCES users_login(userId)  NOT NULL,
+  userId                  VARCHAR REFERENCES users(userId)  NOT NULL,
   organizerId             INT REFERENCES organizers(organizerId)  NOT NULL
 );
 CREATE UNIQUE INDEX organizersFollowedIndex ON organizersFollowed (userId, organizerId);
@@ -673,7 +693,7 @@ CREATE TABLE eventsAddresses (
 
 CREATE TABLE usersOrganizers (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users_login (userId),
+  userId                  VARCHAR(255) REFERENCES users (userId),
   organizerId             INT REFERENCES organizers(organizerId)
 );
 CREATE UNIQUE INDEX usersOrganizersIndex ON usersOrganizers (userId, organizerId);
@@ -759,7 +779,7 @@ LANGUAGE plpgsql;
 
 CREATE TABLE playlists (
   playlistId              SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
+  userId                  VARCHAR(255) REFERENCES users (userId) NOT NULL,
   name                    VARCHAR(255) NOT NULL
 );
 CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);
@@ -776,7 +796,7 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
+  userId                  VARCHAR(255) REFERENCES users (userId) NOT NULL,
   trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
   ratingUp                INT,
   ratingDown              INT,
@@ -826,7 +846,7 @@ LANGUAGE plpgsql;
 
 CREATE TABLE usersFavoriteTracks(
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
+  userId                  VARCHAR(255) REFERENCES users (userId) NOT NULL,
   trackId                 UUID REFERENCES tracks (trackId) NOT NULL
 );
 CREATE UNIQUE INDEX usersFavoriteTracksIndex ON usersFavoriteTracks (userId, trackId);
@@ -921,13 +941,12 @@ DROP TABLE IF EXISTS places;
 DROP TABLE IF EXISTS amountDue;
 DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS events;
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS tracks;
 DROP TABLE IF EXISTS organizers;
-DROP TABLE IF EXISTS users_login, users_token;
+DROP TABLE IF EXISTS users_token;
 DROP TABLE IF EXISTS artists;
 DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS addresses;
 DROP TABLE IF EXISTS frenchCities;
-
+DROP TABLE IF EXISTS users, logininfo, userlogininfo, passwordinfo, oauth1info,  oauth2info, openidinfo, openidattributes;
 
