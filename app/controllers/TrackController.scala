@@ -2,19 +2,36 @@ package controllers
 
 import java.util.UUID
 
-import models.Track
+import models.{TrackMethods, Track, User}
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
+import play.api.libs.ws.WSClient
 import play.api.mvc._
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
+import services.Utilities
 import scala.util.{Failure, Success}
 import json.JsonHelper._
 import play.api.libs.json.DefaultWrites
+import javax.inject.Inject
+import com.mohiva.play.silhouette.api.{ Environment, LogoutEvent, Silhouette }
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import play.api.i18n.MessagesApi
+import scala.concurrent.ExecutionContext.Implicits.global
 
-object TrackController extends Controller with securesocial.core.SecureSocial {
+class TrackController @Inject() (ws: WSClient,
+                                 val messagesApi: MessagesApi,
+                                 val trackMethods: TrackMethods,
+                                 val utilities: Utilities,
+                                 val env: Environment[User, CookieAuthenticator],
+                                 socialProviderRegistry: SocialProviderRegistry)
+    extends Silhouette[User, CookieAuthenticator] {
+
+  val FOREIGN_KEY_VIOLATION = utilities.FOREIGN_KEY_VIOLATION
+  val UNIQUE_VIOLATION = utilities.UNIQUE_VIOLATION
+
   val trackBindingForm = Form(mapping(
     "trackId" -> nonEmptyText(8),
     "title" -> nonEmptyText(2),
@@ -24,37 +41,42 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     "artistFacebookUrl" -> nonEmptyText(2),
     "artistName" -> nonEmptyText(2),
     "redirectUrl" -> optional(nonEmptyText(2))
-  )(Track.formApply)(Track.formUnapply))
+  )(trackMethods.formApply)(trackMethods.formUnapply))
+//
+//  def createTrack = Action { implicit request =>
+//    trackBindingForm.bindFromRequest().fold(
+//      formWithErrors => {
+//        Logger.error(formWithErrors.errorsAsJson.toString())
+//        BadRequest(formWithErrors.errorsAsJson)
+//      },
+//      track => {
+//        trackMethods.save(track) match {
+//          case Success(true) =>
+//            trackMethods.find(track.trackId) match {
+//              case Success(Some(trackFound)) => Ok(Json.toJson(trackFound))
+//              case _ => NotFound
+//            }
+//          case Success(false) =>
+//            Logger.error("TrackController.createTrack")
+//            InternalServerError
+//          case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+//            Logger.error("TrackController.createTrack: Tried to save duplicate track")
+//            Conflict
+//          case Failure(exception) =>
+//            Logger.error("TrackController.createTrack", exception)
+//            InternalServerError
+//        }
+//      }
+//    )
+//  }
 
-  def createTrack = Action { implicit request =>
-    trackBindingForm.bindFromRequest().fold(
-      formWithErrors => {
-        Logger.error(formWithErrors.errorsAsJson.toString())
-        BadRequest(formWithErrors.errorsAsJson)
-      },
-      track => {
-        Track.save(track) match {
-          case Success(true) =>
-            Track.find(track.trackId) match {
-              case Success(Some(trackFound)) => Ok(Json.toJson(trackFound))
-              case _ => NotFound
-            }
-          case Success(false) =>
-            Logger.error("TrackController.createTrack")
-            InternalServerError
-          case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-            Logger.error("TrackController.createTrack: Tried to save duplicate track")
-            Conflict
-          case Failure(exception) =>
-            Logger.error("TrackController.createTrack", exception)
-            InternalServerError
-        }
-      }
-    )
-  }
-
-  def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int) = Action {
-    Ok(Json.toJson(Track.findAllByArtist(artistFacebookUrl, numberToReturn, offset)))
+  def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int) = Action.async {
+    trackMethods.findAllByArtist(artistFacebookUrl, numberToReturn, offset) map { tracks =>
+      Ok(Json.toJson(tracks))
+    } recover { case t: Throwable =>
+      Logger.error("TrackController.findOrganizersContaining: ", t)
+      InternalServerError("TrackController.findOrganizersContaining: " + t.getMessage)
+    }
   }
 
   val trackRatingBindingForm = Form(mapping(
@@ -71,74 +93,74 @@ object TrackController extends Controller with securesocial.core.SecureSocial {
     Some((trackRating.trackId, trackRating.rating,
       trackRating.reason match { case None => None; case Some(char) => Option(char.toString) }))
 
-  def upsertRatingForUser = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    trackRatingBindingForm.bindFromRequest().fold(
-      formWithErrors => {
-        Logger.error(formWithErrors.errorsAsJson.toString())
-        BadRequest(formWithErrors.errorsAsJson)
-      },
-      trackRating => {
-        val trackIdUUID = UUID.fromString(trackRating.trackId)
-        trackRating.rating match {
-          case ratingUp if ratingUp > 0 =>
-            Track.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
-              case Success(true) => Ok
-              case _ => InternalServerError
-            }
-          case ratingDown if ratingDown < 0 =>
-            Track.upsertRatingDown(userId, trackIdUUID, ratingDown, trackRating.reason) match {
-              case Success(true) => Ok
-              case _ => InternalServerError
-            }
-          case _ => BadRequest
-        }
-      }
-    )
-  }
-
-  def getRatingForUser(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Track.getRatingForUser(userId, UUID.fromString(trackId)) match {
-      case Success(Some(rating)) => Ok(Json.toJson(rating._1.toString + "," + rating._2.toString))
-      case _ => InternalServerError
-    }
-  }
-
-  def addToFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Track.addToFavorites(userId, UUID.fromString(trackId)) match {
-      case Success(1) =>
-        Ok
-      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-        Conflict(s"This user already has track $trackId in his favorites.")
-      case Failure(e: Exception) =>
-        Logger.error("TrackController.addToFavorites", e)
-        InternalServerError
-      case _ =>
-        InternalServerError(s"Track.controller.addTOFavorite: trackId $trackId was not added")
-    }
-  }
-
-  def removeFromFavorites(trackId: String) = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Track.removeFromFavorites(userId, UUID.fromString(trackId)) match {
-      case Success(1) =>
-        Ok
-      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-        NotFound(s"The track $trackId is not in the favorites of this user or this track does not exist.")
-      case _ =>
-        InternalServerError
-    }
-  }
-
-  def findFavorites = SecuredAction(ajaxCall = true) { implicit request =>
-    val userId = request.user.identityId.userId
-    Track.findFavorites(userId) match {
-      case Success(tracks) =>
-        Ok(Json.toJson(tracks))
-      case _ =>
-        InternalServerError
-    }
-  }
+//  def upsertRatingForUser = SecuredAction { implicit request =>
+//    val userId = request.identity.UUID
+//    trackRatingBindingForm.bindFromRequest().fold(
+//      formWithErrors => {
+//        Logger.error(formWithErrors.errorsAsJson.toString())
+//        BadRequest(formWithErrors.errorsAsJson)
+//      },
+//      trackRating => {
+//        val trackIdUUID = UUID.fromString(trackRating.trackId)
+//        trackRating.rating match {
+//          case ratingUp if ratingUp > 0 =>
+//            Track.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
+//              case Success(true) => Ok
+//              case _ => InternalServerError
+//            }
+//          case ratingDown if ratingDown < 0 =>
+//            Track.upsertRatingDown(userId, trackIdUUID, ratingDown, trackRating.reason) match {
+//              case Success(true) => Ok
+//              case _ => InternalServerError
+//            }
+//          case _ => BadRequest
+//        }
+//      }
+//    )
+//  }
+//
+//  def getRatingForUser(trackId: String) = SecuredAction { implicit request =>
+//    val userId = request.identity.UUID
+//    Track.getRatingForUser(userId, UUID.fromString(trackId)) match {
+//      case Success(Some(rating)) => Ok(Json.toJson(rating._1.toString + "," + rating._2.toString))
+//      case _ => InternalServerError
+//    }
+//  }
+//
+//  def addToFavorites(trackId: String) = SecuredAction { implicit request =>
+//    val userId = request.identity.UUID
+//    trackMethods.addToFavorites(userId, UUID.fromString(trackId)) match {
+//      case Success(1) =>
+//        Ok
+//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
+//        Conflict(s"This user already has track $trackId in his favorites.")
+//      case Failure(e: Exception) =>
+//        Logger.error("TrackController.addToFavorites", e)
+//        InternalServerError
+//      case _ =>
+//        InternalServerError(s"Track.controller.addTOFavorite: trackId $trackId was not added")
+//    }
+//  }
+//
+//  def removeFromFavorites(trackId: String) = SecuredAction { implicit request =>
+//    val userId = request.identity.UUID
+//    trackMethods.removeFromFavorites(userId, UUID.fromString(trackId)) match {
+//      case Success(1) =>
+//        Ok
+//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
+//        NotFound(s"The track $trackId is not in the favorites of this user or this track does not exist.")
+//      case _ =>
+//        InternalServerError
+//    }
+//  }
+//
+//  def findFavorites = SecuredAction { implicit request =>
+//    val userId = request.identity.UUID
+//    trackMethods.findFavorites(userId) match {
+//      case Success(tracks) =>
+//        Ok(Json.toJson(tracks))
+//      case _ =>
+//        InternalServerError
+//    }
+//  }
 }

@@ -1,12 +1,16 @@
 package models
 
-import anorm.SqlParser._
-import anorm._
-import play.api.db.DB
+
+import javax.inject.Inject
+
 import play.api.Play.current
 import controllers.{SchedulerException, DAOException}
 import java.util.Date
 import java.math.BigDecimal
+
+import play.api.db.slick.DatabaseConfigProvider
+import services.Utilities
+import slick.driver.JdbcProfile
 
 case class Tariff (tariffId: Long,
                    denomination: String,
@@ -17,26 +21,17 @@ case class Tariff (tariffId: Long,
                    endTime: Date,
                    eventId: Long)
 
-object Tariff {
+class TariffMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                             val utilities: Utilities) {
+
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
+  import dbConfig._
   def formApply(denomination: String,  nbTicketToSell: Int, price: scala.BigDecimal, startTime: Date, endTime: Date) =
     new Tariff(-1L, denomination, nbTicketToSell, 0, price.bigDecimal, startTime, endTime, -1L)
   def formUnapply(tariff: Tariff) = Some((tariff.denomination, tariff.nbTicketToSell, scala.BigDecimal(tariff.price),
                                           tariff.startTime, tariff.endTime))
 
-  private val TariffParser: RowParser[Tariff] = {
-    get[Long]("tariffId") ~
-    get[String]("denomination") ~
-    get[Int]("nbTicketToSell") ~
-    get[Int]("nbTicketSold") ~
-    get[BigDecimal]("price") ~
-    get[Date]("startTime") ~
-    get[Date]("endTime") ~
-    get[Long]("eventId") map {
-      case tariffId ~ denomination ~ nbTicketToSell ~ nbTicketSold ~ price ~ startTime ~ endTime ~ eventId =>
-        Tariff(tariffId, denomination, nbTicketToSell, nbTicketSold, price, startTime, endTime, eventId)
-    }
-  }
-
+/*
   def findAll(): List[Tariff] = {
     DB.withConnection { implicit connection =>
       SQL("select * from tariffs").as(TariffParser.*)
@@ -78,7 +73,7 @@ object Tariff {
     }
   } catch {
     case e: Exception => throw new DAOException("Tariff.save: " + e.getMessage)
-  }
+  }*/
 
   def findPrices(description: Option[String]): Option[String] = description match {
     case None =>

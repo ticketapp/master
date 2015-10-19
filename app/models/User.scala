@@ -1,36 +1,100 @@
 package models
 
-import anorm.SqlParser._
-import anorm._
-import controllers.{UserOAuth2InfoWronglyFormatted, DAOException}
+import java.sql.Timestamp
+import java.util.{Date, UUID}
+import javax.inject.Inject
+
+
+import com.mohiva.play.silhouette.api.Identity
+import controllers.{DAOException, UserOAuth2InfoWronglyFormatted}
+import org.joda.time.DateTime
 import play.api.Logger
-import play.api.db.DB
-import play.api.libs.json.{Json, JsNull, Writes}
 import play.api.Play.current
-import java.util.Date
+import play.api.db.slick.DatabaseConfigProvider
 
-case class User (userId: Long,
-                 creationDateTime: Date,
-                 email: String,
-                 nickname : String,
-                 password : String,
-                 profile: String)
+import play.api.libs.json.Json
+import services.Utilities
 
-object User {
+import play.api.libs.json.Json
+import slick.driver.PostgresDriver.api._
+import slick.model.ForeignKeyAction
+import scala.language.postfixOps
+/*import com.github.tototoshi.slick.PostgresJodaSupport._
+import driver.api._*/
+import com.mohiva.play.silhouette.api.{ Identity, LoginInfo }
+
+case class User(userID: UUID,
+                loginInfo: LoginInfo,
+                firstName: Option[String],
+                lastName: Option[String],
+                fullName: Option[String],
+                email: Option[String],
+                avatarURL: Option[String]) extends Identity
+
+//case class User (UUID: UUID,
+//                 creationDateTime: DateTime,
+//                 email: String,
+//                 nickname : String,
+//                 password : String,
+//                 profile: String)
+
+class UserMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                             val organizerMethods: OrganizerMethods,
+                             val placeMethods: PlaceMethods,
+                             val artistMethods: ArtistMethods,
+                             val tariffMethods: TariffMethods,
+                             val utilities: Utilities) {
+
+
+//  class Users(tag: Tag) extends Table[User](tag, "users") {
+//    def UUID = column[UUID]("userId", O.PrimaryKey, O.AutoInc)
+//    def creationDateTime = column[DateTime]("creationDateTime")
+//    def email = column[String]("email")
+//    def nickname = column[String]("nickname")
+//    def password = column[String]("password")
+//    def profile = column[String]("profile")
+//    def * = (UUID, creationDateTime, email, nickname, password, profile) <> ((User.apply _).tupled, User.unapply)
+//  }
+//
+//  val users = TableQuery[Users]
+
   implicit val userWrites = Json.writes[User]
 
-  private val UserParser: RowParser[User] = {
-    get[Long]("userId") ~
-      get[Date]("creationDateTime") ~
-      get[String]("email") ~
-      get[String]("nickname") ~
-      get[String]("password") ~
-      get[String]("profile")  map {
-      case id ~ creationDateTime ~ email ~ nickname ~ password ~ profile =>
-        User(id, creationDateTime, email, nickname, password, profile)
-    }
-  }
+  case class User(userID: UUID,
+                   loginInfo: LoginInfo,
+                   firstName: Option[String],
+                   lastName: Option[String],
+                   fullName: Option[String],
+                   email: Option[String],
+                   avatarURL: Option[String]) extends Identity
 
+//  class Users(tag: Tag) extends Table[User](tag, "users") {
+//    def userID = column[UUID]("userid")
+//    def firstName = column[Option[String]]("firstname")
+//    def lastName = column[Option[String]]("lastname")
+//    def fullName = column[Option[String]]("fullname")
+//    def email = column[Option[String]]("email")
+//    def avatarURL = column[Option[String]]("avatarurl")
+//    def * = (userID, firstName, lastName, fullName, email, avatarURL) <> ((User.apply _).tupled, User.unapply)
+//  }
+//
+
+//  class Users(tag: Tag) extends Table[User](tag, "users") {
+//    def UUID = column[UUID]("userId", O.PrimaryKey, O.AutoInc)
+//    def creationDateTime = column[DateTime]("creationDateTime")
+//    def email = column[String]("email")
+//    def nickname = column[String]("nickname")
+//    def password = column[String]("password")
+//    def profile = column[String]("profile")
+//    def * = (UUID, creationDateTime, email, nickname, password, profile) <> ((User.apply _).tupled, User.unapply)
+//  }
+//
+//  val users = TableQuery[Users]
+//
+//  implicit val userWrites = Json.writes[User]
+
+
+/*
   def findAll(): Seq[User] = try {
     DB.withConnection { implicit connection =>
       SQL("select * from users_login").as(UserParser.*)
@@ -76,7 +140,7 @@ object User {
   }
 
   def formApply(email: String, nickname: String, password: String, profile: String): User =
-    new User(-1L, new Date, email, nickname, password, profile)
+    User(UUID.randomUUID(), new DateTime, email, nickname, password, profile)
 
   def formUnapply(user: User): Option[(String, String, String, String)] =
     Some((user.email, user.nickname, user.password, user.profile))
@@ -102,12 +166,12 @@ object User {
     case e: Exception => throw new DAOException("User.delete: " + e.getMessage)
   }
 
-  def findFacebookAccessToken(userId: String): Option[String] = try {
+  def findFacebookAccessToken(userUUID: UUID): Option[String] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT oAuth2Info FROM users_login
           | WHERE userId = {userId} """.stripMargin)
-        .on('userId -> userId )
+        .on('userId -> userUUID )
         .as(scalar[String].singleOpt) match {
         case None => None
         case Some(oAuth2info) =>
@@ -122,19 +186,19 @@ object User {
     case e: Exception => throw new DAOException("User.findFacebookAccessToken: " + e.getMessage)
   }
 
-  def getTracksRemoved(userId: String): Seq[Track] = try {
+  def getTracksRemoved(userUUID: UUID): Seq[Track] = try {
     DB.withConnection { implicit connection =>
       SQL(
         """SELECT * FROM tracksRating tracksRating
           |  INNER JOIN tracks tracks
           |    ON tracks.trackId = tracksRating.trackId
           |    WHERE tracksRating.userId = {userId} AND tracksRating.reason IS NOT NULL""".stripMargin)
-        .on('userId -> userId)
+        .on('userId -> userUUID)
         .as(Track.trackParser *)
     }
   } catch {
     case e: Exception =>
       Logger.error("User.getTracksRemoved: ", e)
       Seq.empty
-  }
+  }*/
 }

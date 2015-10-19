@@ -261,11 +261,12 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         }, 0);
                     }
                     value.forEach(pushTrack);*/
-                    console.log(value)
-                    if (value == "end") {
-                        $rootScope.$apply(function () {
-                            $rootScope.loadingTracks = false;
-                        });
+                        if (value == "end") {
+                        $timeout(function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.loadingTracks = false;
+                            });
+                        }, 0);
                     } else {
                         $timeout(function () {
                             $rootScope.$apply(function () {

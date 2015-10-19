@@ -1,22 +1,8 @@
-import controllers.SearchArtistsController._
+/*
 import models.Artist
-import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
-import play.api.Play.current
-import securesocial.core.IdentityId
-import services.SearchSoundCloudTracks
-import scala.util.Success
-import scala.util.Failure
-import play.api.libs.concurrent.Execution.Implicits._
-import services.Utilities._
 
 class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
 
@@ -189,8 +175,8 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "soundcloud.com/osunlade",
       "discogs.com/artist/1156643-lee-holman",
       "discogs.com/artist/2922409-binny-2",
-      "discogs.com/label/447040-clft")
-      
+      "discogs.com/label/447040-clft"
+      )
       val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "Hein Cooper")
       whenReady(getEventuallyArtistsInEventTitle(Artist.splitArtistNamesInTitle(title), websites), timeout(Span(5, Seconds))) {
         _.map{ artist => artist.name } mustBe expectedArtists
@@ -198,4 +184,4 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
     }
   }
 }
-
+*/

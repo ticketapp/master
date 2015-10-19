@@ -1,17 +1,14 @@
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import models._
-import models.Playlist._
-import models.Track
-import securesocial.core.IdentityId
-import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
 import java.util.UUID.randomUUID
+
+import models.Playlist._
+import models.{Track, _}
+import org.scalatest._
+import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 
 import scala.util.Success
 
 class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
-  var artistId = -1L
+/*  var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website"))
 
@@ -70,5 +67,5 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
         Track.delete(trackId3)
       }
     }
-  }
+  }*/
 }

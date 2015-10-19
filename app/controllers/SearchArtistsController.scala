@@ -1,24 +1,27 @@
 package controllers
 
+import javax.inject.Inject
+import play.api.Play.current
 import json.JsonHelper._
-import play.api.libs.ws.WS
-import play.api.libs.ws.Response
+import models.{GenreMethods, Artist, AddressMethods}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.libs.ws.{WSResponse, WS}
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import play.api.libs.functional.syntax._
 import services.Utilities
-import models.Artist
-import models.Genre
-import models.Genre.genresStringToGenresSet
 import play.api.libs.json.Reads._
-import services.Utilities.{ normalizeUrl, getNormalizedWebsitesInText, facebookToken, soundCloudClientId, linkPattern }
 
 import scala.language.postfixOps
 import scala.util.matching.Regex
 
-object SearchArtistsController extends Controller {
+class SearchArtistsController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                        val addressMethods: AddressMethods,
+                                        val genreMethods: GenreMethods,
+                                        val utilities: Utilities) extends Controller {
+
   val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
@@ -28,13 +31,13 @@ object SearchArtistsController extends Controller {
   }
 
   def getEventuallyFacebookArtists(pattern: String): Future[Seq[Artist]] = {
-    WS.url("https://graph.facebook.com/" + Utilities.facebookApiVersion + "/search")
+    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/search")
       .withQueryString(
         "q" -> pattern,
         "type" -> "page",
         "limit" -> "400",
         "fields" -> facebookArtistFields,
-        "access_token" -> facebookToken)
+        "access_token" -> utilities.facebookToken)
       .get()
       .map { readFacebookArtists }
   }
@@ -55,8 +58,8 @@ object SearchArtistsController extends Controller {
         Future  { filterFacebookArtistsForEvent(artists, artistName, eventWebSites)}
     }
   }
-  
-  def filterFacebookArtistsForEvent(artists: Seq[Artist], artistName: String, eventWebsites: Set[String]): Seq[Artist] = 
+
+  def filterFacebookArtistsForEvent(artists: Seq[Artist], artistName: String, eventWebsites: Set[String]): Seq[Artist] =
     artists match {
     case onlyOneArtist: Seq[Artist] if onlyOneArtist.size == 1 && onlyOneArtist.head.name.toLowerCase == artistName =>
       onlyOneArtist
@@ -65,7 +68,7 @@ object SearchArtistsController extends Controller {
         if ((artist.websites intersect eventWebsites).nonEmpty) Option(artist)
         else None
       }
-      artists 
+      artists
   }
 
   def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
@@ -89,19 +92,19 @@ object SearchArtistsController extends Controller {
   def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
-      .withQueryString("client_id" -> soundCloudClientId)
+      .withQueryString("client_id" -> utilities.soundCloudClientId)
       .get()
       .map { readMaybeFacebookUrl }
   }
 
-  def readMaybeFacebookUrl(soundCloudWebProfilesResponse: Response): Option[String] = {
+  def readMaybeFacebookUrl(soundCloudWebProfilesResponse: WSResponse): Option[String] = {
     val facebookUrlReads = (
       (__ \ "url").read[String] and
         (__ \ "service").read[String]
       )((url: String, service: String) => (url, service))
 
     val collectOnlyFacebookUrls = Reads.seq(facebookUrlReads).map { urlService =>
-      urlService.collect { case (url: String, "facebook") => normalizeUrl(url) }
+      urlService.collect { case (url: String, "facebook") => utilities.normalizeUrl(url) }
     }
 
     soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
@@ -111,10 +114,10 @@ object SearchArtistsController extends Controller {
   }
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
-    WS.url("https://graph.facebook.com/" + Utilities.facebookApiVersion + "/" + normalizeFacebookUrl(url))
+    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + normalizeFacebookUrl(url))
       .withQueryString(
         "fields" -> facebookArtistFields,
-        "access_token" -> facebookToken)
+        "access_token" -> utilities.facebookToken)
       .get()
       .map { readFacebookArtist }
   }
@@ -176,7 +179,7 @@ object SearchArtistsController extends Controller {
     (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
       maybeLikes, maybeCountry))
 
-  def readFacebookArtists(facebookResponse: Response): Seq[Artist] = {
+  def readFacebookArtists(facebookResponse: WSResponse): Seq[Artist] = {
     val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
         case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
@@ -190,8 +193,8 @@ object SearchArtistsController extends Controller {
       .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
       .getOrElse(Seq.empty)
   }
-  
-  def readFacebookArtist(facebookResponse: Response): Option[Artist] = {
+
+  def readFacebookArtist(facebookResponse: WSResponse): Option[Artist] = {
     facebookResponse.json
       .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String],
         String, Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
@@ -208,14 +211,14 @@ object SearchArtistsController extends Controller {
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                  maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
                  maybeCountry: Option[String]): Artist = {
-    val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
-    val websitesSet = getNormalizedWebsitesInText(maybeWebsites)
+    val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
+    val websitesSet = utilities.getNormalizedWebsitesInText(maybeWebsites)
       .filterNot(_.contains("facebook.com"))
       .filterNot(_ == "")
-    val description = Utilities.formatDescription(maybeDescription)
-    val genres = genresStringToGenresSet(maybeGenre)
-    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet, genres.toSeq,
-      Seq.empty, maybeLikes, maybeCountry)
+    val description = utilities.formatDescription(maybeDescription)
+    val genres = genreMethods.genresStringToGenresSet(maybeGenre)
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet/*, genres.toSeq,
+      Seq.empty, maybeLikes, maybeCountry*/)
   }
 
   def removeUselessInSoundCloudWebsite(website: String): String = website match {

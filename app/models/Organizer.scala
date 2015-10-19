@@ -1,25 +1,25 @@
 package models
 
-import java.sql.Connection
+import javax.inject.Inject
 
-import anorm.SqlParser._
-import anorm._
-import controllers.{ThereIsNoOrganizerForThisFacebookIdException, DAOException}
+import com.vividsolutions.jts.geom.Point
+import json.JsonHelper._
+import org.joda.time.DateTime
 import play.api.Logger
-import play.api.libs.json._
-import play.api.libs.ws.{WS, Response}
-import securesocial.core.IdentityId
-import services.Utilities
-import play.api.db.DB
 import play.api.Play.current
-import play.api.libs.concurrent.Execution.Implicits._
-import services.Utilities._
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
-import scala.util.Try
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import play.api.libs.ws.{WS, WSResponse}
+import services.MyPostgresDriver.api._
+import services.{MyPostgresDriver, Utilities}
+import slick.model.ForeignKeyAction
 
-case class Organizer (organizerId: Option[Long],
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.language.postfixOps
+
+case class Organizer (id: Option[Long],
                       facebookId: Option[String] = None,
                       name: String,
                       description: Option[String] = None,
@@ -29,11 +29,18 @@ case class Organizer (organizerId: Option[Long],
                       websites: Option[String] = None,
                       verified: Boolean = false,
                       imagePath: Option[String] = None,
-                      geographicPoint: Option[String] = None,
-                      address: Option[Address] = None,
+                      geographicPoint: Option[Point] = None,
                       linkedPlaceId: Option[Long] = None)
 
-object Organizer {
+case class OrganizerWithAddress(organizer: Organizer, address: Option[Address])
+
+case class OrganizerFollowed(userId: String, Organizer: Long)
+
+class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
+                                 val placeMethods: PlaceMethods,
+                                 val utilities: Utilities,
+                                 val geographicPointMethods: GeographicPointMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
                 imagePath: Option[String]): Organizer =
@@ -41,289 +48,187 @@ object Organizer {
   def formUnapply(organizer: Organizer) =
     Some((organizer.facebookId, organizer.name, organizer.description, organizer.websites, organizer.imagePath))
 
-  private val OrganizerParser: RowParser[Organizer] = {
-    get[Long]("organizerId") ~
-      get[Option[String]]("facebookId") ~
-      get[String]("name") ~
-      get[Option[String]]("description") ~
-      get[Option[Long]]("addressId") ~
-      get[Option[String]]("phone") ~
-      get[Option[String]]("publicTransit") ~
-      get[Option[String]]("websites") ~
-      get[Boolean]("verified") ~
-      get[Option[String]]("imagePath") ~
-      get[Option[String]]("geographicPoint") ~
-      get[Option[Long]]("placeId") map {
-      case organizerId ~ facebookId ~ name ~ description ~ addressId ~ phone ~ publicTransit ~ websites ~ verified ~
-        imagePath ~ geographicPoint ~ placeId =>
-        Organizer(Option(organizerId), facebookId, name, description, addressId, phone, publicTransit, websites,
-          verified, imagePath, geographicPoint, None, placeId)
-    }
+//  def getOrganizerProperties(organizer: Organizer): Organizer = organizer.copy(
+//    address = Address.find(organizer.addressId)
+//  )
+
+  def find(numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] = {
+    val tupledJoin = organizers joinLeft addresses on (_.addressId === _.id)
+
+    db.run(tupledJoin.result).map(_.map(OrganizerWithAddress.tupled))
   }
 
-  def getOrganizerProperties(organizer: Organizer): Organizer = organizer.copy(
-    address = Address.find(organizer.addressId)
-  )
+  def findAllByEvent(event: Event): Future[Seq[Organizer]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
 
-  def findAll(numberToReturn: Int, offset: Int): List[Organizer] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT * FROM organizers
-          |LIMIT $numberToReturn
-          |OFFSET $offset""".stripMargin)
-        .as(OrganizerParser.*)
-        .map(getOrganizerProperties)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.findAll: " + e.getMessage)
+    val query = for {
+      event <- events if event.id === event.id
+      eventOrganizer <- eventsOrganizers
+      organizer <- organizers if organizer.id === eventOrganizer.organizerId
+    } yield organizer
+
+
+    //getOrganizerProperties
+    db.run(query.result)
   }
 
-  def findAllWithFacebookId: Try[List[Organizer]] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT *
-          |  FROM organizers
-          |  WHERE facebookId IS NOT NULL""".stripMargin)
-        .as(OrganizerParser.*)
-    }
+  def findById(id: Long): Future[Option[Organizer]] = {
+    val query = organizers.filter(_.id === id)
+    db.run(query.result.headOption)
   }
 
-  def findAllByEvent(event: Event): List[Organizer] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT * FROM eventsOrganizers eA
-          | INNER JOIN organizers a ON a.organizerId = eA.organizerId
-          | WHERE eA.eventId = {eventId}""".stripMargin)
-        .on('eventId -> event.eventId)
-        .as(OrganizerParser.*)
-        .map(getOrganizerProperties)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.findAll: " + e.getMessage)
+  def findAllContaining(pattern: String): Future[Seq[Organizer]] = {
+    val lowercasePattern = pattern.toLowerCase
+    val query = for {
+      organizer <- organizers if organizer.name.toLowerCase like s"%$lowercasePattern%"
+    } yield organizer
+    //        .map(getOrganizerProperties)
+    db.run(query.result)
   }
 
-  def find(organizerId: Long): Option[Organizer] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM organizers WHERE organizerId = {organizerId}")
-        .on('organizerId -> organizerId)
-        .as(OrganizerParser.singleOpt)
-        .map(getOrganizerProperties)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Method organizer.find: " + e.getMessage)
+  def save(organizer: Organizer): Future[Organizer] = {
+    val insertQuery = organizers returning organizers.map(_.id) into ((organizer, id) => organizer.copy(id = Option(id)))
+    val action = insertQuery += organizer
+    db.run(action)
   }
 
-  def findAllContaining(pattern: String): Seq[Organizer] = try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT * FROM organizers WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%' LIMIT 10")
-        .on('patternLowCase -> pattern.toLowerCase)
-        .as(OrganizerParser.*)
-        .map(getOrganizerProperties)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.findAllContaining: " + e.getMessage)
-  }
-  
-  def findIdByFacebookId(facebookId: Option[String])(implicit connection: Connection): Option[Long] = {
-    SQL(
-      """SELECT organizerId FROM organizers
-        | WHERE facebookId = {facebookId}""".stripMargin)
-      .on("facebookId" -> facebookId)
-      .as(scalar[Long].singleOpt)
+
+
+//  def save(organizer: Organizer): Future[Long] = {
+////    val addressId = organizer.address match {
+////      case None => None
+////      case Some(address) => Address.save(Option(address))
+////    }
+//    val placeIdWithSameFacebookId = placeMethods.findIdByFacebookId(organizer.facebookId)
+//    val phoneNumbers = Utilities.phoneNumbersSetToOptionString(Utilities.phoneNumbersStringToSet(organizer.phone))
+//    val description = Utilities.formatDescription(organizer.description)
+//    }
+//  }
+
+  def findIdByFacebookId(facebookId: Option[String]): Future[Option[Long]] = {
+    val query = organizers.filter(_.facebookId === facebookId).map(_.id)
+    db.run(query.result.headOption)
   }
 
-  def save(organizer: Organizer): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      val maybeAddressId = organizer.address match {
-        case None => None
-        case Some(address) => Address.save(Option(address)) match {
-          case Success(Some(addressId)) =>
-            addressId
-          case _ =>
-            Logger.error("Organizer.save: address could not be saved")
-            None
-        }
-      }
-      val placeIdWithSameFacebookId = Place.findIdByFacebookId(organizer.facebookId)
-      val phoneNumbers = Utilities.phoneNumbersSetToOptionString(Utilities.phoneNumbersStringToSet(organizer.phone))
-      val description = Utilities.formatDescription(organizer.description)
-      SQL(
-        """SELECT insertOrganizer({facebookId}, {name}, {description}, {addressId}, {phone}, {publicTransit},
-          |{websites}, {imagePath}, {geographicPoint}, {placeId})""".stripMargin)
-        .on(
-          'facebookId -> organizer.facebookId,
-          'name -> organizer.name,
-          'description -> description,
-          'addressId -> maybeAddressId,
-          'phone -> phoneNumbers,
-          'publicTransit -> organizer.publicTransit,
-          'websites -> organizer.websites,
-          'imagePath -> organizer.imagePath,
-          'geographicPoint -> organizer.geographicPoint,
-          'placeId -> placeIdWithSameFacebookId)
-        .as(scalar[Option[Long]].single)
-    }
+  def findNear(geographicPoint: Point, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] = {
+    val query = organizers
+      .sortBy(_.geographicPoint <-> geographicPoint)
+      .drop(numberToReturn)
+      .take(offset)
+    db.run(query.result)
   }
 
-  def findIdByName(name: String): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      SQL("SELECT organizerId FROM organizers WHERE name = {name}")
-        .on('name -> name)
-        .as(scalar[Long].singleOpt)
-    }
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] =
+    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
+      case None =>
+        Logger.info("Organizer.findNearCity: no city found with this name")
+        Future { Seq.empty }
+      case Some(geographicPoint) =>
+        findNear(geographicPoint, numberToReturn, offset)
   }
 
-  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT * FROM organizers
-           |ORDER BY geographicPoint <-> point '$geographicPoint'
-                                                                  |LIMIT $numberToReturn
-            |OFFSET $offset""".stripMargin)
-        .as(OrganizerParser.*)
-        .map(getOrganizerProperties)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.findNear: " + e.getMessage)
+  def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Int] = save(organizer) flatMap {
+    case organizer: Organizer => saveEventRelation(eventId, organizer.id.get)
   }
 
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Seq[Organizer] = try {
-    Address.findGeographicPointOfCity(city) match {
-      case None => Seq.empty
-      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.findNearCity: " + e.getMessage)
+  def saveEventRelation(eventId: Long, organizerId: Long): Future[Int] =
+    db.run(eventsOrganizers += EventOrganizer(eventId, organizerId))
+
+
+  def deleteEventRelation(eventId: Long, organizerId: Long): Future[Int] = db.run(eventsOrganizers.filter(eventOrganizer =>
+      eventOrganizer.eventId === eventId && eventOrganizer.organizerId === organizerId).delete)
+
+    def delete(id: Long): Future[Int] = db.run(organizers.filter(_.id === id).delete)
+  /*
+     def followById(userId : UUID, organizerId : Long): Try[Option[Long]] = Try {
+       DB.withConnection { implicit connection =>
+         SQL(
+           """INSERT INTO organizersFollowed(userId, organizerId)
+             |VALUES({userId}, {organizerId})""".stripMargin)
+           .on(
+             'userId -> userId,
+             'organizerId -> organizerId)
+           .executeInsert()
+       }
+     }
+
+     def followByFacebookId(userId : UUID, facebookId: String): Try[Option[Long]] = {
+       DB.withConnection { implicit connection =>
+         SQL("""SELECT organizerId FROM organizers WHERE facebookId = {facebookId}""")
+           .on('facebookId -> facebookId)
+           .as(scalar[Long].singleOpt) match {
+           case None => throw new ThereIsNoOrganizerForThisFacebookIdException("Organizer.followOrganizerIdByFacebookId")
+           case Some(organizerId) => followById(userId, organizerId)
+         }
+       }
+     }
+
+     def unfollowByOrganizerId(userId: UUID, organizerId: Long): Try[Int] = Try {
+       DB.withConnection { implicit connection =>
+         SQL(
+           """DELETE FROM organizersFollowed
+             | WHERE userId = {userId} AND organizerId = {organizerId}""".stripMargin)
+           .on('userId -> userId,
+             'organizerId -> organizerId)
+           .executeUpdate()
+       }
+     }
+
+     def isFollowed(userId: UUID, organizerId: Long): Boolean = try {
+       DB.withConnection { implicit connection =>
+         SQL(
+           """SELECT exists(SELECT 1 FROM organizersFollowed
+             |  WHERE userId = {userId} AND organizerId = {organizerId})""".stripMargin)
+           .on("userId" -> userId,
+             "organizerId" -> organizerId)
+           .as(scalar[Boolean].single)
+       }
+     } catch {
+       case e: Exception => throw new DAOException("Organizer.isOrganizerFollowed: " + e.getMessage)
+     }
+
+     def getFollowedOrganizers(userId: UUID): Seq[Organizer] = try {
+       DB.withConnection { implicit connection =>
+         SQL("""select a.* from organizers a
+               |  INNER JOIN organizersFollowed af ON a.organizerId = af.organizerId
+               |WHERE af.userId = {userId}""".stripMargin)
+           .on('userId -> userId)
+           .as(OrganizerParser.*)
+   //        .map(getOrganizerProperties)
+       }
+     } catch {
+       case e: Exception => throw new DAOException("Organizer.getFollowedOrganizers: " + e.getMessage)
+     }
+*/
+  def readOrganizer(organizer: WSResponse, organizerId: String): Option[OrganizerWithAddress] = {
+   val readOrganizer = (
+     (__ \ "name").read[String] and
+       (__ \ "description").readNullable[String] and
+       (__ \ "cover" \ "source").readNullable[String] and
+       (__ \ "location" \ "street").readNullable[String] and
+       (__ \ "location" \ "zip").readNullable[String] and
+       (__ \ "location" \ "city").readNullable[String] and
+       (__ \ "phone").readNullable[String] and
+       (__ \ "public_transit").readNullable[String] and
+       (__ \ "website").readNullable[String])
+     .apply((name: String, description: Option[String], source: Option[String], street: Option[String],
+             zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
+             website: Option[String]) =>
+     OrganizerWithAddress(Organizer(None, Some(organizerId), name, utilities.formatDescription(description), None, phone, public_transit,
+       website, verified = false, imagePath = source, geographicPoint = None), address = Option(Address(None, None,
+         city, zip, street)))
+     )
+   organizer.json.asOpt[OrganizerWithAddress](readOrganizer)
   }
 
-  def saveWithEventRelation(organizer: Organizer, eventId: Long): Option[Long] = {
-    save(organizer) match {
-      case Success(Some(organizerId)) =>
-        saveEventRelation(eventId, organizerId)
-        Option(organizerId)
-      case Success(None) =>
-        None
-      case Failure(e) =>
-        Logger.error("Organizer.saveWithEventRelation: " + e.getMessage)
-        None
-    }
-  }
-
-  def saveEventRelation(eventId: Long, organizerId: Long): Boolean = try {
-    DB.withConnection { implicit connection =>
-      SQL( """SELECT insertEventOrganizerRelation({eventId}, {organizerId})""")
-        .on(
-          'eventId -> eventId,
-          'organizerId -> organizerId)
-        .execute()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Cannot save in saveEventOrganizerRelation: " + e.getMessage)
-  }
-
-  def deleteEventRelation(eventId: Long, organizerId: Long): Try[Int] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(s"""DELETE FROM eventsOrganizers WHERE eventId = $eventId AND organizerId = $organizerId""")
-        .executeUpdate()
-    }
-  }
-
-  def delete(organizerId: Long): Try[Int] = Try {
-    DB.withConnection { implicit connection =>
-      SQL("DELETE FROM organizers WHERE organizerId = {organizerId}")
-        .on('organizerId -> organizerId)
-        .executeUpdate()
-    }
-  }
-
-  def followByOrganizerId(userId : String, organizerId : Long): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """INSERT INTO organizersFollowed(userId, organizerId)
-          |VALUES({userId}, {organizerId})""".stripMargin)
-        .on(
-          'userId -> userId,
-          'organizerId -> organizerId)
-        .executeInsert()
-    }
-  }
-
-  def followByFacebookId(userId : String, facebookId: String): Try[Option[Long]] = {
-    DB.withConnection { implicit connection =>
-      SQL("""SELECT organizerId FROM organizers WHERE facebookId = {facebookId}""")
-        .on('facebookId -> facebookId)
-        .as(scalar[Long].singleOpt) match {
-        case None => throw new ThereIsNoOrganizerForThisFacebookIdException("Organizer.followOrganizerIdByFacebookId")
-        case Some(organizerId) => followByOrganizerId(userId, organizerId)
-      }
-    }
-  }
-
-  def unfollowByOrganizerId(userId: String, organizerId: Long): Try[Int] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """DELETE FROM organizersFollowed
-          | WHERE userId = {userId} AND organizerId = {organizerId}""".stripMargin)
-        .on('userId -> userId,
-          'organizerId -> organizerId)
-        .executeUpdate()
-    }
-  }
-
-  def isFollowed(userId: IdentityId, organizerId: Long): Boolean = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT exists(SELECT 1 FROM organizersFollowed
-          |  WHERE userId = {userId} AND organizerId = {organizerId})""".stripMargin)
-        .on("userId" -> userId.userId,
-          "organizerId" -> organizerId)
-        .as(scalar[Boolean].single)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.isOrganizerFollowed: " + e.getMessage)
-  }
-
-  def getFollowedOrganizers(userId: IdentityId): Seq[Organizer] = try {
-    DB.withConnection { implicit connection =>
-      SQL("""select a.* from organizers a
-            |  INNER JOIN organizersFollowed af ON a.organizerId = af.organizerId
-            |WHERE af.userId = {userId}""".stripMargin)
-        .on('userId -> userId.userId)
-        .as(OrganizerParser.*)
-        .map(getOrganizerProperties)
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Organizer.getFollowedOrganizers: " + e.getMessage)
-  }
-
-  def readOrganizer(organizer: Response, organizerId: String): Option[Organizer] = {
-    val readOrganizer = (
-      (__ \ "name").read[String] and
-        (__ \ "description").readNullable[String] and
-        (__ \ "cover" \ "source").readNullable[String] and
-        (__ \ "location" \ "street").readNullable[String] and
-        (__ \ "location" \ "zip").readNullable[String] and
-        (__ \ "location" \ "city").readNullable[String] and
-        (__ \ "phone").readNullable[String] and
-        (__ \ "public_transit").readNullable[String] and
-        (__ \ "website").readNullable[String])
-      .apply((name: String, description: Option[String], source: Option[String], street: Option[String],
-              zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
-              website: Option[String]) =>
-      Organizer(None, Some(organizerId), name, Utilities.formatDescription(description), None, phone, public_transit,
-        website, verified = false, imagePath = source, geographicPoint = None, address = Option(Address(None, None,
-          city, zip, street)))
-      )
-    organizer.json.asOpt[Organizer](readOrganizer)
-  }
-
-  def getOrganizerInfo(maybeOrganizerFacebookId: Option[String]): Future[Option[Organizer]] = maybeOrganizerFacebookId match {
+  def getOrganizerInfo(maybeOrganizerFacebookId: Option[String]): Future[Option[OrganizerWithAddress]] = maybeOrganizerFacebookId match {
     case None => Future { None }
     case Some(organizerId) =>
-      WS.url("https://graph.facebook.com/"+ Utilities.facebookApiVersion +"/" + organizerId)
+      WS.url("https://graph.facebook.com/"+ utilities.facebookApiVersion +"/" + organizerId)
         .withQueryString(
           "fields" -> "name,description,cover{source},location,phone,public_transit,website",
-          "access_token" -> facebookToken)
+          "access_token" -> utilities.facebookToken)
         .get()
         .map { response => readOrganizer(response, organizerId) }
   }

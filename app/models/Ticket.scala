@@ -1,18 +1,12 @@
 package models
 
-import anorm.SqlParser._
-import anorm._
-import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.Play.current
 import controllers.DAOException
-import java.util.Date
 
 import scala.util.Random
+import scala.language.postfixOps
 
-/**
- * Created by sim on 03/10/14.
- */
 case class Ticket (ticketId: Long,
                    isValid: Boolean = true,
                    qrCode: String,
@@ -25,26 +19,13 @@ case class Ticket (ticketId: Long,
 object Ticket {
   implicit val ticketWrites = Json.writes[Ticket]
 
-  private val TicketParser: RowParser[Ticket] = {
-    get[Long]("ticketId") ~
-      get[Boolean]("isValid") ~
-      get[String]("qrCode") ~
-      get[String]("firstName") ~
-      get[String]("lastName") ~
-      get[Long]("orderId") ~
-      get[Long]("tariffId") map {
-      case ticketId ~ isValid ~ qrCode ~ firstName ~ lastName  ~ orderId ~ tariffId=>
-        Ticket(ticketId, isValid, qrCode, firstName, lastName, orderId, tariffId)
-    }
-  }
-
   def createQrCode(ticketId: Long): String = {
     val rnd = new Random()
     ticketId.toString + (100000.0 + rnd.nextDouble() * (10000000000.0 - 100000.0)).toLong.toString
   }
 
 
-
+/*
   def findAll(): Seq[Ticket] = {
     DB.withConnection { implicit connection =>
       SQL("select * from tickets").as(TicketParser *)
@@ -94,11 +75,10 @@ object Ticket {
       SQL( """SELECT *
            FROM Tickets
            WHERE userId = {userId}""")
-        .on('userId -> user.userId)
+        .on('userId -> user.UUID)
         .as(TicketParser *)
     }
   }
-  
   
   def save(ticket: Ticket) = {
     try {
@@ -115,5 +95,5 @@ object Ticket {
     } catch {
       case e: Exception => throw new DAOException("Cannot save ticket: " + e.getMessage)
     }
-  }
+  }*/
 }

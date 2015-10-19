@@ -1,3 +1,4 @@
+/*
 package securesocial
 
 import org.joda.time.DateTime
@@ -220,4 +221,4 @@ class UserSpec extends Specification {
   def oAuth2Info: Option[OAuth2Info]
   def passwordInfo: Option[PasswordInfo]*/
 
-}
+}*/

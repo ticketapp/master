@@ -15,3 +15,9 @@ dist
 /.settings
 export-bin.sh
 node_modules/*
+.sbtserver/
+project/.sbtserver
+project/.sbtserver.lock
+project/play-fork-run.sbt
+project/sbt-ui.sbt
+projectFilesBackup/*

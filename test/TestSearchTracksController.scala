@@ -1,29 +1,13 @@
-import java.util.Date
-import controllers.DAOException
-import models.{Track, Place, Artist, Event}
-import models.Track._
-import org.postgresql.util.PSQLException
-import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.time.{Seconds, Span}
-import org.scalatestplus.play._
+/*import json.JsonHelper._
+import org.scalatest.Matchers._
 import org.scalatest._
-import Matchers._
-import play.api.libs.json._
-import play.api.test.{WithApplication, PlaySpecification, FakeRequest}
-import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
-import play.api.Play.current
-import securesocial.core.IdentityId
-import scala.language.postfixOps
-import scala.util.Success
-import scala.util.Failure
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.test._
-import play.api.test.Helpers._
-import json.JsonHelper._
+import org.scalatestplus.play._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+
+import scala.language.postfixOps
 
 class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
 
@@ -48,4 +32,4 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
       seqTitleArtistName.toSet.size mustBe seqTitleArtistName.size
     }
   }
-}
+}*/

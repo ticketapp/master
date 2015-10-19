@@ -1,21 +1,4 @@
-import java.util.Date
-import controllers.DAOException
-import models.{Track, Artist, Tariff}
-import models.Tariff._
-import org.postgresql.util.PSQLException
-import org.scalatestplus.play._
-import org.scalatest._
-import Matchers._
-import securesocial.core.Identity
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
-import play.api.Play.current
-import securesocial.core.IdentityId
-import scala.util.Success
-import scala.util.Failure
-import services.Utilities.{UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION}
-import java.util.UUID.randomUUID
+/*import org.scalatestplus.play._
 
 class TestTariffModel extends PlaySpec with OneAppPerSuite {
 
@@ -32,4 +15,4 @@ class TestTariffModel extends PlaySpec with OneAppPerSuite {
       findPrices(Some("ion no no 6.8 € jlk ljk klj klj 3.11 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.11-6.8")
     }
   }
-}
+}*/

@@ -1,25 +1,28 @@
 package services
 
 import java.util.UUID._
+import javax.inject.Inject
 
-import models.{Genre, Artist, Track}
+import models._
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import play.api.libs.iteratee.{Enumeratee, Iteratee, Enumerator}
 import play.api.libs.iteratee.Input.EOF
-import play.api.libs.ws.{WS, Response}
+import play.api.libs.ws.{WS, WSResponse}
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
-import services.Utilities.normalizeUrl
 import scala.concurrent.Future
-import services.SearchSoundCloudTracks.normalizeTrackTitle
-import models.Genre.saveGenreForArtistInFuture
 import scala.language.postfixOps
-import services.Utilities._
-import scala.util.{Success, Failure}
-import play.api.Logger
+import play.api.Play.current
 
-object SearchYoutubeTracks {
-  val youtubeKey = play.Play.application.configuration.getString("youtube.key")
+class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
+                                     val genreMethods: GenreMethods,
+                                     val utilities: Utilities,
+                                     val trackMethods: TrackMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] {
+
+  val youtubeKey = utilities.googleKey
+  val echonestApiKey = utilities.echonestApiKey
 
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Enumerator[Set[Track]] = Enumerator.flatten(
     getMaybeEchonestIdByFacebookId(artist) map {
@@ -29,8 +32,8 @@ object SearchYoutubeTracks {
   )
 
   def getYoutubeTracksByChannel(artist: Artist): Future[Set[Track]] = Future.sequence (
-      filterAndNormalizeYoutubeChannelIds(artist.websites) map {
-         getYoutubeTracksByChannelId(artist, _)
+      filterAndNormalizeYoutubeChannelIds(artist.websites) map {youtubeId =>
+         getYoutubeTracksByChannelId(artist, youtubeId)
     }
   ).map { _.flatten.toSet }
 
@@ -139,7 +142,7 @@ object SearchYoutubeTracks {
   }
 
   def eventuallySaveArtistGenres(echonestId: String, artist: Artist): Unit = Future {
-    saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.artistId
+    saveArtistGenres(getArtistGenresOnEchonest(echonestId, artist.id
       .getOrElse(throw new Exception("SearchYoutubeTracks.getYoutubeTracksByEchonestId: artist without id found"))))
   }
 
@@ -159,7 +162,7 @@ object SearchYoutubeTracks {
         "key" -> youtubeKey)
       .get()
       .map { response => removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
-        track.copy(title = normalizeTrackTitle(track.title, artist.name))
+        track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
       }
     }
   }
@@ -174,7 +177,7 @@ object SearchYoutubeTracks {
         "key" -> youtubeKey)
       .get()
       .map { readYoutubeTracks(_, artist).toSet map { track:Track =>
-        track.copy(title = normalizeTrackTitle(track.title, artist.name))
+        track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
       }
     }
   }
@@ -191,14 +194,14 @@ object SearchYoutubeTracks {
       .map { readYoutubeUser }
   }
 
-  def readYoutubeUser(youtubeResponse: Response): Set[String] = {
+  def readYoutubeUser(youtubeResponse: WSResponse): Set[String] = {
     val channelIds: Reads[Option[String]] = (__ \\ "id").readNullable[String]
     (youtubeResponse.json \ "items")
       .as[Set[Option[String]]](Reads.set(channelIds))
       .flatten
   }
 
-  def readYoutubeTracks(youtubeResponse: Response, artist: Artist): Seq[Track] = {
+  def readYoutubeTracks(youtubeWSResponse: WSResponse, artist: Artist): Seq[Track] = {
     val youtubeTrackReads = (
       (__ \ "snippet" \ "title").readNullable[String] and
         (__ \ "id" \ "videoId").readNullable[String] and
@@ -213,13 +216,13 @@ object SearchYoutubeTracks {
       }
     }
 
-    (youtubeResponse.json \ "items")
+    (youtubeWSResponse.json \ "items")
       .asOpt[Seq[Track]](collectOnlyValidTracks)
       .getOrElse(Seq.empty)
   }
 
   def removeTracksWithoutArtistName(tracks: Seq[Track], artistName: String): Seq[Track] = tracks collect {
-    case (track: Track) if Track.isArtistNameInTrackTitle(track.title, artistName) => track
+    case (track: Track) if trackMethods.isArtistNameInTrackTitle(track.title, artistName) => track
   }
 
   def getMaybeEchonestArtistUrlsByFacebookId(facebookArtistId: String): Future[Option[(String, Set[String])]] = {
@@ -229,15 +232,13 @@ object SearchYoutubeTracks {
         "id" -> s"facebook:artist:$facebookArtistId",
         "format" -> "json")
       .get()
-      .map {
-      readMaybeEchonestArtistIdAndUrls
-    }
+      .map { response => readMaybeEchonestArtistIdAndUrls(response) }
   }
 
-  def readMaybeEchonestArtistIdAndUrls(echonestResponse: Response): Option[(String, Set[String])] = {
-    val id = (echonestResponse.json \ "response" \ "id").asOpt[String]
-    val urlsJsValue = echonestResponse.json \ "response" \ "urls"
-    if (id == None)
+  def readMaybeEchonestArtistIdAndUrls(echonestWSResponse: WSResponse): Option[(String, Set[String])] = {
+    val id = (echonestWSResponse.json \ "response" \ "id").asOpt[String]
+    val urlsJsValue = echonestWSResponse.json \ "response" \ "urls"
+    if (id.isEmpty)
       None
     else {
       urlsJsValue match {
@@ -248,7 +249,7 @@ object SearchYoutubeTracks {
   }
 
   def readUrlsFromJsObject(urlsJsObject: JsObject): Set[String] = urlsJsObject.values.map { url =>
-    normalizeUrl(url.as[String])
+    utilities.normalizeUrl(url.as[String])
   }.toSet
 
   def getMaybeEchonestIdByFacebookId(artist: Artist): Future[Option[String]] = artist.facebookId match {
@@ -260,16 +261,16 @@ object SearchYoutubeTracks {
         "id" -> ("facebook:artist:" +facebookId),
         "format" -> "json")
       .get()
-      .map { echonestResponse => getEchonestIdIfSameName(echonestResponse.json, artist.name) }
+      .map { echonestWSResponse => getEchonestIdIfSameName(echonestWSResponse.json, artist.name) }
   }
 
-  def getEchonestIdIfSameName(echonestResponse: JsValue, artistName: String): Option[String] = {
-    val echonestName = (echonestResponse \ "response" \ "artist" \ "name")
+  def getEchonestIdIfSameName(echonestWSResponse: JsValue, artistName: String): Option[String] = {
+    val echonestName = (echonestWSResponse \ "response" \ "artist" \ "name")
       .asOpt[String]
       .getOrElse("")
       .toLowerCase
     if (echonestName == artistName.toLowerCase)
-      (echonestResponse \ "response" \ "artist" \ "id").asOpt[String]
+      (echonestWSResponse \ "response" \ "artist" \ "id").asOpt[String]
     else
       None
   }
@@ -277,13 +278,13 @@ object SearchYoutubeTracks {
   def getEchonestSongs(echonestArtistId: String): Enumerator[Set[String]] = {
     def getEchonestSongsFrom(start: Long, echonestArtistId: String): Enumerator[Set[String]] = {
       Enumerator.flatten(
-        getEchonestSongsOnEchonest(start: Long, echonestArtistId: String).map { echonestResponse =>
-          val total = (echonestResponse \ "response" \ "total").asOpt[Int]
+        getEchonestSongsOnEchonest(start: Long, echonestArtistId: String).map { echonestWSResponse =>
+          val total = (echonestWSResponse \ "response" \ "total").asOpt[Int]
           total.exists(_ > start + 100) match {
             case false =>
               Enumerator.eof
             case true =>
-              Enumerator(readEchonestSongs(echonestResponse)) >>> getEchonestSongsFrom(start + 100, echonestArtistId)
+              Enumerator(readEchonestSongs(echonestWSResponse)) >>> getEchonestSongsFrom(start + 100, echonestArtistId)
           }
         }
       )
@@ -321,7 +322,7 @@ object SearchYoutubeTracks {
       .map { readEchonestTupleIdFacebookId }
   }
 
-  def readEchonestTupleIdFacebookId(echonestResponse: Response): Seq[(String, String)] = {
+  def readEchonestTupleIdFacebookId(echonestWSResponse: WSResponse): Seq[(String, String)] = {
     //                                                                  16 = "facebook:artist:".length
     def cleanFacebookId(implicit r: Reads[String]): Reads[String] = r.map(_.substring(16))
     val TupleEnIdFbIdReads = (
@@ -337,7 +338,7 @@ object SearchYoutubeTracks {
           (echonestId, facebookId.head)
       }
     }
-    (echonestResponse.json \ "response" \ "artists")
+    (echonestWSResponse.json \ "response" \ "artists")
       .asOpt[Seq[(String, String)] ](collectOnlyValidTuples)
       .getOrElse(Seq.empty)
   }
@@ -356,14 +357,14 @@ object SearchYoutubeTracks {
   def saveArtistGenres(tupleArtistIdGenres: Future[(Long, Array[String])]): Unit = {
     tupleArtistIdGenres.map { artistIdGenres =>
       artistIdGenres._2.foreach { genre =>
-        Genre.saveGenreForArtistInFuture(Option(genre), artistIdGenres._1.toInt)
+        genreMethods.saveGenreForArtistInFuture(Option(genre), artistIdGenres._1)
       }
     }
   }
 
-  def readEchonestGenres(echonestJsonResponse: JsValue): Array[String] = {
+  def readEchonestGenres(echonestJsonWSResponse: JsValue): Array[String] = {
     val genreReads: Reads[Option[String]] = (__ \\ "name").readNullable[String]
-    (echonestJsonResponse \ "response" \ "artist" \ "genres")
+    (echonestJsonWSResponse \ "response" \ "artist" \ "genres")
       .asOpt[Set[Option[String]]](Reads.set(genreReads))
       .getOrElse(Set.empty)
       .flatten

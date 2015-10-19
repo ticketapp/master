@@ -1,23 +1,21 @@
 package services
 
-import java.sql.Connection
+import java.sql.{Timestamp, Connection}
 import java.text.Normalizer
 import java.util.{UUID, Date}
-import anorm.SqlParser._
-import anorm._
-import controllers.DAOException
-import models._
-import play.api.db.DB
-import securesocial.core.{OAuth2Info, OAuth1Info, PasswordInfo}
-import play.api.libs.json.JsNumber
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import play.api.Play.current
+import javax.inject.Inject
+
+import org.joda.time.DateTime
+import play.api.Logger
+import slick.driver.PostgresDriver.api._
 
 import scala.collection.mutable.ListBuffer
 import scala.util.matching.Regex
+import scala.util.{Try, Failure, Success}
+import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Point}
 
-object Utilities {
+
+class Utilities @Inject()() {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
   val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc"
   val echonestApiKey = "3ZYZKU3H3MKR2M59Z"
@@ -25,42 +23,13 @@ object Utilities {
 
   val linkPattern = """((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-z@A-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)""".r
 
-  val geographicPointPattern = """(\(-?\d+\.?\d*,-?\d+\.?\d*\))""".r
-
   val UNIQUE_VIOLATION = "23505"
   val FOREIGN_KEY_VIOLATION = "23503"
   val facebookApiVersion = "v2.4"
 
-  case class GeographicPoint(geoPoint: String) {
-    require(geographicPointPattern.pattern.matcher(geoPoint).matches, "Invalid geographicPoint")
-    override def toString() = geoPoint
-  }
-
-  implicit def geographicPointToString: Column[String] = Column.nonNull { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case d: Any => Right(d.toString)
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + ":" + value.asInstanceOf[AnyRef].getClass +
-        " to String for column " + qualified) )
-    }
-  }
-
-  implicit def rowToUUID: Column[UUID] = {
-    Column.nonNull[UUID] { (value, meta) =>
-      value match {
-        case v: UUID => Right(v)
-        case _ => Left(TypeDoesNotMatch(s"Cannot convert $value:${value.asInstanceOf[AnyRef].getClass} to UUID for column ${meta.column}"))
-      }
-    }
-  }
-
-  implicit def columnToChar: Column[Char] = Column[Char](transformer = { (value, meta) =>
-    val MetaDataItem(qualified, nullable, clazz) = meta
-    value match {
-      case ch: String => Right(ch.head)
-      case _ => Left(TypeDoesNotMatch("Cannot convert " + value + " to Char for column " + qualified))
-    }
-  })
+  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
+    dt => new Timestamp(dt.getMillis),
+    ts => new DateTime(ts.getTime))
 
   def normalizeString(string: String): String = string //Should be replace accentued letters for example?
 
@@ -75,27 +44,7 @@ object Utilities {
   def removeMailFromListOfWebsites(websites: Set[String]): Set[String] = websites.filter(website =>
     website.indexOf("@") == -1)
 
-
   def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
-
-  def testIfExist(table: String, fieldName: String, valueAnyType: Any)(implicit connection: Connection): Boolean = {
-    val value = valueAnyType match {
-      case Some(v: Int) => v
-      case Some(v: String) => v
-      case v: Int => v
-      case v: String => v
-      case _ => None
-    }
-    try {
-      DB.withConnection { implicit connection =>
-        SQL(s"""SELECT exists(SELECT 1 FROM $table where $fieldName = {value} LIMIT 1)""")
-          .on("value" -> value)
-          .as(scalar[Boolean].single)
-      }
-    } catch {
-      case e: Exception => throw new DAOException("Utilities.testIfExistById: " + e.getMessage)
-    }
-  }
 
   def getNormalizedWebsitesInText(maybeDescription: Option[String]): Set[String] = maybeDescription match {
     case None =>
@@ -182,7 +131,4 @@ object Utilities {
 
   def setToOptionString(set: Set[String]): Option[String] =
     if (set.isEmpty) None else Option(set.mkString(","))
-
-  def optionStringToSet(maybeString: Option[String]): Set[String] =
-    if (maybeString.isEmpty) Set.empty else maybeString.get.split(",").toSet
 }
