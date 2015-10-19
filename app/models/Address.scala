@@ -2,7 +2,7 @@ package models
 
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.{Geometry, Point}
 import controllers.OverQueryLimit
 import play.api.Logger
 import play.api.Play.current
@@ -18,7 +18,7 @@ import scala.util.{Failure, Success, Try}
 
 
 case class Address (id: Option[Long],
-                    geographicPoint: Option[Point],
+                    geographicPoint: Option[Geometry],
                     city: Option[String],
                     zip: Option[String],
                     street: Option[String]){
@@ -30,7 +30,6 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
                                val utilities: Utilities,
                                val geographicPointMethods: GeographicPointMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
-
 
 
   def formApply(city: Option[String], zip: Option[String], street: Option[String]) =

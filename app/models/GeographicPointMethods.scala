@@ -6,7 +6,7 @@ import play.api.Logger
 import play.api.libs.ws.{WSResponse, WS}
 import services.MyPostgresDriver.api._
 
-import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Point}
+import com.vividsolutions.jts.geom.{Geometry, Coordinate, GeometryFactory, Point}
 import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import services.{MyPostgresDriver, Utilities}
 
@@ -20,7 +20,7 @@ class GeographicPointMethods @Inject()(protected val dbConfigProvider: DatabaseC
                                        val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
-  def findGeographicPointOfCity(city: String): Future[Option[Point]] = {
+  def findGeographicPointOfCity(city: String): Future[Option[Geometry]] = {
     val query = frenchCities.filter(_.city === city) map (_.geographicPoint)
     db.run(query.result.headOption)
   }

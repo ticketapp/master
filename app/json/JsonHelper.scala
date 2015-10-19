@@ -46,8 +46,8 @@ object JsonHelper {
     wktReaderHolder.get.read(wkt).asInstanceOf[T]
   }
 
-//  implicit val geomJsonFormat = geomJsonFormat[Geometry]
-  implicit val pointJsonFormat = geomJsonFormat[Point]
+  implicit val geometryJsonFormat = geomJsonFormat[Geometry]
+//  implicit val pointJsonFormat = geomJsonFormat[Point]
 
 //  implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
 //  implicit val account63Writes: Writes[Account63] = Json.writes[Account63]

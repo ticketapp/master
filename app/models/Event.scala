@@ -3,7 +3,7 @@ package models
 import java.sql.Timestamp
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.{GeometryFactory, Point}
+import com.vividsolutions.jts.geom.{Geometry, GeometryFactory, Point}
 import json.JsonHelper._
 import org.joda.time.DateTime
 import play.api.Play.current
@@ -24,7 +24,7 @@ case class Event(id: Option[Long],
                  isPublic: Boolean,
                  isActive: Boolean,
                  name: String,
-                 geographicPoint: Option[Point],
+                 geographicPoint: Option[Geometry],
                  description: Option[String],
                  startTime: DateTime,
                  endTime: Option[DateTime],
@@ -78,7 +78,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result.headOption)
   }
 
-  def findNear(geographicPoint: Point, numberToReturn: Int, offset: Int): Future[Seq[Event]] = {
+  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Event]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
     val query = events

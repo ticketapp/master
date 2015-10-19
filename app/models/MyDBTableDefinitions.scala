@@ -3,7 +3,7 @@ package models
 import java.sql.Timestamp
 import java.util.UUID
 
-import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.Geometry
 import org.joda.time.DateTime
 import services.MyPostgresDriver.api._
 import silhouette.DBTableDefinitions
@@ -38,8 +38,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
       Some((artist.id, artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
         Option(artist.websites.mkString(","))))
     })
-    //    def * = (id.?, facebookId, name, imagePath, description, facebookUrl, websites, likes, country) <>
-    //      ((Artist.apply _).tupled, Artist.unapply)
   }
 
   case class UserArtistRelation(userId: String, artistId: Long)
@@ -86,7 +84,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def isPublic = column[Boolean]("ispublic")
     def isActive = column[Boolean]("isactive")
     def name = column[String]("name")
-    def geographicPoint = column[Option[Point]]("geographicpoint")
+    def geographicPoint = column[Option[Geometry]]("geographicpoint")
     def description = column[Option[String]]("description")
     def startTime = column[DateTime]("starttime")
     def endTime = column[Option[DateTime]]("endtime")
@@ -173,7 +171,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def id = column[Long]("placeid", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
     def facebookId = column[Option[String]]("facebookid")
-    def geographicPoint = column[Option[Point]]("geographicpoint")
+    def geographicPoint = column[Option[Geometry]]("geographicpoint")
     def description = column[Option[String]]("description")
     def websites = column[Option[String]]("websites")
     def capacity = column[Option[Int]]("capacity")
@@ -208,7 +206,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def websites = column[Option[String]]("websites")
     def verified = column[Boolean]("verified")
     def imagePath = column[Option[String]]("imagepath")
-    def geographicPoint = column[Option[Point]]("geographicpoint")
+    def geographicPoint = column[Option[Geometry]]("geographicpoint")
     def linkedPlaceId = column[Option[Long]]("placeid")
 
     def * = (id.?, facebookId, name, description, addressId, phone, publicTransit, websites, verified, imagePath, geographicPoint, linkedPlaceId) <>
@@ -226,7 +224,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
   class Tracks(tag: Tag) extends Table[Track](tag, "tracks") {
     /*def id = column[Long]("trackid", O.PrimaryKey, O.AutoInc)*/
-    def uuid = column[UUID]("trackid", O.PrimaryKey)
+    def uuid = column[UUID]("trackid", O.PrimaryKey, O.AutoInc)
     def url = column[String]("url")
     def title = column[String]("title")
     def platform = column[Char]("platform")
@@ -253,8 +251,8 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
 
   class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
-    def id = column[Long]("addressid", O.PrimaryKey)
-    def geographicPoint = column[Option[Point]]("geographicpoint")
+    def id = column[Long]("addressid", O.PrimaryKey, O.AutoInc)
+    def geographicPoint = column[Option[Geometry]]("geographicpoint")
     def city = column[Option[String]]("city")
     def zip = column[Option[String]]("zip")
     def street = column[Option[String]]("street")
@@ -262,12 +260,12 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
       ((Address.apply _).tupled, Address.unapply)
   }
 
-  case class FrenchCity(city: String, geographicPoint: Point)
+  case class FrenchCity(city: String, geographicPoint: Geometry)
 
   class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
-    def id = column[Long]("cityid", O.PrimaryKey)
+    def id = column[Long]("cityid", O.PrimaryKey, O.AutoInc)
     def city = column[String]("city")
-    def geographicPoint = column[Point]("geographicpoint")
+    def geographicPoint = column[Geometry]("geographicpoint")
     def * = (city, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
   }
 
