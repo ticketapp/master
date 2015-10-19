@@ -1,3 +1,4 @@
+/*
 package controllers
 
 import play.api.mvc.{Controller}
@@ -8,4 +9,4 @@ object InitController extends Controller {
     fillDatabase.InsertGenres.insertGenres
     fillDatabase.InsertTwoLettersArtists.insertTwoLettersArtists
   }
-}
+}*/
