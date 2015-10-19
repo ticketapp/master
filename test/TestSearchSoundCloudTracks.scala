@@ -1,6 +1,7 @@
 /*
 import java.util.UUID
 
+>>>>>>> master
 import models.{Artist, Track}
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
@@ -46,7 +47,6 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
       val listWebsitesSc2 = Seq("facebook.com/pages/nto/50860802143", "hungrymusic.fr", "youtube.com/user/ntotunes",
         "twitter.com/#!/ntohungry")
       val listWebsitesSc3 = Seq("hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls")
-
       computationScConfidence(artist, listWebsitesSc1, soundCloudId1) mustBe SoundCloudArtistConfidence(Some(1), 124, 1.0.toFloat)
       computationScConfidence(artist, listWebsitesSc2, soundCloudId2) mustBe SoundCloudArtistConfidence(Some(1), 1234, 0.07826595210746258.toFloat)
       computationScConfidence(artist, listWebsitesSc3, soundCloudId3) mustBe SoundCloudArtistConfidence(Some(1), 12345, 0.5258055254220182.toFloat)

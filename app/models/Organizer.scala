@@ -92,41 +92,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     val action = insertQuery += organizer
     db.run(action)
   }
-  /*
-  <<<<<<< HEAD
-  def save(organizer: Organizer): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      val maybeAddressId = organizer.address match {
-        case None => None
-        case Some(address) => Address.save(Option(address)) match {
-          case Success(Some(addressId)) =>
-            addressId
-          case _ =>
-            Logger.error("Organizer.save: address could not be saved")
-            None
-        }
-      }
-      val placeIdWithSameFacebookId = Place.findIdByFacebookId(organizer.facebookId)
-      val phoneNumbers = Utilities.phoneNumbersSetToOptionString(Utilities.phoneNumbersStringToSet(organizer.phone))
-      val description = Utilities.formatDescription(organizer.description)
-      SQL(
-        """SELECT insertOrganizer({facebookId}, {name}, {description}, {addressId}, {phone}, {publicTransit},
-          |{websites}, {imagePath}, {geographicPoint}, {placeId})""".stripMargin)
-        .on(
-          'facebookId -> organizer.facebookId,
-          'name -> organizer.name,
-          'description -> description,
-          'addressId -> maybeAddressId,
-          'phone -> phoneNumbers,
-          'publicTransit -> organizer.publicTransit,
-          'websites -> organizer.websites,
-          'imagePath -> organizer.imagePath,
-          'geographicPoint -> organizer.geographicPoint,
-          'placeId -> placeIdWithSameFacebookId)
-        .as(scalar[Option[Long]].single)
-    }
-=======
-   */
+
 
 
 //  def save(organizer: Organizer): Future[Long] = {

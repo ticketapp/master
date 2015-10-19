@@ -27,6 +27,7 @@ class Test extends Controller {
     //Concurrent.broadcast returns (Enumerator, Concurrent.Channel)
     val (out,channel) = Concurrent.broadcast[String]
 
+
     //log the message to stdout and send response back to client
     val in = Iteratee.foreach[String] {
       msg => println(msg)

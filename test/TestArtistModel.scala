@@ -1,5 +1,4 @@
 import java.util.UUID
-
 import models._
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
@@ -9,7 +8,6 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.iteratee.Iteratee
 import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
-
 import scala.util.{Failure, Success}
 
 class TestArtistModel extends PlaySpec with OneAppPerSuite {
@@ -147,7 +145,6 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
           List(),List(),None,None))
       val enumerateTracks = artistMethods.getArtistTracks(patternAndArtist)
       val iteratee = Iteratee.foreach[Set[Track]]{track => println("track = " + track)}
-
       whenReady(enumerateTracks |>> iteratee, timeout(Span(6, Seconds))) { a=>
           a
       }

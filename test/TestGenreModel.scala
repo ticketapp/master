@@ -149,7 +149,6 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
     }
 
     "find over genres in genre set" in {
-
       val genres = Seq(Genre(None, "genreTest1"),
         Genre(None, "genreTest2"),
         Genre(None, "genreTest3"),
@@ -190,7 +189,6 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         Genre(None, "genreTest7"),
         Genre(None, "genreTest8"),
         Genre(None, "genreTest9"))
-
       whenReady(genreMethods.saveOrFind(Genre(None, "genreTest1", 'g')), timeout(Span(5, Seconds))) { genre1 =>
         whenReady(genreMethods.saveOrFind(Genre(None, "genreTest2", 'r')), timeout(Span(5, Seconds))) { genre2 =>
           whenReady(genreMethods.saveOrFind(Genre(None, "genreTest3", 'm')), timeout(Span(5, Seconds))) { genre3 =>

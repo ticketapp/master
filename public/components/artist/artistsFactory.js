@@ -247,9 +247,9 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     description: artist.description,
                     genre: artist.genre
                 }
-            }).start(function (data, etc) {
+            }).start(function (data, etc, a) {
             })
-            .done(function (value) {
+            .done(function (value, a) {
                     $rootScope.loadingTracks = true;
                     /*function pushTrack(track) {
                         $timeout(function () {
@@ -261,13 +261,20 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         }, 0);
                     }
                     value.forEach(pushTrack);*/
-                    $timeout(function () {
-                        $rootScope.$apply(function () {
-                            $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
-                            $rootScope.tracks = $rootScope.artist.tracks;
-                            $rootScope.loadingTracks = false;
-                        });
-                    }, 0);
+                        if (value == "end") {
+                        $timeout(function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.loadingTracks = false;
+                            });
+                        }, 0);
+                    } else {
+                        $timeout(function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
+                                $rootScope.tracks = $rootScope.artist.tracks;
+                            });
+                        }, 0);
+                    }
             })
             .fail(function (error) {
                 console.log(error)

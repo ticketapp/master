@@ -44,7 +44,6 @@ class Utilities @Inject()() {
   def removeMailFromListOfWebsites(websites: Set[String]): Set[String] = websites.filter(website =>
     website.indexOf("@") == -1)
 
-
   def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
 
   def getNormalizedWebsitesInText(maybeDescription: Option[String]): Set[String] = maybeDescription match {

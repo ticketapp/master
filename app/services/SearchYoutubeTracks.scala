@@ -15,7 +15,6 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import play.api.Play.current
 
-
 class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                      val genreMethods: GenreMethods,
                                      val utilities: Utilities,
@@ -62,21 +61,23 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
     userNames map { name =>
       if (name.indexOf("user/") > -1) {
         val nameWithoutUser = name.substring(name.indexOf("user/") + 5)
-        if (nameWithoutUser.indexOf("/") > -1)
+        if (nameWithoutUser.indexOf("/") > -1) {
           nameWithoutUser.substring(0, nameWithoutUser.lastIndexOf("/") + 1).stripSuffix("/")
-        else
+        } else {
           nameWithoutUser
+        }
       } else if (name.indexOf("channel/") > -1) {
         val nameWithoutUser = name.substring(name.indexOf("channel/") + 8)
-        if (nameWithoutUser.indexOf("/") > -1)
+        if (nameWithoutUser.indexOf("/") > -1) {
           nameWithoutUser.substring(0, nameWithoutUser.lastIndexOf("/") + 1).stripSuffix("/")
-        else
+        } else {
           nameWithoutUser
+        }
       } else {
         val nameWithoutUser = name.substring(name.indexOf("youtube.com/") + 12)
-        if (nameWithoutUser.indexOf("/") > -1)
+        if (nameWithoutUser.indexOf("/") > -1) {
           nameWithoutUser.substring(0, nameWithoutUser.lastIndexOf("/") + 1).stripSuffix("/")
-        else
+        } else
           nameWithoutUser
       }
     }
