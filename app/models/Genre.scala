@@ -19,7 +19,7 @@ case class Genre (id: Option[Int], name: String, icon: Char = 'a') {
 
 class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val utilities: Utilities)
-  extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApply(name: String) = new Genre(None, name)
   def formUnapply(genre: Genre) = Some(genre.name)
@@ -82,21 +82,26 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def save(genre: Genre): Future[Genre] =
     db.run(genres returning genres.map(_.id) into ((genre, id) => genre.copy(id = Option(id))) += genre)
 
+  def saveOrFind(genre: Genre): Future[Genre] = db.run((for {
+    genreFound <- genres.filter(_.name === genre.name).result.headOption
+    result <- genreFound.map(DBIO.successful).getOrElse(genres returning genres.map(_.id) += genre)
+  } yield { result match {
+      case g: Genre => g
+      case id: Int => genre.copy(id = Option(id))
+    }
+  }).transactionally)
 
   def findByFacebookUrl(facebookUrl: String): Future[Option[Artist]] = {
     val query = artists.filter(_.facebookUrl === facebookUrl)
     db.run(query.result.headOption)
   }
   
-  def findIdByName(name: String): Future[Option[Int]] = {
-    val query = genres.filter(_.name === name) map (_.id)
-    db.run(query.result.headOption)
-  }
- 
+  def findByName(name: String): Future[Option[Genre]] = db.run(genres.filter(_.name === name).result.headOption)
+
   def saveWithEventRelation(genre: Genre, eventId: Long): Future[Int] = save(genre) flatMap { 
     _.id match {
       case None =>
-        Logger.error("Genre.saveWithEventRelation: genre saved retunred None as id")
+        Logger.error("Genre.saveWithEventRelation: genre saved returned None as id")
         Future(0)
       case Some(id) =>
         saveEventRelation(EventGenreRelation(eventId, id))
@@ -112,7 +117,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def saveWithArtistRelation(genre: Genre, artistId: Long): Future[Int] = save(genre) flatMap {
     _.id match {
       case None =>
-        Logger.error("Genre.saveWithArtistRelation: genre saved retunred None as id")
+        Logger.error("Genre.saveWithArtistRelation: genre saved returned None as id")
         Future(0)
       case Some(id) =>
         saveArtistRelation(ArtistGenreRelation(artistId, id))
@@ -149,7 +154,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def saveWithTrackRelation(genre: Genre, trackId: UUID): Future[Int] = save(genre) flatMap {
     _.id match {
       case None =>
-        Logger.error("Genre.saveWithTrackRelation: genre saved retunred None as id")
+        Logger.error("Genre.saveWithTrackRelation: genre saved returned None as id")
         Future(0)
       case Some(id) =>
         saveTrackRelation(TrackGenreRelation(trackId, id))
@@ -157,9 +162,9 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def findOverGenres(genres: Seq[Genre]): Future[Seq[Genre]] = Future.sequence(genres map { genre: Genre =>
-    findIdByName(genre.name) flatMap {
-      case Some(genreId) =>
-        findById(genreId) map {
+    findByName(genre.name) flatMap {
+      case Some(genre: Genre) =>
+        findById(genre.id.getOrElse(-1)) map {
           case Some(genreFound) if genreFound.icon =='g' =>
             Option(Genre(None, "reggae"))
           case Some(genreFound) if genreFound.icon == 'e' =>

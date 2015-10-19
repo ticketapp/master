@@ -37,8 +37,7 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def formApplyForTrackCreatedWithArtist(trackId: String, title: String, url: String, platform: String,
                                          thumbnailUrl: Option[String], userThumbnailUrl: Option[String],
                                          artistFacebookUrl: String, artistName: String, redirectUrl: Option[String])
-  : Track = {
-    thumbnailUrl match {
+  : Track = { thumbnailUrl match {
       case Some(thumbnail: String) =>
         Track(UUID.fromString(trackId), title, url, platform(0), thumbnail, artistFacebookUrl, artistName, redirectUrl)
       case None => userThumbnailUrl match {
