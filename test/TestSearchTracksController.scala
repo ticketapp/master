@@ -1,11 +1,15 @@
-/*import json.JsonHelper._
+import json.JsonHelper._
+import models.{ArtistMethods, GenreMethods, TrackMethods}
 import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatestplus.play._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 import scala.language.postfixOps
 
@@ -32,4 +36,4 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
       seqTitleArtistName.toSet.size mustBe seqTitleArtistName.size
     }
   }
-}*/
+}
