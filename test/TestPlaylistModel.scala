@@ -4,10 +4,19 @@ import models.Playlist._
 import models.{Track, _}
 import org.scalatest._
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.Utilities
 
 import scala.util.Success
 
 class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
+
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities()
+
 /*  var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website"))
