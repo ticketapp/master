@@ -89,7 +89,10 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
      val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
        "artistFacebookUrlTestGenre2", Set("website"))
      val trackId = UUID.randomUUID
+      println(trackId)
+
      val track = Track(trackId, "titleTestGenreModel1", "url", 's', "thumbnailUrl", "artistFacebookUrlTestGenre2", "artistName")
+
      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
        whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
          whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
