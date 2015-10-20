@@ -11,6 +11,17 @@ import slick.jdbc.{PositionedParameters, SetParameter}
 import slick.model.ForeignKeyAction
 
 case class UserArtistRelation(userId: UUID, artistId: Long)
+case class EventArtistRelation(eventId: Long, artistId: Long)
+case class ArtistGenreRelation(artistId: Long, genreId: Int, weight: Long = 0)
+case class UserGenreRelation(userId: UUID, genreId: Long)
+case class UserEventRelation(userId: UUID, eventId: Long)
+case class TrackGenreRelation(trackId: UUID, genreId: Int, weight: Long = 0)
+case class UserPlaceRelation(userId: UUID, placeId: Long)
+case class EventOrganizer(eventId: Long, organizerId: Long)
+case class EventGenreRelation(eventId: Long, genreId: Int)
+case class EventPlaceRelation(eventId: Long, placeId: Long)
+case class FrenchCity(city: String, geographicPoint: Geometry)
+
 
 trait MyDBTableDefinitions extends DBTableDefinitions {
 
@@ -54,8 +65,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def * = (userId, artistId) <> ((UserArtistRelation.apply _).tupled, UserArtistRelation.unapply)
   }
 
-  case class ArtistGenreRelation(artistId: Long, genreId: Int, weight: Long = 0)
-
   class ArtistsGenres(tag: Tag) extends Table[ArtistGenreRelation](tag, "artistsgenres") {
     def artistId = column[Long]("artistid")
     def genreId = column[Int]("genreid")
@@ -74,8 +83,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
     def * = (id.?, name, icon) <> ((Genre.apply _).tupled, Genre.unapply)
   }
-
-  case class UserGenreRelation(userId: UUID, genreId: Long)
 
   class GenresFollowed(tag: Tag) extends Table[UserGenreRelation](tag, "genresfollowed") {
     def userId = column[UUID]("userid")
@@ -103,8 +110,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
       ageRestriction, tariffRange, ticketSellers, imagePath) <> ((Event.apply _).tupled, Event.unapply)
   }
 
-  case class UserEventRelation(userId: UUID, eventId: Long)
-
   class EventsFollowed(tag: Tag) extends Table[UserEventRelation](tag, "eventsfollowed") {
     def userId = column[UUID]("userid")
     def eventId = column[Long]("eventid")
@@ -114,8 +119,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("userid", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
     def bFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
-
-  case class EventPlaceRelation(eventId: Long, placeId: Long)
 
   class EventsPlaces(tag: Tag) extends Table[EventPlaceRelation](tag, "eventsPlaces") {
     def eventId = column[Long]("eventid")
@@ -137,8 +140,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("addressid", addressId, addresses)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  case class EventGenreRelation(eventId: Long, genreId: Int)
-
   class EventsGenres(tag: Tag) extends Table[EventGenreRelation](tag, "eventsgenres") {
     def eventId = column[Long]("eventid")
     def genreId = column[Int]("genreid")
@@ -149,8 +150,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  case class EventOrganizer(eventId: Long, organizerId: Long)
-
   class EventsOrganizers(tag: Tag) extends Table[EventOrganizer](tag, "eventsorganizers") {
     def eventId = column[Long]("eventid")
     def organizerId = column[Long]("organizerid")
@@ -160,8 +159,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
     def bFK = foreignKey("organizerid", organizerId, organizers)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
-
-  case class EventArtistRelation(eventId: Long, artistId: Long)
 
   class EventsArtists(tag: Tag) extends Table[EventArtistRelation](tag, "eventsartists") {
     def eventId = column[Long]("eventid")
@@ -188,8 +185,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def * = (id.?, name, facebookId, geographicPoint, description, websites, capacity, openingHours,
       imagePath, linkedOrganizerId) <> ((Place.apply _).tupled, Place.unapply)
   }
-
-  case class UserPlaceRelation(userId: UUID, placeId: Long)
 
   class PlacesFollowed(tag: Tag) extends Table[UserPlaceRelation](tag, "placesfollowed") {
     def userId = column[UUID]("userid")
@@ -248,8 +243,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("artistfacebookurl", artistFacebookUrl, artists)(_.facebookUrl, onDelete = ForeignKeyAction.Cascade)
   }
 
-  case class TrackGenreRelation(trackId: UUID, genreId: Int, weight: Long = 0)
-
   class TracksGenres(tag: Tag) extends Table[TrackGenreRelation](tag, "tracksgenres") {
     def trackId = column[UUID]("trackid")
     def genreId = column[Int]("genreid")
@@ -267,8 +260,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def * = (id.?, geographicPoint, city, zip, street) <>
       ((Address.apply _).tupled, Address.unapply)
   }
-
-  case class FrenchCity(city: String, geographicPoint: Geometry)
 
   class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
     def id = column[Long]("cityid", O.PrimaryKey, O.AutoInc)
