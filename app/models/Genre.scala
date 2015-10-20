@@ -113,18 +113,36 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def deleteEventRelation(eventGenreRelation: EventGenreRelation): Future[Int] = db.run(eventsGenres.filter(eventGenre =>
     eventGenre.eventId === eventGenreRelation.eventId && eventGenre.genreId === eventGenreRelation.genreId).delete)
 
-  def saveWithArtistRelation(genre: Genre, artistId: Long): Future[Int] = save(genre) flatMap {
+  def saveWithArtistRelation(genre: Genre, artistId: Long): Future[Option[ArtistGenreRelation]] = save(genre) flatMap {
     _.id match {
       case None =>
         Logger.error("Genre.saveWithArtistRelation: genre saved returned None as id")
-        Future(0)
+        Future(None)
       case Some(id) =>
-        saveArtistRelation(ArtistGenreRelation(artistId, id))
+        saveArtistRelation(ArtistGenreRelation(artistId, id)) map { Option(_) }
     }
   }
 
-  def saveArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] =
-    db.run(artistsGenres += artistGenreRelation)
+  def saveArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[ArtistGenreRelation] = {
+    db.run((for {
+      artistGenreFound <- artistsGenres.filter(relation => relation.artistId === artistGenreRelation.artistId &&
+        relation.genreId === artistGenreRelation.genreId).result.headOption
+      result <- artistGenreFound.map(DBIO.successful).getOrElse(artistsGenres returning artistsGenres.map(_.artistId) += artistGenreRelation)
+    } yield result match {
+        case artistGenre: ArtistGenreRelation =>
+          val updatedArtistGenreRelation = artistGenre.copy(weight = artistGenre.weight + 1)
+          updateArtistRelation(updatedArtistGenreRelation) map {
+            case int if int != 1 =>
+              Logger.error("Genre.saveArtistRelation: not exactly one row was updated")
+          }
+          updatedArtistGenreRelation
+        case id: Long => artistGenreRelation.copy(artistId = id)
+      }).transactionally)
+  }
+
+  def updateArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] =
+    db.run(artistsGenres.filter(relation => relation.artistId === artistGenreRelation.artistId &&
+      relation.genreId === artistGenreRelation.genreId).update(artistGenreRelation))
 
   def deleteArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] = db.run(artistsGenres.filter(artistGenre =>
     artistGenre.artistId === artistGenreRelation.artistId && artistGenre.genreId === artistGenreRelation.genreId).delete)
