@@ -236,7 +236,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def ratingUp = column[Int]("ratingup")
     def ratingDown = column[Int]("ratingdown")
 
-    def * = (uuid, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence.?) <>
+    def * = (uuid, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence) <>
       ((Track.apply _).tupled, Track.unapply)
 
     def aFK = foreignKey("artistfacebookurl", artistFacebookUrl, artists)(_.facebookUrl, onDelete = ForeignKeyAction.Cascade)

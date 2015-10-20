@@ -26,7 +26,7 @@ case class Track (uuid: UUID,
                   artistFacebookUrl: String,
                   artistName: String,
                   redirectUrl: Option[String] = None,
-                  confidence: Option[Double] = Option(0.toDouble)/*,
+                  confidence: Double = 0.toDouble/*,
                   playlistRank: Option[Double] = None,
                   genres: Seq[Genre] = Seq.empty*/)
 

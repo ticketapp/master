@@ -73,7 +73,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
         Option("description"), "facebookUrl3", Set("website"))
 
       val expectedTrack = Track(UUID.randomUUID, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
-          "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
+          "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None)
 
       whenReady(searchYoutubeTrack.getYoutubeTracksByArtistAndTitle(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
         tracks => val tracksTitle = tracks.map { track => track.title }
@@ -87,7 +87,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       val tracksTitle = Set("Le poinçonneur des Lilas")
 
       val expectedTrack = Track(UUID.randomUUID, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y',
-        "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg", "facebookUrl3", "Serge Gainsbourg", None, None)
+        "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg", "facebookUrl3", "Serge Gainsbourg", None)
 
       whenReady(searchYoutubeTrack.getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>
         val tracksTitle = tracks.map { track => track.title}
@@ -155,7 +155,7 @@ class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
       val uuid = UUID.fromString("04d64aef-2baa-42b3-a0dc-07f77da9303d")
 
       val expectedTrack = Track(uuid, "Welcome to Topsify", "ISo15c2zKa4", 'y',
-        "https://i.ytimg.com/vi/ISo15c2zKa4/default.jpg", "facebookUrl3", "Skrillex", None, None/*, None, List()*/)
+        "https://i.ytimg.com/vi/ISo15c2zKa4/default.jpg", "facebookUrl3", "Skrillex", None/*, None, List()*/)
 
       val eventuallyYoutubeTracks = searchYoutubeTrack.getYoutubeTracksByChannelId(artist, youtubeChannel)
 
