@@ -129,15 +129,15 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         relation.genreId === artistGenreRelation.genreId).result.headOption
       result <- artistGenreFound.map(DBIO.successful).getOrElse(artistsGenres returning artistsGenres.map(_.artistId) += artistGenreRelation)
     } yield result match {
-        case artistGenre: ArtistGenreRelation =>
-          val updatedArtistGenreRelation = artistGenre.copy(weight = artistGenre.weight + 1)
-          updateArtistRelation(updatedArtistGenreRelation) map {
-            case int if int != 1 =>
-              Logger.error("Genre.saveArtistRelation: not exactly one row was updated")
-          }
-          updatedArtistGenreRelation
-        case id: Long => artistGenreRelation.copy(artistId = id)
-      }).transactionally)
+      case artistGenre: ArtistGenreRelation =>
+        val updatedArtistGenreRelation = artistGenre.copy(weight = artistGenre.weight + 1)
+        updateArtistRelation(updatedArtistGenreRelation) map {
+          case int if int != 1 =>
+            Logger.error("Genre.saveArtistRelation: not exactly one row was updated")
+        }
+        updatedArtistGenreRelation
+      case id: Long => artistGenreRelation.copy(artistId = id)
+    }).transactionally)
   }
 
   def updateArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] =
