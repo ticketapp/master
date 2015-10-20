@@ -160,49 +160,68 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
         NotFound
       case unknownException =>
         Logger.error("ArtistController.followArtistByArtistId", unknownException)
-        Status(INTERNAL_SERVER_ERROR)
+        InternalServerError
     }
-//    Future(Ok)
   }
-//
-//    def unfollowArtistByArtistId(artistId : Long) = SecuredAction { implicit request =>
-//      val userId = request.identity.UUID
-//      artistMethods.unfollowByArtistId(userId, artistId) match {
-//        case Success(1) =>
-//          Ok
-//        case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-//          Logger.error(s"The user (id: $userId) does not follow the artist (artistId: $artistId) or the artist does not exist.")
-//          NotFound
-//        case Failure(unknownException) =>
-//          Logger.error("ArtistController.followArtistByArtistId", unknownException)
-//          InternalServerError
-//      }
-//    }
-//
-//    def followArtistByFacebookId(facebookId : String) = SecuredAction { implicit request =>
-//      val userId = request.identity.UUID
-//      artistMethods.followByFacebookId(userId, facebookId) match {
-//        case Success(_) =>
-//          Created
-//        case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-//          Logger.error(
-//            s"""ArtistController.followArtistByFacebookId: user with id $userId already follows
-//               |artist with facebook id $facebookId""".stripMargin)
-//          Conflict("This user already follows this artist.")
-//        case Failure(thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException) =>
-//          Logger.error(s"ArtistController.followArtistByFacebookId : there is no artist with the facebook id $facebookId")
-//          NotFound("There is no artist with this id.")
-//        case Failure(unknownException) =>
-//          Logger.error("ArtistController.followArtistByFacebookId", unknownException)
-//          Status(INTERNAL_SERVER_ERROR)
-//      }
-//    }
-//
-//    def getFollowedArtists = SecuredAction { implicit request =>
-//      Ok(Json.toJson(artistMethods.getFollowedArtists(request.identity.UUID)))
-//    }
-//
-//    def isArtistFollowed(artistId: Long) = SecuredAction { implicit request =>
-//      Ok(Json.toJson(artistMethods.isFollowed(request.identity.UUID, artistId)))
-//    }
+
+  def unfollowArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    artistMethods.unfollowByArtistId(UserArtistRelation(userId, artistId)) map {
+      case 1 =>
+        Ok
+      case _ =>
+        Logger.error("ArtistController.unfollowArtistByArtistId:  artistMethods.unfollowByArtistId did not return 1!")
+        InternalServerError("ArtistController.unfollowArtistByArtistId:  artistMethods.unfollowByArtistId did not return 1!")
+    } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"The user (id: $userId) does not follow the artist (artistId: $artistId) or the artist does not exist.")
+        NotFound
+      case unknownException =>
+        Logger.error("ArtistController.unfollowArtistByArtistId", unknownException)
+        InternalServerError
+    }
+  }
+
+  def followArtistByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    artistMethods.followByFacebookId(userId, facebookId) map {
+      case 1 =>
+        Created
+      case _ =>
+        Logger.error("ArtistController.followArtistByFacebookId:  artistMethods.followByArtistId did not return 1!")
+        InternalServerError("ArtistController.followArtistByFacebookId:  artistMethods.followByArtistId did not return 1!")
+    } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+        Logger.error(
+          s"""ArtistController.followArtistByFacebookId: user with id $userId already follows
+             |artist with facebook id $facebookId""".stripMargin)
+        Conflict("This user already follows this artist.")
+      case thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException =>
+        Logger.error(s"ArtistController.followArtistByFacebookId : there is no artist with the facebook id $facebookId")
+        NotFound("There is no artist with this id.")
+      case unknownException =>
+        Logger.error("ArtistController.followArtistByFacebookId", unknownException)
+        InternalServerError
+    }
+  }
+
+  def getFollowedArtists = SecuredAction.async { implicit request =>
+    artistMethods.getFollowedArtists(request.identity.uuid) map { artists =>
+      Ok(Json.toJson(artists))
+    } recover {
+      case e =>
+        Logger.error("ArtistController.getFollowedArtists: ", e)
+        InternalServerError
+    }
+  }
+
+  def isArtistFollowed(artistId: Long) = SecuredAction.async { implicit request =>
+    artistMethods.isFollowed(UserArtistRelation(request.identity.uuid, artistId)) map { boolean =>
+      Ok(Json.toJson(boolean))
+    } recover {
+      case e =>
+        Logger.error("ArtistController.isArtistFollowed: ", e)
+        InternalServerError
+    }
+  }
 }

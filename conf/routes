@@ -32,21 +32,21 @@ GET         /events/nearCity/:city                        @controllers.EventCont
 
 ################################### Artists ##############################################
 GET     /artists                                                          @controllers.ArtistController.findAll
-#GET     /artists/since/:offset/:number                                    @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
-#GET     /artists/:facebookUrl                                             @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
-#GET     /artists/:facebookUrl/tracks                                      @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
+GET     /artists/since/:offset/:number                                    @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
+GET     /artists/:facebookUrl                                             @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
+GET     /artists/:facebookUrl/tracks                                      @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
 GET     /artists/byId/:id                                                 @controllers.ArtistController.artist(id: Long)
-#POST    /artists/createArtist                                             @controllers.ArtistController.createArtist
+POST    /artists/createArtist                                             @controllers.ArtistController.createArtist
 POST    /artists/:artistId/followByArtistId                               @controllers.ArtistController.followArtistByArtistId(artistId: Long)
-#POST    /artists/:artistId/unfollowArtistByArtistId                       @controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
-#POST    /artists/:facebookId/followByFacebookId                           @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
-#GET     /artists/followed/                                                @controllers.ArtistController.getFollowedArtists
-#GET     /artists/:artistId/isFollowed                                     @controllers.ArtistController.isArtistFollowed(artistId: Long)
-#DELETE  /artists/:artistId                                                @controllers.ArtistController.deleteArtist(artistId: Long)
-#GET     /artists/:facebookUrl/events                                      @controllers.EventController.findByArtist(facebookUrl: String)
-#GET     /artists/:artistId/passedEvents                                   @controllers.EventController.findPassedByArtist(artistId: Long)
-#GET     /artists/containing/:pattern                                      @controllers.ArtistController.findArtistsContaining(pattern: String)
-#GET     /artists/facebookContaining/:pattern                              @controllers.ArtistController.getFacebookArtistsContaining(pattern: String)
+POST    /artists/:artistId/unfollowArtistByArtistId                       @controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
+POST    /artists/:facebookId/followByFacebookId                           @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
+GET     /artists/followed/                                                @controllers.ArtistController.getFollowedArtists
+GET     /artists/:artistId/isFollowed                                     @controllers.ArtistController.isArtistFollowed(artistId: Long)
+DELETE  /artists/:artistId                                                @controllers.ArtistController.deleteArtist(artistId: Long)
+GET     /artists/:facebookUrl/events                                      @controllers.EventController.findByArtist(facebookUrl: String)
+GET     /artists/:artistId/passedEvents                                   @controllers.EventController.findPassedByArtist(artistId: Long)
+GET     /artists/containing/:pattern                                      @controllers.ArtistController.findArtistsContaining(pattern: String)
+GET     /artists/facebookContaining/:pattern                              @controllers.ArtistController.getFacebookArtistsContaining(pattern: String)
 #
 ################################### Places ###############################################
 #GET     /places                                                           @controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
