@@ -49,13 +49,14 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def * = (userId, artistId) <> ((UserArtistRelation.apply _).tupled, UserArtistRelation.unapply)
   }
 
-  case class ArtistGenreRelation(artistId: Long, genreId: Int)
+  case class ArtistGenreRelation(artistId: Long, genreId: Int, weight: Long = 0)
 
   class ArtistsGenres(tag: Tag) extends Table[ArtistGenreRelation](tag, "artistsgenres") {
     def artistId = column[Long]("artistid")
     def genreId = column[Int]("genreid")
+    def weight = column[Long]("weight", O.Default(0))
 
-    def * = (artistId, genreId) <> ((ArtistGenreRelation.apply _).tupled, ArtistGenreRelation.unapply)
+    def * = (artistId, genreId, weight) <> ((ArtistGenreRelation.apply _).tupled, ArtistGenreRelation.unapply)
 
     def aFK = foreignKey("artistid", artistId, artists)(_.id, onDelete=ForeignKeyAction.Cascade)
     def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete=ForeignKeyAction.Cascade)
@@ -242,14 +243,14 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("artistfacebookurl", artistFacebookUrl, artists)(_.facebookUrl, onDelete = ForeignKeyAction.Cascade)
   }
 
-  case class TrackGenreRelation(trackId: UUID, genreId: Int)
+  case class TrackGenreRelation(trackId: UUID, genreId: Int, weight: Long = 0)
 
   class TracksGenres(tag: Tag) extends Table[TrackGenreRelation](tag, "tracksgenres") {
     def trackId = column[UUID]("trackid")
     def genreId = column[Int]("genreid")
-    def weight = column[Long]("weight")
+    def weight = column[Long]("weight", O.Default(0))
 
-    def * = (trackId, genreId) <> ((TrackGenreRelation.apply _).tupled, TrackGenreRelation.unapply)
+    def * = (trackId, genreId, weight) <> ((TrackGenreRelation.apply _).tupled, TrackGenreRelation.unapply)
   }
 
   class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
