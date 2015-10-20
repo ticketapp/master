@@ -7,14 +7,12 @@ import javax.inject.Inject
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.Future
-
+import services.MyPostgresDriver.api._
 /**
  * The DAO to store the OpenID information.
  */
 class OpenIDInfoDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     extends DelegableAuthInfoDAO[OpenIDInfo] with DAOSlick {
-
-  import driver.api._
 
   protected def openIDInfoQuery(loginInfo: LoginInfo) = for {
     dbLoginInfo <- loginInfoQuery(loginInfo)
