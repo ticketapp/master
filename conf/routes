@@ -89,7 +89,7 @@ POST        /organizers/create                            @controllers.Organizer
 
 ################################# Tracks ############################################
 #POST    /tracks/create                                                    @controllers.TrackController.createTrack
-#GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle               @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
+GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle               @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
 #GET     /tracks/youtubeTrackInfo/:youtubeId                              @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
 #GET     /tracks/:trackId/rating                                           @controllers.TrackController.getRatingForUser(trackId: String)
 #POST    /tracks/rating                                                    @controllers.TrackController.upsertRatingForUser
