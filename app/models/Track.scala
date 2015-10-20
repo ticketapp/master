@@ -149,13 +149,13 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
    */
 
   def save(track: Track): Future[Track] = db.run((for {
-    trackFound <- tracks.filter(_.uuid === track.uuid).result.headOption
+    trackFound <- tracks.filter(trackFound => (trackFound.title === track.title &&
+      trackFound.artistName === track.artistName) || trackFound.url === track.url).result.headOption
     result <- trackFound.map(DBIO.successful).getOrElse(tracks returning tracks.map(_.uuid) += track)
-  } yield { result match {
+  } yield result match {
       case t: Track => t
       case uuid: UUID => track.copy(uuid = uuid)
-    }
-    }).transactionally)
+  }).transactionally)
 
   def delete(uuid: UUID): Future[Int] = db.run(tracks.filter(_.uuid === uuid).delete)
 

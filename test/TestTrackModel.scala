@@ -51,27 +51,28 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       }
     }
 
-    /*"not be saved twice for same title and artistName" in {
-      val trackId = randomUUID
-      val trackId2 = randomUUID
-      val track = Track(trackId, "title2", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-      val track2 = Track(trackId2, "title2", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+    "not be saved twice for same title and artistName" in {
+      val trackId = UUID.randomUUID
+      val trackId2 = UUID.randomUUID
+      val track = Track(uuid = trackId, title = "title2", url = "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
+      val track2 = Track(uuid = trackId2, title = "title2", url = "url1", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
 
       try {
-        save(track)
-        save(track2) match {
-          case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-          case _ =>
-            throw new Exception("save twice a track with same title and artist name worked!")
+        whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
+          whenReady(trackMethods.save(track2), timeout(Span(5, Seconds))) {
+              case track1 if track1 == savedTrack =>
+              case _ =>
+                throw new Exception("save twice a track with same title and artist name worked!")
+          }
         }
       } finally {
-        delete(trackId)
+        trackMethods.delete(trackId)
       }
     }
 
-    "be rated up by a user" in {
+    /*"be rated up by a user" in {
       val trackId = randomUUID
-      save(Track(trackId, "title4", "url1", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
+      trackMethods.save(Track(trackId, "title4", "url1", 'y', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName"))
 
       try {
         upsertRatingUp("userTestId", trackId, 1) mustBe Success(true)
@@ -111,7 +112,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       save(track)
 
       try {
-        addToFavorites("userTestId", trackId) mustBe Success(1)
+        trackMethods.addToFavorites("userTestId", trackId) mustBe Success(1)
         findFavorites("userTestId") mustBe Success(Seq(track.copy(confidence = Some(0))))
         removeFromFavorites("userTestId", trackId) mustBe Success(1)
       } finally {
@@ -155,17 +156,17 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       } finally {
         delete(trackId)
       }
-    }
+    }*/
 
     "calculate confidence with rating up and down" in {
-      calculateConfidence(0, 15) mustBe -0.015
-      calculateConfidence(5000, 0) mustBe 0.6488845039956165
-      calculateConfidence(510, 500) mustBe 0.0746875564598663
-      calculateConfidence(500, 510) mustBe 0.07199615149144027
-      calculateConfidence(5000, 2000) mustBe 0.4086681496298129
+      trackMethods.calculateConfidence(0, 15) mustBe -0.015
+      trackMethods.calculateConfidence(5000, 0) mustBe 0.6488845039956165
+      trackMethods.calculateConfidence(510, 500) mustBe 0.0746875564598663
+      trackMethods.calculateConfidence(500, 510) mustBe 0.07199615149144027
+      trackMethods.calculateConfidence(5000, 2000) mustBe 0.4086681496298129
     }
 
-    "have his confidence updated" in {
+    /*"have his confidence updated" in {
       val newTrackId = randomUUID
       val track = Track(newTrackId, "title10", "url6", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       Logger.info("have his confidence updated " + save(track).toString)
@@ -205,21 +206,24 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         delete(newTrackId2)
         Artist.delete(artistId)
       }
-    }
+    }*/
 
     "find n (numberToReturn) tracks for an artist" in {
       val newTrackId = randomUUID
       val newTrackId2 = randomUUID
       val track = Track(newTrackId, "title13", "url7", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
       val track2 = Track(newTrackId2, "title14", "url10", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-      save(track)
-      save(track2)
-
-      try {
-        findAllByArtist(artist.facebookUrl, 1, 1) should have length 1
-      } finally {
-        delete(newTrackId)
-        delete(newTrackId2)
+      whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { _ =>
+        whenReady(trackMethods.save(track2), timeout(Span(5, Seconds))) { _ =>
+          try {
+            whenReady(trackMethods.findAllByArtist(artist.facebookUrl, 1, 1), timeout(Span(5, Seconds))) { tracksSeq =>
+              tracksSeq.length mustBe 1
+            }
+          } finally {
+            trackMethods.delete(newTrackId)
+            trackMethods.delete(newTrackId2)
+          }
+        }
       }
     }
 
@@ -234,17 +238,17 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       val expectedTracks = Seq(
         Track(trackId1, "titleNotduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
         Track(trackId2, "titleduplicaté", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"))
-      removeDuplicateByTitleAndArtistName(tracks) must contain theSameElementsAs expectedTracks
+      trackMethods.removeDuplicateByTitleAndArtistName(tracks) must contain theSameElementsAs expectedTracks
     }
 
     "return true if artist name is in the title and vice-versa without taking account of accentuated letters" in {
-      isArtistNameInTrackTitle("brassens trackTitle", "brassens") mustBe true
-      isArtistNameInTrackTitle("brassens trackTitle", "Brassens") mustBe true
-      isArtistNameInTrackTitle("Brassens trackTitle", "brassens") mustBe true
-      isArtistNameInTrackTitle("Bràsséns trackTitle", "brassens") mustBe true
-      isArtistNameInTrackTitle("Brâssens trackTitle", "brassêns") mustBe true
-      isArtistNameInTrackTitle("Brassens trackTitle", "notRelatedArtist") mustBe false
-    }*/
+      trackMethods.isArtistNameInTrackTitle("brassens trackTitle", "brassens") mustBe true
+      trackMethods.isArtistNameInTrackTitle("brassens trackTitle", "Brassens") mustBe true
+      trackMethods.isArtistNameInTrackTitle("Brassens trackTitle", "brassens") mustBe true
+      trackMethods.isArtistNameInTrackTitle("Bràsséns trackTitle", "brassens") mustBe true
+      trackMethods.isArtistNameInTrackTitle("Brâssens trackTitle", "brassêns") mustBe true
+      trackMethods.isArtistNameInTrackTitle("Brassens trackTitle", "notRelatedArtist") mustBe false
+    }
   }
   }
 }
