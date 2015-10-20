@@ -64,20 +64,24 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     val lowerCaseAddress = address.copy(id = address.id, geographicPoint = address.geographicPoint,
       street = utilities.optionStringToLowerCaseOptionString(address.street), zip = address.zip,
       city = utilities.optionStringToLowerCaseOptionString(address.city))
+
     db.run((for {
       addressFound <- addresses.filter(a => a.street === lowerCaseAddress.street &&
         a.zip === lowerCaseAddress.zip && a.city === lowerCaseAddress.city).result.headOption
       result <- addressFound.map(DBIO.successful).getOrElse(addresses returning addresses.map(_.id) += lowerCaseAddress)
     } yield result match {
-        case a: Address =>
-          if (a.geographicPoint.isDefined || lowerCaseAddress.geographicPoint.isEmpty) {
-            a
-          } else {
-            val updatedAddress = lowerCaseAddress.copy(id = a.id)
-            update(updatedAddress)
-            updatedAddress
+      case addressWithoutGeographicPoint: Address
+        if addressWithoutGeographicPoint.geographicPoint.isEmpty && lowerCaseAddress.geographicPoint.nonEmpty =>
+          val updatedAddress = lowerCaseAddress.copy(id = addressWithoutGeographicPoint.id)
+          update(updatedAddress) map {
+            case int if int != 1 =>
+              Logger.error("Address.save: not exactly one row was updated")
           }
-        case id: Long => lowerCaseAddress.copy(id = Option(id))
+        updatedAddress
+      case a: Address =>
+        a
+      case id: Long =>
+        lowerCaseAddress.copy(id = Option(id))
       }).transactionally)
   }
 
