@@ -16,10 +16,10 @@ import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import models.User
 import play.api.i18n.MessagesApi
 
-class MailController @Inject() (ws: WSClient,
-                             val messagesApi: MessagesApi,
-                             val env: Environment[User, CookieAuthenticator],
-                             socialProviderRegistry: SocialProviderRegistry)
+class MailController @Inject()(ws: WSClient,
+                               val messagesApi: MessagesApi,
+                               val env: Environment[User, CookieAuthenticator],
+                               socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, CookieAuthenticator] {
 
 //  def mails = Action { Ok(Json.toJson(Mail.findAll)) }

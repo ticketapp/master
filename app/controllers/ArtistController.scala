@@ -6,7 +6,7 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
-import models.{Artist, Genre, User, _}
+import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
@@ -17,14 +17,15 @@ import play.api.libs.iteratee.{Enumeratee, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
+import services.Utilities
 
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
+import scala.util.Failure
 
 
-class ArtistController @Inject()(ws: WSClient,
-                                 val messagesApi: MessagesApi,
+class ArtistController @Inject()(val messagesApi: MessagesApi,
+                                 val utilities: Utilities,
                                  val env: Environment[User, CookieAuthenticator],
                                  val artistMethods: ArtistMethods,
                                  val trackMethods: TrackMethods,
@@ -37,7 +38,7 @@ class ArtistController @Inject()(ws: WSClient,
     }
   }
 
-  def artists = Action.async {
+  def findAll = Action.async {
     artistMethods.findAll.map { artists =>
       Ok(Json.toJson(artists))
     }
@@ -141,23 +142,28 @@ class ArtistController @Inject()(ws: WSClient,
     }
   }
   
-    def followArtistByArtistId(artistId : Long) = SecuredAction { implicit request =>
-      val userId = request.identity.userID
-//      artistMethods.followByArtistId(userId, artistId) match {
-//        case Success(_) =>
-//          Created
-//        case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-//          Logger.error(s"ArtistController.followArtistByArtistId: user with id $userId already follows artist with id $artistId")
-//          Conflict("This user already follows this artist.")
-//        case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-//          Logger.error(s"ArtistController.followArtistByArtistId: there is no artist with the id $artistId")
-//          NotFound
-//        case Failure(unknownException) =>
-//          Logger.error("ArtistController.followArtistByArtistId", unknownException)
-//          Status(INTERNAL_SERVER_ERROR)
-//      }
-      Ok
+  def followArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    Logger.info(userId.toString)
+    artistMethods.followByArtistId(UserArtistRelation(userId, artistId)) map {
+      case 1 =>
+        Created
+      case _ =>
+        Logger.error("ArtistController.followArtistByArtistId:  artistMethods.followByArtistId did not return 1!")
+        InternalServerError("ArtistController.followArtistByArtistId:  artistMethods.followByArtistId did not return 1!")
+    } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+        Logger.error(s"ArtistController.followArtistByArtistId: user with id $userId already follows artist with id $artistId")
+        Conflict("This user already follows this artist.")
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"ArtistController.followArtistByArtistId: there is no artist with the id $artistId")
+        NotFound
+      case unknownException =>
+        Logger.error("ArtistController.followArtistByArtistId", unknownException)
+        Status(INTERNAL_SERVER_ERROR)
     }
+//    Future(Ok)
+  }
 //
 //    def unfollowArtistByArtistId(artistId : Long) = SecuredAction { implicit request =>
 //      val userId = request.identity.UUID

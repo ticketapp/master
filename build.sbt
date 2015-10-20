@@ -40,7 +40,9 @@ libraryDependencies ++= Seq(
   "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
   "com.github.tminglei" %% "slick-pg" % "0.9.1",
   "com.vividsolutions" % "jts" % "1.13",
-  "com.github.tminglei" %% "slick-pg" % "0.9.0"
+  "com.github.tminglei" %% "slick-pg" % "0.9.0",
+  "com.mohiva" %% "play-silhouette-testkit" % "3.0.2" % "test",
+  specs2 % Test
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)

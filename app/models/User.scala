@@ -23,7 +23,7 @@ import scala.language.postfixOps
 import driver.api._*/
 import com.mohiva.play.silhouette.api.{ Identity, LoginInfo }
 
-case class User(userID: UUID,
+case class User(uuid: UUID,
                 loginInfo: LoginInfo,
                 firstName: Option[String],
                 lastName: Option[String],

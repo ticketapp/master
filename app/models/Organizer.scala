@@ -1,5 +1,6 @@
 package models
 
+import java.util.UUID
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.{Geometry, Point}
@@ -34,7 +35,7 @@ case class Organizer (id: Option[Long],
 
 case class OrganizerWithAddress(organizer: Organizer, address: Option[Address])
 
-case class OrganizerFollowed(userId: String, Organizer: Long)
+case class OrganizerFollowed(userId: UUID, Organizer: Long)
 
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,

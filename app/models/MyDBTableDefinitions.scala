@@ -1,15 +1,22 @@
 package models
 
-import java.sql.Timestamp
+import java.sql.{JDBCType, Timestamp}
 import java.util.UUID
 
 import com.vividsolutions.jts.geom.Geometry
 import org.joda.time.DateTime
 import services.MyPostgresDriver.api._
 import silhouette.DBTableDefinitions
+import slick.jdbc.{PositionedParameters, SetParameter}
 import slick.model.ForeignKeyAction
 
+case class UserArtistRelation(userId: UUID, artistId: Long)
+
 trait MyDBTableDefinitions extends DBTableDefinitions {
+
+  implicit object SetUUID extends SetParameter[UUID] {
+    def apply(v: UUID, pp: PositionedParameters) { pp.setObject(v, JDBCType.BINARY.getVendorTypeNumber) }
+  }
 
   def optionStringToSet(maybeString: Option[String]): Set[String] = maybeString match {
     case None => Set.empty
@@ -40,10 +47,8 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     })
   }
 
-  case class UserArtistRelation(userId: String, artistId: Long)
-
   class ArtistsFollowed(tag: Tag) extends Table[UserArtistRelation](tag, "artistsfollowed") {
-    def userId = column[String]("userid")
+    def userId = column[UUID]("userid")
     def artistId = column[Long]("artistid")
 
     def * = (userId, artistId) <> ((UserArtistRelation.apply _).tupled, UserArtistRelation.unapply)
@@ -69,10 +74,10 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def * = (id.?, name, icon) <> ((Genre.apply _).tupled, Genre.unapply)
   }
 
-  case class UserGenreRelation(userId: String, genreId: Long)
+  case class UserGenreRelation(userId: UUID, genreId: Long)
 
   class GenresFollowed(tag: Tag) extends Table[UserGenreRelation](tag, "genresfollowed") {
-    def userId = column[String]("userid")
+    def userId = column[UUID]("userid")
     def genreId = column[Long]("genreid")
 
     def * = (userId, genreId) <> ((UserGenreRelation.apply _).tupled, UserGenreRelation.unapply)
@@ -97,10 +102,10 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
       ageRestriction, tariffRange, ticketSellers, imagePath) <> ((Event.apply _).tupled, Event.unapply)
   }
 
-  case class UserEventRelation(userId: String, eventId: Long)
+  case class UserEventRelation(userId: UUID, eventId: Long)
 
   class EventsFollowed(tag: Tag) extends Table[UserEventRelation](tag, "eventsfollowed") {
-    def userId = column[String]("userid")
+    def userId = column[UUID]("userid")
     def eventId = column[Long]("eventid")
 
     def * = (userId, eventId) <> ((UserEventRelation.apply _).tupled, UserEventRelation.unapply)
@@ -183,10 +188,10 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
       imagePath, linkedOrganizerId) <> ((Place.apply _).tupled, Place.unapply)
   }
 
-  case class UserPlaceRelation(userId: String, placeId: Long)
+  case class UserPlaceRelation(userId: UUID, placeId: Long)
 
   class PlacesFollowed(tag: Tag) extends Table[UserPlaceRelation](tag, "placesfollowed") {
-    def userId = column[String]("userid")
+    def userId = column[UUID]("userid")
     def placeId = column[Long]("placeid")
 
     def * = (userId, placeId) <> ((UserPlaceRelation.apply _).tupled, UserPlaceRelation.unapply)
@@ -216,7 +221,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
 
   class OrganizersFollowed(tag: Tag) extends Table[OrganizerFollowed](tag, "organizersfollowed") {
-    def userId = column[String]("userid")
+    def userId = column[UUID]("userid")
     def organizerId = column[Long]("organizerid")
 
     def * = (userId, organizerId) <> ((OrganizerFollowed.apply _).tupled, OrganizerFollowed.unapply)

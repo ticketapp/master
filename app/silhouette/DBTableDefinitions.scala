@@ -1,5 +1,7 @@
 package silhouette
 
+import java.util.UUID
+
 import com.mohiva.play.silhouette.api.LoginInfo
 import slick.driver.JdbcProfile
 import slick.lifted.ProvenShape.proveShapeOf
@@ -10,7 +12,7 @@ trait DBTableDefinitions {
   import driver.api._
 
   case class DBUser (
-    userID: String,
+    uuid: UUID,
     firstName: Option[String],
     lastName: Option[String],
     fullName: Option[String],
@@ -19,7 +21,7 @@ trait DBTableDefinitions {
   )
 
   class Users(tag: Tag) extends Table[DBUser](tag, "users") {
-    def id = column[String]("userid", O.PrimaryKey)
+    def id = column[UUID]("userid", O.PrimaryKey)
     def firstName = column[Option[String]]("firstname")
     def lastName = column[Option[String]]("lastname")
     def fullName = column[Option[String]]("fullname")
@@ -42,14 +44,14 @@ trait DBTableDefinitions {
   }
 
   case class DBUserLoginInfo (
-    userID: String,
+    userID: UUID,
     loginInfoId: Long
   )
 
   class UserLoginInfos(tag: Tag) extends Table[DBUserLoginInfo](tag, "userlogininfo") {
-    def userID = column[String]("userid")
+    def userUUID = column[UUID]("userid")
     def loginInfoId = column[Long]("logininfoid")
-    def * = (userID, loginInfoId) <> (DBUserLoginInfo.tupled, DBUserLoginInfo.unapply)
+    def * = (userUUID, loginInfoId) <> (DBUserLoginInfo.tupled, DBUserLoginInfo.unapply)
   }
 
   case class DBPasswordInfo (

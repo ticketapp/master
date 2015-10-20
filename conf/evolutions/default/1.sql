@@ -202,7 +202,7 @@ CREATE OR REPLACE FUNCTION insertTrack(trackIdValue UUID,
 LANGUAGE plpgsql;
 
 create table users (
-  userID VARCHAR NOT NULL PRIMARY KEY,
+  userID UUID PRIMARY KEY,
   firstName VARCHAR,
   lastName VARCHAR,
   fullName VARCHAR,
@@ -277,7 +277,7 @@ CREATE TABLE receivedMails (
   subject                   VARCHAR NOT NULL,
   message                   VARCHAR NOT NULL,
   read                      BOOLEAN NOT NULL DEFAULT FALSE,
-  userId                    VARCHAR(255) REFERENCES users(userId)
+  userId                    UUID REFERENCES users(userId)
 );
 
 CREATE TABLE events (
@@ -422,21 +422,21 @@ CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
   content                   VARCHAR,
-  userId                    VARCHAR(255) REFERENCES users (userId),
+  userId                    UUID REFERENCES users (userId),
   fixed                     BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE issuesComments (
   commentId                 SERIAL PRIMARY KEY,
   content                   VARCHAR,
-  userId                    VARCHAR(255) REFERENCES users (userId),
+  userId                    UUID REFERENCES users (userId),
   issueId                   BIGINT REFERENCES issues(issueId)
 );
 
 CREATE TABLE usersTools (
   tableId                   SERIAL PRIMARY KEY,
   tools                     VARCHAR(255) NOT NULL,
-  userId                    VARCHAR(255) REFERENCES users (userId)
+  userId                    UUID REFERENCES users(userId)
 );
 
 ---############################## ACCOUNTING ###################################
@@ -548,7 +548,7 @@ CREATE TABLE account403 (
   date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
   amount                  NUMERIC NOT NULL,
   debit                   BOOLEAN NOT NULL, --#sinon debit
-  userId                  VARCHAR(255) REFERENCES users(userId),
+  userId                  UUID REFERENCES users(userId),
   account60Id             BIGINT REFERENCES account60(id)
 );
 
@@ -594,14 +594,14 @@ CREATE TABLE account623 (
 
 CREATE TABLE eventsFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   VARCHAR REFERENCES users(userId),
+  userId                   UUID REFERENCES users(userId),
   eventId                  BIGINT REFERENCES events(eventId)
 );
 CREATE UNIQUE INDEX eventsFollowedIndex ON eventsFollowed (userId, eventId);
 
 CREATE TABLE artistsFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   VARCHAR REFERENCES users(userId),
+  userId                   UUID REFERENCES users(userId),
   artistId                 INT REFERENCES artists(artistId)
 );
 CREATE UNIQUE INDEX artistsFollowedIndex ON artistsFollowed (userId, artistId);
@@ -620,21 +620,21 @@ LANGUAGE plpgsql;
 
 CREATE TABLE placesFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   VARCHAR REFERENCES users(userId) NOT NULL,
+  userId                   UUID REFERENCES users(userId),
   placeId                  INT REFERENCES places(placeId)  NOT NULL
 );
 CREATE UNIQUE INDEX placesFollowedIndex ON placesFollowed (userId, placeId);
 
 CREATE TABLE usersFollowed (
   tableId                 SERIAL PRIMARY KEY,
-  userIdFollower          VARCHAR REFERENCES users(userId)  NOT NULL,
-  userIdFollowed          VARCHAR REFERENCES users(userId)  NOT NULL
+  userIdFollower          UUID REFERENCES users(userId),
+  userIdFollowed          UUID REFERENCES users(userId)
 );
 CREATE UNIQUE INDEX usersFollowedIndex ON usersFollowed (userIdFollower, userIdFollowed);
 
 CREATE TABLE organizersFollowed (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR REFERENCES users(userId)  NOT NULL,
+  userId                  UUID REFERENCES users(userId),
   organizerId             INT REFERENCES organizers(organizerId)  NOT NULL
 );
 CREATE UNIQUE INDEX organizersFollowedIndex ON organizersFollowed (userId, organizerId);
@@ -693,7 +693,7 @@ CREATE TABLE eventsAddresses (
 
 CREATE TABLE usersOrganizers (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users (userId),
+  userId                  UUID REFERENCES users(userId),
   organizerId             INT REFERENCES organizers(organizerId)
 );
 CREATE UNIQUE INDEX usersOrganizersIndex ON usersOrganizers (userId, organizerId);
@@ -779,7 +779,7 @@ LANGUAGE plpgsql;
 
 CREATE TABLE playlists (
   playlistId              SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users (userId) NOT NULL,
+  userId                  UUID REFERENCES users(userId) NOT NULL,
   name                    VARCHAR(255) NOT NULL
 );
 CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);
@@ -796,7 +796,7 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users (userId) NOT NULL,
+  userId                  UUID REFERENCES users(userId) NOT NULL,
   trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
   ratingUp                INT,
   ratingDown              INT,
@@ -846,7 +846,7 @@ LANGUAGE plpgsql;
 
 CREATE TABLE usersFavoriteTracks(
   tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users (userId) NOT NULL,
+  userId                  UUID REFERENCES users(userId) NOT NULL,
   trackId                 UUID REFERENCES tracks (trackId) NOT NULL
 );
 CREATE UNIQUE INDEX usersFavoriteTracksIndex ON usersFavoriteTracks (userId, trackId);

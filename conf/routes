@@ -31,13 +31,13 @@ GET         /events/city/:pattern                         @controllers.EventCont
 GET         /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################### Artists ##############################################
-#GET     /artists                                                          @controllers.ArtistController.artists
+GET     /artists                                                          @controllers.ArtistController.findAll
 #GET     /artists/since/:offset/:number                                    @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
 #GET     /artists/:facebookUrl                                             @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
 #GET     /artists/:facebookUrl/tracks                                      @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
-#GET     /artists/byId/:id                                                 @controllers.ArtistController.artist(id: Long)
+GET     /artists/byId/:id                                                 @controllers.ArtistController.artist(id: Long)
 #POST    /artists/createArtist                                             @controllers.ArtistController.createArtist
-#POST    /artists/:artistId/followByArtistId                               @controllers.ArtistController.followArtistByArtistId(artistId: Long)
+POST    /artists/:artistId/followByArtistId                               @controllers.ArtistController.followArtistByArtistId(artistId: Long)
 #POST    /artists/:artistId/unfollowArtistByArtistId                       @controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
 #POST    /artists/:facebookId/followByFacebookId                           @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
 #GET     /artists/followed/                                                @controllers.ArtistController.getFollowedArtists

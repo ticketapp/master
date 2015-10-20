@@ -1,6 +1,7 @@
 package models
 
 import java.sql.Timestamp
+import java.util.UUID
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.{Geometry, GeometryFactory, Point}
@@ -314,7 +315,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         eventFollowed.userId === userEventRelation.userId && eventFollowed.eventId === userEventRelation.eventId)
      .delete)
 
-  def getFollowed(userId: String): Future[Seq[Event] ]= {
+  def getFollowed(userId: UUID): Future[Seq[Event] ]= {
     val query = for {
       eventFollowed <- eventsFollowed if eventFollowed.userId === userId
       event <- events if event.id === eventFollowed.eventId

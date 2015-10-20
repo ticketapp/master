@@ -53,7 +53,7 @@ class IssueController @Inject() (ws: WSClient,
       },
       partialIssue => {
         issueMethods.save(
-          Issue(None, partialIssue.title, partialIssue.content, request.identity.userID.toString, fixed = false)) map { issues =>
+          Issue(None, partialIssue.title, partialIssue.content, request.identity.uuid, fixed = false)) map { issues =>
           Ok(Json.toJson(issues))
         }
       }
@@ -67,7 +67,7 @@ class IssueController @Inject() (ws: WSClient,
         Future(BadRequest(formWithErrors.errorsAsJson))
       },
       commentContent => { issueMethods.saveComment(
-        IssueComment(commentContent, request.identity.userID.toString, issueId)) map { comment =>
+        IssueComment(commentContent, request.identity.uuid, issueId)) map { comment =>
           Ok(Json.toJson(comment))
         }
       }
