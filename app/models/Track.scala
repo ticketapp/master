@@ -151,7 +151,6 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def delete(uuid: UUID): Future[Int] = db.run(tracks.filter(_.uuid === uuid).delete)
 
-
   def followTrack(userId : Long, trackId : UUID): Option[Long] = {
 //    DB.withConnection { implicit connection =>
 //      SQL("INSERT INTO trackFollowed(userId, trackId) VALUES ({userId}, {trackId})")
