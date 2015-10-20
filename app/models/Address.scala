@@ -61,34 +61,27 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def save(address: Address): Future[Address] = {
-//    val query3 = for {
-//      existing <- addresses
-//        .filter(a => a.street === address.street && a.zip === address.zip && a.city === address.city)
-//        .result
-//        .headOption
-//      row = existing getOrElse address
-//      result <- (addresses returning addresses.map(_.id) into ((address, id) => address.copy(id = Some(id)))).insertOrUpdate(row)
-//      toBeReturned <- result getOrElse existing.get
-//    } yield toBeReturned
-//
-//    db.run(query3)
-//
-
-
-/*    val query = (addresses returning addresses.map(_.id) into ((address, id) => address.copy(id = Some(id)))) insertOrUpdate address
-    db.run(query)
-*/
-    val query2 = (addresses returning addresses.map(_.id)) insertOrUpdate address
-    db.run(query2) flatMap {
-      case None =>
-        db.run(addresses
-          .filter(a => a.street === address.street && a.zip === address.zip && a.city === address.city)
-          .result
-          .head)
-      case Some(addressId) =>
-        Future { address.copy(id = Option(addressId)) }
-    }
+    val lowerCaseAddress = address.copy(id = address.id, geographicPoint = address.geographicPoint,
+      street = utilities.optionStringToLowerCaseOptionString(address.street), zip = address.zip,
+      city = utilities.optionStringToLowerCaseOptionString(address.city))
+    db.run((for {
+      addressFound <- addresses.filter(a => a.street === lowerCaseAddress.street &&
+        a.zip === lowerCaseAddress.zip && a.city === lowerCaseAddress.city).result.headOption
+      result <- addressFound.map(DBIO.successful).getOrElse(addresses returning addresses.map(_.id) += lowerCaseAddress)
+    } yield result match {
+        case a: Address =>
+          if (a.geographicPoint.isDefined || lowerCaseAddress.geographicPoint.isEmpty) {
+            a
+          } else {
+            val updatedAddress = lowerCaseAddress.copy(id = a.id)
+            update(updatedAddress)
+            updatedAddress
+          }
+        case id: Long => lowerCaseAddress.copy(id = Option(id))
+      }).transactionally)
   }
+
+  def update(address: Address): Future[Int] = db.run(addresses.filter(_.id === address.id).update(address))
 
   def saveAddressWithGeoPoint(address: Address): Future[Address] = address match {
     case addressWithoutGeographicPoint if addressWithoutGeographicPoint.geographicPoint.isEmpty =>

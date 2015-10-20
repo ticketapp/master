@@ -29,7 +29,6 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("0.0,0.0"))
       val address = Address(None, geoPoint, Option("privas"), Option("07000"), Option("Avignas"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
-
         whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { addressFound =>
           addressFound mustBe Option(address.copy(id = addressFound.get.id, street = Some("Avignas".toLowerCase)))
 
@@ -43,7 +42,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         try {
           whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) {
-            _ mustBe Success(savedAddress.id.get)
+            _ mustBe Address(Option(savedAddress.id.get),None,Some("privas"),Option("07000"),Some("avignas"))
           }
         } finally {
           addressMethods.delete(savedAddress.id.get)
@@ -56,9 +55,11 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("1.0,5.0"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         try {
-          val addressWithGeoPoint = address.copy(geographicPoint = geoPoint)
+          val addressWithGeoPoint = address.copy(id = savedAddress.id, geographicPoint = geoPoint)
           whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>
-            addressMethods.find(savedAddress.id.get) mustEqual Option(addressWithGeoPoint)
+            whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) {
+              _ mustEqual Option(addressWithGeoPoint)
+            }
           }
         } finally {
           addressMethods.delete(savedAddress.id.get)
