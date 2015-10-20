@@ -1,6 +1,7 @@
 package models
 
 import java.sql.Timestamp
+import java.util.UUID
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.{Geometry, Point}
@@ -151,7 +152,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       placeFollowed.userId === userPlaceRelation.userId && placeFollowed.placeId === userPlaceRelation.placeId)
       .delete)
 
-  def followByFacebookId(userId : String, facebookId: String): Future[Int] =
+  def followByFacebookId(userId : UUID, facebookId: String): Future[Int] =
    findIdByFacebookId(facebookId) flatMap {
      case Some(placeId) =>
        followByPlaceId(UserPlaceRelation(userId, placeId))
@@ -168,7 +169,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   db.run(query.head)
   }
 
-  def getFollowed(userId: String): Future[Seq[Place] ]= {
+  def getFollowed(userId: UUID): Future[Seq[Place] ]= {
     val query = for {
       placeFollowed <- placesFollowed if placeFollowed.userId === userId
       place <- places if place.id === placeFollowed.placeId

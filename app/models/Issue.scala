@@ -1,5 +1,6 @@
 package models
 
+import java.util.UUID
 import javax.inject.Inject
 
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -9,9 +10,9 @@ import silhouette.DBTableDefinitions
 
 import scala.concurrent.Future
 
-case class Issue(id: Option[Long], title: String, content: String, userId: String, fixed: Boolean)
+case class Issue(id: Option[Long], title: String, content: String, userUUID: UUID, fixed: Boolean)
 
-case class IssueComment(content: String, userId: String, issueId: Long)
+case class IssueComment(content: String, userUUID: UUID, issueId: Long)
 
 class IssueMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                      val organizerMethods: OrganizerMethods,
@@ -28,19 +29,19 @@ class IssueMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     def id = column[Long]("issueid")
     def title = column[String]("title")
     def content = column[String]("content")
-    def userId = column[String]("userid")
+    def userUUID = column[UUID]("userid")
     def fixed = column[Boolean]("fixed")
 
-    def * = (id.?, title, content, userId, fixed) <> ((Issue.apply _).tupled, Issue.unapply)
+    def * = (id.?, title, content, userUUID, fixed) <> ((Issue.apply _).tupled, Issue.unapply)
 
-    def aFK = foreignKey("userId", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def aFK = foreignKey("userid", userUUID, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
   lazy val issues = TableQuery[Issues]
 
   class IssuesComments(tag: Tag) extends Table[IssueComment](tag, "issuescomments") {
     def content = column[String]("content")
-    def userId = column[String]("useruuid")
+    def userId = column[UUID]("userid")
     def issueId = column[Long]("issueid")
 
     def * = (content, userId, issueId) <>((IssueComment.apply _).tupled, IssueComment.unapply)

@@ -1,6 +1,6 @@
 package models
 
-import java.sql.Connection
+import java.sql.{JDBCType, Connection}
 import java.util.UUID
 import javax.inject.Inject
 
@@ -16,6 +16,7 @@ import play.api.libs.iteratee.{Enumerator, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services._
+import slick.jdbc.{PositionedParameters, SetParameter}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -230,7 +231,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artistFollowed.userId === userArtistRelation.userId && artistFollowed.artistId === userArtistRelation.artistId)
       .delete)
 
-  def followByFacebookId(userId : String, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
+  def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
     case None =>
       Logger.error("Artist.followByFacebookId: ", ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId"))
       Future { 0 }
@@ -238,7 +239,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       followByArtistId(UserArtistRelation(userId, artistId))
   }
   
-  def getFollowedArtists(userId: String): Future[Seq[Artist] ]= {
+  def getFollowedArtists(userId: UUID): Future[Seq[Artist] ]= {
     val query = for {
       artistFollowed <- artistsFollowed if artistFollowed.userId === userId
       artist <- artists if artist.id === artistFollowed.artistId
@@ -246,9 +247,11 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
     db.run(query.result)
   }
-  
-  def isFollowed(userId: String, artistId: Long): Future[Boolean] = {
-    val query = sql"""SELECT exists(SELECT 1 FROM artistsFollowed WHERE userId = $userId AND artistId = $artistId)"""
+
+  def isFollowed(userArtistRelation: UserArtistRelation): Future[Boolean] = {
+    val query =
+      sql"""SELECT exists(SELECT 1 FROM artistsFollowed WHERE userId = ${userArtistRelation.userId}
+           AND artistId = ${userArtistRelation.artistId})"""
       .as[Boolean]
     db.run(query.head)
   }
