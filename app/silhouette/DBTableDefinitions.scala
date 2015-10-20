@@ -1,16 +1,11 @@
 package silhouette
 
 import java.util.UUID
-
+import services.MyPostgresDriver.api._
 import com.mohiva.play.silhouette.api.LoginInfo
-import slick.driver.JdbcProfile
-import slick.lifted.ProvenShape.proveShapeOf
 
 trait DBTableDefinitions {
   
-  protected val driver: JdbcProfile
-  import driver.api._
-
   case class DBUser (
     uuid: UUID,
     firstName: Option[String],

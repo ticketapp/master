@@ -8,14 +8,13 @@ import javax.inject.Inject
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.Future
+import services.MyPostgresDriver.api._
 
 /**
  * The DAO to store the password information.
  */
 class PasswordInfoDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     extends DelegableAuthInfoDAO[PasswordInfo] with DAOSlick {
-
-  import driver.api._
 
   protected def passwordInfoQuery(loginInfo: LoginInfo) = for {
     dbLoginInfo <- loginInfoQuery(loginInfo)

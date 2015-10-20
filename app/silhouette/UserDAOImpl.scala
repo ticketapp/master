@@ -8,13 +8,12 @@ import slick.dbio.DBIOAction
 import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.Future
+import services.MyPostgresDriver.api._
 
 /**
  * Give access to the user object using Slick
  */
 class UserDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends UserDAO with DAOSlick {
-
-  import driver.api._
 
   /**
    * Finds a user by its login info.

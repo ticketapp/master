@@ -7,14 +7,13 @@ import javax.inject.Inject
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.Future
+import services.MyPostgresDriver.api._
 
 /**
  * The DAO to store the OAuth1 information.
  */
 class OAuth1InfoDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     extends DelegableAuthInfoDAO[OAuth1Info] with DAOSlick {
-
-  import driver.api._
 
   protected def oAuth1InfoQuery(loginInfo: LoginInfo) = for {
     dbLoginInfo <- loginInfoQuery(loginInfo)
