@@ -15,6 +15,9 @@ import play.api.libs.ws.{WS, WSResponse}
 
 import scala.concurrent.Future
 
+case class SoundCloudArtistConfidence(artistId: Option[Long], soundcloudId: Long, confidence: Double)
+case class WebsitesForSoundcloudId(soundcloudId: Long, websites: Seq[String])
+
 class SearchSoundCloudTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                         val utilities: Utilities,
                                         val trackMethods: TrackMethods,
@@ -45,12 +48,10 @@ class SearchSoundCloudTracks @Inject()(protected val dbConfigProvider: DatabaseC
       }
     }
 
-  case class SoundCloudArtistConfidence(artistId: Option[Long], soundcloudId: Long, confidence: Float)
-
   def computationScConfidence(artist: Artist, soundCloudWebsites: Seq[String], soundCloudId: Long): SoundCloudArtistConfidence = {
     if(soundCloudWebsites.filter(_ contains "facebook.com/").exists(_ contains artist.facebookUrl) ||
       soundCloudWebsites.filter(_ contains "facebook.com/").exists(_ contains Some(artist.facebookId))) {
-      SoundCloudArtistConfidence(artist.id, soundCloudId, 1.toFloat)
+      SoundCloudArtistConfidence(artist.id, soundCloudId, 1)
     } else {
       val SCWebsitesWithoutFacebook = soundCloudWebsites.filterNot(_ contains "facebook.com/")
       val numberScWebsites = SCWebsitesWithoutFacebook.size
@@ -58,21 +59,19 @@ class SearchSoundCloudTracks @Inject()(protected val dbConfigProvider: DatabaseC
       if (numberSameWebsites == 0) {
         SoundCloudArtistConfidence(artist.id, soundCloudId, 0)
       } else {
-        SoundCloudArtistConfidence(artist.id, soundCloudId,calculateConfidence(numberScWebsites, numberSameWebsites))
+        SoundCloudArtistConfidence(artist.id, soundCloudId, calculateConfidence(numberScWebsites, numberSameWebsites))
       }
     }
   }
 
-  def calculateConfidence(numberScWebsites: Int, numberSameWebsites: Int): Float = {
+  def calculateConfidence(numberScWebsites: Int, numberSameWebsites: Int): Double = {
     val up = numberSameWebsites.toDouble
     val down = (numberScWebsites - numberSameWebsites).toDouble
     val n = up + down
     val z = 1.64485
     val phat = up / n
-    ((phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)).toFloat
+    (phat + z * z / (2 * n) - z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
   }
-
-  case class WebsitesForSoundcloudId(soundcloudId: Long, websites: Seq[String])
 
   def getSoundcloudWebsites(soundcloudIds: Seq[Long]): Future[Seq[WebsitesForSoundcloudId]] = Future.sequence(
     soundcloudIds.map { id =>
