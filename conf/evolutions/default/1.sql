@@ -214,7 +214,7 @@ create table logininfo (
   providerID VARCHAR NOT NULL,
   providerKey VARCHAR NOT NULL);
 
-create table userlogininfo (userID VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
+create table userlogininfo (userID UUID PRIMARY KEY, loginInfoId BIGINT NOT NULL);
 create table passwordinfo (hasher VARCHAR NOT NULL,password VARCHAR NOT NULL,salt VARCHAR,loginInfoId BIGINT NOT NULL);
 create table oauth1info (id SERIAL PRIMARY KEY,token VARCHAR NOT NULL,secret VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
 create table oauth2info (id SERIAL PRIMARY KEY,accesstoken VARCHAR NOT NULL,tokentype VARCHAR,expiresin INTEGER,refreshtoken VARCHAR,logininfoid BIGINT NOT NULL);
