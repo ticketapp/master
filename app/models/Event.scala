@@ -1,6 +1,5 @@
 package models
 
-import java.sql.Timestamp
 import java.util.UUID
 import javax.inject.Inject
 
@@ -52,16 +51,16 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   val geometryFactory = new GeometryFactory()
 
-//  def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: DateTime,
-//                endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
-//                imagePath: Option[String], tariffs: List[Tariff], addresses: List[Address]): Event =
-//    new Event(None, None, true, true, name, geographicPoint, description, startTime, endTime, ageRestriction,
-//      tariffRange, ticketSellers, imagePath)//, List.empty, List.empty, tariffs, addresses)
-//
-//  def formUnapply(event: Event) = {
-//    Some((event.name, event.geographicPoint, event.description, event.startTime, event.endTime, event.ageRestriction,
-//      event.tariffRange, event.ticketSellers, event.imagePath, event.tariffs, event.addresses))
-//  }
+  def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: DateTime,
+                endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
+                imagePath: Option[String]/*, tariffs: List[Tariff], addresses: List[Address]*/): Event =
+    new Event(None, None, true, true, name, geographicPointMethods.optionStringToOptionPoint(geographicPoint), description, startTime, endTime, ageRestriction,
+      tariffRange, ticketSellers, imagePath)//, List.empty, List.empty, tariffs, addresses)
+
+  def formUnapply(event: Event) = {
+    Some((event.name, Option(event.geographicPoint.getOrElse("").toString), event.description, event.startTime, event.endTime, event.ageRestriction,
+      event.tariffRange, event.ticketSellers, event.imagePath/*, event.tariffs, event.addresses*/))
+  }
 
 //  def getPropertiesOfEvent(event: Event): Event = event.eventId match {
 //    case None => throw new DAOException("Event.getPropertiesOfEvent: event without id has been found")

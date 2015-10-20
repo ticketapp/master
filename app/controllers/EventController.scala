@@ -7,7 +7,10 @@ import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
 import models._
+import org.postgresql.util.PSQLException
 import play.api.Logger
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
@@ -137,17 +140,17 @@ class EventController @Inject()(ws: WSClient,
       Ok(Json.toJson(events)) }
   }
 
-//  val eventBindingForm = Form(
-//    mapping(
-//      "name" -> nonEmptyText(2),
-//      "geographicPoint" -> optional(nonEmptyText(3)),
-//      "description" -> optional(nonEmptyText(2)),
-//      "startTime" -> date("yyyy-MM-dd HH:mm"),
-//      "endTime" -> optional(date("yyyy-MM-dd HH:mm")),
-//      "ageRestriction" -> number,
-//      "imagePath" -> optional(nonEmptyText(2)),
-//      "tariffRange" -> optional(nonEmptyText(3)),
-//      "ticketSellers" -> optional(nonEmptyText(3)),
+  val eventBindingForm = Form(
+    mapping(
+      "name" -> nonEmptyText(2),
+      "geographicPoint" -> optional(nonEmptyText(3)),
+      "description" -> optional(nonEmptyText(2)),
+      "startTime" -> jodaDate("yyyy-MM-dd HH:mm"),
+      "endTime" -> optional(jodaDate("yyyy-MM-dd HH:mm")),
+      "ageRestriction" -> number,
+      "imagePath" -> optional(nonEmptyText(2)),
+      "tariffRange" -> optional(nonEmptyText(3)),
+      "ticketSellers" -> optional(nonEmptyText(3))//,
 //      "tariffs" -> list(
 //        mapping(
 //          "denomination" -> nonEmptyText,
@@ -162,57 +165,80 @@ class EventController @Inject()(ws: WSClient,
 //          "zip" -> optional(text(2)),
 //          "street" -> optional(text(2))
 //        )(Address.formApply)(Address.formUnapply))
-//    )(eventMethods.formApply)(eventMethods.formUnapply)
-//  )
-//
-//  def createEvent = Action { implicit request =>
-//    eventBindingForm.bindFromRequest().fold(
-//      formWithErrors => {
-//        Logger.error("EventController.createEvent: " + formWithErrors.errorsAsJson)
-//        BadRequest(formWithErrors.errorsAsJson)
-//      },
-//      event =>
-//        eventMethods.save(event) match {
-//          case Some(eventId) => Ok(Json.toJson(eventMethods.find(eventId)))
-//          case None => InternalServerError
-//        }
-//    )
-//  }
-//
-//  def followEvent(eventId : Long) = SecuredAction { implicit request =>
-//    eventMethods.follow(request.identity.UUID, eventId) match {
-//      case Success(_) =>
-//        Created
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-//        Logger.error(s"EventController.followEventByEventId: there is no event with the id $eventId")
-//        Conflict
-//      case Failure(unknownException) =>
-//        Logger.error("EventController.followEvent", unknownException)
-//        InternalServerError
-//    }
-//  }
-//
-//  def unfollowEvent(eventId : Long) = SecuredAction { implicit request =>
-//    val userId = request.identity.UUID
-//    eventMethods.unfollow(userId, eventId) match {
-//      case Success(1) =>
-//        Ok
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-//        Logger.error(s"The user (id: $userId) does not follow the event (eventId: $eventId) or the event does not exist.")
-//        Conflict
-//      case Failure(unknownException) =>
-//        Logger.error("EventController.unfollowEvent", unknownException)
-//        InternalServerError
-//    }
-//  }
-//
-//  def getFollowedEvents = SecuredAction { implicit request =>
-//      Ok(Json.toJson(eventMethods.getFollowedEvents(request.identity.UUID)))
-//  }
-//
-//  def isEventFollowed(eventId: Long) = SecuredAction { implicit request =>
-//    Ok(Json.toJson(eventMethods.isFollowed(request.identity.UUID, eventId)))
-//  }
+    )(eventMethods.formApply)(eventMethods.formUnapply)
+  )
+
+  def createEvent = Action.async { implicit request =>
+    eventBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        Logger.error("EventController.createEvent: " + formWithErrors.errorsAsJson)
+        Future(BadRequest(formWithErrors.errorsAsJson))
+      },
+      event =>
+        eventMethods.save(event) map { event =>
+          Ok(Json.toJson(event))
+        } recover {
+          case e =>
+            Logger.error("EventController.createEvent: ", e)
+            InternalServerError
+        }
+    )
+  }
+
+  def followEvent(eventId : Long) = SecuredAction.async { implicit request =>
+    eventMethods.follow(UserEventRelation(request.identity.uuid, eventId)) map {
+      case 1 =>
+        Created
+      case _ =>
+        Logger.error("EventController.followEvent: eventMethods.follow did not return 1")
+        InternalServerError
+     } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+        Logger.error(s"EventController.followEventByEventId: there is no event with the id $eventId")
+        Conflict
+      case unknownException =>
+        Logger.error("EventController.followEvent", unknownException)
+        InternalServerError
+    }
+  }
+
+  def unfollowEvent(eventId : Long) = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    eventMethods.unfollow(UserEventRelation(userId, eventId)) map {
+      case 1 =>
+        Ok
+      case _ =>
+        Logger.error("EventController.unfollowEvent: eventMethods.unfollow did not return 1")
+        InternalServerError
+    } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"The user (id: $userId) does not follow the event (eventId: $eventId) or the event does not exist.")
+        Conflict
+      case unknownException =>
+        Logger.error("EventController.unfollowEvent", unknownException)
+        InternalServerError
+    }
+  }
+
+  def isEventFollowed(eventId: Long) = SecuredAction.async { implicit request =>
+    eventMethods.isFollowed(UserEventRelation(request.identity.uuid, eventId)) map { boolean =>
+      Ok(Json.toJson(boolean))
+    } recover {
+      case e =>
+        Logger.error("EventController.isEventFollowed: ", e)
+        InternalServerError
+    }
+  }
+
+  def getFollowedEvents = SecuredAction.async { implicit request =>
+    eventMethods.getFollowed(request.identity.uuid) map { events =>
+      Ok(Json.toJson(events))
+    } recover {
+      case e =>
+        Logger.error("EventController.getFollowedEvents: ", e)
+        InternalServerError
+    }
+  }
 
   def createEventByFacebookId(facebookId: String) = Action.async {
     eventMethods.saveFacebookEventByFacebookId(facebookId) map { event =>

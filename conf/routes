@@ -20,12 +20,12 @@ GET         /events                                       @controllers.EventCont
 GET         /events/inInterval/:hourInterval              @controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET         /events/passedInInterval/:hourInterval        @controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET         /events/:id                                   @controllers.EventController.find(id: Long)
-#POST    /events/create                                                   @controllers.EventController.createEvent
+POST        /events/create                                @controllers.EventController.createEvent
 POST        /events/create/:facebookId                    @controllers.EventController.createEventByFacebookId(facebookId: String)
-#POST    /events/:eventId/follow                                          @controllers.EventController.followEvent(eventId: Long)
-#POST    /events/:eventId/unfollow                                        @controllers.EventController.unfollowEvent(eventId: Long)
-#GET     /events/followed/                                                @controllers.EventController.getFollowedEvents
-#GET     /events/:eventId/isEventFollowed                                 @controllers.EventController.isEventFollowed(eventId: Long)
+POST        /events/:eventId/follow                       @controllers.EventController.followEvent(eventId: Long)
+POST        /events/:eventId/unfollow                     @controllers.EventController.unfollowEvent(eventId: Long)
+GET         /events/followed/                             @controllers.EventController.getFollowedEvents
+GET         /events/:eventId/isEventFollowed              @controllers.EventController.isEventFollowed(eventId: Long)
 GET         /events/containing/:pattern                   @controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
 GET         /events/city/:pattern                         @controllers.EventController.findByCityPattern(pattern: String)
 GET         /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
