@@ -31,8 +31,8 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestTrack", Set("website"))
 
-    whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-      artistId = savedArtist.id.get
+  whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
+    artistId = savedArtist.id.get
 
   "A track" must {
 
@@ -43,15 +43,13 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
         saveTrack.uuid mustBe trackId
         whenReady(trackMethods.find(trackId), timeout(Span(5, Seconds))) { trackFound =>
           trackFound mustEqual Option(track.copy(uuid = trackId, confidence = Some(0)))
-          
-          whenReady(trackMethods.delete(trackId), timeout(Span(5, Seconds))) { _ mustBe 1 }
+
+          whenReady(trackMethods.delete(trackId), timeout(Span(5, Seconds))) {
+            _ mustBe 1
+          }
         }
       }
-      whenReady(artistMethods.delete(artistId), timeout(Span(5, Seconds))) {
-        _ mustBe 1
-      }
     }
-  }
 
     /*"not be saved twice for same title and artistName" in {
       val trackId = randomUUID
@@ -247,5 +245,6 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       isArtistNameInTrackTitle("Brâssens trackTitle", "brassêns") mustBe true
       isArtistNameInTrackTitle("Brassens trackTitle", "notRelatedArtist") mustBe false
     }*/
+  }
   }
 }
