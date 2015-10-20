@@ -71,7 +71,7 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
       val track = Track(UUID.fromString("9a9ca254-0245-4a69-b66c-494f3a0ced3e"),"Toi (Snippet)",
       "https://api.soundcloud.com/tracks/190465678/stream",'s',
       "https://i1.sndcdn.com/artworks-000106271172-2q3z78-large.jpg","worakls","Worakls",
-      Some("http://soundcloud.com/worakls/toi-snippet"),None/*,None,List()*/)
+      Some("http://soundcloud.com/worakls/toi-snippet")/*,None,List()*/)
       val artist = Artist(Option(26.toLong), Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
         Option("description"), "facebookUrl", Set("website"))
       whenReady(artistMethods.addSoundCloudWebsitesIfNotInWebsites(Some(track), artist), timeout(Span(6, Seconds))) {

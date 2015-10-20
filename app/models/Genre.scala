@@ -85,10 +85,9 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def save(genre: Genre): Future[Genre] = db.run((for {
     genreFound <- genres.filter(_.name === genre.name).result.headOption
     result <- genreFound.map(DBIO.successful).getOrElse(genres returning genres.map(_.id) += genre)
-  } yield { result match {
-      case g: Genre => g
-      case id: Int => genre.copy(id = Option(id))
-    }
+  } yield result match {
+    case g: Genre => g
+    case id: Int => genre.copy(id = Option(id))
   }).transactionally)
 
   def findByFacebookUrl(facebookUrl: String): Future[Option[Artist]] = {

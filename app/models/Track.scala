@@ -26,7 +26,7 @@ case class Track (uuid: UUID,
                   artistFacebookUrl: String,
                   artistName: String,
                   redirectUrl: Option[String] = None,
-                  confidence: Option[Double] = None/*,
+                  confidence: Double = 0.toDouble/*,
                   playlistRank: Option[Double] = None,
                   genres: Seq[Genre] = Seq.empty*/)
 
@@ -147,7 +147,15 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(action)
   }
    */
-  def save(track: Track): Future[Int] = db.run(tracks += track)
+
+  def save(track: Track): Future[Track] = db.run((for {
+    trackFound <- tracks.filter(trackFound => (trackFound.title === track.title &&
+      trackFound.artistName === track.artistName) || trackFound.url === track.url).result.headOption
+    result <- trackFound.map(DBIO.successful).getOrElse(tracks returning tracks.map(_.uuid) += track)
+  } yield result match {
+      case t: Track => t
+      case uuid: UUID => track.copy(uuid = uuid)
+  }).transactionally)
 
   def delete(uuid: UUID): Future[Int] = db.run(tracks.filter(_.uuid === uuid).delete)
 

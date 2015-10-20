@@ -224,7 +224,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
   class Tracks(tag: Tag) extends Table[Track](tag, "tracks") {
     /*def id = column[Long]("trackid", O.PrimaryKey, O.AutoInc)*/
-    def uuid = column[UUID]("trackid", O.PrimaryKey, O.AutoInc)
+    def uuid = column[UUID]("trackid", O.PrimaryKey)
     def url = column[String]("url")
     def title = column[String]("title")
     def platform = column[Char]("platform")
@@ -232,12 +232,14 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def artistFacebookUrl = column[String]("artistfacebookurl")
     def artistName = column[String]("artistname")
     def redirectUrl = column[Option[String]]("redirecturl")
-    def confidence = column[Double]("confidence")
+    def confidence = column[Double]("confidence", O.Default(0.0))
     def ratingUp = column[Int]("ratingup")
     def ratingDown = column[Int]("ratingdown")
 
-    def * = (uuid, url, title, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence.?) <>
+    def * = (uuid, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl, confidence) <>
       ((Track.apply _).tupled, Track.unapply)
+
+    def aFK = foreignKey("artistfacebookurl", artistFacebookUrl, artists)(_.facebookUrl, onDelete = ForeignKeyAction.Cascade)
   }
 
   case class TrackGenreRelation(trackId: UUID, genreId: Int)

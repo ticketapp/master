@@ -126,10 +126,13 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   
   def save(artist: Artist): Future[Artist] = {
     val artistWithFormattedDescription = artist.copy(description = utilities.formatDescription(artist.description))
-    val insertQuery = artists returning artists.map(_.id) into ((artist, id) => artist.copy(id = Option(id)))
-    val action = insertQuery += artistWithFormattedDescription
-
-    db.run(action)
+    db.run((for {
+      artistFound <- artists.filter(_.facebookUrl === artist.facebookUrl).result.headOption
+      result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += artistWithFormattedDescription)
+    } yield result match {
+      case a: Artist => a
+      case id: Long => artistWithFormattedDescription.copy(id = Option(id))
+    }).transactionally)
     /*
        case Some(artistId: Long) =>
               artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId) }
