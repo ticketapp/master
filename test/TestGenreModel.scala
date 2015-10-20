@@ -44,8 +44,8 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
 
     "return the already existing genre when there was a unique violation" in {
       val genre = Genre(None, "rockadockaa")
-      whenReady(genreMethods.saveOrFind(genre), timeout(Span(5, Seconds))) { genreFound =>
-        whenReady(genreMethods.saveOrFind(genre), timeout(Span(5, Seconds))) { secondGenreFound =>
+      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { genreFound =>
+        whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { secondGenreFound =>
           try {
             genreFound mustBe secondGenreFound
           } finally {
@@ -60,7 +60,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
       val genre = Genre(None, "rockiyadockia")
       val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
         "artistFacebookUrlTestGenre", Set("website"))
-      whenReady(genreMethods.saveOrFind(genre), timeout(Span(5, Seconds))) { savedGenre =>
+      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
           try {
             whenReady(genreMethods.saveArtistRelation(genreMethods.ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
@@ -90,7 +90,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
        "artistFacebookUrlTestGenre2", Set("website"))
      val trackId = UUID.randomUUID
      val track = Track(trackId, "titleTestGenreModel1", "url", 's', "thumbnailUrl", "artistFacebookUrlTestGenre2", "artistName")
-     whenReady(genreMethods.saveOrFind(genre), timeout(Span(5, Seconds))) { savedGenre =>
+     whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
        whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
          whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
            try {
@@ -125,7 +125,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         "artistFacebookUrlTestGenreModel", "artistName")
       val genre = Genre(None, "pilipilipims")
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        whenReady(genreMethods.saveOrFind(genre), timeout(Span(5, Seconds))) { savedGenre =>
+        whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
           try {
             whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
               whenReady(genreMethods.saveTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
@@ -189,15 +189,15 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         Genre(None, "genreTest7"),
         Genre(None, "genreTest8"),
         Genre(None, "genreTest9"))
-      whenReady(genreMethods.saveOrFind(Genre(None, "genreTest1", 'g')), timeout(Span(5, Seconds))) { genre1 =>
-        whenReady(genreMethods.saveOrFind(Genre(None, "genreTest2", 'r')), timeout(Span(5, Seconds))) { genre2 =>
-          whenReady(genreMethods.saveOrFind(Genre(None, "genreTest3", 'm')), timeout(Span(5, Seconds))) { genre3 =>
-            whenReady(genreMethods.saveOrFind(Genre(None, "genreTest4", 'h')), timeout(Span(5, Seconds))) { genre4 =>
-              whenReady(genreMethods.saveOrFind(Genre(None, "genreTest5", 'e')), timeout(Span(5, Seconds))) { genre5 =>
-                whenReady(genreMethods.saveOrFind(Genre(None, "genreTest6", 'j')), timeout(Span(5, Seconds))) { genre6 =>
-                  whenReady(genreMethods.saveOrFind(Genre(None, "genreTest7", 's')), timeout(Span(5, Seconds))) { genre7 =>
-                    whenReady(genreMethods.saveOrFind(Genre(None, "genreTest8", 'l')), timeout(Span(5, Seconds))) { genre8 =>
-                      whenReady(genreMethods.saveOrFind(Genre(None, "genreTest9", 'c')), timeout(Span(5, Seconds))) { genre9 =>
+      whenReady(genreMethods.save(Genre(None, "genreTest1", 'g')), timeout(Span(5, Seconds))) { genre1 =>
+        whenReady(genreMethods.save(Genre(None, "genreTest2", 'r')), timeout(Span(5, Seconds))) { genre2 =>
+          whenReady(genreMethods.save(Genre(None, "genreTest3", 'm')), timeout(Span(5, Seconds))) { genre3 =>
+            whenReady(genreMethods.save(Genre(None, "genreTest4", 'h')), timeout(Span(5, Seconds))) { genre4 =>
+              whenReady(genreMethods.save(Genre(None, "genreTest5", 'e')), timeout(Span(5, Seconds))) { genre5 =>
+                whenReady(genreMethods.save(Genre(None, "genreTest6", 'j')), timeout(Span(5, Seconds))) { genre6 =>
+                  whenReady(genreMethods.save(Genre(None, "genreTest7", 's')), timeout(Span(5, Seconds))) { genre7 =>
+                    whenReady(genreMethods.save(Genre(None, "genreTest8", 'l')), timeout(Span(5, Seconds))) { genre8 =>
+                      whenReady(genreMethods.save(Genre(None, "genreTest9", 'c')), timeout(Span(5, Seconds))) { genre9 =>
                         try {
                           whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { _ mustBe expectedGenres }
                           whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { foundGenres =>

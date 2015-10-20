@@ -41,6 +41,12 @@ class Utilities @Inject()() {
   def normalizeUrl(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
 
+
+  def optionStringToLowerCaseOptionString(maybeString: Option[String]): Option[String] = maybeString match {
+    case Some(string: String) => Option(string.toLowerCase)
+    case None => None
+  }
+
   def removeMailFromListOfWebsites(websites: Set[String]): Set[String] = websites.filter(website =>
     website.indexOf("@") == -1)
 
