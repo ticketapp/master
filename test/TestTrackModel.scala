@@ -1,39 +1,59 @@
-/*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 import models._
 import org.postgresql.util.PSQLException
 import org.scalatest._
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.Logger
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 import scala.util.{Failure, Success}
 
 class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
+
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities
+  val trackMethods = new TrackMethods(dbConfProvider, utilities)
+  val genreMethods = new GenreMethods(dbConfProvider, utilities)
+  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
+  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
+  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
+    trackMethods, utilities)
+
   var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestTrack", Set("website"))
 
-  override def beforeAll() = {
-    artistId = Artist.save(artist).get
-  }
-
-  override def afterAll() = {
-    Artist.delete(artistId)
-  }
+    whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
+      artistId = savedArtist.id.get
 
   "A track" must {
 
     "be saved and deleted" in {
-      val trackId = randomUUID
+      val trackId = UUID.randomUUID
       val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-
-      save(track) mustBe Success(true)
-      find(trackId) mustEqual Success(Option(track.copy(uuid = trackId, confidence = Some(0))))
-      delete(trackId) mustBe Success(1)
+      whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { saveTrack =>
+        saveTrack.uuid mustBe trackId
+        whenReady(trackMethods.find(trackId), timeout(Span(5, Seconds))) { trackFound =>
+          trackFound mustEqual Option(track.copy(uuid = trackId, confidence = Some(0)))
+          
+          whenReady(trackMethods.delete(trackId), timeout(Span(5, Seconds))) { _ mustBe 1 }
+        }
+      }
+      whenReady(artistMethods.delete(artistId), timeout(Span(5, Seconds))) {
+        _ mustBe 1
+      }
     }
+  }
 
-    "not be saved twice for same title and artistName" in {
+    /*"not be saved twice for same title and artistName" in {
       val trackId = randomUUID
       val trackId2 = randomUUID
       val track = Track(trackId, "title2", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
@@ -226,7 +246,6 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       isArtistNameInTrackTitle("Bràsséns trackTitle", "brassens") mustBe true
       isArtistNameInTrackTitle("Brâssens trackTitle", "brassêns") mustBe true
       isArtistNameInTrackTitle("Brassens trackTitle", "notRelatedArtist") mustBe false
-    }
+    }*/
   }
 }
-*/
