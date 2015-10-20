@@ -759,17 +759,21 @@ LANGUAGE plpgsql;
 CREATE TABLE artistsGenres (
   artistId                INT REFERENCES artists (artistId),
   genreId                 INT REFERENCES genres (genreId),
-  counter                 INT NOT NULL,
+  weight                  INT NOT NULL,
   PRIMARY KEY (artistId, genreId)
 );
-CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(artistIdValue BIGINT, genreIdValue BIGINT) RETURNS VOID AS
+CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(
+  artistIdValue BIGINT,
+  genreIdValue BIGINT,
+  weightValue BIGINT)
+  RETURNS VOID AS
   $$
     BEGIN
-      UPDATE artistsGenres SET counter = counter + 1 WHERE artistId = artistIdValue AND genreId = genreIdValue;;
+      UPDATE artistsGenres SET weight = weightValue WHERE artistId = artistIdValue AND genreId = genreIdValue;;
       IF found THEN
         RETURN;;
       ELSE
-        INSERT INTO artistsGenres(artistId, genreId, counter) VALUES (artistIdValue, genreIdValue, 1);;
+        INSERT INTO artistsGenres(artistId, genreId, weight) VALUES (artistIdValue, genreIdValue, 1);;
         RETURN;;
       END IF;;
     END;;
