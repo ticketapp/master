@@ -63,20 +63,20 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
       whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
           try {
-            whenReady(genreMethods.saveArtistRelation(genreMethods.ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
+            whenReady(genreMethods.saveArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
               timeout(Span(5, Seconds))) { artistGenreRelation =>
 
-              artistGenreRelation mustBe genreMethods.ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 0)
-              whenReady(genreMethods.saveArtistRelation(genreMethods.ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
+              artistGenreRelation mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 0)
+              whenReady(genreMethods.saveArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
                 timeout(Span(5, Seconds))) { artistGenreRelationUpdated =>
-                artistGenreRelationUpdated mustBe genreMethods.ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 1)
+                artistGenreRelationUpdated mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 1)
               }
 
              // whenReady(artistMethods.findAllByGenre("rockiyadockia", 1, 0), timeout(Span(5, Seconds))) { artistsSet =>
 
                // assert(artistsSet.nonEmpty)
 
-                whenReady(genreMethods.deleteArtistRelation(genreMethods.ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
+                whenReady(genreMethods.deleteArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
                 timeout(Span(5, Seconds))) { _ mustBe 1 }
               //}
             }
@@ -98,7 +98,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
        whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
          whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
            try {
-             whenReady(genreMethods.saveTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+             whenReady(genreMethods.saveTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
                timeout(Span(5, Seconds))) { trackGenreRelation =>
 
                trackGenreRelation mustBe 1
@@ -107,7 +107,7 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
 
                  //assert(tracksSet.nonEmpty)
 
-                 whenReady(genreMethods.deleteTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+                 whenReady(genreMethods.deleteTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
                    timeout(Span(5, Seconds))) { _ mustBe 1 }
                //}
              }
@@ -132,13 +132,13 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
         whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
           try {
             whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
-              whenReady(genreMethods.saveTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+              whenReady(genreMethods.saveTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
               timeout(Span(5, Seconds))) { genreTrackRelation =>
                 whenReady(genreMethods.findAllByTrack(trackId), timeout(Span(5, Seconds))) { tracksSeq =>
 
                   tracksSeq mustBe Seq(genre.copy(id = Some(savedGenre.id.get)))
 
-                  whenReady(genreMethods.deleteTrackRelation(genreMethods.TrackGenreRelation(trackId, savedGenre.id.get)),
+                  whenReady(genreMethods.deleteTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
                     timeout(Span(5, Seconds))) { _ mustBe 1 }
                 }
               }
