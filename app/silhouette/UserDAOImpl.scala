@@ -37,12 +37,12 @@ class UserDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
   /**
    * Finds a user by its user ID.
    *
-   * @param userID The ID of the user to find.
+   * @param uuid The ID of the user to find.
    * @return The found user or None if no user for the given ID could be found.
    */
-  def find(userID: UUID) = {
+  def find(uuid: UUID) = {
     val query = for {
-      dbUser <- slickUsers.filter(_.id === userID)
+      dbUser <- slickUsers.filter(_.id === uuid)
       dbUserLoginInfo <- slickUserLoginInfos.filter(_.userUUID === dbUser.id)
       dbLoginInfo <- slickLoginInfos.filter(_.id === dbUserLoginInfo.loginInfoId)
     } yield (dbUser, dbLoginInfo)
@@ -61,9 +61,7 @@ class UserDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     }
   }
 
-  def delete(userID: UUID) = {
-    db.run(slickUsers.filter(_.id === userID).delete)
-  }
+  def delete(uuid: UUID) = { db.run(slickUsers.filter(_.id === uuid).delete) }
   /**
    * Saves a user.
    *

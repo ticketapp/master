@@ -45,7 +45,7 @@ class GeographicPointMethods @Inject()(protected val dbConfigProvider: DatabaseC
   }
   }
 
-  def readGoogleGeographicPoint(googleGeoCodeResponse: WSResponse): Try[Option[Point]] = googleGeoCodeResponse.statusText match {
+  def readGoogleGeographicPoint(googleGeoCodeResponse: WSResponse): Try[Option[Geometry]] = googleGeoCodeResponse.statusText match {
     case "OK" =>
       val googleGeoCodeJson = googleGeoCodeResponse.json
       val latitude = ((googleGeoCodeJson \ "results")(0) \ "geometry" \ "location" \ "lat").asOpt[Double]
@@ -75,17 +75,17 @@ class GeographicPointMethods @Inject()(protected val dbConfigProvider: DatabaseC
 
   val geometryFactory = new GeometryFactory()
 
-  def stringToGeographicPoint(string: String): Try[Point] = {
+  def stringToGeographicPoint(string: String): Try[Geometry] = {
     val latitudeAndLongitude: Array[String] = string.split(",")
     latAndLngToGeographicPoint(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble)
   }
 
-  def latAndLngToGeographicPoint(latitude: Double, longitude: Double): Try[Point] = Try {
+  def latAndLngToGeographicPoint(latitude: Double, longitude: Double): Try[Geometry] = Try {
     val coordinate= new Coordinate(latitude, longitude)
     geometryFactory.createPoint(coordinate)
   }
 
-  def optionStringToOptionPoint(maybeGeographicPoint: Option[String]): Option[Point] = maybeGeographicPoint match {
+  def optionStringToOptionPoint(maybeGeographicPoint: Option[String]): Option[Geometry] = maybeGeographicPoint match {
     case None =>
       None
     case Some(geoPoint) =>

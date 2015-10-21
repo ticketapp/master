@@ -97,7 +97,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
     }
 
-  def findInPeriodNear(hourInterval: Int, geographicPoint: Point, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+  def findInPeriodNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
 
@@ -122,7 +122,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       db.run(query.result)
     }
 
-  def findAllByGenre(genreName: String, geographicPoint: Point, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+  def findAllByGenre(genreName: String, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
 
@@ -236,7 +236,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.take(20).result)
   }
 
-  def findAllContaining(pattern: String, geographicPoint: Point): Future[Seq[Event]] = {
+  def findAllContaining(pattern: String, geographicPoint: Geometry): Future[Seq[Event]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
     val lowercasePattern = pattern.toLowerCase
