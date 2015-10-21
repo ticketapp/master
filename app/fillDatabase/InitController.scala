@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import com.vividsolutions.jts.geom.Point
+import com.vividsolutions.jts.geom.{Geometry, Point}
 import models._
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -26,24 +26,15 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
                                val utilities: Utilities,
                                val env: Environment[User, CookieAuthenticator],
                                socialProviderRegistry: SocialProviderRegistry)
-    extends Silhouette[User, CookieAuthenticator] with HasDatabaseConfigProvider[MyPostgresDriver] {
+    extends Silhouette[User, CookieAuthenticator]
+    with HasDatabaseConfigProvider[MyPostgresDriver]
+    with MyDBTableDefinitions {
   
   def init() = {
     insertFrenchCities()
     insertGenres()
     insertTwoLettersArtists()
   }
-
-  case class FrenchCity(name: String, geographicPoint: Point)
-
-  class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
-    def name = column[String]("name")
-    def geographicPoint = column[Point]("geographicpoint")
-
-    def * = (name, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
-  }
-
-  lazy val frenchCities = TableQuery[FrenchCities]
 
   def insertFrenchCities() = Action {
     val lines = Source.fromFile("textFiles/villes_france.sql").getLines()

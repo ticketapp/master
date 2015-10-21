@@ -89,9 +89,14 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
 
   def save(organizer: Organizer): Future[Organizer] = {
-    val insertQuery = organizers returning organizers.map(_.id) into ((organizer, id) => organizer.copy(id = Option(id)))
-    val action = insertQuery += organizer
-    db.run(action)
+    val organizerWithFormattedDescription = organizer.copy(description = utilities.formatDescription(organizer.description))
+    db.run((for {
+      organizerFound <- organizers.filter(_.id === organizer.id).result.headOption
+      result <- organizerFound.map(DBIO.successful).getOrElse(organizers returning organizers.map(_.id) += organizerWithFormattedDescription)
+    } yield result match {
+        case o: Organizer => o
+        case id: Long => organizerWithFormattedDescription.copy(id = Option(id))
+      }).transactionally)
   }
 
 
@@ -140,7 +145,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def deleteEventRelation(eventId: Long, organizerId: Long): Future[Int] = db.run(eventsOrganizers.filter(eventOrganizer =>
       eventOrganizer.eventId === eventId && eventOrganizer.organizerId === organizerId).delete)
 
-    def delete(id: Long): Future[Int] = db.run(organizers.filter(_.id === id).delete)
+  def delete(id: Long): Future[Int] = db.run(organizers.filter(_.id === id).delete)
+
   /*
      def followById(userId : UUID, organizerId : Long): Try[Option[Long]] = Try {
        DB.withConnection { implicit connection =>

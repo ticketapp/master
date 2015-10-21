@@ -20,6 +20,7 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
   val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
   val userDAOImpl = new UserDAOImpl(dbConfProvider)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
 
   "A user" must {
 
@@ -81,22 +82,24 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
         }
       }
     }
-//
-//    "get his followed organizers" in {
-//      val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
-//        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-//        geographicPoint = Option("(5.4,5.6)"))
-//      val organizerId = Organizer.save(organizer).get.get
-//      try {
-//        Organizer.followByOrganizerId("userTestId", organizerId)
-//
-//        Organizer.getFollowedOrganizers(IdentityId("userTestId", "providerId")) should not be empty
-//
-//        Organizer.unfollowByOrganizerId("userTestId", organizerId) mustBe Success(1)
-//      } finally {
-//        Organizer.delete(organizerId)
-//      }
-//    }
+
+   /* "get his followed organizers" in {
+      val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+        val organizerId = savedOrganizer.id.get
+        try {
+          organizerMethods.followByOrganizerId("userTestId", organizerId)
+
+          Organizer.getFollowedOrganizers(IdentityId("userTestId", "providerId")) should not be empty
+
+          Organizer.unfollowByOrganizerId("userTestId", organizerId) mustBe 1
+        } finally {
+          Organizer.delete(organizerId)
+        }
+      }
+    }*/
 //
 //    "get tracks he had removed" in {
 //      val artist = Artist(None, Option("facebookIdTestUserModel"), "artistTest", Option("imagePath"),
