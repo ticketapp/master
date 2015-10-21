@@ -61,6 +61,9 @@ class UserDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     }
   }
 
+  def delete(userID: UUID) = {
+    db.run(slickUsers.filter(_.id === userID).delete)
+  }
   /**
    * Saves a user.
    *

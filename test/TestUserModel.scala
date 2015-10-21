@@ -8,13 +8,18 @@ import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import silhouette.UserDAOImpl
+import services.Utilities
+
 
 class TestUserModel extends PlaySpec with OneAppPerSuite {
 
   val appBuilder = new GuiceApplicationBuilder()
   val injector = appBuilder.injector()
   val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities
+  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
   val userDAOImpl = new UserDAOImpl(dbConfProvider)
+  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
 
   "A user" must {
 
@@ -36,26 +41,46 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
 
         whenReady(userDAOImpl.find(user.loginInfo), timeout(Span(2, Seconds))) { userFound =>
           userFound mustBe Option(userSaved)
+          whenReady(userDAOImpl.delete(user.uuid), timeout(Span(5, Seconds))) {
+            _ mustBe 1
+          }
         }
       }
     }
 
-//    "get his followed places" in {
-//      val place = Place(None, "test", None, None, None, None, None, None, None)
-//
-//      whenReady(Place.save(place), timeout(Span(2, Seconds))) { tryPlaceId =>
-//        val placeId = tryPlaceId.get.get
-//        try {
-//          Place.followByPlaceId("userTestId", placeId)
-//
-//          Place.getFollowedPlaces(IdentityId("userTestId", "providerId")) should not be empty
-//
-//          Place.unfollowByPlaceId("userTestId", placeId) mustBe Success(1)
-//        } finally {
-//          Place.delete(placeId)
-//        }
-//      }
-//    }
+    "get his followed places" in {
+      val place = Place(None, "test", None, None, None, None, None, None, None)
+      val uuid: UUID = UUID.randomUUID()
+      val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName1"),
+        lastName = Option("lastName1"),
+        fullName = Option("fullName1"),
+        email = Option("email1"),
+        avatarURL = Option("avatarUrl1"))
+
+      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
+        val placeId = savedPlace.id.get
+        try {
+          whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
+            whenReady(placeMethods.followByPlaceId(placeMethods.UserPlaceRelation(uuid, placeId)),
+              timeout(Span(5, Seconds))) { resp =>
+              whenReady(placeMethods.getFollowed(uuid), timeout(Span(5, Seconds))) { followedPlaces =>
+                assert(followedPlaces.nonEmpty)
+                whenReady(placeMethods.unfollowByPlaceId(placeMethods.UserPlaceRelation(uuid, placeId))) { isDeletePlace =>
+                  isDeletePlace mustBe 1
+                  whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
+                }
+              }
+            }
+          }
+        } finally {
+          placeMethods.delete(placeId)
+        }
+      }
+    }
 //
 //    "get his followed organizers" in {
 //      val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
