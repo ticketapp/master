@@ -206,7 +206,7 @@ create table users (
   firstName VARCHAR,
   lastName VARCHAR,
   fullName VARCHAR,
-  email VARCHAR,
+  email VARCHAR UNIQUE,
   avatarURL VARCHAR);
 
 create table logininfo (
@@ -344,9 +344,8 @@ CREATE TABLE places (
   capacity                  INT,
   openingHours              VARCHAR(255),
   imagePath                 VARCHAR,
-  organizerId               BIGINT,
-  UNIQUE(facebookId),
-  UNIQUE(organizerId)
+  linkedOrganizerId         BIGINT,
+  UNIQUE(facebookId)
 );
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
 INSERT into places(name, geographicPoint, facebookId)

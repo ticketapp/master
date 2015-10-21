@@ -54,13 +54,14 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
   def save(place: Place): Future[Place] = {
-//      val placeuallyAddressId = Address.saveAddressInFutureWithGeoPoint(place.address)
-//      'webSites -> Utilities.setToOptionString(getNormalizedWebsitesInText(place.webSites))
-//    'organizerId -> organizerMethods.findIdByFacebookId(place.facebookId))
-    val query = places returning places.map(_.id) into ((place, id) => place.copy(id = Option(id))) +=
-      place.copy(description =  utilities.formatDescription(place.description))
-
-    db.run(query)
+    val placeWithFormattedDescription = place.copy(description = utilities.formatDescription(place.description))
+    db.run((for {
+      placeFound <- places.filter(_.id === place.id).result.headOption
+      result <- placeFound.map(DBIO.successful).getOrElse(places returning places.map(_.id) += placeWithFormattedDescription)
+    } yield result match {
+        case p: Place => p
+        case id: Long => placeWithFormattedDescription.copy(id = Option(id))
+      }).transactionally)
   }
 
   def find(id: Long): Future[Option[Place]] = db.run(places.filter(_.id === id).result.headOption)
