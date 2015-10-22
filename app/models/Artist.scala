@@ -18,25 +18,29 @@ import play.api.libs.ws.{WS, WSResponse}
 import services._
 import slick.jdbc.{PositionedParameters, SetParameter}
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 import services.MyPostgresDriver.api._
+import scala.concurrent.duration._
 
-case class Artist (id: Option[Long],
-                   facebookId: Option[String],
-                   name: String,
-                   imagePath: Option[String] = None,
-                   description: Option[String] = None,
-                   facebookUrl: String,
-                   websites: Set[String] = Set.empty,
+
+case class Artist(id: Option[Long],
+                  facebookId: Option[String],
+                  name: String,
+                  imagePath: Option[String] = None,
+                  description: Option[String] = None,
+                  facebookUrl: String,
+                  websites: Set[String] = Set.empty,
 //                   genres: Seq[Genre] = Seq.empty,
 //                   tracks: Seq[Track] = Seq.empty,
-                   likes: Option[Int] = None,
-                   country: Option[String] = None)
+                  likes: Option[Int] = None,
+                  country: Option[String] = None)
 
-case class PatternAndArtist (searchPattern: String, artist: Artist)
+case class ArtistWithGenres(artist: Artist, genres: Seq[Genre])
+
+case class PatternAndArtist(searchPattern: String, artist: Artist)
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                        val genreMethods: GenreMethods,
@@ -67,19 +71,84 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 //      genres = Genre.findAllByArtist(artist.id.getOrElse(-1L).toInt)
 //  )
 
-  def findAll: Future[Seq[Artist]] =  db.run(artists.result)//        .map(getArtistProperties)
+  def findAll: Future[Seq[Artist]] = db.run(artists.result)//        .map(getArtistProperties)
+//
+//  Vector(
+//    (
+//      Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None),
+//      Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1)))
+//      ), (
+//      Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None),
+//      Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1)))
+//      ), (
+//      Artist(Some(284),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath), Some(<div class='column large-12'>description</div>),facebookUrl1,Set(website),None,None),
+//      None)
+//  )
+//
+//
+//
+//  Vector(
+//    (Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1))), Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
+//    (Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1))),Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
+//    (None,Artist(Some(291),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),facebookUrl1,Set(website),None,None))
+//  )
 
-  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[Artist]] = {
-    val query = artists.drop(offset).take(numberToReturn)
-    db.run(query.result)
-//        .map(getArtistProperties)
+//  Map(
+//    Artist(Some(298),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),
+//      facebookUrl1,Set(website),None,None) ->
+//      Vector((None,
+//        Artist(Some(298),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),
+//        facebookUrl1,Set(website),None,None))),
+//    Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None) ->
+//      Vector((Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1))),
+//        Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
+//        (Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1))),Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None))))
+
+
+
+//  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithGenres]] = {
+//    val query = genres join
+//      artistsGenres on (_.id === _.genreId) joinRight
+//      artists on (_._2.artistId === _.id)
+//
+//    val action = query.drop(offset).take(numberToReturn).result
+//    db.run(action) map { artistWithRelations =>
+//       artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
+//    }
+////        .map(getArtistProperties)
+//  }
+
+  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithGenres]] = {
+    val query = /*tracks join*/
+      genres join
+      artistsGenres on (_.id === _.genreId) joinRight
+      artists on (_._2.artistId === _.id)
+
+    val action = query.drop(offset).take(numberToReturn).result
+    db.run(action) map { artistWithRelations =>
+      artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
+    }
+    //        .map(getArtistProperties)
   }
-  
+
   def findAllByEvent(event: Event): Future[Seq[Artist]] = {
+    val query2 = for {
+      e <- events if e.id === event.id
+      eventArtist <- eventsArtists
+      artist <- artists if artist.id === eventArtist.artistId
+      artistGenre <- artistsGenres if artistGenre.artistId === artist.id
+      genre <- genres if genre.id === artistGenre.genreId
+//      artistGenre <- artists joinLeft artistsGenres on (artistGenre.artistId === artist.id)
+    } yield (artist, genre)
+
+    val a = Await.result(db.run(query2.result), 3 seconds)
+
+    println(a)
+
     val query = for {
       e <- events if e.id === event.id
       eventArtist <- eventsArtists
-      artist <- artists if artist.id === eventArtist.artistId 
+      artist <- artists if artist.id === eventArtist.artistId
     } yield artist
 
     db.run(query.result)
@@ -168,17 +237,21 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def getArtistTracks(patternAndArtist: PatternAndArtist): Enumerator[Set[Track]] = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
       searchSoundCloudTracks.getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
-        addSoundCloudWebsiteIfMissing(soundCloudTracks.headOption, patternAndArtist.artist)
-        addSoundCloudWebsitesIfNotInWebsites(soundCloudTracks.headOption, patternAndArtist.artist)
+        soundCloudTracks.headOption match {
+          case Some(track) =>
+            addSoundCloudUrlIfMissing(track, patternAndArtist.artist)
+            addWebsitesFoundOnSoundCloud(track, patternAndArtist.artist)
+          case None =>
+        }
         Enumerator(soundCloudTracks.toSet).andThen(Enumerator.eof)
       })
 
     val youtubeTracksEnumerator =
       searchYoutubeTracks.getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern).andThen(Enumerator.eof)
 
-   val youtubeTracksFromChannel = Enumerator.flatten(searchYoutubeTracks.getYoutubeTracksByChannel(patternAndArtist.artist) map { track =>
+    val youtubeTracksFromChannel = Enumerator.flatten(searchYoutubeTracks.getYoutubeTracksByChannel(patternAndArtist.artist) map { track =>
      Enumerator(track).andThen(Enumerator.eof)
-   } )
+    } )
 
     val youtubeTracksFromYoutubeUser = Enumerator.flatten(
       searchYoutubeTracks.getYoutubeTracksByYoutubeUser(patternAndArtist.artist) map { track =>
@@ -200,16 +273,15 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     db.run(query)
   }
 
-  def addSoundCloudWebsiteIfMissing(soundCloudTrack: Option[Track], artist: Artist): Unit = soundCloudTrack match {
+  def addSoundCloudUrlIfMissing(soundCloudTrack: Track, artist: Artist): Future[Int] = soundCloudTrack.redirectUrl match {
     case None =>
-    case Some(soundCloudTrack: Track) =>
-      soundCloudTrack.redirectUrl match {
-        case None =>
-        case Some(redirectUrl) =>
-          val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl))
-          if (!artist.websites.contains(refactoredRedirectUrl) && artist.id.nonEmpty)
-            addWebsite(artist.id.get, refactoredRedirectUrl)
-      }
+      Future(0)
+    case Some(redirectUrl) =>
+      val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl))
+      if (!artist.websites.contains(refactoredRedirectUrl) && artist.id.nonEmpty)
+        addWebsite(artist.id.get, refactoredRedirectUrl)
+      else
+        Future(0)
   }
 
   def saveWithEventRelation(artist: Artist, eventId: Long): Future[Int] = save(artist) flatMap { artist =>
@@ -462,38 +534,37 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
                 maybeCountry: Option[String]): Artist = {
-   val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
-   val websitesSet = utilities.getNormalizedWebsitesInText(maybeWebsites)
+    val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
+    val websitesSet = utilities.getNormalizedWebsitesInText(maybeWebsites)
      .filterNot(_.contains("facebook.com"))
      .filterNot(_ == "")
-   val description = utilities.formatDescription(maybeDescription)
-   val genres = genreMethods.genresStringToGenresSet(maybeGenre)
-   Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet/*, genres.toSeq,
+    val description = utilities.formatDescription(maybeDescription)
+    val genres = maybeGenre match {
+     case Some(genre) => genreMethods.genresStringToGenresSet(genre)
+     case None => Set.empty
+    }
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet/*, genres.toSeq,
      Seq.empty, maybeLikes, maybeCountry*/)
   }
 
   def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =
     imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
 
-  def addSoundCloudWebsitesIfNotInWebsites(maybeTrack: Option[Track], artist: Artist): Future[Seq[String]] =
-    maybeTrack match {
-      case None => Future(Seq.empty)
-      case Some(track: Track) => track.redirectUrl match {
-        case None => Future(Seq.empty)
-        case Some(redirectUrl) => val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).
-          substring("soundcloud.com/".length)
-          WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
-            .withQueryString("client_id" -> utilities.soundCloudClientId)
-            .get()
-            .map { soundCloudResponse =>
-            readSoundCloudWebsites(soundCloudResponse).map { website =>
-              val normalizedWebsite = utilities.normalizeUrl(website)
-              if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty) {
-                addWebsite(artist.id.get, normalizedWebsite)
-              }
-            }
-            readSoundCloudWebsites(soundCloudResponse)
+  def addWebsitesFoundOnSoundCloud(track: Track, artist: Artist): Future[Seq[String]] = track.redirectUrl match {
+    case None => Future(Seq.empty)
+    case Some(redirectUrl) => val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).
+      substring("soundcloud.com/".length)
+      WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
+        .withQueryString("client_id" -> utilities.soundCloudClientId)
+        .get()
+        .map { soundCloudResponse =>
+        readSoundCloudWebsites(soundCloudResponse).map { website =>
+          val normalizedWebsite = utilities.normalizeUrl(website)
+          if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty) {
+            addWebsite(artist.id.get, normalizedWebsite)
           }
+        }
+        readSoundCloudWebsites(soundCloudResponse)
       }
-    }
+  }
 }

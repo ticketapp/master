@@ -69,16 +69,17 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
               artistGenreRelation mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 0)
               whenReady(genreMethods.saveArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
                 timeout(Span(5, Seconds))) { artistGenreRelationUpdated =>
+
                 artistGenreRelationUpdated mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 1)
               }
 
-             // whenReady(artistMethods.findAllByGenre("rockiyadockia", 1, 0), timeout(Span(5, Seconds))) { artistsSet =>
+              whenReady(artistMethods.findAllByGenre("rockiyadockia", 1, 0), timeout(Span(5, Seconds))) { artistsSet =>
 
-               // assert(artistsSet.nonEmpty)
+                assert(artistsSet.nonEmpty)
 
                 whenReady(genreMethods.deleteArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
                 timeout(Span(5, Seconds))) { _ mustBe 1 }
-              //}
+              }
             }
           } finally {
             genreMethods.delete(savedGenre.id.get)

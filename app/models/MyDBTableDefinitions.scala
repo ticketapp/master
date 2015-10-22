@@ -72,8 +72,8 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
     def * = (artistId, genreId, weight) <> ((ArtistGenreRelation.apply _).tupled, ArtistGenreRelation.unapply)
 
-    def aFK = foreignKey("artistid", artistId, artists)(_.id, onDelete=ForeignKeyAction.Cascade)
-    def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete=ForeignKeyAction.Cascade)
+    def aFK = foreignKey("artistid", artistId, artists)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
   class Genres(tag: Tag) extends Table[Genre](tag, "genres") {

@@ -52,6 +52,27 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
+    "be found" in {
+      val artist = Artist(None, Option("facebookIdTestArtistModel1"), "artistTest1", Option("imagePath"),
+        Option("description"), "facebookUrl1", Set("website"))
+      whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
+        try {
+          whenReady(artistMethods.findSinceOffset(2, 0), timeout(Span(5, Seconds))) { foundArtist =>
+
+            println("findAll: " + Await.result(artistMethods.findAll, 2 seconds))
+
+            foundArtist.headOption mustBe Option(artist.copy(id = Some(savedArtist.id.get),
+              description = Some("<div class='column large-12'>description</div>")))
+
+            whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+          }
+        } finally {
+          artistMethods.delete(savedArtist.id.get)
+        }
+      }
+    }
+
+
     "be followed and unfollowed by a user" in {
       val artist = Artist(None, Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),
         "facebookUrl2", Set("website"))
@@ -146,8 +167,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "have his websites updated" in {
-      val artist = Artist(None, Option("facebookId4"), "artistTest4", Option("imagePath"), Option("description"),
-        "facebookUrl4", Set("website"))
+      val artist = Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
+        "facebookUrl5", Set("website"))
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         try {
           whenReady(artistMethods.addWebsite(savedArtist.id.get, "normalizedUrl"), timeout(Span(5, Seconds))) { resp =>
@@ -166,25 +187,41 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     "have another website" in {
       val artist = Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
         "facebookUrl5", Set("website"))
-      val maybeTrack = Option(Track(UUID.randomUUID, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
-        Option("redirectUrl")))
+      val track = Track(UUID.randomUUID, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
+        Option("redirectUrl"))
+
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        val artistWithId = artist.copy(id = Option(savedArtist.id.get))
-        artistMethods.addSoundCloudWebsiteIfMissing(maybeTrack, artistWithId)
-        try {
-          whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { artistFound =>
-            artistFound mustBe Option(artistWithId.copy(websites = Set("website", "redirecturl"),
-              description = Some("<div class='column large-12'>description</div>")))
+        whenReady(artistMethods.addSoundCloudUrlIfMissing(track, savedArtist), timeout(Span(5, Seconds))) { _ =>
+          try {
+            whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { artistFound =>
+              artistFound mustBe Option(savedArtist.copy(websites = Set("website", "redirecturl"),
+                description = Some("<div class='column large-12'>description</div>")))
+            }
+          } finally {
+            whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) {
+              _ mustBe 1
+            }
           }
-        } catch {
-          case e: Exception => throw e
-        } finally {
-          whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
         }
       }
     }
 
-    "get tracks for an artist" in {
+    "save soundcloud websites for an artist" in {
+      val track = Track(UUID.fromString("9a9ca254-0245-4a69-b66c-494f3a0ced3e"),"Toi (Snippet)",
+        "https://api.soundcloud.com/tracks/190465678/stream",'s',
+        "https://i1.sndcdn.com/artworks-000106271172-2q3z78-large.jpg","worakls","Worakls",
+        Some("http://soundcloud.com/worakls/toi-snippet")/*,None,List()*/)
+      val artist = Artist(Option(26.toLong), Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
+        Option("description"), "facebookUrl", Set("website"))
+
+      whenReady(artistMethods.addWebsitesFoundOnSoundCloud(track, artist), timeout(Span(6, Seconds))) {
+
+        _ mustBe List("http://www.hungrymusic.fr", "https://www.youtube.com/user/worakls/videos",
+          "https://twitter.com/worakls", "https://www.facebook.com/worakls/")
+      }
+    }
+
+   /* "get tracks for an artist" in {
       val patternAndArtist = PatternAndArtist("Feu! Chatterton",
         Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
           Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
@@ -192,9 +229,9 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
           /*List(),List(),*/None,None))
       val enumerateTracks = artistMethods.getArtistTracks(patternAndArtist)
       val iteratee = Iteratee.foreach[Set[Track]]{ track => println("track = " + track) }
-      whenReady(enumerateTracks |>> iteratee, timeout(Span(6, Seconds))) { a=>
-          a
+      whenReady(enumerateTracks |>> iteratee, timeout(Span(6, Seconds))) { tracks =>
+          tracks
       }
-    }
+    }*/
   }
 }

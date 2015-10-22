@@ -6,7 +6,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
-class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
+class TestSearchArtist extends PlaySpec with OneAppPerSuite {
 
   val appBuilder = new GuiceApplicationBuilder()
   val injector = appBuilder.injector()
@@ -22,13 +22,13 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
   "SearchArtistController" must {
 
     "find a sequence of artists on Facebook" in {
-      whenReady (artistMethods.getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
+      whenReady(artistMethods.getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
         assert(artists.nonEmpty)
       }
     }
 
     "find Rone (an artist) on Facebook" in {
-      whenReady (artistMethods.getFacebookArtistByFacebookUrl("roneofficial"), timeout(Span(6, Seconds))) { artist =>
+      whenReady(artistMethods.getFacebookArtistByFacebookUrl("roneofficial"), timeout(Span(6, Seconds))) { artist =>
         assert(artist.isDefined)
       }
     }
@@ -173,7 +173,8 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
       ,"woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
 
       whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
-        _.flatten.map{ artist => artist.name } mustBe expectedArtists      }
+
+        _.flatten.map{ artist => artist.name } mustBe expectedArtists }
     }
 
     "find artists in event's title" in {
@@ -188,11 +189,12 @@ class TestSearchArtistController extends PlaySpec with OneAppPerSuite {
         "soundcloud.com/osunlade",
       "discogs.com/artist/1156643-lee-holman",
       "discogs.com/artist/2922409-binny-2",
-      "discogs.com/label/447040-clft"
-      )
+      "discogs.com/label/447040-clft")
       val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "CLFT", "Hein Cooper")
+
       whenReady(artistMethods.getEventuallyArtistsInEventTitle(artistMethods.splitArtistNamesInTitle(title), websites),
         timeout(Span(5, Seconds))) {
+
         _.map{ artist => artist.name } mustBe expectedArtists
       }
     }

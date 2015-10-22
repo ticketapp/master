@@ -65,6 +65,8 @@ object JsonHelper {
   implicit val trackWrites: Writes[Track] = Json.writes[Track]
   implicit val playlistWrites = Json.writes[Playlist]
   implicit val artistWrites = Json.writes[Artist]
+  implicit val genreWrites = Json.writes[Genre]
+  implicit val artistWithGenresWrites = Json.writes[ArtistWithGenres]
   implicit val addressWrites = Json.writes[Address]
   implicit val placeWrites = Json.writes[Place]
   implicit val organizerWrites = Json.writes[Organizer]

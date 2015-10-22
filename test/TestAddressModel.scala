@@ -41,8 +41,8 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         try {
-          whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) {
-            _ mustBe Address(Option(savedAddress.id.get),None,Some("privas"),Option("07000"),Some("avignas"))
+          whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAgainAddress =>
+            savedAgainAddress mustBe Address(Option(savedAddress.id.get),None,Some("privas"),Option("07000"),Some("avignas"))
           }
         } finally {
           addressMethods.delete(savedAddress.id.get)
@@ -50,15 +50,16 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "should update address" in {
+    "update address" in {
       val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
       val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("1.0,5.0"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         try {
           val addressWithGeoPoint = address.copy(id = savedAddress.id, geographicPoint = geoPoint)
-          whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>
-            whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) {
-              _ mustEqual Option(addressWithGeoPoint)
+          whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { _ =>
+            whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { foundAddress =>
+
+              foundAddress mustEqual Option(addressWithGeoPoint)
             }
           }
         } finally {

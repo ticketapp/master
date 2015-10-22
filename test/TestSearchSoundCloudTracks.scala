@@ -66,18 +66,5 @@ class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite {
       searchSoundCloudTracks.computationScConfidence(artist, listWebsitesSc3, soundCloudId3) mustBe
         SoundCloudArtistConfidence(Some(1), 12345, 0.5258055254220182)
     }
-
-    "save soundcloud websites for an artist" in {
-      val track = Track(UUID.fromString("9a9ca254-0245-4a69-b66c-494f3a0ced3e"),"Toi (Snippet)",
-      "https://api.soundcloud.com/tracks/190465678/stream",'s',
-      "https://i1.sndcdn.com/artworks-000106271172-2q3z78-large.jpg","worakls","Worakls",
-      Some("http://soundcloud.com/worakls/toi-snippet")/*,None,List()*/)
-      val artist = Artist(Option(26.toLong), Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
-        Option("description"), "facebookUrl", Set("website"))
-      whenReady(artistMethods.addSoundCloudWebsitesIfNotInWebsites(Some(track), artist), timeout(Span(6, Seconds))) {
-        _ mustBe List("http://www.hungrymusic.fr", "https://www.youtube.com/user/worakls/videos",
-          "https://twitter.com/worakls", "https://www.facebook.com/worakls/")
-      }
-    }
   }
 }

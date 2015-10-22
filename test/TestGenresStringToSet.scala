@@ -21,52 +21,44 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
 
   "A sequence of genres as a string" must {
 
-    "return an empty set for None" in {
-      val genres = List(None, None)
-
-      val genresSets: List[Set[Genre]] = genres.map { genreMethods.genresStringToGenresSet }
-
-      val expectedResult = List(Set.empty, Set.empty)
-
-      genresSets mustBe expectedResult
+    "return an empty set for an empty string" in {
+      genreMethods.genresStringToGenresSet("") mustBe Set.empty
     }
 
     "return a unique low case genre for a single word without punctuation" in {
-      val genres = List(Some("rock"), Some("Rap"))
+      val genres = List("rock", "Rap")
 
-      val genresSets: List[Set[Genre]] = genres.map { genreMethods.genresStringToGenresSet }
+      val genresSets: Set[Genre] = genres.flatMap{ genreMethods.genresStringToGenresSet }.toSet
 
-      val expectedResult = List(Set(Genre(None, "rock")), Set(Genre(None, "rap")))
+      val expectedResult = Set(Genre(None, "rock"), Genre(None, "rap"))
 
       genresSets mustBe expectedResult
     }
 
     "return genres split by comas in the string given" in {
-      val genres = List(Some("Rock, rockstep"), Some("Hi-tech soul, Cosmic jazz-funk, Riot disco, Timeless electro"))
+      val genres = List("Rock, rockstep", "Hi-tech soul, Cosmic jazz-funk, Riot disco, Timeless electro")
 
-      val genresSets: List[Set[Genre]] = genres.map { genreMethods.genresStringToGenresSet }
+      val genresSets: Set[Genre] = genres.flatMap { genreMethods.genresStringToGenresSet }.toSet
 
-      val expectedResult = List(Set(Genre(None, "rock"), Genre(None, "rockstep")), Set(Genre(None, "hi-tech soul"),
+      val expectedResult = Set(Genre(None, "rock"), Genre(None, "rockstep"), Genre(None, "hi-tech soul"),
         Genre(None, "cosmic jazz-funk"), Genre(None, "riot disco"), Genre(None, "timeless electro"))
-      )
 
       genresSets should contain theSameElementsAs expectedResult
     }
 
     "return genres split by spaces in the string given" in {
-      val genres = List(Some("Rock Pop Covers"), Some("Hi-tech soul jazz-funk"))
+      val genres = List("Rock Pop Covers", "Hi-tech soul jazz-funk")
 
       val genresSets: List[Set[Genre]] = genres.map { genreMethods.genresStringToGenresSet }
 
       val expectedResult = List(Set(Genre(None, "rock"), Genre(None, "pop"), Genre(None, "covers")),
-        Set(Genre(None, "hi-tech"), Genre(None, "soul"), Genre(None, "jazz-funk"))
-      )
+        Set(Genre(None, "hi-tech"), Genre(None, "soul"), Genre(None, "jazz-funk")))
 
       genresSets should contain theSameElementsAs expectedResult
     }
 
-    "return return hip-hop" in {
-      val genres = List(Some("Hip-Hop"), Some("Indie Pop-Folk"))
+    "return hip-hop" in {
+      val genres = List("Hip-Hop", "Indie Pop-Folk")
 
       val genresSets: List[Set[Genre]] = genres.map { genreMethods.genresStringToGenresSet }
 
@@ -74,11 +66,19 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
 
       genresSets should contain theSameElementsAs expectedResult
     }
+
+    "return the genres without music or synonyms" in {
+      val genres = "Electronic Dance Music"
+
+      val expectedResult = Set(Genre(None, "electronic"), Genre(None, "dance"))
+
+      genreMethods.genresStringToGenresSet(genres) should contain theSameElementsAs expectedResult
+    }
   }
 }
 /*
 
-   SomSome("Electronic Dance Music"), Some("Симфо Саунд"),
+    Some("Симфо Саунд"),
    Some("""Rock ´n Roll"""),  Some("Indie Pop-Folk"),
    Some("Electronic, Techno, Experimental"), Some("Dub"), Some("Psychedelic Roots"),
    Some("Jungle / Ragga Jungle / DnB / Drumstep / Dubstep? Hip-Hop Instrumentals / Reggae Riddims"),
