@@ -191,11 +191,10 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
         Option("redirectUrl"))
 
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        val artistWithId = artist.copy(id = Option(savedArtist.id.get))
-        whenReady(artistMethods.addSoundCloudUrlIfMissing(track, artistWithId), timeout(Span(5, Seconds))) { _ =>
+        whenReady(artistMethods.addSoundCloudUrlIfMissing(track, savedArtist), timeout(Span(5, Seconds))) { _ =>
           try {
             whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { artistFound =>
-              artistFound mustBe Option(artistWithId.copy(websites = Set("website", "redirecturl"),
+              artistFound mustBe Option(savedArtist.copy(websites = Set("website", "redirecturl"),
                 description = Some("<div class='column large-12'>description</div>")))
             }
           } finally {

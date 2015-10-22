@@ -26,19 +26,21 @@ import services.MyPostgresDriver.api._
 import scala.concurrent.duration._
 
 
-case class Artist (id: Option[Long],
-                   facebookId: Option[String],
-                   name: String,
-                   imagePath: Option[String] = None,
-                   description: Option[String] = None,
-                   facebookUrl: String,
-                   websites: Set[String] = Set.empty,
+case class Artist(id: Option[Long],
+                  facebookId: Option[String],
+                  name: String,
+                  imagePath: Option[String] = None,
+                  description: Option[String] = None,
+                  facebookUrl: String,
+                  websites: Set[String] = Set.empty,
 //                   genres: Seq[Genre] = Seq.empty,
 //                   tracks: Seq[Track] = Seq.empty,
-                   likes: Option[Int] = None,
-                   country: Option[String] = None)
+                  likes: Option[Int] = None,
+                  country: Option[String] = None)
 
-case class PatternAndArtist (searchPattern: String, artist: Artist)
+case class ArtistWithGenres(artist: Artist, genres: Seq[Genre])
+
+case class PatternAndArtist(searchPattern: String, artist: Artist)
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                        val genreMethods: GenreMethods,
@@ -70,45 +72,63 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 //  )
 
   def findAll: Future[Seq[Artist]] = db.run(artists.result)//        .map(getArtistProperties)
+//
+//  Vector(
+//    (
+//      Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None),
+//      Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1)))
+//      ), (
+//      Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None),
+//      Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1)))
+//      ), (
+//      Artist(Some(284),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath), Some(<div class='column large-12'>description</div>),facebookUrl1,Set(website),None,None),
+//      None)
+//  )
+//
+//
+//
+//  Vector(
+//    (Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1))), Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
+//    (Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1))),Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
+//    (None,Artist(Some(291),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),facebookUrl1,Set(website),None,None))
+//  )
+
+//  Map(
+//    Artist(Some(298),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),
+//      facebookUrl1,Set(website),None,None) ->
+//      Vector((None,
+//        Artist(Some(298),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),
+//        facebookUrl1,Set(website),None,None))),
+//    Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None) ->
+//      Vector((Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1))),
+//        Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
+//        (Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1))),Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None))))
 
 
-  /*
-        val query = for {
-        ((((order, _), brand), _), image) <- orders outerJoin
-          orderBrand on (_.uuid === _.orderId) leftJoin
-          brands on (_._2.brandId === _.uuid) outerJoin
-          orderImage on (_._1._1.uuid === _.orderId) leftJoin
-          images on (_._2.imageId === _.uuid)
-      } yield (order, brand.uuid.?, brand.objectString.?, image.uuid.?, image.objectString.?)
 
-      Logger info "query:\n" + query.list.toString
+//  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithGenres]] = {
+//    val query = genres join
+//      artistsGenres on (_.id === _.genreId) joinRight
+//      artists on (_._2.artistId === _.id)
+//
+//    val action = query.drop(offset).take(numberToReturn).result
+//    db.run(action) map { artistWithRelations =>
+//       artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
+//    }
+////        .map(getArtistProperties)
+//  }
 
-      query.list.groupBy(_._1).map { generalObjectsWithRelations =>
-        (generalObjectsWithRelations._1,
-          generalObjectsWithRelations._2.foldLeft(Seq.empty[MaybeRelation]) { (res, generalObjectWithRelation) =>
-            res :+
-              MaybeRelation("brands", MaybeGeneralObject(generalObjectWithRelation._2, generalObjectWithRelation._3)) :+
-              MaybeRelation("images", MaybeGeneralObject(generalObjectWithRelation._4, generalObjectWithRelation._5))
-          }.distinct.filterNot(_.maybeGeneralObject.objectString == None))
-      }
-        .toSeq
-        .map { generalObjectWithRelation =>
-        GeneralObjectWithRelations(generalObjectWithRelation._1, generalObjectWithRelation._2)
-      }
-   */
-
-  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[Artist]] = {
-    val query = genres join
-      artistsGenres on (_.id === _.genreId) joinRight 
+  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithGenres]] = {
+    val query = /*tracks join*/
+      genres join
+      artistsGenres on (_.id === _.genreId) joinRight
       artists on (_._2.artistId === _.id)
 
     val action = query.drop(offset).take(numberToReturn).result
-    db.run(action) map {
-     a =>
-       println(a)
-       a.map(_._2)
+    db.run(action) map { artistWithRelations =>
+      artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
     }
-//        .map(getArtistProperties)
+    //        .map(getArtistProperties)
   }
 
   def findAllByEvent(event: Event): Future[Seq[Artist]] = {
