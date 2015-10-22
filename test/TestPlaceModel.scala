@@ -78,28 +78,45 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
     }
 
     "save and delete his relation with an event" in {
-      val eventId = Event.save(Event(None, None, isPublic = true, isActive = true, "event name", Option("(5.4,5.6)"),
-        Option("description"), new Date(), Option(new Date(100000000000000L)), 16, None, None, None, List.empty, List.empty,
-        List.empty, List.empty, List.empty, List.empty)).get
+      val event = Event(None, None, isPublic = true, isActive = true, "event name",
+        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
+        Option("description"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty, List.empty,
+        List.empty, List.empty, List.empty, List.empty*/)
+      val place = Place(None, "test1", Some("1231"), None,
+        Some("""Ancienne usine1"""),
+        Some("transbordeur.fr"), Some(90999), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
+      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
+        whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { tryPlace =>
+          val placeId = tryPlace.id.get
+          try {
+            whenReady(placeMethods.find(placeId), timeout(Span(5, Seconds))) { foundPlace =>
+              foundPlace shouldEqual Option(place.copy(id = Option(placeId),
+                description = Some("<div class='column large-12'>Ancienne usine1</div>")))
+              whenReady(placeMethods.saveEventRelation(EventPlaceRelation(savedEvent.id.get, placeId)),
+                timeout(Span(5, Seconds))) { resp =>
+                resp mustBe 1
+                whenReady(placeMethods.findAllByEvent(savedEvent.id.get), timeout(Span(5, Seconds))) { places =>
+                  places should not be empty
+                  whenReady(eventMethods.findAllByPlace(placeId), timeout(Span(5, Seconds))) { events1 =>
+                    events1 should not be empty
+                  }
+                }
+              }
+            }
+          } finally {
+            whenReady(placeMethods.deleteEventRelation(EventPlaceRelation(savedEvent.id.get, placeId)),
+              timeout(Span(5, Seconds))) { resp =>
+              resp mustBe 1
+              whenReady(placeMethods.delete(placeId), timeout(Span(5, Seconds))) { resp1 =>
+                resp1 mustBe 1
+                whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
 
-      whenReady(save(place), timeout(Span(2, Seconds))) { tryPlaceId =>
-        val placeId = tryPlaceId.get.get
-        try {
-          find(placeId) shouldEqual Option(place.copy(id = Option(placeId),
-            description = Some("<div class='column large-12'>Ancienne usine</div>")))
+                  _ mustBe 1
 
-          saveEventRelation(eventId, placeId) mustBe true
-
-          findAllByEvent(eventId) should not be empty
-          Event.findAllByPlace(placeId) should not be empty
-          deleteEventRelation(eventId, placeId) mustBe Success(1)
-
-          delete(placeId) mustBe Success(1)
-          Event.delete(eventId) mustBe 1
-        } finally {
-          deleteEventRelation(eventId, placeId)
-          delete(placeId)
-          Event.delete(eventId)
+                }
+              }
+            }
+          }
         }
       }
     }
