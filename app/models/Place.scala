@@ -53,15 +53,32 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
-  def save(place: Place): Future[Place] = {
-    val placeWithFormattedDescription = place.copy(description = utilities.formatDescription(place.description))
+  def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] = {
+    val query = organizers.filter(_.facebookId === facebookId).map(_.id)
+    db.run(query.result.headOption)
+  }
+
+  def doSave(place: Place): Future[Place] = {
     db.run((for {
       placeFound <- places.filter(_.id === place.id).result.headOption
-      result <- placeFound.map(DBIO.successful).getOrElse(places returning places.map(_.id) += placeWithFormattedDescription)
+      result <- placeFound.map(DBIO.successful).getOrElse(places returning places.map(_.id) += place)
     } yield result match {
         case p: Place => p
-        case id: Long => placeWithFormattedDescription.copy(id = Option(id))
+        case id: Long => place.copy(id = Option(id))
       }).transactionally)
+  }
+
+  def save(place: Place): Future[Place] = {
+    val placeWithFormattedDescription = place.copy(description = utilities.formatDescription(place.description))
+    place.facebookId match {
+      case None =>
+        doSave(placeWithFormattedDescription)
+      case Some(facebookId) =>
+        findOrganizerIdByFacebookId(facebookId) flatMap { maybePlaceId =>
+          val organizerWithLinkedPlace = placeWithFormattedDescription.copy(linkedOrganizerId = maybePlaceId)
+          doSave(organizerWithLinkedPlace)
+        }
+    }
   }
 
   def find(id: Long): Future[Option[Place]] = db.run(places.filter(_.id === id).result.headOption)
@@ -165,7 +182,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def isFollowed(userPlaceRelation: UserPlaceRelation): Future[Boolean] = {
   val query =
     sql"""SELECT exists(
-         |  SELECT 1 FROM placesFollowed WHERE userId = ${userPlaceRelation.userId} AND placeId = ${userPlaceRelation.placeId})"""
+           SELECT 1 FROM placesFollowed WHERE userId = ${userPlaceRelation.userId} AND placeId = ${userPlaceRelation.placeId})"""
     .as[Boolean]
   db.run(query.head)
   }
@@ -181,6 +198,6 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def saveEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces += eventPlaceRelation)
  
-  def deletePlaceRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces.filter(event =>
+  def deleteEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces.filter(event =>
     event.eventId === eventPlaceRelation.eventId && event.placeId === eventPlaceRelation.placeId).delete)
 }
