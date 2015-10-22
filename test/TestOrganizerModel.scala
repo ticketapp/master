@@ -6,7 +6,7 @@ import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 
