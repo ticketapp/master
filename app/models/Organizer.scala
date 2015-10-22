@@ -88,15 +88,27 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     db.run(query.result)
   }
 
-  def save(organizer: Organizer): Future[Organizer] = {
-    val organizerWithFormattedDescription = organizer.copy(description = utilities.formatDescription(organizer.description))
+  def doSave (organizer: Organizer): Future[Organizer] = {
     db.run((for {
-      organizerFound <- organizers.filter(_.id === organizer.id).result.headOption
-      result <- organizerFound.map(DBIO.successful).getOrElse(organizers returning organizers.map(_.id) += organizerWithFormattedDescription)
+      organizerFound <- organizers.filter(_.facebookId === organizer.facebookId).result.headOption
+      result <- organizerFound.map(DBIO.successful).getOrElse(organizers returning organizers.map(_.id) += organizer)
     } yield result match {
         case o: Organizer => o
-        case id: Long => organizerWithFormattedDescription.copy(id = Option(id))
+        case id: Long => organizer.copy(id = Option(id))
       }).transactionally)
+  }
+
+  def save(organizer: Organizer): Future[Organizer] = {
+    val organizerWithFormattedDescription = organizer.copy(description = utilities.formatDescription(organizer.description))
+    organizer.facebookId match {
+      case None =>
+        doSave(organizerWithFormattedDescription)
+      case Some(facebookId) =>
+        placeMethods.findIdByFacebookId(facebookId) flatMap { maybePlaceId =>
+          val organizerWithLinkedPlace = organizerWithFormattedDescription.copy(linkedPlaceId = maybePlaceId)
+          doSave(organizerWithLinkedPlace)
+        }
+    }
   }
 
 
@@ -134,8 +146,14 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
         findNear(geographicPoint, numberToReturn, offset)
   }
 
-  def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Int] = save(organizer) flatMap {
-    case organizer: Organizer => saveEventRelation(eventId, organizer.id.get)
+  def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Organizer] = save(organizer) flatMap {
+    case organizer: Organizer => saveEventRelation(eventId, organizer.id.get) map {
+      case 1 =>
+        organizer
+      case _ =>
+        Logger.error("Organizer.saveWithEventRelation: not exactly one row was updated by saveEventRelation")
+        organizer
+    }
   }
 
   def saveEventRelation(eventId: Long, organizerId: Long): Future[Int] =
