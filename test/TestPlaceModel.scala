@@ -1,79 +1,157 @@
-/*
-import java.util.Date
-
-import models.Place._
-import models.{Address, Event, Organizer, Place}
+import java.util.UUID
+import com.mohiva.play.silhouette.api.LoginInfo
+import models._
+import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
-import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.libs.concurrent.Execution.Implicits._
-
-import scala.util.{Failure, Success}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
+import silhouette.UserDAOImpl
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
+  val appBuilder = new GuiceApplicationBuilder()
+  val injector = appBuilder.injector()
+  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  val utilities = new Utilities
+  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
+  val trackMethods = new TrackMethods(dbConfProvider, utilities)
+  val genreMethods = new GenreMethods(dbConfProvider, utilities)
+  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
+  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
+  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
+    trackMethods, utilities)
+  val tariffMethods = new TariffMethods(dbConfProvider, utilities)
+  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
+  val userDAOImpl = new UserDAOImpl(dbConfProvider)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
+  val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
+    geographicPointMethods, utilities)
+  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+
   "A place" must {
 
-    /*val place = Place(None, "test", Some("123"), None,
-      Some("""Ancienne usine"""),
-      Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
-
     "be saved and deleted in database and return the new id" in {
-      whenReady(save(place), timeout(Span(2, Seconds))) { placeId =>
+      val place = Place(None, "test", Some("123"), None,
+        Some("""Ancienne usine"""),
+        Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
+      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
         try {
-          find(placeId.get.get) mustBe Option(place.copy(id = placeId.get,
-            description = Some("<div class='column large-12'>Ancienne usine</div>")))
-          delete(placeId.get.get) mustBe Success(1)
+          whenReady(placeMethods.find(savedPlace.id.get), timeout(Span(5, Seconds))) { foundPlace =>
+            foundPlace mustBe Option(place.copy(id = foundPlace.get.id,
+              description = Some("<div class='column large-12'>Ancienne usine</div>")))
+          }
         } finally {
-          delete(placeId.get.get)
+          whenReady(placeMethods.delete(savedPlace.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
         }
       }
     }
 
-    "be saved with its address and deleted in database" in {
+    /*"be saved with its address and deleted in database" in {
       val address = Address(None, None, Some("privas"), Some("07000"), Some("avignas"))
       val place = Place(None, "test", None, None, None, None, Some(9099), None, None, address = Option(address))
 
-      whenReady(save(place), timeout(Span(5, Seconds))) { placeId =>
+      whenReady(placeMethods.save(place), timeout(Span(5, Seconds))) { savedPlace =>
         try {
-          find(placeId.get.get) mustBe
-            Option(place.copy(id = placeId.get,
-              address = Option(address.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))))
+          whenReady(placeMethods.find(savedPlace.id.get), timeout(Span(5, Seconds))) { foundPlace =>
+            foundPlace mustBe
+              Option(place.copy(id = savedPlace.id,
+                address = Option(address.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))))
+          }
         } finally {
-          delete(placeId.get.get)
+          placeMethods.delete(savedPlace.id.get)
+        }
+      }
+    }*/
+
+    "be followed and unfollowed by a user" in {
+      val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
+      val uuid: UUID = UUID.randomUUID()
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName"),
+        lastName = Option("lastName"),
+        fullName = Option("fullName"),
+        email = Option("email"),
+        avatarURL = Option("avatarUrl"))
+      val place = Place(None, "test", Some("123"), None,
+        Some("""Ancienne usine"""),
+        Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
+      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
+        whenReady(userDAOImpl.save(user), timeout(Span(2, Seconds))) { userSaved =>
+          whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get))) { resp =>
+            whenReady(placeMethods.isFollowed(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp1 =>
+             resp1 mustBe true
+              whenReady(placeMethods.unfollowByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
+                resp2 mustBe 1
+                userDAOImpl.delete(uuid)
+                placeMethods.delete(savedPlace.id.get)
+              }
+            }
+          }
         }
       }
     }
 
-    "be followed and unfollowed by a user" in {
-      followByPlaceId("userTestId", 1)
-      isFollowed(IdentityId("userTestId", "oauth2"), 1) mustBe true
-      unfollowByPlaceId("userTestId", 1) mustBe Success(1)
-    }
-
     "not be able to be followed twice" in {
-      followByPlaceId("userTestId", 1)
-      followByPlaceId("userTestId", 1) match {
-        case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
-        case _ => throw new Exception("follow a place twice didn't throw a PSQL UNIQUE_VIOLATION")
+      val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
+      val uuid: UUID = UUID.randomUUID()
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName"),
+        lastName = Option("lastName"),
+        fullName = Option("fullName"),
+        email = Option("email"),
+        avatarURL = Option("avatarUrl"))
+      val place = Place(None, "test", Some("123"), None,
+        Some("""Ancienne usine"""),
+        Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
+      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
+        whenReady(userDAOImpl.save(user), timeout(Span(2, Seconds))) { userSaved =>
+          whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get))) { resp =>
+            try {
+              Await.result(placeMethods.followByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get)), 3 seconds)
+            } catch {
+              case e: PSQLException =>
+
+                e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+            } finally {
+              whenReady(placeMethods.unfollowByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
+                resp2 mustBe 1
+                userDAOImpl.delete(uuid)
+                placeMethods.delete(savedPlace.id.get)
+              }
+            }
+          }
+        }
       }
-      unfollowByPlaceId("userTestId", 1) mustBe Success(1)
     }
 
     "be linked to an organizer if one with the same facebookId already exists" in {
-      val organizerId = Organizer.save(Organizer(None, Some("1234567"), "organizerTestee")).get
-
-      whenReady (save(Place(None, "Name", Some("1234567"), None, None, None, None, None, None, None)),
-        timeout(Span(2, Seconds)))  { tryPlaceId =>
-        val placeId = tryPlaceId.get.get
-
-        find(placeId).get.linkedOrganizerId mustBe organizerId
-
-        delete(placeId) mustBe Success(1)
-        Organizer.delete(organizerId.get) mustBe Success(1)
+      whenReady(organizerMethods.save(Organizer(None, Some("1234567"), "organizerTestee")), timeout(Span(5, Seconds))) { savedOrganizer =>
+        whenReady (placeMethods.save(Place(None, "Name", Some("1234567"), None, None, None, None, None, None, None)),
+          timeout(Span(2, Seconds)))  { tryPlaceId =>
+          val placeId = tryPlaceId.id.get
+          try {
+            whenReady(placeMethods.find(placeId), timeout(Span(5, Seconds))) { foundPlace =>
+              foundPlace.get.linkedOrganizerId mustBe Some(savedOrganizer.id.get)
+            }
+          } finally {
+            whenReady(placeMethods.delete(placeId), timeout(Span(5, Seconds))) { resp =>
+              resp mustBe 1
+              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+            }
+          }
+        }
       }
     }
 
@@ -110,9 +188,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
               whenReady(placeMethods.delete(placeId), timeout(Span(5, Seconds))) { resp1 =>
                 resp1 mustBe 1
                 whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
-
                   _ mustBe 1
-
                 }
               }
             }
@@ -121,62 +197,14 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "get the geoPoint" in {
-      val address1 = Address(None, Some("(1.0,1.0)"), None, None, None)
-      val address2 = None
-      val address3 = Address(None, None, Some("privas"), Some("07000"), Some("avignas"))
-
-      whenReady(Address.saveAddressInFutureWithGeoPoint(Option(address1)), timeout(Span(5, Seconds))) {
-        case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe Some(address1)
-        case _ => throw new Exception("address not saved")
-      }
-
-      whenReady(Address.saveAddressInFutureWithGeoPoint(address2), timeout(Span(5, Seconds))) {
-        case Success(None) =>
-        case _ => throw new Exception("address not saved")
-      }
-
-      whenReady(Address.saveAddressInFutureWithGeoPoint(Option(address3)), timeout(Span(5, Seconds))) {
-        case Success(Some(addressId)) => Address.find(Option(addressId)) mustBe
-          Some(address3.copy(geographicPoint = Some("(44.7053439,4.596782999999999)")))
-        case _ => throw new Exception("address not saved")
-      }
-    }
-
     "get a new place by facebookId when saving new event by facebookId" in {
-      getPlaceByFacebookId(Option("836137029786070")) map {
-        case Some(placeFound) => Place.delete(placeFound.placeId.get)
-        case None =>
-      }
-
-      val maybeFacebookId = Option("836137029786070")
-
-      val expectedPlace = Place(None, "Akwaba Coop Culturelle", Some("836137029786070"), None,
-       None,
-        Some(Utilities.normalizeUrl("http://akwaba.coop")), None, None,
-        Some("https://scontent.xx.fbcdn.net/hphotos-xtp1/v/t1.0-9/s720x720/12074633_957584020974703_292685474037804" +
-          "3281_n.jpg?oh=32879078efc1d52962a1e592d8cb7fbf&oe=56A17586"), Some(Address(None, Some("(43.9308729,4.9536721)"),
-          Some("châteauneuf-de-gadagne"), Some("84470"), Some("500 chemin des matouses"))), None)
-
-      whenReady(getPlaceByFacebookId(maybeFacebookId), timeout(Span(5, Seconds)))  { place =>
-        val placeIdSaved = place.get.placeId
-        try {
-          place.get.facebookId mustBe expectedPlace.facebookId
-        } finally {
-          Place.delete(placeIdSaved.get)
+      whenReady(eventMethods.saveFacebookEventByFacebookId("933514060052903"), timeout(Span(5, Seconds))) { event =>
+        whenReady(placeMethods.getPlaceByFacebookId("836137029786070"), timeout(Span(5, Seconds))) { place =>
+          place.name mustBe "Akwaba Coop Culturelle"
+          whenReady(placeMethods.delete(place.id.get), timeout(Span(5, Seconds))) { _ mustBe 1}
+          whenReady(eventMethods.delete(event.id.get), timeout(Span(5, Seconds))) { _ mustBe 1}
         }
       }
     }
-
-    "get an exiting place by facebookId" in {
-      val maybeFacebookId = Option("117030545096697")
-
-      val placeName = "Le transbordeur"
-
-      whenReady(getPlaceByFacebookId(maybeFacebookId), timeout(Span(5, Seconds))) {
-        _.get.name mustBe placeName
-      }
-    }*/
   }
 }
-*/

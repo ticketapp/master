@@ -120,7 +120,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  class EventsPlaces(tag: Tag) extends Table[EventPlaceRelation](tag, "eventsPlaces") {
+  class EventsPlaces(tag: Tag) extends Table[EventPlaceRelation](tag, "eventsplaces") {
     def eventId = column[Long]("eventid")
     def placeId = column[Long]("placeid")
 
