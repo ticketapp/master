@@ -59,11 +59,9 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
           whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>
 
             savedAddressWithGeoPoint mustBe addressWithGeoPoint
-
             whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { foundAddress =>
 
               foundAddress mustEqual Option(savedAddressWithGeoPoint)
-
             }
           }
         } finally {
