@@ -263,14 +263,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def addWebsite(artistId: Long, normalizedUrl: String): Future[Int] = {
-    //val query = artists.filter(_.id == artistId).map(_.update())
-    val query = sqlu"""UPDATE artists
-            SET websites = case
-              WHEN websites IS NULL THEN $normalizedUrl
-              ELSE websites || ',' || $normalizedUrl
-            END
-          WHERE artistId = $artistId"""
-    db.run(query)
+    val query = artists.filter(_.id === artistId)
+
+    val action = for {
+      artist <- query.result.headOption
+      updatedArtist <- query.map(_.websites).update(Option(artist.get.websites.mkString(",") + "," + normalizedUrl))
+    } yield updatedArtist
+
+    db.run(action)
   }
 
   def addSoundCloudUrlIfMissing(soundCloudTrack: Track, artist: Artist): Future[Int] = soundCloudTrack.redirectUrl match {
@@ -551,18 +551,22 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
 
   def addWebsitesFoundOnSoundCloud(track: Track, artist: Artist): Future[Seq[String]] = track.redirectUrl match {
-    case None => Future(Seq.empty)
-    case Some(redirectUrl) => val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).
-      substring("soundcloud.com/".length)
+    case None =>
+      Future(Seq.empty)
+    case Some(redirectUrl) =>
+      val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).substring("soundcloud.com/".length)
       WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
         .withQueryString("client_id" -> utilities.soundCloudClientId)
         .get()
         .map { soundCloudResponse =>
-        readSoundCloudWebsites(soundCloudResponse).map { website =>
+        readSoundCloudWebsites(soundCloudResponse) foreach { website =>
           val normalizedWebsite = utilities.normalizeUrl(website)
-          if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty) {
-            addWebsite(artist.id.get, normalizedWebsite)
-          }
+          if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty)
+            addWebsite(artist.id.get, normalizedWebsite) map {
+              case res if res != 1 =>
+                Logger.error("Artist.addWebsitesFoundOnSoundCloud: not exactly one row was updated by addWebsite for artist" +
+                  artist + "for website " + normalizedWebsite)
+            }
         }
         readSoundCloudWebsites(soundCloudResponse)
       }
