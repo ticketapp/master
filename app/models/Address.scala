@@ -66,23 +66,25 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       city = utilities.optionStringToLowerCaseOptionString(address.city))
 
     db.run((for {
-      addressFound <- addresses.filter(a => a.street === lowerCaseAddress.street &&
-        a.zip === lowerCaseAddress.zip && a.city === lowerCaseAddress.city).result.headOption
-      result <- addressFound.map(DBIO.successful).getOrElse(addresses returning addresses.map(_.id) += lowerCaseAddress)
-    } yield result match {
-      case addressWithoutGeographicPoint: Address
-        if addressWithoutGeographicPoint.geographicPoint.isEmpty && lowerCaseAddress.geographicPoint.nonEmpty =>
-          val updatedAddress = lowerCaseAddress.copy(id = addressWithoutGeographicPoint.id)
-          update(updatedAddress) map {
-            case int if int != 1 =>
-              Logger.error("Address.save: not exactly one row was updated")
-          }
-        updatedAddress
-      case a: Address =>
-        a
-      case id: Long =>
-        lowerCaseAddress.copy(id = Option(id))
-      }).transactionally)
+        addressFound <- addresses.filter(a => a.street === lowerCaseAddress.street &&
+          a.zip === lowerCaseAddress.zip && a.city === lowerCaseAddress.city).result.headOption
+        result <- addressFound.map(DBIO.successful).getOrElse(addresses returning addresses.map(_.id) += lowerCaseAddress)
+      } yield result match {
+        case addressWithoutGeographicPoint: Address
+          if addressWithoutGeographicPoint.geographicPoint.isEmpty && lowerCaseAddress.geographicPoint.nonEmpty =>
+            val updatedAddress = lowerCaseAddress.copy(id = addressWithoutGeographicPoint.id)
+            update(updatedAddress) map {
+              case int if int != 1 =>
+                Logger.error("Address.save: not exactly one row was updated")
+                addressWithoutGeographicPoint
+              case _ =>
+                updatedAddress
+            }
+        case a: Address =>
+          Future(a)
+        case id: Long =>
+          Future(lowerCaseAddress.copy(id = Option(id)))
+        }).transactionally).flatMap(eventuallyAddress => eventuallyAddress)
   }
 
   def update(address: Address): Future[Int] = db.run(addresses.filter(_.id === address.id).update(address))

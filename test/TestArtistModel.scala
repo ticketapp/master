@@ -172,13 +172,17 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         try {
           whenReady(artistMethods.addWebsite(savedArtist.id.get, "normalizedUrl"), timeout(Span(5, Seconds))) { resp =>
+
+            resp mustBe 1
+
             whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
               
-              foundArtist mustBe Option(artist.copy(id = Option(savedArtist.id.get), websites = Set("website", "normalizedUrl"),
+              foundArtist mustBe Option(foundArtist.get.copy(id = Option(savedArtist.id.get), websites = Set("website", "normalizedUrl"),
                 description = Some("<div class='column large-12'>description</div>")))
             }
           }
         } finally {
+
           artistMethods.delete(savedArtist.id.get)
         }
       }

@@ -6,8 +6,6 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.Utilities
 
-import scala.util.Success
-
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
 
   val appBuilder = new GuiceApplicationBuilder()
@@ -51,15 +49,18 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
     }
 
     "update address" in {
-      val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
+      val address = Address(None, None, Option("coux"), Option("07000"), Option("avignas"))
       val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("1.0,5.0"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         try {
           val addressWithGeoPoint = address.copy(id = savedAddress.id, geographicPoint = geoPoint)
-          whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { _ =>
+          whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>
+
+            savedAddressWithGeoPoint mustBe addressWithGeoPoint
+
             whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { foundAddress =>
 
-              foundAddress mustEqual Option(addressWithGeoPoint)
+              foundAddress mustEqual Option(savedAddressWithGeoPoint)
             }
           }
         } finally {
