@@ -127,15 +127,16 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val query = for {
       genre <- genres if genre.name === genreName
-      eventGenre <- eventsGenres
+      eventGenre <- eventsGenres if eventGenre.genreId === genre.id
       event <- events if event.id === eventGenre.eventId &&
       ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
     } yield event
 
     //getEventProperties
     db.run(query.sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(numberToReturn)
-      .take(offset).result)
+      .drop(offset)
+      .take(numberToReturn)
+      .result)
   }
 
   def findAllByPlace(placeId: Long): Future[Seq[Event]] = {
@@ -326,7 +327,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def isFollowed(userEventRelation: UserEventRelation): Future[Boolean] = {
     val query =
       sql"""SELECT exists(
-           |  SELECT 1 FROM eventsFollowed WHERE userId = ${userEventRelation.userId} AND eventId = ${userEventRelation.eventId})"""
+             SELECT 1 FROM eventsFollowed WHERE userId = ${userEventRelation.userId} AND eventId = ${userEventRelation.eventId})"""
       .as[Boolean]
     db.run(query.head)
   }
