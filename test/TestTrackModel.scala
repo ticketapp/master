@@ -1,6 +1,5 @@
 import java.util.UUID
 import java.util.UUID.randomUUID
-
 import models._
 import org.joda.time.Duration
 import org.postgresql.util.PSQLException

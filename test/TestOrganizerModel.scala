@@ -92,10 +92,10 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
     }*/
 
     "be linked to a place if one with the same facebookId already exists" in {
-      whenReady (placeMethods.save(Place(None, "Name", Some("123456789"), None, None, None, None, None, None, None)),
+      whenReady (placeMethods.save(Place(None, "Name1", Some("1234567891"), None, None, None, None, None, None, None)),
         timeout(Span(2, Seconds)))  { tryPlace =>
         val placeId = tryPlace.id.get
-        whenReady(organizerMethods.save(Organizer(None, Some("123456789"), "organizerTest2")),
+        whenReady(organizerMethods.save(Organizer(None, Some("1234567891"), "organizerTest2")),
           timeout(Span(5, Seconds))) { savedOrganizer =>
           try {
             whenReady(organizerMethods.findById(savedOrganizer.id.get), timeout(Span(5, Seconds))) {
