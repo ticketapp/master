@@ -1,29 +1,24 @@
 package models
 
-import java.sql.{JDBCType, Connection}
 import java.util.UUID
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.Point
-import controllers.{DAOException, ThereIsNoArtistForThisFacebookIdException}
-import org.joda.time.DateTime
+import controllers.ThereIsNoArtistForThisFacebookIdException
 import play.api.Logger
 import play.api.Play.current
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.iteratee.{Enumerator, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
+import services.MyPostgresDriver.api._
 import services._
-import slick.jdbc.{PositionedParameters, SetParameter}
 
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 import scala.util.matching.Regex
-import scala.util.{Failure, Success, Try}
-import services.MyPostgresDriver.api._
-import scala.concurrent.duration._
 
 
 case class Artist(id: Option[Long],
@@ -72,39 +67,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 //  )
 
   def findAll: Future[Seq[Artist]] = db.run(artists.result)//        .map(getArtistProperties)
-//
-//  Vector(
-//    (
-//      Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None),
-//      Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1)))
-//      ), (
-//      Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None),
-//      Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1)))
-//      ), (
-//      Artist(Some(284),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath), Some(<div class='column large-12'>description</div>),facebookUrl1,Set(website),None,None),
-//      None)
-//  )
-//
-//
-//
-//  Vector(
-//    (Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1))), Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
-//    (Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1))),Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
-//    (None,Artist(Some(291),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),facebookUrl1,Set(website),None,None))
-//  )
-
-//  Map(
-//    Artist(Some(298),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),
-//      facebookUrl1,Set(website),None,None) ->
-//      Vector((None,
-//        Artist(Some(298),Some(facebookIdTestArtistModel1),artistTest1,Some(imagePath),Some(<div class='column large-12'>description</div>),
-//        facebookUrl1,Set(website),None,None))),
-//    Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None) ->
-//      Vector((Some((Genre(Some(71),a,a),ArtistGenreRelation(261,71,1))),
-//        Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None)),
-//        (Some((Genre(Some(72),b,b),ArtistGenreRelation(261,72,1))),Artist(Some(261),Some(a),a,Some(a),Some(a),a,Set(a),None,None))))
-
-
 
 //  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithGenres]] = {
 //    val query = genres join
@@ -122,7 +84,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val query = /*tracks join*/
       genres join
       artistsGenres on (_.id === _.genreId) joinRight
-      artists on (_._2.artistId === _.id)
+      artists on (_._2.artistId === _.id) /*join
+      tracks on (_._2.facebookUrl === _.artistFacebookUrl)*/
 
     val action = query.drop(offset).take(numberToReturn).result
     db.run(action) map { artistWithRelations =>
@@ -132,18 +95,18 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def findAllByEvent(event: Event): Future[Seq[Artist]] = {
-    val query2 = for {
-      e <- events if e.id === event.id
-      eventArtist <- eventsArtists
-      artist <- artists if artist.id === eventArtist.artistId
-      artistGenre <- artistsGenres if artistGenre.artistId === artist.id
-      genre <- genres if genre.id === artistGenre.genreId
-//      artistGenre <- artists joinLeft artistsGenres on (artistGenre.artistId === artist.id)
-    } yield (artist, genre)
-
-    val a = Await.result(db.run(query2.result), 3 seconds)
-
-    println(a)
+//    val query2 = for {
+//      e <- events if e.id === event.id
+//      eventArtist <- eventsArtists
+//      artist <- artists if artist.id === eventArtist.artistId
+//      artistGenre <- artistsGenres if artistGenre.artistId === artist.id
+//      genre <- genres if genre.id === artistGenre.genreId
+////      artistGenre <- artists joinLeft artistsGenres on (artistGenre.artistId === artist.id)
+//    } yield (artist, genre)
+//
+//    val a = Await.result(db.run(query2.result), 3 seconds)
+//
+//    println(a)
 
     val query = for {
       e <- events if e.id === event.id
