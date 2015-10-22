@@ -220,38 +220,42 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def delete(id: Int): Future[Int] = db.run(genres.filter(_.id === id).delete) 
 
-  def followGenre(userGenreRelation: UserGenreRelation): Future[Int] =
+  def follow(userGenreRelation: UserGenreRelation): Future[Int] =
     db.run(genresFollowed += userGenreRelation)
 
-  def genresStringToGenresSet(genres: Option[String]): Set[Genre] = genres match {
-    case None => Set.empty
-    case Some(genres: String) =>
-      val lowercaseGenres = genres.toLowerCase.replace("\n", "").filter(_ >= ' ')
-      val genresSplitByCommas = lowercaseGenres.trim.split(",").flatMap { _.trim.split("/") }
-        .flatMap { _.trim.split(":") }.flatMap { _.trim.split(";") }.filter(_.nonEmpty)
-      if (genresSplitByCommas.length > 1) {
-        genresSplitByCommas.map { genreName => Genre(None, genreName.stripSuffix(",").trim) }.toSet
-      } else {
+  def genresStringToGenresSet(genres: String): Set[Genre] = {
+    val refactoredGenres = genres
+      .toLowerCase
+      .filter(_ >= ' ')
+      .replaceAll("'", "")
+      .replaceAll("&", "")
+      .replaceAll("musique", "")
+      .replaceAll("musik", "")
+      .replaceAll("music", "")
+    val genresSplitBySpecialCharacters = refactoredGenres
+      .split(",")
+      .flatMap(_.split("/"))
+      .flatMap(_.split(":"))
+      .flatMap(_.split(";"))
+      .map(_.trim)
+      .filter(_.nonEmpty)
+
+    genresSplitBySpecialCharacters.length match {
+      case twoOrPlusElement if twoOrPlusElement > 1 =>
+        genresSplitBySpecialCharacters.map { genreName => Genre(None, genreName) }.toSet
+      case _ =>
         """([%/+\.;]|& )""".r
-          .split(lowercaseGenres)
-          .map { _.trim }
-          .filterNot(_ == "")
-        match {
+          .split(refactoredGenres)
+          .filterNot(_ == "") match {
           case list if list.length != 1 =>
             list.map { genreName => new Genre(None, genreName) }.toSet
           case listOfOneItem =>
-            listOfOneItem(0) match {
-              case genre if genre.contains("'") || genre.contains("&") || genre.contains("musique") ||
-                genre.contains("musik") || genre.contains("music") =>
-                Set(new Genre(None, genre))
-              case genreWithoutForbiddenChars =>
-                genreWithoutForbiddenChars
-                  .split("\\s+")
-                  .map { genreName => new Genre(None, genreName.stripSuffix(".")) }
-                  .filterNot(_.name == "")
-                  .toSet
-            }
-        }
+            listOfOneItem(0)
+              .split("\\s+")
+              .filter(_.nonEmpty)
+              .map { genreName => new Genre(None, genreName.stripSuffix(".")) }
+              .toSet
       }
+    }
   }
 }

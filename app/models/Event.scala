@@ -90,11 +90,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Event]] =
-    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
-      case None => Future { Seq.empty }
-      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
-    }
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Event]] = geographicPointMethods
+    .findGeographicPointOfCity(city) flatMap {
+    case None => Future { Seq.empty }
+    case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+  }
 
   def findInPeriodNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
     val now = DateTime.now()

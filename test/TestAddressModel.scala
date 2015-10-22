@@ -50,14 +50,15 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    "should update address" in {
+    "update address" in {
       val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
       val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("1.0,5.0"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         try {
           val addressWithGeoPoint = address.copy(id = savedAddress.id, geographicPoint = geoPoint)
-          whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>
+          whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { _ =>
             whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) {
+
               _ mustEqual Option(addressWithGeoPoint)
             }
           }
