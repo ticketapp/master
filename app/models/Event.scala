@@ -85,8 +85,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       .filter(event =>
         (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
       .sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(numberToReturn)
-      .take(offset)
+      .drop(offset)
+      .take(numberToReturn)
     db.run(query.result)
   }
 
@@ -109,17 +109,17 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-    def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
-      val now = DateTime.now()
-      val xHoursAgo = now.minusHours(hourInterval)
+  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+    val now = DateTime.now()
+    val xHoursAgo = now.minusHours(hourInterval)
 
-      val query = events
-        .filter(event => (event.startTime < now) || (event.startTime > xHoursAgo))
-        .sortBy(_.geographicPoint <-> geographicPoint)
-        .drop(numberToReturn)
-        .take(offset)
-      db.run(query.result)
-    }
+    val query = events
+      .filter(event => (event.startTime < now) || (event.startTime > xHoursAgo))
+      .sortBy(_.geographicPoint <-> geographicPoint)
+      .drop(numberToReturn)
+      .take(offset)
+    db.run(query.result)
+  }
 
   def findAllByGenre(genreName: String, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
     val now = DateTime.now()
@@ -216,7 +216,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val query = for {
       artist <- artists if artist.id === artistId
-      eventArtist <- eventsArtists
+      eventArtist <- eventsArtists if eventArtist.artistId === artist.id
       event <- events if event.id === eventArtist.eventId && event.startTime < now
     } yield event
 

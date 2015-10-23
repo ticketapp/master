@@ -163,7 +163,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def deleteEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] = db.run(
     eventsOrganizers.filter(eventOrganizer =>
       eventOrganizer.eventId === eventOrganizerRelation.eventId &&
-        eventOrganizer.organizerId === eventOrganizerRelation.organizerId).delete)
+        eventOrganizer.organizerId === eventOrganizerRelation.organizerId)
+    .delete)
 
   def delete(id: Long): Future[Int] = db.run(organizers.filter(_.id === id).delete)
 
