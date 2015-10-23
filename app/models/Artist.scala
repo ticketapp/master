@@ -227,12 +227,17 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def addWebsite(artistId: Long, normalizedUrl: String): Future[Int] = {
     val query = artists.filter(_.id === artistId)
 
-    val action = for {
-      artist <- query.result.headOption
-      updatedArtist <- query.map(_.websites).update(Option(artist.get.websites.mkString(",") + "," + normalizedUrl))
-    } yield updatedArtist
-
-    db.run(action)
+    db.run(query.result.headOption) flatMap {
+      case Some(artist) =>
+        val websites = artist.websites.mkString(",") match {
+          case "" => normalizedUrl
+          case nonEmptyString => nonEmptyString + "," + normalizedUrl
+        }
+        db.run(query.map(_.websites).update(Option(websites)))
+      case None =>
+        Logger.info("Artist.addWebsite: there is no artist with the id " + artistId)
+        Future(0)
+    }
   }
 
   def addSoundCloudUrlIfMissing(soundCloudTrack: Track, artist: Artist): Future[Int] = soundCloudTrack.redirectUrl match {
@@ -264,31 +269,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       .delete)
 
   def delete(id: Long): Future[Int] = db.run(artists.filter(_.id === id).delete)
-  
-  /*def followByArtistId(userArtistRelation: UserArtistRelation): Future[Int] = db.run(artistsFollowed += userArtistRelation)
-
-  def unfollowByArtistId(userArtistRelation: UserArtistRelation): Future[Int] = db.run(
-    artistsFollowed
-      .filter(artistFollowed =>
-      artistFollowed.userId === userArtistRelation.userId && artistFollowed.artistId === userArtistRelation.artistId)
-      .delete)
-  
-  def getFollowedArtists(userId: UUID): Future[Seq[Artist] ]= {
-    val query = for {
-      artistFollowed <- artistsFollowed if artistFollowed.userId === userId
-      artist <- artists if artist.id === artistFollowed.artistId
-    } yield artist
-
-    db.run(query.result)
-  }
-
-  def isFollowed(userArtistRelation: UserArtistRelation): Future[Boolean] = {
-    val query =
-      sql"""SELECT exists(SELECT 1 FROM artistsFollowed WHERE userId = ${userArtistRelation.userId}
-           AND artistId = ${userArtistRelation.artistId})"""
-      .as[Boolean]
-    db.run(query.head)
-  }*/
 
   def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
     case None =>
@@ -530,7 +510,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
           if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty)
             addWebsite(artist.id.get, normalizedWebsite) map {
               case res if res != 1 =>
-                Logger.error("Artist.addWebsitesFoundOnSoundCloud: not exactly one row was updated by addWebsite for artist" +
+                Logger.error("Artist.addWebsitesFoundOnSoundCloud: not exactly one row was updated by addWebsite for artist " +
                   artist + "for website " + normalizedWebsite)
             }
         }

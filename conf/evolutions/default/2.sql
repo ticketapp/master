@@ -1,3 +1,4 @@
+# --- !Ups
 INSERT INTO users(userID, firstName, lastName, fullName, email, avatarURL) VALUES ('a4aea509-1002-47d0-b55c-593c91cb32ae', 'simon',
 'garnier', 'fullname', 'email0', 'avatarUrl');
 
