@@ -20,6 +20,7 @@ case class UserPlaceRelation(userId: UUID, placeId: Long)
 case class EventOrganizer(eventId: Long, organizerId: Long)
 case class EventGenreRelation(eventId: Long, genreId: Int)
 case class EventPlaceRelation(eventId: Long, placeId: Long)
+case class EventOrganizerRelation(eventId: Long, organizerId: Long)
 case class FrenchCity(city: String, geographicPoint: Geometry)
 
 
@@ -150,11 +151,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("genreid", genreId, genres)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  class EventsOrganizers(tag: Tag) extends Table[EventOrganizer](tag, "eventsorganizers") {
+  class EventsOrganizers(tag: Tag) extends Table[EventOrganizerRelation](tag, "eventsorganizers") {
     def eventId = column[Long]("eventid")
     def organizerId = column[Long]("organizerid")
 
-    def * = (eventId, organizerId) <> ((EventOrganizer.apply _).tupled, EventOrganizer.unapply)
+    def * = (eventId, organizerId) <> ((EventOrganizerRelation.apply _).tupled, EventOrganizerRelation.unapply)
 
     def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
     def bFK = foreignKey("organizerid", organizerId, organizers)(_.id, onDelete = ForeignKeyAction.Cascade)

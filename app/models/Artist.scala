@@ -294,7 +294,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def deleteEventRelation(eventArtistRelation: EventArtistRelation): Future[Int] = db.run(
     eventsArtists
       .filter(artistFollowed =>
-        artistFollowed.eventId === eventArtistRelation.artistId && artistFollowed.eventId === eventArtistRelation.eventId)
+        artistFollowed.artistId === eventArtistRelation.artistId && artistFollowed.eventId === eventArtistRelation.eventId)
       .delete)
 
   def delete(id: Long): Future[Int] = db.run(artists.filter(_.id === id).delete)

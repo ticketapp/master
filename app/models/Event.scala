@@ -145,7 +145,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val query = for {
       place <- places if place.id === placeId
-      eventPlace <- eventsPlaces
+      eventPlace <- eventsPlaces if eventPlace.placeId === place.id
       event <- events if event.id === eventPlace.eventId &&
         ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
     } yield event
@@ -160,7 +160,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val query = for {
       place <- places if place.id === placeId
-      eventPlace <- eventsPlaces
+      eventPlace <- eventsPlaces if eventPlace.placeId === place.id
       event <- events if event.id === eventPlace.eventId && event.startTime < now
     } yield event
 
@@ -174,7 +174,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
       val query = for {
         organizer <- organizers if organizer.id === organizerId
-        eventOrganizer <- eventsOrganizers
+        eventOrganizer <- eventsOrganizers if eventOrganizer.organizerId === organizer.id
         event <- events if event.id === eventOrganizer.eventId &&
         ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
       } yield event
@@ -202,7 +202,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val query = for {
       artist <- artists if artist.facebookUrl === facebookUrl
-      eventArtist <- eventsArtists
+      eventArtist <- eventsArtists if eventArtist.artistId === artist.id
       event <- events if event.id === eventArtist.eventId &&
       ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
     } yield event

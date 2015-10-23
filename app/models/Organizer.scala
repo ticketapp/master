@@ -147,7 +147,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
 
   def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Organizer] = save(organizer) flatMap {
-    case organizer: Organizer => saveEventRelation(eventId, organizer.id.get) map {
+    case organizer: Organizer => saveEventRelation(EventOrganizerRelation(eventId, organizer.id.get)) map {
       case 1 =>
         organizer
       case _ =>
@@ -156,12 +156,14 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     }
   }
 
-  def saveEventRelation(eventId: Long, organizerId: Long): Future[Int] =
-    db.run(eventsOrganizers += EventOrganizer(eventId, organizerId))
+  def saveEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] =
+    db.run(eventsOrganizers += eventOrganizerRelation)
 
 
-  def deleteEventRelation(eventId: Long, organizerId: Long): Future[Int] = db.run(eventsOrganizers.filter(eventOrganizer =>
-      eventOrganizer.eventId === eventId && eventOrganizer.organizerId === organizerId).delete)
+  def deleteEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] = db.run(
+    eventsOrganizers.filter(eventOrganizer =>
+      eventOrganizer.eventId === eventOrganizerRelation.eventId &&
+        eventOrganizer.organizerId === eventOrganizerRelation.organizerId).delete)
 
   def delete(id: Long): Future[Int] = db.run(organizers.filter(_.id === id).delete)
 

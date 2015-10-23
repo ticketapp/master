@@ -127,7 +127,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
           whenReady(organizerMethods.saveWithEventRelation(organizer, savedEvent.id.get), timeout(Span(5, Seconds))) { savedOrganizer =>
             whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
               //
-              organizerMethods.deleteEventRelation(savedEvent.id.get, savedOrganizer.id.get)
+              organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get))
               organizerMethods.delete(savedOrganizer.id.get)
             }
           }
