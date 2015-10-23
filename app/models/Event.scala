@@ -104,8 +104,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       .filter(event =>
         (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
       .sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(numberToReturn)
-      .take(offset)
+      .drop(offset)
+      .take(numberToReturn)
     db.run(query.result)
   }
 
@@ -116,8 +116,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     val query = events
       .filter(event => (event.startTime < now) || (event.startTime > xHoursAgo))
       .sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(numberToReturn)
-      .take(offset)
+      .drop(offset)
+      .take(numberToReturn)
     db.run(query.result)
   }
 

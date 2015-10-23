@@ -163,7 +163,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     } yield artist
 
     //getArtistProperties
-    db.run(query.drop(numberToReturn).take(offset).result)
+    db.run(query.drop(offset).take(numberToReturn).result)
   }
   
   def find(id: Long): Future[Option[Artist]] = {

@@ -130,8 +130,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Place]] = {
    val query = places
      .sortBy(_.geographicPoint <-> geographicPoint)
-     .drop(numberToReturn)
-     .take(offset)
+     .drop(offset)
+     .take(numberToReturn)
    db.run(query.result)
   }
 

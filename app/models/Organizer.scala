@@ -132,8 +132,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] = {
     val query = organizers
       .sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(numberToReturn)
-      .take(offset)
+      .drop(offset)
+      .take(numberToReturn)
     db.run(query.result)
   }
 
