@@ -231,7 +231,7 @@ class EventController @Inject()(ws: WSClient,
   }
 
   def getFollowedEvents = SecuredAction.async { implicit request =>
-    eventMethods.getFollowed(request.identity.uuid) map { events =>
+    eventMethods.getFollowedEvents(request.identity.uuid) map { events =>
       Ok(Json.toJson(events))
     } recover {
       case e =>

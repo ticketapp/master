@@ -14,7 +14,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
-import services.{MyPostgresDriver, Utilities}
+import services.{FollowService, MyPostgresDriver, Utilities}
 import silhouette.DBTableDefinitions
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,7 +36,7 @@ case class Place (id: Option[Long],
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val geographicPointMethods: GeographicPointMethods,
                              val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with DBTableDefinitions with MyDBTableDefinitions {
 
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
@@ -161,39 +161,15 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-  def followByPlaceId(placeRelation: UserPlaceRelation): Future[Int] = db.run(placesFollowed += placeRelation)
-
-  def unfollowByPlaceId(userPlaceRelation: UserPlaceRelation): Future[Int] = db.run(
-    placesFollowed
-      .filter(placeFollowed =>
-      placeFollowed.userId === userPlaceRelation.userId && placeFollowed.placeId === userPlaceRelation.placeId)
-      .delete)
-
   def followByFacebookId(userId : UUID, facebookId: String): Future[Int] =
-   findIdByFacebookId(facebookId) flatMap {
-     case Some(placeId) =>
-       followByPlaceId(UserPlaceRelation(userId, placeId))
-     case None =>
-       Logger.error("Place.followByFacebookId: ThereIsNoPlaceForThisFacebookId")
-       Future(0)
-   }
+    findIdByFacebookId(facebookId) flatMap {
+      case Some(placeId) =>
+        followByPlaceId(UserPlaceRelation(userId, placeId))
+      case None =>
+        Logger.error("Place.followByFacebookId: ThereIsNoPlaceForThisFacebookId")
+        Future(0)
+    }
 
-  def isFollowed(userPlaceRelation: UserPlaceRelation): Future[Boolean] = {
-  val query =
-    sql"""SELECT exists(
-           SELECT 1 FROM placesFollowed WHERE userId = ${userPlaceRelation.userId} AND placeId = ${userPlaceRelation.placeId})"""
-    .as[Boolean]
-  db.run(query.head)
-  }
-
-  def getFollowed(userId: UUID): Future[Seq[Place] ]= {
-    val query = for {
-      placeFollowed <- placesFollowed if placeFollowed.userId === userId
-      place <- places if place.id === placeFollowed.placeId
-    } yield place
-
-    db.run(query.result)
-  }
 
   def saveEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces += eventPlaceRelation)
  

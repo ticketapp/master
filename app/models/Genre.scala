@@ -134,10 +134,12 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         updateArtistRelation(updatedArtistGenreRelation) map {
           case int if int != 1 =>
             Logger.error("Genre.saveArtistRelation: not exactly one row was updated")
+            artistGenre
+          case _ =>
+            updatedArtistGenreRelation
         }
-        updatedArtistGenreRelation
-      case id: Long => artistGenreRelation.copy(artistId = id)
-    }).transactionally)
+      case id: Long => Future(artistGenreRelation.copy(artistId = id))
+    }).transactionally) flatMap { maybeRelation => maybeRelation }
   }
 
   def updateArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] =
@@ -220,8 +222,6 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def delete(id: Int): Future[Int] = db.run(genres.filter(_.id === id).delete) 
 
-  def follow(userGenreRelation: UserGenreRelation): Future[Int] =
-    db.run(genresFollowed += userGenreRelation)
 
   def genresStringToGenresSet(genres: String): Set[Genre] = {
     val refactoredGenres = genres

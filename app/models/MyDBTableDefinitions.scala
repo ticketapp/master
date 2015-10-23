@@ -13,10 +13,12 @@ import slick.model.ForeignKeyAction
 case class UserArtistRelation(userId: UUID, artistId: Long)
 case class EventArtistRelation(eventId: Long, artistId: Long)
 case class ArtistGenreRelation(artistId: Long, genreId: Int, weight: Long = 0)
-case class UserGenreRelation(userId: UUID, genreId: Long)
+case class UserGenreRelation(userId: UUID, genreId: Int)
 case class UserEventRelation(userId: UUID, eventId: Long)
 case class TrackGenreRelation(trackId: UUID, genreId: Int, weight: Long = 0)
 case class UserPlaceRelation(userId: UUID, placeId: Long)
+case class UserOrganizerRelation(userId: UUID, organizerId: Long)
+case class UserTrackRelation(userId: UUID, trackId: UUID)
 case class EventGenreRelation(eventId: Long, genreId: Int)
 case class EventPlaceRelation(eventId: Long, placeId: Long)
 case class EventOrganizerRelation(eventId: Long, organizerId: Long)
@@ -86,7 +88,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
   class GenresFollowed(tag: Tag) extends Table[UserGenreRelation](tag, "genresfollowed") {
     def userId = column[UUID]("userid")
-    def genreId = column[Long]("genreid")
+    def genreId = column[Int]("genreid")
 
     def * = (userId, genreId) <> ((UserGenreRelation.apply _).tupled, UserGenreRelation.unapply)
   }
@@ -216,11 +218,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def address = foreignKey("addressFk", addressId, addresses)(_.id.?, onDelete = ForeignKeyAction.Cascade)
   }
 
-  class OrganizersFollowed(tag: Tag) extends Table[OrganizerFollowed](tag, "organizersfollowed") {
+  class OrganizersFollowed(tag: Tag) extends Table[UserOrganizerRelation](tag, "organizersfollowed") {
     def userId = column[UUID]("userid")
     def organizerId = column[Long]("organizerid")
 
-    def * = (userId, organizerId) <> ((OrganizerFollowed.apply _).tupled, OrganizerFollowed.unapply)
+    def * = (userId, organizerId) <> ((UserOrganizerRelation.apply _).tupled, UserOrganizerRelation.unapply)
   }
 
   class Tracks(tag: Tag) extends Table[Track](tag, "tracks") {
@@ -249,6 +251,13 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def weight = column[Long]("weight", O.Default(0))
 
     def * = (trackId, genreId, weight) <> ((TrackGenreRelation.apply _).tupled, TrackGenreRelation.unapply)
+  }
+
+  class TracksFollowed(tag: Tag) extends Table[UserTrackRelation](tag, "tracksfollowed") {
+    def userId = column[UUID]("userid")
+    def trackId = column[UUID]("trackid")
+
+    def * = (userId, trackId) <> ((UserTrackRelation.apply _).tupled, UserTrackRelation.unapply)
   }
 
   class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
@@ -289,4 +298,5 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val frenchCities = TableQuery[FrenchCities]
   lazy val tracks = TableQuery[Tracks]
   lazy val tracksGenres = TableQuery[TracksGenres]
+  lazy val tracksFollowed = TableQuery[TracksFollowed]
 }

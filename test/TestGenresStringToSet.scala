@@ -77,7 +77,6 @@ class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
   }
 }
 /*
-
     Some("Симфо Саунд"),
    Some("""Rock ´n Roll"""),  Some("Indie Pop-Folk"),
    Some("Electronic, Techno, Experimental"), Some("Dub"), Some("Psychedelic Roots"),

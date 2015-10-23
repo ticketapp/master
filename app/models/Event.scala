@@ -12,7 +12,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
-import services.{MyPostgresDriver, Utilities}
+import services.{FollowService, MyPostgresDriver, Utilities}
 import silhouette.DBTableDefinitions
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,7 +47,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val tariffMethods: TariffMethods,
                              val geographicPointMethods: GeographicPointMethods,
                              val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with DBTableDefinitions with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with DBTableDefinitions with MyDBTableDefinitions {
 
   val geometryFactory = new GeometryFactory()
 
@@ -306,31 +306,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def delete(id: Long): Future[Int] = db.run(events.filter(_.id === id).delete)
 
   def update(event: Event): Future[Int] = db.run(events.filter(_.id === event.id).update(event))
-
-  def follow(userEventRelation: UserEventRelation): Future[Int] = db.run(eventsFollowed += userEventRelation)
-
-  def unfollow(userEventRelation: UserEventRelation): Future[Int] = db.run(
-   eventsFollowed
-     .filter(eventFollowed =>
-        eventFollowed.userId === userEventRelation.userId && eventFollowed.eventId === userEventRelation.eventId)
-     .delete)
-
-  def getFollowed(userId: UUID): Future[Seq[Event] ]= {
-    val query = for {
-      eventFollowed <- eventsFollowed if eventFollowed.userId === userId
-      event <- events if event.id === eventFollowed.eventId
-    } yield event
-
-    db.run(query.result)
-  }
-
-  def isFollowed(userEventRelation: UserEventRelation): Future[Boolean] = {
-    val query =
-      sql"""SELECT exists(
-             SELECT 1 FROM eventsFollowed WHERE userId = ${userEventRelation.userId} AND eventId = ${userEventRelation.eventId})"""
-      .as[Boolean]
-    db.run(query.head)
-  }
 
   def saveFacebookEventByFacebookId(eventFacebookId: String): Future[Event] =
     findEventOnFacebookByFacebookId(eventFacebookId) flatMap { save }
