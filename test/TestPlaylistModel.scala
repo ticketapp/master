@@ -1,13 +1,14 @@
 import java.util.UUID.randomUUID
-
+import scala.concurrent.duration._
 import models.Playlist._
 import models.{Track, _}
 import org.scalatest._
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.Utilities
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
+import scala.concurrent.Await
 import scala.util.Success
 
 class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
@@ -15,23 +16,29 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
   val appBuilder = new GuiceApplicationBuilder()
   val injector = appBuilder.injector()
   val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
+  val utilities = new Utilities
+  val trackMethods = new TrackMethods(dbConfProvider, utilities)
+  val genreMethods = new GenreMethods(dbConfProvider, utilities)
+  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
+  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
+  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
+    trackMethods, utilities)
 
-/*  var artistId = -1L
+  var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website"))
 
-  override def beforeAll() = {
-    artistId = Artist.save(artist).get
+  /*override def beforeAll() = {
+    artistId = Await.result(artistMethods.save(artist), 2 seconds).id.get
   }
 
   override def afterAll() = {
-    Artist.delete(artistId)
-  }
+    artistId = Await.result(artistMethods.delete(artistId), 2 seconds)
+  }*/
 
   "A playlist" must {
 
-    "be able to be saved and deleted" in {
+    /*"be able to be saved and deleted" in {
       val playlist = Playlist(None, "userTestId", "name", Seq.empty)
       val playlistId = Playlist.save(playlist) match {
         case Success(Some(newPlaylistId)) =>
@@ -75,6 +82,6 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
         Track.delete(trackId2)
         Track.delete(trackId3)
       }
-    }
-  }*/
+    }*/
+  }
 }
