@@ -1,12 +1,21 @@
 
+import java.util.UUID
+
+import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.joda.time.DateTime
+import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
+import silhouette.UserDAOImpl
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
+import scala.concurrent.Await
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
 
@@ -26,6 +35,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
     trackMethods, utilities)
   val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
     geographicPointMethods, utilities)
+  val userDAOImpl = new UserDAOImpl(dbConfProvider)
 
   "An Organizer" must {
 
@@ -58,38 +68,105 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-    /*"be followed and unfollowed by a user" in {
+    "be followed and unfollowed by a user" in {
       val organizer = Organizer(None, Option("facebookId4"), "organizerTest4", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option("(5.4,5.6)"))
-      val organizerId = save(organizer).get.get
-      try {
-        followByOrganizerId("userTestId", organizerId)
-        isFollowed(IdentityId("userTestId", "oauth2"), organizerId) mustBe true
-        unfollowByOrganizerId("userTestId", organizerId) mustBe Success(1)
-      } finally {
-        delete(organizerId)
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+      val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
+      val uuid: UUID = UUID.randomUUID()
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName"),
+        lastName = Option("lastName"),
+        fullName = Option("fullName"),
+        email = Option("email"),
+        avatarURL = Option("avatarUrl"))
+      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
+          try {
+            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+            timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(organizerMethods.isFollowed(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+                timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe true
+              }
+            }
+          } finally {
+            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+              timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe 1
+
+                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1 }
+              }
+            }
+          }
+        }
       }
     }
 
     "not be followed twice" in {
-      val organizer = Organizer(None, Option("facebookId5"), "organizerTest5", Option("description"), None,
+      val organizer = Organizer(None, Option("facebookId14"), "organizerTest14", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option("(5.4,5.6)"))
-      val organizerId = save(organizer).get.get
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+      val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
+      val uuid: UUID = UUID.randomUUID()
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName1"),
+        lastName = Option("lastName1"),
+        fullName = Option("fullName1"),
+        email = Option("email1"),
+        avatarURL = Option("avatarUrl"))
+      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
+          try {
+            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+              timeout(Span(5, Seconds))) { response =>
 
-      try {
-        followByOrganizerId("userTestId", organizerId)
+              response mustBe 1
 
-        followByOrganizerId("userTestId", organizerId) match {
-          case Failure(psqlException: PSQLException) => psqlException.getSQLState mustBe UNIQUE_VIOLATION
-          case _ => throw new Exception("follow an organizer twice didn't throw a PSQL UNIQUE_VIOLATION")
+              whenReady(organizerMethods.isFollowed(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+                timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe true
+                try {
+                  Await.result(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get))
+                    , 3 seconds)
+                } catch {
+                  case e: PSQLException =>
+
+                    e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+                }
+              }
+            }
+          } finally {
+            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+              timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe 1
+
+                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1 }
+              }
+            }
+          }
         }
-      } finally {
-        unfollowByOrganizerId("userTestId", organizerId)
-        delete(organizerId)
       }
-    }*/
+    }
 
     "be linked to a place if one with the same facebookId already exists" in {
       whenReady (placeMethods.save(Place(None, "Name1", Some("1234567891"), None, None, None, None, None, None, None)),
