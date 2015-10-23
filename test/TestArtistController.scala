@@ -1,4 +1,5 @@
 /*
+/*
 import java.util.UUID
 
 import com.google.inject.AbstractModule
@@ -104,25 +105,13 @@ class TestArtistController extends PlaySpecification with Mockito {
   }
 }
 */
-import java.util.UUID
-
-import com.google.inject.AbstractModule
-import com.mohiva.play.silhouette.api.{ Environment, LoginInfo }
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import controllers.{ArtistController, routes}
-import models.User
-import net.codingwell.scalaguice.ScalaModule
 import org.specs2.mock.Mockito
-import org.specs2.specification.Scope
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json.Json
-import play.api.mvc.Controller
-import play.api.test.{ FakeRequest, PlaySpecification, WithApplication }
-import controllers.ArtistController
+import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 
-class TestArtistController extends PlaySpecification with Mockito {
+
+class TestArtistController extends PlaySpecification with Mockito with Context {
   sequential
 
   "The `index` action" should {
@@ -164,44 +153,5 @@ class TestArtistController extends PlaySpecification with Mockito {
       }
     }
   }
-
-  /**
-   * The context.
-   */
-  trait Context extends Scope {
-
-    /**
-     * A fake Guice module.
-     */
-    class FakeModule extends AbstractModule with ScalaModule {
-      def configure() = {
-        bind[Environment[User, CookieAuthenticator]].toInstance(env)
-      }
-    }
-
-    /**
-     * An identity.
-     */
-    val identity = User(
-      uuid = UUID.randomUUID(),
-      loginInfo = LoginInfo("facebook", "user@facebook.com"),
-      firstName = None,
-      lastName = None,
-      fullName = None,
-      email = None,
-      avatarURL = None
-    )
-
-    /**
-     * A Silhouette fake environment.
-     */
-    implicit val env: Environment[User, CookieAuthenticator] = new FakeEnvironment[User, CookieAuthenticator](Seq(identity.loginInfo -> identity))
-
-    /**
-     * The application.
-     */
-    lazy val application = new GuiceApplicationBuilder()
-      .overrides(new FakeModule)
-      .build()
-  }
 }
+*/

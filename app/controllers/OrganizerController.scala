@@ -6,7 +6,7 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper.organizerWrites
-import models.{Organizer, User}
+import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
@@ -17,11 +17,9 @@ import play.api.libs.ws.WSClient
 //import services.Utilities.{FOREIGN_KEY_VIOLATION, UNIQUE_VIOLATION}
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.mvc._
-
+import services.Utilities
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import models.Organizer
-import models.OrganizerMethods
 import json.JsonHelper._
 import json.JsonHelper._
 
@@ -29,6 +27,7 @@ class OrganizerController @Inject()(ws: WSClient,
                                     val organizerMethods: OrganizerMethods,
                                     val messagesApi: MessagesApi,
                                     val env: Environment[User, CookieAuthenticator],
+                                    val utilities: Utilities,
                                     socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, CookieAuthenticator] {
 
@@ -83,7 +82,23 @@ class OrganizerController @Inject()(ws: WSClient,
       }
     )
   }
-//
+
+  def followOrganizerByOrganizerId(organizerId : Long) = SecuredAction.async { implicit request =>
+    organizerMethods.followByOrganizerId(UserOrganizerRelation(request.identity.uuid, organizerId)) map {
+      case 1 =>
+        Created
+      case _ =>
+        Logger.error("OrganizerController.followOrganizer: organizerMethods.follow did not return 1")
+        InternalServerError
+    } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+        Logger.error(s"OrganizerController.followOrganizerByOrganizerId: there is no organizer with the id $organizerId")
+        Conflict
+      case unknownException =>
+        Logger.error("OrganizerController.followOrganizer", unknownException)
+        InternalServerError
+    }
+  }
 //  def followOrganizerByOrganizerId(organizerId : Long) = SecuredAction { implicit request =>
 //    organizerMethods.followById(request.identity.UUID, organizerId) match {
 //      case Success(_) =>
