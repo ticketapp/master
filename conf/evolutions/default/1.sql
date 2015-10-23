@@ -789,7 +789,7 @@ LANGUAGE plpgsql;
 
 CREATE TABLE playlists (
   playlistId              SERIAL PRIMARY KEY,
-  userId                  UUID REFERENCES users(userId) NOT NULL,
+  userId                  UUID REFERENCES users(userId) ON DELETE CASCADE NOT NULL,
   name                    VARCHAR(255) NOT NULL
 );
 CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);

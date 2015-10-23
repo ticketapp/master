@@ -1,6 +1,6 @@
 package controllers
 
-import models.Playlist
+import models.PlaylistWithTracks
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._

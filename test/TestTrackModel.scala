@@ -46,8 +46,8 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
     "be saved and deleted" in {
       val trackId = UUID.randomUUID
       val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "artistFacebookUrlTestTrack", "artistName")
-      whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { saveTrack =>
-        saveTrack.uuid mustBe trackId
+      whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
+        savedTrack.uuid mustBe trackId
         whenReady(trackMethods.find(trackId), timeout(Span(5, Seconds))) { trackFound =>
           trackFound mustEqual Option(track.copy(uuid = trackId, confidence = 0))
 

@@ -4,7 +4,7 @@ import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.Utilities
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 class TestAddressModel extends PlaySpec with OneAppPerSuite {
 
