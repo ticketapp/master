@@ -87,7 +87,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       .sortBy(_.geographicPoint <-> geographicPoint)
       .drop(numberToReturn)
       .take(offset)
-    db.run(query.result)
+  db.run(query.result)
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Event]] = geographicPointMethods

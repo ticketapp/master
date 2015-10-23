@@ -2,7 +2,7 @@ package models
 
 import java.util.UUID
 import javax.inject.Inject
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import controllers.{PlaylistUpdateTrackWithoutRankException, PlaylistDoesNotExistException, DAOException}
 import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import services.MyPostgresDriver.api._
@@ -17,9 +17,9 @@ import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
 
 
-case class Playlist(playlistInfo: PlaylistInfo, tracksWithRank: Seq[TrackWithPlaylistRank])
+case class PlaylistWithTracks(playlistInfo: Playlist, tracksWithRank: Seq[TrackWithPlaylistRank])
 
-case class PlaylistInfo(playlistId: Option[Long], userId: UUID, name: String)
+case class Playlist(playlistId: Option[Long], userId: UUID, name: String)
 
 case class TrackWithPlaylistRank(track: Track, rank: Double)
 
@@ -31,7 +31,7 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
                          val utilities: Utilities)
   extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper with MyDBTableDefinitions {
 //
-//  case class TrackUUIDAndRank(UUID: UUID, rank: BigDecimal)
+
 //  def idAndRankFormApply(stringUUID: String, rank: BigDecimal) = TrackUUIDAndRank(UUID.fromString(stringUUID), rank)
 //  def idAndRankFormUnapply(trackIdAndRank: TrackUUIDAndRank) = Option((trackIdAndRank.UUID.toString, trackIdAndRank.rank))
 //
@@ -40,38 +40,98 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
 //    PlaylistNameTracksIdAndRank(name, tracksIdAndRank)
 //  def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
 //    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
-  
-  /*
-  db.run(events returning events.map(_.id) into ((event, id) => event.copy(id = Some(id))) += event)
-    val tupledJoin = organizers joinLeft addresses on (_.addressId === _.id)
 
-    db.run(tupledJoin.result).map(_.map(OrganizerWithAddress.tupled))
-   */
-
-  def save(playlistInfo: PlaylistInfo): Future[PlaylistInfo] =
+  def save(playlistInfo: Playlist): Future[Playlist] =
     db.run(playlists returning playlists.map(_.id) into ((playlist, id) => playlist.copy(playlistId = Option(id))) += playlistInfo)
 
-//  def find(id: Long): Future[Seq[PlaylistInfo]] = {
-////    val query = /*tracks join*/
-////      genres join
-////        artistsGenres on (_.id === _.genreId) joinRight
-////        artists on (_._2.artistId === _.id)
-////
-////    val action = query.drop(offset).take(numberToReturn).result
-////    db.run(action) map { artistWithRelations =>
-////      artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
-//
-//    val query = tracks join
-//      playlistsTracks on(_.uuid === _.trackId) joinRight
-//      playlists on (_._2.playlistId === _.id)
-//
-//    db.run(query.result) map { playlistWithTracks =>
-//
-//            playlistWithTracks.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => playlistWithGenres(e._1, e._2))
-//
-//  }
-//        .map(playlist => playlist.copy(tracks = Track.findByPlaylistId(playlist.playlistId)))
+  def find(id: Long): Future[Option[PlaylistWithTracks]] = {
 
+    //    val query = for {
+    //      (playlist, playlistTrack, track) <- playlists joinFull
+    //      playlistsTracks on (_.id === _.playlistId) joinRight
+    //      tracks on (_._2 === tracks.trackId)
+    //    } yield (playlist, playlistTrack, track)
+
+    /*
+      (for {
+        (computer, company) <- computers joinLeft companies on (_.companyId === _.id)
+        if computer.name.toLowerCase like filter.toLowerCase
+      } yield (computer, company.map(_.id), company.map(_.name)))
+        .drop(offset)
+        .take(pageSize)
+     */
+//
+//    val query = tracks joinRight
+//      playlistsTracks on (_.uuid === _.trackId) joinRight
+//      playlists on (_._2.playlistId === id)
+//
+
+//    val findBooksQuery = libraries
+//      .join(libraryToBooks).on(_.id === _.libraryId)
+//      .join(books).on(_.id === _._2.bookId)
+//      // To group by libraries.id
+//      .groupBy(_._1.id)
+//      .result
+////join, joinFull,joinLeft, joinRight
+
+
+    val queryPlaylistWithPlaylistTrack = playlists.filter(_.id === id)
+      .joinLeft(playlistsTracks).on(_.id === _.playlistId)
+//      .join(tracks).on(_._2)
+
+//    val query = for {
+//      playlist <- playlists //if playlist.id === id
+//      playlistTrack <- playlistsTracks if playlistTrack.playlistId === playlist.id
+//      track <- tracks if playlistTrack.trackId === track.uuid
+//    } yield (playlist, playlistTrack, track)
+
+
+//    val query = for {
+//      ((((order, _), brand), _), image) <- orders outerJoin
+//        orderBrand on (_.uuid === _.orderId) leftJoin
+//        brands on (_._2.brandId === _.uuid) outerJoin
+//        orderImage on (_._1._1.uuid === _.orderId) leftJoin
+//        images on (_._2.imageId === _.uuid)
+//      if order.uuid in orderIds.map(_._1.orderId)
+//    } yield (order, brand.uuid.?, brand.objectString.?, image.uuid.?, image.objectString.?)
+
+    val query = for {
+      (playlist, pT) <- playlists joinFull //if playlist.id === id
+      playlistsTracks on (_.id === _.playlistId)
+    } yield (playlist, pT)
+
+
+    db.run(query.result) map { playlistWithTracks =>
+//      case None =>
+//        None
+//      case Some(playlistWithTracks) =>
+        println("\n\n\nplaylistWithTracks = " + playlistWithTracks)
+//
+//        val playlistMap = playlistWithTracks.groupBy(_._2)
+//        println("\n\npMap" + playlistMap)
+//        val tuple3PlaylistWithTracksAndRank = playlistMap.map(c => (c._1, c._2.flatMap(d => d._1.map(_._1))))
+//        println("\n\ntuple3" + tuple3PlaylistWithTracksAndRank)
+//        val a = tuple3PlaylistWithTracksAndRank.toList map (e => PlaylistWithTracks(e._1, Seq.empty /*e._2*/))
+//        println("\n\ntuple3PlaylistWithTracksAndRank = " + tuple3PlaylistWithTracksAndRank)
+//        a.headOption
+            None
+    }
+  }
+
+  def delete(id: Long): Future[Int] = db.run(playlists.filter(_.id === id).delete)
+
+  def saveTrackRelation(playlistTrack: PlaylistTrack): Future[Int] = db.run(playlistsTracks += playlistTrack)
+
+//  def saveWithTrackRelation(userId: UUID, playlistNameTracksIdAndRank: PlaylistNameTracksIdAndRank): Long = {
+//    save(Playlist(None, userId, playlistNameTracksIdAndRank.name, Seq.empty)) match {
+//      case Success(Some(playlistId: Long)) =>
+//        playlistNameTracksIdAndRank.tracksIdAndRank.foreach(trackIdAndRank =>
+//          saveTrackRelation(playlistId, trackIdAndRank))
+//        playlistId
+//      case _ =>
+//        throw new DAOException("Playlist.saveWithTrackRelation")
+//    }
+//  }
 /*
   def findByUserId(userUUID: UUID): Seq[Playlist] = try {
     DB.withConnection { implicit connection =>
@@ -86,25 +146,6 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
     case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
   }
 
-  def delete(userId: UUID, playlistId: Long): Try[Int] = Try {
-    deleteTracksRelations(userId, playlistId) match {
-      case Success(_) =>
-        DB.withConnection { implicit connection =>
-          SQL(
-            """DELETE FROM playlists
-              |  WHERE userId = {userId}
-              |  AND playlistId = {playlistId}""".stripMargin)
-            .on(
-              'userId -> userId,
-              'playlistId -> playlistId)
-            .executeUpdate()
-        }
-      case Failure(exception) =>
-        Logger.error("Playlist.delete", exception)
-        throw exception
-    }
-  }
-
   def deleteTracksRelations(userId: UUID, playlistId: Long): Try[Int] = Try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -117,31 +158,6 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
     }
   }
 
-  def saveWithTrackRelation(userId: UUID, playlistNameTracksIdAndRank: PlaylistNameTracksIdAndRank): Long = {
-    save(Playlist(None, userId, playlistNameTracksIdAndRank.name, Seq.empty)) match {
-      case Success(Some(playlistId: Long)) =>
-        playlistNameTracksIdAndRank.tracksIdAndRank.foreach(trackIdAndRank =>
-          saveTrackRelation(playlistId, trackIdAndRank))
-        playlistId
-      case _ =>
-        throw new DAOException("Playlist.saveWithTrackRelation")
-      }
-  }
-
-  def saveTrackRelation(playlistId: Long, trackIdAndRank: TrackUUIDAndRank): Option[Long] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """INSERT INTO playlistsTracks (playlistId, trackId, trackRank)
-          |  VALUES ({playlistId}, {trackId}, {trackRank})""".stripMargin)
-        .on(
-          'playlistId -> playlistId,
-          'trackId -> trackIdAndRank.UUID,
-          'trackRank -> trackIdAndRank.rank.bigDecimal)
-        .executeInsert()
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Track.saveTrackRelation: " + e.getMessage)
-  }
 
   def deleteTrackRelation(playlistId: Long, trackId: UUID): Int = try {
     DB.withConnection { implicit connection =>
@@ -220,7 +236,7 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
   } catch {
     case e: Exception => throw new DAOException("Playlist.updateTrackRank: " + e.getMessage)
   }
-  
+
   def addTracksInPlaylist(userId: String, playlistIdAndTracksId: PlaylistIdAndTracksId): Unit = {
     playlistIdAndTracksId.tracksId.foreach(trackId =>
       Track.savePlaylistTrackRelation(playlistIdAndTracksId.id, trackId))

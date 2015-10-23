@@ -78,10 +78,16 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def findByPlaylistId(playlistId: Option[Long]): Future[Seq[Track]] = {
-    Future { Seq.empty }
-  }
+  def findByPlaylistId(playlistId: Long): Future[Seq[TrackWithPlaylistRank]] = {
+    val query = for {
+      playlistTrack <- playlistsTracks if playlistTrack.playlistId === playlistId
+      track <- tracks if track.uuid === playlistTrack.trackId
+    } yield (track, playlistTrack.trackRank)
 
+    db.run(query.result) map { trackWithPlaylistRankTuple =>
+      trackWithPlaylistRankTuple map { TrackWithPlaylistRank.tupled }
+    }
+  }
 
 //    try {
 //    DB.withConnection { implicit connection =>
@@ -158,7 +164,6 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }).transactionally)
 
   def delete(uuid: UUID): Future[Int] = db.run(tracks.filter(_.uuid === uuid).delete)
-
 
   def followTrack(userId : Long, trackId : UUID): Option[Long] = {
 //    DB.withConnection { implicit connection =>
