@@ -5,6 +5,7 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
@@ -33,7 +34,11 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
     Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website"))
 
   override def beforeAll() = {
-    artistId = Await.result(artistMethods.save(artist), 2 seconds).id.get
+    try {
+      artistId = Await.result(artistMethods.save(artist), 2 seconds).id.get
+    } catch {
+      case e: Exception => Logger.info("TestPlaylistModel.beforeAll:" + e.getMessage)
+    }
   }
 
   override def afterAll() = {
@@ -49,9 +54,9 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
 
         savedPlaylist mustBe playlist.copy(playlistId = maybePlaylistId)
 
-        whenReady(playlistMethods.find(maybePlaylistId.get), timeout(Span(5, Seconds))) { foundPlaylistWithTracks =>
+        whenReady(playlistMethods.find(maybePlaylistId.get), timeout(Span(5, Seconds))) { foundPlaylist =>
 
-          foundPlaylistWithTracks mustBe Option(PlaylistWithTracks(savedPlaylist, Seq.empty))
+          foundPlaylist mustBe Option(savedPlaylist)
 
           whenReady(playlistMethods.delete(maybePlaylistId.get), timeout(Span(5, Seconds))) {
 

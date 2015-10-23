@@ -2,8 +2,8 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import models._
-import play.api.libs.iteratee.Iteratee
 import scala.concurrent.duration._
+import org.scalatest.Matchers._
 
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
@@ -57,12 +57,12 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
         Option("description"), "facebookUrl1", Set("website"))
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         try {
+          println("findAll: " + Await.result(artistMethods.findAll, 2 seconds))
+
           whenReady(artistMethods.findSinceOffset(2, 0), timeout(Span(5, Seconds))) { foundArtist =>
 
-            println("findAll: " + Await.result(artistMethods.findAll, 2 seconds))
-
-            foundArtist.headOption mustBe Option(artist.copy(id = Some(savedArtist.id.get),
-              description = Some("<div class='column large-12'>description</div>")))
+            foundArtist should contain (ArtistWithGenres(artist.copy(id = Some(savedArtist.id.get),
+              description = Some("<div class='column large-12'>description</div>")), Seq.empty))
 
             whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
           }
