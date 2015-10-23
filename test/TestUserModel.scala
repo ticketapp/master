@@ -83,23 +83,53 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
-   /* "get his followed organizers" in {
+    "get his followed organizers" in {
+      val uuid: UUID = UUID.randomUUID()
+      val loginInfo: LoginInfo = LoginInfo("providerId11", "providerKey11")
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName11"),
+        lastName = Option("lastName11"),
+        fullName = Option("fullName11"),
+        email = Option("email11"),
+        avatarURL = Option("avatarUrl11"))
       val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
         val organizerId = savedOrganizer.id.get
-        try {
-          organizerMethods.followByOrganizerId("userTestId", organizerId)
+        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
 
-          Organizer.getFollowedOrganizers(IdentityId("userTestId", "providerId")) should not be empty
+          try {
+            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+              timeout(Span(5, Seconds))) { response =>
 
-          Organizer.unfollowByOrganizerId("userTestId", organizerId) mustBe 1
-        } finally {
-          Organizer.delete(organizerId)
+                response mustBe 1
+
+              whenReady(organizerMethods.getFollowedOrganizers(uuid), timeout(Span(5, Seconds))) { organizers =>
+
+                  organizers must contain (savedOrganizer)
+
+              }
+            }
+          } finally {
+            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+              timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe 1
+
+                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
+              }
+            }
+          }
         }
       }
-    }*/
+    }
 //
 //    "get tracks he had removed" in {
 //      val artist = Artist(None, Option("facebookIdTestUserModel"), "artistTest", Option("imagePath"),

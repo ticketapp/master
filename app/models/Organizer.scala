@@ -13,7 +13,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
-import services.{MyPostgresDriver, Utilities}
+import services.{FollowService, MyPostgresDriver, Utilities}
 import slick.model.ForeignKeyAction
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +39,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
                                  val placeMethods: PlaceMethods,
                                  val utilities: Utilities,
                                  val geographicPointMethods: GeographicPointMethods)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with MyDBTableDefinitions {
 
   def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
                 imagePath: Option[String]): Organizer =
