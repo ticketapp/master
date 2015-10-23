@@ -57,8 +57,8 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
     }
 
     "save, update and delete its relation with an artist" in {
-      val genre = Genre(None, "rockiyadockia")
-      val artist = Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+      val genre = Genre(None, "rockiyadockiaaa")
+      val artist = Artist(None, Option("facebookId111"), "artistTest", Option("imagePath"), Option("description"),
         "artistFacebookUrlTestGenre", Set("website"))
       whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
@@ -67,21 +67,21 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite {
               timeout(Span(5, Seconds))) { artistGenreRelation =>
 
               artistGenreRelation mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 0)
+
               whenReady(genreMethods.saveArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
                 timeout(Span(5, Seconds))) { artistGenreRelationUpdated =>
 
                 artistGenreRelationUpdated mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 1)
-              }
 
-              whenReady(artistMethods.findAllByGenre("rockiyadockia", 1, 0), timeout(Span(5, Seconds))) { artistsSet =>
+                whenReady(artistMethods.findAllByGenre(genre.name, 0, 1), timeout(Span(5, Seconds))) { artists =>
 
-                assert(artistsSet.nonEmpty)
-
-                whenReady(genreMethods.deleteArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
-                timeout(Span(5, Seconds))) { _ mustBe 1 }
+                  assert(artists.nonEmpty)
+                }
               }
             }
           } finally {
+            whenReady(genreMethods.deleteArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
+              timeout(Span(5, Seconds))) { _ mustBe 1 }
             genreMethods.delete(savedGenre.id.get)
             artistMethods.delete(savedArtist.id.get)
           }

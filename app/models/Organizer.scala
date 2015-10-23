@@ -35,8 +35,6 @@ case class Organizer (id: Option[Long],
 
 case class OrganizerWithAddress(organizer: Organizer, address: Option[Address])
 
-case class OrganizerFollowed(userId: UUID, Organizer: Long)
-
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,
                                  val utilities: Utilities,

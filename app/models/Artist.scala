@@ -48,7 +48,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
                        val searchYoutubeTracks: SearchYoutubeTracks,
                        val trackMethods: TrackMethods,
                        val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper with FollowService with MyDBTableDefinitions {
 
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
@@ -158,10 +158,9 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[Artist]] = {
     val query = for {
       genre <- genres if genre.name === genreName
-      artistGenre <- artistsGenres
+      artistGenre <- artistsGenres if artistGenre.genreId === genre.id
       artist <- artists if artist.id === artistGenre.artistId 
     } yield artist
-
     //getArtistProperties
     db.run(query.drop(offset).take(numberToReturn).result)
   }
@@ -299,21 +298,13 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def delete(id: Long): Future[Int] = db.run(artists.filter(_.id === id).delete)
   
-  def followByArtistId(userArtistRelation: UserArtistRelation): Future[Int] = db.run(artistsFollowed += userArtistRelation)
+  /*def followByArtistId(userArtistRelation: UserArtistRelation): Future[Int] = db.run(artistsFollowed += userArtistRelation)
 
   def unfollowByArtistId(userArtistRelation: UserArtistRelation): Future[Int] = db.run(
     artistsFollowed
       .filter(artistFollowed =>
       artistFollowed.userId === userArtistRelation.userId && artistFollowed.artistId === userArtistRelation.artistId)
       .delete)
-
-  def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
-    case None =>
-      Logger.error("Artist.followByFacebookId: ", ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId"))
-      Future { 0 }
-    case Some(artistId) =>
-      followByArtistId(UserArtistRelation(userId, artistId))
-  }
   
   def getFollowedArtists(userId: UUID): Future[Seq[Artist] ]= {
     val query = for {
@@ -330,6 +321,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
            AND artistId = ${userArtistRelation.artistId})"""
       .as[Boolean]
     db.run(query.head)
+  }*/
+
+  def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
+    case None =>
+      Logger.error("Artist.followByFacebookId: ", ThereIsNoArtistForThisFacebookIdException("Artist.followByFacebookId"))
+      Future { 0 }
+    case Some(artistId) =>
+      followByArtistId(UserArtistRelation(userId, artistId))
   }
 
   def normalizeArtistName(artistName: String): String = utilities.normalizeString(artistName)

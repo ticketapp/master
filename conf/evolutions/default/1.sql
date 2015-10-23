@@ -638,6 +638,13 @@ CREATE TABLE organizersFollowed (
 );
 CREATE UNIQUE INDEX organizersFollowedIndex ON organizersFollowed (userId, organizerId);
 
+CREATE TABLE tracksFollowed (
+  tableId                  SERIAL PRIMARY KEY,
+  userId                   UUID REFERENCES users(userId),
+  trackId                  UUID REFERENCES tracks(trackId)
+);
+CREATE UNIQUE INDEX tracksFollowedIndex ON tracksFollowed (userId, trackId);
+
 CREATE TABLE eventsPlaces (
   eventId                 BIGINT REFERENCES events (eventId),
   placeId                 INT REFERENCES places (placeId),
@@ -847,12 +854,6 @@ CREATE OR REPLACE FUNCTION upsertTrackRatingDown(
 LANGUAGE plpgsql;
 
 
-CREATE TABLE usersFavoriteTracks(
-  tableId                 SERIAL PRIMARY KEY,
-  userId                  UUID REFERENCES users(userId) NOT NULL,
-  trackId                 UUID REFERENCES tracks (trackId) NOT NULL
-);
-CREATE UNIQUE INDEX usersFavoriteTracksIndex ON usersFavoriteTracks (userId, trackId);
 
 CREATE OR REPLACE FUNCTION dropfunction(functionname text)
   RETURNS text AS
@@ -896,7 +897,7 @@ LANGUAGE plpgsql VOLATILE
 COST 100;;
 
 # --- !Downs
-DROP TABLE IF EXISTS usersFavoriteTracks;
+DROP TABLE IF EXISTS tracksFollowed;
 DROP TABLE IF EXISTS tracksRating;
 DROP TABLE IF EXISTS usersPlaylists;
 DROP TABLE IF EXISTS playlistsTracks;
