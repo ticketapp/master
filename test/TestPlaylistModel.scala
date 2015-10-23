@@ -1,14 +1,20 @@
+import java.util.UUID
 import java.util.UUID.randomUUID
-
+import scala.language.postfixOps
 import models.Playlist._
 import models.{Track, _}
 import org.scalatest._
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.Utilities
+import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
+import scala.concurrent.Await
 import scala.util.Success
+import scala.concurrent.duration._
+
 
 class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
 
@@ -16,33 +22,38 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
   val injector = appBuilder.injector()
   val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
   val utilities = new Utilities()
+  val trackMethods = new TrackMethods(dbConfProvider, utilities)
+  val genreMethods = new GenreMethods(dbConfProvider, utilities)
+  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
+  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
+  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
+    trackMethods, utilities)
+  val playlistMethods = new PlaylistMethods(dbConfProvider, utilities)
 
-/*  var artistId = -1L
+
+  var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website"))
 
   override def beforeAll() = {
-    artistId = Artist.save(artist).get
+    artistId = Await.result(artistMethods.save(artist), 2 seconds).id.get
   }
 
   override def afterAll() = {
-    Artist.delete(artistId)
+    artistMethods.delete(artistId)
   }
 
   "A playlist" must {
 
     "be able to be saved and deleted" in {
-      val playlist = Playlist(None, "userTestId", "name", Seq.empty)
-      val playlistId = Playlist.save(playlist) match {
-        case Success(Some(newPlaylistId)) =>
-          find(newPlaylistId) mustBe Option(playlist.copy(Some(newPlaylistId)))
-          newPlaylistId
-        case _ =>
-          throw new Exception("playlist not saved")
+      val playlist = PlaylistInfo(None, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), "name")
+      whenReady(playlistMethods.save(playlist), timeout(Span(5, Seconds))) { savedPlaylist =>
+        savedPlaylist mustBe playlist.copy(playlistId = savedPlaylist.playlistId)
+//        playlistMethods.find(newPlaylistId) mustBe Option(playlist.copy(Some(newPlaylistId)))
       }
-      Playlist.delete("userTestId", playlistId) mustBe Success(1)
+//      Playlist.delete("userTestId", playlistId) mustBe Success(1)
     }
-
+/*
     "be able to be saved with its tracks, rendered sorted by rank and deleted" in {
       val trackId1 = randomUUID
       val track1 = Track(trackId1, "title", "urlPlaylistTest", 's', "thumbnailUrl",
@@ -75,6 +86,6 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
         Track.delete(trackId2)
         Track.delete(trackId3)
       }
-    }
-  }*/
+    }*/
+  }
 }

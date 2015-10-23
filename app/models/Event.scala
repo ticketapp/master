@@ -262,10 +262,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     Future { Seq.empty }
   }
 
-  def save(event: Event): Future[Event] = {
-    val query = events returning events.map(_.id) into ((event, id) => event.copy(id = Some(id))) += event
-    db.run(query)
-  }
+  def save(event: Event): Future[Event] =
+    db.run(events returning events.map(_.id) into ((event, id) => event.copy(id = Some(id))) += event)
   /*
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>

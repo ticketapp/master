@@ -21,6 +21,7 @@ case class EventOrganizer(eventId: Long, organizerId: Long)
 case class EventGenreRelation(eventId: Long, genreId: Int)
 case class EventPlaceRelation(eventId: Long, placeId: Long)
 case class FrenchCity(city: String, geographicPoint: Geometry)
+case class PlaylistTrack(playlistId: Long, tracksId: UUID, trackRank: Double)
 
 
 trait MyDBTableDefinitions extends DBTableDefinitions {
@@ -257,15 +258,37 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def city = column[Option[String]]("city")
     def zip = column[Option[String]]("zip")
     def street = column[Option[String]]("street")
-    def * = (id.?, geographicPoint, city, zip, street) <>
-      ((Address.apply _).tupled, Address.unapply)
+
+    def * = (id.?, geographicPoint, city, zip, street) <> ((Address.apply _).tupled, Address.unapply)
   }
 
   class FrenchCities(tag: Tag) extends Table[FrenchCity](tag, "frenchcities") {
     def id = column[Long]("cityid", O.PrimaryKey, O.AutoInc)
     def city = column[String]("city")
     def geographicPoint = column[Geometry]("geographicpoint")
+
     def * = (city, geographicPoint) <> ((FrenchCity.apply _).tupled, FrenchCity.unapply)
+  }
+
+  class Playlists(tag: Tag) extends Table[PlaylistInfo](tag, "playlists") {
+    def id = column[Long]("playlistid", O.PrimaryKey, O.AutoInc)
+    def userId = column[UUID]("userid")
+    def name = column[String]("name")
+
+    def * = (id.?, userId, name) <> ((PlaylistInfo.apply _).tupled, PlaylistInfo.unapply)
+
+    def aFK = foreignKey("userId", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
+  class PlaylistsTracks(tag: Tag) extends Table[PlaylistTrack](tag, "playliststracks") {
+    def playlistId = column[Long]("playlistid")
+    def trackId = column[UUID]("trackid")
+    def rank = column[Double]("rank")
+
+    def * = (playlistId, trackId, rank) <> ((PlaylistTrack.apply _).tupled, PlaylistTrack.unapply)
+
+    def aFK = foreignKey("playlistId", playlistId, playlists)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("trackId", trackId, tracks)(_.uuid, onDelete = ForeignKeyAction.Cascade)
   }
 
 
@@ -289,4 +312,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val frenchCities = TableQuery[FrenchCities]
   lazy val tracks = TableQuery[Tracks]
   lazy val tracksGenres = TableQuery[TracksGenres]
+  lazy val playlists = TableQuery[Playlists]
+  lazy val playlistsTracks = TableQuery[PlaylistsTracks]
 }

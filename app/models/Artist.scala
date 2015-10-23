@@ -279,7 +279,11 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     case Some(redirectUrl) =>
       val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl))
       if (!artist.websites.contains(refactoredRedirectUrl) && artist.id.nonEmpty)
-        addWebsite(artist.id.get, refactoredRedirectUrl)
+        addWebsite(artist.id.get, refactoredRedirectUrl) recover {
+          case e: Exception =>
+            Logger.error("Artist.addSoundCloudUrlIfMissing: ", e)
+            0
+        }
       else
         Future(0)
   }

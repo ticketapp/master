@@ -1,54 +1,78 @@
 package models
 
 import java.util.UUID
+import javax.inject.Inject
 
 import controllers.{PlaylistUpdateTrackWithoutRankException, PlaylistDoesNotExistException, DAOException}
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
+import services.MyPostgresDriver.api._
 
 import play.api.libs.json.Json
 import play.api.Play.current
 import json.JsonHelper._
 import play.api.Logger
+import services._
 
+import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
 
 
-case class Playlist(playlistId: Option[Long], userId: UUID, name: String, tracks: Seq[Track])
+case class Playlist(playlistInfo: PlaylistInfo, tracksWithRank: Seq[TrackWithPlaylistRank])
 
-object Playlist {
+case class PlaylistInfo(playlistId: Option[Long], userId: UUID, name: String)
 
-  case class TrackUUIDAndRank(UUID: UUID, rank: BigDecimal)
-  def idAndRankFormApply(stringUUID: String, rank: BigDecimal) = TrackUUIDAndRank(UUID.fromString(stringUUID), rank)
-  def idAndRankFormUnapply(trackIdAndRank: TrackUUIDAndRank) = Option((trackIdAndRank.UUID.toString, trackIdAndRank.rank))
+case class TrackWithPlaylistRank(track: Track, rank: Double)
 
-  case class PlaylistNameTracksIdAndRank(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank])
-  def formApply(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank]) =
-    PlaylistNameTracksIdAndRank(name, tracksIdAndRank)
-  def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
-    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
+class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
+//                         val genreMethods: GenreMethods,
+//                         val searchSoundCloudTracks: SearchSoundCloudTracks,
+//                         val searchYoutubeTracks: SearchYoutubeTracks,
+//                         val trackMethods: TrackMethods,
+                         val utilities: Utilities)
+  extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper with MyDBTableDefinitions {
+//
+//  case class TrackUUIDAndRank(UUID: UUID, rank: BigDecimal)
+//  def idAndRankFormApply(stringUUID: String, rank: BigDecimal) = TrackUUIDAndRank(UUID.fromString(stringUUID), rank)
+//  def idAndRankFormUnapply(trackIdAndRank: TrackUUIDAndRank) = Option((trackIdAndRank.UUID.toString, trackIdAndRank.rank))
+//
+//  case class PlaylistNameTracksIdAndRank(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank])
+//  def formApply(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank]) =
+//    PlaylistNameTracksIdAndRank(name, tracksIdAndRank)
+//  def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
+//    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
+  
+  /*
+  db.run(events returning events.map(_.id) into ((event, id) => event.copy(id = Some(id))) += event)
+    val tupledJoin = organizers joinLeft addresses on (_.addressId === _.id)
+
+    db.run(tupledJoin.result).map(_.map(OrganizerWithAddress.tupled))
+   */
+
+  def save(playlistInfo: PlaylistInfo): Future[PlaylistInfo] =
+    db.run(playlists returning playlists.map(_.id) into ((playlist, id) => playlist.copy(playlistId = Option(id))) += playlistInfo)
+
+//  def find(id: Long): Future[Seq[PlaylistInfo]] = {
+////    val query = /*tracks join*/
+////      genres join
+////        artistsGenres on (_.id === _.genreId) joinRight
+////        artists on (_._2.artistId === _.id)
+////
+////    val action = query.drop(offset).take(numberToReturn).result
+////    db.run(action) map { artistWithRelations =>
+////      artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
+//
+//    val query = tracks join
+//      playlistsTracks on(_.uuid === _.trackId) joinRight
+//      playlists on (_._2.playlistId === _.id)
+//
+//    db.run(query.result) map { playlistWithTracks =>
+//
+//            playlistWithTracks.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => playlistWithGenres(e._1, e._2))
+//
+//  }
+//        .map(playlist => playlist.copy(tracks = Track.findByPlaylistId(playlist.playlistId)))
 
 /*
-  private val playlistParser: RowParser[Playlist] = {
-    get[Long]("playlistId") ~
-      get[UUID]("userId") ~
-      get[String]("name") map {
-      case playlistId ~ userId ~ name => Playlist(Option(playlistId), userId, name, Seq.empty)
-    }
-  }
-
->>>>>>> master
-  def find(playlistId: Long): Option[Playlist] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """SELECT * FROM playlists
-          | WHERE playlistId = {playlistId}""".stripMargin)
-        .on('playlistId -> playlistId)
-        .as(playlistParser.singleOpt)
-        .map(playlist => playlist.copy(tracks = Track.findByPlaylistId(playlist.playlistId)))
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Playlist.findByUserId: " + e.getMessage)
-  }
-
   def findByUserId(userUUID: UUID): Seq[Playlist] = try {
     DB.withConnection { implicit connection =>
       SQL(
@@ -90,16 +114,6 @@ object Playlist {
           'userId -> userId,
           'playlistId -> playlistId)
         .executeUpdate()
-    }
-  }
-
-  def save(playlist: Playlist): Try[Option[Long]] = Try {
-    DB.withConnection { implicit connection =>
-      SQL("""INSERT INTO playlists(userId, name) VALUES({userId}, {name})""")
-        .on(
-          'userId -> playlist.userId,
-          'name -> playlist.name)
-        .executeInsert()
     }
   }
 
@@ -205,8 +219,8 @@ object Playlist {
     }
   } catch {
     case e: Exception => throw new DAOException("Playlist.updateTrackRank: " + e.getMessage)
-  }*/
-/*
+  }
+  
   def addTracksInPlaylist(userId: String, playlistIdAndTracksId: PlaylistIdAndTracksId): Unit = {
     playlistIdAndTracksId.tracksId.foreach(trackId =>
       Track.savePlaylistTrackRelation(playlistIdAndTracksId.id, trackId))
