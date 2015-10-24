@@ -40,16 +40,16 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
-                imagePath: Option[String], city: Option[String], zip: Option[String], street: Option[String]): Place = {
-    val address = Option(Address(None, None, city, zip, street))
+                imagePath: Option[String]/*, city: Option[String], zip: Option[String], street: Option[String]*/): Place = {
+//    val address = Option(Address(None, None, city, zip, street))
     val point = geographicPointMethods.optionStringToOptionPoint(geographicPoint)
 
     Place(None, name, facebookId, point, description, webSite, capacity, openingHours, imagePath/*, address*/)
   }
 
   def formUnapply(place: Place) =
-    Some((place.name, place.facebookId, place.geographicPoint, place.description, place.webSites, place.capacity,
-      place.openingHours, place.imagePath/*, place.address.get.city, place.address.get.zip, place.address.get.street*/))
+    Option((place.name, place.facebookId, Option(place.geographicPoint.toString), place.description, place.webSites,
+      place.capacity, place.openingHours, place.imagePath/*, place.address.get.city, place.address.get.zip, place.address.get.street*/))
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
@@ -59,7 +59,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def doSave(place: Place): Future[Place] = {
     db.run((for {
-      placeFound <- places.filter(_.id === place.id).result.headOption
+      placeFound <- places.filter(_.facebookId === place.facebookId).result.headOption
       result <- placeFound.map(DBIO.successful).getOrElse(places returning places.map(_.id) += place)
     } yield result match {
         case p: Place => p

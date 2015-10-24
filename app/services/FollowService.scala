@@ -127,7 +127,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
 
   def followByPlaceId(placeRelation: UserPlaceRelation): Future[Int] = db.run(placesFollowed += placeRelation)
 
-  def unfollowByPlaceId(userPlaceRelation: UserPlaceRelation): Future[Int] = db.run(
+  def unfollow(userPlaceRelation: UserPlaceRelation): Future[Int] = db.run(
     placesFollowed
       .filter(placeFollowed =>
         placeFollowed.userId === userPlaceRelation.userId && placeFollowed.placeId === userPlaceRelation.placeId)

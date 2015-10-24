@@ -90,7 +90,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
           whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get))) { resp =>
             whenReady(placeMethods.isFollowed(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp1 =>
              resp1 mustBe true
-              whenReady(placeMethods.unfollowByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
+              whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
                 resp2 mustBe 1
                 userDAOImpl.delete(uuid)
                 placeMethods.delete(savedPlace.id.get)
@@ -125,7 +125,7 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
 
                 e.getSQLState mustBe utilities.UNIQUE_VIOLATION
             } finally {
-              whenReady(placeMethods.unfollowByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
+              whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
                 resp2 mustBe 1
                 userDAOImpl.delete(uuid)
                 placeMethods.delete(savedPlace.id.get)
