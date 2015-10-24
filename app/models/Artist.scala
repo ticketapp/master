@@ -15,8 +15,8 @@ import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
 import services._
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.collection.immutable.Seq
+import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.matching.Regex
 
@@ -28,14 +28,14 @@ case class Artist(id: Option[Long],
                   description: Option[String] = None,
                   facebookUrl: String,
                   websites: Set[String] = Set.empty,
-//                   genres: Seq[Genre] = Seq.empty,
-//                   tracks: Seq[Track] = Seq.empty,
                   likes: Option[Int] = None,
                   country: Option[String] = None)
 
-case class ArtistWithGenres(artist: Artist, genres: Seq[Genre])
+case class ArtistWithWeightedGenre(artist: Artist, genres: Seq[GenreWithWeight])
 
 case class PatternAndArtist(searchPattern: String, artist: Artist)
+  
+case class GenreWithWeight(genre: Genre, weight: Long)
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                        val genreMethods: GenreMethods,
@@ -49,7 +49,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   val soundCloudClientId = utilities.soundCloudClientId
 
   def formApply(facebookId: Option[String], name: String, imagePath: Option[String], description: Option[String],
-                facebookUrl: String, websites: Seq[String]/*, genres: Seq[Genre], tracks: Seq[Track]*/, likes: Option[Int],
+                facebookUrl: String, websites: scala.Seq[String]/*, genres: Seq[Genre], tracks: Seq[Track]*/, likes: Option[Int],
                 country: Option[String]): Artist =
     Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet/*, genres, tracks*/, likes, country)
   def formUnapply(artist: Artist) =
@@ -60,61 +60,34 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     new PatternAndArtist(searchPattern, artist)
   def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =
     Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
-  
-//  def getArtistProperties(artist: Artist): Artist = artist.copy(
-//      tracks = Track.findAllByArtist(artist.facebookUrl, 0, 0),
-//      genres = Genre.findAllByArtist(artist.id.getOrElse(-1L).toInt)
-//  )
 
-  def findAll: Future[Seq[Artist]] = db.run(artists.result)//        .map(getArtistProperties)
+  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenre]] = {
+    val query = for {
+      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+    } yield (artist, optionalArtistGenreAndGenre)
 
-//  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithGenres]] = {
-//    val query = genres join
-//      artistsGenres on (_.id === _.genreId) joinRight
-//      artists on (_._2.artistId === _.id)
-//
-//    val action = query.drop(offset).take(numberToReturn).result
-//    db.run(action) map { artistWithRelations =>
-//       artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
-//    }
-////        .map(getArtistProperties)
-//  }
+    db.run(query.drop(offset).take(numberToReturn).result) map { seqArtistAndOptionalGenre =>
+      val groupedByArtist = seqArtistAndOptionalGenre.groupBy(_._1)
+      println("groupedByArtist = " + groupedByArtist)
 
-  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithGenres]] = {
-    val query = /*tracks join*/
-      genres join
-      artistsGenres on (_.id === _.genreId) joinRight
-      artists on (_._2.artistId === _.id) /*join
-      tracks on (_._2.facebookUrl === _.artistFacebookUrl)*/
-
-    val action = query.drop(offset).take(numberToReturn).result
-    db.run(action) map { artistWithRelations =>
-      artistWithRelations.groupBy(_._2).map(c => (c._1, c._2.flatMap(d => d._1.map(_._1)))).toList map (e => ArtistWithGenres(e._1, e._2))
-    }
-    //        .map(getArtistProperties)
+      val artistsWithGenres = groupedByArtist map { tupleArtistSeqTupleArtistWithMaybeGenres =>
+        (tupleArtistSeqTupleArtistWithMaybeGenres._1, tupleArtistSeqTupleArtistWithMaybeGenres._2 collect {
+          case (_, Some((artistGenre, genre))) => GenreWithWeight(genre, artistGenre.weight)
+        })
+      }
+      artistsWithGenres map (artistWithGenre => ArtistWithWeightedGenre(artistWithGenre._1, artistWithGenre._2.to[Seq]))
+    } map { _.toVector }
   }
 
   def findAllByEvent(event: Event): Future[Seq[Artist]] = {
-//    val query2 = for {
-//      e <- events if e.id === event.id
-//      eventArtist <- eventsArtists
-//      artist <- artists if artist.id === eventArtist.artistId
-//      artistGenre <- artistsGenres if artistGenre.artistId === artist.id
-//      genre <- genres if genre.id === artistGenre.genreId
-////      artistGenre <- artists joinLeft artistsGenres on (artistGenre.artistId === artist.id)
-//    } yield (artist, genre)
-//
-//    val a = Await.result(db.run(query2.result), 3 seconds)
-//
-//    println(a)
-
     val query = for {
       e <- events if e.id === event.id
       eventArtist <- eventsArtists
       artist <- artists if artist.id === eventArtist.artistId
     } yield artist
 
-    db.run(query.result)
+    db.run(query.result) map { _.toVector }
     //.map(getArtistProperties)
   }
   
@@ -125,7 +98,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artist <- artists if artist.id === artistGenre.artistId 
     } yield artist
     //getArtistProperties
-    db.run(query.drop(offset).take(numberToReturn).result)
+    db.run(query.drop(offset).take(numberToReturn).result) map { _.toVector }
   }
   
   def find(id: Long): Future[Option[Artist]] = {
@@ -144,7 +117,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artist <- artists if artist.name.toLowerCase like s"%$lowercasePattern%"
     } yield artist
 
-    db.run(query.take(10).result)
+    db.run(query.take(10).result) map { _.toVector }
   }
 
   def findIdByName(name: String): Future[Option[Long]] =
@@ -162,14 +135,12 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artistFound <- artists.filter(_.facebookUrl === artist.facebookUrl).result.headOption
       result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += artistWithFormattedDescription)
     } yield result match {
-      case a: Artist => a
-      case id: Long => artistWithFormattedDescription.copy(id = Option(id))
+      case a: Artist =>
+        a
+      case id: Long =>
+        Logger.info("Artist.save: this artist is already saved")
+        artistWithFormattedDescription.copy(id = Option(id))
     }).transactionally)
-    /*
-       case Some(artistId: Long) =>
-              artist.genres.foreach { Genre.saveWithArtistRelation(_, artistId) }
-              artist.tracks.foreach { Track.save }
-     */
     /*
     Done BY Loann:
      .as(scalar[Long].singleOpt) match {
@@ -181,8 +152,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
           case None =>
             None
       }
-
-
      */
   }
 
@@ -312,9 +281,9 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     getEventuallyFacebookArtists(artistName).flatMap {
       case noArtist if noArtist.isEmpty && artistName.split("\\W+").size >= 2 =>
         val nestedEventuallyArtists = artistName.split("\\W+").toSeq.map { getArtistsForAnEvent(_, eventWebSites) }
-        Future.sequence(nestedEventuallyArtists) map { _.flatten }
-      case artists =>
-        Future  { filterFacebookArtistsForEvent(artists, artistName, eventWebSites)}
+        Future.sequence(nestedEventuallyArtists) map { _.toVector.flatten }
+      case foundArtists =>
+        Future { filterFacebookArtistsForEvent(foundArtists, artistName, eventWebSites)}
     }
   }
 
@@ -366,7 +335,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       urlService.collect { case (url: String, "facebook") => utilities.normalizeUrl(url) }
     }
 
-    soundCloudWebProfilesResponse.json.asOpt[Seq[String]](collectOnlyFacebookUrls) match {
+    soundCloudWebProfilesResponse.json.asOpt[scala.Seq[String]](collectOnlyFacebookUrls) match {
       case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
       case _ => None
     }
@@ -441,16 +410,16 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      maybeLikes, maybeCountry))
 
   def readFacebookArtists(facebookWSResponse: WSResponse): Seq[Artist] = {
-   val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
-     artists.collect {
+    val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
+      artists.collect {
        case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
        maybeDescription, maybeGenre, maybeLikes, maybeCountry)
          if category.equalsIgnoreCase("Musician/Band") | category.equalsIgnoreCase("Artist") =>
          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten)
-     }
-   }
-   (facebookWSResponse.json \ "data")
+      }.toVector
+    }
+    (facebookWSResponse.json \ "data")
      .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
      .getOrElse(Seq.empty)
   }
@@ -489,8 +458,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      case Some(genre) => genreMethods.genresStringToGenresSet(genre)
      case None => Set.empty
     }
-    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet/*, genres.toSeq,
-     Seq.empty, maybeLikes, maybeCountry*/)
+    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet)
   }
 
   def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =

@@ -17,6 +17,8 @@ import scala.language.postfixOps
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Await
+import scala.collection.immutable.Seq
+
 
 class TestArtistModel extends PlaySpec with OneAppPerSuite {
 
@@ -52,16 +54,18 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
+    "all be found" in {
+      println("findAll: " + Await.result(artistMethods.findSinceOffset(10, 0), 2 seconds))
+    }
+
     "be found" in {
       val artist = Artist(None, Option("facebookIdTestArtistModel1"), "artistTest1", Option("imagePath"),
         Option("description"), "facebookUrl1", Set("website"))
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         try {
-          println("findAll: " + Await.result(artistMethods.findAll, 2 seconds))
+          whenReady(artistMethods.findSinceOffset(100000, 0), timeout(Span(5, Seconds))) { foundArtist =>
 
-          whenReady(artistMethods.findSinceOffset(2, 0), timeout(Span(5, Seconds))) { foundArtist =>
-
-            foundArtist should contain (ArtistWithGenres(artist.copy(id = Some(savedArtist.id.get),
+            foundArtist should contain (ArtistWithWeightedGenre(artist.copy(id = Some(savedArtist.id.get),
               description = Some("<div class='column large-12'>description</div>")), Seq.empty))
 
             whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
@@ -170,27 +174,24 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
       val artist = Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
         "facebookUrl5", Set("website"))
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        try {
-          whenReady(artistMethods.addWebsite(savedArtist.id.get, "normalizedUrl"), timeout(Span(5, Seconds))) { resp =>
+        whenReady(artistMethods.addWebsite(savedArtist.id.get, "normalizedUrl"), timeout(Span(5, Seconds))) { response =>
 
-            resp mustBe 1
+          response mustBe 1
 
-            whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
-              
-              foundArtist mustBe Option(foundArtist.get.copy(id = Option(savedArtist.id.get), websites = Set("website", "normalizedUrl"),
-                description = Some("<div class='column large-12'>description</div>")))
-            }
+          whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
+
+            foundArtist mustBe Option(foundArtist.get.copy(id = Option(savedArtist.id.get), websites = Set("website", "normalizedUrl"),
+              description = Some("<div class='column large-12'>description</div>")))
+
+            artistMethods.delete(savedArtist.id.get)
           }
-        } finally {
-
-          artistMethods.delete(savedArtist.id.get)
         }
       }
     }
 
     "have another website" in {
-      val artist = Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
-        "facebookUrl5", Set("website"))
+      val artist = Artist(None, Option("facebookId6"), "artistTest6", Option("imagePath"), Option("description"),
+        "facebookUrl6", Set("website"))
       val track = Track(UUID.randomUUID, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
         Option("redirectUrl"))
 

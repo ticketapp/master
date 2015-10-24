@@ -59,7 +59,7 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
                 TrackWithPlaylistRank(playlistTrackWithTrack._2, playlistTrackWithTrack._1.trackRank)
             }
           }
-          val seqTracksWithRating = iterableTracksWithRating.toVector//to[immutable.Seq]
+          val seqTracksWithRating = iterableTracksWithRating.toVector
           Option(PlaylistWithTracks(playlist, seqTracksWithRating))
       }
     }

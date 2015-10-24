@@ -2,6 +2,8 @@ package services
 
 import play.api.libs.json._
 import play.api.libs.ws.WSResponse
+import scala.collection.immutable.Seq
+
 
 trait SoundCloudHelper {
   def removeUselessInSoundCloudWebsite(website: String): String = website match {
@@ -13,10 +15,11 @@ trait SoundCloudHelper {
     case _ => website
   }
 
-  def readSoundCloudWebsites(soundCloudResponse: WSResponse): Seq[String] = {
-    val readSoundCloudUrls: Reads[Seq[String]] = Reads.seq((__ \ "url").read[String])
+  def readSoundCloudWebsites(soundCloudResponse: WSResponse): Vector[String] = {
+    val readSoundCloudUrls = Reads.seq((__ \ "url").read[String])
     soundCloudResponse.json
-      .asOpt[Seq[String]](readSoundCloudUrls)
+      .asOpt[scala.Seq[String]](readSoundCloudUrls)
       .getOrElse(Seq.empty)
+      .toVector
   }
 }
