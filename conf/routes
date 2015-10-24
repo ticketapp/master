@@ -65,16 +65,16 @@ GET     /artists/facebookContaining/:pattern                              @contr
 ################################## Organizers ###############################################
 GET         /organizers                                   @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)
 GET         /organizers/:id                               @controllers.OrganizerController.findById(id: Long)
-#POST    /organizers/:organizerId/followByOrganizerId                     @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
-#POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId          @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
-#POST    /organizers/:facebookId/followByFacebookId                       @controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
-#GET     /organizers/:organizerId/isFollowed                              @controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
+POST        /organizers/:organizerId/followByOrganizerId                  @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
+POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId          @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
+POST    /organizers/:facebookId/followByFacebookId                       @controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
+GET     /organizers/:organizerId/isFollowed                              @controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
 GET         /organizers/containing/:pattern               @controllers.OrganizerController.findOrganizersContaining(pattern: String)
 POST        /organizers/create                            @controllers.OrganizerController.createOrganizer
 #GET     /organizers/:organizerId/events                                  @controllers.EventController.findByOrganizer(organizerId: Long)
 #GET     /organizers/:organizerId/passedEvents                            @controllers.EventController.findPassedByOrganizer(organizerId: Long)
 #GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
-#GET     /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
+GET     /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
 #GET     /playlists                                                       @controllers.PlaylistController.findByUser

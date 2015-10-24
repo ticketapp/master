@@ -83,7 +83,7 @@ class OrganizerController @Inject()(ws: WSClient,
     )
   }
 
-  def followOrganizerByOrganizerId(organizerId : Long) = SecuredAction.async { implicit request =>
+  def followOrganizerByOrganizerId(organizerId: Long) = SecuredAction.async { implicit request =>
     organizerMethods.followByOrganizerId(UserOrganizerRelation(request.identity.uuid, organizerId)) map {
       case 1 =>
         Created
@@ -92,67 +92,76 @@ class OrganizerController @Inject()(ws: WSClient,
         InternalServerError
     } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
-        Logger.error(s"OrganizerController.followOrganizerByOrganizerId: there is no organizer with the id $organizerId")
+        Logger.error(s"OrganizerController.followOrganizerByOrganizerId: $organizerId is already followed")
         Conflict
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"OrganizerController.followOrganizerByOrganizerId: there is no organizer with the id $organizerId")
+        NotFound
       case unknownException =>
         Logger.error("OrganizerController.followOrganizer", unknownException)
         InternalServerError
     }
   }
-//  def followOrganizerByOrganizerId(organizerId : Long) = SecuredAction { implicit request =>
-//    organizerMethods.followById(request.identity.UUID, organizerId) match {
-//      case Success(_) =>
-//        Created
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-//        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
-//        Conflict
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-//        Logger.error("OrganizerController.followOrganizerByOrganizerId", psqlException)
-//        NotFound
-//      case Failure(unknownException) =>
-//        Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
-//        InternalServerError
-//    }
-//  }
-//
-//  def unfollowOrganizerByOrganizerId(organizerId : Long) = SecuredAction { implicit request =>
-//    val userId = request.identity.UUID
-//    organizerMethods.unfollowByOrganizerId(userId, organizerId) match {
-//      case Success(1) =>
-//        Ok
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-//        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerId: $organizerId) or the organizer does not exist.")
-//        NotFound
-//      case Failure(unknownException) =>
-//        Logger.error("OrganizerController.followOrganizerByOrganizerId", unknownException)
-//        InternalServerError
-//    }
-//  }
-//
-//  def followOrganizerByFacebookId(facebookId : String) = SecuredAction { implicit request =>
-//    organizerMethods.followByFacebookId(request.identity.UUID, facebookId) match {
-//      case Success(_) =>
-//        Created
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-//        Logger.error("OrganizerController.followOrganizerByFacebookId", psqlException)
-//        Conflict("This user already follow this organizer.")
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-//        Logger.error("OrganizerController.followOrganizerByFacebookId", psqlException)
-//        NotFound("There is no organizer with this id.")
-//      case Failure(unknownException) =>
-//        Logger.error("OrganizerController.followOrganizerByFacebookId", unknownException)
-//        InternalServerError
-//    }
-//  }
-//
-//  def getFollowedOrganizers = SecuredAction { implicit request =>
-//    Ok(Json.toJson(organizerMethods.getFollowedOrganizers(request.identity.UUID)))
-//  }
-//
-//  def isOrganizerFollowed(organizerId: Long) = SecuredAction { implicit request =>
-//    Ok(Json.toJson(organizerMethods.isFollowed(request.identity.UUID, organizerId)))
-//  }
-//
+
+  def unfollowOrganizerByOrganizerId(organizerId : Long) = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    organizerMethods.unfollow(UserOrganizerRelation(userId, organizerId)) map {
+      case 1 =>
+        Ok
+      case _ =>
+        Logger.error("OrganizerController.unfollowOrganizer: organizerMethods.unfollow did not return 1")
+        InternalServerError
+    } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerId: $organizerId) or the organizer does not exist.")
+        NotFound
+      case unknownException =>
+        Logger.error("OrganizerController.unfollowOrganizer", unknownException)
+        InternalServerError
+    }
+  }
+
+  def followOrganizerByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    organizerMethods.followByFacebookId(userId, facebookId) map {
+      case 1 =>
+        Created
+      case _ =>
+        Logger.error("OrganizerController.unfollowOrganizer: organizerMethods.unfollow did not return 1")
+        InternalServerError
+    } recover {
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerFacebookId: $facebookId) or the organizer does not exist.")
+        NotFound
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+        Logger.error(s"The user (id: $userId) already follow organizerFacebookId: $facebookId).")
+        Conflict
+      case unknownException =>
+        Logger.error("OrganizerController.followOrganizerByFacebookId", unknownException)
+        InternalServerError
+    }
+  }
+
+  def getFollowedOrganizers = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    organizerMethods.getFollowedOrganizers(userId) map { organizers =>
+      Ok(Json.toJson(organizers))
+    } recover { case t: Throwable =>
+      Logger.error("OrganizerController.getFollowedOrganizers: ", t)
+      InternalServerError("OrganizerController.getFollowedOrganizers: " + t.getMessage)
+    }
+  }
+
+  def isOrganizerFollowed(organizerId: Long) = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    organizerMethods.isFollowed(UserOrganizerRelation(userId, organizerId)) map { organizers =>
+      Ok(Json.toJson(organizers))
+    } recover { case t: Throwable =>
+      Logger.error("OrganizerController.isOrganizerFollowed: ", t)
+      InternalServerError("OrganizerController.isOrganizerFollowed: " + t.getMessage)
+    }
+  }
+
   def findNearCity(city: String, numberToReturn: Int, offset: Int) = Action.async {
     organizerMethods.findNearCity(city, numberToReturn, offset) map { organizers =>
       Ok(Json.toJson(organizers))

@@ -4,6 +4,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.{Geometry, Point}
+import controllers.{ThereIsNoOrganizerForThisFacebookIdException, ThereIsNoArtistForThisFacebookIdException}
 import json.JsonHelper._
 import org.joda.time.DateTime
 import play.api.Logger
@@ -165,6 +166,14 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     .delete)
 
   def delete(id: Long): Future[Int] = db.run(organizers.filter(_.id === id).delete)
+
+  def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(Some(facebookId)) flatMap {
+    case None =>
+      Logger.error("Organizer.followByFacebookId: ", ThereIsNoOrganizerForThisFacebookIdException("Organizer.followByFacebookId"))
+      Future { 0 }
+    case Some(organizerId) =>
+      followByOrganizerId(UserOrganizerRelation(userId, organizerId))
+  }
 
   /*
      def followById(userId : UUID, organizerId : Long): Try[Option[Long]] = Try {
