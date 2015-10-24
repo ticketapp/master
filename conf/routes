@@ -74,7 +74,7 @@ POST     /organizers/create                                               @contr
 #GET     /organizers/:organizerId/events                                  @controllers.EventController.findByOrganizer(organizerId: Long)
 #GET     /organizers/:organizerId/passedEvents                            @controllers.EventController.findPassedByOrganizer(organizerId: Long)
 #GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
-GET     /organizers/followed/                                             @controllers.OrganizerController.getFollowedOrganizers
+GET      /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
 #GET     /playlists                                                       @controllers.PlaylistController.findByUser
