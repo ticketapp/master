@@ -35,7 +35,8 @@ class TestOrganizerController extends PlaySpecification with Mockito {
   val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
   val tariffMethods = new TariffMethods(dbConfProvider, utilities)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
+  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
   val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
     trackMethods, utilities)
   val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
@@ -72,7 +73,7 @@ class TestOrganizerController extends PlaySpecification with Mockito {
 
     "find one organizer by id" in new Context {
       new WithApplication(application) {
-        val organizerId = await(organizerMethods.findAllContaining("test")).headOption.get.id
+        val organizerId = await(organizerMethods.findAllContaining("test")).headOption.get.organizer.id
         val Some(organizer) = route(FakeRequest(GET, "/organizers/" + organizerId.get))
         contentAsJson(organizer).toString() must contain(""""facebookId":"111","name":"test"""")
       }
@@ -81,7 +82,7 @@ class TestOrganizerController extends PlaySpecification with Mockito {
     "follow and unfollow an organizer by id" in new Context {
       new WithApplication(application) {
         await(userDAOImpl.save(identity))
-        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.organizer.id
         val Some(response) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/followByOrganizerId")
           .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -99,7 +100,7 @@ class TestOrganizerController extends PlaySpecification with Mockito {
     "return an error if an user try to follow an organizer twice" in new Context {
       new WithApplication(application) {
         await(userDAOImpl.save(identity))
-        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.organizer.id
         val Some(response) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/followByOrganizerId")
           .withAuthenticator[CookieAuthenticator](identity.loginInfo))
         status(response) mustEqual CREATED
@@ -120,7 +121,7 @@ class TestOrganizerController extends PlaySpecification with Mockito {
     "follow an unfollow an organizer by facebookId" in new Context {
       new WithApplication(application) {
         await(userDAOImpl.save(identity))
-        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.organizer.id
         val Some(response) = route(FakeRequest(POST, "/organizers/111/followByFacebookId")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -138,7 +139,7 @@ class TestOrganizerController extends PlaySpecification with Mockito {
     "find followed organizers" in new Context {
       new WithApplication(application) {
         await(userDAOImpl.save(identity))
-        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.organizer.id
         val Some(response) = route(FakeRequest(POST, "/organizers/111/followByFacebookId")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -161,7 +162,7 @@ class TestOrganizerController extends PlaySpecification with Mockito {
     "find one followed organizer by id" in new Context {
       new WithApplication(application) {
         await(userDAOImpl.save(identity))
-        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.organizer.id
         val Some(response) = route(FakeRequest(POST, "/organizers/111/followByFacebookId")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 

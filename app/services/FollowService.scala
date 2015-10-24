@@ -10,6 +10,7 @@ import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import silhouette.DBTableDefinitions
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
   
@@ -88,13 +89,13 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
     db.run(query.result)
   }
 
-  def isFollowed(userGenreRelation: UserGenreRelation): Future[Boolean] = {
-    val query =
-      sql"""SELECT exists(
-             SELECT 1 FROM genresFollowed WHERE userId = ${userGenreRelation.userId} AND genreId = ${userGenreRelation.genreId})"""
-        .as[Boolean]
-    db.run(query.head)
-  }
+//  def isFollowed(userGenreRelation: UserGenreRelation): Future[Boolean] = {
+//    val query =
+//      sql"""SELECT exists(
+//             SELECT 1 FROM genresFollowed WHERE userId = ${userGenreRelation.userId} AND genreId = ${userGenreRelation.genreId})"""
+//        .as[Boolean]
+//    db.run(query.head)
+//  }
 
   //////////////////////////////////////////// organizer ///////////////////////////////////////////////////////////////
 
@@ -114,13 +115,14 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
     db.run(query.head)
   }
 
-  def getFollowedOrganizers(userId: UUID): Future[Seq[Organizer] ]= {
+  def getFollowedOrganizers(userId: UUID): Future[Seq[OrganizerWithAddress]]= {
     val query = for {
       organizerFollowed <- organizersFollowed if organizerFollowed.userId === userId
-      organizer <- organizers if organizer.id === organizerFollowed.organizerId
-    } yield organizer
+      organizerWithAddress <- organizers joinLeft addresses on (_.addressId === _.id)
+      if organizerWithAddress._1.id === organizerFollowed.organizerId
+    } yield organizerWithAddress
 
-    db.run(query.result)
+    db.run(query.result) map(_ map OrganizerWithAddress.tupled)
   }
 
   //////////////////////////////////////////// place ///////////////////////////////////////////////////////////////
@@ -165,7 +167,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
   def isFollowed(userTrackRelation: UserTrackRelation): Future[Boolean] = {
     val query =
       sql"""SELECT exists(
-           SELECT 1 FROM tracksFollowed WHERE userId = ${userTrackRelation.userId} AND trackId = ${userTrackRelation.trackId})"""
+           SELECT 1 FROM usersFavoriteTracks WHERE userId = ${userTrackRelation.userId} AND trackId = ${userTrackRelation.trackId})"""
         .as[Boolean]
     db.run(query.head)
   }

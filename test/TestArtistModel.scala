@@ -55,7 +55,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "all be found" in {
-      println("findAll: " + Await.result(artistMethods.findSinceOffset(10, 0), 2 seconds))
+//      println("findAll: " + Await.result(artistMethods.findSinceOffset(10, 0), 2 seconds))
     }
 
     "be found" in {

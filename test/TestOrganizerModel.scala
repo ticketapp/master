@@ -30,7 +30,8 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
   val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
   val tariffMethods = new TariffMethods(dbConfProvider, utilities)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
+  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
   val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
     trackMethods, utilities)
   val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
@@ -43,12 +44,15 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
-      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         try {
-          savedOrganizer mustEqual organizer.copy(id = Some(savedOrganizer.id.get),
-            description = Some("<div class='column large-12'>description</div>"))
+          savedOrganizer mustEqual OrganizerWithAddress(
+            organizer.copy(
+              id = Some(savedOrganizer.organizer.id.get),
+              description = Some("<div class='column large-12'>description</div>")),
+            None)
         } finally {
-          whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) {
+          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
             _ mustBe 1
           }
         }
@@ -59,11 +63,12 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       val organizer = Organizer(None, Option("facebookId3"), "organizerTest3", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
-      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         try {
-          whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { _ mustBe savedOrganizer }
+          whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds)))
+          { _ mustBe savedOrganizer }
         } finally {
-          whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
         }
       }
     }
@@ -82,27 +87,27 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         fullName = Option("fullName"),
         email = Option("email"),
         avatarURL = Option("avatarUrl"))
-      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
           try {
-            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
             timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
 
-              whenReady(organizerMethods.isFollowed(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+              whenReady(organizerMethods.isFollowed(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
                 timeout(Span(5, Seconds))) { response1 =>
 
                 response1 mustBe true
               }
             }
           } finally {
-            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
               timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
 
-              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { response1 =>
+              whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { response1 =>
 
                 response1 mustBe 1
 
@@ -128,20 +133,20 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         fullName = Option("fullName1"),
         email = Option("email1"),
         avatarURL = Option("avatarUrl"))
-      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
           try {
-            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
               timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
 
-              whenReady(organizerMethods.isFollowed(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+              whenReady(organizerMethods.isFollowed(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
                 timeout(Span(5, Seconds))) { response1 =>
 
                 response1 mustBe true
                 try {
-                  Await.result(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get))
+                  Await.result(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get))
                     , 3 seconds)
                 } catch {
                   case e: PSQLException =>
@@ -151,12 +156,12 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
               }
             }
           } finally {
-            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
               timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
 
-              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { response1 =>
+              whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { response1 =>
 
                 response1 mustBe 1
 
@@ -172,17 +177,17 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
       whenReady (placeMethods.save(Place(None, "Name1", Some("1234567891"), None, None, None, None, None, None, None)),
         timeout(Span(2, Seconds)))  { tryPlace =>
         val placeId = tryPlace.id.get
-        whenReady(organizerMethods.save(Organizer(None, Some("1234567891"), "organizerTest2")),
+        whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(Organizer(None, Some("1234567891"), "organizerTest2"), None)),
           timeout(Span(5, Seconds))) { savedOrganizer =>
           try {
-            whenReady(organizerMethods.findById(savedOrganizer.id.get), timeout(Span(5, Seconds))) {
-              case Some(organizer: Organizer) =>
-                organizer.linkedPlaceId mustBe Some(placeId)
+            whenReady(organizerMethods.findById(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
+              case Some(organizerWithAddress: OrganizerWithAddress) =>
+                organizerWithAddress.organizer.linkedPlaceId mustBe Some(placeId)
               case _ =>
                 throw new Exception("TestOrganizerModel.musBeLinkedToAPlace: error on save or find")
             }
           } finally {
-            organizerMethods.delete(savedOrganizer.id.get)
+            organizerMethods.delete(savedOrganizer.organizer.id.get)
             placeMethods.delete(placeId)
           }
         }
@@ -203,7 +208,7 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         try {
           whenReady(organizerMethods.saveWithEventRelation(organizer, savedEvent.id.get), timeout(Span(5, Seconds))) { savedOrganizer =>
             whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
-              //
+
               organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get))
               organizerMethods.delete(savedOrganizer.id.get)
             }
@@ -219,6 +224,8 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite {
         organizerInfos.get.organizer.name mustBe "Le Transbordeur"
       }
     }
+
+    //find save and delete with address
   }
 }
 

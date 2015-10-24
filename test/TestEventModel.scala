@@ -34,7 +34,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
   val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
   val tariffMethods = new TariffMethods(dbConfProvider, utilities)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
+  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
   val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
     geographicPointMethods, utilities)
   val userDAOImpl = new UserDAOImpl(dbConfProvider)
@@ -351,20 +352,20 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       List.empty, List.empty, List.empty, List.empty, List.empty)*/)
       val organizer = Organizer(None, Option("facebookId10"), "organizerTest2")
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+        whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
           try {
-            whenReady(organizerMethods.saveEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
+            whenReady(organizerMethods.saveEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.organizer.id.get)),
               timeout(Span(5, Seconds))) { organizerEventRelation =>
 
               organizerEventRelation mustBe 1
 
-              whenReady(eventMethods.findAllByOrganizer(savedOrganizer.id.get), timeout(Span(5, Seconds))) { eventsByOrganizer =>
+              whenReady(eventMethods.findAllByOrganizer(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { eventsByOrganizer =>
 
                 eventsByOrganizer must contain(savedEvent)
               }
             }
           } finally {
-            whenReady(organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
+            whenReady(organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.organizer.id.get)),
               timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
@@ -372,7 +373,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
                 response1 mustBe 1
 
-                whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+                whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
           }
@@ -387,18 +388,18 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
       List.empty, List.empty, List.empty, List.empty, List.empty)*/)
       val organizer = Organizer(None, Option("facebookId101"), "organizerTest21")
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
+        whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
           try {
-            whenReady(organizerMethods.saveEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
+            whenReady(organizerMethods.saveEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.organizer.id.get)),
               timeout(Span(5, Seconds))) { organizerEventRelation =>
 
               organizerEventRelation mustBe 1
 
-              whenReady(eventMethods.findAllByOrganizer(savedOrganizer.id.get), timeout(Span(5, Seconds))) { eventsByOrganizer =>
+              whenReady(eventMethods.findAllByOrganizer(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { eventsByOrganizer =>
 
                 eventsByOrganizer must not contain savedEvent
 
-                whenReady(eventMethods.findAllPassedByOrganizer(savedOrganizer.id.get), timeout(Span(5, Seconds))) {
+                whenReady(eventMethods.findAllPassedByOrganizer(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
                   passedEventsByOrganizer =>
 
                   passedEventsByOrganizer must contain(savedEvent)
@@ -406,7 +407,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
               }
             }
           } finally {
-            whenReady(organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
+            whenReady(organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.organizer.id.get)),
               timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
@@ -415,7 +416,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
 
                 response1 mustBe 1
 
-                whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+                whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
           }
@@ -472,5 +473,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         event.genres should contain allOf (Genre(None, "hip", 'a'), Genre(None, "hop", 'a'))
       }
     }*/
+
+    //save with an address
+    //get with an address
   }
 }

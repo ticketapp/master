@@ -69,7 +69,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
     db.run(query.drop(offset).take(numberToReturn).result) map { seqArtistAndOptionalGenre =>
       val groupedByArtist = seqArtistAndOptionalGenre.groupBy(_._1)
-      println("groupedByArtist = " + groupedByArtist)
 
       val artistsWithGenres = groupedByArtist map { tupleArtistSeqTupleArtistWithMaybeGenres =>
         (tupleArtistSeqTupleArtistWithMaybeGenres._1, tupleArtistSeqTupleArtistWithMaybeGenres._2 collect {
