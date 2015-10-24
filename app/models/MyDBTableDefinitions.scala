@@ -2,7 +2,7 @@ package models
 
 import java.sql.{JDBCType, Timestamp}
 import java.util.UUID
-
+import scala.collection.immutable.Seq
 import com.vividsolutions.jts.geom.Geometry
 import org.joda.time.DateTime
 import services.MyPostgresDriver.api._

@@ -58,7 +58,7 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
 
         whenReady(playlistMethods.find(maybePlaylistId.get), timeout(Span(5, Seconds))) { foundPlaylist =>
 
-          foundPlaylist mustBe Option(savedPlaylist)
+          foundPlaylist mustBe Option(PlaylistWithTracks(savedPlaylist, Vector.empty))
 
           whenReady(playlistMethods.delete(maybePlaylistId.get), timeout(Span(5, Seconds))) {
 
@@ -82,29 +82,64 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
       whenReady(trackMethods.save(track1), timeout(Span(5, Seconds))) { _ =>
         whenReady(trackMethods.save(track2), timeout(Span(5, Seconds))) { _ =>
           whenReady(trackMethods.save(track3), timeout(Span(5, Seconds))) { _ =>
-            val playlist = Playlist(None, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), "name2")
+            val userUUID = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
+            val playlist = Playlist(None, userUUID, "name2")
             whenReady(playlistMethods.save(playlist), timeout(Span(5, Seconds))) { savedPlaylist =>
-              val playlistId = savedPlaylist.playlistId.get
+              val playlistId = savedPlaylist.playlistId
               try {
-                whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId, trackId1, 2)),
+                whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId.get, trackId1, 2)),
                   timeout(Span(5, Seconds))) { _ =>
-                  whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId, trackId2, 3)),
+                  whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId.get, trackId2, 3)),
                     timeout(Span(5, Seconds))) { _ =>
-                    whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId, trackId3, 1)),
+                    whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId.get, trackId3, 1)),
                       timeout(Span(5, Seconds))) { _ =>
 
-                      whenReady(trackMethods.findByPlaylistId(playlistId), timeout(Span(5, Seconds))) { tracks =>
+                      whenReady(trackMethods.findByPlaylistId(playlistId.get), timeout(Span(5, Seconds))) { tracks =>
                         tracks should contain allOf(
                           TrackWithPlaylistRank(track1, 2),
                           TrackWithPlaylistRank(track2, 3),
                           TrackWithPlaylistRank(track3, 1))
                       }
 
-                      whenReady(playlistMethods.find(playlistId), timeout(Span(5, Seconds))) { playlistWithTracks =>
-                        playlistWithTracks mustBe Option(PlaylistWithTracks(savedPlaylist, Seq.empty))
+                      whenReady(playlistMethods.find(playlistId.get), timeout(Span(5, Seconds))) { playlistWithTracks =>
+                        playlistWithTracks mustBe Option(PlaylistWithTracks(
+                          Playlist(playlistId, userUUID, "name2"), Vector(
+                            TrackWithPlaylistRank(Track(
+                              uuid = trackId1,
+                              title = "title",
+                              url = "urlPlaylistTest",
+                              platform = 's',
+                              thumbnailUrl = "thumbnailUrl",
+                              artistFacebookUrl = "artistFacebookUrlTestPlaylistModel",
+                              artistName = "name",
+                              redirectUrl = None,
+                              confidence = 0.0),
+                              rank = 2.0),
+                            TrackWithPlaylistRank(Track(
+                              uuid = trackId2,
+                              title = "title2",
+                              url = "urlPlaylistTest2",
+                              platform = 's',
+                              thumbnailUrl = "thumbnailUrl",
+                              artistFacebookUrl = "artistFacebookUrlTestPlaylistModel",
+                              artistName = "name",
+                              redirectUrl = None,
+                              confidence = 0.0),
+                              rank = 3.0),
+                            TrackWithPlaylistRank(Track(
+                              uuid = trackId3,
+                              title = "title3",
+                              url = "urlPlaylistTest3",
+                              platform = 's',
+                              thumbnailUrl = "thumbnailUrl",
+                              artistFacebookUrl = "artistFacebookUrlTestPlaylistModel",
+                              artistName = "name",
+                              redirectUrl = None,
+                              confidence = 2.0),
+                              rank = 1.0))))
                       }
 
-                      whenReady(playlistMethods.delete(playlistId), timeout(Span(5, Seconds))) { _ mustBe 1 }
+                      whenReady(playlistMethods.delete(playlistId.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
                     }
                   }
                 }
