@@ -49,18 +49,18 @@ GET     /artists/containing/:pattern                                      @contr
 GET     /artists/facebookContaining/:pattern                              @controllers.ArtistController.getFacebookArtistsContaining(pattern: String)
 #
 ################################### Places ###############################################
-#GET     /places                                                           @controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
-#GET     /places/:id                                                       @controllers.PlaceController.place(id: Long)
-#POST    /places/:placeId/followByPlaceId                                  @controllers.PlaceController.followPlaceByPlaceId(placeId: Long)
-#POST    /places/:placeId/unfollowPlaceByPlaceId                           @controllers.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
-#POST    /places/:facebookId/followByFacebookId                            @controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
-#GET     /places/:placeId/isFollowed                                       @controllers.PlaceController.isPlaceFollowed(placeId: Long)
-#GET     /places/containing/:pattern                                       @controllers.PlaceController.findPlacesContaining(pattern: String)
-#POST    /places/create                                                    @controllers.PlaceController.create
+GET      /places                                                           @controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
+GET      /places/:id                                                       @controllers.PlaceController.findById(id: Long)
+POST     /places/:placeId/followByPlaceId                                  @controllers.PlaceController.followPlaceByPlaceId(placeId: Long)
+POST     /places/:placeId/unfollowPlaceByPlaceId                           @controllers.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
+POST     /places/:facebookId/followByFacebookId                            @controllers.PlaceController.followPlaceByFacebookId(facebookId: String)
+GET      /places/:placeId/isFollowed                                       @controllers.PlaceController.isPlaceFollowed(placeId: Long)
+GET      /places/containing/:pattern                                       @controllers.PlaceController.findPlacesContaining(pattern: String)
+POST     /places/create                                                    @controllers.PlaceController.createPlace
 #GET     /places/:placeId/events                                          @controllers.EventController.findByPlace(placeId: Long)
 #GET     /places/:placeId/passedEvents                                    @controllers.EventController.findPassedByPlace(placeId: Long)
 #GET     /places/nearCity/:city                                            @controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
-#GET     /places/followed/                                                 @controllers.PlaceController.getFollowedPlaces
+GET      /places/followed/                                                 @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
 GET         /organizers                                   @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)

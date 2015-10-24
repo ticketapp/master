@@ -70,7 +70,7 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
               timeout(Span(5, Seconds))) { resp =>
               whenReady(placeMethods.getFollowedPlaces(uuid), timeout(Span(5, Seconds))) { followedPlaces =>
                 assert(followedPlaces.nonEmpty)
-                whenReady(placeMethods.unfollowByPlaceId(UserPlaceRelation(uuid, placeId))) { isDeletePlace =>
+                whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, placeId))) { isDeletePlace =>
                   isDeletePlace mustBe 1
                   whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
                 }

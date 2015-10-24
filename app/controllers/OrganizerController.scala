@@ -127,7 +127,7 @@ class OrganizerController @Inject()(ws: WSClient,
       case 1 =>
         Created
       case _ =>
-        Logger.error("OrganizerController.unfollowOrganizer: organizerMethods.unfollow did not return 1")
+        Logger.error("OrganizerController.followOrganizerByFacebookId: organizerMethods.followOrganizerByFacebookId did not return 1")
         InternalServerError
     } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
