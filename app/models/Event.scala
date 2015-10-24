@@ -5,7 +5,9 @@ import javax.inject.Inject
 import com.vividsolutions.jts.geom.{Geometry, GeometryFactory}
 import json.JsonHelper._
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import play.api.Play.current
+import play.api.data.Forms._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -50,15 +52,17 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   val geometryFactory = new GeometryFactory()
 
-  def formApply(name: String, geographicPoint: Option[String], description: Option[String], startTime: DateTime,
-                endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String], ticketSellers: Option[String],
-                imagePath: Option[String]/*, tariffs: List[Tariff], addresses: List[Address]*/): Event =
-    new Event(None, None, true, true, name, geographicPointMethods.optionStringToOptionPoint(geographicPoint), description, startTime, endTime, ageRestriction,
+  def formApply(facebookId: Option[String], name: String, geographicPoint: Option[String], description: Option[String],
+                startTime: DateTime, endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String],
+                ticketSellers: Option[String], imagePath: Option[String]/*, tariffs: List[Tariff], addresses: List[Address]*/
+                 ): Event =
+    new Event(None, facebookId, true, true, name, geographicPointMethods.optionStringToOptionPoint(geographicPoint), description, startTime, endTime, ageRestriction,
       tariffRange, ticketSellers, imagePath)//, List.empty, List.empty, tariffs, addresses)
 
   def formUnapply(event: Event) = {
-    Some((event.name, Option(event.geographicPoint.getOrElse("").toString), event.description, event.startTime, event.endTime, event.ageRestriction,
-      event.tariffRange, event.ticketSellers, event.imagePath/*, event.tariffs, event.addresses*/))
+    Some((event.facebookId, event.name, Option(event.geographicPoint.getOrElse("").toString), event.description,
+      event.startTime, event.endTime, event.ageRestriction, event.tariffRange, event.ticketSellers, event.imagePath/*,
+      event.tariffs, event.addresses*/))
   }
 
 //  def getPropertiesOfEvent(event: Event): Event = event.eventId match {
@@ -108,12 +112,12 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
     val now = DateTime.now()
     val xHoursAgo = now.minusHours(hourInterval)
 
     val query = events
-      .filter(event => (event.startTime < now) || (event.startTime > xHoursAgo))
+      .filter(event => (event.startTime < now) && (event.startTime > xHoursAgo))
       .sortBy(_.geographicPoint <-> geographicPoint)
       .drop(offset)
       .take(numberToReturn)
@@ -263,7 +267,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def save(event: Event): Future[Event] =
-    db.run(events returning events.map(_.id) into ((event, id) => event.copy(id = Some(id))) += event)
+    db.run((for {
+      eventFound <- events.filter(_.facebookId === event.facebookId).result.headOption
+      result <- eventFound.map(DBIO.successful).getOrElse(events returning events.map(_.id) += event)
+    } yield result match {
+        case p: Event => p
+        case id: Long => event.copy(id = Option(id))
+      }).transactionally)
   /*
   def save(event: Event): Option[Long] = try {
     DB.withConnection { implicit connection =>
@@ -304,8 +314,17 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def update(event: Event): Future[Int] = db.run(events.filter(_.id === event.id).update(event))
 
-  def saveFacebookEventByFacebookId(eventFacebookId: String): Future[Event] =
-    findEventOnFacebookByFacebookId(eventFacebookId) flatMap { save }
+  def saveFacebookEventByFacebookId(eventFacebookId: String): Future[Event] = {
+    val maybeEvent = db.run(events.filter(_.facebookId === eventFacebookId).result.headOption)
+    maybeEvent flatMap {
+      case Some(event) =>
+        Future(event)
+      case None =>
+        findEventOnFacebookByFacebookId(eventFacebookId) flatMap { event =>
+          save(event)
+        }
+    }
+  }
 
   def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Event] = {
     WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + eventFacebookId)
@@ -354,13 +373,26 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
         artistMethods.saveArtistsAndTheirTracks(nonEmptyArtists)
 
+        val normalizedStartTime: DateTime = startTime match {
+          case Some(matchedDate) =>
+            utilities.stringToDateTime(matchedDate)
+          case None =>
+          new DateTime()
+        }
+
+        val normalizedEndTime = endTime match {
+          case Some(matchedDate) =>
+            Option(utilities.stringToDateTime(matchedDate))
+          case None => None
+        }
+
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //        val eventGenres = (nonEmptyArtists.flatMap(_.genres) ++
 //                          nonEmptyArtists.flatMap(artist => Genre.findOverGenres(artist.genres))).distinct
 
         val event = Event(None, facebookId, isPublic = true, isActive = true, utilities.refactorEventOrPlaceName(name), None,
-        utilities.formatDescription(description), new DateTime()/*formatDate(startTime).getOrElse(new Date()),
-        formatDate(endTime)*/, Option(new DateTime()), 16, tariffMethods.findPrices(description), ticketSellers, Option(source)/*, List(organizer).flatten,
+        utilities.formatDescription(description), normalizedStartTime/*,
+        formatDate(endTime)*/, normalizedEndTime, 16, tariffMethods.findPrices(description), ticketSellers, Option(source)/*, List(organizer).flatten,
         nonEmptyArtists, List.empty, List(address), List.empty, eventGenres*/)
 
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
