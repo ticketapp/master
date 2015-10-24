@@ -40,8 +40,11 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
                                  val placeMethods: PlaceMethods,
                                  val addressMethods: AddressMethods,
                                  val utilities: Utilities,
-                                 val geographicPointMethods: GeographicPointMethods)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with MyDBTableDefinitions {
+                                 val geographicPointMethods: SearchGeographicPoint)
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with FollowService
+    with MyDBTableDefinitions
+    with addressFormsTrait {
 
   def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
                 imagePath: Option[String], address: Option[Address]): OrganizerWithAddress =

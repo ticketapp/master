@@ -28,19 +28,8 @@ case class Address (id: Option[Long],
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                val utilities: Utilities,
-                               val geographicPointMethods: GeographicPointMethods)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
-
-
-  def formApply(city: Option[String], zip: Option[String], street: Option[String]): Option[Address] = try {
-    Option(Address(None, None, city, zip, street))
-  } catch {
-    case e: Exception =>
-      Logger.error("Address.formApply: ", e)
-      None
-  }
-  def formUnapply(maybeAddress: Option[Address]): Option[(Option[String], Option[String], Option[String])] =
-    Some((maybeAddress.get.city, maybeAddress.get.zip, maybeAddress.get.street))
+                               val geographicPointMethods: SearchGeographicPoint)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions with addressFormsTrait {
 
   def findAll: Future[Seq[Address]] = db.run(addresses.result)
 

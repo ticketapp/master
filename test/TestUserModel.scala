@@ -17,7 +17,7 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
   val injector = appBuilder.injector()
   val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
   val utilities = new Utilities
-  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
+  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
   val userDAOImpl = new UserDAOImpl(dbConfProvider)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
   val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)

@@ -357,7 +357,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
   def saveArtistGenres(tupleArtistIdGenres: Future[(Long, Array[String])]): Unit = {
     tupleArtistIdGenres.map { artistIdGenres =>
       artistIdGenres._2.foreach { genre =>
-        genreMethods.saveGenreForArtistInFuture(Option(genre), artistIdGenres._1)
+        Future(genreMethods.saveGenreOfArtist(Option(genre), artistIdGenres._1))
       }
     }
   }

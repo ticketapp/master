@@ -25,12 +25,11 @@ import json.JsonHelper._
 
 class OrganizerController @Inject()(ws: WSClient,
                                     val organizerMethods: OrganizerMethods,
-                                    val addressMethods: AddressMethods,
                                     val messagesApi: MessagesApi,
                                     val env: Environment[User, CookieAuthenticator],
                                     val utilities: Utilities,
                                     socialProviderRegistry: SocialProviderRegistry)
-  extends Silhouette[User, CookieAuthenticator] {
+  extends Silhouette[User, CookieAuthenticator] with addressFormsTrait {
 
   def find(numberToReturn: Int, offset: Int) = Action.async {
     organizerMethods.find(numberToReturn: Int, offset: Int) map { organizers =>
@@ -70,7 +69,7 @@ class OrganizerController @Inject()(ws: WSClient,
         "city" -> optional(text(2)),
         "zip" -> optional(text(2)),
         "street" -> optional(text(2))
-      )(addressMethods.formApply)(addressMethods.formUnapply)
+      )(addressFormApply)(addressFormUnapply)
     )(organizerMethods.formApply)(organizerMethods.formUnapply)
   )
 

@@ -24,7 +24,7 @@ import scala.util.{Failure, Success}
 class EventController @Inject()(ws: WSClient,
                                 val messagesApi: MessagesApi,
                                 val utilities: Utilities,
-                                val geographicPointMethods: GeographicPointMethods,
+                                val geographicPointMethods: SearchGeographicPoint,
                                 val env: Environment[User, CookieAuthenticator],
                                 socialProviderRegistry: SocialProviderRegistry,
                                 val eventMethods: EventMethods)

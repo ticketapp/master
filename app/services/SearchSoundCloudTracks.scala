@@ -131,11 +131,11 @@ class SearchSoundCloudTracks @Inject()(protected val dbConfigProvider: DatabaseC
     Option[String], Option[String], Option[String])], artist: Artist): Seq[Track] = {
     tracks.collect {
       case (Some(url), Some(title), redirectUrl: Option[String], Some(thumbnailUrl: String), avatarUrl, genre) =>
-        genreMethods.saveGenreForArtistInFuture(genre, artist.id.getOrElse(-1L))
+        Future(genreMethods.saveGenreOfArtist(genre, artist.id.getOrElse(-1L)))
         Track(randomUUID, trackMethods.normalizeTrackTitle(title, artist.name), url, 's', thumbnailUrl, artist.facebookUrl, artist.name,
           redirectUrl)
       case (Some(url), Some(title), redirectUrl: Option[String], None, Some(avatarUrl: String), genre) =>
-        genreMethods.saveGenreForArtistInFuture(genre, artist.id.getOrElse(-1L))
+        Future(genreMethods.saveGenreOfArtist(genre, artist.id.getOrElse(-1L)))
         Track(randomUUID, trackMethods.normalizeTrackTitle(title, artist.name), url, 's', avatarUrl, artist.facebookUrl, artist.name,
           redirectUrl)
     }
