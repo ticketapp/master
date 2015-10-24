@@ -74,7 +74,7 @@ class TestOrganizerController extends PlaySpecification with Mockito {
       new WithApplication(application) {
         val organizerId = await(organizerMethods.findAllContaining("test")).headOption.get.id
         val Some(organizer) = route(FakeRequest(GET, "/organizers/" + organizerId.get))
-        contentAsJson(organizer).toString() must contain( """"facebookId":"111","name":"test"""")
+        contentAsJson(organizer).toString() must contain(""""facebookId":"111","name":"test"""")
       }
     }
 

@@ -1,52 +1,52 @@
 # Home page
-GET         /                                             @controllers.Application.index
+GET      /                                            @controllers.Application.index
 
-GET         /test                                         @controllers.Test.test1
+GET      /test                                        @controllers.Test.test1
 
-POST        /signUp                                       @controllers.SignUpController.signUp
-POST        /signIn                                       @controllers.Application.signIn
-POST        /authenticateByCredentials                    @controllers.CredentialsAuthController.authenticate
-GET         /signOut                                      @controllers.Application.signOut
+POST     /signUp                                      @controllers.SignUpController.signUp
+POST     /signIn                                      @controllers.Application.signIn
+POST     /authenticateByCredentials                   @controllers.CredentialsAuthController.authenticate
+GET      /signOut                                     @controllers.Application.signOut
 
 ################################## fill database ################################################
-GET         /initDatabase                                 @fillDatabase.InitController.init
+GET      /initDatabase                                @fillDatabase.InitController.init
 
 ################################## Admin ################################################
-GET         /admin                                        @controllers.Admin.indexAdmin
+GET      /admin                                       @controllers.Admin.indexAdmin
 ##POST     /admin/createTariff           @controllers.Admin.createTariff
 #
 ################################### Events ###############################################
-GET         /events                                       @controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
-GET         /events/inInterval/:hourInterval              @controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET         /events/passedInInterval/:hourInterval        @controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET         /events/:id                                   @controllers.EventController.find(id: Long)
-POST        /events/create                                @controllers.EventController.createEvent
-POST        /events/create/:facebookId                    @controllers.EventController.createEventByFacebookId(facebookId: String)
-POST        /events/:eventId/follow                       @controllers.EventController.followEvent(eventId: Long)
-POST        /events/:eventId/unfollow                     @controllers.EventController.unfollowEvent(eventId: Long)
-GET         /events/followed/                             @controllers.EventController.getFollowedEvents
-GET         /events/:eventId/isEventFollowed              @controllers.EventController.isEventFollowed(eventId: Long)
-GET         /events/containing/:pattern                   @controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
-GET         /events/city/:pattern                         @controllers.EventController.findByCityPattern(pattern: String)
-GET         /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+GET     /events                                       @controllers.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
+GET     /events/inInterval/:hourInterval              @controllers.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET     /events/passedInInterval/:hourInterval        @controllers.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET     /events/:id                                   @controllers.EventController.find(id: Long)
+POST    /events/create                                @controllers.EventController.createEvent
+POST    /events/create/:facebookId                    @controllers.EventController.createEventByFacebookId(facebookId: String)
+POST    /events/:eventId/follow                       @controllers.EventController.followEvent(eventId: Long)
+POST    /events/:eventId/unfollow                     @controllers.EventController.unfollowEvent(eventId: Long)
+GET     /events/followed/                             @controllers.EventController.getFollowedEvents
+GET     /events/:eventId/isEventFollowed              @controllers.EventController.isEventFollowed(eventId: Long)
+GET     /events/containing/:pattern                   @controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
+GET     /events/city/:pattern                         @controllers.EventController.findByCityPattern(pattern: String)
+GET     /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################### Artists ##############################################
-GET     /artists                                                          @controllers.ArtistController.findAll
-GET     /artists/since/:offset/:number                                    @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
-GET     /artists/:facebookUrl                                             @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
-GET     /artists/:facebookUrl/tracks                                      @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
-GET     /artists/byId/:id                                                 @controllers.ArtistController.artist(id: Long)
-POST    /artists/createArtist                                             @controllers.ArtistController.createArtist
-POST    /artists/:artistId/followByArtistId                               @controllers.ArtistController.followArtistByArtistId(artistId: Long)
-POST    /artists/:artistId/unfollowArtistByArtistId                       @controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
-POST    /artists/:facebookId/followByFacebookId                           @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
-GET     /artists/followed/                                                @controllers.ArtistController.getFollowedArtists
-GET     /artists/:artistId/isFollowed                                     @controllers.ArtistController.isArtistFollowed(artistId: Long)
-DELETE  /artists/:artistId                                                @controllers.ArtistController.deleteArtist(artistId: Long)
-GET     /artists/:facebookUrl/events                                      @controllers.EventController.findByArtist(facebookUrl: String)
-GET     /artists/:artistId/passedEvents                                   @controllers.EventController.findPassedByArtist(artistId: Long)
-GET     /artists/containing/:pattern                                      @controllers.ArtistController.findArtistsContaining(pattern: String)
-GET     /artists/facebookContaining/:pattern                              @controllers.ArtistController.getFacebookArtistsContaining(pattern: String)
+GET     /artists                                      @controllers.ArtistController.findAll
+GET     /artists/since/:offset/:number                @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
+GET     /artists/:facebookUrl                         @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
+GET     /artists/:facebookUrl/tracks                  @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
+GET     /artists/byId/:id                             @controllers.ArtistController.artist(id: Long)
+POST    /artists/createArtist                         @controllers.ArtistController.createArtist
+POST    /artists/:artistId/followByArtistId           @controllers.ArtistController.followArtistByArtistId(artistId: Long)
+POST    /artists/:artistId/unfollowArtistByArtistId   @controllers.ArtistController.unfollowArtistByArtistId(artistId: Long)
+POST    /artists/:facebookId/followByFacebookId       @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
+GET     /artists/followed/                            @controllers.ArtistController.getFollowedArtists
+GET     /artists/:artistId/isFollowed                 @controllers.ArtistController.isArtistFollowed(artistId: Long)
+DELETE  /artists/:artistId                            @controllers.ArtistController.deleteArtist(artistId: Long)
+GET     /artists/:facebookUrl/events                  @controllers.EventController.findByArtist(facebookUrl: String)
+GET     /artists/:artistId/passedEvents               @controllers.EventController.findPassedByArtist(artistId: Long)
+GET     /artists/containing/:pattern                  @controllers.ArtistController.findArtistsContaining(pattern: String)
+GET     /artists/facebookContaining/:pattern          @controllers.ArtistController.getFacebookArtistsContaining(pattern: String)
 #
 ################################### Places ###############################################
 #GET     /places                                                           @controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
@@ -63,18 +63,18 @@ GET     /artists/facebookContaining/:pattern                              @contr
 #GET     /places/followed/                                                 @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
-GET         /organizers                                   @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)
-GET         /organizers/:id                               @controllers.OrganizerController.findById(id: Long)
-POST        /organizers/:organizerId/followByOrganizerId                  @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
-POST    /organizers/:organizerId/unfollowOrganizerByOrganizerId          @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
-POST    /organizers/:facebookId/followByFacebookId                       @controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
-GET     /organizers/:organizerId/isFollowed                              @controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
-GET         /organizers/containing/:pattern               @controllers.OrganizerController.findOrganizersContaining(pattern: String)
-POST        /organizers/create                            @controllers.OrganizerController.createOrganizer
+GET      /organizers                                                      @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)
+GET      /organizers/:id                                                  @controllers.OrganizerController.findById(id: Long)
+POST     /organizers/:organizerId/followByOrganizerId                     @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
+POST     /organizers/:organizerId/unfollowOrganizerByOrganizerId          @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
+POST     /organizers/:facebookId/followByFacebookId                       @controllers.OrganizerController.followOrganizerByFacebookId(facebookId: String)
+GET      /organizers/:organizerId/isFollowed                              @controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
+GET      /organizers/containing/:pattern                                  @controllers.OrganizerController.findOrganizersContaining(pattern: String)
+POST     /organizers/create                                               @controllers.OrganizerController.createOrganizer
 #GET     /organizers/:organizerId/events                                  @controllers.EventController.findByOrganizer(organizerId: Long)
 #GET     /organizers/:organizerId/passedEvents                            @controllers.EventController.findPassedByOrganizer(organizerId: Long)
 #GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
-GET     /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
+GET      /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
 #GET     /playlists                                                       @controllers.PlaylistController.findByUser
