@@ -31,7 +31,6 @@ GET     /events/city/:pattern                         @controllers.EventControll
 GET     /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################### Artists ##############################################
-GET     /artists                                      @controllers.ArtistController.findAll
 GET     /artists/since/:offset/:number                @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
 GET     /artists/:facebookUrl                         @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
 GET     /artists/:facebookUrl/tracks                  @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
@@ -47,7 +46,7 @@ GET     /artists/:facebookUrl/events                  @controllers.EventControll
 GET     /artists/:artistId/passedEvents               @controllers.EventController.findPassedByArtist(artistId: Long)
 GET     /artists/containing/:pattern                  @controllers.ArtistController.findArtistsContaining(pattern: String)
 GET     /artists/facebookContaining/:pattern          @controllers.ArtistController.getFacebookArtistsContaining(pattern: String)
-#
+
 ################################### Places ###############################################
 GET      /places                                                           @controllers.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET      /places/:id                                                       @controllers.PlaceController.findById(id: Long)
