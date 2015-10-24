@@ -31,10 +31,10 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
   val tariffMethods = new TariffMethods(dbConfProvider, utilities)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
   val userDAOImpl = new UserDAOImpl(dbConfProvider)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
+  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
   val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
     geographicPointMethods, utilities)
-  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
 
   "A place" must {
 
@@ -137,18 +137,18 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
     }
 
     "be linked to an organizer if one with the same facebookId already exists" in {
-      whenReady(organizerMethods.save(Organizer(None, Some("1234567"), "organizerTestee")), timeout(Span(5, Seconds))) { savedOrganizer =>
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(Organizer(None, Some("1234567"), "organizerTestee"), None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         whenReady (placeMethods.save(Place(None, "Name", Some("1234567"), None, None, None, None, None, None, None)),
           timeout(Span(2, Seconds)))  { tryPlaceId =>
           val placeId = tryPlaceId.id.get
           try {
             whenReady(placeMethods.find(placeId), timeout(Span(5, Seconds))) { foundPlace =>
-              foundPlace.get.linkedOrganizerId mustBe Some(savedOrganizer.id.get)
+              foundPlace.get.linkedOrganizerId mustBe Some(savedOrganizer.organizer.id.get)
             }
           } finally {
             whenReady(placeMethods.delete(placeId), timeout(Span(5, Seconds))) { resp =>
               resp mustBe 1
-              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+              whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
             }
           }
         }

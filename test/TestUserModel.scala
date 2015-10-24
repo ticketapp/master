@@ -20,7 +20,8 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
   val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
   val userDAOImpl = new UserDAOImpl(dbConfProvider)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, utilities, geographicPointMethods)
+  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
 
   "A user" must {
 
@@ -97,12 +98,12 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
       val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
-      whenReady(organizerMethods.save(organizer), timeout(Span(5, Seconds))) { savedOrganizer =>
-        val organizerId = savedOrganizer.id.get
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
+        val organizerId = savedOrganizer.organizer.id.get
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
 
           try {
-            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, organizerId)),
               timeout(Span(5, Seconds))) { response =>
 
                 response mustBe 1
@@ -110,16 +111,15 @@ class TestUserModel extends PlaySpec with OneAppPerSuite {
               whenReady(organizerMethods.getFollowedOrganizers(uuid), timeout(Span(5, Seconds))) { organizers =>
 
                   organizers must contain (savedOrganizer)
-
               }
             }
           } finally {
-            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.id.get)),
+            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, organizerId)),
               timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
 
-              whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { response1 =>
+              whenReady(organizerMethods.delete(organizerId), timeout(Span(5, Seconds))) { response1 =>
 
                 response1 mustBe 1
 

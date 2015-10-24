@@ -38,67 +38,72 @@ case class OrganizerWithAddress(organizer: Organizer, address: Option[Address])
 
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,
+                                 val addressMethods: AddressMethods,
                                  val utilities: Utilities,
                                  val geographicPointMethods: GeographicPointMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with MyDBTableDefinitions {
 
   def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
-                imagePath: Option[String]): Organizer =
-    Organizer(None, facebookId, name, description = description, websites = websites, imagePath = imagePath)
-  def formUnapply(organizer: Organizer) =
-    Some((organizer.facebookId, organizer.name, organizer.description, organizer.websites, organizer.imagePath))
+                imagePath: Option[String], address: Option[Address]): OrganizerWithAddress =
+    OrganizerWithAddress(Organizer(None, facebookId, name, description = description, websites = websites, imagePath = imagePath), address)
+  def formUnapply(organizerWithAddress: OrganizerWithAddress) =
+    Some((organizerWithAddress.organizer.facebookId, organizerWithAddress.organizer.name,
+      organizerWithAddress.organizer.description, organizerWithAddress.organizer.websites,
+      organizerWithAddress.organizer.imagePath, organizerWithAddress.address))
 
-//  def getOrganizerProperties(organizer: Organizer): Organizer = organizer.copy(
-//    address = Address.find(organizer.addressId)
-//  )
 
   def find(numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] = {
     val tupledJoin = organizers joinLeft addresses on (_.addressId === _.id)
 
-    db.run(tupledJoin.result).map(_.map(OrganizerWithAddress.tupled))
+    db.run(tupledJoin.result) map(_ map OrganizerWithAddress.tupled)
   }
 
-  def findAllByEvent(event: Event): Future[Seq[Organizer]] = {
-    val now = DateTime.now()
-    val twelveHoursAgo = now.minusHours(12)
-
+  def findAllByEvent(event: Event): Future[Seq[OrganizerWithAddress]] = {
     val query = for {
       event <- events if event.id === event.id
       eventOrganizer <- eventsOrganizers
-      organizer <- organizers if organizer.id === eventOrganizer.organizerId
-    } yield organizer
+      organizerWithAddress <- organizers joinLeft addresses on (_.addressId === _.id)
+      if organizerWithAddress._1.id === eventOrganizer.organizerId
+    } yield organizerWithAddress
 
-
-    //getOrganizerProperties
-    db.run(query.result)
+    db.run(query.result) map(_ map OrganizerWithAddress.tupled)
   }
 
-  def findById(id: Long): Future[Option[Organizer]] = {
-    val query = organizers.filter(_.id === id)
-    db.run(query.result.headOption)
+  def findById(id: Long): Future[Option[OrganizerWithAddress]] = {
+    val query = organizers.filter(_.id === id) joinLeft addresses on (_.addressId === _.id)
+    db.run(query.result.headOption).map {
+      case Some(organizer) => Option(OrganizerWithAddress.tupled(organizer))
+      case None => None
+    }
   }
 
-  def findAllContaining(pattern: String): Future[Seq[Organizer]] = {
+  def findAllContaining(pattern: String): Future[Seq[OrganizerWithAddress]] = {
     val lowercasePattern = pattern.toLowerCase
     val query = for {
-      organizer <- organizers if organizer.name.toLowerCase like s"%$lowercasePattern%"
-    } yield organizer
-    //        .map(getOrganizerProperties)
-    db.run(query.result)
+      organizerWithAddress <- organizers joinLeft addresses on (_.addressId === _.id)
+      if organizerWithAddress._1.name.toLowerCase like s"%$lowercasePattern%"
+    } yield organizerWithAddress
+    db.run(query.result) map(_ map OrganizerWithAddress.tupled)
   }
 
-  def doSave (organizer: Organizer): Future[Organizer] = {
-    db.run((for {
-      organizerFound <- organizers.filter(_.facebookId === organizer.facebookId).result.headOption
-      result <- organizerFound.map(DBIO.successful).getOrElse(organizers returning organizers.map(_.id) += organizer)
-    } yield result match {
-        case o: Organizer => o
-        case id: Long => organizer.copy(id = Option(id))
-      }).transactionally)
+  def saveWithAddress(organizerWithAddress: OrganizerWithAddress): Future[OrganizerWithAddress] = {
+    organizerWithAddress.address match {
+      case Some(address) => 
+        addressMethods.save(address) flatMap { savedAddress =>
+          save(organizerWithAddress.organizer.copy(addressId = savedAddress.id)) map { orga =>
+            OrganizerWithAddress(orga, Option(savedAddress))
+          }
+        }
+      case None =>
+        save(organizerWithAddress.organizer) map { savedOrganizer =>
+          OrganizerWithAddress(savedOrganizer, None)
+        }
+    }
   }
-
+  
   def save(organizer: Organizer): Future[Organizer] = {
-    val organizerWithFormattedDescription = organizer.copy(description = utilities.formatDescription(organizer.description))
+    val organizerWithFormattedDescription = organizer.copy(
+      description = utilities.formatDescription(organizer.description))
     organizer.facebookId match {
       case None =>
         doSave(organizerWithFormattedDescription)
@@ -110,6 +115,15 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     }
   }
 
+  def doSave(organizer: Organizer): Future[Organizer] = {
+    db.run((for {
+      organizerFound <- organizers.filter(_.facebookId === organizer.facebookId).result.headOption
+      result <- organizerFound.map(DBIO.successful).getOrElse(organizers returning organizers.map(_.id) += organizer)
+    } yield result match {
+        case o: Organizer => o
+        case id: Long => organizer.copy(id = Option(id))
+      }).transactionally)
+  }
 
 
 //  def save(organizer: Organizer): Future[Long] = {
@@ -128,15 +142,19 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     db.run(query.result.headOption)
   }
 
-  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] = {
-    val query = organizers
-      .sortBy(_.geographicPoint <-> geographicPoint)
+  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] = {
+    val query = for {
+      organizerWithAddress <- organizers joinLeft addresses on (_.addressId === _.id)
+    } yield organizerWithAddress
+
+    db.run(query
+      .sortBy(_._1.geographicPoint <-> geographicPoint)
       .drop(offset)
       .take(numberToReturn)
-    db.run(query.result)
+      .result) map(_ map OrganizerWithAddress.tupled)
   }
 
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Organizer]] =
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] =
     geographicPointMethods.findGeographicPointOfCity(city) flatMap {
       case None =>
         Logger.info("Organizer.findNearCity: no city found with this name")
@@ -145,8 +163,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
         findNear(geographicPoint, numberToReturn, offset)
   }
 
-  def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Organizer] = save(organizer) flatMap {
-    case organizer: Organizer => saveEventRelation(EventOrganizerRelation(eventId, organizer.id.get)) map {
+  def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Organizer] = save(organizer) flatMap { organizer =>
+    saveEventRelation(EventOrganizerRelation(eventId, organizer.id.get)) map {
       case 1 =>
         organizer
       case _ =>

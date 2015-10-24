@@ -32,10 +32,15 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
 
-  def formApply(city: Option[String], zip: Option[String], street: Option[String]) =
-    new Address(None, None, city, zip, street)
-  def formUnapply(address: Address): Option[(Option[String], Option[String], Option[String])] =
-    Some((address.city, address.zip, address.street))
+  def formApply(city: Option[String], zip: Option[String], street: Option[String]): Option[Address] = try {
+    Option(Address(None, None, city, zip, street))
+  } catch {
+    case e: Exception =>
+      Logger.error("Address.formApply: ", e)
+      None
+  }
+  def formUnapply(maybeAddress: Option[Address]): Option[(Option[String], Option[String], Option[String])] =
+    Some((maybeAddress.get.city, maybeAddress.get.zip, maybeAddress.get.street))
 
   def findAll: Future[Seq[Address]] = db.run(addresses.result)
 

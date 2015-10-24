@@ -25,6 +25,7 @@ import json.JsonHelper._
 
 class OrganizerController @Inject()(ws: WSClient,
                                     val organizerMethods: OrganizerMethods,
+                                    val addressMethods: AddressMethods,
                                     val messagesApi: MessagesApi,
                                     val env: Environment[User, CookieAuthenticator],
                                     val utilities: Utilities,
@@ -64,7 +65,12 @@ class OrganizerController @Inject()(ws: WSClient,
       "name" -> nonEmptyText(2),
       "description" -> optional(nonEmptyText(2)),
       "websites" -> optional(nonEmptyText(4)),
-      "imagePath" -> optional(nonEmptyText(2))
+      "imagePath" -> optional(nonEmptyText(2)),
+      "address" -> mapping (
+        "city" -> optional(text(2)),
+        "zip" -> optional(text(2)),
+        "street" -> optional(text(2))
+      )(addressMethods.formApply)(addressMethods.formUnapply)
     )(organizerMethods.formApply)(organizerMethods.formUnapply)
   )
 
@@ -72,7 +78,7 @@ class OrganizerController @Inject()(ws: WSClient,
     organizerBindingForm.bindFromRequest().fold(
       formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       organizer => {
-        organizerMethods.save(organizer) map { organizerCreated =>
+        organizerMethods.saveWithAddress(organizer) map { organizerCreated =>
           Ok(Json.toJson(organizerCreated))
         } recover {
           case throwable: Throwable =>
