@@ -1,5 +1,6 @@
 package models
 
+import scala.collection.immutable.Seq
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,7 +14,7 @@ import json.JsonHelper._
 import play.api.Logger
 import services._
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.util.{Try, Success, Failure}
 
 
@@ -41,22 +42,61 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
 //  def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
 //    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
 
-  def save(playlistInfo: Playlist): Future[Playlist] =
-    db.run(playlists returning playlists.map(_.id) into ((playlist, id) => playlist.copy(playlistId = Option(id))) += playlistInfo)
+  def save(playlist: Playlist): Future[Playlist] =
+    db.run(playlists returning playlists.map(_.id) into ((playlist, id) => playlist.copy(playlistId = Option(id))) += playlist)
 
-  def find(id: Long): Future[Option[Playlist]] =  db.run(playlists.filter(_.id === id).result.headOption)
+  def find(id: Long): Future[Option[PlaylistWithTracks]] = {
+    val query = for {
+      (playlist, optionalPlaylistTrackAndTrack) <- playlists joinLeft
+        (playlistsTracks join tracks on (_.trackId === _.uuid)) on (_.id === _._1.playlistId)
+    } yield (playlist, optionalPlaylistTrackAndTrack)
+
+    import scala.concurrent.duration._
+//
+//    val id = 3
+//
+//
+    println("\n\nfilter\n" + Await.result(db.run(query.filter(_._1.id === id).result), 2.seconds))
+    println("\n\nfiltergroupeeeeeeeeeeeeeed\n" +
+      Await.result(db.run(query.filter(_._1.id === id).result), 2.seconds))
+
+
+  db.run(query.filter(_._1.id === id).result) map { seqPlaylistAndOptionalTrackRank =>
+    val groupedByPlaylist = seqPlaylistAndOptionalTrackRank.groupBy(_._1)
+    val maybePlaylist = groupedByPlaylist.keys.headOption
+    maybePlaylist match {
+      case None =>
+        None
+      case Some(playlist) =>
+        val iterableTracksWithRating = groupedByPlaylist flatMap {
+          _._2 collect {
+            case (_, Some(playlistTrackWithTrack)) =>
+              TrackWithPlaylistRank(playlistTrackWithTrack._2, playlistTrackWithTrack._1.trackRank)
+          }
+        }
+        val seqTracksWithRating = iterableTracksWithRating.toVector//to[immutable.Seq]
+        Option(PlaylistWithTracks(playlist, seqTracksWithRating))
+    }
+  }
+  }
 
   def delete(id: Long): Future[Int] = db.run(playlists.filter(_.id === id).delete)
 
   def saveTrackRelation(playlistTrack: PlaylistTrack): Future[Int] = db.run(playlistsTracks += playlistTrack)
 
-//  def saveWithTrackRelation(userId: UUID, playlistNameTracksIdAndRank: PlaylistNameTracksIdAndRank): Long = {
-//    save(Playlist(None, userId, playlistNameTracksIdAndRank.name, Seq.empty)) match {
-//      case Success(Some(playlistId: Long)) =>
-//        playlistNameTracksIdAndRank.tracksIdAndRank.foreach(trackIdAndRank =>
-//          saveTrackRelation(playlistId, trackIdAndRank))
-//        playlistId
-//      case _ =>
+  def saveTracksRelation(playlistTracks: Seq[PlaylistTrack]): Any = {
+    val a = playlistsTracks ++= playlistTracks
+    db.run(a) recover {
+      case e: Exception => Logger.error("Playlist.saveTracksRelation: ", e)
+    }
+  }
+//
+//  def saveWithTrack(playlist: Playlist, tracksWithPlaylistRank: Seq[TrackWithPlaylistRank]): Future[Int] = {
+//    save(playlist) flatMap { playlist =>
+//        saveTracksRelation(tracksWithPlaylistRank)
+//    } recover {
+//      case e: Exception =>
+//        Logger.error("Playlist.saveWithtRACK")
 //        throw new DAOException("Playlist.saveWithTrackRelation")
 //    }
 //  }

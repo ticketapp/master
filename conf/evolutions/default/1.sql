@@ -797,8 +797,8 @@ CREATE UNIQUE INDEX playlistsIndex ON playlists (playlistId, userId);
 
 CREATE TABLE playlistsTracks (
   tableId                 SERIAL PRIMARY KEY,
-  playlistId              BIGINT REFERENCES playlists (playlistId),
-  trackId                 UUID REFERENCES tracks (trackId),
+  playlistId              BIGINT REFERENCES playlists (playlistId) ON DELETE CASCADE,
+  trackId                 UUID REFERENCES tracks (trackId) ON DELETE CASCADE,
   trackRank               DOUBLE PRECISION NOT NULL
 );
 CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId);
