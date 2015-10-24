@@ -15,9 +15,5 @@ import services.Utilities
 class AddressController @Inject()(dbConfigProvider: DatabaseConfigProvider,
                       val addressMethods: AddressMethods,
                       val utilities: Utilities) extends Controller {
-  val addressBindingForm = Form(mapping(
-    "city" -> optional(text(2)),
-    "zip" -> optional(text(2)),
-    "street" -> optional(text(2))
-  )(addressMethods.formApply)(addressMethods.formUnapply))
+
 }

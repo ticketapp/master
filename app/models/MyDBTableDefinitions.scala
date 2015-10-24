@@ -183,10 +183,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def capacity = column[Option[Int]]("capacity")
     def openingHours = column[Option[String]]("openinghours")
     def imagePath = column[Option[String]]("imagepath")
+    def addressId = column[Option[Long]]("addressid")
     def linkedOrganizerId = column[Option[Long]]("linkedorganizerid")
 
     def * = (id.?, name, facebookId, geographicPoint, description, websites, capacity, openingHours,
-      imagePath, linkedOrganizerId) <> ((Place.apply _).tupled, Place.unapply)
+      imagePath, addressId, linkedOrganizerId) <> ((Place.apply _).tupled, Place.unapply)
   }
 
   class PlacesFollowed(tag: Tag) extends Table[UserPlaceRelation](tag, "placesfollowed") {

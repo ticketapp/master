@@ -24,11 +24,11 @@ import scala.util.{Failure, Success}
 class PlaceController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
                                  val utilities: Utilities,
-                                 val geographicPointMethods: GeographicPointMethods,
+                                 val geographicPointMethods: SearchGeographicPoint,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry,
                                   val placeMethods: PlaceMethods)
-  extends Silhouette[User, CookieAuthenticator] {
+    extends Silhouette[User, CookieAuthenticator] with addressFormsTrait with placeFormsTrait {
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
     geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
@@ -41,20 +41,6 @@ class PlaceController @Inject() (ws: WSClient,
         }
     }
   }
-
-  val placeBindingForm = Form(mapping(
-    "name" -> nonEmptyText(2),
-    "facebookId" -> optional(nonEmptyText()),
-    "geographicPoint" -> optional(nonEmptyText(5)),
-    "description" -> optional(nonEmptyText(2)),
-    "webSite" -> optional(nonEmptyText(4)),
-    "capacity" -> optional(number),
-    "openingHours" -> optional(nonEmptyText(4)),
-    "imagePath" -> optional(nonEmptyText(2))/*,
-    "city" -> optional(nonEmptyText(2)),
-    "zip" -> optional(nonEmptyText(3)),
-    "street" -> optional(nonEmptyText(2))*/
-  )(placeMethods.formApply)(placeMethods.formUnapply))
 
   def createPlace = Action.async { implicit request =>
     placeBindingForm.bindFromRequest().fold(

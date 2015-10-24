@@ -149,26 +149,12 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def deleteArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] = db.run(artistsGenres.filter(artistGenre =>
     artistGenre.artistId === artistGenreRelation.artistId && artistGenre.genreId === artistGenreRelation.genreId).delete)
   
-  def saveGenreForArtistInFuture(genreName: Option[String], artistId: Long): Unit = {
-//    Future {
-//      genreName match {
-//        case Some(genreFound) if genreFound.nonEmpty =>
-//          saveWithArtistRelation(new Genre(None, genreFound), artistId)
-//      }
-//    }
+  def saveGenreOfArtist(genreName: Option[String], artistId: Long): Unit = genreName match {
+    case Some(name) if name.nonEmpty =>
+      saveWithArtistRelation(new Genre(None, name), artistId)
+
+      findOverGenres(Seq(Genre(None, name))) map { _.foreach(genre => saveWithArtistRelation(genre, artistId)) }
   }
-      /*
-      DONE BY LOLO:
-      
-  def saveGenreForArtistInFuture(genreName: Option[String], artistId: Long): Unit = {
-    Future {
-      genreName match {
-        case Some(genreFound) if genreFound.nonEmpty =>
-          saveWithArtistRelation(new Genre(None, genreFound), artistId)
-          val overGenre = findOverGenres(Seq(Genre(None, genreFound)))
-          overGenre.foreach(genre => saveWithArtistRelation(genre, artistId))
-      }
-       */
 
   def saveWithTrackRelation(genre: Genre, trackId: UUID): Future[Int] = save(genre) flatMap {
     _.id match {

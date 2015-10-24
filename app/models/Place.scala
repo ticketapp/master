@@ -1,10 +1,9 @@
 package models
 
-import java.sql.Timestamp
 import java.util.UUID
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.{Geometry, Point}
+import com.vividsolutions.jts.geom.Geometry
 import json.JsonHelper._
 import org.joda.time.DateTime
 import play.api.Logger
@@ -30,26 +29,16 @@ case class Place (id: Option[Long],
                   capacity: Option[Int] = None,
                   openingHours: Option[String] = None,
                   imagePath: Option[String] = None,
-                  /*address : Option[Address] = None,*/
+                  addressId: Option[Long] = None,
                   linkedOrganizerId: Option[Long] = None)
 
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val geographicPointMethods: GeographicPointMethods,
+                             val geographicPointMethods: SearchGeographicPoint,
                              val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with DBTableDefinitions with MyDBTableDefinitions {
-
-  def formApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
-                webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
-                imagePath: Option[String]/*, city: Option[String], zip: Option[String], street: Option[String]*/): Place = {
-//    val address = Option(Address(None, None, city, zip, street))
-    val point = geographicPointMethods.optionStringToOptionPoint(geographicPoint)
-
-    Place(None, name, facebookId, point, description, webSite, capacity, openingHours, imagePath/*, address*/)
-  }
-
-  def formUnapply(place: Place) =
-    Option((place.name, place.facebookId, Option(place.geographicPoint.toString), place.description, place.webSites,
-      place.capacity, place.openingHours, place.imagePath/*, place.address.get.city, place.address.get.zip, place.address.get.street*/))
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with FollowService
+    with DBTableDefinitions
+    with MyDBTableDefinitions {
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
@@ -128,11 +117,11 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
  }
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Place]] = {
-   val query = places
+    val query = places
      .sortBy(_.geographicPoint <-> geographicPoint)
      .drop(offset)
      .take(numberToReturn)
-   db.run(query.result)
+    db.run(query.result)
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Place]] =
@@ -161,15 +150,13 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-  def followByFacebookId(userId : UUID, facebookId: String): Future[Int] =
-    findIdByFacebookId(facebookId) flatMap {
-      case Some(placeId) =>
-        followByPlaceId(UserPlaceRelation(userId, placeId))
-      case None =>
-        Logger.error("Place.followByFacebookId: ThereIsNoPlaceForThisFacebookId")
-        Future(0)
-    }
-
+  def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
+    case Some(placeId) =>
+      followByPlaceId(UserPlaceRelation(userId, placeId))
+    case None =>
+      Logger.error("Place.followByFacebookId: ThereIsNoPlaceForThisFacebookId")
+      Future(0)
+  }
 
   def saveEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces += eventPlaceRelation)
  

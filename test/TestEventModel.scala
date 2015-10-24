@@ -31,7 +31,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
   val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
   val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
     trackMethods, utilities)
-  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
+  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
   val tariffMethods = new TariffMethods(dbConfProvider, utilities)
   val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
   val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)

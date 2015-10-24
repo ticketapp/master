@@ -14,7 +14,7 @@ class TestGeographicPointMethods extends PlaySpec with OneAppPerSuite {
   val injector = appBuilder.injector()
   val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
   val utilities = new Utilities()
-  val geographicPointMethods = new GeographicPointMethods(dbConfProvider, utilities)
+  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
   val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
 
   "A geographicPoint" must {

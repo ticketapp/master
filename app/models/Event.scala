@@ -44,7 +44,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val placeMethods: PlaceMethods,
                              val artistMethods: ArtistMethods,
                              val tariffMethods: TariffMethods,
-                             val geographicPointMethods: GeographicPointMethods,
+                             val geographicPointMethods: SearchGeographicPoint,
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with DBTableDefinitions with MyDBTableDefinitions {
 

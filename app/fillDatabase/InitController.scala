@@ -22,7 +22,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
                                val messagesApi: MessagesApi,
                                val genreMethods: GenreMethods,
                                val artistMethods: ArtistMethods,
-                               val geographicPointMethods: GeographicPointMethods,
+                               val geographicPointMethods: SearchGeographicPoint,
                                val utilities: Utilities,
                                val env: Environment[User, CookieAuthenticator],
                                socialProviderRegistry: SocialProviderRegistry)
