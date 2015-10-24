@@ -80,6 +80,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
               whenReady(eventMethods.isFollowed(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe true
               }
             }
@@ -87,7 +88,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
             whenReady(eventMethods.unfollow(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
               response mustBe 1
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) {
                   _ mustBe 1
                 }
@@ -117,7 +120,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
           try {
             whenReady(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
+
               response mustBe 1
+
               try {
                 Await.result(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), 3 seconds)
               } catch {
@@ -152,18 +157,25 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(genreMethods.saveEventRelation(EventGenreRelation(savedEvent.id.get, savedGenre.id.get)),
               timeout(Span(5, Seconds))) { genreEventRelation =>
+
               genreEventRelation mustBe 1
+
               whenReady(eventMethods.findAllByGenre("rockiedockie", geographicPointMethods.stringToGeographicPoint("5.4,5.6").get, 0, 1),
                 timeout(Span(5, Seconds))) { eventsByGenre =>
+
                 eventsByGenre must contain(savedEvent)
               }
             }
           } finally {
             whenReady(genreMethods.deleteEventRelation(EventGenreRelation(savedEvent.id.get, savedGenre.id.get)),
               timeout(Span(5, Seconds))) { response =>
+
               response mustBe 1
+
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(genreMethods.delete(savedGenre.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
@@ -183,17 +195,24 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(placeMethods.saveEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.id.get)),
               timeout(Span(5, Seconds))) { placeEventRelation =>
+
               placeEventRelation mustBe 1
+
               whenReady(eventMethods.findAllByPlace(savedPlace.id.get), timeout(Span(5, Seconds))) { eventsByPlace =>
+
                 eventsByPlace must contain(savedEvent)
               }
             }
           } finally {
             whenReady(placeMethods.deleteEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.id.get)),
               timeout(Span(5, Seconds))) { response =>
+
               response mustBe 1
+
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(placeMethods.delete(savedPlace.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
@@ -213,10 +232,15 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(placeMethods.saveEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.id.get)),
               timeout(Span(5, Seconds))) { placeEventRelation =>
+
               placeEventRelation mustBe 1
+
               whenReady(eventMethods.findAllByPlace(savedPlace.id.get), timeout(Span(5, Seconds))) { eventsByPlace =>
+
                 eventsByPlace must not contain savedEvent
+
                 whenReady(eventMethods.findAllPassedByPlace(savedPlace.id.get), timeout(Span(5, Seconds))) { passedEventsByPlace =>
+
                   passedEventsByPlace must contain(savedEvent)
                 }
               }
@@ -224,9 +248,13 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           } finally {
             whenReady(placeMethods.deleteEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.id.get)),
               timeout(Span(5, Seconds))) { response =>
+
               response mustBe 1
+
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(placeMethods.delete(savedPlace.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
@@ -247,8 +275,11 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(artistMethods.saveEventRelation(EventArtistRelation(savedEvent.id.get, savedArtist.id.get)),
               timeout(Span(5, Seconds))) { artistEventRelation =>
+
               artistEventRelation mustBe 1
+
               whenReady(eventMethods.findAllByArtist(savedArtist.facebookUrl), timeout(Span(5, Seconds))) { eventsByArtist =>
+
                 eventsByArtist must contain(savedEvent)
               }
             }
@@ -257,8 +288,11 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
               timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
+
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
@@ -279,10 +313,15 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(artistMethods.saveEventRelation(EventArtistRelation(savedEvent.id.get, savedArtist.id.get)),
               timeout(Span(5, Seconds))) { artistEventRelation =>
+
               artistEventRelation mustBe 1
+
               whenReady(eventMethods.findAllByArtist(savedArtist.facebookUrl), timeout(Span(5, Seconds))) { eventsByArtist =>
+
                 eventsByArtist must not contain savedEvent
+
                 whenReady(eventMethods.findAllPassedByArtist(savedArtist.id.get), timeout(Span(5, Seconds))) { passedEventsByArtist =>
+
                   passedEventsByArtist must contain(savedEvent)
                 }
               }
@@ -290,9 +329,13 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           } finally {
             whenReady(artistMethods.deleteEventRelation(EventArtistRelation(savedEvent.id.get, savedArtist.id.get)),
               timeout(Span(5, Seconds))) { response =>
+
               response mustBe 1
+
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
@@ -312,17 +355,23 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(organizerMethods.saveEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
               timeout(Span(5, Seconds))) { organizerEventRelation =>
+
               organizerEventRelation mustBe 1
+
               whenReady(eventMethods.findAllByOrganizer(savedOrganizer.id.get), timeout(Span(5, Seconds))) { eventsByOrganizer =>
+
                 eventsByOrganizer must contain(savedEvent)
               }
             }
           } finally {
             whenReady(organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
               timeout(Span(5, Seconds))) { response =>
+
               response mustBe 1
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
@@ -342,11 +391,16 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           try {
             whenReady(organizerMethods.saveEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
               timeout(Span(5, Seconds))) { organizerEventRelation =>
+
               organizerEventRelation mustBe 1
+
               whenReady(eventMethods.findAllByOrganizer(savedOrganizer.id.get), timeout(Span(5, Seconds))) { eventsByOrganizer =>
+
                 eventsByOrganizer must not contain savedEvent
+
                 whenReady(eventMethods.findAllPassedByOrganizer(savedOrganizer.id.get), timeout(Span(5, Seconds))) {
                   passedEventsByOrganizer =>
+
                   passedEventsByOrganizer must contain(savedEvent)
                 }
               }
@@ -354,9 +408,13 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
           } finally {
             whenReady(organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get)),
               timeout(Span(5, Seconds))) { response =>
+
               response mustBe 1
+
               whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
+
                 response1 mustBe 1
+
                 whenReady(organizerMethods.delete(savedOrganizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
@@ -396,6 +454,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite {
             try {
               whenReady(eventMethods.findNear(geographicPointMethods.stringToGeographicPoint("45.767995, 4.817010").get, 3, 0),
                 timeout(Span(5, Seconds))) { eventsSeq =>
+
                 eventsSeq should contain inOrder(savedEvent2, savedEvent1, savedEvent)
               }
             } finally {
