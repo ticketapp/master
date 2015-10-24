@@ -25,7 +25,7 @@ POST    /events/create/:facebookId                    @controllers.EventControll
 POST    /events/:eventId/follow                       @controllers.EventController.followEvent(eventId: Long)
 POST    /events/:eventId/unfollow                     @controllers.EventController.unfollowEvent(eventId: Long)
 GET     /events/followed/                             @controllers.EventController.getFollowedEvents
-GET     /events/:eventId/isEventFollowed              @controllers.EventController.isEventFollowed(eventId: Long)
+GET     /events/:eventId/isFollowed                   @controllers.EventController.isEventFollowed(eventId: Long)
 GET     /events/containing/:pattern                   @controllers.EventController.findAllContaining(pattern: String, geographicPoint: String)
 GET     /events/city/:pattern                         @controllers.EventController.findByCityPattern(pattern: String)
 GET     /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
@@ -57,8 +57,8 @@ POST     /places/:facebookId/followByFacebookId                            @cont
 GET      /places/:placeId/isFollowed                                       @controllers.PlaceController.isPlaceFollowed(placeId: Long)
 GET      /places/containing/:pattern                                       @controllers.PlaceController.findPlacesContaining(pattern: String)
 POST     /places/create                                                    @controllers.PlaceController.createPlace
-#GET     /places/:placeId/events                                          @controllers.EventController.findByPlace(placeId: Long)
-#GET     /places/:placeId/passedEvents                                    @controllers.EventController.findPassedByPlace(placeId: Long)
+GET      /places/:placeId/events                                          @controllers.EventController.findByPlace(placeId: Long)
+GET      /places/:placeId/passedEvents                                    @controllers.EventController.findPassedByPlace(placeId: Long)
 #GET     /places/nearCity/:city                                            @controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 GET      /places/followed/                                                 @controllers.PlaceController.getFollowedPlaces
 
@@ -71,8 +71,8 @@ POST     /organizers/:facebookId/followByFacebookId                       @contr
 GET      /organizers/:organizerId/isFollowed                              @controllers.OrganizerController.isOrganizerFollowed(organizerId: Long)
 GET      /organizers/containing/:pattern                                  @controllers.OrganizerController.findOrganizersContaining(pattern: String)
 POST     /organizers/create                                               @controllers.OrganizerController.createOrganizer
-#GET     /organizers/:organizerId/events                                  @controllers.EventController.findByOrganizer(organizerId: Long)
-#GET     /organizers/:organizerId/passedEvents                            @controllers.EventController.findPassedByOrganizer(organizerId: Long)
+GET      /organizers/:organizerId/events                                  @controllers.EventController.findByOrganizer(organizerId: Long)
+GET      /organizers/:organizerId/passedEvents                            @controllers.EventController.findPassedByOrganizer(organizerId: Long)
 #GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 GET      /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
 #

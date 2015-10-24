@@ -62,7 +62,7 @@ class EventController @Inject()(ws: WSClient,
   = Action.async {
     geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
       case Success(point) =>
-        eventMethods.findPassedInHourIntervalNear(hourInterval, geographicPoint, offset, numberToReturn) map { events =>
+        eventMethods.findPassedInHourIntervalNear(hourInterval, point, offset, numberToReturn) map { events =>
           Ok(Json.toJson(events))
         }
       case _ =>
@@ -142,6 +142,7 @@ class EventController @Inject()(ws: WSClient,
 
   val eventBindingForm = Form(
     mapping(
+      "facebookId"-> optional(nonEmptyText(3)),
       "name" -> nonEmptyText(2),
       "geographicPoint" -> optional(nonEmptyText(3)),
       "description" -> optional(nonEmptyText(2)),

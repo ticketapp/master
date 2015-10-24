@@ -6,6 +6,7 @@ import java.util.{UUID, Date}
 import javax.inject.Inject
 
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import play.api.Logger
 import slick.driver.PostgresDriver.api._
 
@@ -41,6 +42,10 @@ class Utilities @Inject()() {
   def normalizeUrl(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
 
+  def stringToDateTime(string: String): DateTime = {
+    val formatedString = string.replace("T", " ").substring(0, string.length - 5)
+    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime(formatedString)
+  }
 
   def optionStringToLowerCaseOptionString(maybeString: Option[String]): Option[String] = maybeString match {
     case Some(string: String) => Option(string.toLowerCase)
