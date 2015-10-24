@@ -74,11 +74,119 @@ class TestOrganizerController extends PlaySpecification with Mockito {
       new WithApplication(application) {
         val organizerId = await(organizerMethods.findAllContaining("test")).headOption.get.id
         val Some(organizer) = route(FakeRequest(GET, "/organizers/" + organizerId.get))
-        contentAsJson(organizer).toString() must contain( """"facebookId":"111","name":"test"""")
+        contentAsJson(organizer).toString() must contain(""""facebookId":"111","name":"test"""")
       }
     }
+
+    "follow and unfollow an organizer by id" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val Some(response) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/followByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(response1) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/unfollowOrganizerByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response1) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "return an error if an user try to follow an organizer twice" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val Some(response) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/followByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        status(response) mustEqual CREATED
+
+        val Some(response1) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/followByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        status(response1) mustEqual CONFLICT
+
+        val Some(response2) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/unfollowOrganizerByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "follow an unfollow an organizer by facebookId" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val Some(response) = route(FakeRequest(POST, "/organizers/111/followByFacebookId")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(response2) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/unfollowOrganizerByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "find followed organizers" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val Some(response) = route(FakeRequest(POST, "/organizers/111/followByFacebookId")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(organizers) = route(FakeRequest(GET, "/organizers/followed/")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        contentAsJson(organizers).toString() must contain(""""facebookId":"111","name":"test"""")
+
+        val Some(response2) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/unfollowOrganizerByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "find one followed organizer by id" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val organizerId = await(organizerMethods.findAllContaining("test")).head.id
+        val Some(response) = route(FakeRequest(POST, "/organizers/111/followByFacebookId")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(organizers) = route(FakeRequest(GET, "/organizers/" + organizerId.get + "/isFollowed")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        contentAsJson(organizers) mustEqual Json.parse("true")
+
+        val Some(response2) = route(FakeRequest(POST, "/organizers/" + organizerId.get + "/unfollowOrganizerByOrganizerId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    /*"find organizers near city" {
+
+    }*/
   }
 }
+
 trait Context extends Scope {
 
   /**

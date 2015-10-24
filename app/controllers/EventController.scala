@@ -194,8 +194,11 @@ class EventController @Inject()(ws: WSClient,
         InternalServerError
      } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
-        Logger.error(s"EventController.followEventByEventId: there is no event with the id $eventId")
+        Logger.error(s"EventController.followEventByEventId: $eventId is already followed")
         Conflict
+      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+        Logger.error(s"EventController.followEventByEventId: there is no event with the id $eventId")
+        NotFound
       case unknownException =>
         Logger.error("EventController.followEvent", unknownException)
         InternalServerError
