@@ -28,7 +28,7 @@ class EventController @Inject()(ws: WSClient,
                                 val env: Environment[User, CookieAuthenticator],
                                 socialProviderRegistry: SocialProviderRegistry,
                                 val eventMethods: EventMethods)
-  extends Silhouette[User, CookieAuthenticator] {
+    extends Silhouette[User, CookieAuthenticator] with eventFormsTrait {
 
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
@@ -139,35 +139,6 @@ class EventController @Inject()(ws: WSClient,
     eventMethods.findNearCity(city, numberToReturn, offset) map { events =>
       Ok(Json.toJson(events)) }
   }
-
-  val eventBindingForm = Form(
-    mapping(
-      "facebookId"-> optional(nonEmptyText(3)),
-      "name" -> nonEmptyText(2),
-      "geographicPoint" -> optional(nonEmptyText(3)),
-      "description" -> optional(nonEmptyText(2)),
-      "startTime" -> jodaDate("yyyy-MM-dd HH:mm"),
-      "endTime" -> optional(jodaDate("yyyy-MM-dd HH:mm")),
-      "ageRestriction" -> number,
-      "imagePath" -> optional(nonEmptyText(2)),
-      "tariffRange" -> optional(nonEmptyText(3)),
-      "ticketSellers" -> optional(nonEmptyText(3))//,
-//      "tariffs" -> list(
-//        mapping(
-//          "denomination" -> nonEmptyText,
-//          "nbTicketToSell" -> number,
-//          "price" -> bigDecimal,
-//          "startTime" -> date("yyyy-MM-dd HH:mm"),
-//          "endTime" -> date("yyyy-MM-dd HH:mm")
-//        )(Tariff.formApply)(Tariff.formUnapply)),
-//      "addresses" -> list(
-//        mapping(
-//          "city" -> optional(text(2)),
-//          "zip" -> optional(text(2)),
-//          "street" -> optional(text(2))
-//        )(Address.formApply)(Address.formUnapply))
-    )(eventMethods.formApply)(eventMethods.formUnapply)
-  )
 
   def createEvent = Action.async { implicit request =>
     eventBindingForm.bindFromRequest().fold(

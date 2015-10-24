@@ -50,21 +50,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with DBTableDefinitions with MyDBTableDefinitions {
 
-  val geometryFactory = new GeometryFactory()
-
-  def formApply(facebookId: Option[String], name: String, geographicPoint: Option[String], description: Option[String],
-                startTime: DateTime, endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String],
-                ticketSellers: Option[String], imagePath: Option[String]/*, tariffs: List[Tariff], addresses: List[Address]*/
-                 ): Event =
-    new Event(None, facebookId, true, true, name, geographicPointMethods.optionStringToOptionPoint(geographicPoint), description, startTime, endTime, ageRestriction,
-      tariffRange, ticketSellers, imagePath)//, List.empty, List.empty, tariffs, addresses)
-
-  def formUnapply(event: Event) = {
-    Some((event.facebookId, event.name, Option(event.geographicPoint.getOrElse("").toString), event.description,
-      event.startTime, event.endTime, event.ageRestriction, event.tariffRange, event.ticketSellers, event.imagePath/*,
-      event.tariffs, event.addresses*/))
-  }
-
+//  val geometryFactory = new GeometryFactory()
 //  def getPropertiesOfEvent(event: Event): Event = event.eventId match {
 //    case None => throw new DAOException("Event.getPropertiesOfEvent: event without id has been found")
 //    case Some(eventId) => event.copy(
