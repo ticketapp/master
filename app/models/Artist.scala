@@ -262,10 +262,12 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .map { readFacebookArtists }
   }
 
-  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] =
+  def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[Artist]] = {
+    val artistNames = splitArtistNamesInTitle(eventName)
     Future.sequence(
-      artistsNameInTitle.map { name => getArtistsForAnEvent(name, webSites) }
+      artistNames.map { artistName => getArtistsForAnEvent(artistName, websites) }
     ).map { _.flatten }
+  }
 
   def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[Artist]] = {
     getEventuallyFacebookArtists(artistName).flatMap {

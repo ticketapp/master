@@ -2,12 +2,10 @@ package models
 
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.{Geometry, GeometryFactory}
+import com.vividsolutions.jts.geom.Geometry
 import json.JsonHelper._
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import play.api.Play.current
-import play.api.data.Forms._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -43,7 +41,6 @@ case class Event(id: Option[Long],
 
 class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val organizerMethods: OrganizerMethods,
-                             val placeMethods: PlaceMethods,
                              val artistMethods: ArtistMethods,
                              val tariffMethods: TariffMethods,
                              val geographicPointMethods: SearchGeographicPoint,
@@ -344,7 +341,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
       val eventuallyMaybeArtistsFromDescription = artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
       val eventuallyMaybeArtistsFromTitle =
-        artistMethods.getEventuallyArtistsInEventTitle(artistMethods.splitArtistNamesInTitle(name), normalizedWebsites)
+        artistMethods.getEventuallyArtistsInEventTitle(name, normalizedWebsites)
       // !!!!!!!!!!!!!!!!!!!!!!!!!!!
       val eventuallyTryPlace = None//placeMethods.getPlaceByFacebookId(maybePlaceId)
 

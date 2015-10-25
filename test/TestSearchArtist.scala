@@ -173,15 +173,15 @@ class TestSearchArtist extends PlaySpec with OneAppPerSuite with Injectors {
         "mixcloud.com/la_face_b",
         "yorubarecords.net",
         "soundcloud.com/osunlade",
-      "discogs.com/artist/1156643-lee-holman",
-      "discogs.com/artist/2922409-binny-2",
-      "discogs.com/label/447040-clft")
-      val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "CLFT", "Hein Cooper")
+        "discogs.com/artist/1156643-lee-holman",
+        "discogs.com/artist/2922409-binny-2",
+        "discogs.com/label/447040-clft")
+      val expectedArtistNames = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "CLFT", "Hein Cooper")
 
-      whenReady(artistMethods.getEventuallyArtistsInEventTitle(artistMethods.splitArtistNamesInTitle(title), websites),
+      whenReady(artistMethods.getEventuallyArtistsInEventTitle(title, websites),
         timeout(Span(5, Seconds))) {
 
-        _.map{ artist => artist.name } mustBe expectedArtists
+        _.map{ artist => artist.name } mustBe expectedArtistNames
       }
     }
   }
