@@ -47,12 +47,6 @@ class TestUtilities extends PlaySpec with OneAppPerSuite {
     utilities.setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
   }
 
-  /*"return a set from an optional string" in {
-    optionStringToSet(None) mustBe Set.empty
-    optionStringToSet(Some("a")) mustBe Set("a")
-    optionStringToSet(Some("a,b,c")) mustBe Set("a", "b", "c")
-  }*/
-
   "return a list of normalized websites from a text" in {
 
     val expectedWebsites = Set(

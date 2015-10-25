@@ -54,6 +54,36 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
       }
     }
 
+    "all be found, sorted by distance" in {
+      val here = geographicPointMethods.stringToGeographicPoint("5.4,5.6").get
+      val place = Place(None, "test2", Some("123"), None)
+      val place2 = Place(None, "test3", Some("1234"), Option(here))
+      val place3 = Place(None, "test4", Some("12345"), Option(geographicPointMethods.stringToGeographicPoint("50.4,50.6").get))
+      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
+        whenReady(placeMethods.save(place2), timeout(Span(2, Seconds))) { savedPlace2 =>
+          whenReady(placeMethods.save(place3), timeout(Span(2, Seconds))) { savedPlace3 =>
+            try {
+              whenReady(placeMethods.findNear(here, 10000, 0), timeout(Span(5, Seconds))) { foundPlaces =>
+
+                foundPlaces should contain inOrder(savedPlace2, savedPlace3, savedPlace) /*place.copy(id = foundPlace.get.id,
+                  description = Some("<div class='column large-12'>Ancienne usine</div>")))*/
+              }
+            } finally {
+              whenReady(placeMethods.delete(savedPlace.id.get), timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+              whenReady(placeMethods.delete(savedPlace2.id.get), timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+              whenReady(placeMethods.delete(savedPlace3.id.get), timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+            }
+          }
+        }
+      }
+    }
+
     /*"be saved with its address and deleted in database" in {
       val address = Address(None, None, Some("privas"), Some("07000"), Some("avignas"))
       val place = Place(None, "test", None, None, None, None, Some(9099), None, None, address = Option(address))
@@ -200,7 +230,9 @@ class TestPlaceModel extends PlaySpec with OneAppPerSuite {
     "get a new place by facebookId when saving new event by facebookId" in {
       whenReady(eventMethods.saveFacebookEventByFacebookId("933514060052903"), timeout(Span(5, Seconds))) { event =>
         whenReady(placeMethods.getPlaceByFacebookId("836137029786070"), timeout(Span(5, Seconds))) { place =>
+
           place.name mustBe "Akwaba Coop Culturelle"
+
           whenReady(placeMethods.delete(place.id.get), timeout(Span(5, Seconds))) { _ mustBe 1}
           whenReady(eventMethods.delete(event.id.get), timeout(Span(5, Seconds))) { _ mustBe 1}
         }
