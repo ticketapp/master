@@ -20,13 +20,8 @@ case class Playlist(playlistId: Option[Long], userId: UUID, name: String)
 case class TrackWithPlaylistRank(track: Track, rank: Double)
 
 class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-//                         val genreMethods: GenreMethods,
-//                         val searchSoundCloudTracks: SearchSoundCloudTracks,
-//                         val searchYoutubeTracks: SearchYoutubeTracks,
-//                         val trackMethods: TrackMethods,
-                         val utilities: Utilities)
+                                val utilities: Utilities)
   extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper with MyDBTableDefinitions {
-//
 
 //  def idAndRankFormApply(stringUUID: String, rank: BigDecimal) = TrackUUIDAndRank(UUID.fromString(stringUUID), rank)
 //  def idAndRankFormUnapply(trackIdAndRank: TrackUUIDAndRank) = Option((trackIdAndRank.UUID.toString, trackIdAndRank.rank))

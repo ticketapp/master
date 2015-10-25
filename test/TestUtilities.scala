@@ -1,14 +1,6 @@
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.Utilities
 
-class TestUtilities extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
+class TestUtilities extends PlaySpec with OneAppPerSuite with Injectors {
 
   "A utilities" must {
 

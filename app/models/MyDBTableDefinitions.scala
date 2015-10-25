@@ -12,10 +12,10 @@ import slick.model.ForeignKeyAction
 
 case class UserArtistRelation(userId: UUID, artistId: Long)
 case class EventArtistRelation(eventId: Long, artistId: Long)
-case class ArtistGenreRelation(artistId: Long, genreId: Int, weight: Long = 0)
+case class ArtistGenreRelation(artistId: Long, genreId: Int, weight: Int = 0)
 case class UserGenreRelation(userId: UUID, genreId: Int)
 case class UserEventRelation(userId: UUID, eventId: Long)
-case class TrackGenreRelation(trackId: UUID, genreId: Int, weight: Long = 0)
+case class TrackGenreRelation(trackId: UUID, genreId: Int, weight: Int = 0)
 case class UserPlaceRelation(userId: UUID, placeId: Long)
 case class UserOrganizerRelation(userId: UUID, organizerId: Long)
 case class UserTrackRelation(userId: UUID, trackId: UUID)
@@ -71,7 +71,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   class ArtistsGenres(tag: Tag) extends Table[ArtistGenreRelation](tag, "artistsgenres") {
     def artistId = column[Long]("artistid")
     def genreId = column[Int]("genreid")
-    def weight = column[Long]("weight", O.Default(0))
+    def weight = column[Int]("weight", O.Default(0))
 
     def * = (artistId, genreId, weight) <> ((ArtistGenreRelation.apply _).tupled, ArtistGenreRelation.unapply)
 
@@ -250,7 +250,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   class TracksGenres(tag: Tag) extends Table[TrackGenreRelation](tag, "tracksgenres") {
     def trackId = column[UUID]("trackid")
     def genreId = column[Int]("genreid")
-    def weight = column[Long]("weight", O.Default(0))
+    def weight = column[Int]("weight", O.Default(0))
 
     def * = (trackId, genreId, weight) <> ((TrackGenreRelation.apply _).tupled, TrackGenreRelation.unapply)
   }

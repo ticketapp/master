@@ -1,15 +1,9 @@
 import org.scalatestplus.play._
-import models._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
+import services.Utilities
 
-class TestFormatEventDescription extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
+class TestFormatEventDescription extends PlaySpec with OneAppPerSuite with Injectors {
 
   "Format a description" must {
 

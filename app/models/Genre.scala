@@ -21,9 +21,6 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
-  def formApply(name: String) = new Genre(None, name)
-  def formUnapply(genre: Genre) = Some(genre.name)
-
   def findAll: Future[Seq[Genre]] = {
     db.run(genres.result)
   }

@@ -2,24 +2,16 @@ import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
-class TestAddressModel extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
-  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
-  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+class TestAddressModel extends PlaySpec with OneAppPerSuite with Injectors {
 
   "An address" must {
+
     "not be created if empty" in {
       Address(None, None, Some("jkl"), None, None)
       Address(None, None, None, Some("jkl"), None)
       Address(None, None, None, None, Some("jkl"))
+
       an[java.lang.IllegalArgumentException] should be thrownBy Option(Address(None, None, None, None, None))
     }
 
@@ -28,6 +20,7 @@ class TestAddressModel extends PlaySpec with OneAppPerSuite {
       val address = Address(None, geoPoint, Option("privas"), Option("07000"), Option("Avignas"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { addressFound =>
+
           addressFound mustBe Option(address.copy(id = addressFound.get.id, street = Some("Avignas".toLowerCase)))
 
           whenReady(addressMethods.delete(savedAddress.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }

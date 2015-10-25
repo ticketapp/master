@@ -1,44 +1,19 @@
-import java.util.{UUID, Date}
+import java.util.UUID
+
 import com.mohiva.play.silhouette.api.LoginInfo
-import org.joda.time.DateTime
-import models.Place._
 import models._
+import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
-import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
-import silhouette.UserDAOImpl
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
-class TestEventModel extends PlaySpec with OneAppPerSuite {
-
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
-  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
-  val tariffMethods = new TariffMethods(dbConfProvider, utilities)
-  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
-  val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
-    geographicPointMethods, utilities)
-  val userDAOImpl = new UserDAOImpl(dbConfProvider)
+class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
   "An event" must {
 

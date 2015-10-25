@@ -29,7 +29,7 @@ class OrganizerController @Inject()(ws: WSClient,
                                     val env: Environment[User, CookieAuthenticator],
                                     val utilities: Utilities,
                                     socialProviderRegistry: SocialProviderRegistry)
-  extends Silhouette[User, CookieAuthenticator] with addressFormsTrait {
+  extends Silhouette[User, CookieAuthenticator] with organizerFormsTrait {
 
   def find(numberToReturn: Int, offset: Int) = Action.async {
     organizerMethods.find(numberToReturn: Int, offset: Int) map { organizers =>
@@ -57,21 +57,6 @@ class OrganizerController @Inject()(ws: WSClient,
       InternalServerError("OrganizerController.findOrganizersContaining: " + t.getMessage)
     }
   }
-
-  val organizerBindingForm = Form(
-    mapping(
-      "facebookId" -> optional(nonEmptyText(2)),
-      "name" -> nonEmptyText(2),
-      "description" -> optional(nonEmptyText(2)),
-      "websites" -> optional(nonEmptyText(4)),
-      "imagePath" -> optional(nonEmptyText(2)),
-      "address" -> mapping (
-        "city" -> optional(text(2)),
-        "zip" -> optional(text(2)),
-        "street" -> optional(text(2))
-      )(addressFormApply)(addressFormUnapply)
-    )(organizerMethods.formApply)(organizerMethods.formUnapply)
-  )
 
   def createOrganizer = Action.async { implicit request =>
     organizerBindingForm.bindFromRequest().fold(

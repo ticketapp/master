@@ -50,7 +50,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with DBTableDefinitions with MyDBTableDefinitions {
 
-//  val geometryFactory = new GeometryFactory()
 //  def getPropertiesOfEvent(event: Event): Event = event.eventId match {
 //    case None => throw new DAOException("Event.getPropertiesOfEvent: event without id has been found")
 //    case Some(eventId) => event.copy(

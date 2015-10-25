@@ -5,23 +5,9 @@ import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import silhouette.UserDAOImpl
-import services.Utilities
 
 
-class TestUserModel extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities
-  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
-  val userDAOImpl = new UserDAOImpl(dbConfProvider)
-  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
+class TestUserModel extends PlaySpec with OneAppPerSuite with Injectors {
 
   "A user" must {
 
