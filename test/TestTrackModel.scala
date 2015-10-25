@@ -1,33 +1,17 @@
 import java.util.UUID
 import java.util.UUID.randomUUID
+
 import models._
-import org.joda.time.Duration
-import org.postgresql.util.PSQLException
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.Logger
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
-import scala.concurrent.duration._
+
 import scala.concurrent.Await
-import scala.util.{Failure, Success}
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
+class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
 
   var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),

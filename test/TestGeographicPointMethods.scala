@@ -8,14 +8,7 @@ import services.Utilities
 
 import scala.util.Success
 
-class TestGeographicPointMethods extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
-  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
-  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
+class TestGeographicPointMethods extends PlaySpec with OneAppPerSuite with Injectors {
 
   "A geographicPoint" must {
     "get a geographicPoint" in {

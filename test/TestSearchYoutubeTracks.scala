@@ -2,26 +2,15 @@ import java.util.UUID
 
 import models._
 import org.scalatest.Matchers._
-import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Iteratee
 import play.api.libs.json.{JsValue, Json}
-import services.{SearchYoutubeTracks, Utilities}
 
-class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite {
 
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
+class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite with Injectors {
 
   "SearchYoutubeTracks" must {
 

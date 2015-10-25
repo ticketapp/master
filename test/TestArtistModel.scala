@@ -2,37 +2,19 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import models._
-import scala.concurrent.duration._
-import org.scalatest.Matchers._
-
 import org.postgresql.util.PSQLException
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
-import silhouette.UserDAOImpl
-import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Await
 import scala.collection.immutable.Seq
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 
-class TestArtistModel extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
-  val userDAOImpl = new UserDAOImpl(dbConfProvider)
+class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
 
   "An Artist" must {
 
@@ -55,23 +37,23 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite {
     }
 
     "all be found" in {
-//      println("findAll: " + Await.result(artistMethods.findSinceOffset(10, 0), 2 seconds))
-    }
-
-    "be found" in {
-      val artist = Artist(None, Option("facebookIdTestArtistModel1"), "artistTest1", Option("imagePath"),
-        Option("description"), "facebookUrl1", Set("website"))
+      val artist = Artist(None, None, "artistTest0", None, None, "facebookUrl0", Set.empty)
+      val artist2 = Artist(None, None, "artistTest00", None, None, "facebookUrl00", Set.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        try {
-          whenReady(artistMethods.findSinceOffset(100000, 0), timeout(Span(5, Seconds))) { foundArtist =>
+        whenReady(artistMethods.save(artist2), timeout(Span(5, Seconds))) { savedArtist2 =>
+          try {
+            whenReady(artistMethods.findSinceOffset(100000, 0), timeout(Span(5, Seconds))) { foundArtist =>
 
-            foundArtist should contain (ArtistWithWeightedGenre(artist.copy(id = Some(savedArtist.id.get),
-              description = Some("<div class='column large-12'>description</div>")), Seq.empty))
+              foundArtist should contain
+                (ArtistWithWeightedGenre(savedArtist, Seq.empty), ArtistWithWeightedGenre(savedArtist2, Seq.empty))
 
-            whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+              whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+            }
+          } finally {
+            artistMethods.delete(savedArtist.id.get)
           }
-        } finally {
-          artistMethods.delete(savedArtist.id.get)
         }
       }
     }

@@ -2,7 +2,6 @@ package models
 
 import java.util.UUID
 import javax.inject.Inject
-
 import controllers.ThereIsNoArtistForThisFacebookIdException
 import play.api.Logger
 import play.api.Play.current
@@ -14,7 +13,6 @@ import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
 import services._
-
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -33,9 +31,10 @@ case class Artist(id: Option[Long],
 
 case class ArtistWithWeightedGenre(artist: Artist, genres: Seq[GenreWithWeight])
 
-case class PatternAndArtist(searchPattern: String, artist: Artist)
-  
-case class GenreWithWeight(genre: Genre, weight: Long)
+case class GenreWithWeight(genre: Genre, weight: Int = 1)
+
+case class PatternAndArtist(searchPattern: String, artistWithWeightedGenre: ArtistWithWeightedGenre)
+
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                        val genreMethods: GenreMethods,
@@ -43,23 +42,13 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
                        val searchYoutubeTracks: SearchYoutubeTracks,
                        val trackMethods: TrackMethods,
                        val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper with FollowService with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with SoundCloudHelper
+    with FollowService
+    with MyDBTableDefinitions {
 
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
-
-  def formApply(facebookId: Option[String], name: String, imagePath: Option[String], description: Option[String],
-                facebookUrl: String, websites: scala.Seq[String]/*, genres: Seq[Genre], tracks: Seq[Track]*/, likes: Option[Int],
-                country: Option[String]): Artist =
-    Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet/*, genres, tracks*/, likes, country)
-  def formUnapply(artist: Artist) =
-    Option((artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
-      artist.websites.toSeq/*, artist.genres, artist.tracks*/, artist.likes, artist.country))
-
-  def formWithPatternApply(searchPattern: String, artist: Artist) =
-    new PatternAndArtist(searchPattern, artist)
-  def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =
-    Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artist))
 
   def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenre]] = {
     val query = for {
@@ -159,32 +148,34 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
     artists.map { artist =>
       save(artist) map { artistSaved =>
-        getArtistTracks(PatternAndArtist(artistSaved.name, artistSaved)) |>> Iteratee.foreach( a => a.map { trackMethods.save })
+        getArtistTracks(PatternAndArtist(artistSaved.name, ArtistWithWeightedGenre(artistSaved, Vector.empty))) |>>
+          Iteratee.foreach(_ map trackMethods.save)
       }
     }
   }
 
   def getArtistTracks(patternAndArtist: PatternAndArtist): Enumerator[Set[Track]] = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
-      searchSoundCloudTracks.getSoundCloudTracksForArtist(patternAndArtist.artist).map { soundCloudTracks =>
+      searchSoundCloudTracks.getSoundCloudTracksForArtist(patternAndArtist.artistWithWeightedGenre.artist).map { soundCloudTracks =>
         soundCloudTracks.headOption match {
           case Some(track) =>
-            addSoundCloudUrlIfMissing(track, patternAndArtist.artist)
-            addWebsitesFoundOnSoundCloud(track, patternAndArtist.artist)
+            addSoundCloudUrlIfMissing(track, patternAndArtist.artistWithWeightedGenre.artist)
+            addWebsitesFoundOnSoundCloud(track, patternAndArtist.artistWithWeightedGenre.artist)
           case None =>
         }
         Enumerator(soundCloudTracks.toSet).andThen(Enumerator.eof)
       })
 
     val youtubeTracksEnumerator =
-      searchYoutubeTracks.getYoutubeTracksForArtist(patternAndArtist.artist, patternAndArtist.searchPattern).andThen(Enumerator.eof)
+      searchYoutubeTracks.getYoutubeTracksForArtist(patternAndArtist.artistWithWeightedGenre.artist, patternAndArtist.searchPattern).andThen(Enumerator.eof)
 
-    val youtubeTracksFromChannel = Enumerator.flatten(searchYoutubeTracks.getYoutubeTracksByChannel(patternAndArtist.artist) map { track =>
-     Enumerator(track).andThen(Enumerator.eof)
-    } )
+    val youtubeTracksFromChannel = Enumerator.flatten(
+      searchYoutubeTracks.getYoutubeTracksByChannel(patternAndArtist.artistWithWeightedGenre.artist) map { track =>
+        Enumerator(track).andThen(Enumerator.eof)
+      })
 
     val youtubeTracksFromYoutubeUser = Enumerator.flatten(
-      searchYoutubeTracks.getYoutubeTracksByYoutubeUser(patternAndArtist.artist) map { track =>
+      searchYoutubeTracks.getYoutubeTracksByYoutubeUser(patternAndArtist.artistWithWeightedGenre.artist) map { track =>
         Enumerator(track).andThen(Enumerator.eof)
       })
 
@@ -271,10 +262,12 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .map { readFacebookArtists }
   }
 
-  def getEventuallyArtistsInEventTitle(artistsNameInTitle: Seq[String], webSites: Set[String]): Future[Seq[Artist]] =
+  def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[Artist]] = {
+    val artistNames = splitArtistNamesInTitle(eventName)
     Future.sequence(
-      artistsNameInTitle.map { name => getArtistsForAnEvent(name, webSites) }
+      artistNames.map { artistName => getArtistsForAnEvent(artistName, websites) }
     ).map { _.flatten }
+  }
 
   def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[Artist]] = {
     getEventuallyFacebookArtists(artistName).flatMap {

@@ -1,23 +1,9 @@
-import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
-class TestSearchArtist extends PlaySpec with OneAppPerSuite {
 
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
+class TestSearchArtist extends PlaySpec with OneAppPerSuite with Injectors {
 
   "SearchArtistController" must {
 
@@ -187,15 +173,15 @@ class TestSearchArtist extends PlaySpec with OneAppPerSuite {
         "mixcloud.com/la_face_b",
         "yorubarecords.net",
         "soundcloud.com/osunlade",
-      "discogs.com/artist/1156643-lee-holman",
-      "discogs.com/artist/2922409-binny-2",
-      "discogs.com/label/447040-clft")
-      val expectedArtists = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "CLFT", "Hein Cooper")
+        "discogs.com/artist/1156643-lee-holman",
+        "discogs.com/artist/2922409-binny-2",
+        "discogs.com/label/447040-clft")
+      val expectedArtistNames = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "CLFT", "Hein Cooper")
 
-      whenReady(artistMethods.getEventuallyArtistsInEventTitle(artistMethods.splitArtistNamesInTitle(title), websites),
+      whenReady(artistMethods.getEventuallyArtistsInEventTitle(title, websites),
         timeout(Span(5, Seconds))) {
 
-        _.map{ artist => artist.name } mustBe expectedArtists
+        _.map{ artist => artist.name } mustBe expectedArtistNames
       }
     }
   }

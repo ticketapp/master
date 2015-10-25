@@ -3,10 +3,9 @@ package models
 import java.util.UUID
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.{Geometry, Point}
-import controllers.{ThereIsNoOrganizerForThisFacebookIdException, ThereIsNoArtistForThisFacebookIdException}
+import com.vividsolutions.jts.geom.Geometry
+import controllers.ThereIsNoOrganizerForThisFacebookIdException
 import json.JsonHelper._
-import org.joda.time.DateTime
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -15,7 +14,6 @@ import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
 import services.{FollowService, MyPostgresDriver, Utilities}
-import slick.model.ForeignKeyAction
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -43,17 +41,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
                                  val geographicPointMethods: SearchGeographicPoint)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
-    with MyDBTableDefinitions
-    with addressFormsTrait {
-
-  def formApply(facebookId: Option[String], name: String, description: Option[String], websites: Option[String],
-                imagePath: Option[String], address: Option[Address]): OrganizerWithAddress =
-    OrganizerWithAddress(Organizer(None, facebookId, name, description = description, websites = websites, imagePath = imagePath), address)
-  def formUnapply(organizerWithAddress: OrganizerWithAddress) =
-    Some((organizerWithAddress.organizer.facebookId, organizerWithAddress.organizer.name,
-      organizerWithAddress.organizer.description, organizerWithAddress.organizer.websites,
-      organizerWithAddress.organizer.imagePath, organizerWithAddress.address))
-
+    with MyDBTableDefinitions {
 
   def find(numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] = {
     val tupledJoin = organizers joinLeft addresses on (_.addressId === _.id)

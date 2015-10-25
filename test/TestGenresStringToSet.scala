@@ -6,18 +6,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
-class TestGenresStringToSet extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTracks = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTracks,
-    trackMethods, utilities)
+class TestGenresStringToSet extends PlaySpec with OneAppPerSuite with Injectors {
 
   "A sequence of genres as a string" must {
 

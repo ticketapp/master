@@ -5,7 +5,6 @@ import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Geometry
 import json.JsonHelper._
-import org.joda.time.DateTime
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -42,11 +41,10 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
-  def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] = {
+  def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(organizers.filter(_.facebookId === facebookId).map(_.id).result.headOption)
-  }
 
-  def doSave(place: Place): Future[Place] = {
+  def doSave(place: Place): Future[Place] =
     db.run((for {
       placeFound <- places.filter(_.facebookId === place.facebookId).result.headOption
       result <- placeFound.map(DBIO.successful).getOrElse(places returning places.map(_.id) += place)
@@ -54,7 +52,6 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         case p: Place => p
         case id: Long => place.copy(id = Option(id))
       }).transactionally)
-  }
 
   def save(place: Place): Future[Place] = {
     val placeWithFormattedDescription = place.copy(description = utilities.formatDescription(place.description))

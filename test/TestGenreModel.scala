@@ -1,29 +1,17 @@
 import java.util.UUID
 
-import akka.actor.Status.Success
 import models._
-import org.scalatest.time.{Span, Seconds}
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
-import org.scalatest.concurrent.ScalaFutures._
+import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
 
 
-class TestGenreModel extends PlaySpec with OneAppPerSuite {
+class TestGenreModel extends PlaySpec with OneAppPerSuite with Injectors {
 
   "A genre" must {
-
-    val appBuilder = new GuiceApplicationBuilder()
-    val injector = appBuilder.injector()
-    val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-    val utilities = new Utilities()
-    val genreMethods = new GenreMethods(dbConfProvider, utilities)
-    val trackMethods = new TrackMethods(dbConfProvider, utilities)
-    val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-    val searchYoutubeTracks = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-    val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTracks,
-      trackMethods, utilities)
 
     "be saved and deleted" in {
       val genre = Genre(None, "rockadocka", 'r')

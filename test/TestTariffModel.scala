@@ -1,16 +1,6 @@
-import models.TariffMethods
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.Utilities
 
-class TestTariffModel extends PlaySpec with OneAppPerSuite {
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities
-  val tariffMethods = new TariffMethods(dbConfProvider, utilities)
+class TestTariffModel extends PlaySpec with OneAppPerSuite with Injectors {
 
   "Tariff" must {
 

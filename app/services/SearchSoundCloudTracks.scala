@@ -1,13 +1,10 @@
 package services
 
 import java.util.UUID.randomUUID
-import java.util.regex.Pattern
 import javax.inject.Inject
-import services.MyPostgresDriver.api._
 
 import models._
 import play.api.Play.current
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -18,37 +15,44 @@ import scala.concurrent.Future
 case class SoundCloudArtistConfidence(artistId: Option[Long], soundcloudId: Long, confidence: Double)
 case class WebsitesForSoundcloudId(soundcloudId: Long, websites: Seq[String])
 
-class SearchSoundCloudTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                                        val utilities: Utilities,
-                                        val trackMethods: TrackMethods,
-                                        val genreMethods: GenreMethods)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with SoundCloudHelper {
+class SearchSoundCloudTracks @Inject()(val utilities: Utilities,
+                                       val trackMethods: TrackMethods,
+                                       val genreMethods: GenreMethods)
+    extends SoundCloudHelper {
 
   def getSoundCloudTracksForArtist(artist: Artist): Future[Seq[Track]] =
     artist.websites find (_ contains "soundcloud.com") match {
       case None =>
-        getSoundCloudTracksNotDefinedInFb(artist)
+        getSoundCloudTracksWithoutSoundCloudWebsite(artist)
       case Some(soundCloudLink) =>
-        getSoundCloudTracksWithLink(
+        getSoundCloudTracksWithSoundCloudLink(
           removeUselessInSoundCloudWebsite(soundCloudLink).substring("soundcloud.com/".length), artist)
     }
 
-  def getSoundCloudTracksNotDefinedInFb(artist: Artist): Future[Seq[Track]] =
-    getSoundCloudIdsForName(artist.name) flatMap {
-      getSoundcloudWebsites(_) flatMap { listOfTupleIdScAndWebsite =>
-        val listOfScWithConfidence = listOfTupleIdScAndWebsite.map { tuple =>
-          computationScConfidence(artist, tuple.websites, tuple.soundcloudId)
-        }
-        Future.sequence(
-        listOfScWithConfidence.sortWith(_.confidence > _.confidence)
-          .filter(a => a.confidence == listOfScWithConfidence.head.confidence && a.confidence > 0)
-          .map { verifiedSC =>
-          getSoundCloudTracksWithLink(verifiedSC.soundcloudId.toString, artist)
-        }).map { _.flatten }
-      }
-    }
+  def getSoundCloudTracksWithoutSoundCloudWebsite(artist: Artist): Future[Seq[Track]] = getSoundCloudIdsForName(artist.name) flatMap {
+    getSoundcloudWebsites(_) flatMap { listOfTupleIdScAndWebsite =>
+      val listOfScWithConfidence = listOfTupleIdScAndWebsite.map(tuple => 
+        computeSoundCloudConfidence(artist, tuple.websites, tuple.soundcloudId))
 
-  def computationScConfidence(artist: Artist, soundCloudWebsites: Seq[String], soundCloudId: Long): SoundCloudArtistConfidence = {
+      val soundCloudsWithBestConfidence: Seq[SoundCloudArtistConfidence] = returnSoundCloudAccountsWithBestConfidence(listOfScWithConfidence)
+
+      Future.sequence(
+        soundCloudsWithBestConfidence.map(verifiedSC =>
+          getSoundCloudTracksWithSoundCloudLink(verifiedSC.soundcloudId.toString, artist))
+      ).map { _.flatten }
+    }
+  }
+
+  def returnSoundCloudAccountsWithBestConfidence(listOfScWithConfidence: Seq[SoundCloudArtistConfidence]): Seq[SoundCloudArtistConfidence] = {
+    val maxConfidence = listOfScWithConfidence.maxBy(_.confidence).confidence
+    val soundCloudsWithBestConfidence = maxConfidence match {
+      case 0.0 => Seq.empty
+      case max => listOfScWithConfidence.filter(_.confidence == max)
+    }
+    soundCloudsWithBestConfidence
+  }
+
+  def computeSoundCloudConfidence(artist: Artist, soundCloudWebsites: Seq[String], soundCloudId: Long): SoundCloudArtistConfidence = {
     if(soundCloudWebsites.filter(_ contains "facebook.com/").exists(_ contains artist.facebookUrl) ||
       soundCloudWebsites.filter(_ contains "facebook.com/").exists(_ contains Some(artist.facebookId))) {
       SoundCloudArtistConfidence(artist.id, soundCloudId, 1)
@@ -100,7 +104,7 @@ class SearchSoundCloudTracks @Inject()(protected val dbConfigProvider: DatabaseC
       .getOrElse(Seq.empty)
   }
 
-  def getSoundCloudTracksWithLink(soundCloudLink: String, artist: Artist): Future[Seq[Track]] = {
+  def getSoundCloudTracksWithSoundCloudLink(soundCloudLink: String, artist: Artist): Future[Seq[Track]] = {
     WS.url("http://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
       .withQueryString("client_id" -> utilities.soundCloudClientId)
       .get()

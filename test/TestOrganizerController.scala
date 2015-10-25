@@ -8,40 +8,15 @@ import models._
 import net.codingwell.scalaguice.ScalaModule
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
-import org.specs2.matcher.Matchers
-import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
-import play.api.libs.ws.WS
-import play.api.test.{WithServer, FakeRequest, PlaySpecification, WithApplication}
-import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
-import silhouette.UserDAOImpl
+import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
-import scala.concurrent.Await
-import scala.concurrent.duration._
 
-class TestOrganizerController extends PlaySpecification with Mockito {
+class TestOrganizerController extends PlaySpecification with Mockito with Injectors {
   sequential
-
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
-  val tariffMethods = new TariffMethods(dbConfProvider, utilities)
-  val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
-  val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
-  val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
-  val eventMethods = new EventMethods(dbConfProvider, organizerMethods, placeMethods, artistMethods, tariffMethods,
-    geographicPointMethods, utilities)
-  val userDAOImpl = new UserDAOImpl(dbConfProvider)
 
   "organizer controller" should {
 

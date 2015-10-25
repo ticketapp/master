@@ -1,35 +1,19 @@
 import java.util.UUID
-import scala.collection.immutable.Seq
 
 import models._
+import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import org.scalatest.Matchers._
 import play.api.Logger
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
-class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite {
-  val appBuilder = new GuiceApplicationBuilder()
-  val injector = appBuilder.injector()
-  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  val utilities = new Utilities()
-  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
-  val playlistMethods = new PlaylistMethods(dbConfProvider, utilities)
-
+class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
 
   var artistId = -1L
   val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
