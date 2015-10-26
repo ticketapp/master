@@ -5,7 +5,6 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import com.vividsolutions.jts.geom.{Geometry}
 import models._
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -13,6 +12,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Action
 import services.MyPostgresDriver.api._
 import services.{MyPostgresDriver, Utilities}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 import scala.util.{Failure, Success}
@@ -82,7 +82,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     for (c1 <- chars) {
       for (c2 <- chars) {
         artistMethods.getEventuallyFacebookArtists(c1.toString + c2.toString) map { artists =>
-          artists map { artistMethods.save }
+          artists map { artist => artistMethods.save(ArtistWithWeightedGenres(artist, Vector.empty)) }
         }
         Thread.sleep(120)
       }

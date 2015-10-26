@@ -76,11 +76,11 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       },
 
       patternAndArtist => {
-        artistMethods.save(patternAndArtist.artistWithWeightedGenre.artist) map { artist =>
+        artistMethods.save(ArtistWithWeightedGenres(patternAndArtist.artistWithWeightedGenre.artist, Vector.empty)) map { artist =>
          val artistId = artist.id
          val artistWithArtistId = patternAndArtist.artistWithWeightedGenre.artist.copy(id = artistId)
          val patternAndArtistWithArtistId =
-           PatternAndArtist(patternAndArtist.searchPattern, ArtistWithWeightedGenre(artistWithArtistId, Vector.empty))
+           PatternAndArtist(patternAndArtist.searchPattern, ArtistWithWeightedGenres(artistWithArtistId, Vector.empty))
          val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
          val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
            val filteredTracks: Set[Track] = tracks.flatMap { track =>

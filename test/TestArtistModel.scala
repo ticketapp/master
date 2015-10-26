@@ -2,6 +2,7 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import models._
+import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
@@ -19,14 +20,14 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
   "An Artist" must {
 
     "be saved and deleted in database and return the new id" in {
-      val artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
-        Option("description"), "facebookUrl", Set("website"))
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
+        Option("description"), "facebookUrl", Set("website")), Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         try {
           whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
 
-            foundArtist mustBe Option(artist.copy(id = Some(savedArtist.id.get),
-              description = Some("<div class='column large-12'>description</div>")))
+            foundArtist mustBe Option(ArtistWithWeightedGenres(artist.artist.copy(id = Some(savedArtist.id.get),
+              description = Some("<div class='column large-12'>description</div>")), Vector.empty))
 
             whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
           }
@@ -37,15 +38,15 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "all be found" in {
-      val artist = Artist(None, None, "artistTest0", None, None, "facebookUrl0", Set.empty)
-      val artist2 = Artist(None, None, "artistTest00", None, None, "facebookUrl00", Set.empty)
+      val artist = ArtistWithWeightedGenres(Artist(None, None, "artistTest0", None, None, "facebookUrl0", Set.empty), Vector.empty)
+      val artist2 = ArtistWithWeightedGenres(Artist(None, None, "artistTest00", None, None, "facebookUrl00", Set.empty), Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.save(artist2), timeout(Span(5, Seconds))) { savedArtist2 =>
           try {
             whenReady(artistMethods.findSinceOffset(100000, 0), timeout(Span(5, Seconds))) { foundArtist =>
 
               foundArtist should contain
-                (ArtistWithWeightedGenre(savedArtist, Seq.empty), ArtistWithWeightedGenre(savedArtist2, Seq.empty))
+                (ArtistWithWeightedGenres(savedArtist, Seq.empty), ArtistWithWeightedGenres(savedArtist2, Seq.empty))
 
               whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) {
                 _ mustBe 1
@@ -58,10 +59,26 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
       }
     }
 
+    "save its relation with an event and be found by this event" in {
+      val artist = ArtistWithWeightedGenres(Artist(None, None, "artistTest00", None, None, "facebookUrl00", Set.empty), Vector.empty)
+      val event = Event(None, None, isPublic = true, isActive = true, "name", None, None, new DateTime(), None, 16, None, None, None)
+
+      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
+        whenReady(artistMethods.saveWithEventRelation(artist.artist, savedEvent.id.get), timeout(Span(5, Seconds))) { savedArtist =>
+          whenReady(artistMethods.findAllByEvent(savedEvent.id.get), timeout(Span(5, Seconds))) { artistsFound =>
+            artistsFound should contain(ArtistWithWeightedGenres(savedArtist, Vector.empty))
+          }
+
+          whenReady(artistMethods.deleteEventRelation(EventArtistRelation(savedEvent.id.get, savedArtist.id.get)), timeout(Span(5, Seconds))) { result =>
+            result mustBe 1
+          }
+        }
+      }
+    }
 
     "be followed and unfollowed by a user" in {
-      val artist = Artist(None, Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),
-        "facebookUrl2", Set("website"))
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),
+        "facebookUrl2", Set("website")), Vector.empty)
       val uuid: UUID = UUID.randomUUID()
       val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
       val user: User = User(
@@ -97,8 +114,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "not be followed twice" in {
-      val artist = Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
-        "facebookUrl3", Set("website"))
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"), Option("description"),
+        "facebookUrl3", Set("website")), Vector.empty)
       val uuid: UUID = UUID.randomUUID()
       val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
       val user: User = User(
@@ -107,7 +124,7 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
         firstName = Option("firstName"),
         lastName = Option("lastName"),
         fullName = Option("fullName"),
-        email = Option("email"),
+        email = Option("emailArtistFollowTwice"),
         avatarURL = Option("avatarUrl"))
 
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
@@ -138,13 +155,15 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
     
     "be updated" in {
-      val artist = Artist(None, Option("facebookId4"), "artistTest4", Option("imagePath"), Option("description"),
-        "facebookUrl4", Set("website"))
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId4"), "artistTest4", Option("imagePath"), Option("description"),
+        "facebookUrl4", Set("website")), Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         try {
           val updatedArtist = savedArtist.copy(id = Option(savedArtist.id.get), name = "updatedName")
           whenReady(artistMethods.update(updatedArtist), timeout(Span(5, Seconds))) { resp =>
-            whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe Option(updatedArtist) }
+            whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe
+              Option(ArtistWithWeightedGenres(updatedArtist, Vector.empty))
+            }
           }
         } finally {
           artistMethods.delete(savedArtist.id.get)
@@ -153,8 +172,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "have his websites updated" in {
-      val artist = Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
-        "facebookUrl5", Set("website"))
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
+        "facebookUrl5", Set("website")), Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.addWebsite(savedArtist.id.get, "normalizedUrl"), timeout(Span(5, Seconds))) { response =>
 
@@ -162,8 +181,11 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
 
           whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
 
-            foundArtist mustBe Option(foundArtist.get.copy(id = Option(savedArtist.id.get), websites = Set("website", "normalizedUrl"),
-              description = Some("<div class='column large-12'>description</div>")))
+            foundArtist mustBe
+              Option(ArtistWithWeightedGenres(foundArtist.get.artist.copy(
+                id = Option(savedArtist.id.get),
+                websites = Set("website", "normalizedUrl"),
+                description = Some("<div class='column large-12'>description</div>")), Vector.empty))
 
             artistMethods.delete(savedArtist.id.get)
           }
@@ -172,8 +194,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "have another website" in {
-      val artist = Artist(None, Option("facebookId6"), "artistTest6", Option("imagePath"), Option("description"),
-        "facebookUrl6", Set("website"))
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId6"), "artistTest6", Option("imagePath"), Option("description"),
+        "facebookUrl6", Set("website")), Vector.empty)
       val track = Track(UUID.randomUUID, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
         Option("redirectUrl"))
 
@@ -181,8 +203,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
         whenReady(artistMethods.addSoundCloudUrlIfMissing(track, savedArtist), timeout(Span(5, Seconds))) { _ =>
           try {
             whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { artistFound =>
-              artistFound mustBe Option(savedArtist.copy(websites = Set("website", "redirecturl"),
-                description = Some("<div class='column large-12'>description</div>")))
+              artistFound mustBe Option(ArtistWithWeightedGenres(savedArtist.copy(websites = Set("website", "redirecturl"),
+                description = Some("<div class='column large-12'>description</div>")), Vector.empty))
             }
           } finally {
             whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) {
@@ -198,8 +220,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
         "https://api.soundcloud.com/tracks/190465678/stream",'s',
         "https://i1.sndcdn.com/artworks-000106271172-2q3z78-large.jpg","worakls","Worakls",
         Some("http://soundcloud.com/worakls/toi-snippet")/*,None,List()*/)
-      val artist = Artist(Option(26.toLong), Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
-        Option("description"), "facebookUrl", Set("website"))
+      val artist = Artist(Option(26.toLong), Option("facebookIdTestArtistModel"), "artistTest",
+        Option("imagePath"), Option("description"), "facebookUrl", Set("website"))
 
       whenReady(artistMethods.addWebsitesFoundOnSoundCloud(track, artist), timeout(Span(6, Seconds))) {
 
@@ -209,8 +231,8 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
    /* "get tracks for an artist" in {
-      val patternAndArtist = PatternAndArtist("Feu! Chatterton",
-        Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
+      val patternAndArtist = PatternAndArtistWithWeightedGenres(Artist("Feu! Chatterton",
+        ArtistWithWeightedGenres(Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
           Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
             "youtube.com/user/feuchatterton", "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"),
           /*List(),List(),*/None,None))

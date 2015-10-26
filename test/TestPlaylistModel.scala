@@ -16,8 +16,8 @@ import scala.language.postfixOps
 class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
 
   var artistId = -1L
-  val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
-    Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website"))
+  val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
+    Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website")), Vector.empty)
 
   override def beforeAll() = {
     try {
