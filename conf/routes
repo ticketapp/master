@@ -87,8 +87,9 @@ GET      /organizers/followed/                                            @contr
 #GET     /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################
-#POST    /tracks/create                                                    @controllers.TrackController.createTrack
-GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle               @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
+POST     /tracks/create                                                    @controllers.TrackController.createTrack
+GET      /tracks/:artistFacebookUrl                                        @controllers.TrackController.findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int)
+GET      /tracks/:artistName/:artistFacebookUrl/:trackTitle                @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
 #GET     /tracks/youtubeTrackInfo/:youtubeId                              @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
 #GET     /tracks/:trackId/rating                                           @controllers.TrackController.getRatingForUser(trackId: String)
 #POST    /tracks/rating                                                    @controllers.TrackController.upsertRatingForUser
