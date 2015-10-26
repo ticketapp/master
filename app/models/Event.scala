@@ -30,13 +30,14 @@ case class Event(id: Option[Long],
                  ageRestriction: Int,
                  tariffRange: Option[String],
                  ticketSellers: Option[String],
-                 imagePath: Option[String])/*,
-                 organizers: List[OrganizerWithAddress],
-                 artists: List[Artist],
-                 tariffs: List[Tariff],
-                 addresses: List[Address],
-                 places: List[Place] = List.empty,
-                 genres: Seq[Genre] = Seq.empty)*/
+                 imagePath: Option[String])
+
+case class EventWithRelations(event: Event,
+                              organizers: Seq[Organizer] = Vector.empty,
+                              artists: Seq[Artist] = Vector.empty,
+                              places: Seq[Place] = Vector.empty,
+                              genres: Seq[Genre] = Vector.empty,
+                              addresses: Seq[Address] = Vector.empty)
 
 
 class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -45,22 +46,54 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val tariffMethods: TariffMethods,
                              val geographicPointMethods: SearchGeographicPoint,
                              val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with DBTableDefinitions with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with FollowService
+    with DBTableDefinitions
+    with MyDBTableDefinitions {
 
-//  def getPropertiesOfEvent(event: Event): Event = event.eventId match {
-//    case None => throw new DAOException("Event.getPropertiesOfEvent: event without id has been found")
-//    case Some(eventId) => event.copy(
-////      organizers = organizerMethods.findAllByEvent(event),
-//      artists = Artist.findAllByEvent(event),
-//      tariffs = Tariff.findAllByEvent(event),
-//      places = placeMethods.findAllByEvent(eventId),
-//      genres = Genre.findAllByEvent(eventId),
-//      addresses = Address.findAllByEvent(event))
-//  }
+  def find(id: Long): Future[Option[EventWithRelations]] = {
+    val query2 = for {
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events joinLeft
+        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+      if eventWithOptionalEventOrganizers._1.id === id
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-  def find(id: Long): Future[Option[Event]] = {
-    val query = events.filter(_.id === id)
-    db.run(query.result.headOption)
+    db.run(query2.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)) map {
+      _.headOption
+    }
+  }
+
+  def eventWithRelationsTupleToEventWithRelationClass(eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]), Option[(EventArtistRelation, Artist)], Option[(EventPlaceRelation, Place)], Option[(EventGenreRelation, Genre)], Option[(EventAddressRelation, Address)])])
+  : Iterable[EventWithRelations] = {
+    val groupedByEvents = eventWithRelations.groupBy(_._1._1)
+
+    groupedByEvents.map { eventWithOptionalRelations =>
+      val event = eventWithOptionalRelations._1
+      val relations = eventWithOptionalRelations._2
+      val organizers = relations collect {
+        case ((_, Some((_, organizer: Organizer))), _, _, _, _) => organizer
+      }
+      val artists = relations collect {
+        case ((_, _), Some((_, artist: Artist)), _, _, _) => artist
+      }
+      val places = relations collect {
+        case ((_, _), _, Some((_, place: Place)), _, _) => place
+      }
+      val genres = relations collect {
+        case ((_, _), _, _, Some((_, genre: Genre)), _) => genre
+      }
+      val addresses = relations collect {
+        case ((_, _), _, _, _, Some((_, address: Address))) => address
+      }
+
+      EventWithRelations(event, organizers, artists, places, genres, addresses)
+    }
   }
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Event]] = {

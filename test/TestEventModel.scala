@@ -26,7 +26,10 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
         try {
           whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
             foundEvent.get mustEqual
-              event.copy(id = Some(savedEvent.id.get), startTime = foundEvent.get.startTime, endTime =  foundEvent.get.endTime)
+              EventWithRelations(event.copy(
+                id = Some(savedEvent.id.get),
+                startTime = foundEvent.get.event.startTime,
+                endTime =  foundEvent.get.event.endTime))
           }
         } finally {
           whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
@@ -45,7 +48,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
         firstName = Option("firstName"),
         lastName = Option("lastName"),
         fullName = Option("fullName"),
-        email = Option("email"),
+        email = Option("emailFollowEvent"),
         avatarURL = Option("avatarUrl"))
       val event = Event(None, None, isPublic = true, isActive = true, "name1",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
@@ -451,5 +454,6 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
     //save with an address
     //get with an address
+    //get with all relations see docker
   }
 }

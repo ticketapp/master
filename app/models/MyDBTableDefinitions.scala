@@ -12,6 +12,10 @@ import slick.model.ForeignKeyAction
 
 case class UserArtistRelation(userId: UUID, artistId: Long)
 case class EventArtistRelation(eventId: Long, artistId: Long)
+case class EventTariffRelation(eventId: Long, tariffId: Long)
+case class EventGenreRelation(eventId: Long, genreId: Int)
+case class EventPlaceRelation(eventId: Long, placeId: Long)
+case class EventAddressRelation(eventId: Long, addressId: Long)
 case class ArtistGenreRelation(artistId: Long, genreId: Int, weight: Int = 0)
 case class UserGenreRelation(userId: UUID, genreId: Int)
 case class UserEventRelation(userId: UUID, eventId: Long)
@@ -19,8 +23,6 @@ case class TrackGenreRelation(trackId: UUID, genreId: Int, weight: Int = 0)
 case class UserPlaceRelation(userId: UUID, placeId: Long)
 case class UserOrganizerRelation(userId: UUID, organizerId: Long)
 case class UserTrackRelation(userId: UUID, trackId: UUID)
-case class EventGenreRelation(eventId: Long, genreId: Int)
-case class EventPlaceRelation(eventId: Long, placeId: Long)
 case class EventOrganizerRelation(eventId: Long, organizerId: Long)
 case class FrenchCity(city: String, geographicPoint: Geometry)
 case class PlaylistTrack(playlistId: Long, trackId: UUID, trackRank: Double)
@@ -133,11 +135,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("placeid", placeId, places)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
-  class EventsAddresses(tag: Tag) extends Table[(Long, Long)](tag, "eventsaddresses") {
+  class EventsAddresses(tag: Tag) extends Table[EventAddressRelation](tag, "eventsaddresses") {
     def eventId = column[Long]("eventid")
     def addressId = column[Long]("addressid")
 
-    def * = (eventId, addressId) //<> ((EventAddresss.apply _).tupled, EventAddresss.unapply)
+    def * = (eventId, addressId) <> ((EventAddressRelation.apply _).tupled, EventAddressRelation.unapply)
 
     def aFK = foreignKey("eventid", eventId, events)(_.id, onDelete = ForeignKeyAction.Cascade)
     def bFK = foreignKey("addressid", addressId, addresses)(_.id, onDelete = ForeignKeyAction.Cascade)

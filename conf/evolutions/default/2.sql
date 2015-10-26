@@ -72,6 +72,55 @@ EXCEPTION WHEN unique_violation THEN
 -- Ignore duplicate inserts.
 END;
 
+
+BEGIN
+INSERT INTO events(ispublic, isactive, name, starttime)
+  VALUES(true, true, 'name0', current_timestamp);
+EXCEPTION WHEN unique_violation THEN
+-- Ignore duplicate inserts.
+END;
+
+
+BEGIN
+INSERT INTO organizers(name) VALUES('name0');
+EXCEPTION WHEN unique_violation THEN
+-- Ignore duplicate inserts.
+END;
+
+
+BEGIN
+INSERT INTO eventsorganizers(eventid, organizerid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+EXCEPTION WHEN unique_violation THEN
+-- Ignore duplicate inserts.
+END;
+
+
+BEGIN
+INSERT INTO eventsgenres(eventid, genreid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT genreid FROM genres WHERE name = 'genreTest0'));
+EXCEPTION WHEN unique_violation THEN
+-- Ignore duplicate inserts.
+END;
+
+
+BEGIN
+INSERT INTO eventsartists(eventid, artistid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
+EXCEPTION WHEN unique_violation THEN
+-- Ignore duplicate inserts.
+END;
+
+
+BEGIN
+INSERT INTO eventsartists(eventid, artistid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl00'));
+EXCEPTION WHEN unique_violation THEN
+-- Ignore duplicate inserts.
+END;
+
+
+
 -- INSERT INTO playliststracks()
 --
 --
