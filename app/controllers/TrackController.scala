@@ -11,6 +11,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import json.JsonHelper._
 import play.api.libs.json.DefaultWrites
@@ -42,33 +43,24 @@ class TrackController @Inject() (ws: WSClient,
     "artistName" -> nonEmptyText(2),
     "redirectUrl" -> optional(nonEmptyText(2))
   )(trackMethods.formApply)(trackMethods.formUnapply))
-//
-//  def createTrack = Action { implicit request =>
-//    trackBindingForm.bindFromRequest().fold(
-//      formWithErrors => {
-//        Logger.error(formWithErrors.errorsAsJson.toString())
-//        BadRequest(formWithErrors.errorsAsJson)
-//      },
-//      track => {
-//        trackMethods.save(track) match {
-//          case Success(true) =>
-//            trackMethods.find(track.trackId) match {
-//              case Success(Some(trackFound)) => Ok(Json.toJson(trackFound))
-//              case _ => NotFound
-//            }
-//          case Success(false) =>
-//            Logger.error("TrackController.createTrack")
-//            InternalServerError
-//          case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-//            Logger.error("TrackController.createTrack: Tried to save duplicate track")
-//            Conflict
-//          case Failure(exception) =>
-//            Logger.error("TrackController.createTrack", exception)
-//            InternalServerError
-//        }
-//      }
-//    )
-//  }
+
+  def createTrack = Action.async { implicit request =>
+    trackBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        Logger.error("TrackController.createTrack: " + formWithErrors.errorsAsJson)
+        Future(BadRequest(formWithErrors.errorsAsJson))
+      },
+      track =>
+        trackMethods.save(track) map { track =>
+          Ok(Json.toJson(track))
+        } recover {
+          case e =>
+            Logger.error("TrackController.createTrack: ", e)
+            InternalServerError
+        }
+    )
+  }
+
 
   def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int) = Action.async {
     trackMethods.findAllByArtist(artistFacebookUrl, numberToReturn, offset) map { tracks =>
@@ -104,12 +96,12 @@ class TrackController @Inject() (ws: WSClient,
 //        val trackIdUUID = UUID.fromString(trackRating.trackId)
 //        trackRating.rating match {
 //          case ratingUp if ratingUp > 0 =>
-//            Track.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
+//            trackMethods.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
 //              case Success(true) => Ok
 //              case _ => InternalServerError
 //            }
 //          case ratingDown if ratingDown < 0 =>
-//            Track.upsertRatingDown(userId, trackIdUUID, ratingDown, trackRating.reason) match {
+//            trackMethods.upsertRatingDown(userId, trackIdUUID, ratingDown, trackRating.reason) match {
 //              case Success(true) => Ok
 //              case _ => InternalServerError
 //            }
