@@ -1,9 +1,9 @@
 angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$localStorage', '$modal',
     'TracksRecommender', '$rootScope',
     function ($scope, UserFactory, $localStorage, $modal, TracksRecommender, $rootScope) {
-        $scope.addTrackToFavorite = function (trackId) {
-            UserFactory.AddTrackToFavorite(trackId);
-            $rootScope.favoritesTracks.push(trackId)
+        $scope.addTrackToFavorite = function (track) {
+            UserFactory.AddTrackToFavorite(track);
+            $rootScope.favoritesTracks.push(track.id)
         };
 
         $scope.removeFromFavorites = function (trackId) {

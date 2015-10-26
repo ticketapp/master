@@ -110,7 +110,7 @@ angular.module('claudeApp').
                 track.genres.forEach(addGenres);
                 $scope.newTrack = {};
                 if ($rootScope.favoritesTracks) {
-                    if ($rootScope.favoritesTracks.indexOf(track.trackId) > -1) {
+                    if ($rootScope.favoritesTracks.indexOf(track.id) > -1) {
                         track.isFavorite = true;
                         $scope.newTrack.isFavorite = true;
                     }
@@ -127,7 +127,7 @@ angular.module('claudeApp').
                 $scope.newTrack.artist = {name: track.artistName,
                     facebookUrl: track.artistFacebookUrl};
                 $scope.newTrack.title = track.title;
-                $scope.newTrack.trackId = track.trackId;
+                $scope.newTrack.id = track.id;
                 $rootScope.playlist.tracks.push($scope.newTrack);
                 getNextShow($rootScope.playlist.tracks[$rootScope.playlist.tracks.length-1]);
                 $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
@@ -187,7 +187,7 @@ angular.module('claudeApp').
             $rootScope.loadPlaylist = function (playlist) {
                 stopPush = false;
                 $rootScope.playlist.name = playlist.name;
-                $rootScope.playlist.playlistId = playlist.playlistId;
+                $rootScope.playlist.id = playlist.id;
                 $rootScope.playlist.tracks = [];
                 $rootScope.playlist.genres = [];
                 pushListOfTracks(playlist.tracks, true);
@@ -261,11 +261,11 @@ angular.module('claudeApp').
                     || $rootScope.window == 'medium') {
                     TracksRecommender.trackRateByTime(document.getElementById('musicPlayer').duration,
                         document.getElementById('musicPlayer').currentTime,
-                        $rootScope.playlist.tracks[i].trackId);
+                        $rootScope.playlist.tracks[i].id);
                 } else if (player != undefined) {
                     TracksRecommender.trackRateByTime(player.getDuration(),
                     player.getCurrentTime(),
-                        $rootScope.playlist.tracks[i].trackId);
+                        $rootScope.playlist.tracks[i].id);
                 }
                 if ($scope.shuffle == true) {
                     i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
@@ -349,7 +349,7 @@ angular.module('claudeApp').
 
             $scope.play = function (trackIndex) {
                 i = trackIndex;
-                $scope.changeIndexToStart(trackIndex)
+                $scope.changeIndexToStart(trackIndex);
                 //display nextShow info//
                 if ( $rootScope.playlist.tracks[i].nextShow != undefined) {
                     $timeout(function () {

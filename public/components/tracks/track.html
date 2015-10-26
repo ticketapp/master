@@ -1,7 +1,7 @@
 <div class="column large-12 arTrack">
     <i class="fa fa-star absolute pointer left"
        ng-if="!track.isFavorite || $root.connected == false"
-       ng-click="addTrackToFavorite(track.trackId); track.isFavorite = true"
+       ng-click="addTrackToFavorite(track.id); track.isFavorite = true"
             style="margin: 5px">
         <md-track-tooltipe>
             Ajouter aux favoris
@@ -10,7 +10,7 @@
     <i class="fa fa-star absolute pointer favoriteActive left"
        ng-if="track.isFavorite && $root.connected == true"
        style="margin: 5px"
-       ng-click="removeFromFavorites(track.trackId); track.isFavorite = false">
+       ng-click="removeFromFavorites(track.id); track.isFavorite = false">
         <md-track-tooltipe>
             Supprimer des favoris
         </md-track-tooltipe>
@@ -18,7 +18,7 @@
     <div class="column small-1 padding0 text-center float-right"
          style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:70px; margin-top: 10px">
         <i class="fa fa-exclamation column medium-12 padding0 pointer"
-           ng-click="signalTrack(track.trackId, $index)"
+           ng-click="signalTrack(track.id, $index)"
            style="line-height: 24.66px"
                 >
             <md-track-tooltipe class="right">

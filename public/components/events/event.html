@@ -9,7 +9,7 @@
                 {{ event.startTime | date:'dd/MM - HH:mm'}}
             </b>
             <b>
-                <a href="#/places/{{ place.placeId }}"
+                <a href="#/places/{{ place.id }}"
                    ng-class="{'column padding0': $root.window == 'small'}"
                    data-ng-repeat="place in event.places">
                     <i class="fa fa-map-marker"></i>
@@ -96,7 +96,7 @@
     <div class="column large-4 float-left eventInfo marginTop10"
             ng-if="event.organizers.length > 0">
         <div class="column large-12 padding0" data-ng-repeat="organizer in event.organizers">
-            <a href="#/organizers/{{organizer.organizerId}}" class="column large-12 padding0">
+            <a href="#/organizers/{{organizer.id}}" class="column large-12 padding0">
                 <img src="{{organizer.imagePath}}" class="relative width100p"/>
             </a>
             <h3 class="column large-8 medium-10">
@@ -108,7 +108,7 @@
                        ng-click="$parent.readDesc = !$parent.readDesc">
                     </i>
                 </a>
-                <a href="#/organizers/{{organizer.organizerId}}">{{ organizer.name }}</a>
+                <a href="#/organizers/{{organizer.id}}">{{ organizer.name }}</a>
             </h3>
             <a class="absolute bottom0 column medium-4 padding0"
                style='height:55px; right:0;'>
@@ -129,7 +129,7 @@
     <div class="column large-4 float-left eventInfo map-container marginTop10"
             ng-if="map">
         <div class="column large-12 paddingLeft0" ng-if="adresses">
-            <a href="#/places/{{event.places[0].placeId }}"
+            <a href="#/places/{{event.places[0].id }}"
                class="column large-12">
                 <b>{{event.places[0].name}}</b>
             </a>
