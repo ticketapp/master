@@ -244,8 +244,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
       List.empty, List.empty, List.empty, List.empty, List.empty)*/)
-      val artist = Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
-        "facebookUrl123")
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
+        "facebookUrl123"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
           try {
@@ -282,8 +282,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None/*, List.empty,
       List.empty, List.empty, List.empty, List.empty, List.empty)*/)
-      val artist = Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"), Option("description"),
-        "facebookUrl1234")
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"),
+        Option("description"), "facebookUrl1234"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
           try {

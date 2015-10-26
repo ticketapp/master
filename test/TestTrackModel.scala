@@ -14,8 +14,8 @@ import scala.language.postfixOps
 class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
 
   var artistId = -1L
-  val artist = Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
-    Option("description"), "artistFacebookUrlTestTrack", Set("website"))
+  val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
+    Option("description"), "artistFacebookUrlTestTrack", Set("website")), Vector.empty)
 
   override def beforeAll() = {
     artistId = Await.result(artistMethods.save(artist), 3 seconds).id.get
@@ -207,7 +207,7 @@ class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite
       whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { _ =>
         whenReady(trackMethods.save(track2), timeout(Span(5, Seconds))) { _ =>
           try {
-            whenReady(trackMethods.findAllByArtist(artist.facebookUrl, 1, 1), timeout(Span(5, Seconds))) { tracksSeq =>
+            whenReady(trackMethods.findAllByArtist(artist.artist.facebookUrl, 1, 1), timeout(Span(5, Seconds))) { tracksSeq =>
               tracksSeq.length mustBe 1
             }
           } finally {

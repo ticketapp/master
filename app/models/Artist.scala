@@ -29,11 +29,11 @@ case class Artist(id: Option[Long],
                   likes: Option[Int] = None,
                   country: Option[String] = None)
 
-case class ArtistWithWeightedGenre(artist: Artist, genres: Seq[GenreWithWeight])
+case class ArtistWithWeightedGenres(artist: Artist, genres: Seq[GenreWithWeight])
 
 case class GenreWithWeight(genre: Genre, weight: Int = 1)
 
-case class PatternAndArtist(searchPattern: String, artistWithWeightedGenre: ArtistWithWeightedGenre)
+case class PatternAndArtist(searchPattern: String, artistWithWeightedGenre: ArtistWithWeightedGenres)
 
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -50,33 +50,43 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
 
-  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenre]] = {
+  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
       (artist, optionalArtistGenreAndGenre) <- artists joinLeft
         (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield (artist, optionalArtistGenreAndGenre)
 
     db.run(query.drop(offset).take(numberToReturn).result) map { seqArtistAndOptionalGenre =>
-      val groupedByArtist = seqArtistAndOptionalGenre.groupBy(_._1)
-
-      val artistsWithGenres = groupedByArtist map { tupleArtistSeqTupleArtistWithMaybeGenres =>
-        (tupleArtistSeqTupleArtistWithMaybeGenres._1, tupleArtistSeqTupleArtistWithMaybeGenres._2 collect {
-          case (_, Some((artistGenre, genre))) => GenreWithWeight(genre, artistGenre.weight)
-        })
-      }
-      artistsWithGenres map (artistWithGenre => ArtistWithWeightedGenre(artistWithGenre._1, artistWithGenre._2.to[Seq]))
-    } map { _.toVector }
+      ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
+    } map(_.toVector)
   }
 
-  def findAllByEvent(event: Event): Future[Seq[Artist]] = {
-    val query = for {
-      e <- events if e.id === event.id
-      eventArtist <- eventsArtists
-      artist <- artists if artist.id === eventArtist.artistId
-    } yield artist
+  def ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre: scala.Seq[(Artist, Option[(ArtistGenreRelation, Genre)])])
+  : Iterable[ArtistWithWeightedGenres] = {
+    val groupedByArtist = seqArtistAndOptionalGenre.groupBy(_._1)
 
-    db.run(query.result) map { _.toVector }
-    //.map(getArtistProperties)
+    val artistsWithGenres = groupedByArtist map { tupleArtistSeqTupleArtistWithMaybeGenres =>
+      (tupleArtistSeqTupleArtistWithMaybeGenres._1, tupleArtistSeqTupleArtistWithMaybeGenres._2 collect {
+        case (_, Some((artistGenre, genre))) => GenreWithWeight(genre, artistGenre.weight)
+      })
+    }
+    artistsWithGenres map (artistWithGenre => ArtistWithWeightedGenres(artistWithGenre._1, artistWithGenre._2.to[Seq]))
+  }
+
+  def delete(id: Long): Future[Int] = db.run(artists.filter(_.id === id).delete)
+
+  def findAllByEvent(eventId: Long): Future[Seq[ArtistWithWeightedGenres]] = {
+    val query = for {
+      e <- events if e.id === eventId
+      eventArtist <- eventsArtists
+      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      if artist.id === eventArtist.artistId
+    } yield (artist, optionalArtistGenreAndGenre)
+
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
+    } map(_.toVector)
   }
   
   def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[Artist]] = {
@@ -85,27 +95,46 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artistGenre <- artistsGenres if artistGenre.genreId === genre.id
       artist <- artists if artist.id === artistGenre.artistId 
     } yield artist
-    //getArtistProperties
+
     db.run(query.drop(offset).take(numberToReturn).result) map { _.toVector }
   }
   
-  def find(id: Long): Future[Option[Artist]] = {
-    val query = artists.filter(_.id === id)
-    db.run(query.result.headOption)
-  }
-
-  def findByFacebookUrl(facebookUrl: String): Future[Option[Artist]] = {
-    val query = artists.filter(_.facebookUrl === facebookUrl)
-    db.run(query.result.headOption)
-  }
-
-  def findAllContaining(pattern: String): Future[Seq[Artist]] = {
-    val lowercasePattern = pattern.toLowerCase
+  def find(id: Long): Future[Option[ArtistWithWeightedGenres]] = {
     val query = for {
-      artist <- artists if artist.name.toLowerCase like s"%$lowercasePattern%"
-    } yield artist
+      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      if artist.id === id
+    } yield (artist, optionalArtistGenreAndGenre)
 
-    db.run(query.take(10).result) map { _.toVector }
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
+    } map(_.headOption)
+  }
+
+  def findByFacebookUrl(facebookUrl: String): Future[Option[ArtistWithWeightedGenres]] = {
+    val query = for {
+      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      if artist.facebookUrl === facebookUrl
+    } yield (artist, optionalArtistGenreAndGenre)
+
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
+    } map(_.headOption)
+  }
+
+  def findAllContaining(pattern: String): Future[Seq[ArtistWithWeightedGenres]] = {
+    val lowercasePattern = pattern.toLowerCase
+
+    val query = for {
+      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      if artist.name.toLowerCase like s"%$lowercasePattern%"
+    } yield (artist, optionalArtistGenreAndGenre)
+
+    db.run(query.take(20).result) map { seqArtistAndOptionalGenre =>
+      ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
+    } map(_.toVector)
   }
 
   def findIdByName(name: String): Future[Option[Long]] =
@@ -117,38 +146,36 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def findIdByFacebookUrl(facebookUrl: String): Future[Option[Long]] =
     db.run(artists.filter(_.facebookUrl === facebookUrl).map(_.id).result.headOption)
   
-  def save(artist: Artist): Future[Artist] = {
+  def save(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[Artist] = {
+    val artist = artistWithWeightedGenres.artist
+    val genres = artistWithWeightedGenres.genres
+    val genresWithoutWeight = genres map (_.genre)
     val artistWithFormattedDescription = artist.copy(description = utilities.formatDescription(artist.description))
+
+    val genresWithOverGenres = genreMethods.findOverGenres(genresWithoutWeight) map { overGenres =>
+      (genresWithoutWeight ++ overGenres).distinct
+    }
+
     db.run((for {
       artistFound <- artists.filter(_.facebookUrl === artist.facebookUrl).result.headOption
       result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += artistWithFormattedDescription)
     } yield result match {
       case a: Artist =>
+        genresWithOverGenres map(_ map (genre => genreMethods.saveWithArtistRelation(genre = genre, artistId = a.id.get)))
         a
       case id: Long =>
         Logger.info("Artist.save: this artist is already saved")
+        genresWithOverGenres map(_ map (genre => genreMethods.saveWithArtistRelation(genre = genre, artistId = id)))
         artistWithFormattedDescription.copy(id = Option(id))
     }).transactionally)
-    /*
-    Done BY Loann:
-     .as(scalar[Long].singleOpt) match {
-          case Some(artistId: Long) =>
-            val genresWithOverGenres = (artist.genres ++ Genre.findOverGenres(artist.genres)).distinct
-            genresWithOverGenres.foreach { Genre.saveWithArtistRelation(_, artistId.toInt) }
-            artist.tracks.foreach { Track.save }
-            Option(artistId)
-          case None =>
-            None
-      }
-     */
   }
 
   def update(artist: Artist): Future[Int] = db.run(artists.filter(_.id === artist.id).update(artist))
 
   def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
     artists.map { artist =>
-      save(artist) map { artistSaved =>
-        getArtistTracks(PatternAndArtist(artistSaved.name, ArtistWithWeightedGenre(artistSaved, Vector.empty))) |>>
+      save(ArtistWithWeightedGenres(artist, Vector.empty)) map { artistSaved =>
+        getArtistTracks(PatternAndArtist(artistSaved.name, ArtistWithWeightedGenres(artistSaved, Vector.empty))) |>>
           Iteratee.foreach(_ map trackMethods.save)
       }
     }
@@ -214,8 +241,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         Future(0)
   }
 
-  def saveWithEventRelation(artist: Artist, eventId: Long): Future[Int] = save(artist) flatMap { artist =>
-    saveEventRelation(EventArtistRelation(eventId, artist.id.getOrElse(0)))
+  def saveWithEventRelation(artist: Artist, eventId: Long): Future[Artist] = save(ArtistWithWeightedGenres(artist, Vector.empty)) flatMap { artist =>
+    saveEventRelation(EventArtistRelation(eventId, artist.id.getOrElse(0))) map {
+      case 1 =>
+        artist
+      case _ =>
+        Logger.error(s"Artist.saveWithEventRelation: not exactly one row saved by Artist.saveEventRelation for artist $artist and eventId $eventId")
+        artist
+    }
   }
 
   def saveEventRelation(eventArtistRelation: EventArtistRelation): Future[Int] =
@@ -226,8 +259,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       .filter(artistFollowed =>
         artistFollowed.artistId === eventArtistRelation.artistId && artistFollowed.eventId === eventArtistRelation.eventId)
       .delete)
-
-  def delete(id: Long): Future[Int] = db.run(artists.filter(_.id === id).delete)
 
   def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
     case None =>
