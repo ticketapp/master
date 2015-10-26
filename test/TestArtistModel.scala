@@ -43,9 +43,11 @@ class TestArtistModel extends PlaySpec with OneAppPerSuite with Injectors {
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.save(artist2), timeout(Span(5, Seconds))) { savedArtist2 =>
           try {
-            whenReady(artistMethods.findSinceOffset(100000, 0), timeout(Span(5, Seconds))) { foundArtist =>
+            whenReady(artistMethods.findSinceOffset(100000, 0), timeout(Span(5, Seconds))) { foundArtists =>
 
-              foundArtist should contain
+              println(foundArtists.map(_.artist.name))
+
+              foundArtists should contain
                 (ArtistWithWeightedGenres(savedArtist, Seq.empty), ArtistWithWeightedGenres(savedArtist2, Seq.empty))
 
               whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) {

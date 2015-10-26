@@ -70,7 +70,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def eventWithRelationsTupleToEventWithRelationClass(eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]), Option[(EventArtistRelation, Artist)], Option[(EventPlaceRelation, Place)], Option[(EventGenreRelation, Genre)], Option[(EventAddressRelation, Address)])])
-  : Iterable[EventWithRelations] = {
+  : Vector[EventWithRelations] = {
     val groupedByEvents = eventWithRelations.groupBy(_._1._1)
 
     groupedByEvents.map { eventWithOptionalRelations =>
@@ -93,22 +93,34 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       }
 
       EventWithRelations(event, organizers, artists, places, genres, addresses)
-    }
+    }.toVector
   }
 
-  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Event]] = {
+  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
-    val query = events
-      .filter(event =>
-        (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-      .sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(offset)
-      .take(numberToReturn)
-    db.run(query.result)
+    val query = for {
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(offset)
+        .take(numberToReturn) joinLeft
+        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+
+        if (eventWithOptionalEventOrganizers._1.endTime.nonEmpty && eventWithOptionalEventOrganizers._1.endTime > now) ||
+          (eventWithOptionalEventOrganizers._1.endTime.isEmpty && eventWithOptionalEventOrganizers._1.startTime > twelveHoursAgo)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
+
+    db.run(query
+      .result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Event]] = geographicPointMethods
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = geographicPointMethods
     .findGeographicPointOfCity(city) flatMap {
     case None => Future { Seq.empty }
     case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
