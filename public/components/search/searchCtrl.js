@@ -34,15 +34,12 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function updateScope (data, scope, idName, otherScopeToCheck) {
             function isInScope(el) {
-                var idDictionary = {'artistId': el.artistId, 'eventId': el.eventId,
-                    'organizerId': el.organizerId, 'placeId': el.placeId, 'facebookId': el.facebookId};
+                var idDictionary = {'id': el.id, 'facebookId': el.facebookId};
                 if (otherScopeToCheck !== undefined) {
                     var otherScopeToCheckLength = otherScopeToCheck.length;
                     for (var i = 0; i < otherScopeToCheckLength; i++) {
                         var idOtherScopeDictionary = {'artistId': otherScopeToCheck[i].artistId,
-                            'eventId': otherScopeToCheck[i].eventId,
-                            'organizerId': otherScopeToCheck[i].organizerId,
-                            'placeId': otherScopeToCheck[i].placeId,
+                            'id': otherScopeToCheck[i].id,
                             'facebookId': otherScopeToCheck[i].facebookId};
                         if (idDictionary[idName] == idOtherScopeDictionary[idName]) {
                             return true;
@@ -51,10 +48,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 }
                 var scopeLength = scope.length;
                 for (var j = 0; j < scopeLength; j++) {
-                    var idScopeDictionary = {'artistId': scope[j].artistId,
-                        'eventId': scope[j].eventId,
-                        'organizerId': scope[j].organizerId,
-                        'placeId': scope[j].placeId,
+                    var idScopeDictionary = {'id': scope[j].id,
                         'facebookId': scope[j].facebookId};
                     if (idDictionary[idName] == idScopeDictionary[idName]) {
                         return true;
@@ -89,13 +83,13 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         }
         function getArtists () {
             ArtistsFactory.getArtists(offset).then(function (artists) {
-                updateScope(artists, $scope.artists, 'artistId');
+                updateScope(artists, $scope.artists, 'id');
             });
         }
 
         function getArtistsFolowed () {
             ArtistsFactory.getFollowArtists().then(function (artists) {
-                updateScope(artists, $scope.artists, 'artistId');
+                updateScope(artists, $scope.artists, 'id');
                 if (artists.length < $scope.limit) {
                     getArtists()
                 }
@@ -104,61 +98,61 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getArtistsByGenre () {
             ArtistsFactory.getArtistsByGenre(offset, _research).then(function (artists) {
-                updateScope(artists, $scope.artists, 'artistId');
+                updateScope(artists, $scope.artists, 'id');
             })
         }
         function getArtistsByContaining () {
             ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
                 console.log($scope.artists);
                 var artistsFacebookInScope = $scope.artistsFb.map(function (artist) {
-                    return artist.artistId
+                    return artist.id
                 });
                 var artistLength = artists.length;
                 for (var i = 0; i < artistLength; i++) {
-                    if (artistsFacebookInScope.indexOf(artists[i].artistId) > -1) {
-                        $scope.artistsFb.splice(artistsFacebookInScope.indexOf(artists[i].artistId), 1)
+                    if (artistsFacebookInScope.indexOf(artists[i].id) > -1) {
+                        $scope.artistsFb.splice(artistsFacebookInScope.indexOf(artists[i].id), 1)
                     }
                 }
-                updateScope(artists, $scope.artists, 'artistId');
+                updateScope(artists, $scope.artists, 'id');
             });
         }
 
         function getEvents() {
             filterEventsByTime();
             EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
-                updateScope(events, $scope.filtredEvents, 'eventId', $scope.events);
+                updateScope(events, $scope.filtredEvents, 'id', $scope.events);
                 console.log(events)
             });
         }
 
         function getEventsArtistByContaining() {
             EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                updateScope(events, $scope.events, 'id');
             });
         }
 
         function getEventsByGenre() {
             EventsFactory.getEventsByGenre(_research, offset, $rootScope.geoLoc).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                updateScope(events, $scope.events, 'id');
                 console.log(events)
             });
         }
 
         function getPlacesEventsByContaining() {
             EventsFactory.getPlacesEventsByContaining(_research).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                updateScope(events, $scope.events, 'id');
             });
         }
 
         function getEventsByCity() {
             EventsFactory.getEventsByCity(_research, offset).then(function (events) {
-                updateScope(events, $scope.events, 'eventId');
+                updateScope(events, $scope.events, 'id');
             });
         }
 
         function getEventsByContaining() {
             EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
-                updateScope(events, $scope.filtredEvents, 'eventId', $scope.events);
+                updateScope(events, $scope.filtredEvents, 'id', $scope.events);
                 getEventsArtistByContaining();
                 getEventsByGenre();
                 getPlacesEventsByContaining();
@@ -168,32 +162,32 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
 
         function getOrganizersByContaining() {
             OrganizerFactory.getOrganizersByContaining(_research).then(function (organizers) {
-                updateScope(organizers, $scope.organizers, 'organizerId');
+                updateScope(organizers, $scope.organizers, 'id');
             });
         }
 
         function getOrganizers() {
             OrganizerFactory.getOrganizers(offset).then(function (organizers) {
-                updateScope(organizers, $scope.organizers, 'organizerId');
+                updateScope(organizers, $scope.organizers, 'id');
             });
         }
 
         function getPlaces() {
             PlaceFactory.getPlaces(offset, $rootScope.geoLoc).then(function (places) {
                 places.forEach(refactorGeopoint);
-                updateScope(places, $scope.places, 'placeId');
+                updateScope(places, $scope.places, 'id');
             });
         }
 
         function getPlacesByContaining() {
             PlaceFactory.getPlacesByContaining(_research).then(function (places) {
-                updateScope(places, $scope.places, 'placeId');
+                updateScope(places, $scope.places, 'id');
             });
         }
 
         function getPlacesByCity() {
             PlaceFactory.getPlacesByCity(_research, offset).then(function (places) {
-                updateScope(places, $scope.places, 'placeId');
+                updateScope(places, $scope.places, 'id');
             });
         }
 

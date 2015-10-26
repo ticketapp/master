@@ -1,7 +1,7 @@
 <div class="block_min">
     <div class="img_min">
         <div class="toGrow">
-            <a href="#/places/{{place.placeId}}">
+            <a href="#/places/{{place.id}}">
                 <img ng-src="{{place.imagePath}}" on-error-src="assets/images/caroussel1.gif"
                      ng-if="place.imagePath != undefined" class="min"/>
                 <img src="assets/images/caroussel1.gif"
@@ -38,6 +38,6 @@
                 </map>
             </a>
         </div>
-        <a href="#/places/{{place.placeId}}"><h3 class="minTitle">{{place.name}}</h3></a>
+        <a href="#/places/{{place.id}}"><h3 class="minTitle">{{place.name}}</h3></a>
     </div>
 </div>

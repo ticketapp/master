@@ -31,7 +31,7 @@
         <div class="block_event_min">
             <div class="img_min_evnt">
                 <div class="toGrow">
-                    <a target="_blank" href="#/events/{{event.eventId}}">
+                    <a target="_blank" href="#/events/{{event.id}}">
                         <img src="{{ event.imagePath }}" class="width100p" alt="yo"/>
                     </a>
                 </div>
@@ -51,7 +51,7 @@
                        }">
                     </i>
                 </div>
-                <a target="_blank" href="#/events/{{event.eventId}}">
+                <a target="_blank" href="#/events/{{event.id}}">
                     <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
                         {{ event.name }}
                     </h3>
@@ -92,7 +92,7 @@
                         <span  data-ng-repeat="place in event.places">
                             <i class="fa fa-map-marker" style="font-size: 30px; color: {{event.priceColor}};"></i>
                             <b style="vertical-align: text-bottom;">
-                                <a target="_blank"href="#/places/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+                                <a target="_blank"href="#/places/{{ place.id }}">{{place.name | limitTo: 25}} </a>
                             </b>
                         </span>
                     </div>
@@ -101,7 +101,7 @@
                                data-ng-repeat="organizer in event.organizers">
                             <i class="fa fa-user" style="font-size: 30px; color: {{event.priceColor}};"></i>
                             <b style="vertical-align: text-bottom;">
-                                <a target="_blank"href="#/organizers/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}} </a>
+                                <a target="_blank"href="#/organizers/{{organizer.id}}">{{organizer.name | limitTo: 25}} </a>
                             </b>
                         </span>
                     </div>

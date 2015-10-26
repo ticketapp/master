@@ -29,7 +29,7 @@ angular.module('claudeApp').
                         place.facebookUrl);
                 }
                 if ($rootScope.connected == true) {
-                    PlaceFactory.getIsFollowed(place.placeId).then(function (isFollowed) {
+                    PlaceFactory.getIsFollowed(place.id).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
                             $scope.isFollowed = isFollowed;
                         }
@@ -39,7 +39,7 @@ angular.module('claudeApp').
                     if (connected == false) {
                         $scope.isConnected = false;
                     } else {
-                        PlaceFactory.getIsFollowed(place.placeId).then(function (isFollowed) {
+                        PlaceFactory.getIsFollowed(place.id).then(function (isFollowed) {
                             if (isFollowed == true || isFollowed == false) {
                                 $scope.isFollowed = isFollowed;
                             }
@@ -54,7 +54,7 @@ angular.module('claudeApp').
                 $scope.passedEvents = events;
             });
             $scope.follow = function () {
-                PlaceFactory.followPlaceByPlaceId($scope.place.placeId,
+                PlaceFactory.followPlaceByPlaceId($scope.place.id,
                     $scope.place.name).then(
                     function (followed) {
                         if (followed != 'error') {
@@ -65,7 +65,7 @@ angular.module('claudeApp').
             };
 
             $scope.unfollow = function () {
-                PlaceFactory.unfollowPlace($scope.place.placeId,
+                PlaceFactory.unfollowPlace($scope.place.id,
                     $scope.place.name).then(
                     function (followed) {
                         if (followed != 'error') {

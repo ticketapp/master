@@ -16,7 +16,6 @@ angular.module('claudeApp').
                             $scope.event.places[0].isFollowed = isFollowed
                         }
                     });
-                    console.log(event.places[0].geographicPoint);
                     $scope.adresses = true;
                     $scope.mapHeight = '300px';
                     $scope.map = true;
