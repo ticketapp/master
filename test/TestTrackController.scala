@@ -29,8 +29,8 @@ class TestTrackController extends PlaySpecification with Mockito with Injectors 
                              "artistName": "artistTrackTest",
                              "redirectUrl": "url" }"""
 
-        val artist = Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest", Option("imagePath"),
-          Option("description"), "artistTrackFacebookUrl", Set("website"))
+        val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest", Option("imagePath"),
+          Option("description"), "artistTrackFacebookUrl", Set("website")), Vector.empty)
         await(artistMethods.save(artist))
         val Some(result) = route(FakeRequest(POST, "/tracks/create")
         .withJsonBody(Json.parse(jsonTrack))
