@@ -41,9 +41,6 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
-  def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] =
-    db.run(organizers.filter(_.facebookId === facebookId).map(_.id).result.headOption)
-
   def doSave(place: Place): Future[Place] =
     db.run((for {
       placeFound <- places.filter(_.facebookId === place.facebookId).result.headOption
@@ -67,6 +64,9 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def find(id: Long): Future[Option[Place]] = db.run(places.filter(_.id === id).result.headOption)
+
+  def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] =
+    db.run(organizers.filter(_.facebookId === facebookId).map(_.id).result.headOption)
 
   def findIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(places.filter(_.facebookId === facebookId).map(_.id).result.headOption)

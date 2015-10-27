@@ -87,11 +87,6 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     case id: Int => genre.copy(id = Option(id))
   }).transactionally)
 
-  def findByFacebookUrl(facebookUrl: String): Future[Option[Artist]] = {
-    val query = artists.filter(_.facebookUrl === facebookUrl)
-    db.run(query.result.headOption)
-  }
-  
   def findByName(name: String): Future[Option[Genre]] = db.run(genres.filter(_.name === name).result.headOption)
 
   def saveWithEventRelation(genre: Genre, eventId: Long): Future[Int] = save(genre) flatMap { 
