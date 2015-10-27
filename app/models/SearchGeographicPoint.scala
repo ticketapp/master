@@ -31,17 +31,22 @@ class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseCo
       "address" -> (address.street.getOrElse("") + " " + address.zip.getOrElse("") + " " + address.city.getOrElse("")),
       "key" -> utilities.googleKey)
     .get()
-    .flatMap { readGoogleGeographicPoint(_) match {
-      case Success(Some(geographicPoint)) =>
-        Future { address.copy(geographicPoint = Option(geographicPoint)) }
-      case Success(None) =>
-        Future { address }
-      case Failure(e: OverQueryLimit) if retry > 0 =>
-        Logger.info("Address.getGeographicPoint: retry: " + retry + " ", e)
-        getGeographicPoint(address, retry - 1)
-      case Failure(e: Exception) =>
-        Logger.error("Address.getGeographicPoint: ", e)
-        Future { address }
-    }
+    .flatMap {
+      readGoogleGeographicPoint(_) match {
+        case Success(Some(geographicPoint)) =>
+          Future { address.copy(geographicPoint = Option(geographicPoint)) }
+        case Failure(e: Exception) =>
+          Logger.error("Address.getGeographicPoint: ", e)
+          Future { address }
+        case _ =>
+          Future { address }
+      }
+    } recoverWith {
+    case e: OverQueryLimit if retry > 0 =>
+      Logger.info("Address.getGeographicPoint: retry: " + retry + " ", e)
+      getGeographicPoint(address, retry - 1)
+    case e: Exception =>
+      Logger.error("Address.getGeographicPoint: ", e)
+      Future { address }
   }
 }

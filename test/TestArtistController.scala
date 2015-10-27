@@ -1,157 +1,245 @@
-/*
-/*
 import java.util.UUID
 
 import com.google.inject.AbstractModule
 import com.mohiva.play.silhouette.api.{Environment, LoginInfo}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import controllers.routes
-import models.User
+import models._
 import net.codingwell.scalaguice.ScalaModule
+import org.joda.time.DateTime
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
-import play.api.{ApplicationLoader, Configuration}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.test._
-
-
-class TestArtistController extends PlaySpecification with Mockito {
-  sequential
-//
-//  val appBuilder = new GuiceApplicationBuilder()
-//  val injector = appBuilder.injector()
-//  val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-//  val utilities = new Utilities
-//  val trackMethods = new TrackMethods(dbConfProvider, utilities)
-//  val genreMethods = new GenreMethods(dbConfProvider, utilities)
-//  val searchSoundCloudTracks = new SearchSoundCloudTracks(dbConfProvider, utilities, trackMethods, genreMethods)
-//  val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-//  val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-//    trackMethods, utilities)
-//
-//  val messagesApi =  MessagesApi
-//
-//  val injectorr = new GuiceApplicationBuilder() .load(
-//    new play.api.inject.BuiltinModule,
-//    bind[MessagesApi].to[MessagesApi]
-//  ).injector
-//
-//  val artistController = new ArtistController(MessagesApi, utilities, dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack)
-//
-
-  "ArtistController" should {
-
-    "be followed by a user" in new Context {
-//      val eventuallyResult = controllers.ArtistController.findNearCity("abc", 1, 0)(FakeRequest())//RequestBuilder
-//      status(eventuallyResult) mustBe 200
-//      contentAsJson(eventuallyResult) mustBe Json.toJson(Seq.empty[Event])
-
-//      val Some(result) = route(FakeRequest(GET, "/artists"))
-//
-//      status(result) mustEqual OK
-//      contentType(result) mustEqual Some("application/json")
-//      charset(result) mustEqual Some("utf-8")
-//      println(contentAsJson(result))
-//    }
-
-//    "azadqsdqsd" in {
-      val Some(result) = route(FakeRequest(routes.Application.index())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
-      )
-
-      status(result) must beEqualTo(OK)
-    }
-  }
-
-  trait Context extends Scope {
-
-    /**
-     * A fake Guice module.
-     */
-    class FakeModule extends AbstractModule with ScalaModule {
-      def configure() = {
-        bind[Environment[User, CookieAuthenticator]].toInstance(env)
-      }
-    }
-
-    /**
-     * An identity.
-     */
-    val identity = User(
-      uuid = UUID.randomUUID(),
-      loginInfo = LoginInfo("facebook", "user@facebook.com"),
-      firstName = None,
-      lastName = None,
-      fullName = None,
-      email = None,
-      avatarURL = None)
-
-    /**
-     * A Silhouette fake environment.
-     */
-    implicit val env: Environment[User, CookieAuthenticator] = new FakeEnvironment[User, CookieAuthenticator](Seq(identity.loginInfo -> identity))
-
-//    implicit val globalSettings:
-
-    /**
-     * The application.
-     */
-    lazy val application = new GuiceApplicationBuilder()
-      .overrides(new FakeModule)
-//      .loadConfig(ApplicationLoader.Context.mockitoSettings)
-      .build()
-  }
-}
-*/
-import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.test._
-import org.specs2.mock.Mockito
+import play.api.libs.json._
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 
-class TestArtistController extends PlaySpecification with Mockito with Context {
+class TestArtistController extends PlaySpecification with Mockito with Injectors {
   sequential
 
-  "The `index` action" should {
-   /* "redirect to login page if user is unauthorized" in new Context {
+  "artist controller" should {
+
+    "create an artist and return tracks found in enumerator" in new Context {
       new WithApplication(application) {
-        val Some(redirectResult) = route(FakeRequest(routes.Application.index())
-          .withAuthenticator[CookieAuthenticator](LoginInfo("invalid", "invalid"))
-        )
+        val artistJson = Json.parse("""{
+          "searchPattern": "worakls",
+          "artist": {
+            "facebookUrl": "worakls",
+            "artistName": "worakls",
+            "facebookId": "100297159501",
+            "imagePath": "jskd",
+            "websites": ["hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls","facebook.com/worakls"],
+            "description": "artist.description"
+          }
+        }""")
+        val Some(result) = route(FakeRequest(POST, "/artists/createArtist")
+        .withJsonBody(artistJson))
+        status(result) mustEqual OK
 
-        status(redirectResult) must be equalTo SEE_OTHER
-
-        val redirectURL = redirectLocation(redirectResult).getOrElse("")
-        redirectURL must contain(routes.Application.signIn().toString)
-
-        val Some(unauthorizedResult) = route(FakeRequest(GET, redirectURL))
-
-        status(unauthorizedResult) must be equalTo OK
-        contentType(unauthorizedResult) must beSome("text/html")
-        contentAsString(unauthorizedResult) must contain("Silhouette - Sign In")
-      }
-    }*/
-//
-//    "return 200 if user is authorized" in new Context {
-//      new WithApplication(application) {
-//        val Some(result) = route(FakeRequest(routes.Application.index())
-//          .withAuthenticator[CookieAuthenticator](identity.loginInfo)
-//        )
-//
-//        status(result) must beEqualTo(OK)
-//      }
-//    }
-
-    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in new Context {
-      new WithApplication(application) {
-
-        val Some(result) = route(FakeRequest(POST, "/artists/123/followByArtistId").withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-        status(result) mustEqual NOT_FOUND
+        //need to test enumerator
       }
     }
+
+    "find a list of artists" in new Context {
+      new WithApplication(application) {
+        val Some(artists) = route(FakeRequest(GET, "/artists/since?numberToReturn=" + 10 + "&offset=" + 0))
+        contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
+      }
+    }
+
+    "find a list of artist by containing" in new Context {
+      new WithApplication(application) {
+        val Some(artists) = route(FakeRequest(GET, "/artists/containing/worakls"))
+        contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
+      }
+    }
+
+    "find one artist by id" in new Context {
+      new WithApplication(application) {
+        val artistId = await(artistMethods.findAllContaining("worakls")).headOption.get.artist.id
+        val Some(artist) = route(FakeRequest(GET, "/artists/byId/" + artistId.get))
+        contentAsJson(artist).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
+      }
+    }
+
+    "find one artist by facebookUrl" in new Context {
+      new WithApplication(application) {
+        val artistId = await(artistMethods.findAllContaining("worakls")).headOption.get.artist.id
+        val Some(artist) = route(FakeRequest(GET, "/artists/worakls"))
+        contentAsJson(artist).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
+      }
+    }
+
+    "follow and unfollow an artist by id" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+        val Some(response) = route(FakeRequest(POST, "/artists/" + artistId.get + "/followByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(response1) = route(FakeRequest(POST, "/artists/" + artistId.get + "/unfollowArtistByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response1) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "return an error if an user try to follow an artist twice" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+        val Some(response) = route(FakeRequest(POST, "/artists/" + artistId.get + "/followByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        status(response) mustEqual CREATED
+
+        val Some(response1) = route(FakeRequest(POST, "/artists/" + artistId.get + "/followByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        status(response1) mustEqual CONFLICT
+
+        val Some(response2) = route(FakeRequest(POST, "/artists/" + artistId.get + "/unfollowArtistByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "follow and unfollow an artist by facebookId" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+        val Some(response) = route(FakeRequest(POST, "/artists/100297159501/followByFacebookId")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(response2) = route(FakeRequest(POST, "/artists/" + artistId.get + "/unfollowArtistByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "find followed artists" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+        val Some(response) = route(FakeRequest(POST, "/artists/100297159501/followByFacebookId")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(artists) = route(FakeRequest(GET, "/artists/followed/")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
+
+        val Some(response2) = route(FakeRequest(POST, "/artists/" + artistId.get + "/unfollowArtistByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "find one followed artist by id" in new Context {
+      new WithApplication(application) {
+        await(userDAOImpl.save(identity))
+        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+        val Some(response) = route(FakeRequest(POST, "/artists/100297159501/followByFacebookId")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response) mustEqual CREATED
+
+        val Some(artists) = route(FakeRequest(GET, "/artists/" + artistId.get + "/isFollowed")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        contentAsJson(artists) mustEqual Json.parse("true")
+
+        val Some(response2) = route(FakeRequest(POST, "/artists/" + artistId.get + "/unfollowArtistByArtistId")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(response2) mustEqual OK
+
+        userDAOImpl.delete(identity.uuid)
+      }
+    }
+
+    "find tracks by facebookUrl" in new Context {
+      new WithApplication(application) {
+        val Some(tracks) = route(FakeRequest(GET, "/artists/worakls/tracks?numberToReturn=0&offset=0"))
+
+        status(tracks) mustEqual OK
+
+        contentAsJson(tracks).toString() must contain(""""artistFacebookUrl":"worakls","artistName":"worakls"""")
+
+      }
+    }
+
+    "find artist by facebook containing" in new Context {
+      new WithApplication(application) {
+        val Some(tracks) = route(FakeRequest(GET, "/artists/facebookContaining/worakls?numberToReturn=0&offset=0"))
+
+        status(tracks) mustEqual OK
+
+        contentAsJson(tracks).toString() must contain(""""facebookId":"100297159501","name":"Worakls"""")
+
+      }
+    }
+
+    "find events by artistFacebookUrl" in new Context {
+      new WithApplication(application) {
+        val event = Event(None, None, true, true, "artistController.findEventByFacebookId", None, None, new DateTime(),
+          None, 1, None, None, None)
+        val passedEvent = Event(None, None, true, true, "artistController.findEventByFacebookIdPassedEvent", None, None, new DateTime(0),
+          Option(new DateTime(0)), 1, None, None, None)
+        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+        val eventId = await(eventMethods.save(event)).id
+        val passedEventId = await(eventMethods.save(event)).id
+        await(artistMethods.saveEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+        await(artistMethods.saveEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
+        val Some(response) = route(FakeRequest(GET, "/artists/worakls/events"))
+
+        status(response) mustEqual OK
+
+        contentAsJson(response).toString must contain(""""name":"artistController.findEventByFacebookId"""")
+        contentAsJson(response).toString must not contain """"name":"artistController.findEventByFacebookIdPassedEvent""""
+
+        await(artistMethods.deleteEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+        await(artistMethods.deleteEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
+      }
+    }
+
+    /*"find passed events by artistId" in new Context {
+      new WithApplication(application) {
+        val eventId = await(eventMethods.saveFacebookEventByFacebookId("11121")).id
+        val artistId = await(artistMethods.save(Artist(None, "artistTestEvent", Option("123456"), None))).id
+        await(artistMethods.saveEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+        val Some(response) = route(FakeRequest(GET, "/artists/" + artistId.get + "/passedEvents"))
+
+        status(response) mustEqual OK
+
+        contentAsJson(response).toString must contain(""""name":"EventPassedTest","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
+        contentAsJson(response).toString must not contain """"name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc""""
+        await(artistMethods.deleteEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+      }
+    }*/
+
+    /*
+DELETE  /artists/:artistId                            @controllers.ArtistController.deleteArtist(artistId: Long)
+GET     /artists/:facebookUrl/events                  @controllers.EventController.findByArtist(facebookUrl: String)
+GET     /artists/:artistId/passedEvents               @controllers.EventController.findPassedByArtist(artistId: Long)
+GET     /artists/facebookContaining/:pattern
+    */
   }
 }
-*/

@@ -35,6 +35,9 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     artistMethods.getEventuallyFacebookArtists(pattern).map { artists =>
       Ok(Json.toJson(artists))
+    } recover { case t: Throwable =>
+      Logger.error("ArtistController.getFacebookArtistsContaining: ", t)
+      InternalServerError("ArtistController.getFacebookArtistsContaining: " + t.getMessage)
     }
   }
 
