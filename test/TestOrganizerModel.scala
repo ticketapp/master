@@ -13,6 +13,7 @@ import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 import silhouette.UserDAOImpl
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import org.scalatest.Matchers._
 
 import scala.concurrent.Await
 
@@ -34,6 +35,84 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
         } finally {
           whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
             _ mustBe 1
+          }
+        }
+      }
+    }
+
+    "find organizers" in {
+      val organizer = Organizer(None, Option("facebookId22"), "organizerTest22", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
+        try {
+          savedOrganizer mustEqual OrganizerWithAddress(
+            organizer.copy(
+              id = Some(savedOrganizer.organizer.id.get),
+              description = Some("<div class='column large-12'>description</div>")),
+            None)
+          whenReady(organizerMethods.find(0, 0), timeout(Span(5, Seconds))) { foundOrganizers =>
+            foundOrganizers should contain(savedOrganizer)
+          }
+        } finally {
+          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
+            _ mustBe 1
+          }
+        }
+      }
+    }
+
+    "find organizer by facebookId" in {
+      val organizer = Organizer(None, Option("facebookId222"), "organizerTest222", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
+        try {
+          savedOrganizer mustEqual OrganizerWithAddress(
+            organizer.copy(
+              id = Some(savedOrganizer.organizer.id.get),
+              description = Some("<div class='column large-12'>description</div>")),
+            None)
+          whenReady(organizerMethods.findIdByFacebookId(savedOrganizer.organizer.facebookId), timeout(Span(5, Seconds))) { foundOrganizer =>
+            foundOrganizer mustBe savedOrganizer.organizer.id
+          }
+        } finally {
+          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
+            _ mustBe 1
+          }
+        }
+      }
+    }
+
+    "find organizers near geoPoint" in {
+      val organizer = Organizer(None, Option("facebookId2222"), "organizerTest2222", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+      val organizer1 = Organizer(None, Option("facebookId22222"), "organizerTest22222", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("6.4,6.6").get))
+      val organizer2 = Organizer(None, Option("facebookId222222"), "organizerTest222222", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("7.4,7.6").get))
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
+        whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer1, None)), timeout(Span(5, Seconds))) { savedOrganizer1 =>
+          whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer2, None)), timeout(Span(5, Seconds))) { savedOrganizer2 =>
+            try {
+              whenReady(organizerMethods.findNear(geographicPointMethods.stringToGeographicPoint("7.4,7.6").get, 10, 0),
+                timeout(Span(5, Seconds))) { foundOrganizers =>
+                foundOrganizers should contain inOrder(savedOrganizer2, savedOrganizer1, savedOrganizer)
+              }
+            } finally {
+              whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+              whenReady(organizerMethods.delete(savedOrganizer1.organizer.id.get), timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+              whenReady(organizerMethods.delete(savedOrganizer2.organizer.id.get), timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+            }
           }
         }
       }
@@ -71,6 +150,52 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
           try {
             whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
+            timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(organizerMethods.isFollowed(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
+                timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe true
+              }
+            }
+          } finally {
+            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, savedOrganizer.organizer.id.get)),
+              timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe 1
+
+                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    "be followed by facebookId" in {
+      val organizer = Organizer(None, Option("facebookId44"), "organizerTest44", Option("description"), None,
+        None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+      val loginInfo: LoginInfo = LoginInfo("providerId44", "providerKey44")
+      val uuid: UUID = UUID.randomUUID()
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName44"),
+        lastName = Option("lastName"),
+        fullName = Option("fullName"),
+        email = Option("email44"),
+        avatarURL = Option("avatarUrl"))
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
+        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
+          try {
+            whenReady(organizerMethods.followByFacebookId(uuid, savedOrganizer.organizer.facebookId.get),
             timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
@@ -188,9 +313,14 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
         try {
           whenReady(organizerMethods.saveWithEventRelation(organizer, savedEvent.id.get), timeout(Span(5, Seconds))) { savedOrganizer =>
             whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
+              whenReady(organizerMethods.findAllByEventId(foundEvent.get.id.get), timeout(Span(5, Seconds))) { foundOrganizers =>
 
-              organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get))
-              organizerMethods.delete(savedOrganizer.id.get)
+                foundOrganizers.head.organizer mustBe savedOrganizer
+                foundOrganizers.size mustBe 1
+
+                organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get))
+                organizerMethods.delete(savedOrganizer.id.get)
+              }
             }
           }
         } finally {
@@ -205,7 +335,24 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
       }
     }
 
-    //find save and delete with address
+    "save and find an organizer with his address" in {
+      whenReady (organizerMethods.getOrganizerInfo(Option("164354640267171")), timeout(Span(5, Seconds))) { organizerInfos =>
+
+        organizerInfos.get.organizer.name mustBe "Le Transbordeur"
+
+        whenReady(organizerMethods.saveWithAddress(organizerInfos.get), timeout(Span(5, Seconds))) { savedOrganizer =>
+          try {
+            savedOrganizer.organizer.name mustBe "Le Transbordeur"
+            savedOrganizer.address.get mustBe Address(savedOrganizer.address.get.id,
+              Option(geographicPointMethods.stringToGeographicPoint("45.7839103,4.860398399999999").get),
+            Some("villeurbanne"),Some("69100"),Some("3 boulevard de la bataille de stalingrad"))
+          } finally {
+           organizerMethods.delete(savedOrganizer.organizer.id.get)
+          }
+        }
+      }
+    }
+    //find nearCity
   }
 }
 
