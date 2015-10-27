@@ -18,6 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
+
 case class Event(id: Option[Long],
                  facebookId: Option[String],
                  isPublic: Boolean,
@@ -52,26 +53,30 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     with MyDBTableDefinitions {
 
   def find(id: Long): Future[Option[EventWithRelations]] = {
-    val query2 = for {
+    val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-      optionalEventAddresses) <- events joinLeft
+      optionalEventAddresses) <- events
+          .filter(_.id === id) joinLeft
         (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
         (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
         (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
         (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
         (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
-      if eventWithOptionalEventOrganizers._1.id === id
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query2.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)) map {
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)) map {
       _.headOption
     }
   }
 
   def eventWithRelationsTupleToEventWithRelationClass(eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]), Option[(EventArtistRelation, Artist)], Option[(EventPlaceRelation, Place)], Option[(EventGenreRelation, Genre)], Option[(EventAddressRelation, Address)])])
   : Vector[EventWithRelations] = {
+
+    println("eventIds= " + eventWithRelations.map(_._1._1.id))
     val groupedByEvents = eventWithRelations.groupBy(_._1._1)
+
+    println("groupedByEvents = " + groupedByEvents)
 
     groupedByEvents.map { eventWithOptionalRelations =>
       val event = eventWithOptionalRelations._1
@@ -96,28 +101,82 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }.toVector
   }
 
+  def eventWithRelationsTupleToEventWithRelationClass(geographicPoint: Geometry, eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]), Option[(EventArtistRelation, Artist)], Option[(EventPlaceRelation, Place)], Option[(EventGenreRelation, Genre)], Option[(EventAddressRelation, Address)])])
+  : Vector[EventWithRelations] = {
+
+    println("eventIds= " + eventWithRelations.map(_._1._1.id))
+    val groupedByEvents = eventWithRelations.groupBy(_._1._1)
+
+    println("groupedByEvents = " + groupedByEvents)
+
+    val eventsWihRelations = groupedByEvents.map { eventWithOptionalRelations =>
+      val event = eventWithOptionalRelations._1
+      val relations = eventWithOptionalRelations._2
+      val organizers = relations collect {
+        case ((_, Some((_, organizer: Organizer))), _, _, _, _) => organizer
+      }
+      val artists = relations collect {
+        case ((_, _), Some((_, artist: Artist)), _, _, _) => artist
+      }
+      val places = relations collect {
+        case ((_, _), _, Some((_, place: Place)), _, _) => place
+      }
+      val genres = relations collect {
+        case ((_, _), _, _, Some((_, genre: Genre)), _) => genre
+      }
+      val addresses = relations collect {
+        case ((_, _), _, _, _, Some((_, address: Address))) => address
+      }
+
+      EventWithRelations(event, organizers, artists, places, genres, addresses)
+    }.toVector
+
+    val eventsWihRelationsWithoutGeoPoint = eventsWihRelations
+      .filter(_.event.geographicPoint.isEmpty)
+    val eventsWihRelationsSortedByGeoPoint = eventsWihRelations
+      .filter(_.event.geographicPoint.nonEmpty)
+      .sortBy(event => geographicPoint.distance(event.event.geographicPoint.get))
+    eventsWihRelationsSortedByGeoPoint ++ eventsWihRelationsWithoutGeoPoint
+  }
+
+  def test(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Event]] = {
+    val query = for {
+      event <- events
+        //        .filter(event => event.endTime.nonEmpty && event.endTime > now ||
+        //          event.endTime.isEmpty && event.startTime > twelveHoursAgo)
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(offset)
+        .take(numberToReturn)
+    } yield event
+
+    db.run(query.result)
+  }
+
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
+
     val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
       optionalEventAddresses) <- events
+//        .filter(event => event.endTime.nonEmpty && event.endTime > now ||
+//          event.endTime.isEmpty && event.startTime > twelveHoursAgo)
         .sortBy(_.geographicPoint <-> geographicPoint)
         .drop(offset)
         .take(numberToReturn) joinLeft
-        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
-        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
-        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
-        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
-        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
-
-        if (eventWithOptionalEventOrganizers._1.endTime.nonEmpty && eventWithOptionalEventOrganizers._1.endTime > now) ||
-          (eventWithOptionalEventOrganizers._1.endTime.isEmpty && eventWithOptionalEventOrganizers._1.startTime > twelveHoursAgo)
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+//
+//        if (eventWithOptionalEventOrganizers._1.endTime.nonEmpty && eventWithOptionalEventOrganizers._1.endTime > now) ||
+//          (eventWithOptionalEventOrganizers._1.endTime.isEmpty && eventWithOptionalEventOrganizers._1.startTime > twelveHoursAgo)
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query
-      .result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations =>
+      eventWithRelationsTupleToEventWithRelationClass(geographicPoint, eventWithRelations))
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = geographicPointMethods
@@ -126,159 +185,260 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
   }
 
-  def findInPeriodNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
-    val now = DateTime.now()
-    val twelveHoursAgo = now.minusHours(12)
-
-    val query = events
-      .filter(event =>
-        (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-      .sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(offset)
-      .take(numberToReturn)
-    db.run(query.result)
-  }
-
-  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+  def findInPeriodNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
+  : Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val xHoursAgo = now.minusHours(hourInterval)
 
-    val query = events
-      .filter(event => (event.startTime < now) && (event.startTime > xHoursAgo))
-      .sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(offset)
-      .take(numberToReturn)
-    db.run(query.result)
+    val query = for {
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events
+        .filter(event =>
+          (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > xHoursAgo))
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(offset)
+        .take(numberToReturn) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
+
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findAllByGenre(genreName: String, geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[Event]] = {
+  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
+  : Future[Seq[EventWithRelations]] = {
+    val now = DateTime.now()
+    val xHoursAgo = now.minusHours(hourInterval)
+
+    val query = for {
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events
+        .filter(event => (event.startTime < now) && (event.startTime > xHoursAgo))
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(offset)
+        .take(numberToReturn) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
+
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+  }
+
+  def findAllByGenre(genreName: String, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
+  : Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
 
     val query = for {
       genre <- genres if genre.name === genreName
       eventGenre <- eventsGenres if eventGenre.genreId === genre.id
-      event <- events if event.id === eventGenre.eventId &&
-      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events
+//        .filter(event => ((event.endTime.nonEmpty && event.endTime > now) ||
+//          (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(offset)
+        .take(numberToReturn) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
 
-    //getEventProperties
-    db.run(query.sortBy(_.geographicPoint <-> geographicPoint)
-      .drop(offset)
-      .take(numberToReturn)
-      .result)
+      if eventWithOptionalEventOrganizers._1.id == eventGenre.eventId
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
+
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findAllByPlace(placeId: Long): Future[Seq[Event]] = {
+  def findAllByPlace(placeId: Long): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
 
     val query = for {
       place <- places if place.id === placeId
       eventPlace <- eventsPlaces if eventPlace.placeId === place.id
-      event <- events if event.id === eventPlace.eventId &&
-        ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event => event.id === eventPlace.eventId && ((event.endTime.nonEmpty && event.endTime > now)
+          || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
+        .sortBy(_.startTime.desc) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
 
-    //getEventProperties
-    db.run(query.sortBy(_.startTime.desc).result)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
+
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
 
-  def findAllPassedByPlace(placeId: Long): Future[Seq[Event]] = {
+  def findAllPassedByPlace(placeId: Long): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
 
     val query = for {
       place <- places if place.id === placeId
       eventPlace <- eventsPlaces if eventPlace.placeId === place.id
-      event <- events if event.id === eventPlace.eventId && event.startTime < now
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event => event.id === eventPlace.eventId && event.startTime < now)
+        .sortBy(_.startTime.desc) joinLeft
+        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-    //getEventProperties
-    db.run(query.sortBy(_.startTime.desc).result)
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
   
-    def findAllByOrganizer(organizerId: Long): Future[Seq[Event]] = {
+    def findAllByOrganizer(organizerId: Long): Future[Seq[EventWithRelations]] = {
       val now = DateTime.now()
       val twelveHoursAgo = now.minusHours(12)
 
       val query = for {
         organizer <- organizers if organizer.id === organizerId
         eventOrganizer <- eventsOrganizers if eventOrganizer.organizerId === organizer.id
-        event <- events if event.id === eventOrganizer.eventId &&
-        ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-      } yield event
+        (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+          optionalEventAddresses) <- events
+          .filter(event => event.id === eventOrganizer.eventId && event.startTime < now)
+          .sortBy(_.startTime.desc) joinLeft
+            (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+            (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+            (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+            (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+            (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+      } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+          optionalEventAddresses)
 
-      //getEventProperties
-      db.run(query.sortBy(_.startTime.desc).result)
+      db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
     }
 
-  def findAllPassedByOrganizer(organizerId: Long): Future[Seq[Event]] = {
+  def findAllPassedByOrganizer(organizerId: Long): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
 
     val query = for {
       organizer <- organizers if organizer.id === organizerId
-      eventOrganizer <- eventsOrganizers
-      event <- events if event.id === eventOrganizer.eventId && event.startTime < now
-    } yield event
+      eventOrganizer <- eventsOrganizers if eventOrganizer.organizerId === organizer.id
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event => event.id === eventOrganizer.eventId && event.startTime < now)
+        .sortBy(_.startTime.desc) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-    //getEventProperties
-    db.run(query.sortBy(_.startTime.desc).result)
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findAllByArtist(facebookUrl: String): Future[Seq[Event]] = {
+  def findAllByArtist(facebookUrl: String): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
 
     val query = for {
       artist <- artists if artist.facebookUrl === facebookUrl
       eventArtist <- eventsArtists if eventArtist.artistId === artist.id
-      event <- events if event.id === eventArtist.eventId &&
-      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event => event.id === eventArtist.eventId &&
+          ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
+        .sortBy(_.startTime.desc) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-    //getEventProperties
-    db.run(query.sortBy(_.startTime.desc).result)
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findAllPassedByArtist(artistId: Long): Future[Seq[Event]] = {
+  def findAllPassedByArtist(artistId: Long): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
 
     val query = for {
       artist <- artists if artist.id === artistId
       eventArtist <- eventsArtists if eventArtist.artistId === artist.id
-      event <- events if event.id === eventArtist.eventId && event.startTime < now
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event => event.id === eventArtist.eventId && event.startTime < now)
+        .sortBy(_.startTime.desc) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-    //getEventProperties
-    db.run(query.sortBy(_.startTime.desc).result)
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findAllContaining(pattern: String): Future[Seq[Event]] = {
+  def findAllContaining(pattern: String): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
     val lowercasePattern = pattern.toLowerCase
     val query = for {
-      event <- events if (event.name.toLowerCase like s"%$lowercasePattern%") &&
-      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event =>
+          (event.name.toLowerCase like s"%$lowercasePattern%") &&
+          ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
+        .take(20)
+        .sortBy(_.startTime.desc) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-    db.run(query.take(20).result)
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findAllContaining(pattern: String, geographicPoint: Geometry): Future[Seq[Event]] = {
+  def findAllContaining(pattern: String, geographicPoint: Geometry): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
     val lowercasePattern = pattern.toLowerCase
     val query = for {
-      event <- events if (event.name.toLowerCase like s"%$lowercasePattern%") &&
-      ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event => (event.name.toLowerCase like s"%$lowercasePattern%") &&
+          ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .take(20) joinLeft
+        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-    db.run(query.sortBy(_.geographicPoint <-> geographicPoint).take(20).result)
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def findAllByCityPattern(cityPattern: String): Future[Seq[Event]] = {
+  def findAllByCityPattern(cityPattern: String): Future[Seq[EventWithRelations]] = {
 //        """SELECT e.* FROM eventsAddresses eA
 //          | INNER JOIN events e ON e.eventId = eA.eventId AND
 //          |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
