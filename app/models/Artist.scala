@@ -281,7 +281,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
 
-  def getEventuallyFacebookArtists(pattern: String): Future[Seq[Artist]] = {
+  def getEventuallyFacebookArtists(pattern: String): Future[Seq[ArtistWithWeightedGenres]] = {
     WS.url("https://graph.facebook.com/v2.2/search")
      .withQueryString(
        "q" -> pattern,
@@ -293,14 +293,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .map { readFacebookArtists }
   }
 
-  def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[Artist]] = {
+  def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
     val artistNames = splitArtistNamesInTitle(eventName)
     Future.sequence(
       artistNames.map { artistName => getArtistsForAnEvent(artistName, websites) }
     ).map { _.flatten }
   }
 
-  def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[Artist]] = {
+  def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
     getEventuallyFacebookArtists(artistName).flatMap {
       case noArtist if noArtist.isEmpty && artistName.split("\\W+").size >= 2 =>
         val nestedEventuallyArtists = artistName.split("\\W+").toSeq.map { getArtistsForAnEvent(_, eventWebSites) }
@@ -310,19 +310,20 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def filterFacebookArtistsForEvent(artists: Seq[Artist], artistName: String, eventWebsites: Set[String]): Seq[Artist] =
+  def filterFacebookArtistsForEvent(artists: Seq[ArtistWithWeightedGenres], artistName: String, eventWebsites: Set[String]): Seq[ArtistWithWeightedGenres] =
     artists match {
-    case onlyOneArtist: Seq[Artist] if onlyOneArtist.size == 1 && onlyOneArtist.head.name.toLowerCase == artistName =>
-      onlyOneArtist
-    case otherCase: Seq[Artist] =>
-      val artists = otherCase.flatMap { artist: Artist =>
-        if ((artist.websites intersect eventWebsites).nonEmpty) Option(artist)
+    case onlyOneArtist: Seq[ArtistWithWeightedGenres] if onlyOneArtist.size == 1 &&
+      onlyOneArtist.head.artist.name.toLowerCase == artistName =>
+        onlyOneArtist
+    case otherCase: Seq[ArtistWithWeightedGenres] =>
+      val artists = otherCase.flatMap { artist: ArtistWithWeightedGenres =>
+        if ((artist.artist.websites intersect eventWebsites).nonEmpty) Option(artist)
         else None
       }
       artists
   }
 
-  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[Artist]]] = {
+  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[Option[ArtistWithWeightedGenres]]] = {
     Future.sequence(
       websites.map {
         case website if website contains "facebook" =>
@@ -395,7 +396,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
 
-  def getFacebookArtistByFacebookUrl(url: String): Future[Option[Artist]] = {
+  def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenres]] = {
     WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
      .withQueryString(
        "fields" -> facebookArtistFields,
@@ -432,8 +433,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
    (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
      maybeLikes, maybeCountry))
 
-  def readFacebookArtists(facebookWSResponse: WSResponse): Seq[Artist] = {
-    val collectOnlyArtistsWithCover: Reads[Seq[Artist]] = Reads.seq(readArtist).map { artists =>
+  def readFacebookArtists(facebookWSResponse: WSResponse): Seq[ArtistWithWeightedGenres] = {
+    val collectOnlyArtistsWithCover: Reads[Seq[ArtistWithWeightedGenres]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
        case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
        maybeDescription, maybeGenre, maybeLikes, maybeCountry)
@@ -443,7 +444,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       }.toVector
     }
     (facebookWSResponse.json \ "data")
-     .asOpt[Seq[Artist]](collectOnlyArtistsWithCover)
+     .asOpt[Seq[ArtistWithWeightedGenres]](collectOnlyArtistsWithCover)
      .getOrElse(Seq.empty)
   }
 
@@ -452,7 +453,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       _.toLowerCase.replace("live", "").replace("djset", "").replace("dj set", "").replace("set", "").trim()
     }
 
-  def readFacebookArtist(facebookWSResponse: WSResponse): Option[Artist] = {
+  def readFacebookArtist(facebookWSResponse: WSResponse): Option[ArtistWithWeightedGenres] = {
     facebookWSResponse.json
      .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
      Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
@@ -471,7 +472,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
-                maybeCountry: Option[String]): Artist = {
+                maybeCountry: Option[String]): ArtistWithWeightedGenres = {
     val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val websitesSet = utilities.getNormalizedWebsitesInText(maybeWebsites)
      .filterNot(_.contains("facebook.com"))
@@ -481,7 +482,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      case Some(genre) => genreMethods.genresStringToGenresSet(genre)
      case None => Set.empty
     }
-    Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet)
+    ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet),
+    genres.toSeq.map{genre => GenreWithWeight(genre, 0) }.toVector)
   }
 
   def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =
