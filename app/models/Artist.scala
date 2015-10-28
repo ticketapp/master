@@ -14,7 +14,7 @@ import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
 import services._
 import scala.collection.immutable.Seq
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex
@@ -54,7 +54,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
-      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
+      (artist, optionalArtistGenreAndGenre) <- artists.drop(offset).take(numberToReturn) joinLeft
         (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield (artist, optionalArtistGenreAndGenre)
 

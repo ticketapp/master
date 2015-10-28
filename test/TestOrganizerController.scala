@@ -8,6 +8,8 @@ import models._
 import net.codingwell.scalaguice.ScalaModule
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
+import play.api.Configuration
+import play.api.db.evolutions.Evolutions
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
@@ -196,7 +198,14 @@ trait Context extends Scope {
   /**
    * The application.
    */
-  lazy val application = new GuiceApplicationBuilder()
+  lazy val application = new GuiceApplicationBuilder().configure(Configuration.from(Map(
+    "slick.dbs.default.driver" -> "slick.driver.PostgresDriver$",
+    "slick.dbs.default.db.driver" -> "org.postgresql.Driver",
+    "slick.dbs.default.db.url" -> "jdbc:postgresql://localhost:5432/tests",
+    "slick.dbs.default.db.user" -> "simon",
+    "slick.dbs.default.db.password" -> "root",
+    "slick.dbs.default.db.connectionTimeout" -> "5 seconds",
+    "slick.dbs.default.db.connectionPool" -> "disabled")))
     .overrides(new FakeModule)
     .build()
 }

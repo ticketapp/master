@@ -305,11 +305,11 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
         Option("description"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
         List.empty, List.empty, List.empty, List.empty, List.empty*/)
 
-      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
+      whenReady(eventMethods.save(EventWithRelations(event)), timeout(Span(5, Seconds))) { savedEvent =>
         try {
           whenReady(organizerMethods.saveWithEventRelation(organizer, savedEvent.id.get), timeout(Span(5, Seconds))) { savedOrganizer =>
             whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
-              whenReady(organizerMethods.findAllByEventId(foundEvent.get.id.get), timeout(Span(5, Seconds))) { foundOrganizers =>
+              whenReady(organizerMethods.findAllByEventId(foundEvent.get.event.id.get), timeout(Span(5, Seconds))) { foundOrganizers =>
 
                 foundOrganizers.head.organizer mustBe savedOrganizer
                 foundOrganizers.size mustBe 1

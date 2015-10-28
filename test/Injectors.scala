@@ -1,4 +1,6 @@
 import models._
+import play.api.Configuration
+import play.api.db.DBApi
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
@@ -6,7 +8,16 @@ import silhouette.UserDAOImpl
 
 
 trait Injectors {
-  lazy val appBuilder = new GuiceApplicationBuilder()
+  lazy val appBuilder = new GuiceApplicationBuilder().configure(Configuration.from(Map(
+//        "play.evolutions.db.default.autoApply" -> true,
+//        "evolutionplugin" -> "disabled",
+        "slick.dbs.default.driver" -> "slick.driver.PostgresDriver$",
+        "slick.dbs.default.db.driver" -> "org.postgresql.Driver",
+        "slick.dbs.default.db.url" -> "jdbc:postgresql://localhost:5432/tests",
+        "slick.dbs.default.db.user" -> "simon",
+        "slick.dbs.default.db.password" -> "root",
+        "slick.dbs.default.db.connectionTimeout" -> "5 seconds",
+        "slick.dbs.default.db.connectionPool" -> "disabled")))
   lazy val injector = appBuilder.injector()
   lazy val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
   lazy val utilities = new Utilities()
@@ -22,7 +33,9 @@ trait Injectors {
   lazy val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
     trackMethods, utilities)
   lazy val eventMethods = new EventMethods(dbConfProvider, organizerMethods, artistMethods, tariffMethods,
-    geographicPointMethods, utilities)
+    genreMethods, geographicPointMethods, utilities)
   lazy val userDAOImpl = new UserDAOImpl(dbConfProvider)
   lazy val playlistMethods = new PlaylistMethods(dbConfProvider, utilities)
+
+  lazy val databaseApi = injector.instanceOf[DBApi]
 }

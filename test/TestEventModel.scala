@@ -4,29 +4,41 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
+import play.api.db.evolutions.Evolutions
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
+class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
+
+  override def beforeAll() = {
+    Evolutions.applyEvolutions(databaseApi.database("tests"))
+  }
+
+  override def afterAll() = {
+    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
+  }
 
   "An event" must {
 
     "be saved and deleted in database" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name",
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         try {
           whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
             foundEvent.get mustEqual
-              event.copy(id = Some(savedEvent.id.get), startTime = foundEvent.get.startTime, endTime =  foundEvent.get.endTime)
+              EventWithRelations(event.event.copy(
+                id = Some(savedEvent.id.get),
+                startTime = foundEvent.get.event.startTime,
+                endTime =  foundEvent.get.event.endTime))
           }
         } finally {
           whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
@@ -45,12 +57,11 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
         firstName = Option("firstName"),
         lastName = Option("lastName"),
         fullName = Option("fullName"),
-        email = Option("email"),
+        email = Option("emailFollowEvent"),
         avatarURL = Option("avatarUrl"))
-      val event = Event(None, None, isPublic = true, isActive = true, "name1",
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name1",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description1"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description1"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
           try {
@@ -88,10 +99,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
         fullName = Option("fullName1"),
         email = Option("email1"),
         avatarURL = Option("avatarUrl"))
-      val event = Event(None, None, isPublic = true, isActive = true, "name2",
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name2",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description2"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description2"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
           try {
@@ -122,11 +132,10 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
       }
     }
 
-    "return events found by genre" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
+    "find all events by genre" in {
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       val genre = Genre(None, "rockiedockie", 'r')
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
@@ -136,10 +145,12 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
               genreEventRelation mustBe 1
 
-              whenReady(eventMethods.findAllByGenre("rockiedockie", geographicPointMethods.stringToGeographicPoint("5.4,5.6").get, 0, 1),
+              whenReady(
+                eventMethods.findAllByGenre("rockiedockie",
+                  geographicPointMethods.stringToGeographicPoint("5.4,5.6").get, offset = 0, numberToReturn = 100000),
                 timeout(Span(5, Seconds))) { eventsByGenre =>
 
-                eventsByGenre must contain(savedEvent)
+                eventsByGenre must contain(EventWithRelations(event = savedEvent, genres = Vector(savedGenre)))
               }
             }
           } finally {
@@ -160,11 +171,10 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
       }
     }
 
-    "return events linked to a place" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
+    "find all events by place" in {
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description3"), new DateTime(), None, 16, None, None, None))
       val place = Place(None, "name", Some("12345"), None, None, None, None, None, None, None)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(placeMethods.save(place), timeout(Span(5, Seconds))) { savedPlace =>
@@ -176,7 +186,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
               whenReady(eventMethods.findAllByPlace(savedPlace.id.get), timeout(Span(5, Seconds))) { eventsByPlace =>
 
-                eventsByPlace must contain(savedEvent)
+                eventsByPlace must contain(EventWithRelations(
+                  event = savedEvent,
+                  places = Vector(savedPlace)))
               }
             }
           } finally {
@@ -198,10 +210,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "return passed events for a place" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
+        None, None, new DateTime(0), None, 16, None, None, None))
       val place = Place(None, "name", Some("12345"), None, None, None, None, None, None, None)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(placeMethods.save(place), timeout(Span(5, Seconds))) { savedPlace =>
@@ -217,7 +227,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
                 whenReady(eventMethods.findAllPassedByPlace(savedPlace.id.get), timeout(Span(5, Seconds))) { passedEventsByPlace =>
 
-                  passedEventsByPlace must contain(savedEvent)
+                  passedEventsByPlace must contain(EventWithRelations(savedEvent, places = Vector(savedPlace)))
                 }
               }
             }
@@ -240,10 +250,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "return events linked to an artist" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
         "facebookUrl123"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
@@ -256,7 +265,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
               whenReady(eventMethods.findAllByArtist(savedArtist.facebookUrl), timeout(Span(5, Seconds))) { eventsByArtist =>
 
-                eventsByArtist must contain(savedEvent)
+                eventsByArtist must contain(EventWithRelations(event = savedEvent, artists = Vector(savedArtist)))
               }
             }
           } finally {
@@ -278,10 +287,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "return passed events for an artist" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None))
       val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"),
         Option("description"), "facebookUrl1234"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
@@ -298,7 +306,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
                 whenReady(eventMethods.findAllPassedByArtist(savedArtist.id.get), timeout(Span(5, Seconds))) { passedEventsByArtist =>
 
-                  passedEventsByArtist must contain(savedEvent)
+                  passedEventsByArtist must contain(EventWithRelations(event = savedEvent, artists = Vector(savedArtist)))
                 }
               }
             }
@@ -321,10 +329,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "return events linked to an organizer" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       val organizer = Organizer(None, Option("facebookId10"), "organizerTest2")
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
@@ -336,7 +343,7 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
               whenReady(eventMethods.findAllByOrganizer(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { eventsByOrganizer =>
 
-                eventsByOrganizer must contain(savedEvent)
+                eventsByOrganizer must contain(EventWithRelations(event = savedEvent, organizers = Vector(savedOrganizer.organizer)))
               }
             }
           } finally {
@@ -357,10 +364,9 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
     }
 
     "return passed events for an organizer" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+        Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None))
       val organizer = Organizer(None, Option("facebookId101"), "organizerTest21")
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
@@ -377,7 +383,8 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
                 whenReady(eventMethods.findAllPassedByOrganizer(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
                   passedEventsByOrganizer =>
 
-                  passedEventsByOrganizer must contain(savedEvent)
+                  passedEventsByOrganizer must contain(
+                    EventWithRelations(event = savedEvent, organizers = Vector(savedOrganizer.organizer)))
                 }
               }
             }
@@ -407,49 +414,58 @@ class TestEventModel extends PlaySpec with OneAppPerSuite with Injectors {
 
     "find a complete event by facebookId" in {
       whenReady(eventMethods.findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(5, Seconds))) { event =>
-        event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
+        event.event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }
 
     "find nearest events" in {
-      val event = Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("45.041622, 4.839627").get),
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
-      val event1 = Event(None, None, isPublic = true, isActive = true, "name4",
-        Option(geographicPointMethods.stringToGeographicPoint("45.721275, 4.829842").get),
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
-      val event2 = Event(None, None, isPublic = true, isActive = true, "name5",
-        Option(geographicPointMethods.stringToGeographicPoint("45.7654204,4.8393692").get),
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
-      List.empty, List.empty, List.empty, List.empty, List.empty)*/)
+      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
+        Option(geographicPointMethods.stringToGeographicPoint("46, 4").get),
+        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
+      val event1 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name4",
+        Option(geographicPointMethods.stringToGeographicPoint("45, 4").get),
+        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
+      val event2 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name5",
+        Option(geographicPointMethods.stringToGeographicPoint("120, 120").get),
+        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
+      val event3 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name5", None, None,
+        new DateTime(), None, 16, None, None, None))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(eventMethods.save(event1), timeout(Span(5, Seconds))) { savedEvent1 =>
           whenReady(eventMethods.save(event2), timeout(Span(5, Seconds))) { savedEvent2 =>
-            try {
-              whenReady(eventMethods.findNear(geographicPointMethods.stringToGeographicPoint("45.767995, 4.817010").get, 3, 0),
-                timeout(Span(5, Seconds))) { eventsSeq =>
+            whenReady(eventMethods.save(event3), timeout(Span(5, Seconds))) { savedEvent3 =>
+              try {
+                whenReady(
+                  eventMethods.findNear(
+                    geographicPointMethods.stringToGeographicPoint("45, 4").get, numberToReturn = 10000, offset = 0),
+                  timeout(Span(5, Seconds))) { eventsSeq =>
 
-                eventsSeq should contain inOrder(savedEvent2, savedEvent1, savedEvent)
+                  eventsSeq should contain inOrder(
+                    EventWithRelations(savedEvent1),
+                    EventWithRelations(savedEvent),
+                    EventWithRelations(savedEvent2),
+                    EventWithRelations(savedEvent3))
+                }
+              } finally {
+                eventMethods.delete(savedEvent.id.get)
+                eventMethods.delete(savedEvent1.id.get)
+                eventMethods.delete(savedEvent2.id.get)
+                eventMethods.delete(savedEvent3.id.get)
               }
-            } finally {
-              eventMethods.delete(savedEvent.id.get)
-              eventMethods.delete(savedEvent1.id.get)
-              eventMethods.delete(savedEvent2.id.get)
             }
           }
         }
       }
     }
 
-    /*"have the genre of its artists" in {
+    "have the genre of its artists" in {
       whenReady(eventMethods.findEventOnFacebookByFacebookId("758796230916379"), timeout(Span(5, Seconds))) { event =>
         event.genres should contain allOf (Genre(None, "hip", 'a'), Genre(None, "hop", 'a'))
       }
-    }*/
+    }
 
     //save with an address
     //get with an address
+    //get with all relations see docker
   }
 }

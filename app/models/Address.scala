@@ -91,12 +91,12 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
         Logger.error("Address.saveAddressAndEventRelation: address saved did not return an id")
         Future(0)
       case Some(id) =>
-      saveEventAddressRelation(eventId, id)
+      saveEventAddressRelation(EventAddressRelation(eventId, id))
     }
   }
 
-  def saveEventAddressRelation(eventId: Long, addressId: Long): Future[Int] =
-    db.run(eventsAddresses += ((eventId, addressId)))
+  def saveEventAddressRelation(eventAddressRelation: EventAddressRelation): Future[Int] =
+    db.run(eventsAddresses += eventAddressRelation)
 
   def delete(id: Long): Future[Int] = db.run(addresses.filter(_.id === id).delete)
 }

@@ -147,7 +147,7 @@ class EventController @Inject()(ws: WSClient,
         Future(BadRequest(formWithErrors.errorsAsJson))
       },
       event =>
-        eventMethods.save(event) map { event =>
+        eventMethods.save(EventWithRelations(event)) map { event =>
           Ok(Json.toJson(event))
         } recover {
           case e =>
