@@ -143,7 +143,9 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def findAllContaining(pattern: String): Future[Seq[Place]] = {
     val lowercasePattern = pattern.toLowerCase
-    val query = places.filter(place => place.name.toLowerCase like s"%$lowercasePattern%").take(5)
+    val query = places
+      .filter(place => place.name.toLowerCase like s"%$lowercasePattern%")
+      .take(5)
     db.run(query.result)
   }
 

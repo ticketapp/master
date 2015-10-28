@@ -1,13 +1,25 @@
 import models._
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
+import play.api.db.evolutions.Evolutions
 
-class TestAddressModel extends PlaySpec with OneAppPerSuite with Injectors {
+
+class TestAddressModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
+
+  override def beforeAll() = {
+    Evolutions.applyEvolutions(databaseApi.database("tests"))
+  }
+
+  override def afterAll() = {
+    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
+  }
 
   "An address" must {
 
     "not be created if empty" in {
+
       Address(None, None, Some("jkl"), None, None)
       Address(None, None, None, Some("jkl"), None)
       Address(None, None, None, None, Some("jkl"))
