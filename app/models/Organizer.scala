@@ -58,6 +58,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     } yield organizerWithAddress
 
     db.run(query.result) map(_ map OrganizerWithAddress.tupled)
+
   }
   //
 

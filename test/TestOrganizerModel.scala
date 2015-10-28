@@ -4,18 +4,14 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
-import silhouette.UserDAOImpl
-import scala.concurrent.duration._
-import scala.language.postfixOps
-import org.scalatest.Matchers._
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
 
