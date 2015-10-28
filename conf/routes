@@ -41,7 +41,6 @@ POST    /artists/:artistId/unfollowArtistByArtistId   @controllers.ArtistControl
 POST    /artists/:facebookId/followByFacebookId       @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
 GET     /artists/followed/                            @controllers.ArtistController.getFollowedArtists
 GET     /artists/:artistId/isFollowed                 @controllers.ArtistController.isArtistFollowed(artistId: Long)
-DELETE  /artists/:artistId                            @controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/:facebookUrl/events                  @controllers.EventController.findByArtist(facebookUrl: String)
 GET     /artists/:artistId/passedEvents               @controllers.EventController.findPassedByArtist(artistId: Long)
 GET     /artists/containing/:pattern                  @controllers.ArtistController.findArtistsContaining(pattern: String)
@@ -83,7 +82,7 @@ GET      /organizers/followed/                                            @contr
 #DELETE  /playlists/:playlistId                                           @controllers.PlaylistController.delete(playlistId: Long)
 #
 ################################## Genres ############################################
-#GET     /genres/:genre/artists                                            @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET      /genres/:genre/artists                                           @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
 #GET     /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################
