@@ -71,6 +71,7 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
         Await.result(trackMethods.save(track), 2 seconds)
         Await.result(trackMethods.save(track1), 2 seconds)
         Await.result(trackMethods.save(track2), 2 seconds)
+
         whenReady(playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(playlist, trackIdWithPlaylistRankSeq.toVector)),
           timeout(Span(5, Seconds))) { savedPlaylist =>
 
@@ -140,6 +141,7 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
         Await.result(trackMethods.save(track), 2 seconds)
         Await.result(trackMethods.save(track1), 2 seconds)
         Await.result(trackMethods.save(track2), 2 seconds)
+
         whenReady(playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(playlist, trackIdWithPlaylistRankSeq.toVector)),
           timeout(Span(5, Seconds))) { savedPlaylist =>
 
