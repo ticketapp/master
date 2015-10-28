@@ -31,11 +31,13 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
             "facebookId": "100297159501",
             "imagePath": "jskd",
             "websites": ["hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls","facebook.com/worakls"],
+            "genres": [{"name": "rock", "weight": 0}],
             "description": "artist.description"
           }
         }""")
         val Some(result) = route(FakeRequest(POST, "/artists/createArtist")
         .withJsonBody(artistJson))
+
         status(result) mustEqual OK
 
         //need to test enumerator
@@ -66,7 +68,6 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
 
     "find one artist by facebookUrl" in new Context {
       new WithApplication(application) {
-        val artistId = await(artistMethods.findAllContaining("worakls")).headOption.get.artist.id
         val Some(artist) = route(FakeRequest(GET, "/artists/worakls"))
         contentAsJson(artist).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
       }
@@ -177,6 +178,7 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
 
     "find tracks by facebookUrl" in new Context {
       new WithApplication(application) {
+
         val Some(tracks) = route(FakeRequest(GET, "/artists/worakls/tracks?numberToReturn=0&offset=0"))
 
         status(tracks) mustEqual OK
@@ -199,13 +201,13 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
 
     "find events by artistFacebookUrl" in new Context {
       new WithApplication(application) {
-        val event = Event(None, None, true, true, "artistController.findEventByFacebookId", None, None, new DateTime(),
+        val event = Event(None, None, true, true, "artistController.findEventByFacebookId", None, None, new DateTime(100000000000000L),
           None, 1, None, None, None)
         val passedEvent = Event(None, None, true, true, "artistController.findEventByFacebookIdPassedEvent", None, None, new DateTime(0),
           Option(new DateTime(0)), 1, None, None, None)
         val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
         val eventId = await(eventMethods.save(event)).id
-        val passedEventId = await(eventMethods.save(event)).id
+        val passedEventId = await(eventMethods.save(passedEvent)).id
         await(artistMethods.saveEventRelation(EventArtistRelation(eventId.get, artistId.get)))
         await(artistMethods.saveEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
         val Some(response) = route(FakeRequest(GET, "/artists/worakls/events"))
@@ -220,26 +222,36 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
       }
     }
 
-    /*"find passed events by artistId" in new Context {
+    "find passed events by artistId" in new Context {
       new WithApplication(application) {
-        val eventId = await(eventMethods.saveFacebookEventByFacebookId("11121")).id
-        val artistId = await(artistMethods.save(Artist(None, "artistTestEvent", Option("123456"), None))).id
+        val event = Event(None, None, true, true, "artistController.findEventByArtistId", None, None, new DateTime(100000000000000L),
+          None, 1, None, None, None)
+        val passedEvent = Event(None, None, true, true, "artistController.findEventByArtistIdPassedEvent", None, None, new DateTime(0),
+          Option(new DateTime(0)), 1, None, None, None)
+        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+        val eventId = await(eventMethods.save(event)).id
+        val passedEventId = await(eventMethods.save(passedEvent)).id
         await(artistMethods.saveEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+        await(artistMethods.saveEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
         val Some(response) = route(FakeRequest(GET, "/artists/" + artistId.get + "/passedEvents"))
 
         status(response) mustEqual OK
 
-        contentAsJson(response).toString must contain(""""name":"EventPassedTest","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
-        contentAsJson(response).toString must not contain """"name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc""""
+        contentAsJson(response).toString must contain(""""name":"artistController.findEventByArtistIdPassedEvent"""")
+        contentAsJson(response).toString must not contain """"name":"artistController.findEventByArtistId""""
         await(artistMethods.deleteEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+        await(artistMethods.deleteEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
       }
-    }*/
+    }
 
-    /*
-DELETE  /artists/:artistId                            @controllers.ArtistController.deleteArtist(artistId: Long)
-GET     /artists/:facebookUrl/events                  @controllers.EventController.findByArtist(facebookUrl: String)
-GET     /artists/:artistId/passedEvents               @controllers.EventController.findPassedByArtist(artistId: Long)
-GET     /artists/facebookContaining/:pattern
-    */
+    "find artists by genre" in new Context {
+      new WithApplication(application) {
+        val Some(response) = route(FakeRequest(GET, "/genres/rock/artists?numberToReturn=200&offset=0"))
+
+        status(response) mustEqual OK
+
+        contentAsJson(response).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
+      }
+    }
   }
 }

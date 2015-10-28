@@ -294,10 +294,10 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .get()
      .map { resp =>
        readFacebookArtists(resp) match {
-         case Success(a) =>
-           a
-         case Failure(e) =>
-           Logger.error(throw e)
+         case Success(success) =>
+           success
+         case Failure(e: Throwable) =>
+           Logger.error("ArtistModel.getEventuallyFacebookArtists :", e)
            Seq.empty
        }
      }
