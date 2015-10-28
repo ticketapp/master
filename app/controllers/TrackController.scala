@@ -66,8 +66,8 @@ class TrackController @Inject() (ws: WSClient,
     trackMethods.findAllByArtist(artistFacebookUrl, numberToReturn, offset) map { tracks =>
       Ok(Json.toJson(tracks))
     } recover { case t: Throwable =>
-      Logger.error("TrackController.findOrganizersContaining: ", t)
-      InternalServerError("TrackController.findOrganizersContaining: " + t.getMessage)
+      Logger.error("TrackController.findAllByArtist: ", t)
+      InternalServerError("TrackController.findAllByArtist: " + t.getMessage)
     }
   }
 

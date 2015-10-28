@@ -35,10 +35,13 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     artistMethods.getEventuallyFacebookArtists(pattern).map { artists =>
       Ok(Json.toJson(artists))
+    } recover { case t: Throwable =>
+      Logger.error("ArtistController.getFacebookArtistsContaining: ", t)
+      InternalServerError("ArtistController.getFacebookArtistsContaining: " + t.getMessage)
     }
   }
 
-  def artistsSinceOffsetBy(number: Int, offset: Int) =  Action.async {
+  def artistsSinceOffset(number: Int, offset: Int) =  Action.async {
     artistMethods.findSinceOffset(numberToReturn = number, offset = offset).map { artists =>
       Ok(Json.toJson(artists))
     }
@@ -57,7 +60,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   }
 
   def artistsByGenre(genre: String, numberToReturn: Int, offset: Int) = Action.async {
-    artistMethods.findAllByGenre(genre, numberToReturn, offset).map { artists =>
+    artistMethods.findAllByGenre(genre, offset = offset, numberToReturn = numberToReturn).map { artists =>
       Ok(Json.toJson(artists))
     }
   }
@@ -76,7 +79,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       },
 
       patternAndArtist => {
-        artistMethods.save(ArtistWithWeightedGenres(patternAndArtist.artistWithWeightedGenre.artist, Vector.empty)) map { artist =>
+        artistMethods.save(ArtistWithWeightedGenres(patternAndArtist.artistWithWeightedGenre.artist, patternAndArtist.artistWithWeightedGenre.genres)) map { artist =>
          val artistId = artist.id
          val artistWithArtistId = patternAndArtist.artistWithWeightedGenre.artist.copy(id = artistId)
          val patternAndArtistWithArtistId =
@@ -96,12 +99,6 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
         }
       }
     )
-  }
-
-  def deleteArtist(artistId: Long) = Action.async {
-    artistMethods.delete(artistId) map { result =>
-      Ok(Json.toJson(result))
-    }
   }
   
   def followArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>

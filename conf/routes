@@ -31,6 +31,7 @@ GET     /events/city/:pattern                         @controllers.EventControll
 GET     /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################### Artists ##############################################
+
 GET     /artists/since                                @controllers.ArtistController.artistsSinceOffset(numberToReturn: Int, offset: Int)
 GET     /artists/:facebookUrl                         @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
 GET     /artists/:facebookUrl/tracks                  @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
@@ -41,7 +42,6 @@ POST    /artists/:artistId/unfollowArtistByArtistId   @controllers.ArtistControl
 POST    /artists/:facebookId/followByFacebookId       @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
 GET     /artists/followed/                            @controllers.ArtistController.getFollowedArtists
 GET     /artists/:artistId/isFollowed                 @controllers.ArtistController.isArtistFollowed(artistId: Long)
-DELETE  /artists/:artistId                            @controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/:facebookUrl/events                  @controllers.EventController.findByArtist(facebookUrl: String)
 GET     /artists/:artistId/passedEvents               @controllers.EventController.findPassedByArtist(artistId: Long)
 GET     /artists/containing/:pattern                  @controllers.ArtistController.findArtistsContaining(pattern: String)
@@ -83,7 +83,7 @@ GET      /organizers/followed/                                            @contr
 #DELETE  /playlists/:playlistId                                           @controllers.PlaylistController.delete(playlistId: Long)
 #
 ################################## Genres ############################################
-#GET     /genres/:genre/artists                                            @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET      /genres/:genre/artists                                           @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
 #GET     /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################

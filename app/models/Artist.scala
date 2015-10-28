@@ -16,6 +16,7 @@ import services._
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex
 
 
@@ -49,6 +50,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
+  val facebookApiVersion = utilities.facebookApiVersion
 
   def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
@@ -283,7 +285,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
 
   def getEventuallyFacebookArtists(pattern: String): Future[Seq[ArtistWithWeightedGenres]] = {
-    WS.url("https://graph.facebook.com/v2.2/search")
+    WS.url("https://graph.facebook.com/" + facebookApiVersion + "/search")
      .withQueryString(
        "q" -> pattern,
        "type" -> "page",
@@ -291,7 +293,15 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
        "fields" -> facebookArtistFields,
        "access_token" -> facebookToken)
      .get()
-     .map { readFacebookArtists }
+     .map { resp =>
+       readFacebookArtists(resp) match {
+         case Success(success) =>
+           success
+         case Failure(e: Throwable) =>
+           Logger.error("ArtistModel.getEventuallyFacebookArtists :", e)
+           Seq.empty
+       }
+     }
   }
 
   def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
@@ -398,7 +408,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenres]] = {
-    WS.url("https://graph.facebook.com/v2.2/" + normalizeFacebookUrl(url))
+    WS.url("https://graph.facebook.com/"+ facebookApiVersion + "/" + normalizeFacebookUrl(url))
      .withQueryString(
        "fields" -> facebookArtistFields,
        "access_token" -> facebookToken)
@@ -434,7 +444,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
    (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
      maybeLikes, maybeCountry))
 
-  def readFacebookArtists(facebookWSResponse: WSResponse): Seq[ArtistWithWeightedGenres] = {
+  def readFacebookArtists(facebookWSResponse: WSResponse): Try[Seq[ArtistWithWeightedGenres]] = Try {
     val collectOnlyArtistsWithCover: Reads[Seq[ArtistWithWeightedGenres]] = Reads.seq(readArtist).map { artists =>
       artists.collect {
        case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
