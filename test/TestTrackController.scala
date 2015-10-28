@@ -47,8 +47,6 @@ class TestTrackController extends PlaySpecification with Mockito with Injectors 
         contentAsJson(tracks).toString() must contain(""""title":"trackTest","url":"url","platform":"y","thumbnailUrl":"url","artistFacebookUrl":"artistTrackFacebookUrl"""")
       }
     }
-
-    /**/
   }
 }
 
