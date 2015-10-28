@@ -7,7 +7,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 trait playlistFormTrait extends {
-  
+
   val playlistBindingForm = Form(mapping(
     "name" -> nonEmptyText,
     "tracksId" -> seq(mapping(
@@ -29,3 +29,12 @@ trait playlistFormTrait extends {
       Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))
 }
 */
+
+//  def idAndRankFormApply(stringUUID: String, rank: BigDecimal) = TrackUUIDAndRank(UUID.fromString(stringUUID), rank)
+//  def idAndRankFormUnapply(trackIdAndRank: TrackUUIDAndRank) = Option((trackIdAndRank.UUID.toString, trackIdAndRank.rank))
+//
+//  case class PlaylistNameTracksIdAndRank(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank])
+//  def formApply(name: String, tracksIdAndRank: Seq[TrackUUIDAndRank]) =
+//    PlaylistNameTracksIdAndRank(name, tracksIdAndRank)
+//  def formUnapply(playlistNameAndTracksId: PlaylistNameTracksIdAndRank) =
+//    Option((playlistNameAndTracksId.name, playlistNameAndTracksId.tracksIdAndRank))

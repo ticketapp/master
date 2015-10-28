@@ -1,5 +1,6 @@
 import java.util.UUID
 
+import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -34,103 +35,137 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
   "A playlist" must {
 
     "be able to be saved and deleted" in {
-      val playlist = Playlist(None, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), "name")
-      whenReady(playlistMethods.save(playlist), timeout(Span(5, Seconds))) { savedPlaylist =>
-        val maybePlaylistId = savedPlaylist.playlistId
+      val loginInfo: LoginInfo = LoginInfo("providerId231", "providerKey231")
+      val uuid: UUID = UUID.randomUUID()
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName123"),
+        lastName = Option("lastName123"),
+        fullName = Option("fullName123"),
+        email = Option("email12345"),
+        avatarURL = Option("avatarUrl"))
+      whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
+        val playlist = Playlist(None, uuid, "name")
+        val trackId = UUID.randomUUID
+        val trackId1 = UUID.randomUUID
+        val trackId2 = UUID.randomUUID
+        val track = Track(trackId, "title", "urlPlaylistTest", 's', "thumbnailUrl",
+            "artistFacebookUrlTestPlaylistModel", "name", None)
+        val track1 = Track(trackId1, title = "title2", url = "urlPlaylistTest2", platform = 's',
+            thumbnailUrl = "thumbnailUrl", artistFacebookUrl = "artistFacebookUrlTestPlaylistModel", artistName = "name",
+            redirectUrl = None, confidence = 0.0)
+        val track2 = Track(trackId2, "title3", "urlPlaylistTest3", 's', "thumbnailUrl",
+            "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
 
-        savedPlaylist mustBe playlist.copy(playlistId = maybePlaylistId)
+        val trackIdWithPlaylistRankSeq = Seq(
+        TrackIdWithPlaylistRank(trackId, 1.0),
+        TrackIdWithPlaylistRank(trackId1, 1.5),
+        TrackIdWithPlaylistRank(trackId2, 1.2)
+        )
+        val tracksWithPlaylistRank = Vector (
+        TrackWithPlaylistRank(track, 1.0),
+        TrackWithPlaylistRank(track2, 1.2),
+        TrackWithPlaylistRank(track1, 1.5)
+        )
+        Await.result(trackMethods.save(track), 2 seconds)
+        Await.result(trackMethods.save(track1), 2 seconds)
+        Await.result(trackMethods.save(track2), 2 seconds)
 
-        whenReady(playlistMethods.find(maybePlaylistId.get), timeout(Span(5, Seconds))) { foundPlaylist =>
+        whenReady(playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(playlist, trackIdWithPlaylistRankSeq.toVector)),
+          timeout(Span(5, Seconds))) { savedPlaylist =>
 
-          foundPlaylist mustBe Option(PlaylistWithTracks(savedPlaylist, Vector.empty))
+          val maybePlaylistId = savedPlaylist
 
-          whenReady(playlistMethods.delete(maybePlaylistId.get), timeout(Span(5, Seconds))) {
+          try {
+            whenReady(playlistMethods.find(savedPlaylist), timeout(Span(5, Seconds))) { foundPlaylist =>
 
-            _ mustBe 1
+              foundPlaylist mustBe Option(PlaylistWithTracks(playlist.copy(playlistId = Option(savedPlaylist)),
+                tracksWithPlaylistRank))
+
+
+            }
+          } finally {
+            whenReady(playlistMethods.delete(maybePlaylistId), timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe 1
+
+                Await.result(trackMethods.delete(trackId), 2 seconds)
+                Await.result(trackMethods.delete(trackId1), 2 seconds)
+                Await.result(trackMethods.delete(trackId2), 2 seconds)
+
+              }
+            }
           }
         }
       }
     }
+    "find playlists by userUUID" in {
+      val loginInfo: LoginInfo = LoginInfo("providerId23189", "providerKey23187")
+      val uuid: UUID = UUID.randomUUID()
+      val user: User = User(
+        uuid = uuid,
+        loginInfo = loginInfo,
+        firstName = Option("firstName12345"),
+        lastName = Option("lastName123"),
+        fullName = Option("fullName123"),
+        email = Option("email1234587"),
+        avatarURL = Option("avatarUrl"))
+      whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
+        val playlist = Playlist(None, uuid, "name")
+        val trackId = UUID.randomUUID
+        val trackId1 = UUID.randomUUID
+        val trackId2 = UUID.randomUUID
+        val track = Track(trackId, "title", "urlPlaylistTest", 's', "thumbnailUrl",
+          "artistFacebookUrlTestPlaylistModel", "name", None)
+        val track1 = Track(trackId1, title = "title2", url = "urlPlaylistTest2", platform = 's',
+          thumbnailUrl = "thumbnailUrl", artistFacebookUrl = "artistFacebookUrlTestPlaylistModel", artistName = "name",
+          redirectUrl = None, confidence = 0.0)
+        val track2 = Track(trackId2, "title3", "urlPlaylistTest3", 's', "thumbnailUrl",
+          "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
 
-    "be able to be saved with its tracks, rendered sorted by rank and deleted" in {
-      val trackId1 = UUID.randomUUID
-      val track1 = Track(trackId1, "title", "urlPlaylistTest", 's', "thumbnailUrl",
-        "artistFacebookUrlTestPlaylistModel", "name", None)
-      val trackId2 = UUID.randomUUID
-      val track2 = Track(uuid = trackId2, title = "title2", url = "urlPlaylistTest2", platform = 's',
-        thumbnailUrl = "thumbnailUrl", artistFacebookUrl = "artistFacebookUrlTestPlaylistModel", artistName = "name",
-        redirectUrl = None, confidence = 0.0)
-      val trackId3 = UUID.randomUUID
-      val track3 = Track(trackId3, "title3", "urlPlaylistTest3", 's', "thumbnailUrl",
-        "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
-      whenReady(trackMethods.save(track1), timeout(Span(5, Seconds))) { _ =>
-        whenReady(trackMethods.save(track2), timeout(Span(5, Seconds))) { _ =>
-          whenReady(trackMethods.save(track3), timeout(Span(5, Seconds))) { _ =>
-            val userUUID = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
-            val playlist = Playlist(None, userUUID, "name2")
-            whenReady(playlistMethods.save(playlist), timeout(Span(5, Seconds))) { savedPlaylist =>
-              val playlistId = savedPlaylist.playlistId
-              try {
-                whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId.get, trackId1, 2)),
-                  timeout(Span(5, Seconds))) { _ =>
-                  whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId.get, trackId2, 3)),
-                    timeout(Span(5, Seconds))) { _ =>
-                    whenReady(playlistMethods.saveTrackRelation(PlaylistTrack(playlistId.get, trackId3, 1)),
-                      timeout(Span(5, Seconds))) { _ =>
+        val trackIdWithPlaylistRankSeq = Seq(
+          TrackIdWithPlaylistRank(trackId, 1.0),
+          TrackIdWithPlaylistRank(trackId1, 1.5),
+          TrackIdWithPlaylistRank(trackId2, 1.2)
+        )
+        val tracksWithPlaylistRank = Vector (
+          TrackWithPlaylistRank(track, 1.0),
+          TrackWithPlaylistRank(track2, 1.2),
+          TrackWithPlaylistRank(track1, 1.5)
+        )
+        Await.result(trackMethods.save(track), 2 seconds)
+        Await.result(trackMethods.save(track1), 2 seconds)
+        Await.result(trackMethods.save(track2), 2 seconds)
 
-                      whenReady(trackMethods.findByPlaylistId(playlistId.get), timeout(Span(5, Seconds))) { tracks =>
-                        tracks should contain allOf(
-                          TrackWithPlaylistRank(track1, 2),
-                          TrackWithPlaylistRank(track2, 3),
-                          TrackWithPlaylistRank(track3, 1))
-                      }
+        whenReady(playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(playlist, trackIdWithPlaylistRankSeq.toVector)),
+          timeout(Span(5, Seconds))) { savedPlaylist =>
 
-                      whenReady(playlistMethods.find(playlistId.get), timeout(Span(5, Seconds))) { playlistWithTracks =>
-                        playlistWithTracks mustBe Option(PlaylistWithTracks(
-                          Playlist(playlistId, userUUID, "name2"), Vector(
-                            TrackWithPlaylistRank(Track(
-                              uuid = trackId1,
-                              title = "title",
-                              url = "urlPlaylistTest",
-                              platform = 's',
-                              thumbnailUrl = "thumbnailUrl",
-                              artistFacebookUrl = "artistFacebookUrlTestPlaylistModel",
-                              artistName = "name",
-                              redirectUrl = None,
-                              confidence = 0.0),
-                              rank = 2.0),
-                            TrackWithPlaylistRank(Track(
-                              uuid = trackId2,
-                              title = "title2",
-                              url = "urlPlaylistTest2",
-                              platform = 's',
-                              thumbnailUrl = "thumbnailUrl",
-                              artistFacebookUrl = "artistFacebookUrlTestPlaylistModel",
-                              artistName = "name",
-                              redirectUrl = None,
-                              confidence = 0.0),
-                              rank = 3.0),
-                            TrackWithPlaylistRank(Track(
-                              uuid = trackId3,
-                              title = "title3",
-                              url = "urlPlaylistTest3",
-                              platform = 's',
-                              thumbnailUrl = "thumbnailUrl",
-                              artistFacebookUrl = "artistFacebookUrlTestPlaylistModel",
-                              artistName = "name",
-                              redirectUrl = None,
-                              confidence = 2.0),
-                              rank = 1.0))))
-                      }
+          val maybePlaylistId = savedPlaylist
 
-                      whenReady(playlistMethods.delete(playlistId.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
-                    }
-                  }
-                }
-              } finally {
-                trackMethods.delete(trackId1)
-                trackMethods.delete(trackId2)
-                trackMethods.delete(trackId3)
+          try {
+            whenReady(playlistMethods.findByUserId(uuid), timeout(Span(5, Seconds))) { foundPlaylist =>
+
+              foundPlaylist must contain(PlaylistWithTracks(playlist.copy(playlistId = Option(savedPlaylist)),
+                tracksWithPlaylistRank))
+            }
+          } finally {
+            whenReady(playlistMethods.delete(maybePlaylistId), timeout(Span(5, Seconds))) { response =>
+
+              response mustBe 1
+
+              whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { response1 =>
+
+                response1 mustBe 1
+
+                Await.result(trackMethods.delete(trackId), 2 seconds)
+                Await.result(trackMethods.delete(trackId1), 2 seconds)
+                Await.result(trackMethods.delete(trackId2), 2 seconds)
+
               }
             }
           }
