@@ -29,6 +29,7 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
         }, 500)
     };
 
+        //change to update
     $scope.updatePlaylist = function (playlist) {
         UserFactory.deletePlaylist(playlist.id).then(function (del) {
             $scope.createNewPlaylist(playlist)
