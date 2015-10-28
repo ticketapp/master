@@ -2,13 +2,17 @@ import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import models._
 import org.specs2.mock.Mockito
+import play.api.db.slick.HasDatabaseConfigProvider
 import play.api.libs.json._
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
+import services.MyPostgresDriver
 
 import scala.language.postfixOps
 
 
-class TestEventController extends PlaySpecification with Mockito with Injectors {
+class TestEventController extends PlaySpecification
+    with Mockito
+    with Injectors {
   sequential
 
   "event controller" should {
