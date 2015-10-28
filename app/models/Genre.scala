@@ -8,7 +8,6 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import services.MyPostgresDriver.api._
 import services.{MyPostgresDriver, Utilities}
-
 import scala.concurrent.Future
 import scala.language.postfixOps
 
@@ -60,21 +59,16 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-  //  def findContaining(pattern: String): Future[Seq[Genre]] = {
-  //    val lowercasePattern = pattern.toLowerCase
-  //    val query = for {
-  //      genre <- genres if genre.name.toLowerCase like s"%$lowercasePattern%"
-  //    } yield genre
-  //
-  //    db.run(query.take(12).result)
-  //
-  ////        """SELECT * FROM genres
-  ////          | WHERE LOWER(name) LIKE '%'||{patternLowCase}||'%'
-  ////          | LIMIT 12""".stripMargin)
-  ////        .on('patternLowCase -> pattern.toLowerCase)
-  ////        .as(GenreParser.*)
-  ////    }
-  //  }
+  def findAllContaining(pattern: String): Future[Seq[Genre]] = {
+    val lowercasePattern = pattern.toLowerCase
+
+    val query = for {
+      (genre) <- genres
+      if genre.name.toLowerCase like s"%$lowercasePattern%"
+    } yield genre
+
+    db.run(query.result)
+  }
 
   /*def save(genre: Genre): Future[Genre] =
     db.run(genres returning genres.map(_.id) into ((genre, id) => genre.copy(id = Option(id))) += genre)*/
@@ -86,7 +80,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     case g: Genre => g
     case id: Int => genre.copy(id = Option(id))
   }).transactionally)
-
+  
   def findByName(name: String): Future[Option[Genre]] = db.run(genres.filter(_.name === name).result.headOption)
 
   def saveWithEventRelation(genre: Genre, eventId: Long): Future[Int] = save(genre) flatMap { 
@@ -148,6 +142,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       findOverGenres(Seq(Genre(None, name))) map { _.foreach(genre => saveWithArtistRelation(genre, artistId)) }
   }
 
+  // not used
   def saveWithTrackRelation(genre: Genre, trackId: UUID): Future[Int] = save(genre) flatMap {
     _.id match {
       case None =>
@@ -157,6 +152,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         saveTrackRelation(TrackGenreRelation(trackId, id))
     }
   }
+  //
 
   def findOverGenres(genres: Seq[Genre]): Future[Seq[Genre]] = Future.sequence(genres map { genre: Genre =>
     findByName(genre.name) flatMap {

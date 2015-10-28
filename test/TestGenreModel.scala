@@ -7,6 +7,7 @@ import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
+import org.scalatest.Matchers._
 
 
 class TestGenreModel extends PlaySpec with OneAppPerSuite with Injectors {
@@ -19,6 +20,19 @@ class TestGenreModel extends PlaySpec with OneAppPerSuite with Injectors {
         whenReady(genreMethods.findById(genreSaved.id.get), timeout(Span(5, Seconds))) { genreFound =>
 
           genreFound.get mustBe genre.copy(id = Option(genreSaved.id.get))
+
+          whenReady(genreMethods.delete(genreSaved.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+        }
+      }
+    }
+
+    "find a genre by containing" in {
+      val genre = Genre(None, "rockodocki", 'r')
+
+      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { genreSaved =>
+        whenReady(genreMethods.findAllContaining("rockodo"), timeout(Span(5, Seconds))) { genreFound =>
+
+          genreFound should contain (genre.copy(id = Option(genreSaved.id.get)))
 
           whenReady(genreMethods.delete(genreSaved.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
         }
