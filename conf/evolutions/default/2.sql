@@ -29,6 +29,7 @@ EXCEPTION WHEN unique_violation THEN
 -- Ignore duplicate inserts.
 END;
 
+
 BEGIN
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
   ('13894e56-08d1-4c1f-b3e4-466c069d15ed', 'title0', 'url00', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
