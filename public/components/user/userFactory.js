@@ -1,8 +1,16 @@
 angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreRequest', 'InfoModal',
     'TracksRecommender', '$rootScope', 'RoutesFactory',
-    function ($http, $q, StoreRequest, InfoModal, TracksRecommender, $rootScope, RoutesFactory){
+    function ($http, $q, StoreRequest, InfoModal, TracksRecommender, $rootScope, RoutesFactory) {
+
     var factory = {
-        user : {},
+        user : {
+            name: false,
+            id: false,
+            facebookAccessToken : false,
+            favoritesTracks : false,
+            removedTracksIds : false,
+            playlists : false
+        },
         getToken : function () {
             var deferred = $q.defer();
             $http.get('/users/facebookAccessToken/')
@@ -18,8 +26,12 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.delete('/playlists/' + id).
                 success(function (data) {
-                    factory.user.deletePlaylistResponse = data;
-                    deferred.resolve(factory.user.deletePlaylistResponse);
+                    var indexPlaylistToDelet = factory.user.playlists.indexOf(
+                        factory.user.playlists.filter(function(playlist) {
+                        return playlist.id === id
+                    })[0]);
+                    factory.user.playlists.splice(indexPlaylistToDelet, 1);
+                    deferred.resolve(data);
                 }).
                 error (function (data) {
             });
@@ -29,25 +41,26 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.get('/artists/' + id + '/isFollowed').
                 success(function (data) {
-                    factory.user.ArtistIsFollowedResponse = data;
-                    deferred.resolve(factory.user.ArtistIsFollowedResponse);
+                    deferred.resolve(data);
                 }).
                 error (function (data) {
                 deferred.resolve(data)
             });
             return deferred.promise;
         },
-        AddTrackToFavorite: function (trackId) {
-            $http.post('/tracks/' + trackId + '/addToFavorites').
+        AddTrackToFavorite: function (track) {
+            $http.post('/tracks/' + track.id + '/addToFavorites').
                 success(function () {
-                    TracksRecommender.UpsertTrackRate(true, trackId);
+                    factory.user.favoritesTracks.push(track);
+                    TracksRecommender.UpsertTrackRate(true, track.id);
+
                 }).
                 error(function (data) {
                     if (data.error == 'Credentials required') {
-                        StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
+                        StoreRequest.storeRequest('post', '/tracks/' + track.id + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
                         var connectListener = $rootScope.$watch('connected', function (newVal) {
                             if (newVal == true) {
-                                TracksRecommender.UpsertTrackRate(true, trackId);
+                                TracksRecommender.UpsertTrackRate(true, track.id);
                                 connectListener();
                             }
                         })
@@ -80,19 +93,23 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         },
         getFavoritesTracks: function () {
             var deferred = $q.defer();
-            $http.get('/tracks/favorites').
-                success(function (data) {
-                    factory.user.favoritesTracks = data;
-                    deferred.resolve(factory.user.favoritesTracks);
-                }).
-                error (function (data) {
-            });
+            if (factory.user.favoritesTracks != false) {
+                deferred.resolve(factory.user.favoritesTracks);
+            } else {
+                $http.get('/tracks/favorites').
+                    success(function (data) {
+                        factory.user.favoritesTracks = data;
+                        deferred.resolve(factory.user.favoritesTracks);
+                    }).
+                    error(function (data) {
+                });
+            }
             return deferred.promise;
         },
         makeFavoriteTracksRootScope : function () {
             $rootScope.favoritesTracks = [];
             function passFavoritesTracksToRootscope(track) {
-                $rootScope.favoritesTracks.push(track.trackId)
+                $rootScope.favoritesTracks.push(track.id)
             }
             factory.getFavoritesTracks().then(function (tracks) {
                 tracks.forEach(passFavoritesTracksToRootscope)

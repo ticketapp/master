@@ -39,7 +39,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                 if (numberOfRates >= 50) {
                     return
                 }
-                if (track.confidence != undefined && track.confidence > 5000000 && numberOfRates <50) {
+                if (track.confidence != undefined && track.confidence > 5000 && numberOfRates <50) {
                     numberOfRates ++;
                 }
             }

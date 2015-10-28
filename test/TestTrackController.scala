@@ -1,31 +1,52 @@
-/*import org.scalatestplus.play._
-import play.api.libs.json.Json
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import java.util.UUID
 
-class TestTrackController extends PlaySpec with OneAppPerSuite {
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.test._
+import models._
+import org.scalatest.concurrent.ScalaFutures._
+import org.specs2.mock.Mockito
+import play.api.libs.json._
+import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 
-  "TrackController" must {
-
-    "upsert rating up for a user" in {
-      val eventuallyResult = route(FakeRequest(controllers.routes.TrackController.upsertRatingForUser())
-        .withBody(Json.obj(
-        "trackId" -> "eada2738-445b-4257-9c60-da955e2c7da9",
-        "rating" -> 1000,
-        "reason" -> "r"))
-        .withFormUrlEncodedBody(("username", "test@example.com"), ("password", "MyTestPassword"))).get
+import scala.language.postfixOps
 
 
-//      status(eventuallyResult) mustBe 200
+class TestTrackController extends PlaySpecification with Mockito with Injectors {
+  sequential
+
+  "track controller" should {
+
+    "create a track" in new Context {
+      new WithApplication(application) {
+        val uuid = UUID.randomUUID()
+
+        val jsonTrack = """{ "trackId": """" + uuid + """",
+                             "title": "trackTest",
+                             "url": "url",
+                             "platform": "y",
+                             "thumbnailUrl": "url",
+                             "artistFacebookUrl": "artistTrackFacebookUrl",
+                             "artistName": "artistTrackTest",
+                             "redirectUrl": "url" }"""
+
+        val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest", Option("imagePath"),
+          Option("description"), "artistTrackFacebookUrl", Set("website")), Vector.empty)
+        await(artistMethods.save(artist))
+        val Some(result) = route(FakeRequest(POST, "/tracks/create")
+        .withJsonBody(Json.parse(jsonTrack))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+        status(result) mustEqual OK
+
+      }
     }
 
-    "upsert rating down for a user" in {
-//      upsertRatingForUser
-    }
-
-    "upsert rating down and add a reason for a user" in {
-//      upsertRatingForUser
+    "find a list of tracks by artist" in new Context {
+      new WithApplication(application) {
+        val Some(tracks) = route(FakeRequest(GET, "/tracks/artistTrackFacebookUrl?numberToReturn=0&offset=" + 0))
+        contentAsJson(tracks).toString() must contain(""""title":"trackTest","url":"url","platform":"y","thumbnailUrl":"url","artistFacebookUrl":"artistTrackFacebookUrl"""")
+      }
     }
   }
 }
-*/
+

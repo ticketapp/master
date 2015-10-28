@@ -11,8 +11,8 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
         $scope.newPlaylist = true;
         $timeout(function () {
             for (var i=0; i < playlist.tracks.length; i++) {
-                TracksRecommender.UpsertTrackRate(true, playlist.tracks[i].trackId);
-                tracksToSave.push({trackId: playlist.tracks[i].trackId, trackRank: i})
+                TracksRecommender.UpsertTrackRate(true, playlist.tracks[i].id);
+                tracksToSave.push({id: playlist.tracks[i].id, trackRank: i})
             }
             $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
                 success(function (data) {
@@ -29,8 +29,9 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
         }, 500)
     };
 
+        //change to update
     $scope.updatePlaylist = function (playlist) {
-        UserFactory.deletePlaylist(playlist.playlistId).then(function (del) {
+        UserFactory.deletePlaylist(playlist.id).then(function (del) {
             $scope.createNewPlaylist(playlist)
         })
     };

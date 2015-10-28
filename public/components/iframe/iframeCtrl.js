@@ -11,8 +11,7 @@ angular.module('claudeApp').
     function updateScope (data, scope, idName, otherScopeToCheck) {
         var scopeIdList = [];
         function getId(el, index, array) {
-            var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
-                'placeId': el.placeId, 'facebookId': el.facebookId};
+            var idDictionnary = {'id': el.id, 'facebookId': el.facebookId};
             scopeIdList.push(idDictionnary[idName]);
         }
         if (otherScopeToCheck != undefined) {
@@ -20,8 +19,7 @@ angular.module('claudeApp').
         }
         scope.forEach(getId);
         function pushEl (el, index, array) {
-            var idDictionnary = {'artistId': el.artistId, 'eventId': el.eventId, 'organizerId': el.organizerId,
-                'placeId': el.placeId, 'facebookId': el.facebookId};
+            var idDictionnary = {'id': el.id, 'facebookId': el.facebookId};
             if (scopeIdList.indexOf(idDictionnary[idName]) == -1) {
                 $timeout(function () {
                     $scope.$apply(function () {
@@ -48,37 +46,37 @@ angular.module('claudeApp').
     function getEvents() {
         filterEventsByTime();
         EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
-            updateScope(events, $scope.events, 'eventId');
+            updateScope(events, $scope.events, 'id');
         });
     }
 
     function getEventsByContaining() {
         EventsFactory.getEventsByContaining($scope.search, $rootScope.geoLoc).then(function (events) {
-            updateScope(events, $scope.events, 'eventId');
+            updateScope(events, $scope.events, 'id');
         });
     }
 
     function getEventsArtistByContaining() {
         EventsFactory.getArtistsEventsByContaining($scope.search).then(function (events) {
-            updateScope(events, $scope.events, 'eventId');
+            updateScope(events, $scope.events, 'id');
         });
     }
 
     function getEventsByGenre() {
         EventsFactory.getEventsByGenre($scope.search, offset).then(function (events) {
-            updateScope(events, $scope.events, 'eventId');
+            updateScope(events, $scope.events, 'id');
         });
     }
 
     function getPlacesEventsByContaining() {
         EventsFactory.getPlacesEventsByContaining($scope.search).then(function (events) {
-            updateScope(events, $scope.events, 'eventId');
+            updateScope(events, $scope.events, 'id');
         });
     }
 
     function getEventsByCity() {
         EventsFactory.getEventsByCity($scope.search, offset).then(function (events) {
-            updateScope(events, $scope.events, 'eventId');
+            updateScope(events, $scope.events, 'id');
         });
     }
 

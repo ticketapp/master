@@ -37,7 +37,7 @@ angular.module('claudeApp').
                 })
             }*/
             if ($rootScope.connected == true) {
-                OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
+                OrganizerFactory.getIsFollowed(organizer.id).then(function (isFollowed) {
                     if (isFollowed == true || isFollowed == false) {
                         $scope.isFollowed = isFollowed;
                     }
@@ -47,7 +47,7 @@ angular.module('claudeApp').
                 if (connected == false) {
                     $scope.isFollowed = false;
                 } else {
-                    OrganizerFactory.getIsFollowed(organizer.organizerId).then(function (isFollowed) {
+                    OrganizerFactory.getIsFollowed(organizer.id).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
                             if (isFollowed == true || isFollowed == false) {
                                 $scope.isFollowed = isFollowed;

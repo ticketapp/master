@@ -1,7 +1,7 @@
 <div class="block_min">
     <div class="img_min">
         <div class="toGrow">
-            <a href="#/events/{{event.eventId}}">
+            <a href="#/events/{{event.id}}">
                 <img ng-src="{{ event.imagePath }}" class="width100p"
                      on-error-src="assets/images/caroussel1.gif" ng-if="event.imagePath"/>
                 <img src="assets/images/caroussel1.gif"
@@ -24,7 +24,7 @@
                }">
             </i>
         </div>
-        <a href="#/events/{{event.eventId}}">
+        <a href="#/events/{{event.id}}">
             <h3 style="overflow: hidden; border-color: {{event.priceColor}}" class="minTitle">
                 {{ event.name }}
             </h3>
@@ -58,12 +58,12 @@
                 <span class="dropDown" data-ng-repeat="place in event.places">
                     <i class="fa fa-map-marker" style="font-size: 30px; color: {{event.priceColor}};"></i>
                     <b style="vertical-align: text-bottom;">
-                        <a ng-mouseenter="isFollowedPlace(place)" href="#/places/{{ place.placeId }}">{{place.name | limitTo: 25}} </a>
+                        <a ng-mouseenter="isFollowedPlace(place)" href="#/places/{{ place.id }}">{{place.name | limitTo: 25}} </a>
                     </b>
                     <ul class="f-dropdown" ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <li style="display: block;"
                             class="float-left width100p relative">
-                            <a href="#/places/{{place.placeId}}"
+                            <a href="#/places/{{place.id}}"
                                class="width100p padding0" style="height: 140px; overflow: hidden;
                                background-color: {{event.priceColor}};
                                background-image: url('assets/images/caroussel1.gif'); background-repeat: no-repeat;
@@ -102,13 +102,13 @@
                        style="font-size: 30px; color: {{event.priceColor}};"></i>
                     <b style="vertical-align: text-bottom;">
                         <a ng-mouseenter="isFollowedOrganizer(organizer)"
-                           href="#/organizers/{{organizer.organizerId}}">{{organizer.name | limitTo: 25}}</a>
+                           href="#/organizers/{{organizer.id}}">{{organizer.name | limitTo: 25}}</a>
                     </b>
                     <ul class="f-dropdown"
                         ng-if="$root.window != 'small' && $root.window != 'medium'">
                         <li style="display: block;"
                             class="float-left width100p relative">
-                            <a href="#/organizers/{{organizer.organizerId}}"
+                            <a href="#/organizers/{{organizer.id}}"
                                class="width100p padding0" style="height: 150px;
                                overflow: hidden;">
                                 <img class="width100p " ng-src="{{organizer.imagePath}}"

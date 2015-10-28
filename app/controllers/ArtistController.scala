@@ -13,7 +13,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.iteratee.{Enumeratee, Iteratee}
+import play.api.libs.iteratee.{Enumerator, Enumeratee, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
@@ -35,11 +35,14 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     artistMethods.getEventuallyFacebookArtists(pattern).map { artists =>
       Ok(Json.toJson(artists))
+    } recover { case t: Throwable =>
+      Logger.error("ArtistController.getFacebookArtistsContaining: ", t)
+      InternalServerError("ArtistController.getFacebookArtistsContaining: " + t.getMessage)
     }
   }
 
-  def artistsSinceOffsetBy(number: Int, offset: Int) =  Action.async {
-    artistMethods.findSinceOffset(number, offset).map { artists =>
+  def artistsSinceOffset(number: Int, offset: Int) =  Action.async {
+    artistMethods.findSinceOffset(numberToReturn = number, offset = offset).map { artists =>
       Ok(Json.toJson(artists))
     }
   } 
@@ -57,7 +60,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   }
 
   def artistsByGenre(genre: String, numberToReturn: Int, offset: Int) = Action.async {
-    artistMethods.findAllByGenre(genre, numberToReturn, offset).map { artists =>
+    artistMethods.findAllByGenre(genre, offset = offset, numberToReturn = numberToReturn).map { artists =>
       Ok(Json.toJson(artists))
     }
   }
@@ -76,7 +79,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       },
 
       patternAndArtist => {
-        artistMethods.save(ArtistWithWeightedGenres(patternAndArtist.artistWithWeightedGenre.artist, Vector.empty)) map { artist =>
+        artistMethods.save(ArtistWithWeightedGenres(patternAndArtist.artistWithWeightedGenre.artist, patternAndArtist.artistWithWeightedGenre.genres)) map { artist =>
          val artistId = artist.id
          val artistWithArtistId = patternAndArtist.artistWithWeightedGenre.artist.copy(id = artistId)
          val patternAndArtistWithArtistId =
@@ -92,16 +95,10 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
          val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
 
          Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { trackMethods.save }) }
-         Ok.chunked(tracksJsonEnumerator)
+         Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
         }
       }
     )
-  }
-
-  def deleteArtist(artistId: Long) = Action.async {
-    artistMethods.delete(artistId) map { result =>
-      Ok(Json.toJson(result))
-    }
   }
   
   def followArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>

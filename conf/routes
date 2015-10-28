@@ -31,7 +31,8 @@ GET     /events/city/:pattern                         @controllers.EventControll
 GET     /events/nearCity/:city                        @controllers.EventController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 
 ################################### Artists ##############################################
-GET     /artists/since/:offset/:number                @controllers.ArtistController.artistsSinceOffsetBy(number: Int, offset: Int)
+
+GET     /artists/since                                @controllers.ArtistController.artistsSinceOffset(numberToReturn: Int, offset: Int)
 GET     /artists/:facebookUrl                         @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
 GET     /artists/:facebookUrl/tracks                  @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
 GET     /artists/byId/:id                             @controllers.ArtistController.artist(id: Long)
@@ -41,7 +42,6 @@ POST    /artists/:artistId/unfollowArtistByArtistId   @controllers.ArtistControl
 POST    /artists/:facebookId/followByFacebookId       @controllers.ArtistController.followArtistByFacebookId(facebookId: String)
 GET     /artists/followed/                            @controllers.ArtistController.getFollowedArtists
 GET     /artists/:artistId/isFollowed                 @controllers.ArtistController.isArtistFollowed(artistId: Long)
-DELETE  /artists/:artistId                            @controllers.ArtistController.deleteArtist(artistId: Long)
 GET     /artists/:facebookUrl/events                  @controllers.EventController.findByArtist(facebookUrl: String)
 GET     /artists/:artistId/passedEvents               @controllers.EventController.findPassedByArtist(artistId: Long)
 GET     /artists/containing/:pattern                  @controllers.ArtistController.findArtistsContaining(pattern: String)
@@ -76,19 +76,19 @@ GET      /organizers/:organizerId/passedEvents                            @contr
 GET      /organizers/followed/                                            @controllers.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
-#GET     /playlists                                                       @controllers.PlaylistController.findByUser
-#POST    /playlists                                                       @controllers.PlaylistController.create
-#PUT     /playlists                                                       @controllers.PlaylistController.update
-#GET     /playlists/:playlistId                                           @controllers.PlaylistController.find(playlistId: Long)
-#DELETE  /playlists/:playlistId                                           @controllers.PlaylistController.delete(playlistId: Long)
+GET      /playlists                                                       @controllers.PlaylistController.findByUser
+POST     /playlists                                                       @controllers.PlaylistController.create
+PUT      /playlists/:playlistId                                           @controllers.PlaylistController.update(playlistId: Long)
+DELETE   /playlists/:playlistId                                           @controllers.PlaylistController.delete(playlistId: Long)
 #
 ################################## Genres ############################################
-#GET     /genres/:genre/artists                                            @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
+GET      /genres/:genre/artists                                           @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
 #GET     /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################
-#POST    /tracks/create                                                    @controllers.TrackController.createTrack
-GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle               @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
+POST     /tracks/create                                                    @controllers.TrackController.createTrack
+GET      /tracks/:artistFacebookUrl                                        @controllers.TrackController.findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int)
+GET      /tracks/:artistName/:artistFacebookUrl/:trackTitle                @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
 #GET     /tracks/youtubeTrackInfo/:youtubeId                              @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
 #GET     /tracks/:trackId/rating                                           @controllers.TrackController.getRatingForUser(trackId: String)
 #POST    /tracks/rating                                                    @controllers.TrackController.upsertRatingForUser

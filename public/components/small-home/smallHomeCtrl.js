@@ -17,13 +17,13 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
     function uploadEvents(el, index, array) {
         var scopeIdList = [];
         function getEventId(el) {
-            scopeIdList.push(el.eventId);
+            scopeIdList.push(el.id);
         }
         $scope.events.forEach(getEventId);
         if ($scope.mapBounces == undefined) {
             $scope.mapBounces = map.getBounds()
         }
-        if (scopeIdList.indexOf(el.eventId) == -1) {
+        if (scopeIdList.indexOf(el.id) == -1) {
             if ( el.geographicPoint != undefined) {
                 el.geographicPoint = el.geographicPoint.replace('(', '').replace(')', '');
                 var geoPoint = el.geographicPoint;
@@ -165,8 +165,8 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                 var __ret = addIcon(i);
                 var geoPoint = __ret.geoPoint;
                 var markerGenre = __ret.markerGenre;
-                pushMarker(markerGenre, geoPoint, $scope.events[i].eventId,
-                    $scope.events[i].places[0].placeId);
+                pushMarker(markerGenre, geoPoint, $scope.events[i].id,
+                    $scope.events[i].places[0].id);
             }
         }
         $scope.markerClusterer = new MarkerClusterer(map, $scope.dynMarkers, {});

@@ -1,0 +1,16 @@
+<div ng-if="playlist.tracks[0].thumbnailUrl != undefined"
+     class="img-circularPlayer"
+     style="background-image: url('{{playlist.tracks[0].thumbnailUrl}}');"
+     ng-class="{'padding0 margin0': $root.window == 'small'}">
+    <i class="fi-play playInImg"
+       ng-click="$root.loadPlaylist(playlist)">
+        <md-track-tooltipe>
+            Lire la playlist
+        </md-track-tooltipe>
+    </i>
+</div>
+<b>
+    <a ng-click="$root.loadPlaylist(playlist)">
+        {{playlist.name}} ({{playlist.tracks.length}}) morceaux
+    </a>
+</b>

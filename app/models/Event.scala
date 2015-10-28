@@ -526,7 +526,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       } yield {
 
         val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
-        artistMethods.saveArtistsAndTheirTracks(nonEmptyArtists)
+        artistMethods.saveArtistsAndTheirTracks(nonEmptyArtists map { _.artist })
 
         val normalizedStartTime: DateTime = startTime match {
           case Some(matchedDate) =>

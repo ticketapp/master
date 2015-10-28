@@ -82,7 +82,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     for (c1 <- chars) {
       for (c2 <- chars) {
         artistMethods.getEventuallyFacebookArtists(c1.toString + c2.toString) map { artists =>
-          artists map { artist => artistMethods.save(ArtistWithWeightedGenres(artist, Vector.empty)) }
+          artists map { artist => artistMethods.save(artist) }
         }
         Thread.sleep(120)
       }
