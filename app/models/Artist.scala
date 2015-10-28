@@ -58,7 +58,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield (artist, optionalArtistGenreAndGenre)
 
-    db.run(query.drop(offset).take(numberToReturn).result) map { seqArtistAndOptionalGenre =>
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
       ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
@@ -72,6 +72,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         case (_, Some((artistGenre, genre))) => GenreWithWeight(genre, artistGenre.weight)
       })
     }
+
     artistsWithGenres map (artistWithGenre => ArtistWithWeightedGenres(artistWithGenre._1, artistWithGenre._2.to[Seq]))
   }
 

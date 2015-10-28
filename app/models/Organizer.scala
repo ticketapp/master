@@ -82,7 +82,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def saveWithAddress(organizerWithAddress: OrganizerWithAddress): Future[OrganizerWithAddress] = {
     organizerWithAddress.address match {
       case Some(address) => 
-        addressMethods.save(address) flatMap { savedAddress =>
+        addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
           save(organizerWithAddress.organizer.copy(addressId = savedAddress.id)) map { orga =>
             OrganizerWithAddress(orga, Option(savedAddress))
           }
@@ -95,18 +95,19 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
   
   def save(organizer: Organizer): Future[Organizer] = {
-    val organizerWithFormattedDescription = organizer.copy(
-      description = utilities.formatDescription(organizer.description))
-    val organizerWithFormattedDescriptionAndPhone = organizerWithFormattedDescription.copy( phone =
-      utilities.phoneNumbersSetToOptionString(utilities.phoneNumbersStringToSet(organizer.phone)))
-    organizer.facebookId match {
+    val eventuallyMaybePlaceId: Future[Option[Long]] = organizer.facebookId match {
       case None =>
-        doSave(organizerWithFormattedDescriptionAndPhone)
+        Future(None)
       case Some(facebookId) =>
-        placeMethods.findIdByFacebookId(facebookId) flatMap { maybePlaceId =>
-          val organizerWithLinkedPlace = organizerWithFormattedDescriptionAndPhone.copy(linkedPlaceId = maybePlaceId)
-          doSave(organizerWithLinkedPlace)
-        }
+        placeMethods.findIdByFacebookId(facebookId)
+    }
+
+    eventuallyMaybePlaceId flatMap { maybePlaceId =>
+      doSave(organizer.copy(
+        description = utilities.formatDescription(organizer.description),
+        phone = utilities.phoneNumbersSetToOptionString(utilities.phoneNumbersStringToSet(organizer.phone)),
+        linkedPlaceId = maybePlaceId
+      ))
     }
   }
 

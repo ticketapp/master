@@ -4,18 +4,14 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
-import silhouette.UserDAOImpl
-import scala.concurrent.duration._
-import scala.language.postfixOps
-import org.scalatest.Matchers._
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
 
@@ -335,7 +331,23 @@ class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors {
       }
     }
 
-    //find save and delete with address
+    "save and find an organizer with his address" in {
+      whenReady (organizerMethods.getOrganizerInfo(Option("164354640267171")), timeout(Span(5, Seconds))) { organizerInfos =>
+
+        organizerInfos.get.organizer.name mustBe "Le Transbordeur"
+
+        whenReady(organizerMethods.saveWithAddress(organizerInfos.get), timeout(Span(5, Seconds))) { savedOrganizer =>
+          try {
+            savedOrganizer.organizer.name mustBe "Le Transbordeur"
+            savedOrganizer.address.get mustBe Address(savedOrganizer.address.get.id,
+              Option(geographicPointMethods.stringToGeographicPoint("45.7839103,4.860398399999999").get),
+            Some("villeurbanne"),Some("69100"),Some("3 boulevard de la bataille de stalingrad"))
+          } finally {
+           organizerMethods.delete(savedOrganizer.organizer.id.get)
+          }
+        }
+      }
+    }
     //find nearCity
   }
 }

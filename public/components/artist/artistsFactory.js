@@ -6,6 +6,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
     var factory = {
         artists : false,
         lastGetArtist: {url: '', artist: {}},
+        refactorArtistObject: function (artist) {
+            artist.artist.genres = artist.genres;
+            artist = artist.artist;
+            return artist
+        },
         getArtist : function (url) {
             var deferred = $q.defer();
             if (url == factory.lastGetArtist.url) {
@@ -13,10 +18,20 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/' + url)
                     .success(function (data, status) {
+                        data = factory.refactorArtistObject(data);
                         data = ImagesFactory(data);
-                        factory.lastGetArtist.artist = data;
-                        factory.lastGetArtist.url = url;
-                        deferred.resolve(factory.lastGetArtist.artist);
+                        $http.get('/tracks/' + data.facebookUrl + '?numberToReturn=0&offset=0').
+                            success(function(tracks) {
+                                data.tracks = tracks;
+                                factory.lastGetArtist.artist = data;
+                                factory.lastGetArtist.url = url;
+                                deferred.resolve(factory.lastGetArtist.artist);
+                        }).error(function () {
+                                data.tracks = [];
+                                factory.lastGetArtist.artist = data;
+                                factory.lastGetArtist.url = url;
+                                deferred.resolve(factory.lastGetArtist.artist);
+                            })
                     }).error(function (data, status) {
                         deferred.reject('error');
                     });
@@ -36,16 +51,22 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         lastGetArtists: {offset: -1, artists: []},
         getArtists : function (offset) {
             var deferred = $q.defer();
+            console.log(offset)
             if (offset <= factory.lastGetArtists.offset) {
                 deferred.resolve(factory.lastGetArtists.artists)
             } else {
-                $http.get('/artists/since/' + offset + '/12 ')
+                $http.get('/artists/since?offset=' + offset + '&numberToReturn=12')
                     .success(function (data, status) {
-                        data.forEach(ImagesFactory);
-                        factory.lastGetArtists.artists = factory.lastGetArtists.artists.concat(data);
+                        console.log("success", data)
+                        var artists = data.map(function(artist) {
+                            return factory.refactorArtistObject(artist)
+                        });
+                        artists.forEach(ImagesFactory);
+                        factory.lastGetArtists.artists = factory.lastGetArtists.artists.concat(artists);
                         factory.lastGetArtists.offset = offset;
                         deferred.resolve(factory.lastGetArtists.artists);
                     }).error(function (data, status) {
+                        console.log("error", data, status)
                         deferred.reject('error');
                     });
             }
@@ -152,7 +173,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             })
             .fail(function (error) {
                 deferred.resolve('error');
-                console.log(error)
             });
             return deferred.promise;
         },
@@ -233,9 +253,9 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             var searchPattern = document.getElementById('searchBar').value.trim();
             $rootScope.artisteToCreate = true;
             $rootScope.artist = artist;
+            $rootScope.artist.tracks = [];
             $rootScope.tracks = [];
             $rootScope.loadingTracks = true;
-            console.log(artist);
             oboe.post('artists/createArtist', {
                 searchPattern: searchPattern,
                 artist: {
@@ -251,17 +271,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             })
             .done(function (value, a) {
                     $rootScope.loadingTracks = true;
-                    /*function pushTrack(track) {
-                        $timeout(function () {
-                            $rootScope.$apply(function () {
-                                $rootScope.artist.tracks.push(track);
-                                $rootScope.tracks.push(track);
-                                $rootScope.loadingTracks = false;
-                            });
-                        }, 0);
-                    }
-                    value.forEach(pushTrack);*/
-                        if (value == "end") {
+                        if (value === "end") {
                         $timeout(function () {
                             $rootScope.$apply(function () {
                                 $rootScope.loadingTracks = false;
@@ -277,7 +287,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     }
             })
             .fail(function (error) {
-                console.log(error)
             });
         },
         passArtisteToCreateToFalse : function () {
