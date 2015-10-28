@@ -18,6 +18,8 @@ case class PlaylistWithTracks(playlistInfo: Playlist, tracksWithRank: Vector[Tra
 
 case class PlaylistWithTracksIdAndRank(playlistInfo: Playlist, tracksWithRank: Vector[TrackIdWithPlaylistRank])
 
+case class PlaylistNameTracksIdAndRank(name: String, tracksIdAndRank: Vector[TrackIdWithPlaylistRank])
+
 case class TrackWithPlaylistRank(track: Track, rank: Double)
 
 case class TrackIdWithPlaylistRank(trackId: UUID, rank: Double)
@@ -62,6 +64,17 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
     } yield playlistId
     
     db.run(query)
+  }
+
+  // need to do a transaction
+  def update(playlist: PlaylistWithTracksIdAndRank): Future[Long] = {
+    playlist.playlistInfo.playlistId match {
+      case Some(playlistId) =>
+        delete(playlistId)
+        saveWithTrackRelations(playlist.playlistInfo, playlist.tracksWithRank)
+      case None =>
+        Future(0)
+    }
   }
 
   def findByUserId(userUUID: UUID): Future[Vector[PlaylistWithTracks]] = {
