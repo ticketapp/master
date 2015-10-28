@@ -160,7 +160,7 @@ class TestSearchArtist extends PlaySpec with OneAppPerSuite with Injectors {
 
       whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
 
-        _.flatten.map{ artist => artist.name } mustBe expectedArtists }
+        _.flatten.map{ artist => artist.artist.name } mustBe expectedArtists }
     }
 
     "find artists in event's title" in {
@@ -181,7 +181,7 @@ class TestSearchArtist extends PlaySpec with OneAppPerSuite with Injectors {
       whenReady(artistMethods.getEventuallyArtistsInEventTitle(title, websites),
         timeout(Span(5, Seconds))) {
 
-        _.map{ artist => artist.name } mustBe expectedArtistNames
+        _.map{ artist => artist.artist.name } mustBe expectedArtistNames
       }
     }
   }
