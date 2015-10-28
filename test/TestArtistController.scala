@@ -9,14 +9,18 @@ import net.codingwell.scalaguice.ScalaModule
 import org.joda.time.DateTime
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
+import play.api.db.evolutions.Evolutions
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
-
 import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.language.postfixOps
 
 class TestArtistController extends PlaySpecification with Mockito with Injectors {
+
+//  Evolutions.applyEvolutions(databaseApi.database("tests"))
+
   sequential
 
   "artist controller" should {
@@ -201,33 +205,33 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
 
     "find events by artistFacebookUrl" in new Context {
       new WithApplication(application) {
-        val event = Event(None, None, true, true, "artistController.findEventByFacebookId", None, None, new DateTime(100000000000000L),
-          None, 1, None, None, None)
-        val passedEvent = Event(None, None, true, true, "artistController.findEventByFacebookIdPassedEvent", None, None, new DateTime(0),
-          Option(new DateTime(0)), 1, None, None, None)
-        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
-        val eventId = await(eventMethods.save(event)).id
-        val passedEventId = await(eventMethods.save(passedEvent)).id
-        await(artistMethods.saveEventRelation(EventArtistRelation(eventId.get, artistId.get)))
-        await(artistMethods.saveEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
-        val Some(response) = route(FakeRequest(GET, "/artists/worakls/events"))
+//        val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "artistController.findEventByFacebookId", None, None, new DateTime(100000000000000L),
+//          None, 1, None, None, None))
+//        val passedEvent = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "artistController.findEventByFacebookIdPassedEvent", None, None, new DateTime(0),
+//          Option(new DateTime(0)), 1, None, None, None))
+//        val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
+//        val eventId = await(eventMethods.save(event)).id
+//        val passedEventId = await(eventMethods.save(passedEvent)).id
+//        await(artistMethods.saveEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+//        await(artistMethods.saveEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
+        val Some(response) = route(FakeRequest(GET, "/artists/facebookUrl00/events"))
 
         status(response) mustEqual OK
 
-        contentAsJson(response).toString must contain(""""name":"artistController.findEventByFacebookId"""")
-        contentAsJson(response).toString must not contain """"name":"artistController.findEventByFacebookIdPassedEvent""""
+        contentAsJson(response).toString must contain(""""name":"name0"""")
+        contentAsJson(response).toString must not contain """"name":"name00""""
 
-        await(artistMethods.deleteEventRelation(EventArtistRelation(eventId.get, artistId.get)))
-        await(artistMethods.deleteEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
+//        await(artistMethods.deleteEventRelation(EventArtistRelation(eventId.get, artistId.get)))
+//        await(artistMethods.deleteEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
       }
     }
 
     "find passed events by artistId" in new Context {
       new WithApplication(application) {
-        val event = Event(None, None, true, true, "artistController.findEventByArtistId", None, None, new DateTime(100000000000000L),
-          None, 1, None, None, None)
-        val passedEvent = Event(None, None, true, true, "artistController.findEventByArtistIdPassedEvent", None, None, new DateTime(0),
-          Option(new DateTime(0)), 1, None, None, None)
+        val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "artistController.findEventByArtistId", None,
+          None, new DateTime(100000000000000L), None, 1, None, None, None))
+        val passedEvent = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "artistController.findEventByArtistIdPassedEvent",
+          None, None, new DateTime(0), Option(new DateTime(0)), 1, None, None, None))
         val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
         val eventId = await(eventMethods.save(event)).id
         val passedEventId = await(eventMethods.save(passedEvent)).id
@@ -253,4 +257,6 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
       }
     }
   }
+
+//  Evolutions.cleanupEvolutions(databaseApi.database("tests"))
 }

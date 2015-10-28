@@ -10,6 +10,11 @@ INSERT INTO users(userID, firstName, lastName, fullName, email, avatarURL) VALUE
 INSERT INTO artists(name, facebookurl) VALUES('name', 'facebookUrl0');
 
 INSERT INTO artists(name, facebookurl) VALUES('name0', 'facebookUrl00');
+/*
+ ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
+//    Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website")), Vector.empty)
+ */
+INSERT INTO artists(facebookid, name, facebookurl) VALUES('facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
 
 -------------------------------------------------------- tracks --------------------------------------------------------
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
@@ -35,6 +40,7 @@ INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
 
 -------------------------------------------------------- events --------------------------------------------------------
 INSERT INTO events(ispublic, isactive, name, starttime) VALUES(true, true, 'name0', current_timestamp);
+INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'name00', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
 
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
@@ -51,6 +57,9 @@ INSERT INTO eventsgenres(eventid, genreid) VALUES
 INSERT INTO eventsartists(eventid, artistid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
 
+  INSERT INTO eventsartists(eventid, artistid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name00'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
+
 INSERT INTO eventsartists(eventid, artistid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl00'));
 
@@ -65,6 +74,3 @@ INSERT INTO eventsartists(eventid, artistid) VALUES
 -- trackId                 UUID REFERENCES tracks (trackId),
 -- trackRank               DOUBLE PRECISION NOT NULL
 -- );
-
-
-# --- !Downs

@@ -1,9 +1,20 @@
+import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play._
+import org.specs2.specification.BeforeAfterAll
+import play.api.db.evolutions.Evolutions
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.Utilities
 
-class TestFormatEventDescription extends PlaySpec with OneAppPerSuite with Injectors {
+class TestFormatEventDescription extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
+
+  override def beforeAll() = {
+    Evolutions.applyEvolutions(databaseApi.database("tests"))
+  }
+
+  override def afterAll() = {
+    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
+  }
 
   "Format a description" must {
 

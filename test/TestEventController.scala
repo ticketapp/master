@@ -2,6 +2,7 @@ import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import models._
 import org.specs2.mock.Mockito
+import play.api.db.evolutions.Evolutions
 import play.api.db.slick.HasDatabaseConfigProvider
 import play.api.libs.json._
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
@@ -15,6 +16,8 @@ class TestEventController extends PlaySpecification
     with Mockito
     with Injectors {
   sequential
+
+  Evolutions.applyEvolutions(databaseApi.database("tests"))
 
   "event controller" should {
 
@@ -255,5 +258,7 @@ class TestEventController extends PlaySpecification
     /events/nearCity/:city
     */
   }
+
+  Evolutions.cleanupEvolutions(databaseApi.database("tests"))
 }
 

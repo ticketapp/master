@@ -37,8 +37,8 @@ class PlaylistController @Inject() (ws: WSClient,
       },
       playlistNameAndTracksId => {
         val userId = request.identity.uuid
-        playlistMethods.saveWithTrackRelations(Playlist(None, userId, playlistNameAndTracksId.name),
-          playlistNameAndTracksId.tracksIdAndRank) map { playlist =>
+        playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(Playlist(None, userId, playlistNameAndTracksId.name),
+          playlistNameAndTracksId.tracksIdAndRank)) map { playlist =>
           Ok(Json.toJson(playlist))
         } recover {
           case batchUpdateException: java.sql.BatchUpdateException =>

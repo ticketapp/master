@@ -71,7 +71,7 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
     playlist.playlistInfo.playlistId match {
       case Some(playlistId) =>
         delete(playlistId)
-        saveWithTrackRelations(playlist.playlistInfo, playlist.tracksWithRank)
+        saveWithTrackRelations(playlist)
       case None =>
         Future(0)
     }

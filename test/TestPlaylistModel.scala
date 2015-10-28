@@ -8,6 +8,7 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.Logger
+import play.api.db.evolutions.Evolutions
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -16,20 +17,12 @@ import scala.language.postfixOps
 
 class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
 
-  var artistId = -1L
-  val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
-    Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website")), Vector.empty)
-
   override def beforeAll() = {
-    try {
-      artistId = Await.result(artistMethods.save(artist), 2 seconds).id.get
-    } catch {
-      case e: Exception => Logger.info("TestPlaylistModel.beforeAll:" + e.getMessage)
-    }
+    Evolutions.applyEvolutions(databaseApi.database("tests"))
   }
 
   override def afterAll() = {
-    Await.result(artistMethods.delete(artistId), 2 seconds)
+    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
   }
 
   "A playlist" must {
@@ -59,14 +52,14 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
             "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
 
         val trackIdWithPlaylistRankSeq = Seq(
-        TrackIdWithPlaylistRank(trackId, 1.0),
-        TrackIdWithPlaylistRank(trackId1, 1.5),
-        TrackIdWithPlaylistRank(trackId2, 1.2)
+          TrackIdWithPlaylistRank(trackId, 1.0),
+          TrackIdWithPlaylistRank(trackId1, 1.5),
+          TrackIdWithPlaylistRank(trackId2, 1.2)
         )
         val tracksWithPlaylistRank = Vector (
-        TrackWithPlaylistRank(track, 1.0),
-        TrackWithPlaylistRank(track2, 1.2),
-        TrackWithPlaylistRank(track1, 1.5)
+          TrackWithPlaylistRank(track, 1.0),
+          TrackWithPlaylistRank(track2, 1.2),
+          TrackWithPlaylistRank(track1, 1.5)
         )
         Await.result(trackMethods.save(track), 2 seconds)
         Await.result(trackMethods.save(track1), 2 seconds)
@@ -83,7 +76,6 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
               foundPlaylist mustBe Option(PlaylistWithTracks(playlist.copy(playlistId = Option(savedPlaylist)),
                 tracksWithPlaylistRank))
 
-
             }
           } finally {
             whenReady(playlistMethods.delete(maybePlaylistId), timeout(Span(5, Seconds))) { response =>
@@ -97,13 +89,13 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
                 Await.result(trackMethods.delete(trackId), 2 seconds)
                 Await.result(trackMethods.delete(trackId1), 2 seconds)
                 Await.result(trackMethods.delete(trackId2), 2 seconds)
-
               }
             }
           }
         }
       }
     }
+
     "find playlists by userUUID" in {
       val loginInfo: LoginInfo = LoginInfo("providerId23189", "providerKey23187")
       val uuid: UUID = UUID.randomUUID()
@@ -161,11 +153,6 @@ class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSu
               whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { response1 =>
 
                 response1 mustBe 1
-
-                Await.result(trackMethods.delete(trackId), 2 seconds)
-                Await.result(trackMethods.delete(trackId1), 2 seconds)
-                Await.result(trackMethods.delete(trackId2), 2 seconds)
-
               }
             }
           }
