@@ -249,7 +249,6 @@ class TestArtistController extends PlaySpecification with Mockito with Injectors
         val Some(response) = route(FakeRequest(GET, "/genres/rock/artists?numberToReturn=200&offset=0"))
 
         status(response) mustEqual OK
-
         contentAsJson(response).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
       }
     }
