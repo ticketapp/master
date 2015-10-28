@@ -13,7 +13,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.iteratee.{Enumeratee, Iteratee}
+import play.api.libs.iteratee.{Enumerator, Enumeratee, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
@@ -39,7 +39,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   }
 
   def artistsSinceOffsetBy(number: Int, offset: Int) =  Action.async {
-    artistMethods.findSinceOffset(number, offset).map { artists =>
+    artistMethods.findSinceOffset(numberToReturn = number, offset = offset).map { artists =>
       Ok(Json.toJson(artists))
     }
   } 
@@ -92,7 +92,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
          val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
 
          Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { trackMethods.save }) }
-         Ok.chunked(tracksJsonEnumerator)
+         Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
         }
       }
     )
