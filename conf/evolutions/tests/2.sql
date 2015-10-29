@@ -37,7 +37,8 @@ INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
 
 -------------------------------------------------------- events --------------------------------------------------------
 INSERT INTO events(ispublic, isactive, name, starttime) VALUES(true, true, 'name0', current_timestamp);
-INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'name00', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+INSERT INTO events(ispublic, isactive, name, starttime) VALUES(true, true, 'notPassedEvent', timestamp '2050-08-24 14:00:00');
 
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
@@ -46,6 +47,10 @@ INSERT INTO organizers(name, facebookid) VALUES('name1', 'facebookId');
 -------------------------------------------------------- eventsOrganizers ----------------------------------------------
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+INSERT INTO eventsorganizers(eventid, organizerid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'eventPassed'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+INSERT INTO eventsorganizers(eventid, organizerid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'notPassedEvent'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
 
 -------------------------------------------------------- eventsGenres --------------------------------------------------
 INSERT INTO eventsgenres(eventid, genreid) VALUES
@@ -56,12 +61,14 @@ INSERT INTO eventsartists(eventid, artistid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
 
   INSERT INTO eventsartists(eventid, artistid) VALUES
-  ((SELECT eventId FROM events WHERE name = 'name00'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
+  ((SELECT eventId FROM events WHERE name = 'eventPassed'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
 
 INSERT INTO eventsartists(eventid, artistid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl00'));
 
-
+-------------------------------------------------------- eventsFollowed ------------------------------------------------
+INSERT INTO eventsfollowed(eventid, userid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT userid FROM users WHERE email = 'user@facebook.com'));
 
 
 -- INSERT INTO playliststracks()

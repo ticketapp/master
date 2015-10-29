@@ -6,23 +6,26 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.db.evolutions.Evolutions
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class TestTrackModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
 
+class TestTrackModel extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
   var artistId = -1L
   val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestTrack", Set("website")), Vector.empty)
 
   override def beforeAll() = {
+    Evolutions.applyEvolutions(databaseApi.database("tests"))
+
     artistId = Await.result(artistMethods.save(artist), 3 seconds).id.get
   }
 
   override def afterAll() = {
-    Await.result(artistMethods.delete(artistId), 3 seconds)
+    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
   }
   
   "A track" must {
