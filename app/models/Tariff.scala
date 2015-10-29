@@ -101,6 +101,7 @@ class TariffMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
         website.contains("yurplan") && website != "yurplan.com" ||
         website.contains("eventbrite") && website != "eventbrite.fr" ||
         website.contains("ticketmaster") && website != "ticketmaster.fr" ||
+        website.contains("fnacspectacles") && website != "fnacspectacles.com" ||
         website.contains("ticketnet") && website != "ticketnet.fr")
     match {
       case set: Set[String] if set.isEmpty => None

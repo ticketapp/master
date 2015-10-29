@@ -1,3 +1,5 @@
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 
 class TestUtilities extends PlaySpec with OneAppPerSuite with Injectors {
@@ -83,7 +85,9 @@ class TestUtilities extends PlaySpec with OneAppPerSuite with Injectors {
       "soundcloud.com/kuna-maze",
       "soundcloud.com/paulatemple",
       "facebook.com/musicseptembre?fref=ts",
-      "facebook.com/paulatempleofficial")
+      "facebook.com/paulatempleofficial",
+      "lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm")
+
 
     val exampleDescription =
       """La programmation d’artistes Coup de Cœur peut s’avérer être un choix cornélien. Entre le nombre accru de
@@ -271,8 +275,11 @@ class TestUtilities extends PlaySpec with OneAppPerSuite with Injectors {
         |        les chances de son côté en collaborant avec des invités de marque tels que Michael McGough (Being As An Ocean)
         |         et Michael Lawler (In Vice Versa), et en publiant plusieurs clips de qualité.
         |         Facebook : facebook.com/burningdownalaska    Phantoms : youtube.com/watch?v=jesdtqr3cko
+        |         http://bit.ly/1KfXhqX
         |         -----------------------------------------------------------------------""".stripMargin
 
-    utilities.getNormalizedWebsitesInText(Option(exampleDescription)) mustBe expectedWebsites
+    whenReady(utilities.getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) {
+      _ must contain theSameElementsAs expectedWebsites
+    }
   }
 }
