@@ -6,14 +6,12 @@ INSERT INTO users(userID, firstName, lastName, fullName, email, avatarURL) VALUE
 INSERT INTO users(userID, firstName, lastName, fullName, email, avatarURL) VALUES ('b4aea509-1002-47d0-b55c-593c91cb32ae', 'simon',
 'garnier', 'fullname', 'email00', 'avatarUrl');
 
+INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');
+
 -------------------------------------------------------- artists -------------------------------------------------------
 INSERT INTO artists(name, facebookurl) VALUES('name', 'facebookUrl0');
 
 INSERT INTO artists(name, facebookurl) VALUES('name0', 'facebookUrl00');
-/*
- ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
-//    Option("description"), "artistFacebookUrlTestPlaylistModel", Set("website")), Vector.empty)
- */
 INSERT INTO artists(facebookid, name, facebookurl) VALUES('facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
 
 -------------------------------------------------------- tracks --------------------------------------------------------
@@ -28,7 +26,6 @@ INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookur
 
 -------------------------------------------------------- genres --------------------------------------------------------
 INSERT INTO genres(name, icon) VALUES('genreTest0', 'a');
-
 INSERT INTO genres(name, icon) VALUES('genreTest00', 'a');
 
 -------------------------------------------------------- artistsGenres -------------------------------------------------
@@ -44,6 +41,7 @@ INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, tr
 
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
+INSERT INTO organizers(name, facebookid) VALUES('name1', 'facebookId');
 
 -------------------------------------------------------- eventsOrganizers ----------------------------------------------
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
