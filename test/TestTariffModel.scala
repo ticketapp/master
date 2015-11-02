@@ -1,6 +1,6 @@
 import org.scalatestplus.play._
 
-class TestTariffModel extends PlaySpec with OneAppPerSuite with Injectors {
+class TestTariffModel extends GlobalApplicationForModels {
 
   "Tariff" must {
 

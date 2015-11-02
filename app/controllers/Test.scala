@@ -21,6 +21,15 @@ import play.api.mvc.Results._
 import scala.util.{Success, Failure}
 import play.api.libs.functional.syntax._
 import play.api.Play.current
+/*
+ follower counts SC
+ regarder le next de facebook
+ aller chercher les artistes d'une lettre et deux lettres
+ enlever 0.1 par lettre en plus au temps de latence à partir de trois
+ un seul match echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
+ hendrix : bug si getechoSongs recursif
+ */
+
 
 class Test extends Controller {
   /*def test1 = WebSocket.using[String] { request =>

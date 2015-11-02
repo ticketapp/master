@@ -10,7 +10,7 @@ import play.api.libs.iteratee.Iteratee
 import play.api.libs.json.{JsValue, Json}
 
 
-class TestSearchYoutubeTracks extends PlaySpec with OneAppPerSuite with Injectors {
+class TestSearchYoutubeTracks extends GlobalApplicationForModels {
 
   "SearchYoutubeTracks" must {
 

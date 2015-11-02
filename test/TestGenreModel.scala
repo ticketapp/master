@@ -12,16 +12,7 @@ import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
 import org.scalatest.Matchers._
 
 
-class TestGenreModel extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll{
-
-  override def beforeAll() = {
-    Evolutions.applyEvolutions(databaseApi.database("tests"))
-  }
-
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-  }
-
+class TestGenreModel extends GlobalApplicationForModels {
 
   "A genre" must {
 

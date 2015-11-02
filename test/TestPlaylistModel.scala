@@ -15,15 +15,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
-class TestPlaylistModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
-
-  override def beforeAll() = {
-    Evolutions.applyEvolutions(databaseApi.database("tests"))
-  }
-
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-  }
+class TestPlaylistModel extends GlobalApplicationForModels {
 
   "A playlist" must {
 

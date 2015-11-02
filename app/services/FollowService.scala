@@ -99,7 +99,8 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
 
   //////////////////////////////////////////// organizer ///////////////////////////////////////////////////////////////
 
-  def followByOrganizerId(userOrganizerRelation: UserOrganizerRelation): Future[Int] = db.run(organizersFollowed += userOrganizerRelation)
+  def followByOrganizerId(userOrganizerRelation: UserOrganizerRelation): Future[Int] =
+    db.run(organizersFollowed += userOrganizerRelation)
 
   def unfollow(userOrganizerRelation: UserOrganizerRelation): Future[Int] = db.run(
     organizersFollowed

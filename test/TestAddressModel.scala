@@ -6,15 +6,7 @@ import org.scalatestplus.play._
 import play.api.db.evolutions.Evolutions
 
 
-class TestAddressModel extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
-
-  override def beforeAll() = {
-    Evolutions.applyEvolutions(databaseApi.database("tests"))
-  }
-
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-  }
+class TestAddressModel extends GlobalApplicationForModels {
 
   "An address" must {
 

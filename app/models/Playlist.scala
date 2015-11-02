@@ -3,12 +3,10 @@ package models
 import java.util.UUID
 import javax.inject.Inject
 
-import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import services.MyPostgresDriver.api._
 import services._
 
-import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

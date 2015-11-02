@@ -3,14 +3,12 @@ import play.api.Configuration
 import play.api.db.DBApi
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
+import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
 import silhouette.UserDAOImpl
 
 
 trait Injectors {
   lazy val appBuilder = new GuiceApplicationBuilder().configure(Configuration.from(Map(
-//        "play.evolutions.db.default.autoApply" -> true,
-//        "evolutionplugin" -> "disabled",
         "slick.dbs.default.driver" -> "slick.driver.PostgresDriver$",
         "slick.dbs.default.db.driver" -> "org.postgresql.Driver",
         "slick.dbs.default.db.url" -> "jdbc:postgresql://localhost:5432/tests",

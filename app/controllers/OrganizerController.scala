@@ -74,7 +74,8 @@ class OrganizerController @Inject()(ws: WSClient,
   }
 
   def followOrganizerByOrganizerId(organizerId: Long) = SecuredAction.async { implicit request =>
-    organizerMethods.followByOrganizerId(UserOrganizerRelation(request.identity.uuid, organizerId)) map {
+    organizerMethods.followByOrganizerId(
+      UserOrganizerRelation(userId = request.identity.uuid, organizerId = organizerId)) map {
       case 1 =>
         Created
       case _ =>
@@ -95,7 +96,8 @@ class OrganizerController @Inject()(ws: WSClient,
 
   def unfollowOrganizerByOrganizerId(organizerId : Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
-    organizerMethods.unfollow(UserOrganizerRelation(userId, organizerId)) map {
+    organizerMethods.unfollow(
+      UserOrganizerRelation(userId = request.identity.uuid, organizerId = organizerId)) map {
       case 1 =>
         Ok
       case _ =>
@@ -103,10 +105,10 @@ class OrganizerController @Inject()(ws: WSClient,
         InternalServerError
     } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
-        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerId: $organizerId) or the organizer does not exist.")
+        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerId: $organizerId).")
         NotFound
       case unknownException =>
-        Logger.error("OrganizerController.unfollowOrganizer", unknownException)
+        Logger.error("OrganizerController.unfollowOrganizer: unknownException: ", unknownException)
         InternalServerError
     }
   }
@@ -121,7 +123,7 @@ class OrganizerController @Inject()(ws: WSClient,
         InternalServerError
     } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
-        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerFacebookId: $facebookId) or the organizer does not exist.")
+        Logger.error(s"The user (id: $userId) does not follow the organizer (organizerFacebookId: $facebookId).")
         NotFound
       case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
         Logger.error(s"The user (id: $userId) already follow organizerFacebookId: $facebookId).")

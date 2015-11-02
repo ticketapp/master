@@ -7,7 +7,7 @@ import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 
 
-class TestUserModel extends PlaySpec with OneAppPerSuite with Injectors {
+class TestUserModel extends GlobalApplicationForModels {
 
   "A user" must {
 
