@@ -14,5 +14,12 @@ class TestTariffModel extends PlaySpec with OneAppPerSuite with Injectors {
       tariffMethods.findPrices(Some("ion no no 6.8€ jlk ljk klj klj 3,45 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.45-6.8")
       tariffMethods.findPrices(Some("ion no no 6.8 € jlk ljk klj klj 3.11 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.11-6.8")
     }
+
+    "find ticket seller" in {
+      val fnacTicket = tariffMethods.findTicketSellers(Set("lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm"))
+      val digitick = tariffMethods.findTicketSellers(Set("digitick.com"))
+      fnacTicket mustBe Some("lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm")
+      digitick mustBe empty
+    }
   }
 }

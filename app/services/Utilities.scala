@@ -1,19 +1,21 @@
 package services
 
-import java.sql.{Timestamp, Connection}
+import java.sql.Timestamp
 import java.text.Normalizer
-import java.util.{UUID, Date}
+import java.util.Date
 import javax.inject.Inject
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import play.api.Logger
+import play.api.libs.json._
+import play.api.libs.ws.WS
 import slick.driver.PostgresDriver.api._
+import play.api.Play.current
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.matching.Regex
-import scala.util.{Try, Failure, Success}
-import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Point}
 
 
 class Utilities @Inject()() {
@@ -42,6 +44,9 @@ class Utilities @Inject()() {
   def normalizeUrl(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website.toLowerCase, p => "").stripSuffix("/")
 
+  def normalizeUrlWithoutLowerCase(website: String): String =
+    """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website, p => "").stripSuffix("/")
+
   def stringToDateTime(string: String): DateTime = {
     val formatedString = string.replace("T", " ").substring(0, string.length - 5)
     DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime(formatedString)
@@ -56,12 +61,41 @@ class Utilities @Inject()() {
     website.indexOf("@") == -1)
 
   def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
+  
+  def unshortLink(string: String): Future[String] = {
+    if (string.indexOf("bit.ly") > -1 || string.indexOf("bit.do") > -1 || string.indexOf("t.co") > -1 ||
+      string.indexOf("lnkd.in") > -1 || string.indexOf("db.tt") > -1 ||  string.indexOf("qr.ae") > -1 ||
+      string.indexOf("adf.ly") > -1 || string.indexOf("goo.gl") > -1 || string.indexOf("bitly.com") > -1 ||
+      string.indexOf("cur.lv") > -1 || string.indexOf("tinyurl.com") > - 1 || string.indexOf("ow.ly") > -1 ||
+      string.indexOf("adcrun.ch") > -1 || string.indexOf("ity.im") > -1 || string.indexOf("q.gs") > -1 ||
+      string.indexOf("viralurl.com") > -1 || string.indexOf("is.gd") > -1 || string.indexOf("vur.me") > -1 ||
+      string.indexOf("bc.vc") > -1 || string.indexOf("twitthis.com") > -1 || string.indexOf("u.to") > -1 ||
+      string.indexOf("j.mp") > -1 || string.indexOf("buzurl.com") > -1 || string.indexOf("cutt.us") > -1 ||
+      string.indexOf("u.bb") > -1 || string.indexOf("yourls.org") > -1 || string.indexOf("crisco.com") > -1 ||
+      string.indexOf("x.co") > -1 ||  string.indexOf("prettylinkpro.com") > -1 || string.indexOf("viralurl.biz") > -1 ||
+      string.indexOf("adcraft.co") > -1 || string.indexOf("virl.ws") > -1 || string.indexOf("scrnch.me") > -1 ||
+      string.indexOf("filoops.info") > -1 || string.indexOf("vurl.bz") > -1 || string.indexOf("vzturl.com") > -1 ||
+      string.indexOf("lemde.fr") > -1 || string.indexOf("qr.net") > -1 || string.indexOf("1url.com") > -1 ||
+      string.indexOf("tweez.me") > -1 || string.indexOf("7vd.cn") > -1 || string.indexOf("v.gd") > -1 ||
+      string.indexOf("dft.ba") > -1 || string.indexOf("aka.gr") > -1 || string.indexOf("tr.im") > -1) {
+      WS.url("http://expandurl.appspot.com/expand?url=http://" + string)
+        .get()
+        .map { response =>
+          val readUnshortedUrl: Reads[Option[String]] = (__ \ "end_url").readNullable[String]
 
-  def getNormalizedWebsitesInText(maybeDescription: Option[String]): Set[String] = maybeDescription match {
-    case None =>
-      Set.empty
-    case Some(description) =>
-      removeMailFromListOfWebsites(linkPattern.findAllIn(description).toSet).map { normalizeUrl }
+          response.json.as[Option[String]](readUnshortedUrl) match {
+            case Some(url) => normalizeUrl(url)
+            case None => string
+          }
+        }
+    } else
+      Future(string)
+  }
+
+  def getNormalizedWebsitesInText(description: String): Future[Set[String]] = Future.sequence {
+    removeMailFromListOfWebsites(linkPattern.findAllIn(description).toSet) map { webSite =>
+      unshortLink(normalizeUrlWithoutLowerCase(webSite)) map { _.toLowerCase }
+    }
   }
 
   def phoneNumbersStringToSet(phoneNumbers: Option[String]): Set[String] = phoneNumbers match {

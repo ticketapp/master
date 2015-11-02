@@ -158,9 +158,9 @@ class TestSearchArtist extends PlaySpec with OneAppPerSuite with Injectors {
         "Defeater", "BURNING DOWN ALASKA", "Nosaj Thing", "Mono (Japan)", "SÓLSTAFIR", "The Ocean Collective", "LOHEEM"
       ,"woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
 
-      whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) {
+      whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) { maybeArtists =>
 
-        _.flatten.map{ artist => artist.artist.name } mustBe expectedArtists }
+        maybeArtists.map{ artist => artist.artist.name } mustBe expectedArtists }
     }
 
     "find artists in event's title" in {

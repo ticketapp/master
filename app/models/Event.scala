@@ -491,7 +491,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def readFacebookEvent(eventFacebookResponse: WSResponse): Future[EventWithRelations] = {
-    val eventRead = (
+    val eventRead: Reads[Future[EventWithRelations]] = (
       (__ \ "description").readNullable[String] and
         (__ \ "cover" \ "source").read[String] and
         (__ \ "name").read[String] and
@@ -503,30 +503,32 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         (__ \ "venue" \ "city").readNullable[String] and
         (__ \ "owner" \ "id").readNullable[String] and
         (__ \ "place" \ "id").readNullable[String]
-      )((description: Option[String], source: String, name: String, facebookId: Option[String],
+      )((maybeDescription: Option[String], source: String, name: String, facebookId: Option[String],
          startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
          city: Option[String], maybeOwnerId: Option[String], maybePlaceId: Option[String]) => {
 
       val eventuallyOrganizer = organizerMethods.getOrganizerInfo(maybeOwnerId)
       val address = new Address(None, None, city, zip, street)
 
-      val normalizedWebsites: Set[String] = utilities.getNormalizedWebsitesInText(description)
-      val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
-      val eventuallyMaybeArtistsFromDescription = artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
-      val eventuallyMaybeArtistsFromTitle =
-        artistMethods.getEventuallyArtistsInEventTitle(name, normalizedWebsites)
       // !!!!!!!!!!!!!!!!!!!!!!!!!!!
       val eventuallyTryPlace = None//placeMethods.getPlaceByFacebookId(maybePlaceId)
 
+      val eventuallyNormalizedWebsites: Future[Set[String]] = maybeDescription match {
+        case Some(description) => utilities.getNormalizedWebsitesInText(description)
+        case None => Future(Set.empty)
+      }
+
       for {
         organizer <- eventuallyOrganizer
-        artistsFromDescription <- eventuallyMaybeArtistsFromDescription
-        artistsFromTitle <- eventuallyMaybeArtistsFromTitle
+        normalizedWebsites <- eventuallyNormalizedWebsites
+        artistsFromDescription <- artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
+        eventuallyMaybeArtistsFromTitle <- artistMethods.getEventuallyArtistsInEventTitle(name, normalizedWebsites)
 //        optionPlace <- eventuallyTryPlace
       } yield {
+        val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
 
-        val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
-        artistMethods.saveArtistsAndTheirTracks(nonEmptyArtists map { _.artist })
+//        val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
+//        artistMethods.saveArtistsAndTheirTracks(nonEmptyArtists map { _.artist })
 
         val normalizedStartTime: DateTime = startTime match {
           case Some(matchedDate) =>
@@ -541,15 +543,14 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           case None => None
         }
 
-
 //        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //        val eventGenres = (nonEmptyArtists.flatMap(_.genres) ++
 //          nonEmptyArtists.flatMap(artist => genreMethods.findOverGenres(artist.genres))).distinct
 
         val event = EventWithRelations(
           event = Event(None, facebookId, isPublic = true, isActive = true, utilities.refactorEventOrPlaceName(name), None,
-            utilities.formatDescription(description), normalizedStartTime/*,
-            formatDate(endTime)*/, normalizedEndTime, 16, tariffMethods.findPrices(description), ticketSellers, Option(source)),
+            utilities.formatDescription(maybeDescription), normalizedStartTime/*,
+            formatDate(endTime)*/, normalizedEndTime, 16, tariffMethods.findPrices(maybeDescription), ticketSellers, Option(source)),
           genres = Vector.empty)
 
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
