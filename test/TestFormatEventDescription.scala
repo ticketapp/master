@@ -6,7 +6,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.Utilities
 
-class TestFormatEventDescription extends PlaySpec with BeforeAndAfterAll with OneAppPerSuite with Injectors {
+class TestFormatEventDescription extends GlobalApplicationForModels {
 
   override def beforeAll() = {
     Evolutions.applyEvolutions(databaseApi.database("tests"))

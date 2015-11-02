@@ -8,7 +8,7 @@ import play.api.test.{FakeRequest, PlaySpecification}
 
 import scala.language.postfixOps
 
-class TestArtistController extends PlaySpecification with Mockito with Injectors with GlobalApplication {
+class TestArtistController extends GlobalApplicationForControllers {
   sequential
 
   "artist controller" should {

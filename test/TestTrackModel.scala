@@ -13,21 +13,11 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
-class TestTrackModel extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
+class TestTrackModel extends GlobalApplicationForModels {
   var artistId = -1L
   val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestTrack", Set("website")), Vector.empty)
 
-  override def beforeAll() = {
-    Evolutions.applyEvolutions(databaseApi.database("tests"))
-
-    artistId = Await.result(artistMethods.save(artist), 3 seconds).id.get
-  }
-
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-  }
-  
   "A track" must {
 
     "be saved and deleted" in {

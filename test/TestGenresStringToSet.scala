@@ -6,7 +6,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
-class TestGenresStringToSet extends PlaySpec with OneAppPerSuite with Injectors {
+class TestGenresStringToSet extends GlobalApplicationForModels {
 
   "A sequence of genres as a string" must {
 

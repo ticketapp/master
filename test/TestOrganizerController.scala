@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
 
-class TestOrganizerController extends PlaySpecification with Mockito with GlobalApplication {
+class TestOrganizerController extends GlobalApplicationForControllers {
     sequential
 
   "organizer controller" should {

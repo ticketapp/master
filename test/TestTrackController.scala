@@ -11,7 +11,7 @@ import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 import scala.language.postfixOps
 
 
-class TestTrackController extends PlaySpecification with Mockito with Injectors with GlobalApplication {
+class TestTrackController extends GlobalApplicationForControllers {
   sequential
 
   "track controller" should {

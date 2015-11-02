@@ -15,7 +15,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class TestOrganizerModel extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
+class TestOrganizerModel extends GlobalApplicationForModels {
 
   override def beforeAll() = {
     Evolutions.applyEvolutions(databaseApi.database("tests"))

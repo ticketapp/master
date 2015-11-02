@@ -8,7 +8,7 @@ import services.SoundCloudArtistConfidence
 import org.scalatest.Matchers._
 
 
-class TestSearchSoundCloudTracks extends PlaySpec with OneAppPerSuite with Injectors {
+class TestSearchSoundCloudTracks extends GlobalApplicationForModels {
 
   val ninaKraviz = Artist(None, Option("facebookId3"), "nina", Option("imagePath"), Option("description"),
     "facebookUrl3", Set("soundcloud.com/nina-kraviz"))

@@ -3,7 +3,7 @@ import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
 
 
-class TestSearchArtist extends PlaySpec with OneAppPerSuite with Injectors {
+class TestSearchArtist extends GlobalApplicationForModels {
 
   "SearchArtistController" must {
 

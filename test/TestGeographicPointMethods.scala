@@ -10,7 +10,7 @@ import services.Utilities
 
 import scala.util.Success
 
-class TestGeographicPointMethods extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
+class TestGeographicPointMethods extends GlobalApplicationForModels {
 
   override def beforeAll() = {
     Evolutions.applyEvolutions(databaseApi.database("tests"))

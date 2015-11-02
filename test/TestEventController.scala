@@ -9,10 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
 
-class TestEventController extends PlaySpecification
-    with Mockito
-    with Injectors
-    with GlobalApplication {
+class TestEventController extends GlobalApplicationForControllers {
   sequential
 
   "event controller" should {

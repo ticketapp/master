@@ -1,6 +1,6 @@
 import org.scalatestplus.play._
 
-class TestUtilities extends PlaySpec with OneAppPerSuite with Injectors {
+class TestUtilities extends GlobalApplicationForModels {
 
   "A utilities" must {
 

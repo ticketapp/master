@@ -159,6 +159,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def saveEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces += eventPlaceRelation)
  
-  def deleteEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces.filter(event =>
-    event.eventId === eventPlaceRelation.eventId && event.placeId === eventPlaceRelation.placeId).delete)
+  def deleteEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces
+    .filter(eventPlace => eventPlace.eventId === eventPlaceRelation.eventId &&
+      eventPlace.placeId === eventPlaceRelation.placeId)
+    .delete)
 }

@@ -8,7 +8,7 @@ import play.api.libs.json._
 import play.api.test.{FakeRequest, PlaySpecification}
 
 
-class TestPlaylistController extends PlaySpecification with Mockito with Injectors with GlobalApplication {
+class TestPlaylistController extends GlobalApplicationForControllers {
   sequential
 
   "playlist controller" should {
@@ -65,7 +65,6 @@ class TestPlaylistController extends PlaySpecification with Mockito with Injecto
     }
 
     "find playlists by user" in {
-      await(userDAOImpl.save(identity))
       val trackId = UUID.randomUUID
       val trackId1 = UUID.randomUUID
       val trackId2 = UUID.randomUUID
@@ -150,8 +149,8 @@ class TestPlaylistController extends PlaySpecification with Mockito with Injecto
           }"""
 
       val Some(result) = route(FakeRequest(POST, "/playlists")
-      .withJsonBody(Json.parse(jsonPlaylist))
-      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withJsonBody(Json.parse(jsonPlaylist))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(result) mustEqual OK
 
@@ -179,14 +178,14 @@ class TestPlaylistController extends PlaySpecification with Mockito with Injecto
            ]
           }"""
 
-      val Some(update) = route(FakeRequest(PUT, "/playlists/" + contentAsJson(result).toString())
-      .withJsonBody(Json.parse(jsonUpdatedPlaylist))
-      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      val Some(update) = route(FakeRequest(PUT, "/playlists/" + contentAsString(result))
+        .withJsonBody(Json.parse(jsonUpdatedPlaylist))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(update) mustEqual OK
 
       val Some(playlists) = route(FakeRequest(GET, "/playlists")
-      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsJson(playlists).toString() must contain(""""title":"title4","url":"urlPlaylistControllerTestFindByUser4"""")
     }

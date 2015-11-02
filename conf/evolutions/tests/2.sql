@@ -10,9 +10,9 @@ INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44',
 
 -------------------------------------------------------- artists -------------------------------------------------------
 INSERT INTO artists(name, facebookurl) VALUES('name', 'facebookUrl0');
-
 INSERT INTO artists(name, facebookurl) VALUES('name0', 'facebookUrl00');
 INSERT INTO artists(facebookid, name, facebookurl) VALUES('facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
+INSERT INTO artists(facebookid, name, facebookurl) VALUES('withoutEventRelation', 'withoutEventRelation', 'withoutEventRelation');
 
 -------------------------------------------------------- tracks --------------------------------------------------------
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES

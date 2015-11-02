@@ -3,7 +3,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play._
 import play.api.db.evolutions.Evolutions
 
-class TestNormalizeArtistName extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
+class TestNormalizeArtistName extends GlobalApplicationForModels {
 
   override def beforeAll() = {
     Evolutions.applyEvolutions(databaseApi.database("tests"))
