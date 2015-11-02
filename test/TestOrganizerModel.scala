@@ -4,26 +4,15 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatestplus.play._
-import play.api.db.evolutions.Evolutions
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class TestOrganizerModel extends GlobalApplicationForModels {
-
-  override def beforeAll() = {
-    Evolutions.applyEvolutions(databaseApi.database("tests"))
-  }
-
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-  }
 
   "An Organizer" must {
 

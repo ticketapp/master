@@ -4,7 +4,6 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 
 
 class TestUserModel extends GlobalApplicationForModels {

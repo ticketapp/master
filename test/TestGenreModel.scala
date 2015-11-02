@@ -1,15 +1,9 @@
 import java.util.UUID
 
 import models._
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.db.evolutions.Evolutions
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
-import org.scalatest.Matchers._
 
 
 class TestGenreModel extends GlobalApplicationForModels {
