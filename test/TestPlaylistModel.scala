@@ -2,13 +2,8 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import models._
-import org.scalatest.Matchers._
-import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.Logger
-import play.api.db.evolutions.Evolutions
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

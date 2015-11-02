@@ -1,6 +1,5 @@
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatestplus.play._
 
 class TestUtilities extends GlobalApplicationForModels {
 

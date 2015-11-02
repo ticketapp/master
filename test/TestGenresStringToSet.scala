@@ -1,10 +1,5 @@
-import models.{ArtistMethods, TrackMethods, GenreMethods, Genre}
+import models.Genre
 import org.scalatest.Matchers._
-import org.scalatest._
-import org.scalatestplus.play._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchYoutubeTracks, SearchSoundCloudTracks, Utilities}
 
 class TestGenresStringToSet extends GlobalApplicationForModels {
 

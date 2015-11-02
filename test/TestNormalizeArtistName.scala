@@ -1,17 +1,4 @@
-
-import org.scalatest.BeforeAndAfterAll
-import org.scalatestplus.play._
-import play.api.db.evolutions.Evolutions
-
 class TestNormalizeArtistName extends GlobalApplicationForModels {
-
-  override def beforeAll() = {
-    Evolutions.applyEvolutions(databaseApi.database("tests"))
-  }
-
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-  }
 
   "A sequence of artists names (strings)" must {
 

@@ -3,10 +3,8 @@ import java.util.UUID
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import models._
-import org.scalatest.concurrent.ScalaFutures._
-import org.specs2.mock.Mockito
 import play.api.libs.json._
-import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
+import play.api.test.FakeRequest
 
 import scala.language.postfixOps
 

@@ -1,5 +1,3 @@
-import org.scalatestplus.play._
-
 class TestTariffModel extends GlobalApplicationForModels {
 
   "Tariff" must {

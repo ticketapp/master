@@ -1,9 +1,6 @@
 import models._
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatestplus.play._
-import play.api.db.evolutions.Evolutions
 
 
 class TestAddressModel extends GlobalApplicationForModels {

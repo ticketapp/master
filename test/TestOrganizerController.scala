@@ -1,20 +1,8 @@
-import java.util.UUID
-
-import com.google.inject.AbstractModule
-import com.mohiva.play.silhouette.api.{Environment, LoginInfo}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import models._
-import net.codingwell.scalaguice.ScalaModule
-import org.specs2.mock.Mockito
-import org.specs2.specification.{AfterAll, BeforeAll, Scope}
-import play.api.db.evolutions.Evolutions
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
 import play.api.test._
-import play.api.{Configuration, Play}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
 
