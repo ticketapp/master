@@ -141,9 +141,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     } map(_.toVector)
   }
 
-  def findIdByName(name: String): Future[Option[Long]] =
-    db.run(artists.filter(_.name === name).map(_.id).result.headOption)
-
   def findIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(artists.filter(_.facebookId === facebookId).map(_.id).result.headOption)
 

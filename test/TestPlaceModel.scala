@@ -214,5 +214,28 @@ class TestPlaceModel extends GlobalApplicationForModels {
         }
       }
     }
+
+    "find id by facebookId" in {
+      whenReady(placeMethods.findIdByFacebookId("776137029786070"), timeout(Span(5, Seconds))) {
+        _ mustBe Some(2)
+      }
+    }
+
+    "find place on facebook" in {
+      whenReady(placeMethods.getPlaceOnFacebook("836137029786070"), timeout(Span(5, Seconds))) {
+        _.name mustBe "Akwaba Coop Culturelle"
+      }
+    }
+
+    "be followed by facebookId" in {
+      whenReady(placeMethods.followByFacebookId(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), "776137029786070"),
+        timeout(Span(5, Seconds))) {
+        _ mustBe 1
+      }
+    }
+
+    /*
+    findNearCity
+    */
   }
 }
