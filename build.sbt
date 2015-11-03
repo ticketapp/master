@@ -65,3 +65,5 @@ scalacOptions ++= Seq(
 
 
 fork in run := true
+
+cancelable in Global := true

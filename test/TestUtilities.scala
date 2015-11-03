@@ -31,7 +31,7 @@ class TestUtilities extends GlobalApplicationForModels {
     val eventsName = Seq("abc", "abcdef @transbordeur abc", "abcdef@hotmail.fr")
     val expectedEventsName = Seq("abc", "abcdef", "abcdef@hotmail.fr")
 
-    eventsName map  { utilities.refactorEventOrPlaceName } mustBe expectedEventsName
+    eventsName map { utilities.refactorEventOrPlaceName } mustBe expectedEventsName
   }
 
   "return an optional string from a set" in {
@@ -41,7 +41,6 @@ class TestUtilities extends GlobalApplicationForModels {
   }
 
   "return a list of normalized websites from a text" in {
-
     val expectedWebsites = Set(
       "facebook.com/cruelhand",
       "facebook.com/alexsmokemusic",
@@ -86,7 +85,6 @@ class TestUtilities extends GlobalApplicationForModels {
       "facebook.com/musicseptembre?fref=ts",
       "facebook.com/paulatempleofficial",
       "lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm")
-
 
     val exampleDescription =
       """La programmation d’artistes Coup de Cœur peut s’avérer être un choix cornélien. Entre le nombre accru de

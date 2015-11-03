@@ -3,163 +3,115 @@ package models
 import java.util.UUID
 import javax.inject.Inject
 
-
-
 import controllers.DAOException
-import play.api.Logger
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import services.MyPostgresDriver.api._
+import services.{MyPostgresDriver, Utilities}
 
-import play.api.db.slick.DatabaseConfigProvider
-import services.Utilities
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
-import slick.model.ForeignKeyAction
-
-import scala.collection.mutable.ListBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
-/*
-CREATE TABLE tracksRating (
-  tableId                 SERIAL PRIMARY KEY,
-  userId                  VARCHAR(255) REFERENCES users_login (userId) NOT NULL,
-  trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
-  ratingUp                INT,
-  ratingDown              INT,
-  reason                  CHAR
-);
- */
+
 
 case class TrackRating(userId: UUID,
                       trackId: UUID,
                       ratingUp: Int,
                       ratingDown: Int,
-                      reason: Char)
+                      reason: Option[Char] = None)
+
+case class Rating(ratingUp: Int, ratingDown: Int)
 
 
-class TrackRatingMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                             val utilities: Utilities) {
-  val dbConfig = dbConfigProvider.get[JdbcProfile]
-  import dbConfig._
+class TrackRatingMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
+                                   val utilities: Utilities,
+                                   val trackMethods: TrackMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with MyDBTableDefinitions {
 
-  class TrackRatings(tag: Tag) extends Table[TrackRating](tag, "trackratings") {
-    def tableId = column[Long]("tableid", O.PrimaryKey, O.AutoInc)
-    def userId = column[UUID]("userid")
-    def trackId = column[UUID]("trackid")
-    def ratingUp = column[Int]("ratingup")
-    def ratingDown = column[Int]("ratingdown")
-    def reason = column[Char]("reason")
+  def upsertRatingForAUser(userId: UUID, trackId: UUID, rating: Int): Future[Int] = {
+    val newRating = rating match {
+      case ratingUp if ratingUp > 0 =>
+        TrackRating(userId = userId, trackId = trackId, ratingUp = rating, ratingDown = 0)
+      case ratingDown if ratingDown <= 0 =>
+        TrackRating(userId = userId, trackId = trackId, ratingUp = 0, ratingDown = rating)
+    }
 
-    def * = (userId, trackId, ratingUp, ratingDown, reason) <> ((TrackRating.apply _).tupled, TrackRating.unapply)
+    updateGeneralRating(trackId, rating)
+
+    db.run((for {
+      userTrackRatingFound <- trackRatings.filter(trackRating => trackRating.userId === userId &&
+        trackRating.trackId === trackId).result.headOption
+      result <- userTrackRatingFound
+        .map(DBIO.successful)
+        .getOrElse(trackRatings returning trackRatings.map(_.tableId) += newRating)
+    } yield result match {
+      case ratingToUpdate: TrackRating =>
+        db.run(trackRatings
+          .filter(trackRating => trackRating.userId === userId && trackRating.trackId === trackId)
+          .update(ratingToUpdate.copy(
+            ratingUp = ratingToUpdate.ratingUp + newRating.ratingUp,
+            ratingDown = ratingToUpdate.ratingDown + newRating.ratingDown)))
+      case long: Long =>
+          Future(1)
+    }).transactionally)
+      .flatMap(numberOfUpdatedRows => numberOfUpdatedRows)
   }
 
-  lazy val trackRatings = TableQuery[TrackRatings]
-/*
-  def upsertRatingUp(userId: UUID, trackId: UUID, rating: Int): Try[Boolean] = Try {
-//    trackRatings.insertOrUpdate()
+  def updateGeneralRating(trackId: UUID, ratingToAdd: Int): Future[Try[Double]] = getGeneralRating(trackId) flatMap {
+    case Some(actualRating) =>
+      var actualRatingUp = actualRating.ratingUp
+      var actualRatingDown = actualRating.ratingDown
 
-    updateRating(trackId, rating)
+      ratingToAdd match {
+        case ratingUp if ratingUp > 0 => actualRatingUp = actualRatingUp + ratingUp
+        case ratingDown if ratingDown <= 0 => actualRatingDown = actualRatingDown + math.abs(ratingDown)
+      }
 
-    DB.withConnection { implicit connection =>
-      SQL("SELECT upsertTrackRatingUp({userId}, {trackId}, {rating})")
-        .on(
-          'userId -> userId,
-          'trackId -> trackId,
-          'rating -> rating)
-        .execute()
-    }
-  }
+      val confidence = trackMethods.calculateConfidence(actualRatingUp, actualRatingDown)
 
-  def upsertRatingDown(userId: UUID, trackId: UUID, rating: Int, reason: Option[Char]): Try[Boolean] = Try {
-    updateRating(trackId, rating)
-
-    DB.withConnection { implicit connection =>
-      SQL("SELECT upsertTrackRatingDown({userId}, {trackId}, {rating}, {reason})")
-        .on(
-          'userId -> userId,
-          'trackId -> trackId,
-          'rating -> math.abs(rating),
-          'reason -> reason)
-        .execute()
-    }
-  }
-
-  //  private val ratingParser: RowParser[(Int, Int)] = {
-  //    get[Option[Int]]("ratingUp") ~
-  //      get[Option[Int]]("ratingDown") map {
-  //      case ratingUp ~ ratingDown => (ratingUp.getOrElse(0), ratingDown.getOrElse(0))
-  //    }
-  //  }
-
-  def updateRating(trackId: UUID, ratingToAdd: Int): Try[Double] = Try {
-    getRating(trackId) match {
-      case Success(Some(actualRating)) =>
-        var actualRatingUp = actualRating._1
-        var actualRatingDown = actualRating._2
-
-        ratingToAdd match {
-          case ratingUp if ratingUp > 0 => actualRatingUp = actualRatingUp + ratingUp
-          case ratingDown if ratingDown <= 0 => actualRatingDown = actualRatingDown + math.abs(ratingDown)
-        }
-
-        val confidence = calculateConfidence(actualRatingUp, actualRatingDown)
-
-        persistUpdateRating(trackId, actualRatingUp, actualRatingDown, confidence) match {
-          case Success(1) =>
-            confidence
-          case Failure(exception) =>
-            Logger.error(s"Track.updateRating: persistUpdateRating: error while updating with trackId: trackId", exception)
-            throw exception
-          case _ =>
-            throw new DAOException("Track.updateRating: persistUpdateRating")
-        }
-
-      case Failure(exception) =>
-        Logger.error(s"Track.updateRating: error while updating with trackId: trackId", exception)
-        throw exception
-
-      case _ =>
-        Logger.error(s"Track.updateRating: error while updating with trackId: $trackId")
-        throw new DAOException("Track.updateRating")
-    }
+      persistUpdateRating(trackId, actualRatingUp, actualRatingDown, confidence) map {
+        case 1 =>
+          Success(confidence)
+        case _ =>
+          Failure(DAOException(s"TrackRating.updateRating: error while updating with trackId: $trackId"))
+      }
+    case None =>
+      Future(Failure(DAOException(s"TrackRating.updateRating: no track with id: $trackId")))
   }
 
   def persistUpdateRating(uuid: UUID, actualRatingUp: Int, actualRatingDown: Int, confidence: Double): Future[Int] = {
     val query = tracks
       .filter(_.uuid === uuid)
       .map(track => (track.ratingUp, track.ratingDown, track.confidence))
-      .update((actualRatingUp, actualRatingDown, Option(confidence)))
+      .update((actualRatingUp, actualRatingDown, confidence))
 
     db.run(query)
   }
 
-  def getRating(uuid: UUID): Future[Option[(Int, Int)]] = {
-    val query = tracks
+  def getGeneralRating(uuid: UUID): Future[Option[Rating]] = db.run(
+    tracks
       .filter(_.uuid === uuid)
       .map(track => (track.ratingUp, track.ratingDown))
-    db.run(query.result.headOption)
-  }
+      .result
+      .headOption) map(_ map Rating.tupled)
 
-  def getRatingForUser(userId: UUID, trackId: UUID): Future[Option[(Int, Int)]] = {
-    //    val query = tracks
-    //      .filter(_.uuid === uuid)
-    //      .map(track => (track.ratingUp, track.ratingDown))
-    //    DB.withConnection { implicit connection =>
-    //      SQL("SELECT ratingUp, ratingDown FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}")
-    //        .on(
-    //          'userId -> userId,
-    //          'trackId -> trackId)
-    //        .as(ratingParser.singleOpt)
-    //    }
-    Future { Option((0, 0))}
-  }
+  def getRatingForUser(userId: UUID, trackId: UUID): Future[Option[Rating]] = db.run(
+    trackRatings
+      .filter(_.userId === userId)
+      .map(trackRating => (trackRating.ratingUp, trackRating.ratingDown))
+      .result
+      .headOption) map(_ map Rating.tupled)
 
-  def deleteRatingForUser(userId: UUID, trackId: UUID): Try[Int] = Try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        """DELETE FROM tracksRating WHERE userId = {userId} AND trackId = {trackId}""".stripMargin)
-        .on('userId -> userId,
-          'trackId -> trackId)
-        .executeUpdate()
-    }
-  }*/
+  def getReasonForUser(userId: UUID, trackId: UUID): Future[Option[Char]] = db.run(
+    trackRatings
+      .filter(_.userId === userId)
+      .map(trackRating => trackRating.reason)
+      .result
+      .headOption) map (_.flatten)
+
+  def deleteRatingForUser(userId: UUID, trackId: UUID): Future[Int] = db.run(
+    trackRatings
+      .filter(trackRating => trackRating.userId === userId && trackRating.trackId === trackId)
+      .delete)
 }
