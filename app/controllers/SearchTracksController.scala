@@ -2,19 +2,16 @@ package controllers
 
 import javax.inject.Inject
 
-import play.api.libs.ws.WS
-import play.api.mvc.Controller
-import models.{TrackMethods, Artist, Track}
 import json.JsonHelper._
-import play.api.mvc._
-import play.api.libs.json._
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.functional.syntax._
-import services.{SearchYoutubeTracks, Utilities}
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
-import play.api.libs.ws.WSResponse
+import models.{Artist, TrackMethods}
 import play.api.Play.current
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json._
+import play.api.libs.ws.WS
+import play.api.mvc.{Controller, _}
+import services.{SearchYoutubeTracks, Utilities}
+
+import scala.concurrent.Future
 
 
 class SearchTracksController @Inject()(val utilities: Utilities,

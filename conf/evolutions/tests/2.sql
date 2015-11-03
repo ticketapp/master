@@ -70,7 +70,8 @@ INSERT INTO eventsartists(eventid, artistid) VALUES
 INSERT INTO eventsfollowed(eventid, userid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT userid FROM users WHERE email = 'user@facebook.com'));
 
-
+-------------------------------------------------------- french city ------------------------------------------------
+INSERT INTO frenchcities(city, geographicpoint) VALUES('Lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340')
 -- INSERT INTO playliststracks()
 --
 --

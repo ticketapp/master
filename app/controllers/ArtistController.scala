@@ -9,19 +9,15 @@ import json.JsonHelper._
 import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.iteratee.{Enumerator, Enumeratee, Iteratee}
+import play.api.libs.iteratee.{Enumeratee, Enumerator, Iteratee}
 import play.api.libs.json._
-import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
 
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.Failure
 
 
 class ArtistController @Inject()(val messagesApi: MessagesApi,

@@ -89,7 +89,7 @@ GET      /genres/:genre/artists                                           @contr
 POST     /tracks/create                                                    @controllers.TrackController.createTrack
 GET      /tracks/:artistFacebookUrl                                        @controllers.TrackController.findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int)
 GET      /tracks/:artistName/:artistFacebookUrl/:trackTitle                @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
-#GET     /tracks/youtubeTrackInfo/:youtubeId                              @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
+GET      /tracks/youtubeTrackInfo/:youtubeId                              @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
 #GET     /tracks/:trackId/rating                                           @controllers.TrackController.getRatingForUser(trackId: String)
 #POST    /tracks/rating                                                    @controllers.TrackController.upsertRatingForUser
 #POST    /tracks/:trackId/addToFavorites                                   @controllers.TrackController.addToFavorites(trackId: String)
