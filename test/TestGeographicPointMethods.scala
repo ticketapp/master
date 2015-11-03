@@ -21,5 +21,11 @@ class TestGeographicPointMethods extends GlobalApplicationForModels {
         addressWithGeoPoint.geographicPoint mustBe geoPoint
       }
     }
+
+    "get a geographicPoint for a city" in {
+      whenReady(geographicPointMethods.findGeographicPointOfCity("lyon"), timeout(Span(5, Seconds))) {
+        _ mustBe geographicPointMethods.optionStringToOptionPoint(Option("45.783808,4.860598"))
+      }
+    }
   }
 }
