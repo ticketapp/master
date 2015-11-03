@@ -226,6 +226,30 @@ class TestArtistModel extends GlobalApplicationForModels {
       }
     }
 
+    "find artist id by facebookId" in {
+      whenReady(artistMethods.findIdByFacebookId("facebookIdTestTrack"), timeout(Span(5, Seconds))) {
+        _ mustBe Some(3.toLong)
+      }
+    }
+
+    "find artist id by facebookUrl" in {
+      whenReady(artistMethods.findIdByFacebookUrl("artistFacebookUrlTestPlaylistModel"), timeout(Span(5, Seconds))) {
+        _ mustBe Some(3.toLong)
+      }
+    }
+
+    "find artist by facebookUrl" in {
+      whenReady(artistMethods.findByFacebookUrl("artistFacebookUrlTestPlaylistModel"), timeout(Span(5, Seconds))) { artist =>
+        artist.get.artist.id mustBe Some(3.toLong)
+      }
+    }
+
+    "follow artist by facebookId" in {
+      whenReady(artistMethods.followByFacebookId(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+      "facebookIdTestTrack"), timeout(Span(5, Seconds))) { response =>
+        response mustBe 1
+      }
+    }
    /* "get tracks for an artist" in {
       val patternAndArtist = PatternAndArtistWithWeightedGenres(Artist("Feu! Chatterton",
         ArtistWithWeightedGenres(Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
@@ -237,5 +261,6 @@ class TestArtistModel extends GlobalApplicationForModels {
       whenReady(enumerateTracks |>> iteratee, timeout(Span(6, Seconds))) { tracks =>
           tracks
       }
-    }*/
+    }
+    */
 }
