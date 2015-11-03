@@ -808,8 +808,8 @@ CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
   userId                  UUID REFERENCES users(userId) NOT NULL,
   trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
-  ratingUp                INT,
-  ratingDown              INT,
+  ratingUp                INT DEFAULT 0,
+  ratingDown              INT DEFAULT 0,
   reason                  CHAR
 );
 CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);

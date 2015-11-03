@@ -2,7 +2,7 @@ package models
 
 import java.sql.{JDBCType, Timestamp}
 import java.util.UUID
-import scala.collection.immutable.Seq
+
 import com.vividsolutions.jts.geom.Geometry
 import org.joda.time.DateTime
 import services.MyPostgresDriver.api._
@@ -249,6 +249,17 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("artistfacebookurl", artistFacebookUrl, artists)(_.facebookUrl, onDelete = ForeignKeyAction.Cascade)
   }
 
+  class TrackRatings(tag: Tag) extends Table[TrackRating](tag, "tracksrating") {
+    def tableId = column[Long]("tableid", O.PrimaryKey, O.AutoInc)
+    def userId = column[UUID]("userid")
+    def trackId = column[UUID]("trackid")
+    def ratingUp = column[Int]("ratingup", O.Default(0))
+    def ratingDown = column[Int]("ratingdown", O.Default(0))
+    def reason = column[Option[Char]]("reason")
+
+    def * = (userId, trackId, ratingUp, ratingDown, reason) <> ((TrackRating.apply _).tupled, TrackRating.unapply)
+  }
+
   class TracksGenres(tag: Tag) extends Table[TrackGenreRelation](tag, "tracksgenres") {
     def trackId = column[UUID]("trackid")
     def genreId = column[Int]("genreid")
@@ -303,7 +314,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("trackId", trackId, tracks)(_.uuid, onDelete = ForeignKeyAction.Cascade)
   }
 
-
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]
   lazy val genres = TableQuery[Genres]
   lazy val genresFollowed = TableQuery[GenresFollowed]
@@ -319,6 +329,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val places = TableQuery[Places]
   lazy val placesFollowed = TableQuery[PlacesFollowed]
   lazy val organizers = TableQuery[Organizers]
+  lazy val trackRatings = TableQuery[TrackRatings]
   lazy val organizersFollowed = TableQuery[OrganizersFollowed]
   lazy val addresses = TableQuery[Addresses]
   lazy val frenchCities = TableQuery[FrenchCities]

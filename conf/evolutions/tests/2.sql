@@ -24,6 +24,9 @@ INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookur
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
   ('24894e56-08d1-4c1f-b3e4-466c069d15ed', 'title00', 'url000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
 
+INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
+  ('35894e56-08d1-4c1f-b3e4-466c069d15ed', 'title000', 'url0000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
+
 -------------------------------------------------------- genres --------------------------------------------------------
 INSERT INTO genres(name, icon) VALUES('genreTest0', 'a');
 INSERT INTO genres(name, icon) VALUES('genreTest00', 'a');
