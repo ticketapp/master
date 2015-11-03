@@ -31,5 +31,11 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
       seqTitleArtistName should not be empty
       seqTitleArtistName.toSet.size mustBe seqTitleArtistName.size
     }
+
+    "get youtube track info" in {
+      val Some(info) = route(FakeRequest(GET, "/tracks/youtubeTrackInfo/ujUUkrmfpis"))
+
+      contentAsString(info) should include("author=Pan-Pot")
+    }
   }
 }
