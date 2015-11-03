@@ -2,7 +2,7 @@ package controllers
 
 import java.util.UUID
 
-import models.{TrackMethods, Track, User}
+import models.{trackFormsTrait, TrackMethods, Track, User}
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.data.Form
@@ -28,21 +28,10 @@ class TrackController @Inject() (ws: WSClient,
                                  val utilities: Utilities,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry)
-    extends Silhouette[User, CookieAuthenticator] {
+    extends Silhouette[User, CookieAuthenticator] with trackFormsTrait {
 
   val FOREIGN_KEY_VIOLATION = utilities.FOREIGN_KEY_VIOLATION
   val UNIQUE_VIOLATION = utilities.UNIQUE_VIOLATION
-
-  val trackBindingForm = Form(mapping(
-    "trackId" -> nonEmptyText(8),
-    "title" -> nonEmptyText(2),
-    "url" -> nonEmptyText(3),
-    "platform" -> nonEmptyText,
-    "thumbnailUrl" -> nonEmptyText(2),
-    "artistFacebookUrl" -> nonEmptyText(2),
-    "artistName" -> nonEmptyText(2),
-    "redirectUrl" -> optional(nonEmptyText(2))
-  )(trackMethods.formApply)(trackMethods.formUnapply))
 
   def createTrack = Action.async { implicit request =>
     trackBindingForm.bindFromRequest().fold(
@@ -60,7 +49,6 @@ class TrackController @Inject() (ws: WSClient,
         }
     )
   }
-
 
   def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int) = Action.async {
     trackMethods.findAllByArtist(artistFacebookUrl, numberToReturn, offset) map { tracks =>

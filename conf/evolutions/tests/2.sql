@@ -27,6 +27,9 @@ INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookur
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
   ('35894e56-08d1-4c1f-b3e4-466c069d15ed', 'title000', 'url0000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
 
+-------------------------------------------------------- playlists -----------------------------------------------------
+INSERT INTO playlists(userId, name) VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', 'playlist0');
+
 -------------------------------------------------------- genres --------------------------------------------------------
 INSERT INTO genres(name, icon) VALUES('genreTest0', 'a');
 INSERT INTO genres(name, icon) VALUES('genreTest00', 'a');
@@ -73,13 +76,12 @@ INSERT INTO eventsartists(eventid, artistid) VALUES
 INSERT INTO eventsfollowed(eventid, userid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT userid FROM users WHERE email = 'user@facebook.com'));
 
--------------------------------------------------------- french city ------------------------------------------------
-INSERT INTO frenchcities(city, geographicpoint) VALUES('Lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340')
--- INSERT INTO playliststracks()
---
---
---
--- playlistId              BIGINT REFERENCES playlists (playlistId),
--- trackId                 UUID REFERENCES tracks (trackId),
--- trackRank               DOUBLE PRECISION NOT NULL
--- );
+-------------------------------------------------------- frenchCities --------------------------------------------------
+INSERT INTO frenchcities(city, geographicpoint) VALUES('Lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+
+-------------------------------------------------------- playlistsTracks -----------------------------------------------
+INSERT INTO playliststracks(playlistId, trackid, trackrank) VALUES(1, '02894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
+INSERT INTO playliststracks(playlistId, trackid, trackrank) VALUES(1, '13894e56-08d1-4c1f-b3e4-466c069d15ed', 2);
+
+-------------------------------------------------------- tracksGenres -----------------------------------------------
+INSERT INTO tracksgenres(genreid, trackid, weight) VALUES(1, '13894e56-08d1-4c1f-b3e4-466c069d15ed', 1)

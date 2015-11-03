@@ -17,6 +17,18 @@ class TestTrackModel extends GlobalApplicationForModels {
 
   "A track" must {
 
+    def isOrdered(list: List[Double]): Boolean = list match {
+      case Nil => true
+      case x :: Nil => true
+      case x :: xs => x <= xs.head && isOrdered(xs)
+    }
+
+    "be found by playlist id" in {
+      whenReady(trackMethods.findByPlaylistId(1L), timeout(Span(5, Seconds))) { tracksWithPlaylistRank =>
+        assert(isOrdered((tracksWithPlaylistRank map (_.rank)).toList))
+      }
+    }
+
     "be saved and deleted" in {
       val trackId = UUID.randomUUID
       val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "facebookUrl0", "artistName")
@@ -44,6 +56,23 @@ class TestTrackModel extends GlobalApplicationForModels {
             case _ =>
               throw new Exception("save twice a track with same title and artist name worked!")
         }
+      }
+    }
+
+    "be found by pattern" in {
+      whenReady(trackMethods.findAllContainingInTitle("title0"), timeout(Span(5, Seconds))) { tracks =>
+        val titles = tracks map(_.title)
+        titles should contain allOf("title0", "title00", "title000")
+        titles should not contain "title"
+      }
+    }
+
+    "be found by genre" in {
+      whenReady(trackMethods.findAllByGenre(genreName = "genreTest0", numberToReturn = 10, offset = 0),
+        timeout(Span(5, Seconds))) { tracks =>
+        val titles = tracks map(_.title)
+
+        titles should contain only "title0"
       }
     }
 
