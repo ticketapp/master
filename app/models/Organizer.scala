@@ -162,10 +162,13 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def saveEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] =
     db.run(eventsOrganizers += eventOrganizerRelation)
 
-  def saveEventRelations(eventOrganizerRelations: Seq[EventOrganizerRelation]): Any =
-    db.run(eventsOrganizers ++= eventOrganizerRelations) recover {
+  def saveEventRelations(eventOrganizerRelations: Seq[EventOrganizerRelation]): Future[Boolean] =
+    db.run(eventsOrganizers ++= eventOrganizerRelations) map { _ =>
+      true
+    } recover {
       case e: Exception =>
         Logger.error("Organizer.saveEventRelations: ", e)
+        false
     }
 
   def deleteEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] = db.run(

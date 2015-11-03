@@ -347,6 +347,19 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         }
       }
     }
+
+    "find organizers containing" in {
+      whenReady(organizerMethods.findAllContaining("name"), timeout(Span(5, Seconds))) {
+        _.size mustBe 3
+      }
+    }
+
+    "save events relations" in {
+      val eventOrganizerRelations = Seq(EventOrganizerRelation(2, 3), EventOrganizerRelation(3, 3))
+      whenReady (organizerMethods.saveEventRelations(eventOrganizerRelations), timeout(Span(5, Seconds))) { response =>
+        response mustBe true
+      }
+    }
     //find nearCity
   }
 }

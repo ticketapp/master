@@ -127,8 +127,6 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
   }
 
-  def findAll: Future[Seq[Place]] = db.run(places.result)
-
   def findAllByEvent(eventId: Long): Future[Seq[Place]] = {
     val query = for {
       event <- events if event.id === eventId
@@ -138,8 +136,6 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     db.run(query.result)
   }
-
-  def findAllWithNonEmptyFacebookId: Future[Seq[Place]] = db.run(places.filter(_.facebookId.nonEmpty).result)
 
   def findAllContaining(pattern: String): Future[Seq[Place]] = {
     val lowercasePattern = pattern.toLowerCase

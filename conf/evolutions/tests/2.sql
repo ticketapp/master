@@ -43,6 +43,10 @@ INSERT INTO events(ispublic, isactive, name, starttime) VALUES(true, true, 'notP
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
 INSERT INTO organizers(name, facebookid) VALUES('name1', 'facebookId');
+INSERT INTO organizers(name, facebookid) VALUES('name2', 'facebookId1');
+
+-------------------------------------------------------- places ----------------------------------------------------
+INSERT INTO places(name, facebookid) VALUES('Test', '776137029786070');
 
 -------------------------------------------------------- eventsOrganizers ----------------------------------------------
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
