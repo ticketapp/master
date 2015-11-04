@@ -46,7 +46,8 @@ INSERT INTO organizers(name, facebookid) VALUES('name1', 'facebookId');
 INSERT INTO organizers(name, facebookid) VALUES('name2', 'facebookId1');
 
 -------------------------------------------------------- places ----------------------------------------------------
-INSERT INTO places(name, facebookid) VALUES('Test', '776137029786070');
+INSERT INTO places(name, facebookid, geographicpoint) VALUES('Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+INSERT INTO places(name, facebookid, geographicpoint) VALUES('Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
 -------------------------------------------------------- eventsOrganizers ----------------------------------------------
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
