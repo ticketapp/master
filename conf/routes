@@ -58,7 +58,7 @@ GET           /places/containing/:pattern                                    @co
 POST          /places/create                                                 @controllers.PlaceController.createPlace
 GET           /places/:placeId/events                                        @controllers.EventController.findByPlace(placeId: Long)
 GET           /places/:placeId/passedEvents                                  @controllers.EventController.findPassedByPlace(placeId: Long)
-#GET     /places/nearCity/:city                                            @controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
+GET           /places/nearCity/:city                                         @controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /places/followed/                                              @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
@@ -72,7 +72,7 @@ GET           /organizers/containing/:pattern                                @co
 POST          /organizers/create                                             @controllers.OrganizerController.createOrganizer
 GET           /organizers/:organizerId/events                                @controllers.EventController.findByOrganizer(organizerId: Long)
 GET           /organizers/:organizerId/passedEvents                          @controllers.EventController.findPassedByOrganizer(organizerId: Long)
-#GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+GET           /organizers/findNearCity/:city                                 @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /organizers/followed/                                          @controllers.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
@@ -116,9 +116,9 @@ GET     /tracks/:trackId/isFollowed                                    @controll
 #GET     /users/:id                                                        @controllers.UserController.user(id: Long)
 #GET     /users/containing/:pattern                                        @controllers.UserController.findUsersContaining(pattern: String)
 #GET     /users/:userId/tools                                              @controllers.UserController.findToolsByUserId(userId: Long)
-#GET     /users/geographicPoint/                                           @controllers.UserController.getUserGeographicPoint
+GET      /users/geographicPoint                                            @controllers.UserController.getUserGeographicPoint
 #GET     /users/facebookAccessToken/                                       @controllers.UserController.findFacebookAccessToken
-#GET     /users/tracksRemoved/                                             @controllers.UserController.getTracksRemoved
+GET      /users/tracksRemoved                                              @controllers.UserController.getTracksRemoved
 
 ################################## Buy ticket ###########################################
 GET           /buyTicket                                                     @controllers.TicketController.buyTicket
