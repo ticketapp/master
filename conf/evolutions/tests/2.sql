@@ -83,5 +83,8 @@ INSERT INTO frenchcities(city, geographicpoint) VALUES('Lyon', '0101000020E61000
 INSERT INTO playliststracks(playlistId, trackid, trackrank) VALUES(1, '02894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
 INSERT INTO playliststracks(playlistId, trackid, trackrank) VALUES(1, '13894e56-08d1-4c1f-b3e4-466c069d15ed', 2);
 
--------------------------------------------------------- tracksGenres -----------------------------------------------
-INSERT INTO tracksgenres(genreid, trackid, weight) VALUES(1, '13894e56-08d1-4c1f-b3e4-466c069d15ed', 1)
+-------------------------------------------------------- tracksGenres --------------------------------------------------
+INSERT INTO tracksgenres(genreid, trackid, weight) VALUES(1, '13894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
+
+-------------------------------------------------------- tracksFollowed -------------------------------------------
+INSERT INTO tracksfollowed(userId, trackId) VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', '02894e56-08d1-4c1f-b3e4-466c069d15ed');

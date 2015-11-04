@@ -145,7 +145,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
     db.run(query.head)
   }
 
-  def getFollowedPlaces(userId: UUID): Future[Seq[Place] ]= {
+  def getFollowedPlaces(userId: UUID): Future[Seq[Place]]= {
     val query = for {
       placeFollowed <- placesFollowed if placeFollowed.userId === userId
       place <- places if place.id === placeFollowed.placeId
@@ -168,12 +168,12 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
   def isFollowed(userTrackRelation: UserTrackRelation): Future[Boolean] = {
     val query =
       sql"""SELECT exists(
-           SELECT 1 FROM usersFavoriteTracks WHERE userId = ${userTrackRelation.userId} AND trackId = ${userTrackRelation.trackId})"""
+           SELECT 1 FROM tracksFollowed WHERE userId = ${userTrackRelation.userId} AND trackId = ${userTrackRelation.trackId})"""
         .as[Boolean]
     db.run(query.head)
   }
 
-  def getFollowedTracks(userId: UUID): Future[Seq[Track] ]= {
+  def getFollowedTracks(userId: UUID): Future[Seq[Track]]= {
     val query = for {
       trackFollowed <- tracksFollowed if trackFollowed.userId === userId
       track <- tracks if track.uuid === trackFollowed.trackId

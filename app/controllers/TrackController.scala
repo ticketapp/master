@@ -1,30 +1,29 @@
 package controllers
 
 import java.util.UUID
+import javax.inject.Inject
 
-import models.{trackFormsTrait, TrackMethods, Track, User}
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import json.JsonHelper._
+import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
-import json.JsonHelper._
-import play.api.libs.json.DefaultWrites
-import javax.inject.Inject
-import com.mohiva.play.silhouette.api.{ Environment, LogoutEvent, Silhouette }
-import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import play.api.i18n.MessagesApi
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 class TrackController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
                                  val trackMethods: TrackMethods,
+                                 val trackRatingMethods: TrackRatingMethods,
                                  val utilities: Utilities,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry)
@@ -59,88 +58,122 @@ class TrackController @Inject() (ws: WSClient,
     }
   }
 
-  val trackRatingBindingForm = Form(mapping(
-    "trackId" -> nonEmptyText(8),
-    "rating" -> number,
-    "reason" -> optional(nonEmptyText)
-  )(trackRatingFormApply)(trackRatingFormUnapply))
+  def upsertRatingForUser = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    trackRatingBindingForm.bindFromRequest().fold(
+      formWithErrors => {
+        Logger.error(formWithErrors.errorsAsJson.toString())
+        Future(BadRequest(formWithErrors.errorsAsJson))
+      },
+      trackRating => {
+        val trackId = UUID.fromString(trackRating.trackId)
+        trackRating.rating match {
+          case rating if rating != 0 =>
+            trackRatingMethods.upsertRatingForAUser(userId, trackId, rating) map {
+              case 1 =>
+                Ok
+              case _ =>
+                Logger.error(s"TrackController.upsertRatingForUser: 1 was not returned by " +
+                  s"trackRatingMethods.upsertRatingForAUser for user id $userId and track id $trackId")
+                InternalServerError
+            }
+          case _ =>
+            Logger.error("TrackController.upsertRatingForUser: nothing has been changed since the ratting to add is 0")
+            Future(BadRequest)
+        }
+      }
+    )
+  }
 
-  case class TrackRating(trackId: String, rating: Int, reason: Option[Char])
-
-  def trackRatingFormApply(trackId: String, rating: Int, reason: Option[String]): TrackRating =
-    new TrackRating(trackId, rating, reason match { case None => None; case Some(string) => Option(string(0)) } )
-  def trackRatingFormUnapply(trackRating: TrackRating) =
-    Some((trackRating.trackId, trackRating.rating,
-      trackRating.reason match { case None => None; case Some(char) => Option(char.toString) }))
-
-//  def upsertRatingForUser = SecuredAction { implicit request =>
-//    val userId = request.identity.UUID
-//    trackRatingBindingForm.bindFromRequest().fold(
-//      formWithErrors => {
-//        Logger.error(formWithErrors.errorsAsJson.toString())
-//        BadRequest(formWithErrors.errorsAsJson)
-//      },
-//      trackRating => {
-//        val trackIdUUID = UUID.fromString(trackRating.trackId)
-//        trackRating.rating match {
-//          case ratingUp if ratingUp > 0 =>
-//            trackMethods.upsertRatingUp(userId, trackIdUUID, ratingUp) match {
-//              case Success(true) => Ok
-//              case _ => InternalServerError
-//            }
-//          case ratingDown if ratingDown < 0 =>
-//            trackMethods.upsertRatingDown(userId, trackIdUUID, ratingDown, trackRating.reason) match {
-//              case Success(true) => Ok
-//              case _ => InternalServerError
-//            }
-//          case _ => BadRequest
-//        }
-//      }
-//    )
-//  }
-//
-//  def getRatingForUser(trackId: String) = SecuredAction { implicit request =>
-//    val userId = request.identity.UUID
-//    Track.getRatingForUser(userId, UUID.fromString(trackId)) match {
-//      case Success(Some(rating)) => Ok(Json.toJson(rating._1.toString + "," + rating._2.toString))
-//      case _ => InternalServerError
-//    }
-//  }
-//
-//  def addToFavorites(trackId: String) = SecuredAction { implicit request =>
-//    val userId = request.identity.UUID
-//    trackMethods.addToFavorites(userId, UUID.fromString(trackId)) match {
-//      case Success(1) =>
-//        Ok
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == UNIQUE_VIOLATION =>
-//        Conflict(s"This user already has track $trackId in his favorites.")
-//      case Failure(e: Exception) =>
-//        Logger.error("TrackController.addToFavorites", e)
-//        InternalServerError
-//      case _ =>
-//        InternalServerError(s"Track.controller.addTOFavorite: trackId $trackId was not added")
-//    }
-//  }
-//
-//  def removeFromFavorites(trackId: String) = SecuredAction { implicit request =>
-//    val userId = request.identity.UUID
-//    trackMethods.removeFromFavorites(userId, UUID.fromString(trackId)) match {
-//      case Success(1) =>
-//        Ok
-//      case Failure(psqlException: PSQLException) if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
-//        NotFound(s"The track $trackId is not in the favorites of this user or this track does not exist.")
-//      case _ =>
+//  def getRatingForUser(trackId: String) = SecuredAction.async { implicit request =>
+//    val userId = request.identity.uuid
+//    trackRatingMethods.getRatingForUser(userId, UUID.fromString(trackId)) map {
+//      case Some(rating) =>
+//        Ok(Json.toJson(rating.ratingUp.toString + "," + rating.ratingDown.toString))
+//      case None =>
+//        Logger.error(s"TrackController.getRatingForUser: there is no rating for the track id $trackId and user id $userId")
+//        NotFound
+//    } recover {
+//      case t: Throwable =>
+//        Logger.error("TrackController.getRatingForUser:", t)
 //        InternalServerError
 //    }
 //  }
-//
-//  def findFavorites = SecuredAction { implicit request =>
-//    val userId = request.identity.UUID
-//    trackMethods.findFavorites(userId) match {
-//      case Success(tracks) =>
-//        Ok(Json.toJson(tracks))
-//      case _ =>
-//        InternalServerError
-//    }
-//  }
+  
+  def followTrack(trackId: String) = SecuredAction.async { implicit request =>
+    Try(UUID.fromString(trackId)) match {
+      case Success(trackUUID) =>
+        trackMethods.followByTrackId(UserTrackRelation(userId = request.identity.uuid, trackId = trackUUID)) map {
+          case 1 =>
+            Created
+          case _ =>
+            Logger.error("TrackController.followTrack: trackMethods.follow did not return 1")
+            InternalServerError
+        } recover {
+          case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+            Logger.error(s"TrackController.followTrackByTrackId: $trackId is already followed")
+            Conflict
+          case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+            Logger.error(s"TrackController.followTrackByTrackId: there is no track with the id $trackId")
+            NotFound
+          case unknownException =>
+            Logger.error("TrackController.followTrack", unknownException)
+            InternalServerError
+        }
+      case Failure(t: Throwable) =>
+        Logger.error("TrackController.followTrack: trackMethods.follow did not return 1")
+        Future(InternalServerError("track uuid is not valid"))
+    }
+  }
+
+  def unfollowTrack(trackId: String) = SecuredAction.async { implicit request =>
+    Try(UUID.fromString(trackId)) match {
+      case Success(trackUUID) =>
+        val userId = request.identity.uuid
+        trackMethods.unfollowByTrackId(UserTrackRelation(userId = request.identity.uuid, trackId = trackUUID)) map {
+          case 1 =>
+            Ok
+          case _ =>
+            Logger.error("TrackController.unfollowTrack: trackMethods.unfollow did not return 1")
+            InternalServerError
+        } recover {
+          case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+            Logger.error(s"The user (id: $userId) does not follow the track (trackId: $trackId).")
+            NotFound
+          case unknownException =>
+            Logger.error("TrackController.unfollowTrack: unknownException: ", unknownException)
+            InternalServerError
+        }
+      case Failure(t: Throwable) =>
+        Logger.error("TrackController.followTrack: trackMethods.follow did not return 1")
+        Future(InternalServerError("track uuid is not valid"))
+    }
+  }
+
+  def getFollowedTracks = SecuredAction.async { implicit request =>
+    val userId = request.identity.uuid
+    println(userId)
+    trackMethods.getFollowedTracks(userId) map { tracks =>
+      Ok(Json.toJson(tracks))
+    } recover { case t: Throwable =>
+      Logger.error("TrackController.getFollowedTracks: ", t)
+      InternalServerError("TrackController.getFollowedTracks: " + t.getMessage)
+    }
+  }
+
+  def isTrackFollowed(trackId: String) = SecuredAction.async { implicit request =>
+    Try(UUID.fromString(trackId)) match {
+      case Success(trackUUID) =>
+        val userId = request.identity.uuid
+        trackMethods.isFollowed(UserTrackRelation(userId, trackUUID)) map { tracks =>
+          Ok(Json.toJson(tracks))
+        } recover { case t: Throwable =>
+          Logger.error("TrackController.isTrackFollowed: ", t)
+          InternalServerError("TrackController.isTrackFollowed: " + t.getMessage)
+        }
+      case Failure(t: Throwable) =>
+        Logger.error("TrackController.followTrack: trackMethods.follow did not return 1")
+        Future(InternalServerError("track uuid is not valid"))
+    }
+  }
 }
