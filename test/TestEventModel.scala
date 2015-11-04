@@ -453,6 +453,12 @@ class TestEventModel extends GlobalApplicationForModels {
       }
     }
 
+    "be found near city" in {
+      whenReady(eventMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { events =>
+        events.head.event.name mustBe "notPassedEvent"
+      }
+    }
+
     //save with an address
     //get with an address
     //get with all relations see docker
