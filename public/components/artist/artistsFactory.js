@@ -20,13 +20,13 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     .success(function (data, status) {
                         data = factory.refactorArtistObject(data);
                         data = ImagesFactory(data);
-                        $http.get('/tracks/' + data.facebookUrl + '?numberToReturn=0&offset=0').
+                        $http.get('/artists/' + data.facebookUrl + '/tracks?numberToReturn=0&offset=0').
                             success(function(tracks) {
                                 data.tracks = tracks;
                                 factory.lastGetArtist.artist = data;
                                 factory.lastGetArtist.url = url;
                                 deferred.resolve(factory.lastGetArtist.artist);
-                        }).error(function () {
+                        }).error(function (error) {
                                 data.tracks = [];
                                 factory.lastGetArtist.artist = data;
                                 factory.lastGetArtist.url = url;
@@ -51,13 +51,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         lastGetArtists: {offset: -1, artists: []},
         getArtists : function (offset) {
             var deferred = $q.defer();
-            console.log(offset)
             if (offset <= factory.lastGetArtists.offset) {
                 deferred.resolve(factory.lastGetArtists.artists)
             } else {
                 $http.get('/artists/since?offset=' + offset + '&numberToReturn=12')
                     .success(function (data, status) {
-                        console.log("success", data)
                         var artists = data.map(function(artist) {
                             return factory.refactorArtistObject(artist)
                         });
@@ -66,7 +64,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtists.offset = offset;
                         deferred.resolve(factory.lastGetArtists.artists);
                     }).error(function (data, status) {
-                        console.log("error", data, status)
                         deferred.reject('error');
                     });
             }
@@ -122,8 +119,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/facebookContaining/' + pattern)
                     .success(function (data, status) {
-                        data.forEach(ImagesFactory);
-                        factory.lastGetArtistsFacebookByContaining.artists = data;
+                        var artists = data.map(function(artist) {
+                            return factory.refactorArtistObject(artist)
+                        });
+                        artists.forEach(ImagesFactory);
+                        factory.lastGetArtistsFacebookByContaining.artists = artists;
                         factory.lastGetArtistsFacebookByContaining.pattern = pattern;
                         deferred.resolve(factory.lastGetArtistsFacebookByContaining.artists);
                     }).error(function (data, status) {
