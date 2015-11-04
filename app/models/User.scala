@@ -218,7 +218,7 @@ class UserMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     } map(_.toVector)
   }*/
 
-  def getUUIDOfTracksRemoved(userUUID: UUID): Future[Seq[UUID]] = db.run((for {
+  def findUUIDOfTracksRemoved(userUUID: UUID): Future[Seq[UUID]] = db.run((for {
     trackRating <- trackRatings if trackRating.userId === userUUID && trackRating.reason.nonEmpty
   } yield trackRating.trackId).result)
 }

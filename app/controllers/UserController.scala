@@ -7,6 +7,7 @@ import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
 import models.{UserMethods, Tool, User}
+import play.api.Logger
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
@@ -69,8 +70,12 @@ class UserController @Inject() (ws: WSClient,
 */
 
   def getTracksRemoved = SecuredAction.async { implicit request =>
-    userMethods.getUUIDOfTracksRemoved(request.identity.uuid) map { response =>
+    userMethods.findUUIDOfTracksRemoved(request.identity.uuid) map { response =>
       Ok(Json.toJson(response))
+    } recover {
+      case e =>
+        Logger.error("UserController.getTracksRemoved: ", e)
+        InternalServerError
     }
   }
 
@@ -78,8 +83,11 @@ class UserController @Inject() (ws: WSClient,
     WS.url("http://ip-api.com/json/" + request.remoteAddress)
       .get()
       .map { response =>
-        println(response.json)
         Ok(Json.toJson(response.json))
-      }
+      } recover {
+      case e =>
+        Logger.error("UserController.getUserGeographicPoint: ", e)
+        InternalServerError
+    }
   }
 }
