@@ -180,7 +180,6 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         defered.resolve(factory.getPassedEvents.events)
                     }
                 ).error(function (data) {
-                        console.log(data)
                     })
             }
             return defered.promise;
