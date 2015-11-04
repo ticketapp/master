@@ -360,6 +360,16 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         response mustBe true
       }
     }
+
+    "be found near city" in {
+      whenReady (organizerMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { response =>
+        response must contain inOrder(OrganizerWithAddress(Organizer(Some(3),Some("facebookId1"),"name2",None,None,None,None,None,false,None,
+          Some(geographicPointMethods.stringToGeographicPoint("45.783808,4.860598").get),None),None),
+        OrganizerWithAddress(Organizer(Some(2),Some("facebookId"),"name1",None,None,None,None,None,false,None,
+          Some(geographicPointMethods.stringToGeographicPoint(
+            "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get),None),None))
+      }
+    }
     //find nearCity
   }
 }
