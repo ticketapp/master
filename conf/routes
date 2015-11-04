@@ -116,9 +116,9 @@ GET     /tracks/:trackId/isFollowed                                    @controll
 #GET     /users/:id                                                        @controllers.UserController.user(id: Long)
 #GET     /users/containing/:pattern                                        @controllers.UserController.findUsersContaining(pattern: String)
 #GET     /users/:userId/tools                                              @controllers.UserController.findToolsByUserId(userId: Long)
-#GET     /users/geographicPoint/                                           @controllers.UserController.getUserGeographicPoint
+GET      /users/geographicPoint                                            @controllers.UserController.getUserGeographicPoint
 #GET     /users/facebookAccessToken/                                       @controllers.UserController.findFacebookAccessToken
-#GET     /users/tracksRemoved/                                             @controllers.UserController.getTracksRemoved
+GET      /users/tracksRemoved                                              @controllers.UserController.getTracksRemoved
 
 ################################## Buy ticket ###########################################
 GET           /buyTicket                                                     @controllers.TicketController.buyTicket
