@@ -3,7 +3,7 @@ angular.module('claudeApp').
         var factory = {
             geoPoint : false,
             refactorGeopoint : function (geoPoint) {
-                factory.geoPoint = geoPoint.replace("(", "").replace(")", "").replace(",", ", ");
+                factory.geoPoint = geoPoint.replace("(", "").replace(")", "").replace("POINT ", "").replace(" ", ", ");
                 return factory.geoPoint
             }
         };
