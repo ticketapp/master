@@ -58,7 +58,7 @@ GET           /places/containing/:pattern                                    @co
 POST          /places/create                                                 @controllers.PlaceController.createPlace
 GET           /places/:placeId/events                                        @controllers.EventController.findByPlace(placeId: Long)
 GET           /places/:placeId/passedEvents                                  @controllers.EventController.findPassedByPlace(placeId: Long)
-#GET     /places/nearCity/:city                                            @controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
+GET           /places/nearCity/:city                                         @controllers.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /places/followed/                                              @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
@@ -72,7 +72,7 @@ GET           /organizers/containing/:pattern                                @co
 POST          /organizers/create                                             @controllers.OrganizerController.createOrganizer
 GET           /organizers/:organizerId/events                                @controllers.EventController.findByOrganizer(organizerId: Long)
 GET           /organizers/:organizerId/passedEvents                          @controllers.EventController.findPassedByOrganizer(organizerId: Long)
-#GET     /organizers/findNearCity/:city                                   @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+GET           /organizers/findNearCity/:city                                 @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /organizers/followed/                                          @controllers.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
