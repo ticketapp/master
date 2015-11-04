@@ -30,7 +30,6 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(getPos, errorPosition, { enableHighAccuracy: false, timeout: 1000});
         } else {
-            console.log("yoyo")
             $http.get('/users/geographicPoint/ ').success(function (data) {
                 if (data.status != 'fail') {
                     $rootScope.geoLoc = data.lat + "," + data.lon;
