@@ -56,6 +56,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                 }).error(function (data, status) {
                     if (status === 401) {
                         StoreRequest.storeRequest('post', '/tracks/' + track.uuid + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
+
                         var connectListener = $rootScope.$watch('connected', function (newVal) {
                             if (newVal == true) {
                                 TracksRecommender.UpsertTrackRate(true, track.uuid);
