@@ -47,7 +47,6 @@ trait trackFormsTrait {
     Some((track.uuid.toString, track.title, track.url, track.platform.toString, track.thumbnailUrl,
       track.artistFacebookUrl, track.artistName, track.redirectUrl))
 
-
   val trackBindingForm = Form(mapping(
     "trackId" -> nonEmptyText(8),
     "title" -> nonEmptyText(2),
@@ -58,4 +57,18 @@ trait trackFormsTrait {
     "artistName" -> nonEmptyText(2),
     "redirectUrl" -> optional(nonEmptyText(2))
   )(formApply)(formUnapply))
+
+  val trackRatingBindingForm = Form(mapping(
+    "trackId" -> nonEmptyText(8),
+    "rating" -> number,
+    "reason" -> optional(nonEmptyText)
+  )(trackRatingFormApply)(trackRatingFormUnapply))
+
+  case class TrackRating(trackId: String, rating: Int, reason: Option[Char])
+
+  def trackRatingFormApply(trackId: String, rating: Int, reason: Option[String]): TrackRating =
+    new TrackRating(trackId, rating, reason match { case None => None; case Some(string) => Option(string(0)) } )
+  def trackRatingFormUnapply(trackRating: TrackRating) =
+    Some((trackRating.trackId, trackRating.rating,
+      trackRating.reason match { case None => None; case Some(char) => Option(char.toString) }))
 }

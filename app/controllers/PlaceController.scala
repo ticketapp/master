@@ -156,9 +156,10 @@ class PlaceController @Inject() (ws: WSClient,
       InternalServerError("PlaceController.isPlaceFollowed: " + t.getMessage)
     }
   }
-  /*
-    def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action {
-      Ok(Json.toJson(placeMethods.findNearCity(city, numberToReturn, offset)))
+
+  def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action.async {
+    placeMethods.findNearCity(city, numberToReturn, offset) map { places =>
+      Ok(Json.toJson(places))
     }
-*/
+  }
 }

@@ -124,7 +124,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Place]] =
     geographicPointMethods.findGeographicPointOfCity(city) flatMap {
       case None => Future(Seq.empty)
-      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+      case Some(geographicPoint) =>
+        findNear(geographicPoint, numberToReturn, offset)
   }
 
   def findAllByEvent(eventId: Long): Future[Seq[Place]] = {

@@ -359,7 +359,7 @@ class TestEventModel extends GlobalApplicationForModels {
         eventWithRelations.genres should contain allOf(Genre(None, "hip", 'a'), Genre(None, "hop", 'a'))
       }
     }
-
+    
     "find events in period near" in {
       whenReady(eventMethods.findInPeriodNear(
         hourInterval = 100000,
@@ -398,6 +398,12 @@ class TestEventModel extends GlobalApplicationForModels {
       whenReady(eventMethods.findAllByCityPattern(cityPattern = "lyon"), timeout(Span(5, Seconds))) { events =>
 
         events should not be empty
+      }
+    }
+
+    "be found near city" in {
+      whenReady(eventMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { events =>
+        events.head.event.name mustBe "notPassedEvent"
       }
     }
   }

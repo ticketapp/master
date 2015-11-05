@@ -26,8 +26,8 @@ class TestTrackController extends GlobalApplicationForControllers {
                            "artistName": "artistTrackTest",
                            "redirectUrl": "url" }"""
 
-      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest", Option("imagePath"),
-        Option("description"), "artistTrackFacebookUrl", Set("website")), Vector.empty)
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest",
+        Option("imagePath"), Option("description"), "artistTrackFacebookUrl", Set("website")), Vector.empty)
       await(artistMethods.save(artist))
       val Some(result) = route(FakeRequest(POST, "/tracks/create")
         .withJsonBody(Json.parse(jsonTrack))
@@ -37,8 +37,42 @@ class TestTrackController extends GlobalApplicationForControllers {
     }
 
     "find a list of tracks by artist" in {
-      val Some(tracks) = route(FakeRequest(GET, "/tracks/artistTrackFacebookUrl?numberToReturn=0&offset=" + 0))
-      contentAsJson(tracks).toString() must contain(""""title":"trackTest","url":"url","platform":"y","thumbnailUrl":"url","artistFacebookUrl":"artistTrackFacebookUrl"""")
+      val Some(tracks) = route(FakeRequest(GET, "/tracks?artistFacebookUrl=facebookUrl0&numberToReturn=0&offset=" + 0))
+      contentAsJson(tracks).toString() must contain(""""uuid":"13894e56-08d1-4c1f-b3e4-466c069d15ed","title":"title0"""")
+    }
+
+    "follow and unfollow a track by id" in {
+      val Some(response) = route(FakeRequest(POST, "/tracks/" + "13894e56-08d1-4c1f-b3e4-466c069d15ed" + "/addToFavorites")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      val Some(response1) = route(FakeRequest(POST, "/tracks/" + "13894e56-08d1-4c1f-b3e4-466c069d15ed" + "/removeFromFavorites")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(response) mustEqual CREATED
+
+      status(response1) mustEqual OK
+    }
+
+    "return an error if an user try to follow a track already followed" in {
+      val Some(response) = route(FakeRequest(POST, "/tracks/" + "02894e56-08d1-4c1f-b3e4-466c069d15ed" + "/addToFavorites")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(response) mustEqual CONFLICT
+    }
+
+    "find followed tracks" in {
+      val Some(tracks) = route(FakeRequest(GET, "/tracks/favorites")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      contentAsString(tracks) must contain(""""uuid":"02894e56-08d1-4c1f-b3e4-466c069d15ed","title":"title"""")
+    }
+
+    "return true if the track is followed" in {
+      val Some(tracks) = route(FakeRequest(GET, "/tracks/" + "02894e56-08d1-4c1f-b3e4-466c069d15ed" + "/isFollowed")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(tracks) mustEqual OK
+
+      contentAsJson(tracks) mustEqual Json.parse("true")
     }
   }
 }

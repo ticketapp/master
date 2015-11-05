@@ -6,7 +6,8 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
-import models.{Tool, User}
+import models.{UserMethods, Tool, User}
+import play.api.Logger
 import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
@@ -19,6 +20,7 @@ import play.api.mvc._
 class UserController @Inject() (ws: WSClient,
                                 val messagesApi: MessagesApi,
                                 val env: Environment[User, CookieAuthenticator],
+                                val userMethods: UserMethods,
                                 socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, CookieAuthenticator] {
 /*
@@ -65,16 +67,27 @@ class UserController @Inject() (ws: WSClient,
   def findFacebookAccessToken = SecuredAction { implicit request =>
     Ok(Json.toJson(User.findFacebookAccessToken(request.identity.UUID)))
   }
+*/
 
-  def getUserGeographicPoint = Action.async { request =>
-    WS.url("http://ip-api.com/json/" + request.remoteAddress)
-      .get()
-      .map { response =>
-      Ok(Json.toJson(response.json))
+  def getTracksRemoved = SecuredAction.async { implicit request =>
+    userMethods.findUUIDOfTracksRemoved(request.identity.uuid) map { response =>
+      Ok(Json.toJson(response))
+    } recover {
+      case e =>
+        Logger.error("UserController.getTracksRemoved: ", e)
+        InternalServerError
     }
   }
 
-  def getTracksRemoved = SecuredAction { implicit request =>
-    Ok(Json.toJson(User.getTracksRemoved(request.identity.UUID)))
-   }*/
+  def getUserGeographicPoint = Action.async { implicit request =>
+    WS.url("http://ip-api.com/json/" + request.remoteAddress)
+      .get()
+      .map { response =>
+        Ok(Json.toJson(response.json))
+      } recover {
+      case e =>
+        Logger.error("UserController.getUserGeographicPoint: ", e)
+        InternalServerError
+    }
+  }
 }

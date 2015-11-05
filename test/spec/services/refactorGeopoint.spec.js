@@ -1,4 +1,4 @@
-/*'use strict';
+'use strict';
 describe('Factory: RefactorGeopoint', function () {
     var RefactorGeopoint;
 
@@ -7,12 +7,10 @@ describe('Factory: RefactorGeopoint', function () {
         RefactorGeopoint = _RefactorGeopoint_;
     }));
 
-    it('should refactore websites', function () {
-        var geoPoints = '(1.12121,2.112121)';
+    it('should refactor geopoint', function () {
+        var geoPoints = 'POINT (1.12121 2.112121)';
         var normalizedGeopoint = RefactorGeopoint.refactorGeopoint(geoPoints);
-
         var expectedGeopoints = '1.12121, 2.112121';
-
         expect(normalizedGeopoint).toEqual(expectedGeopoints);
     });
-});*/
+});

@@ -10,14 +10,15 @@ import controllers.{DAOException, UserOAuth2InfoWronglyFormatted}
 import org.joda.time.DateTime
 import play.api.Logger
 import play.api.Play.current
-import play.api.db.slick.DatabaseConfigProvider
+import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 
 import play.api.libs.json.Json
-import services.Utilities
+import services.{MyPostgresDriver, Utilities}
 
 import play.api.libs.json.Json
 import slick.driver.PostgresDriver.api._
 import slick.model.ForeignKeyAction
+import scala.concurrent.Future
 import scala.language.postfixOps
 /*import com.github.tototoshi.slick.PostgresJodaSupport._
 import driver.api._*/
@@ -38,12 +39,13 @@ case class User(uuid: UUID,
 //                 password : String,
 //                 profile: String)
 
-class UserMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
+class UserMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val organizerMethods: OrganizerMethods,
                              val placeMethods: PlaceMethods,
                              val artistMethods: ArtistMethods,
                              val tariffMethods: TariffMethods,
-                             val utilities: Utilities) {
+                             val utilities: Utilities)
+  extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
 
 //  class Users(tag: Tag) extends Table[User](tag, "users") {
@@ -201,4 +203,22 @@ class UserMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
       Logger.error("User.getTracksRemoved: ", e)
       Seq.empty
   }*/
+
+  /*def findAllByEvent(eventId: Long): Future[Seq[ArtistWithWeightedGenres]] = {
+    val query = for {
+      e <- events if e.id === eventId
+      eventArtist <- eventsArtists
+      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      if artist.id === eventArtist.artistId
+    } yield (artist, optionalArtistGenreAndGenre)
+
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
+    } map(_.toVector)
+  }*/
+
+  def findUUIDOfTracksRemoved(userUUID: UUID): Future[Seq[UUID]] = db.run((for {
+    trackRating <- trackRatings if trackRating.userId === userUUID && trackRating.reason.nonEmpty
+  } yield trackRating.trackId).result)
 }

@@ -144,7 +144,8 @@ class TestPlaceModel extends GlobalApplicationForModels {
     }
 
     "be linked to an organizer if one with the same facebookId already exists" in {
-      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(Organizer(None, Some("1234567"), "organizerTestee"), None)), timeout(Span(5, Seconds))) { savedOrganizer =>
+      whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(Organizer(None, Some("1234567"), "organizerTestee"),
+        None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         whenReady (placeMethods.save(Place(None, "Name", Some("1234567"), None, None, None, None, None, None, None)),
           timeout(Span(2, Seconds)))  { tryPlaceId =>
           val placeId = tryPlaceId.id.get
@@ -234,6 +235,16 @@ class TestPlaceModel extends GlobalApplicationForModels {
       }
     }
 
+    "be found near city" in {
+      whenReady(placeMethods.findNearCity("lyon", 10, 0),
+        timeout(Span(5, Seconds))) {
+        _ should contain inOrder (Place(Some(3),"Test1",Some("666137029786070"),
+          Some(geographicPointMethods.stringToGeographicPoint("45.783808,4.860598").get),None,None,None,None,None,None,None),
+          Place(Some(2),"Test",Some("776137029786070"),Some(geographicPointMethods.stringToGeographicPoint(
+              "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get),
+            None,None,None,None,None,None,None))
+      }
+    }
     /*
     findNearCity
     */

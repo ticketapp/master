@@ -7,7 +7,7 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import services.MyPostgresDriver.api._
-import services.{MyPostgresDriver, Utilities}
+import services.{FollowService, MyPostgresDriver, Utilities}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,7 +26,9 @@ case class Track (uuid: UUID,
 
 class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with MyDBTableDefinitions
+    with FollowService {
 
 
   def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int): Future[Seq[Track]] = {
