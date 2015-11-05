@@ -43,7 +43,6 @@ class SocialAuthController @Inject() (
       case Some(p: SocialProvider with CommonSocialProfileBuilder) =>
         p.authenticate().flatMap {
           case Left(result) =>
-            println("left:" + result)
             Future.successful(result)
           case Right(authInfo) => for {
             profile <- p.retrieveProfile(authInfo)
@@ -54,7 +53,6 @@ class SocialAuthController @Inject() (
             result <- env.authenticatorService.embed(value, Redirect(routes.Application.index()))
           } yield {
             env.eventBus.publish(LoginEvent(user, request, request2Messages))
-              println("result" + result)
             result
           }
         }
