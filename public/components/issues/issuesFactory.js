@@ -17,8 +17,7 @@ angular.module('claudeApp').factory('IssuesFactory', ['$http', '$q',
                     success(function (data) {
                         factory.issues = data;
                         deferred.resolve(factory.issues)
-                    }).
-                    error(function (data) {
+                    }).error(function (data, status) {
 
                     });
                 return deferred.promise;
