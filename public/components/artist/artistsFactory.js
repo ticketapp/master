@@ -143,8 +143,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/artists/containing/' + pattern)
                     .success(function (data, status) {
-                        data.forEach(ImagesFactory);
-                        factory.lastGetArtistsByContainig.artists = data;
+                        var artists = data.map(function(artist) {
+                            return factory.refactorArtistObject(artist)
+                        });
+                        artists.forEach(ImagesFactory);
+                        factory.lastGetArtistsByContainig.artists = artists;
                         factory.lastGetArtistsByContainig.pattern = pattern;
                         deferred.resolve(factory.lastGetArtistsByContainig.artists);
                     }).error(function (data, status) {
@@ -249,12 +252,11 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
 
             return deferred.promise;
         },
-        createNewArtistAndPassItToRootScope : function (artist) {
+        createNewArtist : function (artist) {
             var searchPattern = document.getElementById('searchBar').value.trim();
-            $rootScope.artisteToCreate = true;
-            $rootScope.artist = artist;
-            $rootScope.artist.tracks = [];
-            $rootScope.tracks = [];
+            factory.lastGetArtist.artist = artist;
+            factory.lastGetArtist.url = artist.facebookUrl;
+            factory.lastGetArtist.artist.tracks = [];
             $rootScope.loadingTracks = true;
             oboe.post('artists/createArtist', {
                 searchPattern: searchPattern,
@@ -278,19 +280,16 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             });
                         }, 0);
                     } else {
-                        $timeout(function () {
-                            $rootScope.$apply(function () {
-                                $rootScope.artist.tracks = $rootScope.artist.tracks.concat(value);
-                                $rootScope.tracks = $rootScope.artist.tracks;
-                            });
-                        }, 0);
+                            if (factory.lastGetArtist.url === artist.facebookUrl) {
+                                factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
+                                $timeout(function () {
+                                    $rootScope.$apply();
+                                }, 0);
+                            }
                     }
             })
             .fail(function (error) {
             });
-        },
-        passArtisteToCreateToFalse : function () {
-            $rootScope.artisteToCreate = false;
         },
         refactorArtistName : function (artistName) {
             artistName = artistName
