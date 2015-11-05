@@ -10,6 +10,8 @@ import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.ws._
 
+import scala.concurrent.Future
+
 class Application @Inject()(ws: WSClient,
                             val messagesApi: MessagesApi,
                             val env: Environment[User, CookieAuthenticator],

@@ -152,7 +152,6 @@ class TrackController @Inject() (ws: WSClient,
 
   def getFollowedTracks = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
-    println(userId)
     trackMethods.getFollowedTracks(userId) map { tracks =>
       Ok(Json.toJson(tracks))
     } recover { case t: Throwable =>

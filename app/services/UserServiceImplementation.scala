@@ -45,13 +45,7 @@ class UserServiceImplementation @Inject() (userDAO: UserDAO) extends UserService
   def save(profile: CommonSocialProfile) = {
     userDAO.find(profile.loginInfo).flatMap {
       case Some(user) => // Update user with profile
-        userDAO.save(user.copy(
-          firstName = profile.firstName,
-          lastName = profile.lastName,
-          fullName = profile.fullName,
-          email = profile.email,
-          avatarURL = profile.avatarURL
-        ))
+        Future(user)
       case None => // Insert a new user
         userDAO.save(User(
           uuid = UUID.randomUUID(),
