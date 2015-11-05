@@ -6,10 +6,11 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         user : {
             name: false,
             id: false,
+            isConnected: false,
             facebookAccessToken : false,
-            favoritesTracks : false,
-            removedTracksIds : false,
-            playlists : false
+            favoritesTracks : [],
+            removedTracksIds : [],
+            playlists : []
         },
         getToken : function () {
             var deferred = $q.defer();
@@ -234,8 +235,9 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         },
         getRemovedTracks : function () {
             var deferred = $q.defer();
-            $http.get(RoutesFactory.user.getRemovedTracks()).success(function (tracks) {
-                deferred.resolve(tracks)
+            $http.get(RoutesFactory.user.getRemovedTracks()).success(function (trackIds) {
+                factory.user.removedTracksIds = trackIds;
+                deferred.resolve(trackIds)
             });
             return deferred.promise;
         }
