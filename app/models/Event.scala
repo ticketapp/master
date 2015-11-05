@@ -479,7 +479,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
         "access_token" -> utilities.facebookToken)
       .get()
-      .flatMap { facebookEventToEventWithRelations }
+      .flatMap { response =>
+        facebookEventToEventWithRelations(response) }
 
   case class MaybeOwnerAndPlaceIds(maybeOwnerId: Option[String], maybePlaceId: Option[String])
 
@@ -570,6 +571,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
         artists = nonEmptyArtists,
         organizers = Vector(organizer).flatten,
+        places = Vector(maybePlace).flatten,
         genres = genres)
     }
   }
