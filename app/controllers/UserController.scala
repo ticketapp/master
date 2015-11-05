@@ -6,11 +6,9 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
-import models.{UserMethods, Tool, User}
+import models.{User, UserMethods}
 import play.api.Logger
 import play.api.Play.current
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
@@ -23,51 +21,6 @@ class UserController @Inject() (ws: WSClient,
                                 val userMethods: UserMethods,
                                 socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, CookieAuthenticator] {
-/*
-
-  def users = Action {
-    Ok(Json.toJson(User.findAll()))
-  }
-
-  def user(id: Long) = Action {
-    Ok(Json.toJson(User.find(id)))
-  }
-
-  def findUsersContaining(pattern: String) = Action {
-    Ok(Json.toJson(User.findAllContaining(pattern)))
-  }
-
-  def findToolsByUserId(userId: Long) = Action {
-    Ok(Json.toJson(Tool.findByUserId(userId)))
-  }
-
-  val toolsBindingForm = Form(mapping(
-    "tools" -> nonEmptyText(2),
-    "userId" -> longNumber()
-  )(Tool.formApply)(Tool.formUnapply))
-
-  val userBindingForm = Form(mapping(
-    "email" -> email,
-    "nickname" -> nonEmptyText(2),
-    "password" -> nonEmptyText(2),
-    "profile" -> nonEmptyText(2)
-  )(User.formApply)(User.formUnapply)
-  )
-
-  def createUser = Action { implicit request =>
-    userBindingForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(formWithErrors.errorsAsJson),
-      user => {
-        User.save
-        Redirect(routes.UserController.user(1))
-      }
-    )
-  }
-
-  def findFacebookAccessToken = SecuredAction { implicit request =>
-    Ok(Json.toJson(User.findFacebookAccessToken(request.identity.UUID)))
-  }
-*/
 
   def getTracksRemoved = SecuredAction.async { implicit request =>
     userMethods.findUUIDOfTracksRemoved(request.identity.uuid) map { response =>
