@@ -6,8 +6,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
     var factory = {
         artists : false,
         lastGetArtist: {url: '', artist: {}},
-<<<<<<< HEAD
-=======
         refactorArtistObject: function (artist) {
             artist.artist.genres = artist.genres.map(function (genre) {
                 return genre.genre
@@ -15,7 +13,6 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             artist = artist.artist;
             return artist
         },
->>>>>>> tracks ok
         getArtist : function (url) {
             var deferred = $q.defer();
             if (url == factory.lastGetArtist.url) {
