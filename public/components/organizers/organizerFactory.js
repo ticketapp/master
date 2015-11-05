@@ -4,6 +4,9 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
     var factory = {
         organizers : false,
         lastOrganizer: {id: '', organizer: {}},
+        normalizedOrganizerObject : function (organizer) {
+          return organizer.organizer
+        },
         getOrganizer : function(id) {
             var deferred = $q.defer();
             if (id == factory.lastOrganizer.id) {
@@ -12,7 +15,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 $http.get('/organizers/' + id).
                     success(function(data, status, headers, config) {
                         factory.lastOrganizer.id = id;
-                        factory.lastOrganizer.organizer = data;
+                        factory.lastOrganizer.organizer = factory.normalizedOrganizerObject(data);
                         deferred.resolve(factory.lastOrganizer.organizer);
                     })
             }
@@ -42,9 +45,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             } else {
                 $http.get('/organizers?numberToReturn=12&offset='+offset).
                     success(function(data, status, headers, config) {
+                        var organizers = data.map(function (organizer) {
+                            return factory.normalizedOrganizerObject(organizer)
+                        });
                         factory.lastGetOrganizers.offset = offset;
                         factory.lastGetOrganizers.organizers =
-                            factory.lastGetOrganizers.organizers.concat(data);
+                            factory.lastGetOrganizers.organizers.concat(organizers);
                         deferred.resolve(factory.lastGetOrganizers.organizers);
                     })
             }
@@ -58,7 +64,10 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             } else {
                 $http.get('/organizers/containing/'+ pattern).
                     success(function(data, status, headers, config) {
-                        factory.lastGetOrganizersByContaining.organizers = data;
+                        var organizers = data.map(function (organizer) {
+                            return organizer.organizer;
+                        });
+                        factory.lastGetOrganizersByContaining.organizers = organizers;
                         factory.lastGetOrganizersByContaining.pattern = pattern;
                         deferred.resolve(factory.lastGetOrganizersByContaining.organizers);
                     })
@@ -74,7 +83,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                     if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
                     }
-                    deferred.reject(status);
+                    deferred.reject(data);
                 });
             return deferred.promise;
         },
