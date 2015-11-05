@@ -86,19 +86,19 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       val relations = eventWithOptionalRelations._2
       val organizers = relations collect {
         case ((_, Some((_, organizer: Organizer))), _, _, _, _) => organizer
-      }
+      }.distinct
       val artists = relations collect {
         case ((_, _), Some((_, artist: Artist)), _, _, _) => artist
-      }
+      }.distinct
       val places = relations collect {
         case ((_, _), _, Some((_, place: Place)), _, _) => place
-      }
+      }.distinct
       val genres = relations collect {
         case ((_, _), _, _, Some((_, genre: Genre)), _) => genre
-      }
+      }.distinct
       val addresses = relations collect {
         case ((_, _), _, _, _, Some((_, address: Address))) => address
-      }
+      }.distinct
 
       EventWithRelations(
         event,
@@ -261,11 +261,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       optionalEventAddresses) <- events
         .filter(_.startTime < now)
         .sortBy(_.startTime.desc) joinLeft
-        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
-        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
-        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
-        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
-        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
 
       if eventWithOptionalEventOrganizers._1.id === eventPlace.eventId
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
@@ -423,7 +423,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       address <- addresses.filter(_.city.toLowerCase like s"%$lowercasePattern%")
       eventAddress <- eventsAddresses if eventAddress.addressId === address.id
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-      optionalEventAddresses) <- events
+        optionalEventAddresses) <- events
         .take(50) joinLeft (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
