@@ -110,7 +110,7 @@ angular.module('claudeApp').
                 track.genres.forEach(addGenres);
                 $scope.newTrack = {};
                 if ($rootScope.favoritesTracks) {
-                    if ($rootScope.favoritesTracks.indexOf(track.id) > -1) {
+                    if ($rootScope.favoritesTracks.indexOf(track.uuid) > -1) {
                         track.isFavorite = true;
                         $scope.newTrack.isFavorite = true;
                     }
@@ -127,7 +127,7 @@ angular.module('claudeApp').
                 $scope.newTrack.artist = {name: track.artistName,
                     facebookUrl: track.artistFacebookUrl};
                 $scope.newTrack.title = track.title;
-                $scope.newTrack.id = track.id;
+                $scope.newTrack.id = track.uuid;
                 $rootScope.playlist.tracks.push($scope.newTrack);
                 getNextShow($rootScope.playlist.tracks[$rootScope.playlist.tracks.length-1]);
                 $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
@@ -166,7 +166,7 @@ angular.module('claudeApp').
                 }
             }
 
-            $rootScope.addToPlaylist = function (tracks, artist) {
+            $rootScope.addToPlaylist = function (tracks) {
                 stopPush = false;
                 offset = 0;
                 if ($rootScope.playlist.tracks.length == 0) {
@@ -180,7 +180,11 @@ angular.module('claudeApp').
                     pushListOfTracks(tracks, false);
                     $scope.playlistEnd = false;
                 }
-                artist.genres.forEach(addGenres);
+                tracks.map(function(track) {
+                    track.genres.forEach(addGenres);
+                    return track
+                });
+
                 eventsPlaylist();
             };
 
@@ -195,11 +199,13 @@ angular.module('claudeApp').
                 played = [];
             };
 
-            $rootScope.addAndPlay = function (tracks, artist) {
+            $rootScope.addAndPlay = function (tracks) {
                 stopPush = false;
                 offset = 0;
                 pushListOfTracks(tracks, true);
-                artist.genres.forEach(addGenres);
+                tracks.map(function(track) {
+                    track.genres.forEach(addGenres);
+                });
                 eventsPlaylist();
             };
 

@@ -83,7 +83,7 @@ DELETE        /playlists/:playlistId                                         @co
 #
 ################################## Genres ############################################
 GET           /genres/:genre/artists                                         @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
-#GET     /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET          /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################
 POST    /tracks/create                                                 @controllers.TrackController.createTrack

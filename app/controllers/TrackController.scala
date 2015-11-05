@@ -74,7 +74,7 @@ class TrackController @Inject() (ws: WSClient,
                 Ok
               case _ =>
                 Logger.error(s"TrackController.upsertRatingForUser: 1 was not returned by " +
-                  s"trackRatingMethods.upsertRatingForAUser for user id $userId and track id $trackId")
+                  s"trackRatingMethods.upsertRatingForAUser for user id $userId and track.uuid $trackId")
                 InternalServerError
             }
           case _ =>
@@ -91,7 +91,7 @@ class TrackController @Inject() (ws: WSClient,
 //      case Some(rating) =>
 //        Ok(Json.toJson(rating.ratingUp.toString + "," + rating.ratingDown.toString))
 //      case None =>
-//        Logger.error(s"TrackController.getRatingForUser: there is no rating for the track id $trackId and user id $userId")
+//        Logger.error(s"TrackController.getRatingForUser: there is no rating for the track.uuid $trackId and user id $userId")
 //        NotFound
 //    } recover {
 //      case t: Throwable =>
