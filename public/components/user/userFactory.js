@@ -48,17 +48,17 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             return deferred.promise;
         },
         AddTrackToFavorite: function (track) {
-            $http.post('/tracks/' + track.id + '/addToFavorites').
+            $http.post('/tracks/' + track.uuid + '/addToFavorites').
                 success(function () {
                     factory.user.favoritesTracks.push(track);
-                    TracksRecommender.UpsertTrackRate(true, track.id);
+                    TracksRecommender.UpsertTrackRate(true, track.uuid);
 
                 }).error(function (data, status) {
                     if (status === 401) {
-                        StoreRequest.storeRequest('post', '/tracks/' + track.id + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
+                        StoreRequest.storeRequest('post', '/tracks/' + track.uuid + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
                         var connectListener = $rootScope.$watch('connected', function (newVal) {
                             if (newVal == true) {
-                                TracksRecommender.UpsertTrackRate(true, track.id);
+                                TracksRecommender.UpsertTrackRate(true, track.uuid);
                                 connectListener();
                             }
                         })
@@ -105,7 +105,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         makeFavoriteTracksRootScope : function () {
             $rootScope.favoritesTracks = [];
             function passFavoritesTracksToRootscope(track) {
-                $rootScope.favoritesTracks.push(track.id)
+                $rootScope.favoritesTracks.push(track.uuid)
             }
             factory.getFavoritesTracks().then(function (tracks) {
                 tracks.forEach(passFavoritesTracksToRootscope)
