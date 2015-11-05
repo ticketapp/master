@@ -4,7 +4,6 @@ import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import json.JsonHelper._
 import models.{User, UserMethods}
 import play.api.Logger
@@ -15,11 +14,11 @@ import play.api.libs.json.Json
 import play.api.libs.ws.{WS, WSClient}
 import play.api.mvc._
 
+
 class UserController @Inject() (ws: WSClient,
                                 val messagesApi: MessagesApi,
                                 val env: Environment[User, CookieAuthenticator],
-                                val userMethods: UserMethods,
-                                socialProviderRegistry: SocialProviderRegistry)
+                                val userMethods: UserMethods)
   extends Silhouette[User, CookieAuthenticator] {
 
   def getTracksRemoved = SecuredAction.async { implicit request =>

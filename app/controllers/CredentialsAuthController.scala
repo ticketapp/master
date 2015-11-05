@@ -63,40 +63,40 @@ class CredentialsAuthController @Inject() (
    *
    * @return The result to display.
    */
-  def authenticate = Action.async { implicit request =>
-    signInForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error("authenticate: " + formWithErrors.errorsAsJson)
-        Future.successful(BadRequest(formWithErrors.errorsAsJson))
-      },
-      data => {
-        val credentials = Credentials(data.email, data.password)
-        credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-          val result = Redirect(routes.Application.index())
-          userService.retrieve(loginInfo).flatMap {
-            case Some(user) =>
-              val c = configuration.underlying
-              env.authenticatorService.create(loginInfo).map {
-                case authenticator if data.rememberMe =>
-                  authenticator.copy(
-                    expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
-                    idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
-                    cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
-                  )
-                case authenticator => authenticator
-              }.flatMap { authenticator =>
-                env.eventBus.publish(LoginEvent(user, request, request2Messages))
-                env.authenticatorService.init(authenticator).flatMap { v =>
-                  env.authenticatorService.embed(v, result)
-                }
-              }
-            case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
-          }
-        }.recover {
-          case e: ProviderException =>
-            Redirect(routes.CredentialsAuthController.authenticate()).flashing("error" -> Messages("invalid.credentials"))
-        }
-      }
-    )
-  }
+//  def authenticate = Action.async { implicit request =>
+//    signInForm.bindFromRequest.fold(
+//      formWithErrors => {
+//        Logger.error("authenticate: " + formWithErrors.errorsAsJson)
+//        Future.successful(BadRequest(formWithErrors.errorsAsJson))
+//      },
+//      data => {
+//        val credentials = Credentials(data.email, data.password)
+//        credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
+//          val result = Redirect(routes.Application.index())
+//          userService.retrieve(loginInfo).flatMap {
+//            case Some(user) =>
+//              val c = configuration.underlying
+//              env.authenticatorService.create(loginInfo).map {
+//                case authenticator if data.rememberMe =>
+//                  authenticator.copy(
+//                    expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
+//                    idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
+//                    cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
+//                  )
+//                case authenticator => authenticator
+//              }.flatMap { authenticator =>
+//                env.eventBus.publish(LoginEvent(user, request, request2Messages))
+//                env.authenticatorService.init(authenticator).flatMap { v =>
+//                  env.authenticatorService.embed(v, result)
+//                }
+//              }
+//            case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
+//          }
+//        }.recover {
+//          case e: ProviderException =>
+//            Redirect(routes.CredentialsAuthController.authenticate()).flashing("error" -> Messages("invalid.credentials"))
+//        }
+//      }
+//    )
+//  }
 }

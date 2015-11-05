@@ -3,10 +3,11 @@ GET           /                                                              @co
 
 GET           /test                                                          @controllers.Test.test1
 
-POST          /signUp                                                        @controllers.SignUpController.signUp
 POST          /signIn                                                        @controllers.Application.signIn
-POST          /authenticateByCredentials                                     @controllers.CredentialsAuthController.authenticate
+GET           /authenticate/:provider                                        @controllers.SocialAuthController.authenticate(provider: String)
 GET           /signOut                                                       @controllers.Application.signOut
+#POST          /authenticateByCredentials                                     @controllers.CredentialsAuthController.authenticate
+#POST          /signUp                                                        @controllers.SignUpController.signUp
 
 ################################## fill database ################################################
 GET           /initDatabase                                                  @fillDatabase.InitController.init
@@ -86,16 +87,16 @@ GET           /genres/:genre/artists                                         @co
 #GET     /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
 
 ################################# Tracks ############################################
-POST    /tracks/create                                                 @controllers.TrackController.createTrack
-GET     /tracks                                                        @controllers.TrackController.findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int)
-GET     /tracks/:artistName/:artistFacebookUrl/:trackTitle             @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
-GET     /tracks/youtubeTrackInfo/:youtubeId                            @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
+POST          /tracks/create                                                 @controllers.TrackController.createTrack
+GET           /tracks                                                        @controllers.TrackController.findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int)
+GET           /tracks/:artistName/:artistFacebookUrl/:trackTitle             @controllers.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
+GET           /tracks/youtubeTrackInfo/:youtubeId                            @controllers.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
 #GET     /tracks/:trackId/rating                                        @controllers.TrackController.getRatingForUser(trackId: String)
-POST    /tracks/rating                                                 @controllers.TrackController.upsertRatingForUser
-POST    /tracks/:trackId/addToFavorites                                @controllers.TrackController.followTrack(trackId: String)
-POST    /tracks/:trackId/removeFromFavorites                           @controllers.TrackController.unfollowTrack(trackId: String)
-GET     /tracks/favorites                                              @controllers.TrackController.getFollowedTracks
-GET     /tracks/:trackId/isFollowed                                    @controllers.TrackController.isTrackFollowed(trackId: String)
+POST          /tracks/rating                                                 @controllers.TrackController.upsertRatingForUser
+POST          /tracks/:trackId/addToFavorites                                @controllers.TrackController.followTrack(trackId: String)
+POST          /tracks/:trackId/removeFromFavorites                           @controllers.TrackController.unfollowTrack(trackId: String)
+GET           /tracks/favorites                                              @controllers.TrackController.getFollowedTracks
+GET           /tracks/:trackId/isFollowed                                    @controllers.TrackController.isTrackFollowed(trackId: String)
 
 #
 ################################### Infos ################################################
@@ -116,9 +117,9 @@ GET     /tracks/:trackId/isFollowed                                    @controll
 #GET     /users/:id                                                        @controllers.UserController.user(id: Long)
 #GET     /users/containing/:pattern                                        @controllers.UserController.findUsersContaining(pattern: String)
 #GET     /users/:userId/tools                                              @controllers.UserController.findToolsByUserId(userId: Long)
-GET      /users/geographicPoint                                            @controllers.UserController.getUserGeographicPoint
+GET           /users/geographicPoint                                         @controllers.UserController.getUserGeographicPoint
 #GET     /users/facebookAccessToken/                                       @controllers.UserController.findFacebookAccessToken
-GET      /users/tracksRemoved                                              @controllers.UserController.getTracksRemoved
+GET           /users/tracksRemoved                                           @controllers.UserController.getTracksRemoved
 
 ################################## Buy ticket ###########################################
 GET           /buyTicket                                                     @controllers.TicketController.buyTicket
