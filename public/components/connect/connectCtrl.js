@@ -397,9 +397,8 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                         success(function (data) {
                             InfoModal.displayInfo($rootScope.lastReq.success);
                             $rootScope.lastReq = {};
-                        }).
-                        error(function (data) {
-                            if (data.error == 'Credentials required') {
+                        }).error(function (data, status) {
+                            if (status === 401) {
                                 StoreRequest.storeRequest('post',
                                     $rootScope.lastReq.path, $rootScope.lastReq.object,
                                     $rootScope.lastReq.success)
@@ -412,9 +411,8 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                         success(function (data) {
                             $scope.info = $rootScope.lastReq.success;
                             $rootScope.lastReq = {};
-                        }).
-                        error(function (data) {
-                            if (data.error == 'Credentials required') {
+                        }).error(function (data, status) {
+                            if (status === 401) {
                                 StoreRequest.storeRequest('post', $rootScope.lastReq.path, $rootScope.lastReq.object, $rootScope.lastReq.success)
                             } else {
                             }
@@ -450,7 +448,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 if (connectWin.document.getElementById('top') != undefined &&
                     connectWin.document.getElementById('top') != null) {
                         clearInterval(waitForConnected);
-                    if (connectWin.document.getElementById('top').getAttribute("ng-init") ==
+                    if (connectWin.document.getElementById('top').getAttribute("ng-init") ===
                         '$root.connected = true') {
                         $timeout(function () {
                             $rootScope.$apply(function () {

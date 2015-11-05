@@ -26,8 +26,8 @@ angular.module('claudeApp').controller('issuesCtrl', ['$scope', '$rootScope',
             success(function (data) {
                 $scope.getIssueComments($scope.issues[i].issueId)
                 $scope.addNewComment = false;
-            }).error(function (data) {
-                if (data.error == 'Credentials required') {
+            }).error(function (data, status) {
+                if (status === 401) {
                     var object = {content: $scope.newComment.content};
                     StoreRequest.storeRequest('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
                     $rootScope.$watch('lastReq', function (newVal) {
@@ -49,9 +49,8 @@ angular.module('claudeApp').controller('issuesCtrl', ['$scope', '$rootScope',
                 $scope.newIssue= [];
                 $scope.addNewIssue = false;
                 getIssues();
-            }).
-            error(function (data) {
-                if (data.error == 'Credentials required') {
+            }).error(function (data, status) {
+                if (status === 401) {
                     var object = {content: $scope.newIssue.content, title: $scope.newIssue.title};
                     StoreRequest.storeRequest('post', '/issues', object, 'votre issue' + $scope.newIssue.title + 'est enregistée');
                     $rootScope.$watch('lastReq', function (newVal) {

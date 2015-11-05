@@ -233,7 +233,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 success(function (data) {
                     factory.events = data;
                     deferred.resolve(factory.events);
-                }).error(function (data) {
+                }).error(function (data, status) {
                     factory.events = data;
                     deferred.resolve(factory.events);
                 });
@@ -244,8 +244,8 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             $http.post('/events/' + id +'/follow').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/events/' + id +'/follow', "", 'vous suivez ' + eventName)
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
@@ -259,8 +259,8 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             $http.post('/events/' + id +'/unfollow').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/events/' + id +'/unfollow', "", 'vous ne suivez plus ' + eventName)
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
@@ -286,7 +286,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 success(function (data) {
                     factory.events = data;
                     deferred.resolve(factory.events);
-                }).error(function (data) {
+                }).error(function (data, status) {
                     factory.events = data;
                     deferred.resolve(factory.events);
                 });

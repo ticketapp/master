@@ -185,7 +185,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 success(function (data) {
                     deferred.resolve(data);
                 }).error(function (data, status) {
-                    if (data.error == 'Credentials required') {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
                     }
                     deferred.reject(status);
@@ -197,8 +197,8 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             $http.post('/artists/' + id +'/followByArtistId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByArtistId', "", 'vous suivez ' + artistName)
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
@@ -212,8 +212,8 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             $http.post('/artists/' + id +'/unfollowArtistByArtistId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +
                             '/unfollowArtistByArtistId', "", 'vous ne suivez plus' + artistName)
                     } else {
@@ -235,7 +235,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         factory.lastGetArtistEvents.events = data;
                         factory.lastGetArtistEvents.id = id;
                         deferred.resolve(factory.lastGetArtistEvents.events);
-                    }).error(function (data) {
+                    }).error(function (data, status) {
                         deferred.resolve('error');
                     })
             }
@@ -246,7 +246,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             $http.get('/tracks/' + artistName + '/' + artistFacebookUrl + '/' + trackTitle).
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
+                }).error(function (data, status) {
                     deferred.resolve('error');
                 });
 
