@@ -19,10 +19,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-case class Place (id: Option[Long],
+case class Place (id: Option[Long] = None,
                   name: String,
                   facebookId: Option[String] = None,
-                  geographicPoint: Option[Geometry],
+                  geographicPoint: Option[Geometry] = None,
                   description: Option[String] = None,
                   webSites: Option[String] = None,
                   capacity: Option[Int] = None,
@@ -53,13 +53,13 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def save(place: Place): Future[Place] = {
     val placeWithFormattedDescription = place.copy(description = utilities.formatDescription(place.description))
     place.facebookId match {
-      case None =>
-        doSave(placeWithFormattedDescription)
       case Some(facebookId) =>
         findOrganizerIdByFacebookId(facebookId) flatMap { maybePlaceId =>
           val organizerWithLinkedPlace = placeWithFormattedDescription.copy(linkedOrganizerId = maybePlaceId)
           doSave(organizerWithLinkedPlace)
         }
+      case _ =>
+        doSave(placeWithFormattedDescription)
     }
   }
 
@@ -159,4 +159,23 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     .filter(eventPlace => eventPlace.eventId === eventPlaceRelation.eventId &&
       eventPlace.placeId === eventPlaceRelation.placeId)
     .delete)
+
+  def saveEventRelations(eventPlaceRelations: Seq[EventPlaceRelation]): Future[Boolean] = db.run(
+    eventsPlaces ++= eventPlaceRelations) map { _ =>
+        true
+    } recover {
+    case e: Exception =>
+      Logger.error("place.saveEventRelations: ", e)
+      false
+  }
+
+  def saveWithEventRelation(place: Place, eventId: Long): Future[Place] = save(place) flatMap { savedPlace =>
+    saveEventRelation(EventPlaceRelation(eventId, savedPlace.id.getOrElse(0))) map {
+      case 1 =>
+        savedPlace
+      case _ =>
+        Logger.error(s"Place.saveWithEventRelation: not exactly one row saved by Place.saveEventRelation for place $savedPlace and eventId $eventId")
+        savedPlace
+    }
+  }
 }

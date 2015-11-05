@@ -61,7 +61,7 @@ class TestArtistModel extends GlobalApplicationForModels {
       val artist = ArtistWithWeightedGenres(Artist(None, None, "saveAndDeleteEventRelation", None, None,
         "saveAndDeleteEventRelation", Set.empty), Vector.empty)
 
-      whenReady(artistMethods.saveWithEventRelation(artist.artist, 1L), timeout(Span(5, Seconds))) { savedArtist =>
+      whenReady(artistMethods.saveWithEventRelation(artist, 1L), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.findAllByEvent(1L), timeout(Span(5, Seconds))) { artistsFound =>
           artistsFound should contain(ArtistWithWeightedGenres(savedArtist, Vector.empty))
         }

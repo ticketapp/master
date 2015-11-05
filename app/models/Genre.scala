@@ -12,7 +12,7 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 
 
-case class Genre (id: Option[Int], name: String, icon: Char = 'a') {
+case class Genre (id: Option[Int] = None, name: String, icon: Char = 'a') {
   require(name.nonEmpty, "It is forbidden to create a genre without a name.")
 }
 
@@ -96,6 +96,15 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def saveEventRelation(eventGenreRelation: EventGenreRelation): Future[Int] =
     db.run(eventsGenres += eventGenreRelation)
 
+  def saveEventRelations(eventGenreRelations: Seq[EventGenreRelation]): Future[Boolean] =
+    db.run(eventsGenres ++= eventGenreRelations) map { _ =>
+      true
+    } recover { 
+      case e: Exception =>
+        Logger.error("Genre.saveEventRelations: ", e)
+        false
+    }
+
   def deleteEventRelation(eventGenreRelation: EventGenreRelation): Future[Int] = db.run(eventsGenres.filter(eventGenre =>
     eventGenre.eventId === eventGenreRelation.eventId && eventGenre.genreId === eventGenreRelation.genreId).delete)
 
@@ -134,12 +143,16 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def deleteArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] = db.run(artistsGenres.filter(artistGenre =>
     artistGenre.artistId === artistGenreRelation.artistId && artistGenre.genreId === artistGenreRelation.genreId).delete)
-  
-  def saveGenreOfArtist(genreName: Option[String], artistId: Long): Unit = genreName match {
-    case Some(name) if name.nonEmpty =>
-      saveWithArtistRelation(new Genre(None, name), artistId)
 
-      findOverGenres(Seq(Genre(None, name))) map { _.foreach(genre => saveWithArtistRelation(genre, artistId)) }
+  def saveMaybeGenreOfArtist(maybeGenreName: Option[String], artistId: Long): Unit = maybeGenreName match {
+    case Some(genre) => saveGenreOfArtist(genre, artistId)
+    case _ =>
+  }
+  
+  def saveGenreOfArtist(genreName: String, artistId: Long): Unit = {
+    saveWithArtistRelation(new Genre(None, genreName), artistId)
+
+    findOverGenres(Seq(Genre(None, genreName))) map { _.foreach(genre => saveWithArtistRelation(genre, artistId)) }
   }
 
   // not used
@@ -158,7 +171,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     findByName(genre.name) flatMap {
       case Some(genre: Genre) =>
         findById(genre.id.getOrElse(-1)) map {
-          case Some(genreFound) if genreFound.icon =='g' =>
+          case Some(genreFound) if genreFound.icon == 'g' =>
             Option(Genre(None, "reggae"))
           case Some(genreFound) if genreFound.icon == 'e' =>
             Option(Genre(None, "electro"))
@@ -178,10 +191,11 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
             Option(Genre(None, "musiques du monde"))
           case Some(genreFound) if genreFound.icon == 'a' =>
             Option(Genre(None, ""))
-          case None =>
+          case _ =>
             Logger.error("Artist.findOverGenres: no genre found for this id")
             None
         }
+
       case _ =>
         Logger.error("Artist.findOverGenres: no genre found for this name")
         Future(None)
@@ -195,7 +209,6 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     trackGenre.trackId === trackGenreRelation.trackId && trackGenre.genreId === trackGenreRelation.genreId).delete)
 
   def delete(id: Int): Future[Int] = db.run(genres.filter(_.id === id).delete) 
-
 
   def genresStringToGenresSet(genres: String): Set[Genre] = {
     val refactoredGenres = genres

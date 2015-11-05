@@ -49,8 +49,6 @@ trait geographicPointTrait {
   }
 
   def optionStringToOptionPoint(maybeGeographicPoint: Option[String]): Option[Geometry] = maybeGeographicPoint match {
-    case None =>
-      None
     case Some(geoPoint) =>
       stringToGeographicPoint(geoPoint) match {
         case Failure(exception) =>
@@ -59,6 +57,8 @@ trait geographicPointTrait {
         case Success(validPoint) =>
           Some(validPoint)
       }
+    case _ =>
+      None
   }
 
   def readFacebookGeographicPoint() = {

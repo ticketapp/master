@@ -51,8 +51,11 @@ INSERT INTO organizers(name) VALUES('name0');
 INSERT INTO organizers(name, facebookid) VALUES('name1', 'facebookId');
 INSERT INTO organizers(name, facebookid) VALUES('name2', 'facebookId1');
 
--------------------------------------------------------- places ----------------------------------------------------
+-------------------------------------------------------- places --------------------------------------------------------
 INSERT INTO places(name, facebookid) VALUES('Test', '776137029786070');
+
+-------------------------------------------------------- addresses -----------------------------------------------------
+INSERT INTO addresses(city) VALUES('lyon');
 
 -------------------------------------------------------- eventsOrganizers ----------------------------------------------
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
@@ -65,6 +68,10 @@ INSERT INTO eventsorganizers(eventid, organizerid) VALUES
 -------------------------------------------------------- eventsGenres --------------------------------------------------
 INSERT INTO eventsgenres(eventid, genreid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT genreid FROM genres WHERE name = 'genreTest0'));
+
+  -------------------------------------------------------- eventsAddresses ---------------------------------------------
+INSERT INTO eventsaddresses(eventid, addressid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT addressid FROM addresses WHERE city = 'lyon'));
 
 -------------------------------------------------------- eventsArtists -------------------------------------------------
 INSERT INTO eventsartists(eventid, artistid) VALUES
@@ -81,7 +88,7 @@ INSERT INTO eventsfollowed(eventid, userid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT userid FROM users WHERE email = 'user@facebook.com'));
 
 -------------------------------------------------------- frenchCities --------------------------------------------------
-INSERT INTO frenchcities(city, geographicpoint) VALUES('Lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO frenchcities(city, geographicpoint) VALUES('lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
 -------------------------------------------------------- playlistsTracks -----------------------------------------------
 INSERT INTO playliststracks(playlistId, trackid, trackrank) VALUES(1, '02894e56-08d1-4c1f-b3e4-466c069d15ed', 1);

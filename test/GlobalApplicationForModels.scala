@@ -11,5 +11,4 @@ trait GlobalApplicationForModels extends PlaySpec with OneAppPerSuite with Injec
   override def afterAll() = {
     Evolutions.cleanupEvolutions(databaseApi.database("tests"))
   }
-
 }
