@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequest', 'InfoModal',
-    'ImagesFactory',
-    function ($http, $q, StoreRequest, InfoModal, ImagesFactory){
+    'ImagesFactory', 'RefactorObjectsFactory',
+    function ($http, $q, StoreRequest, InfoModal, ImagesFactory, RefactorObjectsFactory){
     var factory = {
         events : false,
         refactorTicketsInfo : function (event) {
@@ -66,12 +66,15 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 deferred.resolve(factory.lastGetEvents.events);
             } else {
                 $http.get('/events/inInterval/' + start + '?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12')
-                    .success(function (data, status) {
-                        data.forEach(factory.colorEvent);
+                    .success(function (events, status) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(factory.colorEvent);
                         if (offset > factory.lastGetEvents.offset) {
-                            factory.lastGetEvents.events =  factory.lastGetEvents.events.concat(data);
+                            factory.lastGetEvents.events =  factory.lastGetEvents.events.concat(events);
                         } else {
-                            factory.lastGetEvents.events = data;
+                            factory.lastGetEvents.events = events;
                         }
                         factory.lastGetEvents.start = start;
                         factory.lastGetEvents.geoloc = geoloc;
@@ -86,15 +89,15 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
         lastGetEvent : {id: 0, event: {}},
         getEvent : function (id) {
             var deferred = $q.defer();
-            console.log(factory.lastGetEvent)
             if (id == factory.lastGetEvent.id) {
                 deferred.resolve(factory.lastGetEvent.event)
             } else {
                 $http.get('/events/' + id)
-                    .success(function (data, status) {
+                    .success(function (event, status) {
+                        event = RefactorObjectsFactory.normalizeEventObject(event);
                         factory.lastGetEvent.id = id;
-                        data = factory.refactorTicketsInfo(data);
-                        factory.lastGetEvent.event = data;
+                        event = factory.refactorTicketsInfo(event);
+                        factory.lastGetEvent.event = event;
                         deferred.resolve(factory.lastGetEvent.event);
                     }).error(function (data, status) {
                         deferred.reject('erreur');
@@ -110,11 +113,14 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 deferred.resolve(factory.lastGetEventsByContaining.events)
             } else {
                 $http.get('/events/containing/' + pattern + '?geographicPoint=' + geoloc)
-                    .success(function (data, status) {
+                    .success(function (events, status) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
                         factory.lastGetEventsByContaining.pattern = pattern;
                         factory.lastGetEventsByContaining.geoloc = geoloc;
-                        data.forEach(factory.colorEvent);
-                        factory.lastGetEventsByContaining.events = data;
+                        events.forEach(factory.colorEvent);
+                        factory.lastGetEventsByContaining.events = events;
                         deferred.resolve(factory.lastGetEventsByContaining.events);
                     }).error(function (data, status) {
                         deferred.reject('erreur');
@@ -130,23 +136,25 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             } else {
                 var artistsEvents = [];
                 $http.get('/artists/containing/' + pattern).
-                    success(function (data, status, headers, config) {
+                    success(function (artists, status, headers, config) {
                         factory.lastGetArtistsEventsByContaining.pattern = pattern;
-                        function getArtistEvents(art) {
-                            $http.get('/artists/' + art.facebookUrl + '/events ').
-                                success(function (data) {
+                        function getArtistEvents(artist) {
+                            $http.get('/artists/' + artist.facebookUrl + '/events ').
+                                success(function (events) {
                                     function pushEvents(event) {
                                         artistsEvents.push(event)
                                     }
-
-                                    data.forEach(factory.colorEvent);
-                                    data.forEach(pushEvents);
+                                    events = events.map(function(event) {
+                                        return RefactorObjectsFactory.normalizeEventObject(event)
+                                    });
+                                    events.forEach(factory.colorEvent);
+                                    events.forEach(pushEvents);
                                     factory.lastGetArtistsEventsByContaining.events = artistsEvents;
                                     deferred.resolve(factory.lastGetArtistsEventsByContaining.events);
                                 })
                         }
 
-                        data.forEach(getArtistEvents);
+                        artists.forEach(getArtistEvents);
                     });
             }
             return deferred.promise;
@@ -159,23 +167,25 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             } else {
                 var placesEvents = [];
                 $http.get('/places/containing/' + pattern).
-                    success(function (data, status, headers, config) {
+                    success(function (places, status, headers, config) {
                         factory.lastGetPlacesEventsByContaining.pattern = pattern;
                         function getPlaceEvents(place) {
                             $http.get('/places/' + place.placeId + '/events ').
-                                success(function (data) {
+                                success(function (events) {
                                     function pushEvents(event) {
                                         placesEvents.push(event)
                                     }
-
-                                    data.forEach(factory.colorEvent);
-                                    data.forEach(pushEvents);
+                                    events = events.map(function(event) {
+                                        return RefactorObjectsFactory.normalizeEventObject(event)
+                                    });
+                                    events.forEach(factory.colorEvent);
+                                    events.forEach(pushEvents);
                                     factory.lastGetPlacesEventsByContaining.events = placesEvents;
                                     deferred.resolve(factory.lastGetPlacesEventsByContaining.events);
                                 })
                         }
 
-                        data.forEach(getPlaceEvents)
+                        places.forEach(getPlaceEvents)
                     });
             }
             return deferred.promise;
@@ -189,13 +199,16 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 deferred.resolve(factory.lastGetEventsByGenre.events)
             } else {
                 $http.get('/genres/' + pattern + '/events?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12').
-                    success(function (data, status, headers, config) {
-                        data.forEach(factory.colorEvent);
+                    success(function (events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(factory.colorEvent);
                         if (offset > factory.lastGetEventsByGenre.offset) {
                             factory.lastGetEventsByGenre.events =
-                                factory.lastGetEventsByGenre.events.concat(data);
+                                factory.lastGetEventsByGenre.events.concat(events);
                         } else {
-                            factory.lastGetEventsByGenre.events = data;
+                            factory.lastGetEventsByGenre.events = events;
                         }
                         factory.lastGetEventsByGenre.pattern = pattern;
                         factory.lastGetEventsByGenre.offset = offset;
@@ -213,12 +226,15 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 deferred.resolve(factory.lastGetEventsByCity.events)
             } else {
                 $http.get('/events/nearCity/' + pattern + '?numberToReturn=12&offset=' + offset).
-                    success(function (data) {
-                        data.forEach(factory.colorEvent);
+                    success(function (events) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(factory.colorEvent);
                         if (offset > factory.lastGetEventsByCity.offset) {
-                            factory.lastGetEventsByCity.events = factory.lastGetEventsByCity.events.concat(data);
+                            factory.lastGetEventsByCity.events = factory.lastGetEventsByCity.events.concat(events);
                         } else {
-                            factory.lastGetEventsByCity.events = data;
+                            factory.lastGetEventsByCity.events = events;
                         }
                         factory.lastGetEventsByCity.pattern = pattern;
                         factory.lastGetEventsByCity.offset = offset;
