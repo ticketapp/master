@@ -33,8 +33,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     })[0]);
                     factory.user.playlists.splice(indexPlaylistToDelet, 1);
                     deferred.resolve(data);
-                }).
-                error (function (data) {
+                }).error (function (data) {
             });
             return deferred.promise;
         },
@@ -43,8 +42,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.get('/artists/' + id + '/isFollowed').
                 success(function (data) {
                     deferred.resolve(data);
-                }).
-                error (function (data) {
+                }).error (function (data) {
                 deferred.resolve(data)
             });
             return deferred.promise;
@@ -55,9 +53,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     factory.user.favoritesTracks.push(track);
                     TracksRecommender.UpsertTrackRate(true, track.id);
 
-                }).
-                error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/tracks/' + track.id + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
                         var connectListener = $rootScope.$watch('connected', function (newVal) {
                             if (newVal == true) {
@@ -83,9 +80,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                             }
                         }
                     }
-                }).
-                error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'le moreau a été ajouté à vos favoris')
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
@@ -101,8 +97,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     success(function (data) {
                         factory.user.favoritesTracks = data;
                         deferred.resolve(factory.user.favoritesTracks);
-                    }).
-                    error(function (data) {
+                    }).error(function (data, status) {
                 });
             }
             return deferred.promise;
@@ -121,8 +116,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.post('/places/' + id +'/followByPlaceId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/places/' + id +'/followByPlaceId',
                             "", 'vous suivez ' + placeName)
                     } else {
@@ -137,8 +132,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.post('/places/' + id +'/unfollowPlaceByPlaceId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/places/' + id +'/unfollowPlaceByPlaceId',
                             "", 'vous ne suivez plus ' + placeName)
                     } else {
@@ -164,8 +159,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.post('/organizers/' + id +'/followByOrganizerId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/followByOrganizerId',
                             "", 'vous suivez ' + organizerName)
                     } else {
@@ -180,8 +175,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.post('/organizers/' + id +'/unfollowOrganizerByOrganizerId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/unfollowOrganizerByOrganizerId',
                             "", 'vous ne suivez plus ' + organizerName)
                     } else {
@@ -207,8 +202,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.post('/artists/' + id +'/followByArtistId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByArtistId', "", 'vous suivez ' + artistName)
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
@@ -222,8 +217,8 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.post('/artists/' + id +'/unfollowArtistByArtistId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +
                             '/unfollowArtistByArtistId', "", 'vous ne suivez plus' + artistName)
                     } else {

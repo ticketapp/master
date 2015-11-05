@@ -71,7 +71,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 success(function(data, status, headers, config) {
                     deferred.resolve(data);
                 }).error(function (data, status) {
-                    if (data.error == 'Credentials required') {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
                     }
                     deferred.reject(status);
@@ -83,8 +83,8 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             $http.post('/organizers/' + id +'/followByOrganizerId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/followByOrganizerId',
                             "", 'vous suivez ' + organizerName)
                     } else {
@@ -99,8 +99,8 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             $http.post('/organizers/' + id +'/unfollowOrganizerByOrganizerId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/unfollowOrganizerByOrganizerId',
                             "", 'vous ne suivez plus ' + organizerName)
                     } else {
@@ -126,7 +126,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             $http.post('/organizers/create', organizer).
                 success(function(data, status, headers, config) {
                     deferred.resolve(data);
-                }).error(function (data) {
+                }).error(function (data, status) {
                     deferred.resolve('error');
                 });
             return deferred.promise;

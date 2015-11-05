@@ -315,7 +315,7 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                 window.location.href =('#/event/' + data.eventId);
             }).
             error(function(data, status, headers, config) {
-                if (data.error == 'Credentials required') {
+                if (status === 401) {
                     var object = {name: $scope.newEvent.name,
                         description: $scope.newEvent.description,
                         startTime: $filter('date')($scope.newEvent.startTime, "yyyy-MM-dd HH:mm"),

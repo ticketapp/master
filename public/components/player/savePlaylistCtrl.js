@@ -17,9 +17,8 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
             $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
                 success(function (data) {
                     InfoModal.displayInfo('votre playlist ' + playlist.name + ' est enregistrée');
-                }).
-                error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         var object = {name: playlist.name, tracksId: tracksToSave};
                         StoreRequest.storeRequest('post', '/playlists', object, 'votre playlist "' + playlist.name + '" est enregistée')
                     } else {

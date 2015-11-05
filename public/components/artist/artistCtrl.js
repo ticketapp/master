@@ -60,7 +60,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 
         function getIsFollowed(artist) {
-            ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
+            ArtistsFactory.getIsFollowed(artist.id).then(function (isFollowed) {
                 $timeout(function () {
                     $scope.$apply(function () {
                         if (isFollowed == true || isFollowed == false) {
