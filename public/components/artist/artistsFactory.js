@@ -7,7 +7,9 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         artists : false,
         lastGetArtist: {url: '', artist: {}},
         refactorArtistObject: function (artist) {
-            artist.artist.genres = artist.genres;
+            artist.artist.genres = artist.genres.map(function (genre) {
+                return genre.genre
+            });
             artist = artist.artist;
             return artist
         },
@@ -22,7 +24,10 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         data = ImagesFactory(data);
                         $http.get('/artists/' + data.facebookUrl + '/tracks?numberToReturn=0&offset=0').
                             success(function(tracks) {
-                                data.tracks = tracks;
+                                data.tracks = tracks.map(function (track) {
+                                    track.genres = data.genres;
+                                    return track
+                                });
                                 factory.lastGetArtist.artist = data;
                                 factory.lastGetArtist.url = url;
                                 deferred.resolve(factory.lastGetArtist.artist);
@@ -267,7 +272,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     imagePath: artist.oldImagePath,
                     websites: artist.websites,
                     description: artist.description,
-                    genre: artist.genre
+                    genre: artist.genres
                 }
             }).start(function (data, etc, a) {
             })
@@ -281,6 +286,10 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                         }, 0);
                     } else {
                             if (factory.lastGetArtist.url === artist.facebookUrl) {
+                                value = value.map(function (track) {
+                                    track.genres = artist.genres;
+                                    return track
+                                });
                                 factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
                                 $timeout(function () {
                                     $rootScope.$apply();

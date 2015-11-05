@@ -193,6 +193,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     function (tracks) {
                         for (var i = 0; i < tracks.length; i++) {
                             if ($filter('filter')($scope.tracks, tracks[i].url, 'url').length === 0) {
+                                tracks[i].genres = $scope.artist.genres;
                                 $scope.tracks.push(tracks[i]);
                                 $timeout(function () {
                                     $scope.$apply(function(){
