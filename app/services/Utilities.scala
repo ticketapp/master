@@ -2,15 +2,14 @@ package services
 
 import java.sql.Timestamp
 import java.text.Normalizer
-import java.util.Date
 import javax.inject.Inject
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import play.api.Play.current
 import play.api.libs.json._
 import play.api.libs.ws.WS
 import slick.driver.PostgresDriver.api._
-import play.api.Play.current
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,11 +45,6 @@ class Utilities @Inject()() {
 
   def normalizeUrlWithoutLowerCase(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website, p => "").stripSuffix("/")
-
-  def stringToDateTime(string: String): DateTime = {
-    val formatedString = string.replace("T", " ").substring(0, string.length - 5)
-    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime(formatedString)
-  }
 
   def optionStringToLowerCaseOptionString(maybeString: Option[String]): Option[String] = maybeString match {
     case Some(string: String) => Option(string.toLowerCase)
@@ -111,17 +105,18 @@ class Utilities @Inject()() {
         case phoneNumberStartsWithPlus33 if phoneNumberStartsWithPlus33.startsWith("+33") =>
           "0" + phoneNumber.drop(3)
         case alreadyNormalized: String => alreadyNormalized
+        case _ => ""
       }
 
       var numberWithoutLetters = phoneNumbersValue.replaceAll("[^0-9+]", "")
       var normalizedNumbers = ListBuffer.empty[String]
 
-      while (numberWithoutLetters.length >= 10) {
+      while(numberWithoutLetters.length >= 10) {
         val withNormalizedPrefix = normalizePhoneNumberPrefix(numberWithoutLetters)
         normalizedNumbers += withNormalizedPrefix.take(10)
         numberWithoutLetters = withNormalizedPrefix.drop(10)
       }
-      normalizedNumbers.toSet
+      normalizedNumbers.toSet.filter(_ == "")
   }
 
   def phoneNumbersSetToOptionString(phoneNumbers: Set[String]): Option[String] = phoneNumbers match {
@@ -157,14 +152,14 @@ class Utilities @Inject()() {
         "</div>")
   }
 
-  def formatDate(date: Option[String]): Option[Date] = date match {
-    case Some(dateFound: String) => val date = dateFound.replace("T", " ")
-      date.length match {
-        case i if i <= 10 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date))
-        case i if i <= 13 => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH").parse(date))
-        case _ => Option(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date))
-      }
-    case _ => None
+  def stringToDateTime(string: String): DateTime = {
+    val formattedString = string.replace("T", " ").substring(0, string.length - 5)
+    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime(formattedString)
+  }
+
+  def optionStringToOptionDateTime(maybeDate: Option[String]): Option[DateTime] = maybeDate match {
+    case Some(date) => Option(stringToDateTime(date))
+    case None => None
   }
 
   def refactorEventOrPlaceName(eventName: String): String = {

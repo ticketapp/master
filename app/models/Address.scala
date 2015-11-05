@@ -12,10 +12,10 @@ import scala.language.postfixOps
 
 
 case class Address(id: Option[Long], 
-                   geographicPoint: Option[Geometry],
-                   city: Option[String],
-                   zip: Option[String],
-                   street: Option[String]) {
+                   geographicPoint: Option[Geometry] = None,
+                   city: Option[String] = None,
+                   zip: Option[String] = None,
+                   street: Option[String] = None) {
   require(!(geographicPoint.isEmpty && city.isEmpty && zip.isEmpty && street.isEmpty),
     "address must contain at least one field")
 }
@@ -85,18 +85,27 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       save(addressWithGeoPoint)
   }
 
-  def saveAddressAndEventRelation(address: Address, eventId: Long): Future[Int] = save(address) flatMap {
-    _.id match {
-      case None =>
-        Logger.error("Address.saveAddressAndEventRelation: address saved did not return an id")
-        Future(0)
-      case Some(id) =>
-      saveEventAddressRelation(EventAddressRelation(eventId, id))
-    }
-  }
-
-  def saveEventAddressRelation(eventAddressRelation: EventAddressRelation): Future[Int] =
+  def saveEventRelation(eventAddressRelation: EventAddressRelation): Future[Int] =
     db.run(eventsAddresses += eventAddressRelation)
 
+  def saveEventRelations(eventAddressRelations: Seq[EventAddressRelation]): Future[Boolean] =
+    db.run(eventsAddresses ++= eventAddressRelations) map { _ =>
+      true
+    } recover {
+      case e: Exception =>
+        Logger.error("Address.saveEventRelations: ", e)
+        false
+    }
+
+  def saveWithEventRelation(address: Address, eventId: Long): Future[Address] = save(address) flatMap { savedAddress =>
+    saveEventRelation(EventAddressRelation(eventId, savedAddress.id.getOrElse(0))) map {
+      case 1 =>
+        savedAddress
+      case _ =>
+        Logger.error(s"Address.saveWithEventRelation: not exactly one row saved by Address.saveEventRelation for address $savedAddress and eventId $eventId")
+        savedAddress
+    }
+  }
+  
   def delete(id: Long): Future[Int] = db.run(addresses.filter(_.id === id).delete)
 }

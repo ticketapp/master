@@ -129,25 +129,26 @@ class TestGenreModel extends GlobalApplicationForModels {
       val genre = Genre(None, "pilipilipims")
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
-          try {
-            whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
-              whenReady(genreMethods.saveTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
-              timeout(Span(5, Seconds))) { genreTrackRelation =>
-                whenReady(genreMethods.findAllByTrack(trackId), timeout(Span(5, Seconds))) { tracksSeq =>
+          whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
+            whenReady(genreMethods.saveTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
+            timeout(Span(5, Seconds))) { genreTrackRelation =>
+              whenReady(genreMethods.findAllByTrack(trackId), timeout(Span(5, Seconds))) { tracksSeq =>
 
-                  tracksSeq mustBe Seq(genre.copy(id = Some(savedGenre.id.get)))
+                tracksSeq should contain (genre.copy(id = Some(savedGenre.id.get)))
 
-                  whenReady(genreMethods.deleteTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
-                    timeout(Span(5, Seconds))) { _ mustBe 1 }
-                }
+                whenReady(genreMethods.deleteTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
+                  timeout(Span(5, Seconds))) { _ mustBe 1 }
               }
             }
-          } finally {
-              genreMethods.delete(savedGenre.id.get)
-              trackMethods.delete(trackId)
-              artistMethods.delete(savedArtist.id.get)
           }
         }
+      }
+    }
+
+    "save its relation with an event" in {
+      whenReady(genreMethods.saveEventRelation(EventGenreRelation(1, 2)), timeout(Span(5, Seconds))) { genreEventRelation =>
+
+        genreEventRelation mustBe 1
       }
     }
 
@@ -201,21 +202,9 @@ class TestGenreModel extends GlobalApplicationForModels {
                   whenReady(genreMethods.save(Genre(None, "genreTest7", 's')), timeout(Span(5, Seconds))) { genre7 =>
                     whenReady(genreMethods.save(Genre(None, "genreTest8", 'l')), timeout(Span(5, Seconds))) { genre8 =>
                       whenReady(genreMethods.save(Genre(None, "genreTest9", 'c')), timeout(Span(5, Seconds))) { genre9 =>
-                        try {
-                          whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { _ mustBe expectedGenres }
-                          whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { foundGenres =>
-                            foundGenres ++ genres mustBe allGenres
-                          }
-                        } finally {
-                          genreMethods.delete(genre1.id.get)
-                          genreMethods.delete(genre2.id.get)
-                          genreMethods.delete(genre3.id.get)
-                          genreMethods.delete(genre4.id.get)
-                          genreMethods.delete(genre5.id.get)
-                          genreMethods.delete(genre6.id.get)
-                          genreMethods.delete(genre7.id.get)
-                          genreMethods.delete(genre8.id.get)
-                          genreMethods.delete(genre9.id.get)
+                        whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { _ mustBe expectedGenres }
+                        whenReady(genreMethods.findOverGenres(genres), timeout(Span(5, Seconds))) { foundGenres =>
+                          foundGenres ++ genres mustBe allGenres
                         }
                       }
                     }

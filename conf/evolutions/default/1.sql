@@ -646,8 +646,8 @@ CREATE TABLE tracksFollowed (
 CREATE UNIQUE INDEX tracksFollowedIndex ON tracksFollowed (userId, trackId);
 
 CREATE TABLE eventsPlaces (
-  eventId                 BIGINT REFERENCES events (eventId),
-  placeId                 INT REFERENCES places (placeId),
+  eventId                 BIGINT REFERENCES events (eventId) ON DELETE CASCADE,
+  placeId                 INT REFERENCES places (placeId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, placeId)
 );
 CREATE OR REPLACE FUNCTION insertEventPlaceRelation(
@@ -665,15 +665,15 @@ LANGUAGE plpgsql;
 
 
 CREATE TABLE eventsGenres (
-  eventId                 INT REFERENCES events (eventId),
-  genreId                 INT REFERENCES genres (genreId),
+  eventId                 INT REFERENCES events (eventId) ON DELETE CASCADE,
+  genreId                 INT REFERENCES genres (genreId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, genreId)
 );
 
 
 CREATE TABLE eventsOrganizers (
-  eventId                 INT REFERENCES events (eventId),
-  organizerId             INT REFERENCES organizers(organizerId),
+  eventId                 INT REFERENCES events (eventId) ON DELETE CASCADE,
+  organizerId             INT REFERENCES organizers(organizerId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, organizerId)
 );
 CREATE OR REPLACE FUNCTION insertEventOrganizerRelation(
@@ -691,8 +691,8 @@ LANGUAGE plpgsql;
 
 
 CREATE TABLE eventsAddresses (
-  eventId                 INT REFERENCES events (eventId),
-  addressId               INT REFERENCES addresses(addressId),
+  eventId                 INT REFERENCES events (eventId) ON DELETE CASCADE,
+  addressId               INT REFERENCES addresses(addressId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, addressId)
 );
 
@@ -718,8 +718,8 @@ LANGUAGE plpgsql;
 
 
 CREATE TABLE eventsArtists (
-  eventId                 INT REFERENCES events (eventId),
-  artistId                INT REFERENCES artists (artistId),
+  eventId                 INT REFERENCES events (eventId) ON DELETE CASCADE,
+  artistId                INT REFERENCES artists (artistId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, artistId)
 );
 CREATE OR REPLACE FUNCTION insertEventArtistRelation(

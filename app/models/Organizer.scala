@@ -32,7 +32,7 @@ case class Organizer (id: Option[Long],
                       geographicPoint: Option[Geometry] = None,
                       linkedPlaceId: Option[Long] = None)
 
-case class OrganizerWithAddress(organizer: Organizer, address: Option[Address])
+case class OrganizerWithAddress(organizer: Organizer, address: Option[Address] = None)
 
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,
@@ -147,17 +147,16 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
         findNear(geographicPoint, numberToReturn, offset)
   }
 
-  // not used
-  def saveWithEventRelation(organizer: Organizer, eventId: Long): Future[Organizer] = save(organizer) flatMap { organizer =>
-    saveEventRelation(EventOrganizerRelation(eventId, organizer.id.get)) map {
+  def saveWithEventRelation(organizer: OrganizerWithAddress, eventId: Long): Future[OrganizerWithAddress] =
+    saveWithAddress(organizer) flatMap { savedOrganizer =>
+    saveEventRelation(EventOrganizerRelation(eventId, savedOrganizer.organizer.id.get)) map {
       case 1 =>
-        organizer
+        savedOrganizer
       case _ =>
         Logger.error("Organizer.saveWithEventRelation: not exactly one row was updated by saveEventRelation")
-        organizer
+        savedOrganizer
     }
   }
-  //
 
   def saveEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] =
     db.run(eventsOrganizers += eventOrganizerRelation)

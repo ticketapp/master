@@ -296,9 +296,9 @@ class TestOrganizerModel extends GlobalApplicationForModels {
 
     "save organizer with event relation" in {
       val geoPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get)
-      val organizer = Organizer(Option(666), Option("facebookId2"), "organizerTest2", Option("description"), None,
+      val organizer = OrganizerWithAddress(Organizer(Option(666), Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = geoPoint)
+        geographicPoint = geoPoint))
 
       val event = Event(None, None, isPublic = true, isActive = true, "name", geoPoint,
         Option("description"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None/*, List.empty,
@@ -313,8 +313,8 @@ class TestOrganizerModel extends GlobalApplicationForModels {
                 foundOrganizers.head.organizer mustBe savedOrganizer
                 foundOrganizers.size mustBe 1
 
-                organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.id.get))
-                organizerMethods.delete(savedOrganizer.id.get)
+                organizerMethods.deleteEventRelation(EventOrganizerRelation(savedEvent.id.get, savedOrganizer.organizer.id.get))
+                organizerMethods.delete(savedOrganizer.organizer.id.get)
               }
             }
           }

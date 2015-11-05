@@ -1,6 +1,7 @@
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 
+
 class TestUtilities extends GlobalApplicationForModels {
 
   "A utilities" must {
@@ -38,6 +39,10 @@ class TestUtilities extends GlobalApplicationForModels {
     utilities.setToOptionString(Set.empty) mustBe None
     utilities.setToOptionString(Set("a")) mustBe Some("a")
     utilities.setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
+  }
+
+  "convert a string to a datetime" in {
+    utilities.stringToDateTime("2015-06-05T19:30:00+0200").getHourOfDay mustBe 19
   }
 
   "return a list of normalized websites from a text" in {

@@ -3,8 +3,9 @@ package models
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Geometry
-import json.JsonHelper._
+import controllers.WebServiceException
 import org.joda.time.DateTime
+import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
@@ -17,6 +18,9 @@ import silhouette.DBTableDefinitions
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
+import play.api.libs.json.Reads._
+
+import scala.util.{Success, Failure, Try}
 
 
 case class Event(id: Option[Long],
@@ -28,14 +32,14 @@ case class Event(id: Option[Long],
                  description: Option[String],
                  startTime: DateTime,
                  endTime: Option[DateTime],
-                 ageRestriction: Int,
-                 tariffRange: Option[String],
-                 ticketSellers: Option[String],
+                 ageRestriction: Int = 16,
+                 tariffRange: Option[String] = None,
+                 ticketSellers: Option[String] = None,
                  imagePath: Option[String])
 
 case class EventWithRelations(event: Event,
-                              organizers: Seq[Organizer] = Vector.empty,
-                              artists: Seq[Artist] = Vector.empty,
+                              organizers: Seq[OrganizerWithAddress] = Vector.empty,
+                              artists: Seq[ArtistWithWeightedGenres] = Vector.empty,
                               places: Seq[Place] = Vector.empty,
                               genres: Seq[Genre] = Vector.empty,
                               addresses: Seq[Address] = Vector.empty)
@@ -46,7 +50,9 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val artistMethods: ArtistMethods,
                              val tariffMethods: TariffMethods,
                              val genreMethods: GenreMethods,
+                             val placeMethods: PlaceMethods,
                              val geographicPointMethods: SearchGeographicPoint,
+                             val addressMethods: AddressMethods,
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
@@ -94,7 +100,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         case ((_, _), _, _, _, Some((_, address: Address))) => address
       }
 
-      EventWithRelations(event, organizers, artists, places, genres, addresses)
+      EventWithRelations(
+        event,
+        organizers map (OrganizerWithAddress(_)),
+        artists map (ArtistWithWeightedGenres(_)),
+        places,
+        genres,
+        addresses)
     }.toVector
   }
 
@@ -262,30 +274,30 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-    def findAllByOrganizer(organizerId: Long): Future[Seq[EventWithRelations]] = {
-      val now = DateTime.now()
-      val twelveHoursAgo = now.minusHours(12)
+  def findAllByOrganizer(organizerId: Long): Future[Seq[EventWithRelations]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
 
-      val query = for {
-        organizer <- organizers if organizer.id === organizerId
-        eventOrganizer <- eventsOrganizers if eventOrganizer.organizerId === organizer.id
-        (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-          optionalEventAddresses) <- events
-          .filter(event => ((event.endTime.nonEmpty && event.endTime > now)
-            || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
-          .sortBy(_.startTime.desc) joinLeft
-            (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
-            (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
-            (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
-            (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
-            (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    val query = for {
+      organizer <- organizers if organizer.id === organizerId
+      eventOrganizer <- eventsOrganizers if eventOrganizer.organizerId === organizer.id
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        optionalEventAddresses) <- events
+        .filter(event => ((event.endTime.nonEmpty && event.endTime > now)
+          || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
+        .sortBy(_.startTime.desc) joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
 
-        if eventWithOptionalEventOrganizers._1.id === eventOrganizer.eventId
-      } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
-          optionalEventAddresses)
+      if eventWithOptionalEventOrganizers._1.id === eventOrganizer.eventId
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-      db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
-    }
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+  }
 
   def findAllPassedByOrganizer(organizerId: Long): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
@@ -405,66 +417,46 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def findAllByCityPattern(cityPattern: String): Future[Seq[EventWithRelations]] = {
-//        """SELECT e.* FROM eventsAddresses eA
-//          | INNER JOIN events e ON e.eventId = eA.eventId AND
-//          |  (e.endTime IS NOT NULL AND e.endTime > CURRENT_TIMESTAMP
-//          |    OR e.endTime IS NULL AND e.startTime > CURRENT_TIMESTAMP - interval '12 hour')
-//          | INNER JOIN addresses a ON a.addressId = eA.addressId
-//          |   WHERE a.city LIKE '%'||{patternLowCase}||'%'
-//          |LIMIT 50""".stripMargin)
-//        .on('patternLowCase -> cityPattern.toLowerCase)
-//
-//    val query =
-    //    .map(getPropertiesOfEvent)
-    Future { Seq.empty }
+    val lowercasePattern = cityPattern.toLowerCase
+
+    val query = for {
+      address <- addresses.filter(_.city.toLowerCase like s"%$lowercasePattern%")
+      eventAddress <- eventsAddresses if eventAddress.addressId === address.id
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events
+        .take(50) joinLeft (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+
+      if  eventWithOptionalEventOrganizers._1.id === eventAddress.eventId
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
+
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def save(eventWithRelations: EventWithRelations): Future[Event] =
-    db.run((for {
-      eventFound <- events.filter(_.facebookId === eventWithRelations.event.facebookId).result.headOption
-      result <- eventFound.map(DBIO.successful).getOrElse(events returning events.map(_.id) += eventWithRelations.event)
-    } yield result match {
-        case e: Event =>
-          e
-//          organizerMethods.saveEventRelations(EventOrganizerRelation(e.id.get, eventWithRelations.organizers))
-        case id: Long => eventWithRelations.event.copy(id = Option(id))
-      }).transactionally)
-  /*
-  def save(event: Event): Option[Long] = try {
-    DB.withConnection { implicit connection =>
-      SQL(
-        s"""SELECT insertEvent({facebookId}, {isPublic}, {isActive}, {name}, {geographicPoint}, {description},
-           |{startTime}, {endTime}, {imagePath}, {ageRestriction}, {tariffRange}, {ticketSellers})""".stripMargin)
-        .on(
-          'facebookId -> event.facebookId,
-          'isPublic -> event.isPublic,
-          'isActive -> event.isActive,
-          'name -> event.name,
-          'geographicPoint -> event.geographicPoint,
-          'description -> event.description,
-          'startTime -> event.startTime,
-          'endTime -> event.endTime,
-          'imagePath -> event.imagePath,
-          'ageRestriction -> event.ageRestriction,
-          'tariffRange -> event.tariffRange,
-          'ticketSellers -> event.ticketSellers)
-        .as(scalar[Option[Long]].single) match {
-        case None =>
-          Logger.error("Event.save: event could not be saved")
-          None
-        case Some(eventId: Long) =>
-//          event.organizers.foreach { organizer => organizerMethods.saveWithEventRelation(organizer, eventId) }
-          event.tariffs.foreach { tariff => Tariff.save(tariff.copy(eventId = eventId)) }
-          event.artists.foreach { artist => Artist.saveWithEventRelation(artist, eventId) }
-          event.genres.foreach { genre => Genre.saveWithEventRelation(genre, eventId) }
-          event.addresses.foreach { address => Address.saveAddressAndEventRelation(address, eventId) }
-          Option(eventId)
-      }
-    }
-  } catch {
-    case e: Exception => throw new DAOException("Event.save: " + e.getMessage)
+  def save(eventWithRelations: EventWithRelations): Future[Event] = db.run((for {
+    eventFound <- events.filter(_.facebookId === eventWithRelations.event.facebookId).result.headOption
+    result <- eventFound.map(DBIO.successful).getOrElse(events returning events.map(_.id) += eventWithRelations.event)
+  } yield result match {
+    case e: Event =>
+      saveEventRelations(eventWithRelations, e.id.get)
+      e
+    case id: Long =>
+      saveEventRelations(eventWithRelations, id)
+      eventWithRelations.event.copy(id = Option(id))
+  }).transactionally)
+
+  def saveEventRelations(eventWithRelations: EventWithRelations, eventId: Long): Future[Any] = Future {
+    eventWithRelations.genres map(genre => genreMethods.saveWithEventRelation(genre, eventId))
+    eventWithRelations.artists map(artist => artistMethods.saveWithEventRelation(artist, eventId))
+    eventWithRelations.organizers map(organizer => organizerMethods.saveWithEventRelation(organizer, eventId))
+    eventWithRelations.places map(places => placeMethods.saveWithEventRelation(places, eventId))
+    eventWithRelations.addresses map(address => addressMethods.saveWithEventRelation(address, eventId))
   }
-*/
+
   def delete(id: Long): Future[Int] = db.run(events.filter(_.id === id).delete)
 
   def update(event: Event): Future[Int] = db.run(events.filter(_.id === event.id).update(event))
@@ -481,101 +473,106 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[EventWithRelations] = {
+  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[EventWithRelations] =
     WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + eventFacebookId)
       .withQueryString(
         "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
         "access_token" -> utilities.facebookToken)
       .get()
-      .flatMap { readFacebookEvent }
-  }
+      .flatMap { facebookEventToEventWithRelations }
 
-  def readFacebookEvent(eventFacebookResponse: WSResponse): Future[EventWithRelations] = {
-    val eventRead: Reads[Future[EventWithRelations]] = (
-      (__ \ "description").readNullable[String] and
-        (__ \ "cover" \ "source").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "id").readNullable[String] and
-        (__ \ "start_time").readNullable[String] and
-        (__ \ "endTime").readNullable[String] and
-        (__ \ "venue" \ "street").readNullable[String] and
-        (__ \ "venue" \ "zip").readNullable[String] and
-        (__ \ "venue" \ "city").readNullable[String] and
-        (__ \ "owner" \ "id").readNullable[String] and
-        (__ \ "place" \ "id").readNullable[String]
-      )((maybeDescription: Option[String], source: String, name: String, facebookId: Option[String],
-         startTime: Option[String], endTime: Option[String], street: Option[String], zip: Option[String],
-         city: Option[String], maybeOwnerId: Option[String], maybePlaceId: Option[String]) => {
+  case class MaybeOwnerAndPlaceIds(maybeOwnerId: Option[String], maybePlaceId: Option[String])
 
-      val eventuallyOrganizer = organizerMethods.getOrganizerInfo(maybeOwnerId)
-      val address = new Address(None, None, city, zip, street)
+  def readFacebookEvent: Reads[(EventWithRelations, MaybeOwnerAndPlaceIds)] = (
+    (__ \ "description").readNullable[String] and
+      (__ \ "cover" \ "source").readNullable[String] and
+      (__ \ "name").read[String] and
+      (__ \ "id").readNullable[String] and
+      (__ \ "start_time").read[String] and
+      (__ \ "endTime").readNullable[String] and
+      (__ \ "venue" \ "street").readNullable[String] and
+      (__ \ "venue" \ "zip").readNullable[String] and
+      (__ \ "venue" \ "city").readNullable[String] and
+      (__ \ "owner" \ "id").readNullable[String] and
+      (__ \ "place" \ "id").readNullable[String]
+    )((maybeDescription: Option[String], source: Option[String], name: String, facebookId: Option[String],
+       startTime: String, endTime: Option[String], street: Option[String], zip: Option[String],
+       city: Option[String], maybeOwnerId: Option[String], maybePlaceId: Option[String]) => {
 
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!
-      val eventuallyTryPlace = None//placeMethods.getPlaceByFacebookId(maybePlaceId)
+    val event = Event(
+      id = None,
+      facebookId = facebookId,
+      isPublic = true,
+      isActive = true,
+      name = utilities.refactorEventOrPlaceName(name),
+      geographicPoint = None,
+      description = utilities.formatDescription(maybeDescription),
+      startTime = utilities.stringToDateTime(startTime),
+      endTime = utilities.optionStringToOptionDateTime(endTime),
+      imagePath = source,
+      tariffRange = tariffMethods.findPrices(maybeDescription))
 
-      val eventuallyNormalizedWebsites: Future[Set[String]] = maybeDescription match {
-        case Some(description) => utilities.getNormalizedWebsitesInText(description)
-        case None => Future(Set.empty)
-      }
+    val eventWithRelations = EventWithRelations(
+      event = event,
+      addresses = Vector(Address(id = None, geographicPoint = None, street = street, zip = zip, city = city)))
 
-      for {
-        organizer <- eventuallyOrganizer
-        normalizedWebsites <- eventuallyNormalizedWebsites
-        artistsFromDescription <- artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
-        eventuallyMaybeArtistsFromTitle <- artistMethods.getEventuallyArtistsInEventTitle(name, normalizedWebsites)
-//        optionPlace <- eventuallyTryPlace
-      } yield {
-        val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
+    val maybeOwnerIdAndMaybePlaceId = MaybeOwnerAndPlaceIds(maybeOwnerId, maybePlaceId)
 
-//        val nonEmptyArtists = (artistsFromDescription.flatten.toList ++ artistsFromTitle).distinct
-//        artistMethods.saveArtistsAndTheirTracks(nonEmptyArtists map { _.artist })
+    (eventWithRelations, maybeOwnerIdAndMaybePlaceId)
+  })
 
-        val normalizedStartTime: DateTime = startTime match {
-          case Some(matchedDate) =>
-            utilities.stringToDateTime(matchedDate)
-          case None =>
-          new DateTime()
-        }
+  def facebookEventResponseToEventWithRelations(eventFacebookResponse: WSResponse): Try[(EventWithRelations, MaybeOwnerAndPlaceIds)] = {
+    val eventReadResult: JsResult[(EventWithRelations, MaybeOwnerAndPlaceIds)] =
+      eventFacebookResponse.json.validate[(EventWithRelations, MaybeOwnerAndPlaceIds)](readFacebookEvent)
 
-        val normalizedEndTime = endTime match {
-          case Some(matchedDate) =>
-            Option(utilities.stringToDateTime(matchedDate))
-          case None => None
-        }
-
-//        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        val eventGenres = (nonEmptyArtists.flatMap(_.genres) ++
-//          nonEmptyArtists.flatMap(artist => genreMethods.findOverGenres(artist.genres))).distinct
-
-        val event = EventWithRelations(
-          event = Event(None, facebookId, isPublic = true, isActive = true, utilities.refactorEventOrPlaceName(name), None,
-            utilities.formatDescription(maybeDescription), normalizedStartTime/*,
-            formatDate(endTime)*/, normalizedEndTime, 16, tariffMethods.findPrices(maybeDescription), ticketSellers, Option(source)),
-          genres = Vector.empty)
-
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        savePlaceEventRelationIfPossible(optionPlace, event)
-        event
-      }
-    })
-    try {
-      eventFacebookResponse.json.as[Future[EventWithRelations]](eventRead)
-    } catch {
-      case e: Exception => throw new Exception("Empty event read by Event.readFacebookEvent" + e.getMessage)
+    eventReadResult match {
+      case s: JsSuccess[(EventWithRelations, MaybeOwnerAndPlaceIds)] =>
+        Success(eventFacebookResponse.json.as[(EventWithRelations, MaybeOwnerAndPlaceIds)](readFacebookEvent))
+      case e: JsError =>
+        Logger.error("Event.facebookEventResponseToEventWithRelations: " + e)
+        Failure(WebServiceException("Event.facebookEventResponseToEventWithRelations: " ))
     }
   }
 
-//  def savePlaceEventRelationIfPossible(optionPlace: Option[Place], event: Event): Unit = {
-//    optionPlace match {
-//      case Some(place) =>
-//        place.id match {
-//          case Some(id) => saveEventWithGeographicPointAndPlaceRelation(event, id, place.geographicPoint)
-//          case None => Logger.error("Event.readFacebookEvent: place without id found")
-//        }
-//      case None =>
-//        Logger.error("Event.readFacebookEvent: the place is in error")
-//    }
-//  }
+  def facebookEventToEventWithRelations(eventFacebookResponse: WSResponse): Future[EventWithRelations] = {
+    val eventWithRelationsAndMaybePlaceAndOwnerIds = facebookEventResponseToEventWithRelations(eventFacebookResponse).get
+
+    val eventWithRelations = eventWithRelationsAndMaybePlaceAndOwnerIds._1
+
+    val eventuallyMaybeOrganizer = organizerMethods.getOrganizerInfo(eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybeOwnerId)
+
+    val eventuallyMaybePlace: Future[Option[Place]] = eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybePlaceId match {
+      case Some(placeId) => placeMethods.getPlaceByFacebookId(placeId) map (Option(_))
+      case None => Future(None)
+    }
+
+    val eventuallyNormalizedWebsites: Future[Set[String]] = eventWithRelations.event.description match {
+      case Some(description) => utilities.getNormalizedWebsitesInText(description)
+      case None => Future(Set.empty)
+    }
+
+    for {
+      organizer <- eventuallyMaybeOrganizer
+      normalizedWebsites <- eventuallyNormalizedWebsites
+      artistsFromDescription <- artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
+      artistsFromTitle <- artistMethods.getEventuallyArtistsInEventTitle(
+        eventWithRelationsAndMaybePlaceAndOwnerIds._1.event.name, normalizedWebsites)
+      maybePlace <- eventuallyMaybePlace
+      nonEmptyArtists = (artistsFromDescription.toVector ++ artistsFromTitle).distinct
+      artistGenres = nonEmptyArtists.flatMap(_.genres map (_.genre))
+      overGenres <-genreMethods.findOverGenres(artistGenres)
+      genres = (artistGenres ++ overGenres).distinct
+    } yield {
+
+      val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
+
+      eventWithRelations.copy(
+        event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
+        artists = nonEmptyArtists,
+        organizers = Vector(organizer).flatten,
+        genres = genres)
+    }
+  }
 
   def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = {
     WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")

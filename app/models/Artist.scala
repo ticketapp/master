@@ -31,7 +31,7 @@ case class Artist(id: Option[Long],
                   likes: Option[Int] = None,
                   country: Option[String] = None)
 
-case class ArtistWithWeightedGenres(artist: Artist, genres: Seq[GenreWithWeight])
+case class ArtistWithWeightedGenres(artist: Artist, genres: Seq[GenreWithWeight] = Seq.empty)
 
 case class GenreWithWeight(genre: Genre, weight: Int = 1)
 
@@ -97,7 +97,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val query = for {
       genre <- genres if genre.name === genreName
       artistGenre <- artistsGenres if artistGenre.genreId === genre.id
-      artist <- artists if artist.id === artistGenre.artistId 
+      artist <- artists if artist.id === artistGenre.artistId
     } yield artist
 
     db.run(query.drop(offset).take(numberToReturn).result) map { _.toVector }
@@ -242,18 +242,27 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         Future(0)
   }
 
-  def saveWithEventRelation(artist: Artist, eventId: Long): Future[Artist] = save(ArtistWithWeightedGenres(artist, Vector.empty)) flatMap { artist =>
-    saveEventRelation(EventArtistRelation(eventId, artist.id.getOrElse(0))) map {
+  def saveWithEventRelation(artist: ArtistWithWeightedGenres, eventId: Long): Future[Artist] = save(artist) flatMap { savedArtist =>
+    saveEventRelation(EventArtistRelation(eventId, savedArtist.id.getOrElse(0))) map {
       case 1 =>
-        artist
+        savedArtist
       case _ =>
-        Logger.error(s"Artist.saveWithEventRelation: not exactly one row saved by Artist.saveEventRelation for artist $artist and eventId $eventId")
-        artist
+        Logger.error(s"Artist.saveWithEventRelation: not exactly one row saved by Artist.saveEventRelation for artist $savedArtist and eventId $eventId")
+        savedArtist
     }
   }
 
-  def saveEventRelation(eventArtistRelation: EventArtistRelation): Future[Int] =
+  def saveEventRelation(eventArtistRelation: EventArtistRelation): Future[Int] = 
     db.run(eventsArtists += eventArtistRelation)
+
+  def saveEventRelations(eventArtistRelations: Seq[EventArtistRelation]): Future[Boolean] =
+    db.run(eventsArtists ++= eventArtistRelations) map { _ =>
+      true
+    } recover {
+      case e: Exception =>
+        Logger.error("Artist.saveEventRelations: ", e)
+        false
+    }
 
   def deleteEventRelation(eventArtistRelation: EventArtistRelation): Future[Int] = db.run(
     eventsArtists
@@ -317,36 +326,38 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def filterFacebookArtistsForEvent(artists: Seq[ArtistWithWeightedGenres], artistName: String, eventWebsites: Set[String]): Seq[ArtistWithWeightedGenres] =
-    artists match {
+  def filterFacebookArtistsForEvent(artists: Seq[ArtistWithWeightedGenres], artistName: String, eventWebsites: Set[String])
+  : Seq[ArtistWithWeightedGenres] = artists match {
     case onlyOneArtist: Seq[ArtistWithWeightedGenres] if onlyOneArtist.size == 1 &&
       onlyOneArtist.head.artist.name.toLowerCase == artistName =>
         onlyOneArtist
+
     case otherCase: Seq[ArtistWithWeightedGenres] =>
       val artists = otherCase.flatMap { artist: ArtistWithWeightedGenres =>
         if ((artist.artist.websites intersect eventWebsites).nonEmpty) Option(artist)
         else None
       }
       artists
+
+    case _  =>
+      artists
   }
 
-  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[ArtistWithWeightedGenres]] = {
-    Future.sequence(
-      websites.map {
-        case website if website contains "facebook" =>
-          getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
-        case website if website contains "soundcloud" =>
-          getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
-            case None =>
-              Future { None }
-            case Some(facebookUrl) =>
-              getFacebookArtistByFacebookUrl(facebookUrl).map { maybeFacebookArtist => maybeFacebookArtist }
-          }
-        case _ =>
-          Future { None }
-      }
-    ) map(_.flatten)
-  }
+  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[ArtistWithWeightedGenres]] = Future.sequence(
+    websites.map {
+      case website if website contains "facebook" =>
+        getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
+      case website if website contains "soundcloud" =>
+        getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
+          case None =>
+            Future { None }
+          case Some(facebookUrl) =>
+            getFacebookArtistByFacebookUrl(facebookUrl).map { maybeFacebookArtist => maybeFacebookArtist }
+        }
+      case _ =>
+        Future { None }
+    }
+  ) map(_.flatten)
 
   def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
@@ -372,10 +383,11 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def normalizeFacebookUrl(facebookUrl: String): String = {
+  def normalizeFacebookUrl(facebookUrl: String): Option[String] = {
     val firstNormalization = facebookUrl.toLowerCase match {
       case urlWithProfile: String if urlWithProfile contains "profile.php?id=" =>
         Option(urlWithProfile.substring(urlWithProfile.lastIndexOf("=") + 1))
+
       case alreadyNormalizedUrl: String =>
         if (alreadyNormalizedUrl.indexOf("facebook.com/") > -1) {
           val normalizedUrl = alreadyNormalizedUrl.substring(alreadyNormalizedUrl.indexOf("facebook.com/") + 13)
@@ -385,30 +397,33 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
               case Some(id) => Option(id.replace("/", ""))
               case None => None
             }
-          } else if (normalizedUrl.indexOf("/") > -1) {
-            Option(normalizedUrl.take(normalizedUrl.indexOf("/")))
-          } else {
-            Option(normalizedUrl)
-          }
-        } else {
-          Option(alreadyNormalizedUrl)
-        }
+          } else if (normalizedUrl.indexOf("/") > -1) Option(normalizedUrl.take(normalizedUrl.indexOf("/")))
+            else Option(normalizedUrl)
+        } else Option(alreadyNormalizedUrl)
+      case _ =>
+        None
     }
+
     firstNormalization match {
       case Some(urlWithArguments) if urlWithArguments contains "?" =>
-        urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?"))
+        Option(urlWithArguments.slice(0, urlWithArguments.lastIndexOf("?")))
       case Some(urlWithoutArguments) =>
-        urlWithoutArguments
+        Option(urlWithoutArguments)
+      case _ =>
+        None
     }
   }
 
-  def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenres]] = {
-    WS.url("https://graph.facebook.com/"+ facebookApiVersion + "/" + normalizeFacebookUrl(url))
-     .withQueryString(
-       "fields" -> facebookArtistFields,
-       "access_token" -> facebookToken)
-     .get()
-     .flatMap(readFacebookArtist)
+  def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenres]] =  normalizeFacebookUrl(url) match {
+    case Some(normalizedFacebookUrl) =>
+      WS.url("https://graph.facebook.com/"+ facebookApiVersion + "/" + normalizeFacebookUrl(url))
+       .withQueryString(
+         "fields" -> facebookArtistFields,
+         "access_token" -> facebookToken)
+       .get()
+       .flatMap(readFacebookArtist)
+    case _ =>
+      Future(None)
   }
 
   val readArtist = (
@@ -503,8 +518,6 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
 
   def addWebsitesFoundOnSoundCloud(track: Track, artist: Artist): Future[Seq[String]] = track.redirectUrl match {
-    case None =>
-      Future(Seq.empty)
     case Some(redirectUrl) =>
       val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).substring("soundcloud.com/".length)
       WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
@@ -522,5 +535,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         }
         readSoundCloudWebsites(soundCloudResponse)
       }
+    case _ =>
+      Future(Seq.empty)
   }
 }
