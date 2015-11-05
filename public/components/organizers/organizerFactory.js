@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsFactory', 'StoreRequest',
-    'InfoModal', 'RoutesFactory',
-    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory){
+    'InfoModal', 'RoutesFactory', 'RefactorObjectsFactory',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory, RefactorObjectsFactory){
     var factory = {
         organizers : false,
         lastOrganizer: {id: '', organizer: {}},
@@ -28,10 +28,13 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastOrganizerEvents.events);
             } else {
                 $http.get('/organizers/' + id + '/events').
-                    success(function(data, status, headers, config) {
+                    success(function(events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
                         factory.lastOrganizerEvents.id = id;
-                        data.forEach(EventsFactory.colorEvent);
-                        factory.lastOrganizerEvents.events = data;
+                        events.forEach(EventsFactory.colorEvent);
+                        factory.lastOrganizerEvents.events = events;
                         deferred.resolve(factory.lastOrganizerEvents.events);
                     })
             }
@@ -147,9 +150,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastGetPlaceEvents.events);
             } else {
                 $http.get('/places/' + id + '/events').
-                    success(function(data, status, headers, config) {
-                        data.forEach(EventsFactory.colorEvent);
-                        factory.lastGetPlaceEvents.events = data;
+                    success(function(events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(EventsFactory.colorEvent);
+                        factory.lastGetPlaceEvents.events = events;
                         factory.lastGetPlaceEvents.id = id;
                         deferred.resolve(factory.lastGetPlaceEvents.events);
                     })
@@ -163,9 +169,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastGetPassedEvents.events);
             } else {
                 $http.get(RoutesFactory.organizers.getOrganizersPassedEvents(id)).
-                    success(function(data, status, headers, config) {
-                        data.forEach(EventsFactory.colorEvent);
-                        factory.lastGetPassedEvents.events = data;
+                    success(function(events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(EventsFactory.colorEvent);
+                        factory.lastGetPassedEvents.events = events;
                         factory.lastGetPassedEvents.id = id;
                         deferred.resolve(factory.lastGetPassedEvents.events);
                     })

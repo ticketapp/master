@@ -2,7 +2,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
     function ($scope, UserFactory, InfoModal, SearchFactory) {
 
         $scope.isFollowedPlace = function (place) {
-            UserFactory.getIsFollowedPlace(place.placeId).then(function (isFollowed) {
+            UserFactory.getIsFollowedPlace(place.id).then(function (isFollowed) {
                 if (isFollowed == true || isFollowed == false) {
                     place.isFollowed = isFollowed;
                 }
@@ -10,7 +10,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.followPlace = function (place) {
-            UserFactory.followPlaceByPlaceId(place.placeId, place.name).then(function (follow) {
+            UserFactory.followPlaceByPlaceId(place.id, place.name).then(function (follow) {
                 if (follow != 'error') {
                     place.isFollowed = true;
                     InfoModal.displayInfo('Vous suivez ' + place.name)
@@ -19,7 +19,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.unfollowPlace = function (place) {
-            UserFactory.unfollowPlace(place.placeId, place.name).then(function (follow) {
+            UserFactory.unfollowPlace(place.id, place.name).then(function (follow) {
                 if (follow != 'error') {
                     place.isFollowed = false;
                     InfoModal.displayInfo('Vous ne suivez plus ' + place.name)
@@ -28,7 +28,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.isFollowedArtist = function (artist) {
-            UserFactory.ArtistIsFollowed(artist.artistId).then(function (isFollowed) {
+            UserFactory.ArtistIsFollowed(artist.id).then(function (isFollowed) {
                 if (isFollowed == true || isFollowed == false) {
                     artist.isFollowed = isFollowed;
                 }
@@ -36,7 +36,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.followArtist = function (artist) {
-            UserFactory.followArtistByArtistId(artist.artistId, artist.name).then(function (follow) {
+            UserFactory.followArtistByArtistId(artist.id, artist.name).then(function (follow) {
                 if (follow != 'error') {
                     artist.isFollowed = true;
                     InfoModal.displayInfo('Vous suivez ' + artist.name)
@@ -45,7 +45,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.unfollowArtist = function (artist) {
-            UserFactory.unfollowArtist(artist.artistId, artist.name).then(function (follow) {
+            UserFactory.unfollowArtist(artist.id, artist.name).then(function (follow) {
                 if (follow != 'error') {
                     artist.isFollowed = false;
                     InfoModal.displayInfo('Vous ne suivez plus ' + artist.name)
@@ -54,7 +54,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.isFollowedOrganizer = function (organizer) {
-            UserFactory.getIsFollowedOrganizer(organizer.organizerId).then(function (isFollowed) {
+            UserFactory.getIsFollowedOrganizer(organizer.id).then(function (isFollowed) {
                 if (isFollowed == true || isFollowed == false) {
                     organizer.isFollowed = isFollowed;
                 }
@@ -62,7 +62,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.followOrganizer = function (organizer) {
-            UserFactory.followOrganizerByOrganizerId(organizer.organizerId, organizer.name).then(function (follow) {
+            UserFactory.followOrganizerByOrganizerId(organizer.id, organizer.name).then(function (follow) {
                 if (follow != 'error') {
                     organizer.isFollowed = true;
                     InfoModal.displayInfo('Vous suivez ' + organizer.name)
@@ -71,7 +71,7 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
         };
 
         $scope.unfollowOrganizer = function (organizer) {
-            UserFactory.unfollowOrganizer(organizer.organizerId, organizer.name).then(function (follow) {
+            UserFactory.unfollowOrganizer(organizer.id, organizer.name).then(function (follow) {
                 if (follow != 'error') {
                     organizer.isFollowed = false;
                     InfoModal.displayInfo('Vous ne suivez plus ' + organizer.name)
