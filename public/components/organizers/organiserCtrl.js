@@ -27,7 +27,6 @@ angular.module('claudeApp').
                 $scope.websites = WebsitesFactory.normalizeWebsitesObject([],
                     organizer.facebookId);
             }
-            console.log(organizer);
             /*
             if (organizer.placeId !== undefined) {
                 OrganizerFactory.getPlaceEvents(organizer.placeId).then(function (events) {

@@ -1,7 +1,7 @@
 <div class="column large-12 arTrack">
     <i class="fa fa-star absolute pointer left"
        ng-if="!track.isFavorite || $root.connected == false"
-       ng-click="addTrackToFavorite(track.id); track.isFavorite = true"
+       ng-click="addTrackToFavorite(track); track.isFavorite = true"
             style="margin: 5px">
         <md-track-tooltipe>
             Ajouter aux favoris
@@ -10,7 +10,7 @@
     <i class="fa fa-star absolute pointer favoriteActive left"
        ng-if="track.isFavorite && $root.connected == true"
        style="margin: 5px"
-       ng-click="removeFromFavorites(track.id); track.isFavorite = false">
+       ng-click="removeFromFavorites(track.uuid); track.isFavorite = false">
         <md-track-tooltipe>
             Supprimer des favoris
         </md-track-tooltipe>
@@ -18,7 +18,7 @@
     <div class="column small-1 padding0 text-center float-right"
          style="border-left:solid 1px rgba(0, 0, 0, 0.45);  height:70px; margin-top: 10px">
         <i class="fa fa-exclamation column medium-12 padding0 pointer"
-           ng-click="signalTrack(track.id, $index)"
+           ng-click="signalTrack(track.uuid, $index)"
            style="line-height: 24.66px"
                 >
             <md-track-tooltipe class="right">
@@ -26,14 +26,14 @@
             </md-track-tooltipe>
         </i>
         <i class="fa fa-play column medium-12 padding0 pointer"
-           ng-click="$root.addAndPlay([track], artist)"
+           ng-click="$root.addAndPlay([track])"
            style="line-height: 24.66px">
             <md-track-tooltipe class="right">
                 Lire
             </md-track-tooltipe>
         </i>
         <i class="fa fa-plus column medium-12 padding0 pointer"
-           ng-click="$root.addToPlaylist([track], artist)"
+           ng-click="$root.addToPlaylist([track])"
            style="line-height: 24.66px">
             <md-track-tooltipe class="right">
                 Ajouter à la lecture en cours
@@ -45,7 +45,7 @@
          style="background-image: url('{{track.thumbnailUrl}}');"
          ng-class="{'padding0 margin0': $root.window == 'small'}">
         <i class="fi-play playInImg"
-           ng-click="$root.addToPlaylist([track], artist)">
+           ng-click="$root.addToPlaylist([track])">
             <md-track-tooltipe>
                 Ajouter à la lecture en cours
             </md-track-tooltipe>
