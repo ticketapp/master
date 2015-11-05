@@ -6,9 +6,8 @@ angular.module('claudeApp').controller('contactCtrl', ['$scope', '$http', 'Store
         $http.post('/mails', {subject: message.subject, message: message.content}).
             success(function () {
                 InfoModal.displayInfo('votre message à bien été posté');
-            }).
-            error(function (data) {
-                if (data.error == 'Credentials required') {
+            }).error(function (data, status) {
+                if (status === 401) {
                     var object = {subject: message.subject, message: message.content};
                     StoreRequest.storeRequest('post', '/mails', object, 'votre message à bien été posté');
                 } else {
