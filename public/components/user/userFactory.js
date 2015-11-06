@@ -90,7 +90,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         },
         getFavoritesTracks: function () {
             var deferred = $q.defer();
-            if (factory.user.favoritesTracks != false) {
+            if (factory.user.favoritesTracks.length > 0) {
                 deferred.resolve(factory.user.favoritesTracks);
             } else {
                 $http.get('/tracks/favorites').

@@ -13,12 +13,12 @@ angular.module('claudeApp').factory('RoutesFactory', function () {
                 return '/organizers/' + organizerId + '/passedEvents';
             },
             getFollowedOrganizers: function () {
-                return '/organizers/followed/';
+                return '/organizers/followed';
             }
         },
         user : {
             getRemovedTracks : function () {
-                return '/users/tracksRemoved/'
+                return '/users/tracksRemoved'
             }
         }
     };

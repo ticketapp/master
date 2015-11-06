@@ -22,16 +22,17 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 
         if ($rootScope.connected == true) {
-            UserFactory.getRemovedTracks().then(function (trackIds) {
-                var tracksLength = trackIds.length;
+            UserFactory.getRemovedTracks().then(function (uuids) {
+                var tracksLength = uuids.length;
                 for (var i = 0; i < tracksLength; i++) {
-                    $localStorage.tracksSignaled.push(trackIds[i])
+                    $localStorage.tracksSignaled.push(uuids[i])
                 }
             })
         }
 
         function signaledTrack (track) {
-            if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
+            console.log($localStorage.tracksSignaled)
+            if ($filter('filter')($localStorage.tracksSignaled, {trackId: track.uuid}).length === 0) {
                 return track;
             }
         }
@@ -47,9 +48,11 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 
         function setFavorite (track) {
-            if (UserFactory.user.favoritesTracks.indexOf(track.trackId) > -1) {
-                track.isFavorite = true;
-            }
+            UserFactory.getFavoritesTracks().then(function (favoritesTracks) {
+                if ($filter('filter')(favoritesTracks, {uuid: track.uuid}).length > 0) {
+                    track.isFavorite = true;
+                }
+            })
         }
 
         function normalizeWebsites(artist) {
@@ -149,9 +152,9 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             })
         };
 
-        $scope.closeTrack = function (index) {
+        $scope.closeTrack = function (index, trackId) {
             for (var i = 0; i < $scope.tracks.length; i++) {
-                if ($scope.tracks[i].trackId == $scope.artist.tracks[index].trackId) {
+                if ($scope.tracks[i].uuid === trackId) {
                     $scope.tracks.splice(i, 1);
                 }
             }
