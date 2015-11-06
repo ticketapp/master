@@ -41,9 +41,8 @@ libraryDependencies ++= Seq(
   "com.vividsolutions" % "jts" % "1.13",
   "com.mohiva" %% "play-silhouette-testkit" % "3.0.2" % "test",
   specs2 % Test,
-  "com.github.docker-java" % "docker-java" % "1.4.0"/*,
-  "me.lessis" %% "undelay" % "0.1.0",
-  "me.lessis" %% "odelay-core" % "0.1.0"*/
+  "com.github.docker-java" % "docker-java" % "1.4.0",
+  "com.zaxxer" % "HikariCP" % "2.4.1"
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
