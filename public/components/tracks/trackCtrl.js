@@ -18,7 +18,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                     'Attention, en signalant ce morceau il sera supprimé des morceaux que Claude ' +
                     'vous proppose</b>' +
                     '<select ng-model="reason">'+
-                    '<option value="B">Mauvais Artist</option>'+
+                    '<option value="B">Mauvais artiste</option>'+
                     '<option value="Q">Mauvaise qualitée</option>'+
                     '</select><b class="column large-12">{{error}}</b>'+
                     '<input type="submit" class="button">'+
