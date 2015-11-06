@@ -71,6 +71,8 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                     factory.infos.push({content: $sce.trustAsHtml(info), title: title, artist: artist, fixedTitle: fixedTitle})
                 }
 
+                // finish it when artist have have tracks
+
                 function getEventsArtist(artist) {
                     ArtistsFactory.getArtistEvents(artist.facebookUrl).then(function (events) {
                         var info = '';
@@ -104,7 +106,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                 });
 
                 function getOrganizerEvents (organizer) {
-                    OrganizerFactory.getOrganizerEvents(organizer.organizerId).then(function (events) {
+                    OrganizerFactory.getOrganizerEvents(organizer.id).then(function (events) {
                         events = $filter('orderBy')(events, 'startTime', false);
                         var eventsLength = events.length;
                         for (var i = 0; i < eventsLength; i ++) {
@@ -131,7 +133,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                 }
 
                 function getPlaceEvents (place) {
-                    PlaceFactory.getPlaceEvents(place.placeId).then(function (events) {
+                    PlaceFactory.getPlaceEvents(place.id).then(function (events) {
                         events = $filter('orderBy')(events, 'startTime', false);
                         var eventsLength = events.length;
                         for (var i = 0; i < eventsLength; i ++) {
@@ -147,7 +149,8 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                 if (events[i].tracks.length > 0) {
                                     events[i].tracks = $filter('orderBy')(events[i].tracks, 'confidence', true);
                                     var title = 'Ecouter les playliste des événements de ' + place.name + ' avec Claude';
-                                    var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].eventId +'">'+ events[i].name + '</a>';
+                                    var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].id +'">'+
+                                        events[i].name + '</a>';
                                     events[i].name = 'La playlist de l\'événements';
                                     pushConnectedInfo(info, title, events[i], true);
                                 }
