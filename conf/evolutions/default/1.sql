@@ -7,10 +7,7 @@ CREATE TABLE infos (
   animationContent          VARCHAR,
   animationStyle            VARCHAR
 );
-INSERT INTO infos (title, content) VALUES ('Timeline', 'cs - 83 avant la bêta :) :)');
-INSERT INTO infos (title, content) VALUES ('Bienvenue', 'Jetez un oeil, ça vaut le détour');
-INSERT INTO infos (title, content) VALUES (':) :) :)', 'Déjà deux utilisateurs !!!');
-INSERT INTO infos (title, content) VALUES ('TicketApp', 'Cest simple, cest beau, ça fuse');
+
 
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
@@ -19,6 +16,7 @@ CREATE TABLE frenchCities (
 );
 CREATE INDEX frenchCityGeographicPoints ON frenchCities USING GIST (geographicPoint);
 CREATE INDEX frenchCityNames ON frenchCities (city);
+
 
 CREATE TABLE addresses (
   addressId                 SERIAL PRIMARY KEY,
@@ -29,30 +27,7 @@ CREATE TABLE addresses (
 );
 CREATE INDEX geographicPointAddresses ON addresses USING GIST (geographicPoint);
 CREATE UNIQUE INDEX addressesIndex ON addresses (city, zip, street);
-CREATE OR REPLACE FUNCTION upsertAddress(
-  geographicPointValue      VARCHAR(63),
-  cityValue                 VARCHAR(127),
-  zipValue                  VARCHAR(15),
-  streetValue               VARCHAR)
-  RETURNS INT AS
-  $$
-  DECLARE addressIdToReturn int;;
-  BEGIN
-    UPDATE addresses
-    SET geographicPoint = GEOMETRY(geographicPointValue), city = lower(cityValue), zip = lower(zipValue), street = lower(streetValue)
-    WHERE city = lower(cityValue) AND zip = lower(zipValue) AND street = lower(streetValue)
-    RETURNING addressId INTO addressIdToReturn;;
-    IF found THEN
-      RETURN addressIdToReturn;;
-    ELSE
-      INSERT INTO addresses (geographicPoint, city, zip, street)
-      VALUES (GEOMETRY(geographicPointValue), lower(cityValue), lower(zipValue), lower(streetValue))
-      RETURNING addressId INTO addressIdToReturn;;
-      RETURN addressIdToReturn;;
-    END IF;;
-  END;;
-  $$
-LANGUAGE plpgsql;
+
 
 CREATE TABLE orders ( --account701
   orderId                   SERIAL PRIMARY KEY,
@@ -73,28 +48,7 @@ CREATE TABLE artists (
   UNIQUE(facebookId),
   UNIQUE(facebookUrl)
 );
-CREATE OR REPLACE FUNCTION insertArtist(facebookIdValue VARCHAR(63),
-                                        nameValue VARCHAR(255),
-                                        imagePathValue VARCHAR,
-                                        descriptionValue VARCHAR,
-                                        facebookUrlValue VARCHAR(255),
-                                        websitesValue VARCHAR)
-  RETURNS INT AS
-  $$
-  DECLARE artistIdToReturn int;;
-  BEGIN
-    INSERT INTO artists (facebookId, name, imagePath, description, facebookUrl, websites)
-      VALUES (facebookIdValue, nameValue, imagePathValue, descriptionValue, facebookUrlValue, websitesValue)
-    RETURNING artistId INTO artistIdToReturn;;
-    RETURN artistIdToReturn;;
-    EXCEPTION WHEN unique_violation
-    THEN
-      SELECT artistId INTO artistIdToReturn FROM artists
-        WHERE facebookId = facebookIdValue OR facebookUrl = facebookUrlValue;;
-      RETURN artistIdToReturn;;
-  END;;
-  $$
-LANGUAGE plpgsql;
+
 
 CREATE TABLE organizers (
   organizerId             SERIAL PRIMARY KEY,
@@ -112,36 +66,6 @@ CREATE TABLE organizers (
   UNIQUE(facebookId)
 );
 
-CREATE OR REPLACE FUNCTION insertOrganizer(
-  facebookIdValue       VARCHAR(63),
-  nameValue             VARCHAR(255),
-  descriptionValue      VARCHAR,
-  addressIdValue        BIGINT,
-  phoneValue            VARCHAR(255),
-  publicTransitValue    VARCHAR,
-  websitesValue         VARCHAR,
-  imagePathValue        VARCHAR,
-  geographicPointValue  VARCHAR(63),
-  placeIdValue          BIGINT)
-  RETURNS INT AS
-  $$
-  DECLARE organizerIdToReturn int;;
-  BEGIN
-    INSERT INTO organizers (facebookId, name, description, addressId, phone, publicTransit, websites, imagePath,
-                            geographicPoint, placeId)
-    VALUES (facebookIdValue, nameValue, descriptionValue, addressIdValue, phoneValue, publicTransitValue,
-            websitesValue, imagePathValue, GEOMETRY(geographicPointValue), placeIdValue)
-    RETURNING organizerId
-      INTO organizerIdToReturn;;
-    RETURN organizerIdToReturn;;
-    EXCEPTION WHEN unique_violation
-      THEN
-        SELECT organizerId INTO organizerIdToReturn FROM organizers
-        WHERE facebookId = facebookIdValue;;
-      RETURN organizerIdToReturn;;
-  END;;
-  $$
-LANGUAGE plpgsql;;
 
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
@@ -149,21 +73,6 @@ CREATE TABLE genres (
   icon                    CHAR NOT NULL,
   UNIQUE(name)
 );
-CREATE OR REPLACE FUNCTION insertGenre(nameValue VARCHAR(255), iconValue VARCHAR(1)) RETURNS INT AS
-  $$
-  DECLARE genreIdToReturn int;;
-
-  BEGIN
-    INSERT INTO genres (name, icon) VALUES (nameValue, iconValue::CHAR) RETURNING genreId INTO genreIdToReturn;;
-      RETURN genreIdToReturn;;
-      EXCEPTION WHEN unique_violation
-    THEN
-      SELECT genreId INTO genreIdToReturn FROM genres
-      WHERE name = nameValue;;
-    RETURN genreIdToReturn;;
-  END;;
-  $$
-LANGUAGE plpgsql;
 
 
 CREATE TABLE tracks (
@@ -183,23 +92,6 @@ CREATE TABLE tracks (
 CREATE UNIQUE INDEX artistNameAndTitle ON tracks(title, artistName);
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
-CREATE OR REPLACE FUNCTION insertTrack(trackIdValue UUID,
-                                       titleValue VARCHAR(255),
-                                       urlValue VARCHAR,
-                                       platformValue CHAR,
-                                       thumbnailUrlValue VARCHAR,
-                                       artistFacebookUrlValue VARCHAR(255),
-                                       artistNameValue VARCHAR(255),
-                                       redirectUrlValue VARCHAR(255))
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO tracks (trackId, title, url, platform, thumbnailUrl, artistFacebookUrl, artistName, redirectUrl)
-    VALUES (trackIdValue, titleValue, urlValue, platformValue, thumbnailUrlValue, artistFacebookUrlValue,
-            artistNameValue, redirectUrlValue);;
-  END;;
-  $$
-LANGUAGE plpgsql;
 
 create table users (
   userID UUID PRIMARY KEY,
@@ -221,56 +113,6 @@ create table oauth2info (id SERIAL PRIMARY KEY,accesstoken VARCHAR NOT NULL,toke
 create table openidinfo (id VARCHAR NOT NULL PRIMARY KEY,logininfoid BIGINT NOT NULL);
 create table openidattributes (id VARCHAR NOT NULL,key VARCHAR NOT NULL,value VARCHAR NOT NULL);
 
--- CREATE TABLE users (
---   id                        SERIAL PRIMARY KEY,
---   userId                    VARCHAR(255) NOT NULL,
---   providerId                VARCHAR(255) NOT NULL,
---   firstName                 VARCHAR(255) NOT NULL,
---   lastName                  VARCHAR(255) NOT NULL,
---   fullName                  VARCHAR(255) NOT NULL,
---   email                     VARCHAR(255),
---   avatarUrl                 VARCHAR,
---   authMethod                VARCHAR(255) NOT NULL,
---   oAuth1Info                VARCHAR,
---   oAuth2Info                VARCHAR,
---   passwordInfo              VARCHAR(255),
---   UNIQUE(userId)
--- );
--- INSERT INTO users(userId, providerId, firstName, lastName, fullName, authMethod)
--- VALUES ('userTestId', 'providerId', 'firstName', 'lastName', 'fullName', 'oauth2');
---
--- CREATE OR REPLACE FUNCTION insertUser(
---   userIdValue         VARCHAR(255),
---   providerIdValue     VARCHAR(255),
---   firstNameValue      VARCHAR(255),
---   lastNameValue       VARCHAR(255),
---   fullNameValue       VARCHAR(255),
---   emailValue          VARCHAR(255),
---   avatarUrlValue      VARCHAR,
---   authMethodValue     VARCHAR(255),
---   oAuth1InfoValue     VARCHAR,
---   oAuth2InfoValue     VARCHAR,
---   passwordInfoValue   VARCHAR(255))
---   RETURNS VOID AS
---   $$
---   BEGIN
---     INSERT INTO users (userId, providerId, firstName, lastName, fullName, email, avatarUrl, authMethod,
---                              oAuth1Info, oAuth2Info, passwordInfo)
---       VALUES (userIdValue, providerIdValue, firstNameValue, lastNameValue, fullNameValue, emailValue, avatarUrlValue,
---               authMethodValue, oAuth1InfoValue, oAuth2InfoValue, passwordInfoValue);;
---     EXCEPTION WHEN unique_violation THEN RETURN;;
---   END;;
---   $$
--- LANGUAGE plpgsql;
---
---
--- CREATE TABLE users_token (
---   id                        VARCHAR(36) NOT NULL,
---   email                     VARCHAR(255) NOT NULL,
---   creationTime              TIMESTAMP NOT NULL,
---   expirationTime            TIMESTAMP NOT NULL,
---   isSignUp                  BOOLEAN NOT NULL
--- );
 
 CREATE TABLE receivedMails (
   id                        SERIAL PRIMARY KEY,
@@ -298,38 +140,6 @@ CREATE TABLE events (
   UNIQUE(facebookId)
 );
 CREATE INDEX eventGeographicPoint ON events USING GIST (geographicPoint);
-CREATE OR REPLACE FUNCTION insertEvent(
-  facebookIdValue                VARCHAR(63),
-  isPublicValue                  BOOLEAN,
-  isActiveValue                  BOOLEAN,
-  nameValue                      VARCHAR(255),
-  geographicPointValue           VARCHAR(63),
-  descriptionValue               VARCHAR,
-  startTimeValue                 TIMESTAMP with time zone,
-  endTimeValue                   TIMESTAMP with time zone,
-  imagePathValue                 VARCHAR,
-  ageRestrictionValue            INT,
-  tariffRangeValue               VARCHAR(15),
-  ticketSellersValue             VARCHAR)
-  RETURNS INT AS
-  $$
-  DECLARE eventIdToReturn int;;
-  BEGIN
-    INSERT INTO events (facebookid, ispublic, isactive, name, geographicpoint, description, starttime,
-                        endtime, imagePath, agerestriction, tariffRange, ticketSellers)
-    VALUES (facebookidValue, ispublicValue, isactiveValue, nameValue, GEOMETRY (geographicpointValue),
-            descriptionValue, starttimeValue, endtimeValue, imagePathValue, agerestrictionValue::SMALLINT,
-            tariffRangeValue, ticketSellersValue)
-    RETURNING eventId INTO eventIdToReturn;;
-    RETURN eventIdToReturn;;
-    EXCEPTION WHEN unique_violation THEN
-    SELECT eventId INTO eventIdToReturn FROM events WHERE facebookId = facebookIdValue;;
-    RETURN eventIdToReturn;;
-  END;;
-  $$
-LANGUAGE plpgsql;
--- SELECT insertEvent('facebookId', true, true, 'name', '(0,0)', 'description', current_timestamp,
---                    current_timestamp + interval '2000000 hour', 'imagePath', 16, '5-10', 'ticketSeller');
 
 
 CREATE TABLE places (
@@ -351,33 +161,6 @@ CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
 INSERT into places(name, geographicPoint, facebookId)
 values ('Le transbordeur', ST_GeomFromText('POINT(45.783808 4.860598)', 4326), '117030545096697');
 
-CREATE OR REPLACE FUNCTION insertPlace(
-  nameValue                      VARCHAR(255),
-  geographicPointValue           VARCHAR(63),
-  addressIdValue                 BIGINT,
-  facebookIdValue                VARCHAR(63),
-  descriptionValue               VARCHAR,
-  webSitesValue                  VARCHAR,
-  capacityValue                  INT,
-  openingHoursValue              VARCHAR(255),
-  imagePathValue                 VARCHAR,
-  organizerIdValue               BIGINT)
-  RETURNS INT AS
-  $$
-DECLARE placeIdToReturn int;;
-  BEGIN
-    INSERT INTO places (name, geographicPoint, addressId, facebookId, description, webSites,
-                        capacity, openingHours, imagePath, organizerId)
-    VALUES (nameValue, GEOMETRY(geographicPointValue), addressIdValue, facebookIdValue, descriptionValue,
-            webSitesValue, capacityValue, openingHoursValue, imagePathValue, organizerIdValue)
-    RETURNING placeId INTO placeIdToReturn;;
-    RETURN placeIdToReturn;;
-  EXCEPTION WHEN unique_violation THEN
-    SELECT placeId INTO placeIdToReturn FROM places WHERE facebookId = facebookIdValue;;
-    RETURN placeIdToReturn;;
-  END;;
-  $$
-LANGUAGE plpgsql;
 
 CREATE TABLE images (
   imageId                   SERIAL PRIMARY KEY,
@@ -604,18 +387,7 @@ CREATE TABLE artistsFollowed (
   artistId                 INT REFERENCES artists(artistId)
 );
 CREATE UNIQUE INDEX artistsFollowedIndex ON artistsFollowed (userId, artistId);
-CREATE OR REPLACE FUNCTION insertUserArtistRelation(
-  userIdValue             VARCHAR(255),
-  artistIdValue           BIGINT)
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO artistsFollowed (userId, artistId)
-      VALUES (userIdValue, artistIdValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
+
 
 CREATE TABLE placesFollowed (
   tableId                  SERIAL PRIMARY KEY,
@@ -650,18 +422,6 @@ CREATE TABLE eventsPlaces (
   placeId                 INT REFERENCES places (placeId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, placeId)
 );
-CREATE OR REPLACE FUNCTION insertEventPlaceRelation(
-  eventIdValue            BIGINT,
-  placeIdValue            BIGINT)
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO eventsPlaces (eventId, placeId)
-    VALUES (eventIdValue, placeIdValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
 
 
 CREATE TABLE eventsGenres (
@@ -676,18 +436,6 @@ CREATE TABLE eventsOrganizers (
   organizerId             INT REFERENCES organizers(organizerId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, organizerId)
 );
-CREATE OR REPLACE FUNCTION insertEventOrganizerRelation(
-  eventIdValue            BIGINT,
-  organizerIdValue        BIGINT)
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO eventsOrganizers (eventId, organizerId)
-    VALUES (eventIdValue, organizerIdValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
 
 
 CREATE TABLE eventsAddresses (
@@ -703,18 +451,6 @@ CREATE TABLE usersOrganizers (
   organizerId             INT REFERENCES organizers(organizerId)
 );
 CREATE UNIQUE INDEX usersOrganizersIndex ON usersOrganizers (userId, organizerId);
-CREATE OR REPLACE FUNCTION insertUserOrganizerRelation(
-  userIdValue             VARCHAR(255),
-  organizerIdValue        BIGINT)
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO usersOrganizers (userId, organizerId)
-    VALUES (userIdValue, organizerIdValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
 
 
 CREATE TABLE eventsArtists (
@@ -722,18 +458,6 @@ CREATE TABLE eventsArtists (
   artistId                INT REFERENCES artists (artistId) ON DELETE CASCADE,
   PRIMARY KEY (eventId, artistId)
 );
-CREATE OR REPLACE FUNCTION insertEventArtistRelation(
-  eventIdValue            BIGINT,
-  artistIdValue           BIGINT)
-  RETURNS VOID AS
-  $$
-  BEGIN
-    INSERT INTO eventsArtists (eventId, artistId)
-    VALUES (eventIdValue, artistIdValue);;
-    EXCEPTION WHEN unique_violation THEN RETURN;;
-  END;;
-  $$
-LANGUAGE plpgsql;
 
 
 CREATE TABLE tracksGenres (
@@ -743,23 +467,6 @@ CREATE TABLE tracksGenres (
   PRIMARY KEY (genreId)
 );
 CREATE UNIQUE INDEX tracksGenresIndex ON tracksGenres (trackId, genreId);
-CREATE OR REPLACE FUNCTION upsertTrackGenreRelation(
-  trackIdValue UUID,
-  genreIdValue BIGINT,
-  weightValue BIGINT)
-  RETURNS VOID AS
-  $$
-    BEGIN
-      UPDATE tracksGenres SET weight = weightValue WHERE trackId = trackIdValue AND genreId = genreIdValue;;
-      IF found THEN
-        RETURN;;
-      ELSE
-        INSERT INTO tracksGenres(trackId, genreId, weight) VALUES (trackIdValue, genreIdValue, weightValue);;
-        RETURN;;
-      END IF;;
-    END;;
-  $$
-LANGUAGE plpgsql;
 
 
 CREATE TABLE artistsGenres (
@@ -768,23 +475,6 @@ CREATE TABLE artistsGenres (
   weight                  INT NOT NULL,
   PRIMARY KEY (artistId, genreId)
 );
-CREATE OR REPLACE FUNCTION insertOrUpdateArtistGenreRelation(
-  artistIdValue BIGINT,
-  genreIdValue BIGINT,
-  weightValue BIGINT)
-  RETURNS VOID AS
-  $$
-    BEGIN
-      UPDATE artistsGenres SET weight = weightValue WHERE artistId = artistIdValue AND genreId = genreIdValue;;
-      IF found THEN
-        RETURN;;
-      ELSE
-        INSERT INTO artistsGenres(artistId, genreId, weight) VALUES (artistIdValue, genreIdValue, 1);;
-        RETURN;;
-      END IF;;
-    END;;
-  $$
-LANGUAGE plpgsql;
 
 
 CREATE TABLE playlists (
@@ -808,93 +498,12 @@ CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
   userId                  UUID REFERENCES users(userId) NOT NULL,
   trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
-  ratingUp                INT DEFAULT 0,
-  ratingDown              INT DEFAULT 0,
+  ratingUp                INT,
+  ratingDown              INT,
   reason                  CHAR
 );
 CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
-CREATE OR REPLACE FUNCTION upsertTrackRatingUp(
-  userIdValue     VARCHAR(255),
-  trackIdValue    UUID,
-  ratingUpValue   INT)
-  RETURNS VOID AS
-  $$
-    BEGIN
-      UPDATE tracksRating SET ratingUp = ratingUp + ratingUpValue
-        WHERE trackId = trackIdValue AND userId = userIdValue;;
-      IF found THEN
-        RETURN;;
-      ELSE
-        INSERT INTO tracksRating(trackId, userId, ratingUp) VALUES (trackIdValue, userIdValue, ratingUpValue);;
-        RETURN;;
-      END IF;;
-    END;;
-  $$
-LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION upsertTrackRatingDown(
-  userIdValue       VARCHAR(255),
-  trackIdValue      UUID,
-  ratingDownValue   INT,
-  reasonValue       CHAR)
-  RETURNS VOID AS
-  $$
-    BEGIN
-      UPDATE tracksRating
-        SET ratingDown = ratingDown + ratingDownValue, reason = reasonValue
-        WHERE trackId = trackIdValue AND userId = userIdValue;;
-      IF found THEN
-        RETURN;;
-      ELSE
-        INSERT INTO tracksRating(trackId, userId, ratingDown, reason)
-          VALUES (trackIdValue, userIdValue, ratingDownValue, reasonValue);;
-        RETURN;;
-      END IF;;
-    END;;
-  $$
-LANGUAGE plpgsql;
 
-
-
-CREATE OR REPLACE FUNCTION dropfunction(functionname text)
-  RETURNS text AS
-  $BODY$
-DECLARE
-    funcrow RECORD;;
-    numfunctions smallint := 0;;
-    numparameters int;;
-    i int;;
-    paramtext text;;
-BEGIN
-FOR funcrow IN SELECT proargtypes FROM pg_proc WHERE proname = functionname LOOP
-
-    --for some reason array_upper is off by one for the oidvector type, hence the +1
-    numparameters = array_upper(funcrow.proargtypes, 1) + 1;;
-
-    i = 0;;
-    paramtext = '';;
-
-    LOOP
-        IF i < numparameters THEN
-            IF i > 0 THEN
-                paramtext = paramtext || ', ';;
-            END IF;;
-            paramtext = paramtext || (SELECT typname FROM pg_type WHERE oid = funcrow.proargtypes[i]);;
-            i = i + 1;;
-        ELSE
-            EXIT;;
-        END IF;;
-    END LOOP;;
-
-    EXECUTE 'DROP FUNCTION ' || functionname || '(' || paramtext || ');;';;
-    numfunctions = numfunctions + 1;;
-
-END LOOP;;
-
-RETURN 'Dropped ' || numfunctions || ' functions';;
-END;;
-$BODY$
-LANGUAGE plpgsql VOLATILE
-COST 100;;
 
 # --- !Downs
 DROP TABLE IF EXISTS tracksFollowed;

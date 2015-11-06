@@ -54,7 +54,8 @@ class EventController @Inject()(ws: WSClient,
           Ok(Json.toJson(events))
         }
       case _ =>
-        Future(BadRequest("Invalid geographicPoint"))
+        Logger.error("EventController.eventsInHourInterval: invalid geographicPoint")
+        Future(BadRequest("EventController.eventsInHourInterval: invalid geographicPoint"))
     }
   }
 
@@ -66,7 +67,7 @@ class EventController @Inject()(ws: WSClient,
           Ok(Json.toJson(events))
         }
       case _ =>
-        Future(BadRequest("EventController.eventsPassedInHourInterval: Invalid geographic point"))
+        Future(BadRequest("EventController.eventsPassedInHourInterval: invalid geographic point"))
     }
   }
 
