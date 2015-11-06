@@ -5,7 +5,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
 
     var factory = {
         artists : false,
-        lastGetArtist: {url: '', artist: {}},
+        lastGetArtist: {url: '', artist: {tracks: []}},
         getArtist : function (url) {
             var deferred = $q.defer();
             if (url == factory.lastGetArtist.url) {
@@ -288,10 +288,12 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                                     track.genres = artist.genres;
                                     return track
                                 });
-                                factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
                                 $timeout(function () {
-                                    $rootScope.$apply();
+                                    $rootScope.$apply(function () {
+                                        factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
+                                    });
                                 }, 0);
+
                             }
                     }
             })
