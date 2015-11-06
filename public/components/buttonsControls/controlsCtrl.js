@@ -120,7 +120,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         }
 
 	function postEventId (event) {
-        console.log(event)
             EventsFactory.postEventToCreate(event.id)
         }
 
@@ -159,7 +158,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         function getPlacesByName(placeName) {
             $http.get('https://graph.facebook.com/v2.2/search?q=' + placeName + '&type=page&access_token=' + token).
                 success(function (data, status, headers, config) {
-                    console.log(data)
                     data = data.data;
                     for (var iv = 0; iv < data.length; iv++) {
                         if (data[iv].category.toLowerCase() == 'concert venue' ||
