@@ -38,9 +38,12 @@ trait geographicPointTrait {
 
   val geometryFactory = new GeometryFactory()
 
-  def stringToGeographicPoint(string: String): Try[Geometry] = {
+  def stringToGeographicPoint(string: String): Try[Geometry] = Try {
     val latitudeAndLongitude: Array[String] = string.split(",")
-    latAndLngToGeographicPoint(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble)
+    latAndLngToGeographicPoint(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble) match {
+      case Success(point) => point
+      case Failure(failure) => throw failure
+    }
   }
 
   def latAndLngToGeographicPoint(latitude: Double, longitude: Double): Try[Geometry] = Try {
