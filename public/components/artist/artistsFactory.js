@@ -38,12 +38,14 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         },
         getIsFollowed : function (id) {
             var deferred = $q.defer();
-            $http.get('/artists/' + id + '/isFollowed')
-                .success(function(data, status){
-                    deferred.resolve(data);
-                }).error(function(data, status){
-                    deferred.reject('error');
-                });
+            if (id !== undefined) {
+                $http.get('/artists/' + id + '/isFollowed')
+                    .success(function (data, status) {
+                        deferred.resolve(data);
+                    }).error(function (data, status) {
+                        deferred.reject('error');
+                    });
+            }
             return deferred.promise;
         },
         lastGetArtists: {offset: -1, artists: []},
