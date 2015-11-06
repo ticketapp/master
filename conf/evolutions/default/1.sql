@@ -8,7 +8,6 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   city                      VARCHAR(255) NOT NULL,
