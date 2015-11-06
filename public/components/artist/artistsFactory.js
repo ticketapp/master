@@ -142,7 +142,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                 $http.get('/artists/containing/' + pattern)
                     .success(function (data, status) {
                         var artists = data.map(function(artist) {
-                            return factory.refactorArtistObject(artist)
+                            return RefactorObjectsFactory.refactorArtistObject(artist)
                         });
                         artists.forEach(ImagesFactory);
                         factory.lastGetArtistsByContainig.artists = artists;
