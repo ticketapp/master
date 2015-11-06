@@ -5,14 +5,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
 
     var factory = {
         artists : false,
-        lastGetArtist: {url: '', artist: {}},
-        refactorArtistObject: function (artist) {
-            artist.artist.genres = artist.genres.map(function (genre) {
-                return genre.genre
-            });
-            artist = artist.artist;
-            return artist
-        },
+        lastGetArtist: {url: '', artist: {tracks: []}},
         getArtist : function (url) {
             var deferred = $q.defer();
             if (url == factory.lastGetArtist.url) {
@@ -290,16 +283,18 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             });
                         }, 0);
                     } else {
-                        if (factory.lastGetArtist.url === artist.facebookUrl) {
-                            value = value.map(function (track) {
-                                track.genres = artist.genres;
-                                return track
-                            });
-                            factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
-                            $timeout(function () {
-                                $rootScope.$apply();
-                            }, 0);
-                        }
+                            if (factory.lastGetArtist.url === artist.facebookUrl) {
+                                value = value.map(function (track) {
+                                    track.genres = artist.genres;
+                                    return track
+                                });
+                                $timeout(function () {
+                                    $rootScope.$apply(function () {
+                                        factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
+                                    });
+                                }, 0);
+
+                            }
                     }
             })
             .fail(function (error) {
