@@ -33,7 +33,7 @@ class PlaceController @Inject() (ws: WSClient,
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
     geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
       case Failure(exception) =>
-        Logger.error("PlaceController.places: ", exception)
+        Logger.error("PlaceController.places: invalid geographicPoint")
         Future { BadRequest(Json.toJson("Invalid geographicPoint")) }
       case Success(point) =>
         placeMethods.findNear(point, numberToReturn, offset) map { places =>
