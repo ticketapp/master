@@ -31,7 +31,6 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 
         function signaledTrack (track) {
-            console.log($localStorage.tracksSignaled)
             if ($filter('filter')($localStorage.tracksSignaled, {trackId: track.uuid}).length === 0) {
                 return track;
             }
@@ -48,11 +47,13 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         }
 
         function setFavorite (track) {
-            UserFactory.getFavoritesTracks().then(function (favoritesTracks) {
-                if ($filter('filter')(favoritesTracks, {uuid: track.uuid}).length > 0) {
-                    track.isFavorite = true;
-                }
-            })
+            if ($rootScope.connected === true) {
+                UserFactory.getFavoritesTracks().then(function (favoritesTracks) {
+                    if ($filter('filter')(favoritesTracks, {uuid: track.uuid}).length > 0) {
+                        track.isFavorite = true;
+                    }
+                })
+            }
         }
 
         function normalizeWebsites(artist) {
@@ -97,16 +98,18 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                         setFavorite($scope.tracks[i]);
                         countRates($scope.tracks[i])
                     }
-                    $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
+                    $scope.numberOfTop = new Array(Math.round(numberOfRates / 10));
                     $scope.artist.tracks = $scope.tracks;
                     $rootScope.loadingTracks = false;
+                    $rootScope.$watch("loadingTracks", function () {
+                        $scope.tracks = angular.copy($scope.artist.tracks).filter(signaledTrack);
+                    })
                 })
             }, 0);
 
             normalizeWebsites(artist);
             getIsFollowed(artist);
             getArtistsEvent();
-
             $rootScope.$watch('connected', function (connected) {
                 if (connected == false) {
                     $scope.isFollowed = false;
@@ -191,7 +194,6 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             $scope.suggest = false;
             if (trackTitle.length > 2) {
                 artistName = ArtistsFactory.refactorArtistName(artistName);
-                console.log(artistName, trackTitle, artistFacebookUrl);
                 ArtistsFactory.getNewArtistTrack(artistName, trackTitle, artistFacebookUrl).then(
                     function (tracks) {
                         for (var i = 0; i < tracks.length; i++) {
