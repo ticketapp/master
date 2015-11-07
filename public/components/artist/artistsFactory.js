@@ -5,7 +5,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
 
     var factory = {
         artists : false,
-        lastGetArtist: {url: '', artist: {}},
+        lastGetArtist: {url: '', artist: {tracks: []}},
         getArtist : function (url) {
             var deferred = $q.defer();
             if (url == factory.lastGetArtist.url) {
@@ -38,12 +38,14 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         },
         getIsFollowed : function (id) {
             var deferred = $q.defer();
-            $http.get('/artists/' + id + '/isFollowed')
-                .success(function(data, status){
-                    deferred.resolve(data);
-                }).error(function(data, status){
-                    deferred.reject('error');
-                });
+            if (id !== undefined) {
+                $http.get('/artists/' + id + '/isFollowed')
+                    .success(function (data, status) {
+                        deferred.resolve(data);
+                    }).error(function (data, status) {
+                        deferred.reject('error');
+                    });
+            }
             return deferred.promise;
         },
         lastGetArtists: {offset: -1, artists: []},
@@ -281,16 +283,18 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             });
                         }, 0);
                     } else {
-                        if (factory.lastGetArtist.url === artist.facebookUrl) {
-                            value = value.map(function (track) {
-                                track.genres = artist.genres;
-                                return track
-                            });
-                            factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
-                            $timeout(function () {
-                                $rootScope.$apply();
-                            }, 0);
-                        }
+                            if (factory.lastGetArtist.url === artist.facebookUrl) {
+                                value = value.map(function (track) {
+                                    track.genres = artist.genres;
+                                    return track
+                                });
+                                $timeout(function () {
+                                    $rootScope.$apply(function () {
+                                        factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
+                                    });
+                                }, 0);
+
+                            }
                     }
             })
             .fail(function (error) {

@@ -31,7 +31,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                     $localStorage.tracksSignaled.push({trackId: trackId, reason: reason});
                     TracksRecommender.UpsertTrackRate(false, trackId, reason);
                 }
-                $scope.closeTrack(index);
+                $scope.closeTrack(index, trackId);
             }, function () {
             });
 

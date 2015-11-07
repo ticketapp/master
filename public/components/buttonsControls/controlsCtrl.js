@@ -120,7 +120,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         }
 
 	function postEventId (event) {
-        console.log(event)
             EventsFactory.postEventToCreate(event.id)
         }
 
@@ -159,7 +158,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         function getPlacesByName(placeName) {
             $http.get('https://graph.facebook.com/v2.2/search?q=' + placeName + '&type=page&access_token=' + token).
                 success(function (data, status, headers, config) {
-                    console.log(data)
                     data = data.data;
                     for (var iv = 0; iv < data.length; iv++) {
                         if (data[iv].category.toLowerCase() == 'concert venue' ||
@@ -204,7 +202,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                         setTimeout(function () {    //  call a 3s setTimeout when the loop is called
                             if (lines[l] == "Salles de 400 à 1200 places" || lines[l] == "Salles de moins de 400 places") {
                                 //placesName.push(lines[l-1].replace(/ /g, "+"));
-                                // console.log("places", placesName.length)
                                 getPlacesByName(lines[l - 1].replace(/ /g, "+"))
                             }          //  your code here
                             l++;                     //  increment the counter
