@@ -70,7 +70,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     $scope.tracks = TrackService.filterSignaledTracks(artist.tracks);
                     numberOfRates = TrackService.countRates($scope.tracks);
                     $scope.numberOfTop = new Array(Math.round(numberOfRates / 10));
-                    setFavorite($scope.tracks).then(function(tracksWithFavorites) {
+                    TrackService.setFavorite($scope.tracks).then(function(tracksWithFavorites) {
                         $scope.tracks = tracksWithFavorites;
                         $scope.artist.tracks = $scope.tracks;
                         $rootScope.loadingTracks = false;

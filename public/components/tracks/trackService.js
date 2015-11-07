@@ -1,5 +1,5 @@
-angular.module('claudeApp').factory('TrackService', ['$localStorage', '$filter', 'UserFactory',
-    function($localStorage, $filter, UserFactory) {
+angular.module('claudeApp').factory('TrackService', ['$localStorage', '$filter', 'FollowService', '$q',
+    function($localStorage, $filter, FollowService, $q) {
     var factory = {
         /*
          class Track {
@@ -39,17 +39,17 @@ angular.module('claudeApp').factory('TrackService', ['$localStorage', '$filter',
 
         setFavorite: function(tracks) {
             var defered = $q.defer();
-            if ($rootScope.connected === true) {
-                UserFactory.getFavoritesTracks().then(function(favoritesTracks) {
-                    var tracksWithFavorites =  tracks.map(function(track) {
-                        if ($filter('filter')(favoritesTracks, {uuid: track.uuid}).length > 0) {
-                            track.isFavorite = true;
-                        }
-                        return track;
-                    });
-                    defered.resolve(tracksWithFavorites);
-                })
-            } else { defered.resolve(tracks) }
+            FollowService.tracks.favorites().then(function(favoritesTracks) {
+                var tracksWithFavorites =  tracks.map(function(track) {
+                    if ($filter('filter')(favoritesTracks, {uuid: track.uuid}).length > 0) {
+                        track.isFavorite = true;
+                    }
+                    return track;
+                });
+                defered.resolve(tracksWithFavorites);
+            }, function error (error) {
+                defered.resolve(tracks)
+            });
             return defered.promise;
         }
     };
