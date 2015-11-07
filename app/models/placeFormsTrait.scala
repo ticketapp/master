@@ -24,6 +24,6 @@ trait placeFormsTrait extends geographicPointTrait with addressFormsTrait {
   }
 
   def placeFormUnapply(place: Place) =
-    Option((place.name, place.facebookId, Option(place.geographicPoint.toString), place.description, place.webSites,
+    Option((place.name, place.facebookId, Option(place.geographicPoint.toString), place.description, place.websites,
       place.capacity, place.openingHours, place.imagePath, None/*, place.address.get.city, place.address.get.zip, place.address.get.street*/))
 }

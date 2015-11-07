@@ -22,9 +22,11 @@ angular.module('claudeApp').
                     organizer.websites = [organizer.websites]
                 }
                 $scope.websites = WebsitesFactory.normalizeWebsitesObject(organizer.websites,
-                    organizer.facebookUrl);
+                    organizer.facebookId);
+            } else {
+                $scope.websites = WebsitesFactory.normalizeWebsitesObject([],
+                    organizer.facebookId);
             }
-            console.log(organizer);
             /*
             if (organizer.placeId !== undefined) {
                 OrganizerFactory.getPlaceEvents(organizer.placeId).then(function (events) {
@@ -64,7 +66,7 @@ angular.module('claudeApp').
             $scope.passedEvents = events;
         });
         $scope.follow = function () {
-            OrganizerFactory.followOrganizerByOrganizerId($scope.organizer.organizerId, $scope.organizer.name).
+            OrganizerFactory.followOrganizerByOrganizerId($scope.organizer.id, $scope.organizer.name).
                 then(
                 function (followed) {
                     if (followed != 'error') {
@@ -75,7 +77,7 @@ angular.module('claudeApp').
         };
 
         $scope.unfollow = function () {
-            OrganizerFactory.unfollowOrganizer($scope.organizer.organizerId, $scope.organizer.name).
+            OrganizerFactory.unfollowOrganizer($scope.organizer.id, $scope.organizer.name).
                 then(
                 function (followed) {
                     if (followed != 'error') {

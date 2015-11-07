@@ -26,7 +26,10 @@ angular.module('claudeApp').
                         place.websites = [place.websites]
                     }
                     $scope.websites = WebsitesFactory.normalizeWebsitesObject(place.websites,
-                        place.facebookUrl);
+                        place.facebookId);
+                } else {
+                    $scope.websites = WebsitesFactory.normalizeWebsitesObject([],
+                        place.facebookId);
                 }
                 if ($rootScope.connected == true) {
                     PlaceFactory.getIsFollowed(place.id).then(function (isFollowed) {

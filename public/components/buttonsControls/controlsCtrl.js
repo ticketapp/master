@@ -63,6 +63,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                     street: place.location.street
                 };
                 PlaceFactory.postPlace(newPlace).then(function (isCreated) {
+                    getOrganizerEvents(newPlace.facebookId)
                 })
             } else {
                 getCoverPlace(place);
@@ -119,6 +120,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         }
 
 	function postEventId (event) {
+        console.log(event)
             EventsFactory.postEventToCreate(event.id)
         }
 
@@ -157,6 +159,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         function getPlacesByName(placeName) {
             $http.get('https://graph.facebook.com/v2.2/search?q=' + placeName + '&type=page&access_token=' + token).
                 success(function (data, status, headers, config) {
+                    console.log(data)
                     data = data.data;
                     for (var iv = 0; iv < data.length; iv++) {
                         if (data[iv].category.toLowerCase() == 'concert venue' ||
@@ -222,7 +225,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
 		function getCnvList () {
 			$http.get('https://www.cnv.fr/liste-des-affiliés' + page).success(
 				function (data) {
-					console.log(pageNumber)
 					var listNamesPlaces = [];
 					var names = data.match(/<td class="active">([^<]*)/g);
 					names = names.map(function(name) {
@@ -230,7 +232,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
 					});
 					if (cnvList.indexOf(names[0]) == -1) {
 						cnvList = cnvList.concat(names)
-						console.log(cnvList)
 						pageNumber++;
 						page = '?page=' + pageNumber;
 						getCnvList();

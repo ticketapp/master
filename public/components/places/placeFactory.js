@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFactory', 'StoreRequest',
-    'InfoModal', 'RoutesFactory',
-    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory){
+    'InfoModal', 'RoutesFactory', 'RefactorObjectsFactory',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory, RefactorObjectsFactory){
     var factory = {
         places : false,
         lastGetPlace: {id: 0, place: []},
@@ -25,9 +25,12 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 deferred.resolve(factory.lastGetPlaceEvents.events);
             } else {
                 $http.get('/places/' + id + '/events').
-                    success(function(data, status, headers, config) {
-                        data.forEach(EventsFactory.colorEvent);
-                        factory.lastGetPlaceEvents.events = data;
+                    success(function(events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(EventsFactory.colorEvent);
+                        factory.lastGetPlaceEvents.events = events;
                         factory.lastGetPlaceEvents.id = id;
                         deferred.resolve(factory.lastGetPlaceEvents.events);
                     })
@@ -105,7 +108,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                     factory.places = data;
                     deferred.resolve(factory.places);
                 }).error(function (data, status) {
-                    if (data.error == 'Credentials required') {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
                     }
                     deferred.reject(status);
@@ -117,8 +120,8 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             $http.post('/places/' + id +'/followByPlaceId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/places/' + id +'/followByPlaceId',
                             "", 'vous suivez ' + placeName)
                     } else {
@@ -133,8 +136,8 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             $http.post('/places/' + id +'/unfollowPlaceByPlaceId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/places/' + id +'/unfollowPlaceByPlaceId',
                             "", 'vous ne suivez plus ' + placeName)
                     } else {
@@ -173,13 +176,16 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 defered.resolve(factory.getPassedEvents.events)
             } else {
                 $http.get(RoutesFactory.places.getPlacesPassedEvents(placeId)).success(
-                    function (data) {
-                        data.forEach(EventsFactory.colorEvent);
+                    function (events) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(EventsFactory.colorEvent);
                         factory.getPassedEvents.id = placeId;
-                        factory.getPassedEvents.events = data;
+                        factory.getPassedEvents.events = events;
                         defered.resolve(factory.getPassedEvents.events)
                     }
-                ).error(function (data) {
+                ).error(function (data, status) {
                     })
             }
             return defered.promise;

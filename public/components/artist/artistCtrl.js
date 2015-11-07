@@ -3,6 +3,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         '$modal', '$rootScope', '$routeParams', 'WebsitesFactory', 'InfoModal', 'UserFactory',
     function ($scope, $localStorage, ArtistsFactory, $timeout, $filter, $modal, $rootScope,
               $routeParams, WebsitesFactory, InfoModal, UserFactory) {
+
         $scope.trackLimit = 12;
         $scope.trackTitle = '';
         $scope.showDesc = false;
@@ -11,111 +12,115 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         $scope.showTop = false;
         $scope.numberOfTop = 0;
         $scope.events = [];
+        $scope.tracks = [];
+        $scope.artist = [];
+        $scope.artist.events = [];
+        $rootScope.loadingTracks = true;
 
         if ($localStorage.tracksSignaled == undefined) {
             $localStorage.tracksSignaled = [];
-            if ($rootScope.connected == true) {
-                UserFactory.getRemovedTracks().then(function (tracks) {
-                    var tracksLength = tracks.length;
-                    for (var i = 0; i < tracksLength; i++) {
-                        $localStorage.tracksSignaled.push(tracks[i].trackId)
-                    }
-                })
+        }
+
+        if ($rootScope.connected == true) {
+            UserFactory.getRemovedTracks().then(function (trackIds) {
+                var tracksLength = trackIds.length;
+                for (var i = 0; i < tracksLength; i++) {
+                    $localStorage.tracksSignaled.push(trackIds[i])
+                }
+            })
+        }
+
+        function signaledTrack (track) {
+            if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
+                return track;
             }
         }
-        if ($rootScope.artisteToCreate != true) {
-            $scope.tracks = [];
-            $scope.artist = [];
-            $scope.artist.events = [];
-            $rootScope.loadingTracks = true;
-            function signaledTrack (track) {
-                if ($localStorage.tracksSignaled.indexOf(track.trackId) == -1) {
-                    return track;
-                }
-            }
 
-            var numberOfRates = 0;
-            function countRates (track) {
-                if (numberOfRates >= 50) {
-                    return
-                }
-                if (track.confidence != undefined && track.confidence > 5000 && numberOfRates <50) {
-                    numberOfRates ++;
-                }
+        var numberOfRates = 0;
+        function countRates (track) {
+            if (numberOfRates >= 50) {
+                return
             }
-            function setFavorite (track) {
-                if ($rootScope.favoritesTracks) {
-                    if ($rootScope.favoritesTracks.indexOf(track.trackId) > -1) {
-                        track.isFavorite = true;
-                    }
-                }
+            if (track.confidence != undefined && track.confidence > 5000 && numberOfRates < 50) {
+                numberOfRates ++;
             }
-            ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
-                $timeout(function () {
-                    console.log(artist);
-                    $scope.$apply(function() {
-                        $scope.artist = artist;
-                        $scope.tracks = artist.tracks.filter(signaledTrack);
-                        var tracksLength = $scope.tracks.length;
-                        for (var i = 0; i < tracksLength; i ++) {
-                            setFavorite($scope.tracks[i]);
-                            countRates($scope.tracks[i])
-                        }
-                        $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
-                        $scope.artist.tracks = $scope.tracks;
-                        $rootScope.loadingTracks = false;
-                    })
-                }, 0);
-                if (artist.websites != undefined) {
-                    $scope.websites = WebsitesFactory.normalizeWebsitesObject(artist.websites,
-                        $routeParams.facebookUrl);
-                }
-                if ($rootScope.connected == true) {
-                    ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
-                        $timeout(function () {
-                            $scope.$apply(function () {
-                                if (isFollowed == true || isFollowed == false) {
-                                    $scope.isFollowed = isFollowed;
-                                }
-                            })
-                        },0);
-                    })
-                }
-                $rootScope.$watch('connected', function (connected) {
-                    if (connected == false) {
-                        $scope.isFollowed = false;
-                    } else {
-                        ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
-                            if (isFollowed == true || isFollowed == false) {
-                                $timeout(function () {
-                                    $scope.$apply(function () {
-                                        $scope.isFollowed = isFollowed;
-                                    })
-                                }, 0);
-                            }
-                        })
-                    }
-                });
-                ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
-                    $scope.events = events;
-                    if (events.length == 0) {
-                        $timeout(function () {
-                            $scope.$apply(function () {
-                                $scope.selectedTab = 1;
-                            })
-                        }, 0)
-                    }
-                })
+        }
 
-            });
-        } else {
-            $scope.selectedTab = 1;
-            if ($rootScope.artist.websites != undefined) {
-                $scope.websites = WebsitesFactory.normalizeWebsitesObject($rootScope.artist.websites,
+        function setFavorite (track) {
+            if (UserFactory.user.favoritesTracks.indexOf(track.trackId) > -1) {
+                track.isFavorite = true;
+            }
+        }
+
+        function normalizeWebsites(artist) {
+            if (artist.websites != undefined) {
+                $scope.websites = WebsitesFactory.normalizeWebsitesObject(artist.websites,
                     $routeParams.facebookUrl);
             }
-            ArtistsFactory.passArtisteToCreateToFalse();
         }
+
+        function getIsFollowed(artist) {
+            ArtistsFactory.getIsFollowed(artist.id).then(function (isFollowed) {
+                $timeout(function () {
+                    $scope.$apply(function () {
+                        if (isFollowed == true || isFollowed == false) {
+                            $scope.isFollowed = isFollowed;
+                        }
+                    })
+                }, 0);
+            })
+        }
+
+        function getArtistsEvent() {
+            ArtistsFactory.getArtistEvents($routeParams.facebookUrl).then(function (events) {
+                $scope.events = events;
+                if (events.length == 0) {
+                    $timeout(function () {
+                        $scope.$apply(function () {
+                            $scope.selectedTab = 1;
+                        })
+                    }, 0)
+                }
+            })
+        }
+
+        ArtistsFactory.getArtist($routeParams.facebookUrl).then(function (artist) {
+            $timeout(function () {
+                $scope.$apply(function() {
+                    $scope.artist = artist;
+                    $scope.tracks = artist.tracks.filter(signaledTrack);
+                    var tracksLength = $scope.tracks.length;
+                    for (var i = 0; i < tracksLength; i ++) {
+                        setFavorite($scope.tracks[i]);
+                        countRates($scope.tracks[i])
+                    }
+                    $scope.numberOfTop = new Array(Math.round(numberOfRates/10));
+                    $scope.artist.tracks = $scope.tracks;
+                    $rootScope.loadingTracks = false;
+                })
+            }, 0);
+
+            normalizeWebsites(artist);
+            getIsFollowed(artist);
+            getArtistsEvent();
+
+            $rootScope.$watch('connected', function (connected) {
+                if (connected == false) {
+                    $scope.isFollowed = false;
+                } else {
+                    ArtistsFactory.getIsFollowed(artist.artistId).then(function (isFollowed) {
+                        if (isFollowed == true || isFollowed == false) {
+                            $timeout(function () {
+                                $scope.$apply(function () {
+                                    $scope.isFollowed = isFollowed;
+                                })
+                            }, 0);
+                        }
+                    })
+                }
+            });
+
+        });
 
         $scope.follow = function () {
             ArtistsFactory.followArtistByFacebookId($scope.artist.facebookId, $scope.artist.name).then(
@@ -132,7 +137,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
         };
 
         $scope.unfollow = function () {
-            ArtistsFactory.unfollowArtist($scope.artist.artistId).then(function (followed) {
+            ArtistsFactory.unfollowArtist($scope.artist.id).then(function (followed) {
                 if (followed != 'error') {
                     $timeout(function () {
                         $scope.$apply(function () {
@@ -152,6 +157,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
             }
             $scope.artist.tracks.splice(index, 1);
         };
+
         $scope.filterTracks = function () {
             $timeout(function () {
                 $scope.$apply(function(){
@@ -187,6 +193,7 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     function (tracks) {
                         for (var i = 0; i < tracks.length; i++) {
                             if ($filter('filter')($scope.tracks, tracks[i].url, 'url').length === 0) {
+                                tracks[i].genres = $scope.artist.genres;
                                 $scope.tracks.push(tracks[i]);
                                 $timeout(function () {
                                     $scope.$apply(function(){

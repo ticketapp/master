@@ -1,9 +1,12 @@
 angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsFactory', 'StoreRequest',
-    'InfoModal', 'RoutesFactory',
-    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory){
+    'InfoModal', 'RoutesFactory', 'RefactorObjectsFactory',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory, RefactorObjectsFactory){
     var factory = {
         organizers : false,
         lastOrganizer: {id: '', organizer: {}},
+        normalizedOrganizerObject : function (organizer) {
+          return organizer.organizer
+        },
         getOrganizer : function(id) {
             var deferred = $q.defer();
             if (id == factory.lastOrganizer.id) {
@@ -12,7 +15,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 $http.get('/organizers/' + id).
                     success(function(data, status, headers, config) {
                         factory.lastOrganizer.id = id;
-                        factory.lastOrganizer.organizer = data;
+                        factory.lastOrganizer.organizer = factory.normalizedOrganizerObject(data);
                         deferred.resolve(factory.lastOrganizer.organizer);
                     })
             }
@@ -25,10 +28,13 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastOrganizerEvents.events);
             } else {
                 $http.get('/organizers/' + id + '/events').
-                    success(function(data, status, headers, config) {
+                    success(function(events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
                         factory.lastOrganizerEvents.id = id;
-                        data.forEach(EventsFactory.colorEvent);
-                        factory.lastOrganizerEvents.events = data;
+                        events.forEach(EventsFactory.colorEvent);
+                        factory.lastOrganizerEvents.events = events;
                         deferred.resolve(factory.lastOrganizerEvents.events);
                     })
             }
@@ -42,9 +48,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             } else {
                 $http.get('/organizers?numberToReturn=12&offset='+offset).
                     success(function(data, status, headers, config) {
+                        var organizers = data.map(function (organizer) {
+                            return factory.normalizedOrganizerObject(organizer)
+                        });
                         factory.lastGetOrganizers.offset = offset;
                         factory.lastGetOrganizers.organizers =
-                            factory.lastGetOrganizers.organizers.concat(data);
+                            factory.lastGetOrganizers.organizers.concat(organizers);
                         deferred.resolve(factory.lastGetOrganizers.organizers);
                     })
             }
@@ -58,7 +67,10 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             } else {
                 $http.get('/organizers/containing/'+ pattern).
                     success(function(data, status, headers, config) {
-                        factory.lastGetOrganizersByContaining.organizers = data;
+                        var organizers = data.map(function (organizer) {
+                            return organizer.organizer;
+                        });
+                        factory.lastGetOrganizersByContaining.organizers = organizers;
                         factory.lastGetOrganizersByContaining.pattern = pattern;
                         deferred.resolve(factory.lastGetOrganizersByContaining.organizers);
                     })
@@ -71,10 +83,10 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 success(function(data, status, headers, config) {
                     deferred.resolve(data);
                 }).error(function (data, status) {
-                    if (data.error == 'Credentials required') {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/artists/' + id +'/followByFacebookId', "", '')
                     }
-                    deferred.reject(status);
+                    deferred.reject(data);
                 });
             return deferred.promise;
         },
@@ -83,8 +95,8 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             $http.post('/organizers/' + id +'/followByOrganizerId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/followByOrganizerId',
                             "", 'vous suivez ' + organizerName)
                     } else {
@@ -99,8 +111,8 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             $http.post('/organizers/' + id +'/unfollowOrganizerByOrganizerId').
                 success(function (data) {
                     deferred.resolve(data);
-                }).error(function (data) {
-                    if (data.error == 'Credentials required') {
+                }).error(function (data, status) {
+                    if (status === 401) {
                         StoreRequest.storeRequest('post', '/organizers/' + id +'/unfollowOrganizerByOrganizerId',
                             "", 'vous ne suivez plus ' + organizerName)
                     } else {
@@ -126,7 +138,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             $http.post('/organizers/create', organizer).
                 success(function(data, status, headers, config) {
                     deferred.resolve(data);
-                }).error(function (data) {
+                }).error(function (data, status) {
                     deferred.resolve('error');
                 });
             return deferred.promise;
@@ -138,9 +150,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastGetPlaceEvents.events);
             } else {
                 $http.get('/places/' + id + '/events').
-                    success(function(data, status, headers, config) {
-                        data.forEach(EventsFactory.colorEvent);
-                        factory.lastGetPlaceEvents.events = data;
+                    success(function(events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(EventsFactory.colorEvent);
+                        factory.lastGetPlaceEvents.events = events;
                         factory.lastGetPlaceEvents.id = id;
                         deferred.resolve(factory.lastGetPlaceEvents.events);
                     })
@@ -154,9 +169,12 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastGetPassedEvents.events);
             } else {
                 $http.get(RoutesFactory.organizers.getOrganizersPassedEvents(id)).
-                    success(function(data, status, headers, config) {
-                        data.forEach(EventsFactory.colorEvent);
-                        factory.lastGetPassedEvents.events = data;
+                    success(function(events, status, headers, config) {
+                        events = events.map(function(event) {
+                            return RefactorObjectsFactory.normalizeEventObject(event)
+                        });
+                        events.forEach(EventsFactory.colorEvent);
+                        factory.lastGetPassedEvents.events = events;
                         factory.lastGetPassedEvents.id = id;
                         deferred.resolve(factory.lastGetPassedEvents.events);
                     })
