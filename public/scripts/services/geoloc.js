@@ -18,7 +18,7 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
         }
 
         function errorPosition(error) {
-            $http.get('/users/geographicPoint ').success(function (data) {
+            $http.get('/users/geographicPoint').success(function (data) {
                 if (data.status !== 'fail') {
                     $rootScope.geoLoc = data.lat + "," + data.lon;
                     $localStorage.geoloc = data;
@@ -30,7 +30,7 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(getPos, errorPosition, { enableHighAccuracy: false, timeout: 1000});
         } else {
-            $http.get('/users/geographicPoint ').success(function (data) {
+            $http.get('/users/geographicPoint').success(function (data) {
                 if (data.status !== 'fail') {
                     $rootScope.geoLoc = data.lat + "," + data.lon;
                     $localStorage.geoloc = $rootScope.geoLoc;
@@ -39,7 +39,7 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
             })
         }
         if ($rootScope.geoLoc === '') {
-            $http.get('/users/geographicPoint ').success(function (data) {
+            $http.get('/users/geographicPoint').success(function (data) {
                 if (data.status !== 'fail') {
                     $rootScope.geoLoc = data.lat + "," + data.lon;
                     $localStorage.geoloc = $rootScope.geoLoc;
