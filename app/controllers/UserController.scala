@@ -31,6 +31,11 @@ class UserController @Inject() (ws: WSClient,
     }
   }
 
+  def isConnected = SecuredAction { implicit request =>
+    println(request)
+      Ok(Json.toJson(true))
+  }
+
   def getUserGeographicPoint = Action.async { implicit request =>
     WS.url("http://ip-api.com/json/" + request.remoteAddress)
       .get()

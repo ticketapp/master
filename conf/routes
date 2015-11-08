@@ -85,6 +85,7 @@ DELETE        /playlists/:playlistId                                         @co
 ################################## Genres ############################################
 GET           /genres/:genre/artists                                         @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
 GET          /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET          /genres/:genre                                                  @controllers.GenreController.isAGenre(genre: String)
 
 ################################# Tracks ############################################
 POST          /tracks/create                                                 @controllers.TrackController.createTrack
@@ -98,15 +99,17 @@ POST          /tracks/:trackId/removeFromFavorites                           @co
 GET           /tracks/favorites                                              @controllers.TrackController.getFollowedTracks
 GET           /tracks/:trackId/isFollowed                                    @controllers.TrackController.isTrackFollowed(trackId: String)
 
+################################### City ################################################
+GET          /city/:city                                                  @controllers.CityController.isACity(city: String)
 #
 ################################### Infos ################################################
 #GET     /infos                                                            @controllers.Application.infos
 
 ################################# Issues ################################################
-#GET     /issues                                                          @controllers.IssueController.issues
-#POST    /issues                                                          @controllers.IssueController.create
-#GET     /issues/:issueId/comments                                        @controllers.IssueController.commentsForIssue(issueId: Long)
-#POST    /issues/:issueId/comments                                        @controllers.IssueController.createComment(issueId: Long)
+#GET     /issues                                                          @controllers.GenreController.issues
+#POST    /issues                                                          @controllers.GenreController.create
+#GET     /issues/:issueId/comments                                        @controllers.GenreController.commentsForIssue(issueId: Long)
+#POST    /issues/:issueId/comments                                        @controllers.GenreController.createComment(issueId: Long)
 #
 ################################## Mails ################################################
 #GET     /mails                                                            @controllers.MailController.mails
@@ -120,6 +123,7 @@ GET           /tracks/:trackId/isFollowed                                    @co
 GET           /users/geographicPoint                                         @controllers.UserController.getUserGeographicPoint
 #GET     /users/facebookAccessToken/                                       @controllers.UserController.findFacebookAccessToken
 GET           /users/tracksRemoved                                           @controllers.UserController.getTracksRemoved
+GET           /users/isConnected                                           @controllers.UserController.isConnected
 
 ################################## Buy ticket ###########################################
 GET           /buyTicket                                                     @controllers.TicketController.buyTicket

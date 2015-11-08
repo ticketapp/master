@@ -109,9 +109,12 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
         getArtistsFacebookByContaining : function (pattern) {
             var deferred = $q.defer();
             if (pattern == factory.lastGetArtistsFacebookByContaining.pattern) {
-                if ($rootScope.artist != undefined && $rootScope.artist.facebookUrl.length > 0) {
-                    factory.lastGetArtistsFacebookByContaining.artists.splice(
-                        factory.lastGetArtistsFacebookByContaining.artists.indexOf($rootScope.artist),
+                if (factory.lastGetArtist.artist != undefined && factory.lastGetArtist.artist.facebookUrl.length > 0) {
+                    var artistToRemove = factory.lastGetArtistsFacebookByContaining.artists.filter(function(artist) {
+                        return artist.facebookUrl === factory.lastGetArtist.artist.facebookUrl;
+                    });
+                        factory.lastGetArtistsFacebookByContaining.artists.splice(
+                        factory.lastGetArtistsFacebookByContaining.artists.indexOf(artistToRemove),
                         1
                     )
                 }
@@ -276,7 +279,8 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             })
             .done(function (value, a) {
                     $rootScope.loadingTracks = true;
-                        if (value === "end") {
+                    console.log(value);
+                    if (value === "end") {
                         $timeout(function () {
                             $rootScope.$apply(function () {
                                 $rootScope.loadingTracks = false;
@@ -298,6 +302,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     }
             })
             .fail(function (error) {
+                    console.log(error)
             });
         },
         refactorArtistName : function (artistName) {

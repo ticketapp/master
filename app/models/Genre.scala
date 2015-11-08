@@ -83,6 +83,8 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   
   def findByName(name: String): Future[Option[Genre]] = db.run(genres.filter(_.name === name).result.headOption)
 
+  def isAGenre(pattern: String): Future[Boolean] = db.run(genres.filter(_.name === pattern).exists.result)
+
   def saveWithEventRelation(genre: Genre, eventId: Long): Future[Int] = save(genre) flatMap { 
     _.id match {
       case None =>

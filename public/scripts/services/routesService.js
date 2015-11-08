@@ -21,6 +21,16 @@ angular.module('claudeApp').factory('RoutesFactory', function () {
                 return '/users/tracksRemoved'
             }
         },
+        genres: {
+          isAGenre: function(genre) {
+              return '/genres/' + genre;
+          }
+        },
+        city: {
+          isACity: function(city) {
+              return '/city/' + city;
+          }
+        },
         follow : {
             organizers : {
                 followById: function (organizerId) {
