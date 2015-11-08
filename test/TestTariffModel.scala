@@ -9,8 +9,9 @@ class TestTariffModel extends GlobalApplicationForModels {
       tariffMethods.findPrices(Some("ion no no 6€ jlk ljk klj klj 145€ dsq q dqsdqsd q 4€")) mustBe Some("4.0-145.0")
       tariffMethods.findPrices(Some("ion no no 6€ jlk ljk klj klj 7€ dsq q dqsdqsd q 4€/8€ qsdqsd")) mustBe Some("4.0-8.0")
       tariffMethods.findPrices(Some("ion no no 6€ jlk ljk klj klj 3  € dsq q dqsdqsd q 4€/8 € qsdqsd")) mustBe Some("3.0-8.0")
-      tariffMethods.findPrices(Some("ion no no 6.8€ jlk ljk klj klj 3,45 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.45-6.8")
+      tariffMethods.findPrices(Some("ion no no 6.8€ jlk ljk klj klj 3,45 € dsq q 16 dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.45-6.8")
       tariffMethods.findPrices(Some("ion no no 6.8 € jlk ljk klj klj 3.11 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.11-6.8")
+      tariffMethods.findPrices(Some("ion no no 15€/10€/7.5€ jlk ljk klj klj dsq q dqsdqsd q  qsdqsd")) mustBe Some("7.5-15.0")
     }
 
     "find ticket seller" in {
