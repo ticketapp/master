@@ -62,7 +62,6 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             var deferred = $q.defer();
             if (start == factory.lastGetEvents.start && geoloc == factory.lastGetEvents.geoloc &&
                 offset <= factory.lastGetEvents.offset) {
-                console.log(factory.lastGetEvents.events);
                 deferred.resolve(factory.lastGetEvents.events);
             } else {
                 $http.get('/events/inInterval/' + start + '?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12')
@@ -138,6 +137,9 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 $http.get('/artists/containing/' + pattern).
                     success(function (artists, status, headers, config) {
                         factory.lastGetArtistsEventsByContaining.pattern = pattern;
+                        artists = artists.map(function(artist) {
+                            return RefactorObjectsFactory.refactorArtistObject(artist)
+                        });
                         function getArtistEvents(artist) {
                             $http.get('/artists/' + artist.facebookUrl + '/events ').
                                 success(function (events) {
@@ -170,7 +172,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                     success(function (places, status, headers, config) {
                         factory.lastGetPlacesEventsByContaining.pattern = pattern;
                         function getPlaceEvents(place) {
-                            $http.get('/places/' + place.placeId + '/events ').
+                            $http.get('/places/' + place.id + '/events ').
                                 success(function (events) {
                                     function pushEvents(event) {
                                         placesEvents.push(event)
@@ -184,8 +186,37 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                                     deferred.resolve(factory.lastGetPlacesEventsByContaining.events);
                                 })
                         }
-
                         places.forEach(getPlaceEvents)
+                    });
+            }
+            return deferred.promise;
+        },
+        lastGetOrganizersEventsByContaining: {pattern: '', events: []},
+        getOrganizersEventsByContaining : function (pattern) {
+            var deferred = $q.defer();
+            if (pattern == factory.lastGetOrganizersEventsByContaining.pattern) {
+                deferred.resolve(factory.lastGetOrganizersEventsByContaining.events)
+            } else {
+                var organizersEvents = [];
+                $http.get('/organizers/containing/' + pattern).
+                    success(function (organizers, status, headers, config) {
+                        factory.lastGetOrganizersEventsByContaining.pattern = pattern;
+                        function getOrganizerEvents(organizer) {
+                            $http.get('/organizers/' + organizer.id + '/events ').
+                                success(function (events) {
+                                    function pushEvents(event) {
+                                        organizersEvents.push(event)
+                                    }
+                                    events = events.map(function(event) {
+                                        return RefactorObjectsFactory.normalizeEventObject(event)
+                                    });
+                                    events.forEach(factory.colorEvent);
+                                    events.forEach(pushEvents);
+                                    factory.lastGetOrganizersEventsByContaining.events = organizersEvents;
+                                    deferred.resolve(factory.lastGetOrganizersEventsByContaining.events);
+                                })
+                        }
+                        organizers.forEach(getOrganizerEvents)
                     });
             }
             return deferred.promise;

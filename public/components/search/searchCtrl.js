@@ -9,7 +9,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         $scope.organizers = [];
         $scope.places = [];
         $scope.events = [];
-        $scope.filtredEvents = [];
         $scope.loadingMore = true;
         var offset = 0;
         var _selArtist = $rootScope.activArtist;
@@ -66,21 +65,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             data.forEach(pushEl);
         }
 
-        function filterEventsByTime() {
-            function filter (events) {
-                var eventsLength = events.length;
-                var maxStartTime = _selStart * 3600000 + new Date().getTime();
-                for (var e = 0; e < eventsLength; e++) {
-                    if (events[e].startTime > maxStartTime) {
-                        events.splice(e, 1);
-                        e = e - 1;
-                        eventsLength = eventsLength - 1;
-                    }
-                }
-            }
-            filter($scope.events);
-            filter($scope.filtredEvents);
-        }
         function getArtists () {
             ArtistsFactory.getArtists(offset).then(function (artists) {
                 updateScope(artists, $scope.artists, 'id');
@@ -114,49 +98,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     }
                 }
                 updateScope(artists, $scope.artists, 'id');
-            });
-        }
-
-        function getEvents() {
-            filterEventsByTime();
-            EventsFactory.getEvents(_selStart, $rootScope.geoLoc, offset).then(function (events) {
-                updateScope(events, $scope.filtredEvents, 'id', $scope.events);
-                console.log(events)
-            });
-        }
-
-        function getEventsArtistByContaining() {
-            EventsFactory.getArtistsEventsByContaining(_research).then(function (events) {
-                updateScope(events, $scope.events, 'id');
-            });
-        }
-
-        function getEventsByGenre() {
-            EventsFactory.getEventsByGenre(_research, offset, $rootScope.geoLoc).then(function (events) {
-                updateScope(events, $scope.events, 'id');
-                console.log(events)
-            });
-        }
-
-        function getPlacesEventsByContaining() {
-            EventsFactory.getPlacesEventsByContaining(_research).then(function (events) {
-                updateScope(events, $scope.events, 'id');
-            });
-        }
-
-        function getEventsByCity() {
-            EventsFactory.getEventsByCity(_research, offset).then(function (events) {
-                updateScope(events, $scope.events, 'id');
-            });
-        }
-
-        function getEventsByContaining() {
-            EventsFactory.getEventsByContaining(_research, $rootScope.geoLoc).then(function (events) {
-                updateScope(events, $scope.filtredEvents, 'id', $scope.events);
-                getEventsArtistByContaining();
-                getEventsByGenre();
-                getPlacesEventsByContaining();
-                getEventsByCity();
             });
         }
 
@@ -228,9 +169,25 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             }
             if (_selEvent == true) {
                 if (_research.length == 0) {
-                    getEvents()
+                    SearchFactory.getEvents(_selStart, offset).then(function(events) {
+                        $scope.events = events;
+                        $scope.loadingMore = false;
+                    }, function(error) {
+
+                    }, function(update) {
+                        $scope.events = update;
+                        $scope.loadingMore = false;
+                    })
                 } else {
-                    getEventsByContaining();
+                    SearchFactory.searchEventsWithQuery(_research, offset).then(function(events) {
+                        $scope.events = events;
+                        $scope.loadingMore = false;
+                    }, function(error) {
+
+                    }, function(update) {
+                        $scope.events = update;
+                        $scope.loadingMore = false;
+                    })
                 }
             }
         }
@@ -368,14 +325,10 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     _selPlace = false;
                     _selOrganizer = false;
                     if (_research.length == 0) {
-                        $scope.initializeTime()
-                        getEvents()
+                        $scope.initializeTime();
+                        SearchFactory.getEvents(_selStart, offset)
                     } else {
-                        getEventsByContaining();
-                        getEventsArtistByContaining();
-                        getEventsByCity();
-                        getEventsByGenre();
-                        getPlacesEventsByContaining()
+                        SearchFactory.getArtistsByContaining(_research, offset)
                     }
                 } else {
                     $scope.events = []
@@ -444,8 +397,15 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 clearTimeout(StartTimer);
                 StartTimer = setTimeout(function () {
                     $scope.loadingMore = true;
-                    filterEventsByTime();
-                    getEvents()
+                    SearchFactory.getEvents(_selStart, offset).then(function(events) {
+                        $scope.events = events;
+                        $scope.loadingMore = false;
+                    }, function(error) {
+
+                    }, function(update) {
+                        $scope.events = update;
+                        $scope.loadingMore = false;
+                    })
                 }, doneStartInterval);
                 return _selStart;
             }
