@@ -17,12 +17,6 @@ class TestTrackModel extends GlobalApplicationForModels {
 
   "A track" must {
 
-    def isOrdered(list: List[Double]): Boolean = list match {
-      case Nil => true
-      case x :: Nil => true
-      case x :: xs => x <= xs.head && isOrdered(xs)
-    }
-
     "be found by playlist id" in {
       whenReady(trackMethods.findByPlaylistId(1L), timeout(Span(5, Seconds))) { tracksWithPlaylistRank =>
         assert(isOrdered((tracksWithPlaylistRank map (_.rank)).toList))

@@ -237,8 +237,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
         optionalEventAddresses) <- events
         .filter(event => ((event.endTime.nonEmpty && event.endTime > now)
-          || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
-        .sortBy(_.startTime.desc) joinLeft
+          || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -249,7 +248,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations =>
+      eventWithRelationsTupleToEventWithRelationClass(eventWithRelations).sortBy(-_.event.startTime.getMillis))
   }
 
 

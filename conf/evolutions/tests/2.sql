@@ -45,7 +45,8 @@ INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
 -------------------------------------------------------- events --------------------------------------------------------
 INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'name0', current_timestamp, '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent', timestamp '2050-08-24 14:00:00', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent', timestamp '2040-08-24 14:00:00', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
@@ -59,13 +60,22 @@ INSERT INTO places(name, facebookid, geographicpoint) VALUES('Test1', '666137029
 -------------------------------------------------------- addresses -----------------------------------------------------
 INSERT INTO addresses(city) VALUES('lyon');
 
--------------------------------------------------------- eventsOrganizers ----------------------------------------------
+-------------------------------------------------------- eventsPlaces --------------------------------------------------
+INSERT INTO eventsplaces(eventid, placeid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT placeid FROM places WHERE name = 'Test'));
+INSERT INTO eventsplaces(eventid, placeid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'notPassedEvent'), (SELECT placeid FROM places WHERE name = 'Test'));
+INSERT INTO eventsplaces(eventid, placeid) VALUES
+  ((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT placeid FROM places WHERE name = 'Test'));
+
+
+  -------------------------------------------------------- eventsOrganizers --------------------------------------------
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
   ((SELECT eventId FROM events WHERE name = 'eventPassed'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
-  ((SELECT eventId FROM events WHERE name = 'notPassedEvent'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+  ((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
 
 -------------------------------------------------------- eventsGenres --------------------------------------------------
 INSERT INTO eventsgenres(eventid, genreid) VALUES

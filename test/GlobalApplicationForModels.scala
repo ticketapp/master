@@ -11,4 +11,10 @@ trait GlobalApplicationForModels extends PlaySpec with OneAppPerSuite with Injec
   override def afterAll() = {
     Evolutions.cleanupEvolutions(databaseApi.database("tests"))
   }
+
+  def isOrdered(list: List[Double]): Boolean = list match {
+    case Nil => true
+    case x :: Nil => true
+    case x :: xs => x <= xs.head && isOrdered(xs)
+  }
 }

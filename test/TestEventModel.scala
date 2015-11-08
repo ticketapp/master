@@ -182,6 +182,18 @@ class TestEventModel extends GlobalApplicationForModels {
       }
     }
 
+    "find all events by place sorted by date" in {
+      whenReady(eventMethods.findAllByPlace(2), timeout(Span(5, Seconds))) { eventsByPlace =>
+
+        assert(eventsByPlace.size > 2)
+
+        val startTimes = eventsByPlace map (_.event.startTime.getMillis.toDouble)
+        val reverseStartTimes = startTimes.toList.reverse
+
+        assert(isOrdered(reverseStartTimes))
+      }
+    }
+
     "return passed events for a place" in {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         None, None, new DateTime(0), None, 16, None, None, None))
