@@ -190,7 +190,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           case Some(genreFound) if genreFound.icon == 'm' =>
             Option(Genre(None, "musiques du monde"))
           case Some(genreFound) if genreFound.icon == 'a' =>
-            Option(Genre(None, ""))
+            Option(Genre(None, "autre"))
           case _ =>
             Logger.error("Artist.findOverGenres: no genre found for this id")
             None

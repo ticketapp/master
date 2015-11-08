@@ -488,8 +488,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
         "access_token" -> utilities.facebookToken)
       .get()
-      .flatMap { response =>
-        facebookEventToEventWithRelations(response) }
+      .flatMap(facebookEventToEventWithRelations)
 
   case class MaybeOwnerAndPlaceIds(maybeOwnerId: Option[String], maybePlaceId: Option[String])
 

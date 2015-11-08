@@ -16,7 +16,7 @@ trait addressFormsTrait {
     Option(Address(None, None, city, zip, street))
   } catch {
     case e: Exception =>
-      Logger.error("Address.formApply: ", e)
+      Logger.error("Address.formApply: empty address has not been created")
       None
   }
 
