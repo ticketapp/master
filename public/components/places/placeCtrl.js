@@ -9,7 +9,6 @@ angular.module('claudeApp').
             $scope.showDesc = false;
             PlaceFactory.getPlace($routeParams.id).then(function (place) {
                 $scope.place = place;
-                console.log(place);
                 if ($scope.place.address !== undefined && $scope.place.address.geographicPoint !== undefined) {
                     $scope.geographicPoint =
                         RefactorGeopoint.refactorGeopoint($scope.place.address.geographicPoint);

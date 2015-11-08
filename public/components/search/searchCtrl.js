@@ -247,8 +247,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     if (_research.length == 0) {
                         $scope.initializeTime()
                     } else {
-                        $scope.events = $filter('filter')($scope.events, {name: _research});
-                        $scope.filtredEvents = $filter('filter')($scope.filtredEvents, {name: _research});
                         $scope.organizers = $filter('filter')($scope.organizers, {nickname: _research});
                         $scope.places = $filter('filter')($scope.places, {name: _research});
                         $scope.artistsFb = $filter('filter')($scope.artistsFb, {name: _research});
@@ -326,9 +324,25 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     _selOrganizer = false;
                     if (_research.length == 0) {
                         $scope.initializeTime();
-                        SearchFactory.getEvents(_selStart, offset)
+                        SearchFactory.getEvents(_selStart, offset).then(function(events) {
+                            $scope.events = events;
+                            $scope.loadingMore = false;
+                        }, function(error) {
+
+                        }, function(update) {
+                            $scope.events = update;
+                            $scope.loadingMore = false
+                        })
                     } else {
-                        SearchFactory.getArtistsByContaining(_research, offset)
+                        SearchFactory.searchEventsWithQuery(_research, offset).then(function(events) {
+                            $scope.events = events;
+                            $scope.loadingMore = false;
+                        }, function(error) {
+
+                        }, function(update) {
+                            $scope.events = update;
+                            $scope.loadingMore = false
+                        })
                     }
                 } else {
                     $scope.events = []
