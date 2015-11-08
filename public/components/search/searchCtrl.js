@@ -65,21 +65,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             data.forEach(pushEl);
         }
 
-        function filterEventsByTime() {
-            function filter (events) {
-                var eventsLength = events.length;
-                var maxStartTime = _selStart * 3600000 + new Date().getTime();
-                for (var e = 0; e < eventsLength; e++) {
-                    if (events[e].startTime > maxStartTime) {
-                        events.splice(e, 1);
-                        e = e - 1;
-                        eventsLength = eventsLength - 1;
-                    }
-                }
-            }
-            filter($scope.events);
-            filter($scope.filtredEvents);
-        }
         function getArtists () {
             ArtistsFactory.getArtists(offset).then(function (artists) {
                 updateScope(artists, $scope.artists, 'id');
@@ -186,6 +171,11 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 if (_research.length == 0) {
                     SearchFactory.getEvents(_selStart, offset).then(function(events) {
                         $scope.events = events;
+                        $scope.loadingMore = false;
+                    }, function(error) {
+
+                    }, function(update) {
+                        $scope.events = update;
                         $scope.loadingMore = false;
                     })
                 } else {
@@ -335,14 +325,10 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     _selPlace = false;
                     _selOrganizer = false;
                     if (_research.length == 0) {
-                        $scope.initializeTime()
-                        getEvents()
+                        $scope.initializeTime();
+                        SearchFactory.getEvents(_selStart, offset)
                     } else {
-                        getEventsByContaining();
-                        getEventsArtistByContaining();
-                        getEventsByCity();
-                        getEventsByGenre();
-                        getPlacesEventsByContaining()
+                        SearchFactory.getArtistsByContaining(_research, offset)
                     }
                 } else {
                     $scope.events = []
@@ -411,8 +397,15 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 clearTimeout(StartTimer);
                 StartTimer = setTimeout(function () {
                     $scope.loadingMore = true;
-                    filterEventsByTime();
-                    getEvents()
+                    SearchFactory.getEvents(_selStart, offset).then(function(events) {
+                        $scope.events = events;
+                        $scope.loadingMore = false;
+                    }, function(error) {
+
+                    }, function(update) {
+                        $scope.events = update;
+                        $scope.loadingMore = false;
+                    })
                 }, doneStartInterval);
                 return _selStart;
             }

@@ -3,7 +3,7 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
     function ($rootScope, $location, $q, EventsFactory, UserFactory, GenresFactory, GeolocFactory, CityFactory, $localStorage) {
     var factory = {
         initSearch : false,
-        research : '',
+        research : false,
         events: [],
         eventsLocked: false,
         isConnected: false,
@@ -35,7 +35,7 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
         },
         storeSearch : function (search) {
             $rootScope.storeSearch = search;
-            factory.research = search;
+            //factory.research = search;
         },
         filterEventArtists: function (event, research) {
             return event.artists.filter(function (artist) {
@@ -75,127 +75,79 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
             factory.events = factory.events.concat(eventsToPush);
             factory.eventsLocked = false;
         },
-        filterEventsByTime: function(events, start) {
-            var eventsLength = events.length;
-            var maxStartTime = start * 3600000 + new Date().getTime();
-            for (var e = 0; e < eventsLength; e++) {
-                if (events[e].startTime > maxStartTime) {
-                    events.splice(e, 1);
-                    e = e - 1;
-                    eventsLength = eventsLength - 1;
-                }
-            }
-        },
         searchEventsWithQuery: function(research, offset) {
             factory.filterEvent(research);
             var deferred = $q.defer();
-            if (research === factory.research && factory.events.length > 0 && offset === factory.eventsOffset) {
+
+            function waitForUpdateEvents(events) {
+                if (factory.eventsLocked === false) {
+                    factory.updateEvents(events);
+                    deferred.notify(factory.events)
+                } else {
+                    var waitForEvents = setInterval(function () {
+                        if (factory.eventsLocked === false) {
+                            clearInterval(waitForEvents);
+                            factory.updateEvents(events);
+                            deferred.notify(factory.events)
+                        }
+                    }, 100)
+                }
+            }
+
+            if (research === factory.research &&
+                factory.events.length > 0 && offset === factory.eventsOffset) {
                 deferred.resolve(factory.events)
             } else {
                 factory.research = research;
+                factory.eventsOffset = offset;
                 deferred.notify(factory.events);
                 GeolocFactory.getGeolocation().then(function (geolocation) {
                     GenresFactory.isAGenre(research).then(function(isAGenre) {
                         if (isAGenre === true) {
                             EventsFactory.getEventsByGenre(research, offset, geolocation).then(function (events) {
-                                if (factory.eventsLocked === false) {
-                                    factory.updateEvents(events);
-                                    deferred.notify(factory.events)
-                                } else {
-                                    var waitForEvents = setInterval(function() {
-                                        if (factory.eventsLocked === false) {
-                                            clearInterval(waitForEvents);
-                                            factory.updateEvents(events);
-                                            deferred.notify(factory.events)
-                                        }
-                                    }, 100)
-                                }
+                                waitForUpdateEvents(events);
                             })
                         }
                     });
                     CityFactory.isACity(research).then(function(isACity) {
-                        if (isACity === true) {
+                        if (isACity) {
                             EventsFactory.getEventsByCity(research, offset).then(function (events) {
-                                if (factory.eventsLocked === false) {
-                                    factory.updateEvents(events);
-                                    deferred.notify(factory.events)
-                                } else {
-                                    var waitForEvents = setInterval(function() {
-                                        if (factory.eventsLocked === false) {
-                                            clearInterval(waitForEvents);
-                                            factory.updateEvents(events);
-                                            deferred.notify(factory.events)
-                                        }
-                                    }, 100)
-                                }
+                                waitForUpdateEvents(events);
                             })
                         }
                     });
                     EventsFactory.getEventsByContaining(research, geolocation).then(function(events) {
-                        if (factory.eventsLocked === false) {
-                            factory.updateEvents(events);
-                            deferred.notify(factory.events)
-                        } else {
-                            var waitForEvents = setInterval(function() {
-                                if (factory.eventsLocked === false) {
-                                    clearInterval(waitForEvents);
-                                    factory.updateEvents(events);
-                                    deferred.notify(factory.events)
-                                }
-                            }, 100)
-                        }
+                        waitForUpdateEvents(events);
                     });
                     EventsFactory.getArtistsEventsByContaining(research).then(function(events) {
-                        if (factory.eventsLocked === false) {
-                            factory.updateEvents(events);
-                            deferred.notify(factory.events)
-                        } else {
-                            var waitForEvents = setInterval(function() {
-                                if (factory.eventsLocked === false) {
-                                    clearInterval(waitForEvents);
-                                    factory.updateEvents(events);
-                                    deferred.notify(factory.events)
-                                }
-                            }, 100)
-                        }
+                        waitForUpdateEvents(events);
                     });
                     EventsFactory.getPlacesEventsByContaining(research).then(function(events) {
-                        if (factory.eventsLocked === false) {
-                            factory.updateEvents(events);
-                            deferred.notify(factory.events)
-                        } else {
-                            var waitForEvents = setInterval(function() {
-                                if (factory.eventsLocked === false) {
-                                    clearInterval(waitForEvents);
-                                    factory.updateEvents(events);
-                                    deferred.notify(factory.events)
-                                }
-                            }, 100)
-                        }
+                        waitForUpdateEvents(events);
                     });
                     EventsFactory.getOrganizersEventsByContaining(research).then(function(events) {
-                        if (factory.eventsLocked === false) {
-                            factory.updateEvents(events);
-                            deferred.notify(factory.events)
-                        } else {
-                            var waitForEvents = setInterval(function() {
-                                if (factory.eventsLocked === false) {
-                                    clearInterval(waitForEvents);
-                                    factory.updateEvents(events);
-                                    deferred.notify(factory.events)
-                                }
-                            }, 100)
-                        }
+                        waitForUpdateEvents(events);
                     });
                 });
             }
             return deferred.promise;
         },
+        filterByTime: function (start, event) {
+            var maxStartTime = start * 3600000 + new Date().getTime();
+            return event.startTime < maxStartTime
+        },
         getEvents: function(start, offset) {
             var deferred = $q.defer();
-            factory.filterEventsByTime(factory.events);
+            factory.events = factory.events.filter(function(event) {
+                return factory.filterByTime(start, event);
+            });
+            factory.research = false;
+            deferred.notify(factory.events);
             EventsFactory.getEvents(start, $rootScope.geoLoc, offset).then(function (events) {
                 if (factory.eventsLocked === false) {
+                    events = events.filter(function(event) {
+                        return factory.filterByTime(start, event);
+                    });
                     factory.updateEvents(events);
                     deferred.resolve(factory.events);
                 } else {

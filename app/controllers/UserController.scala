@@ -32,7 +32,6 @@ class UserController @Inject() (ws: WSClient,
   }
 
   def isConnected = SecuredAction { implicit request =>
-    println(request)
       Ok(Json.toJson(true))
   }
 

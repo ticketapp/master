@@ -240,7 +240,6 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             $http.get('/users/isConnected').success(function(success) {
                 deferred.resolve(success)
             }).error(function(error) {
-                console.log(error);
                 deferred.resolve(false)
             })
             return deferred.promise
