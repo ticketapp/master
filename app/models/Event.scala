@@ -9,6 +9,7 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
+import play.api.libs.iteratee.Iteratee
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
@@ -49,6 +50,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val organizerMethods: OrganizerMethods,
                              val artistMethods: ArtistMethods,
                              val tariffMethods: TariffMethods,
+                             val trackMethods: TrackMethods,
                              val genreMethods: GenreMethods,
                              val placeMethods: PlaceMethods,
                              val geographicPointMethods: SearchGeographicPoint,
@@ -468,6 +470,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         Future(event)
       case None =>
         findEventOnFacebookByFacebookId(eventFacebookId) flatMap { event =>
+          Future {
+            event.artists.foreach { artist =>
+            val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
+            tracksEnumerator |>> Iteratee.foreach(t => t.map(trackMethods.save))
+              artist
+            }
+          }
           save(event)
         }
     }
@@ -479,8 +488,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
         "access_token" -> utilities.facebookToken)
       .get()
-      .flatMap { response =>
-        facebookEventToEventWithRelations(response) }
+      .flatMap(facebookEventToEventWithRelations)
 
   case class MaybeOwnerAndPlaceIds(maybeOwnerId: Option[String], maybePlaceId: Option[String])
 
