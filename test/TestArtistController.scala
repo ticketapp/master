@@ -47,7 +47,7 @@ class TestArtistController extends GlobalApplicationForControllers {
         }
       }""")
       val Some(result) = route(FakeRequest(POST, "/artists/createArtist")
-      .withJsonBody(artistJson))
+        .withJsonBody(artistJson))
 
       status(result) mustEqual CONFLICT
     }

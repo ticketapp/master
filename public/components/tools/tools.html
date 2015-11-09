@@ -97,8 +97,7 @@
                                 </i>
                             </a>
                         </div>
-                        <ul ng-repeat="track in favorites.tracks | filter: filterFavorites" ng-if="$root.connected == true"
-                            ng-init="track.isFavorite = true">
+                        <ul ng-repeat="track in favorites.tracks | filter: { isFavorite: true }" ng-if="$root.connected == true">
                             <ng-track class="column large-6"></ng-track>
                         </ul>
                         <b ng-if="viewFavorites && favorites.tracks.length == 0 && $root.connected == true">

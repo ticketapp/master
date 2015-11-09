@@ -183,7 +183,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             .done(function (value) {
                 deferred.resolve(value);
             })
-            .fail(function (error, status) {
+            .fail(function (error) {
                 deferred.resolve(error);
             });
             return deferred.promise;
@@ -306,7 +306,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             }
                     }
             })
-            .fail(function (error, status) {
+            .fail(function (error) {
                 if (error.statusCode === 409 && factory.lastGetArtist.url === artist.facebookUrl) {
                     factory.getArtistTracks(artist.facebookUrl).then(function(tracks) {
                         artist.tracks = tracks.map(function (track) {

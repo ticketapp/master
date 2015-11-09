@@ -24,6 +24,8 @@ case class Track (uuid: UUID,
                   redirectUrl: Option[String] = None,
                   confidence: Double = 0.toDouble)
 
+case class TrackWithGenres(track: Track, genres: Seq[Genre])
+
 class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver]

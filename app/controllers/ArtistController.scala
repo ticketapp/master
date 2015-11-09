@@ -78,22 +78,22 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
         artistMethods.saveOrReturnNoneIfDuplicate(ArtistWithWeightedGenres(patternAndArtist.artistWithWeightedGenre.artist,
           patternAndArtist.artistWithWeightedGenre.genres)) map {
           case Some(artist) =>
-           val artistId = artist.id
-           val artistWithArtistId = patternAndArtist.artistWithWeightedGenre.artist.copy(id = artistId)
-           val patternAndArtistWithArtistId =
+            val artistId = artist.id
+            val artistWithArtistId = patternAndArtist.artistWithWeightedGenre.artist.copy(id = artistId)
+            val patternAndArtistWithArtistId =
              PatternAndArtist(patternAndArtist.searchPattern, ArtistWithWeightedGenres(artistWithArtistId, Vector.empty))
-           val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
-           val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
+            val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
+            val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
              val filteredTracks: Set[Track] = tracks.flatMap { track =>
                trackMethods.save(track)
                Some(track)
              }
              Json.toJson(filteredTracks)
-           }
-           val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
+            }
+            val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
 
-           Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { trackMethods.save }) }
-           Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
+            Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { trackMethods.save }) }
+            Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
           case None =>
             Conflict
         }

@@ -28,9 +28,9 @@ angular.module('claudeApp').controller('toolsCtrl', ['$scope', '$modal', '$log',
 // It is not the same as the $modal service used above.
 
 angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalInstance', '$rootScope',
-'$http', 'InfoModal', 'UserFactory', 'ToolsFactory', 'ArtistsFactory', 'PlaceFactory', 'OrganizerFactory',
+'$http', 'InfoModal', 'UserFactory', 'ToolsFactory', 'ArtistsFactory', 'PlaceFactory', 'OrganizerFactory', 'FollowService',
     function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, ToolsFactory, ArtistsFactory, PlaceFactory,
-              OrganizerFactory) {
+              OrganizerFactory, FollowService) {
     $scope.suggeredPlaylists = [];
     $scope.playlists = [];
     $scope.logout = function () {
@@ -81,19 +81,20 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     $scope.favorites = {};
     $scope.getFavorites = function() {
         $scope.favorites.name = 'favories';
-        UserFactory.getFavoritesTracks().then(function (tracks) {
+        FollowService.tracks.favorites().then(function (tracks) {
             $scope.favorites.tracks = tracks;
-            $scope.closeTrack = function (index) {
+            $scope.closeTrack = function (index, trackId) {
+                FollowService.tracks.removeFromFavorites(trackId);
                 $scope.favorites.tracks.tracks.splice(index, 1);
             };
         });
-        ArtistsFactory.getFollowArtists().then(function (artists) {
+        FollowService.artists.followed().then(function (artists) {
             $scope.favorites.artists = artists;
         });
-        PlaceFactory.getFollowedPlaces().then(function (places) {
+        FollowService.places.followed().then(function (places) {
             $scope.favorites.places = places;
         });
-        OrganizerFactory.getFollowedOrganizers().then(function (organizers) {
+        FollowService.organizers.followed().then(function (organizers) {
             $scope.favorites.organizers = organizers;
         })
     };

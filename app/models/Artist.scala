@@ -153,10 +153,10 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         artistFound <- artists.filter(_.facebookUrl === formattedArtist.artist.facebookUrl).result.headOption
         result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += formattedArtist.artist)
       } yield result match {
-        case a: Artist =>
+        case artist: Artist =>
           Logger.info("Artist.save: this artist is already saved")
-          formattedArtist.genres map(genre => genreMethods.saveWithArtistRelation(genre = genre.genre, artistId = a.id.get))
-          a
+          formattedArtist.genres map(genre => genreMethods.saveWithArtistRelation(genre = genre.genre, artistId = artist.id.get))
+          artist
         case id: Long =>
           formattedArtist.genres map(genre => genreMethods.saveWithArtistRelation(genre = genre.genre, artistId = id))
           formattedArtist.artist.copy(id = Option(id))
@@ -170,7 +170,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artistFound <- artists.filter(_.facebookUrl === formattedArtist.artist.facebookUrl).result.headOption
       result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += formattedArtist.artist)
     } yield result match {
-        case a: Artist =>
+        case artist: Artist =>
           Logger.info("Artist.save: this artist is already saved")
           None
         case id: Long =>

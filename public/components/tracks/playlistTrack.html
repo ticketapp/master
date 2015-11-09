@@ -10,7 +10,7 @@
         </i>
         <i class="fa fa-exclamation column large-12 padding0 pointer"
            style="line-height: 23.33px"
-           ng-click="signalTrack(track.uuid); closeTrack($index)">
+           ng-click="signalTrack(track.uuid); closeTrack(track.uuid, $index)">
             <md-track-tooltipe>
                 signaler
             </md-track-tooltipe>
@@ -18,7 +18,7 @@
         <i class="fa fa-star column large-12 padding0 pointer"
            style="line-height: 23.33px"
            ng-if="!track.isFavorite || $root.connected == false"
-           ng-click="addTrackToFavorite(track.uuid); track.isFavorite = true">
+           ng-click="addTrackToFavorite(track); track.isFavorite = true">
             <md-track-tooltipe>
                 Ajouter aux favoris
             </md-track-tooltipe>
