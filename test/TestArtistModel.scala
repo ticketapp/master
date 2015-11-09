@@ -170,15 +170,11 @@ class TestArtistModel extends GlobalApplicationForModels {
       val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId4"), "artistTest4", Option("imagePath"), Option("description"),
         "facebookUrl4", Set("website")), Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        try {
-          val updatedArtist = savedArtist.copy(id = Option(savedArtist.id.get), name = "updatedName")
-          whenReady(artistMethods.update(updatedArtist), timeout(Span(5, Seconds))) { resp =>
-            whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe
-              Option(ArtistWithWeightedGenres(updatedArtist, Vector.empty))
-            }
+        val updatedArtist = savedArtist.copy(id = Option(savedArtist.id.get), name = "updatedName")
+        whenReady(artistMethods.update(updatedArtist), timeout(Span(5, Seconds))) { resp =>
+          whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe
+            Option(ArtistWithWeightedGenres(updatedArtist, Vector.empty))
           }
-        } finally {
-          artistMethods.delete(savedArtist.id.get)
         }
       }
     }
@@ -198,8 +194,23 @@ class TestArtistModel extends GlobalApplicationForModels {
                 id = Option(savedArtist.id.get),
                 websites = Set("website", "normalizedUrl"),
                 description = Some("<div class='column large-12'>description</div>")), Vector.empty))
+          }
+        }
+      }
+    }
 
-            artistMethods.delete(savedArtist.id.get)
+    "have his websites updated without duplicates" in {
+      whenReady(artistMethods.addWebsite(1, "normalizedUrl"), timeout(Span(5, Seconds))) { response =>
+
+        response mustBe 1
+
+        whenReady(artistMethods.addWebsite(1, "normalizedUrl"), timeout(Span(5, Seconds))) { response2 =>
+
+          response2 mustBe 1
+
+          whenReady(artistMethods.find(1), timeout(Span(5, Seconds))) { foundArtist =>
+
+            foundArtist.get.artist.websites mustBe Set("normalizedUrl")
           }
         }
       }
@@ -213,25 +224,19 @@ class TestArtistModel extends GlobalApplicationForModels {
 
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.addSoundCloudUrlIfMissing(track, savedArtist), timeout(Span(5, Seconds))) { _ =>
-          try {
-            whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { artistFound =>
-              artistFound mustBe Option(ArtistWithWeightedGenres(savedArtist.copy(websites = Set("website", "redirecturl"),
-                description = Some("<div class='column large-12'>description</div>")), Vector.empty))
-            }
-          } finally {
-            whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) {
-              _ mustBe 1
-            }
+          whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { artistFound =>
+            artistFound mustBe Option(ArtistWithWeightedGenres(savedArtist.copy(websites = Set("website", "redirecturl"),
+              description = Some("<div class='column large-12'>description</div>")), Vector.empty))
           }
         }
       }
     }
 
     "save soundcloud websites for an artist" in {
-      val track = Track(UUID.fromString("9a9ca254-0245-4a69-b66c-494f3a0ced3e"),"Toi (Snippet)",
-        "https://api.soundcloud.com/tracks/190465678/stream",'s',
-        "https://i1.sndcdn.com/artworks-000106271172-2q3z78-large.jpg","worakls","Worakls",
-        Some("http://soundcloud.com/worakls/toi-snippet")/*,None,List()*/)
+      val track = Track(UUID.fromString("9a9ca254-0245-4a69-b66c-494f3a0ced3e"), "Toi (Snippet)",
+        "https://api.soundcloud.com/tracks/190465678/stream", 's',
+        "https://i1.sndcdn.com/artworks-000106271172-2q3z78-large.jpg", "worakls", "Worakls",
+        Some("http://soundcloud.com/worakls/toi-snippet") /*,None,List()*/)
       val artist = Artist(Option(26.toLong), Option("facebookIdTestArtistModel"), "artistTest",
         Option("imagePath"), Option("description"), "facebookUrl", Set("website"))
 
@@ -262,11 +267,11 @@ class TestArtistModel extends GlobalApplicationForModels {
 
     "follow artist by facebookId" in {
       whenReady(artistMethods.followByFacebookId(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
-      "facebookIdTestTrack"), timeout(Span(5, Seconds))) { response =>
+        "facebookIdTestTrack"), timeout(Span(5, Seconds))) { response =>
         response mustBe 1
       }
     }
-   /* "get tracks for an artist" in {
+    /* "get tracks for an artist" in {
       val patternAndArtist = PatternAndArtistWithWeightedGenres(Artist("Feu! Chatterton",
         ArtistWithWeightedGenres(Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
           Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
