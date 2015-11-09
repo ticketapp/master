@@ -173,12 +173,30 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
     db.run(query.head)
   }
 
-  def getFollowedTracks(userId: UUID): Future[Seq[Track]]= {
+  def getFollowedTracks(userId: UUID): Future[Seq[TrackWithGenres]]= {
     val query = for {
       trackFollowed <- tracksFollowed if trackFollowed.userId === userId
-      track <- tracks if track.uuid === trackFollowed.trackId
-    } yield track
+      (track, genre) <- tracks joinLeft
+        (artists join artistsGenres on (_.id === _.artistId) join genres on (_._2.genreId === _.id)) on
+          (_.artistFacebookUrl === _._1._1.facebookUrl)
 
-    db.run(query.result)
+      if track.uuid === trackFollowed.trackId
+    } yield (track, genre)
+
+    db.run(query.result) map { trackGenreArtistTuples =>
+      val groupedByTracks = trackGenreArtistTuples.groupBy(_._1)
+
+      val tracksWithGenres = groupedByTracks map { trackWithOptionalGenres =>
+        val track = trackWithOptionalGenres._1
+        val genreArtistRelations = trackWithOptionalGenres._2
+        val genres = genreArtistRelations.collect { case (_, Some((_, genre))) =>
+          genre
+        }
+
+        TrackWithGenres(track = track, genres = genres)
+      }
+
+      tracksWithGenres.toVector
+    }
   }
 }

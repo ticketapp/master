@@ -8,6 +8,17 @@ angular.module('claudeApp').
                 artist = artist.artist;
                 return artist
             },
+            refactorTrackWithGenreObject: function (track) {
+                track.track.genres = track.genres.map(function (genre) {
+                    return genre
+                });
+                track = track.track;
+                return track
+            },
+            refactorOrganizerObject: function (organizer) {
+                organizer = organizer.organizer;
+                return organizer
+            },
             normalizeEventObject : function (event) {
                 event.event.addresses = event.addresses;
                 event.event.artists = event.artists.map(function(artist) {

@@ -1,5 +1,6 @@
-angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFactory', '$q', '$http',
-    function($localStorage, RoutesFactory, $q, $http) {
+angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFactory', '$q', '$http', 'RefactorObjectsFactory',
+    'ImagesFactory',
+    function($localStorage, RoutesFactory, $q, $http, RefactorObjectsFactory, ImagesFactory) {
         var factory = {
             followedOrganizers : [],
             followedPlaces : [],
@@ -38,10 +39,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 unfollowById: function (organizerId) {
                     var defered = $q.defer();
                     $http.post(RoutesFactory.follow.organizers.unfollowById(organizerId)).success(function(response) {
-                        var organizerToRemove = factory.followedOrganizers.filter(function(organizer) {
-                            return organizer.id === organizerId
+                        factory.followedOrganizers = factory.followedOrganizers.filter(function(organizer) {
+                            return organizer.id !== organizerId
                         });
-                        factory.followedOrganizers.splice(factory.followedOrganizers.indexOf(organizerToRemove), 1);
                         defered.resolve(response)
                     }).error(function(error, status) {
                         defered.reject(error, status)
@@ -101,6 +101,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                         defered.resolve(factory.followedOrganizers)
                     } else {
                         $http.get(RoutesFactory.follow.organizers.followed()).success(function (organizers) {
+                            organizers = organizers.map(function(organizer) {
+                                return RefactorObjectsFactory.refactorOrganizerObject(organizer)
+                            });
                             factory.followedOrganizers = organizers;
                             defered.resolve(factory.followedOrganizers)
                         }).error(function (error, status) {
@@ -142,10 +145,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 unfollowById: function (placeId) {
                     var defered = $q.defer();
                     $http.post(RoutesFactory.follow.places.unfollowById(placeId)).success(function(response) {
-                        var placeToRemove = factory.followedPlaces.filter(function(place) {
-                            return place.id === placeId
+                        factory.followedPlaces = factory.followedPlaces.filter(function(place) {
+                            return place.id !== placeId
                         });
-                        factory.followedPlaces.splice(factory.followedPlaces.indexOf(placeToRemove), 1);
                         defered.resolve(response)
                     }).error(function(error, status) {
                         defered.reject(error, status)
@@ -246,10 +248,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 unfollowById: function (artistId) {
                     var defered = $q.defer();
                     $http.post(RoutesFactory.follow.artists.unfollowById(artistId)).success(function(response) {
-                        var artistToRemove = factory.followedArtists.filter(function(artist) {
-                            return artist.id === artistId
+                        factory.followedArtists = factory.followedArtists.filter(function(artist) {
+                            return artist.id !== artistId
                         });
-                        factory.followedArtists.splice(factory.followedArtists.indexOf(artistToRemove), 1);
                         defered.resolve(response)
                     }).error(function(error, status) {
                         defered.reject(error, status)
@@ -309,6 +310,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                         defered.resolve(factory.followedArtists)
                     } else {
                         $http.get(RoutesFactory.follow.artists.followed()).success(function (artists) {
+                            artists = artists.map(function(artist) {
+                                return ImagesFactory(artist)
+                            });
                             factory.followedArtists = artists;
                             defered.resolve(factory.followedArtists)
                         }).error(function (error, status) {
@@ -330,7 +334,7 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 addToFavoriteAndAddToFactoryFavoritesTracks: function(track) {
                     var defered = $q.defer();
-                    factory.tracks.addToFavorites(track.trackId).then(function(response) {
+                    factory.tracks.addToFavorites(track.uuid).then(function(response) {
                         if (factory.favoritesTracks.length > 0) {
                             factory.favoritesTracks.push(track);
                             defered.resolve(response)
@@ -350,10 +354,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 removeFromFavorites: function (trackId) {
                     var defered = $q.defer();
                     $http.post(RoutesFactory.follow.tracks.removeFromFavorites(trackId)).success(function(success) {
-                        var trackToRemove = factory.favoritesTracks.filter(function(track) {
-                            return track.trackId === trackId
+                        factory.favoritesTracks = factory.favoritesTracks.filter(function(track) {
+                            return track.uuid !== trackId
                         });
-                        factory.favoritesTracks.splice(factory.favoritesTracks.indexOf(trackToRemove), 1);
                         defered.resolve(success);
 
                     }).error(function(error) {
@@ -385,6 +388,13 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                         defered.resolve(factory.favoritesTracks);
                     } else {
                         $http.get(RoutesFactory.follow.tracks.favorites()).success(function (tracks) {
+                            tracks = tracks.map(function(track) {
+                                return RefactorObjectsFactory.refactorTrackWithGenreObject(track)
+                            });
+                            tracks = tracks.map(function(track) {
+                                track.isFavorite = true;
+                                return track
+                            });
                             factory.favoritesTracks = tracks;
                             defered.resolve(factory.favoritesTracks)
                         }).error(function(error) {
@@ -426,10 +436,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 unfollow: function (eventId) {
                     var defered = $q.defer();
                     $http.post(RoutesFactory.follow.events.unfollow(eventId)).success(function(response) {
-                        var eventToRemove = factory.followedEvents.filter(function(event) {
-                            return event.id === eventId
+                        factory.followedEvents = factory.followedEvents.filter(function(event) {
+                            return event.id !== eventId
                         });
-                        factory.followedEvents.splice(factory.followedEvents.indexOf(eventToRemove), 1);
                         defered.resolve(response)
                     }).error(function(error, status) {
                         defered.reject(error, status)
@@ -461,6 +470,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                         defered.resolve(factory.followedEvents)
                     } else {
                         $http.get(RoutesFactory.follow.events.followed()).success(function (events) {
+                            events = events.map(function(event) {
+                                return RefactorObjectsFactory.normalizeEventObject(event)
+                            });
                             factory.followedEvents = events;
                             defered.resolve(factory.followedEvents)
                         }).error(function (error, status) {
