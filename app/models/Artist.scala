@@ -147,7 +147,39 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def findIdByFacebookUrl(facebookUrl: String): Future[Option[Long]] =
     db.run(artists.filter(_.facebookUrl === facebookUrl).map(_.id).result.headOption)
   
-  def save(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[Artist] = {
+  def save(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[Artist] = formatArtist(artistWithWeightedGenres) flatMap {
+    formattedArtist =>
+      db.run((for {
+        artistFound <- artists.filter(_.facebookUrl === formattedArtist.artist.facebookUrl).result.headOption
+        result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += formattedArtist.artist)
+      } yield result match {
+        case a: Artist =>
+          Logger.info("Artist.save: this artist is already saved")
+          formattedArtist.genres map(genre => genreMethods.saveWithArtistRelation(genre = genre.genre, artistId = a.id.get))
+          a
+        case id: Long =>
+          formattedArtist.genres map(genre => genreMethods.saveWithArtistRelation(genre = genre.genre, artistId = id))
+          formattedArtist.artist.copy(id = Option(id))
+      }).transactionally)
+  }
+
+  def saveOrReturnNoneIfDuplicate(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[Option[Artist]] =
+    formatArtist(artistWithWeightedGenres) flatMap { formattedArtist =>
+
+    db.run((for {
+      artistFound <- artists.filter(_.facebookUrl === formattedArtist.artist.facebookUrl).result.headOption
+      result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += formattedArtist.artist)
+    } yield result match {
+        case a: Artist =>
+          Logger.info("Artist.save: this artist is already saved")
+          None
+        case id: Long =>
+          formattedArtist.genres map(genre => genreMethods.saveWithArtistRelation(genre = genre.genre, artistId = id))
+          Option(formattedArtist.artist.copy(id = Option(id)))
+      }).transactionally)
+  }
+
+  def formatArtist(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[ArtistWithWeightedGenres] = {
     val artist = artistWithWeightedGenres.artist
     val genres = artistWithWeightedGenres.genres
     val genresWithoutWeight = genres map (_.genre)
@@ -157,18 +189,9 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       (genresWithoutWeight ++ overGenres).distinct
     }
 
-    db.run((for {
-      artistFound <- artists.filter(_.facebookUrl === artist.facebookUrl).result.headOption
-      result <- artistFound.map(DBIO.successful).getOrElse(artists returning artists.map(_.id) += artistWithFormattedDescription)
-    } yield result match {
-      case a: Artist =>
-        genresWithOverGenres map(_ map (genre => genreMethods.saveWithArtistRelation(genre = genre, artistId = a.id.get)))
-        a
-      case id: Long =>
-        Logger.info("Artist.save: this artist is already saved")
-        genresWithOverGenres map(_ map (genre => genreMethods.saveWithArtistRelation(genre = genre, artistId = id)))
-        artistWithFormattedDescription.copy(id = Option(id))
-    }).transactionally)
+    genresWithOverGenres map { allGenres =>
+      ArtistWithWeightedGenres(artistWithFormattedDescription, allGenres map (g => GenreWithWeight(g)))
+    }
   }
 
   def update(artist: Artist): Future[Int] = db.run(artists.filter(_.id === artist.id).update(artist))

@@ -6,6 +6,17 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
     var factory = {
         artists : false,
         lastGetArtist: {url: '', artist: {tracks: []}},
+        getArtistTracks: function(facebookUrl) {
+            var deferred = $q.defer();
+            $http.get('/artists/' + facebookUrl + '/tracks?numberToReturn=0&offset=0').
+                success(function(tracks) {
+                    deferred.resolve(tracks);
+                }).error(function (error) {
+                    deferred.resolve([]);
+                });
+
+            return deferred.promise;
+        },
         getArtist : function (url) {
             var deferred = $q.defer();
             if (url === factory.lastGetArtist.url) {
@@ -15,21 +26,15 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     .success(function (data, status) {
                         data = RefactorObjectsFactory.refactorArtistObject(data);
                         data = ImagesFactory(data);
-                        $http.get('/artists/' + data.facebookUrl + '/tracks?numberToReturn=0&offset=0').
-                            success(function(tracks) {
-                                data.tracks = tracks.map(function (track) {
-                                    track.genres = data.genres;
-                                    return track
-                                });
-                                factory.lastGetArtist.artist = data;
-                                factory.lastGetArtist.url = url;
-                                deferred.resolve(factory.lastGetArtist.artist);
-                        }).error(function (error) {
-                                data.tracks = [];
-                                factory.lastGetArtist.artist = data;
-                                factory.lastGetArtist.url = url;
-                                deferred.resolve(factory.lastGetArtist.artist);
-                            })
+                        factory.getArtistTracks(data.facebookUrl).then(function(tracks) {
+                            data.tracks = tracks.map(function (track) {
+                                track.genres = data.genres;
+                                return track
+                            });
+                            factory.lastGetArtist.artist = data;
+                            factory.lastGetArtist.url = url;
+                            deferred.resolve(factory.lastGetArtist.artist);
+                        });
                     }).error(function (data, status) {
                         deferred.reject('error');
                     });
@@ -113,7 +118,8 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     var artistToRemove = factory.lastGetArtistsFacebookByContaining.artists.filter(function(artist) {
                         return artist.facebookUrl === factory.lastGetArtist.artist.facebookUrl;
                     });
-                        factory.lastGetArtistsFacebookByContaining.artists.splice(
+                    factory.lastGetArtistByGenre.artists.push(factory.lastGetArtist.artist);
+                    factory.lastGetArtistsFacebookByContaining.artists.splice(
                         factory.lastGetArtistsFacebookByContaining.artists.indexOf(artistToRemove),
                         1
                     )
@@ -177,8 +183,8 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             .done(function (value) {
                 deferred.resolve(value);
             })
-            .fail(function (error) {
-                deferred.resolve('error');
+            .fail(function (error, status) {
+                deferred.resolve(error);
             });
             return deferred.promise;
         },
@@ -300,7 +306,16 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                             }
                     }
             })
-            .fail(function (error) {
+            .fail(function (error, status) {
+                if (error.statusCode === 409 && factory.lastGetArtist.url === artist.facebookUrl) {
+                    factory.getArtistTracks(artist.facebookUrl).then(function(tracks) {
+                        artist.tracks = tracks.map(function (track) {
+                            track.genres = artist.genres;
+                            return track
+                        });
+                        factory.lastGetArtist.artist.tracks = tracks;
+                    });
+                }
             });
         },
         refactorArtistName : function (artistName) {

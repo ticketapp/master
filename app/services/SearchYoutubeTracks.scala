@@ -161,7 +161,9 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
         "maxResults" -> "20",
         "key" -> youtubeKey)
       .get()
-      .map { response => removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
+      .map { response =>
+        removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
+          println(track)
         track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
       }
     }
