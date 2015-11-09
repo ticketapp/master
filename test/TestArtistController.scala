@@ -33,6 +33,25 @@ class TestArtistController extends GlobalApplicationForControllers {
       //need to test enumerator
     }
 
+    "not create an artist twice and return an error" in {
+      val artistJson = Json.parse("""{
+        "searchPattern": "worakls",
+        "artist": {
+          "facebookUrl": "worakls",
+          "artistName": "worakls",
+          "facebookId": "100297159501",
+          "imagePath": "jskd",
+          "websites": ["hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls","facebook.com/worakls"],
+          "genres": [{"name": "rock", "weight": 0}],
+          "description": "artist.description"
+        }
+      }""")
+      val Some(result) = route(FakeRequest(POST, "/artists/createArtist")
+      .withJsonBody(artistJson))
+
+      status(result) mustEqual CONFLICT
+    }
+
     "find a list of artists" in {
       val Some(artists) = route(FakeRequest(GET, "/artists/since?numberToReturn=" + 10 + "&offset=" + 0))
       contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
