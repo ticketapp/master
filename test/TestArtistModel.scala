@@ -7,6 +7,7 @@ import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play._
+import play.api.libs.json.Json
 
 import scala.collection.immutable.Seq
 import scala.concurrent.Await
@@ -271,6 +272,26 @@ class TestArtistModel extends GlobalApplicationForModels {
         response mustBe 1
       }
     }
+
+  "read a facebook artist json" in {
+    val jsonArtist = Json.parse("""{"name": "Lino Officiel","id": "208555529263642","category": "Musician/Band",
+                               "link": "https://www.facebook.com/linofficiel/","website": "http://arsenik-shop.com",
+                               "genre": "Hip Hop / Rap","likes": 136379}""")
+    whenReady(artistMethods.readFacebookArtist(jsonArtist), timeout(Span(5, Seconds))) { artist =>
+      artist.get.artist mustBe Artist(None,Some("208555529263642"),"Lino Officiel",None,None,"linofficiel",
+        Set("arsenik-shop.com"),None,None)
+    }
+  }
+  "read a set of facebook artist json" in {
+    val jsonArtist = Json.parse("""{"data": [{"name": "Lino Officiel","id": "208555529263642","category": "Musician/Band",
+                               "link": "https://www.facebook.com/linofficiel/","website": "http://arsenik-shop.com",
+                               "genre": "Hip Hop / Rap","likes": 136379}]}""")
+    whenReady(artistMethods.readFacebookArtists(jsonArtist), timeout(Span(5, Seconds))) { artists =>
+      artists.head.artist mustBe Artist(None,Some("208555529263642"),"Lino Officiel",None,None,"linofficiel",
+        Set("arsenik-shop.com"),None,None)
+    }
+  }
+
     /* "get tracks for an artist" in {
       val patternAndArtist = PatternAndArtistWithWeightedGenres(Artist("Feu! Chatterton",
         ArtistWithWeightedGenres(Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
