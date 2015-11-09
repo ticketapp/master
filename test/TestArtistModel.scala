@@ -36,23 +36,18 @@ class TestArtistModel extends GlobalApplicationForModels {
       }
     }
 
-    "return duplicate if try to save an artist already existant" in {
+    "return none when try to save an already existent artist" in {
       val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
         Option("description"), "facebookUrl", Set("website")), Vector.empty)
       whenReady(artistMethods.saveOrReturnNoneIfDuplicate(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        try {
-          whenReady(artistMethods.find(savedArtist.get.id.get), timeout(Span(5, Seconds))) { foundArtist =>
+        whenReady(artistMethods.find(savedArtist.get.id.get), timeout(Span(5, Seconds))) { foundArtist =>
 
-            foundArtist mustBe Option(ArtistWithWeightedGenres(artist.artist.copy(id = Some(savedArtist.get.id.get),
-              description = Some("<div class='column large-12'>description</div>")), Vector.empty))
+          foundArtist mustBe Option(ArtistWithWeightedGenres(artist.artist.copy(id = Some(savedArtist.get.id.get),
+            description = Some("<div class='column large-12'>description</div>")), Vector.empty))
 
-            whenReady(artistMethods.saveOrReturnNoneIfDuplicate(artist), timeout(Span(5, Seconds))) { savedArtist1 =>
-              savedArtist1 mustBe None
-            }
-            whenReady(artistMethods.delete(savedArtist.get.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+          whenReady(artistMethods.saveOrReturnNoneIfDuplicate(artist), timeout(Span(5, Seconds))) { savedArtist1 =>
+            savedArtist1 mustBe None
           }
-        } finally {
-          artistMethods.delete(savedArtist.get.id.get)
         }
       }
     }
