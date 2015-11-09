@@ -171,12 +171,10 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
 
         $scope.suggestQuery = function(trackTitle, artistName, artistFacebookUrl) {
             $scope.suggest = false;
-            console.log(trackTitle, artistName, artistFacebookUrl)
             if (trackTitle.length > 2) {
                 artistName = ArtistsFactory.refactorArtistName(artistName);
                 ArtistsFactory.getNewArtistTrack(artistName, trackTitle, artistFacebookUrl).then(
                     function(tracks) {
-                        console.log(tracks)
                         for (var i = 0; i < tracks.length; i++) {
                             if ($filter('filter')($scope.tracks, tracks[i].url, 'url').length === 0) {
                                 tracks[i].genres = $scope.artist.genres;

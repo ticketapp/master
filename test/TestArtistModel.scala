@@ -36,6 +36,27 @@ class TestArtistModel extends GlobalApplicationForModels {
       }
     }
 
+    "return duplicate if try to save an artist already existant" in {
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
+        Option("description"), "facebookUrl", Set("website")), Vector.empty)
+      whenReady(artistMethods.saveOrReturnNoneIfDuplicate(artist), timeout(Span(5, Seconds))) { savedArtist =>
+        try {
+          whenReady(artistMethods.find(savedArtist.get.id.get), timeout(Span(5, Seconds))) { foundArtist =>
+
+            foundArtist mustBe Option(ArtistWithWeightedGenres(artist.artist.copy(id = Some(savedArtist.get.id.get),
+              description = Some("<div class='column large-12'>description</div>")), Vector.empty))
+
+            whenReady(artistMethods.saveOrReturnNoneIfDuplicate(artist), timeout(Span(5, Seconds))) { savedArtist1 =>
+              savedArtist1 mustBe None
+            }
+            whenReady(artistMethods.delete(savedArtist.get.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+          }
+        } finally {
+          artistMethods.delete(savedArtist.get.id.get)
+        }
+      }
+    }
+
     "all be found" in {
       val artist = ArtistWithWeightedGenres(Artist(None, None, "artistTest0", None, None, "facebookUrl0", Set.empty), Vector.empty)
       val artist2 = ArtistWithWeightedGenres(Artist(None, None, "artistTest00", None, None, "facebookUrl00", Set.empty), Vector.empty)
