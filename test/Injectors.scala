@@ -25,7 +25,7 @@ trait Injectors {
   lazy val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
   lazy val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
   lazy val tariffMethods = new TariffMethods(dbConfProvider, utilities)
-  lazy val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, utilities)
+  lazy val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, addressMethods, utilities)
   lazy val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
   lazy val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
   lazy val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,

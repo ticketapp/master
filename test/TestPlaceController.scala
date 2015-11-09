@@ -36,13 +36,13 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "find one place by id" in {
-      val placeId = await(placeMethods.findAllContaining("est")).headOption.get.id
+      val placeId = await(placeMethods.findAllContaining("est")).headOption.get.place.id
       val Some(place) = route(FakeRequest(GET, "/places/" + placeId.get))
       contentAsJson(place).toString() must contain(""""name":"PlaceTest","facebookId":"111","geographicPoint":"POINT (4.2 4.3)"""")
     }
 
     "follow and unfollow a place by id" in {
-      val placeId = await(placeMethods.findAllContaining("test")).head.id
+      val placeId = await(placeMethods.findAllContaining("test")).head.place.id
       val Some(response) = route(FakeRequest(POST, "/places/" + placeId.get + "/followByPlaceId")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -55,7 +55,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "return an error if a user try to follow a place twice" in {
-      val placeId = await(placeMethods.findAllContaining("test")).head.id
+      val placeId = await(placeMethods.findAllContaining("test")).head.place.id
       val Some(response) = route(FakeRequest(POST, "/places/" + placeId.get + "/followByPlaceId")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
       status(response) mustEqual CREATED
@@ -71,7 +71,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "follow and unfollow a place by facebookId" in {
-      val placeId = await(placeMethods.findAllContaining("test")).head.id
+      val placeId = await(placeMethods.findAllContaining("test")).head.place.id
       val Some(response) = route(FakeRequest(POST, "/places/111/followByFacebookId")
       .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -84,7 +84,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "find followed places" in {
-      val placeId = await(placeMethods.findAllContaining("test")).head.id
+      val placeId = await(placeMethods.findAllContaining("test")).head.place.id
       val Some(response) = route(FakeRequest(POST, "/places/111/followByFacebookId")
       .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -102,7 +102,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "find one followed place by id" in {
-      val placeId = await(placeMethods.findAllContaining("test")).head.id
+      val placeId = await(placeMethods.findAllContaining("test")).head.place.id
       val Some(response) = route(FakeRequest(POST, "/places/111/followByFacebookId")
       .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 

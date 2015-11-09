@@ -4,7 +4,7 @@ import org.scalatest.time.{Seconds, Span}
 
 class TestSearchArtist extends GlobalApplicationForModels {
 
-  "SearchArtistController" must {
+  "SearchArtist" must {
 
     "find a sequence of artists on Facebook" in {
       whenReady(artistMethods.getEventuallyFacebookArtists("rone"), timeout(Span(6, Seconds))) { artists =>
@@ -66,7 +66,7 @@ class TestSearchArtist extends GlobalApplicationForModels {
         "djvadim",
         "djvadim")
 
-      websites.map{ artistMethods.normalizeFacebookUrl } mustBe normalizedUrls
+      websites.flatMap(artistMethods.normalizeFacebookUrl) mustBe normalizedUrls
     }
 
     "remove useless words in a SoundCloudUrl (even if it contains uppercase letters)" in {
@@ -95,20 +95,7 @@ class TestSearchArtist extends GlobalApplicationForModels {
       artistMethods.aggregateImageAndOffset("imageUrl", None, None) mustBe """imageUrl\0\0"""
     }
 
-    "find facebook artists in set of website" in {
-
-      val expectedListArtistNameByFbUrl = List("jp-manova", "nemo.nebbia", "SEPTEMBRE", "loheem", "lotfi", "woodwire",
-        "kunamaze", "nosajthing", "paulatemple", "alexsmoke", "diane", "mono", "solstafirice", "theoceancollective",
-        "theamityaffliction", "defeaterband", "beingasanocean", "cruelhand", "fitforakingband", "burningdownalaska")
-
-      val expectedListArtistNameByScUrl = List("osunlade", "woodwire", "kuna-maze", "paulatemple", "alexsmoke", "diane")
-
-      val expectedListArtistNameByYtUrl = List("mono", "solstafirice", "theoceancollective", "THE AMITY AFFLICTION",
-        "DEFEATER", "beingasanocean", "cruelhand", "FIT FOR A KING", "BURNING DOWN ALASKA")
-
-      val listOfOtherUrls = List("mixcloud.com/la_face_b ", "nosajthing.com", "discogs.com/artist/1156643-lee-holman",
-        "discogs.com/artist/2922409-binny-2", "discogs.com/label/447040-clft", "vimeo.com/irwinb")
-
+    "find facebook artists from a set of website" in {
       val websites = Set(
         "facebook.com/cruelhand",
         "facebook.com/alexsmokemusic",
@@ -153,13 +140,13 @@ class TestSearchArtist extends GlobalApplicationForModels {
         "facebook.com/musicseptembre?fref=ts",
         "facebook.com/paulatempleofficial")
 
-      val expectedArtists = Set("The Amity Affliction", "Kuna Maze", "Being As An Ocean", "Nemo Nebbia", "Fit For A King",
-        "Defeater", "BURNING DOWN ALASKA", "Nosaj Thing", "Mono (Japan)", "SÓLSTAFIR", "The Ocean Collective", "LOHEEM"
-      ,"woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
+      val expectedArtistsName = Set("The Amity Affliction", "Kuna Maze", "Being As An Ocean", "Nemo Nebbia", "Fit For A King",
+        "Defeater", "BURNING DOWN ALASKA", "Nosaj Thing", "Mono (Japan)", "SÓLSTAFIR", "The Ocean Collective", "LOHEEM",
+        "woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
 
-      whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(5, Seconds))) { maybeArtists =>
+      whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(10, Seconds))) { maybeArtists =>
 
-        maybeArtists.map{ artist => artist.artist.name } mustBe expectedArtists }
+        maybeArtists.map{ artist => artist.artist.name } mustBe expectedArtistsName }
     }
 
     "find artists in event's title" in {

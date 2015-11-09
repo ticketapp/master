@@ -19,20 +19,23 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-case class Place (id: Option[Long] = None,
-                  name: String,
-                  facebookId: Option[String] = None,
-                  geographicPoint: Option[Geometry] = None,
-                  description: Option[String] = None,
-                  websites: Option[String] = None,
-                  capacity: Option[Int] = None,
-                  openingHours: Option[String] = None,
-                  imagePath: Option[String] = None,
-                  addressId: Option[Long] = None,
-                  linkedOrganizerId: Option[Long] = None)
+case class Place(id: Option[Long] = None,
+                 name: String,
+                 facebookId: Option[String] = None,
+                 geographicPoint: Option[Geometry] = None,
+                 description: Option[String] = None,
+                 websites: Option[String] = None,
+                 capacity: Option[Int] = None,
+                 openingHours: Option[String] = None,
+                 imagePath: Option[String] = None,
+                 addressId: Option[Long] = None,
+                 linkedOrganizerId: Option[Long] = None)
+
+case class PlaceWithAddress(place: Place, address: Option[Address] = None)
 
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val geographicPointMethods: SearchGeographicPoint,
+                             val addressMethods: AddressMethods,
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
@@ -63,7 +66,26 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def find(id: Long): Future[Option[Place]] = db.run(places.filter(_.id === id).result.headOption)
+  def saveWithAddress(placeWithAddress: PlaceWithAddress): Future[PlaceWithAddress] = {
+    placeWithAddress.address match {
+      case Some(address) =>
+        addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
+          save(placeWithAddress.place.copy(addressId = savedAddress.id)) map { place =>
+            PlaceWithAddress(place, Option(savedAddress))
+          }
+        }
+      case None =>
+        save(placeWithAddress.place) map { savedPlace =>
+          PlaceWithAddress(savedPlace, None)
+        }
+    }
+  }
+
+  def findById(id: Long): Future[Option[PlaceWithAddress]] = {
+    val tupledJoin = places joinLeft addresses on (_.addressId === _.id)
+
+    db.run(tupledJoin.result.headOption) map(_ map PlaceWithAddress.tupled)
+  }
 
   def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(organizers.filter(_.facebookId === facebookId).map(_.id).result.headOption)
@@ -71,9 +93,9 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def findIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(places.filter(_.facebookId === facebookId).map(_.id).result.headOption)
 
-  def getPlaceByFacebookId(placeFacebookId : String) : Future[Place] = findIdByFacebookId(placeFacebookId) flatMap {
+  def getPlaceByFacebookId(placeFacebookId : String) : Future[PlaceWithAddress] = findIdByFacebookId(placeFacebookId) flatMap {
     case Some(id) =>
-      find(id) flatMap {
+      findById(id) flatMap {
         case Some(place) =>
           Future(place)
         case None =>
@@ -83,7 +105,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       getPlaceOnFacebook(placeFacebookId)
   }
 
- def getPlaceOnFacebook(placeFacebookId: String): Future[Place] =
+ def getPlaceOnFacebook(placeFacebookId: String): Future[PlaceWithAddress] =
    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + placeFacebookId)
      .withQueryString(
        "fields" -> "about,location,website,hours,cover,name",
@@ -91,7 +113,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
      .get()
      .flatMap { readFacebookPlace }
 
- def readFacebookPlace (placeFacebookResponse: WSResponse): Future[Place] = {
+ def readFacebookPlace (placeFacebookResponse: WSResponse): Future[PlaceWithAddress] = {
    val placeRead = (
      (__ \ "about").readNullable[String] and
        (__ \ "cover" \ "source").readNullable[String] and
@@ -106,44 +128,48 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
               street: Option[String], zip: Option[String], city: Option[String], country: Option[String],
               website: Option[String]) => {
      val address = Address(None, None, city, zip, street)
-     val newPlace = Place(None, name, facebookId, None, about, website, None, None, source/*, Option(address)*/)
-     save(newPlace)
+     val newPlace = PlaceWithAddress(Place(None, name, facebookId, None, about, website, None, None, source), address = Option(address))
+     saveWithAddress(newPlace)
    })
 
-   placeFacebookResponse.json.as[Future[Place]](placeRead)
+   placeFacebookResponse.json.as[Future[PlaceWithAddress]](placeRead)
  }
 
-  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[Place]] = {
-    val query = places
-     .sortBy(_.geographicPoint <-> geographicPoint)
-     .drop(offset)
-     .take(numberToReturn)
-    db.run(query.result)
+  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] = {
+    val query = for {
+      placeWithAddress <- places joinLeft addresses on (_.addressId === _.id)
+    } yield placeWithAddress
+
+    db.run(query
+      .sortBy(_._1.geographicPoint <-> geographicPoint)
+      .drop(offset)
+      .take(numberToReturn)
+      .result) map(_ map PlaceWithAddress.tupled)
   }
 
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[Place]] =
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] =
     geographicPointMethods.findGeographicPointOfCity(city) flatMap {
       case None => Future(Seq.empty)
       case Some(geographicPoint) =>
         findNear(geographicPoint, numberToReturn, offset)
   }
 
-  def findAllByEvent(eventId: Long): Future[Seq[Place]] = {
+  def findAllByEventId(eventId: Long): Future[Seq[PlaceWithAddress]] = {
     val query = for {
-      event <- events if event.id === eventId
-      eventsPlaces <- eventsPlaces
-      place <- places if place.id === eventsPlaces.placeId
-    } yield place
+      eventPlace <- eventsPlaces.filter(_.eventId === eventId)
+      placeWithAddress <- places joinLeft addresses on (_.addressId === _.id)
+      if placeWithAddress._1.id === eventPlace.placeId
+    } yield placeWithAddress
 
-    db.run(query.result)
+    db.run(query.result) map(_ map PlaceWithAddress.tupled)
   }
 
-  def findAllContaining(pattern: String): Future[Seq[Place]] = {
+  def findAllContaining(pattern: String): Future[Seq[PlaceWithAddress]] = {
     val lowercasePattern = pattern.toLowerCase
     val query = places
       .filter(place => place.name.toLowerCase like s"%$lowercasePattern%")
-      .take(5)
-    db.run(query.result)
+      .take(5) joinLeft addresses on (_.addressId === _.id)
+    db.run(query.result)  map(_ map PlaceWithAddress.tupled)
   }
 
   def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {
@@ -170,8 +196,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       false
   }
 
-  def saveWithEventRelation(place: Place, eventId: Long): Future[Place] = save(place) flatMap { savedPlace =>
-    saveEventRelation(EventPlaceRelation(eventId, savedPlace.id.getOrElse(0))) map {
+  def saveWithEventRelation(place: PlaceWithAddress, eventId: Long): Future[PlaceWithAddress] = saveWithAddress(place) flatMap { savedPlace =>
+    saveEventRelation(EventPlaceRelation(eventId, savedPlace.place.id.getOrElse(0))) map {
       case 1 =>
         savedPlace
       case _ =>
