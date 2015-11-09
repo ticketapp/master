@@ -41,7 +41,7 @@ class TestEventModel extends GlobalApplicationForModels {
       val artists = Vector(ArtistWithWeightedGenres(Artist(None, None, "nameEventRelations", facebookUrl = "saveEventRelations")))
       val organizers = Vector(OrganizerWithAddress(Organizer(None, None, "nameEventRelations")))
       val addresses = Vector(Address(None, None, Option("cityEventRelations")))
-      val places = Vector(Place(name = "nameEventRelations"))
+      val places = Vector(PlaceWithAddress(Place(name = "nameEventRelations")))
       val genres = Vector(Genre(name = "nameEventRelations"))
       val event = EventWithRelations(
         event = Event(None, None, isPublic = true, isActive = true, "nameEventRelations", None, None,
@@ -63,7 +63,7 @@ class TestEventModel extends GlobalApplicationForModels {
             
             foundEvent.artists mustBe Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
             
-            foundEvent.places mustBe Vector(event.places.head.copy(id = foundEvent.places.head.id))
+            foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
             
             foundEvent.addresses mustBe Vector(event.addresses.head.copy(
               id = foundEvent.addresses.head.id,
@@ -175,7 +175,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
               eventsByPlace must contain(EventWithRelations(
                 event = savedEvent,
-                places = Vector(savedPlace)))
+                places = Vector(PlaceWithAddress(savedPlace))))
             }
           }
         }
@@ -199,17 +199,17 @@ class TestEventModel extends GlobalApplicationForModels {
         None, None, new DateTime(0), None, 16, None, None, None))
       val place = Place(None, "name", Some("12345"), None, None, None, None, None, None, None)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(placeMethods.save(place), timeout(Span(5, Seconds))) { savedPlace =>
-          whenReady(placeMethods.saveEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.id.get)),
+        whenReady(placeMethods.saveWithAddress(PlaceWithAddress(place, None)), timeout(Span(5, Seconds))) { savedPlace =>
+          whenReady(placeMethods.saveEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.place.id.get)),
             timeout(Span(5, Seconds))) { placeEventRelation =>
 
             placeEventRelation mustBe 1
 
-            whenReady(eventMethods.findAllByPlace(savedPlace.id.get), timeout(Span(5, Seconds))) { eventsByPlace =>
+            whenReady(eventMethods.findAllByPlace(savedPlace.place.id.get), timeout(Span(5, Seconds))) { eventsByPlace =>
 
               eventsByPlace must not contain savedEvent
 
-              whenReady(eventMethods.findAllPassedByPlace(savedPlace.id.get), timeout(Span(5, Seconds))) { passedEventsByPlace =>
+              whenReady(eventMethods.findAllPassedByPlace(savedPlace.place.id.get), timeout(Span(5, Seconds))) { passedEventsByPlace =>
 
                 passedEventsByPlace must contain(EventWithRelations(savedEvent, places = Vector(savedPlace)))
               }

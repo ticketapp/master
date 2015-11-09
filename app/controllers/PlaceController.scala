@@ -9,14 +9,13 @@ import json.JsonHelper.placeWrites
 import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
+import json.JsonHelper._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -27,7 +26,7 @@ class PlaceController @Inject() (ws: WSClient,
                                  val geographicPointMethods: SearchGeographicPoint,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry,
-                                  val placeMethods: PlaceMethods)
+                                 val placeMethods: PlaceMethods)
     extends Silhouette[User, CookieAuthenticator] with addressFormsTrait with placeFormsTrait {
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
@@ -70,7 +69,7 @@ class PlaceController @Inject() (ws: WSClient,
   }
 
   def findById(id: Long) = Action.async {
-    placeMethods.find(id) map { places =>
+    placeMethods.findById(id) map { places =>
       Ok(Json.toJson(places))
     } recover { case t: Throwable =>
       Logger.error("PlaceController.findById: ", t)

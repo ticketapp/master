@@ -41,7 +41,7 @@ case class Event(id: Option[Long],
 case class EventWithRelations(event: Event,
                               organizers: Seq[OrganizerWithAddress] = Vector.empty,
                               artists: Seq[ArtistWithWeightedGenres] = Vector.empty,
-                              places: Seq[Place] = Vector.empty,
+                              places: Seq[PlaceWithAddress] = Vector.empty,
                               genres: Seq[Genre] = Vector.empty,
                               addresses: Seq[Address] = Vector.empty)
 
@@ -106,7 +106,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         event,
         organizers map (OrganizerWithAddress(_)),
         artists map (ArtistWithWeightedGenres(_)),
-        places,
+        places map (PlaceWithAddress(_)),
         genres,
         addresses)
     }.toVector
@@ -455,7 +455,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     eventWithRelations.genres map(genre => genreMethods.saveWithEventRelation(genre, eventId))
     eventWithRelations.artists map(artist => artistMethods.saveWithEventRelation(artist, eventId))
     eventWithRelations.organizers map(organizer => organizerMethods.saveWithEventRelation(organizer, eventId))
-    eventWithRelations.places map(places => placeMethods.saveWithEventRelation(places, eventId))
+    eventWithRelations.places map(place => placeMethods.saveWithEventRelation(place, eventId))
     eventWithRelations.addresses map(address => addressMethods.saveWithEventRelation(address, eventId))
   }
 
@@ -550,7 +550,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val eventuallyMaybeOrganizer = organizerMethods.getOrganizerInfo(eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybeOwnerId)
 
-    val eventuallyMaybePlace: Future[Option[Place]] = eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybePlaceId match {
+    val eventuallyMaybePlace: Future[Option[PlaceWithAddress]] = eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybePlaceId match {
       case Some(placeId) => placeMethods.getPlaceByFacebookId(placeId) map (Option(_))
       case None => Future(None)
     }
