@@ -19,6 +19,10 @@ angular.module('claudeApp').
                 organizer = organizer.organizer;
                 return organizer
             },
+            refactorPlaceObject: function (place) {
+                place = place.place;
+                return place
+            },
             normalizeEventObject : function (event) {
                 event.event.addresses = event.addresses;
                 event.event.artists = event.artists.map(function(artist) {

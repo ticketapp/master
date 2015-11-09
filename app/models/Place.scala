@@ -82,7 +82,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def findById(id: Long): Future[Option[PlaceWithAddress]] = {
-    val tupledJoin = places joinLeft addresses on (_.addressId === _.id)
+    val tupledJoin = places.filter(_.id === id) joinLeft addresses on (_.addressId === _.id)
 
     db.run(tupledJoin.result.headOption) map(_ map PlaceWithAddress.tupled)
   }

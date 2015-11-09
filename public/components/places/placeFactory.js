@@ -10,8 +10,9 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 deferred.resolve(factory.lastGetPlace.place);
             } else {
                 $http.get('/places/' + id).
-                    success(function(data, status, headers, config) {
-                        factory.lastGetPlace.place = data;
+                    success(function(place, status, headers, config) {
+                        place = RefactorObjectsFactory.refactorPlaceObject(place);
+                        factory.lastGetPlace.place = place;
                         factory.lastGetPlace.id = id;
                         deferred.resolve(factory.lastGetPlace.place);
                     })
@@ -46,6 +47,9 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
             } else {
                 $http.get('/places?geographicPoint='+geoLoc+'&numberToReturn=12&offset='+offset)
                     .success(function(data, status) {
+                        data = data.map(function(place) {
+                            return RefactorObjectsFactory.refactorPlaceObject(place);
+                        });
                         if (offset > factory.lastGetPlaces.offset) {
                             factory.lastGetPlaces.places = factory.lastGetPlaces.places.concat(data);
                         } else {
@@ -68,8 +72,11 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 deferred.resolve(factory.lastGetPlacesByContaining.places);
             } else {
                 $http.get('/places/containing/'+ pattern)
-                    .success(function(data, status) {
-                        factory.lastGetPlacesByContaining.places = data;
+                    .success(function(places, status) {
+                        places = places.map(function(place) {
+                            return RefactorObjectsFactory.refactorPlaceObject(place);
+                        });
+                        factory.lastGetPlacesByContaining.places = places;
                         factory.lastGetPlacesByContaining.pattern = pattern;
                         deferred.resolve(factory.lastGetPlacesByContaining.places);
                     }).error(function(data, status) {
@@ -86,11 +93,14 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                 deferred.resolve(factory.lastGetPlacesByCity.places);
             } else {
                 $http.get('/places/nearCity/'+pattern+'?numberToReturn=12&offset='+offset)
-                    .success(function(data, status) {
+                    .success(function(places, status) {
+                        places = places.map(function(place) {
+                            return RefactorObjectsFactory.refactorPlaceObject(place);
+                        });
                         if (offset > factory.lastGetPlacesByCity.offset) {
-                            factory.lastGetPlacesByCity.places = factory.lastGetPlacesByCity.places.concat(data);
+                            factory.lastGetPlacesByCity.places = factory.lastGetPlacesByCity.places.concat(places);
                         } else {
-                            factory.lastGetPlacesByCity.places = data;
+                            factory.lastGetPlacesByCity.places = places;
                         }
                         factory.lastGetPlacesByCity.pattern = pattern;
                         factory.lastGetPlacesByCity.offset = offset;

@@ -495,7 +495,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def artistTupleToArtist(artist: (String, String, String, Option[String], Option[Int], Option[Int], Option[String], String, Option[String], Option[String], Option[Int], Option[Option[String]])): Future[Option[ArtistWithWeightedGenres]] = {
+  def artistTupleToArtist(artist: (String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
+    Option[String], Option[String], Option[Int], Option[Option[String]])): Future[Option[ArtistWithWeightedGenres]] = {
     artist match {
       case (name, facebookId, category, cover, maybeOffsetX, maybeOffsetY, websites, link,
       maybeDescription, maybeGenre, maybeLikes, maybeCountry)
@@ -503,6 +504,9 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
         makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
           maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten) map Option.apply
+
+      case _ =>
+        Future(None)
     }
   }
 
