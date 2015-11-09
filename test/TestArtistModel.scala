@@ -282,6 +282,15 @@ class TestArtistModel extends GlobalApplicationForModels {
         Set("arsenik-shop.com"),None,None)
     }
   }
+  "read a set of facebook artist json" in {
+    val jsonArtist = Json.parse("""{"data": [{"name": "Lino Officiel","id": "208555529263642","category": "Musician/Band",
+                               "link": "https://www.facebook.com/linofficiel/","website": "http://arsenik-shop.com",
+                               "genre": "Hip Hop / Rap","likes": 136379}]}""")
+    whenReady(artistMethods.readFacebookArtists(jsonArtist), timeout(Span(5, Seconds))) { artists =>
+      artists.head.artist mustBe Artist(None,Some("208555529263642"),"Lino Officiel",None,None,"linofficiel",
+        Set("arsenik-shop.com"),None,None)
+    }
+  }
 
     /* "get tracks for an artist" in {
       val patternAndArtist = PatternAndArtistWithWeightedGenres(Artist("Feu! Chatterton",
