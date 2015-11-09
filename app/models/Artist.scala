@@ -216,10 +216,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
     db.run(query.result.headOption) flatMap {
       case Some(artist) =>
-        val websites = artist.websites.mkString(",") match {
-          case "" => normalizedUrl
-          case nonEmptyString => nonEmptyString + "," + normalizedUrl
-        }
+        val websites = (artist.websites + normalizedUrl).mkString(",")
         db.run(query.map(_.websites).update(Option(websites)))
       case None =>
         Logger.info("Artist.addWebsite: there is no artist with the id " + artistId)
