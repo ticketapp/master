@@ -89,10 +89,10 @@ class TestSearchArtist extends GlobalApplicationForModels {
     }
 
     "aggregate the image path url with its offsets" in {
-      artistMethods.aggregateImageAndOffset("imageUrl", Option(1), Option(200)) mustBe """imageUrl\1\200"""
-      artistMethods.aggregateImageAndOffset("imageUrl", None, Option(200)) mustBe """imageUrl\0\200"""
-      artistMethods.aggregateImageAndOffset("imageUrl", Option(1), None) mustBe """imageUrl\1\0"""
-      artistMethods.aggregateImageAndOffset("imageUrl", None, None) mustBe """imageUrl\0\0"""
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), Option(1), Option(200)) mustBe """imageUrl\1\200"""
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), None, Option(200)) mustBe """imageUrl\0\200"""
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), Option(1), None) mustBe """imageUrl\1\0"""
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), None, None) mustBe """imageUrl\0\0"""
     }
 
     "find facebook artists from a set of website" in {

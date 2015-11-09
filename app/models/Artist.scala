@@ -441,7 +441,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
          "fields" -> facebookArtistFields,
          "access_token" -> facebookToken)
        .get()
-       .flatMap(readFacebookArtist)
+       .flatMap(response => readFacebookArtist(response.json))
     case _ =>
       Future(None)
   }
@@ -476,16 +476,35 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def readFacebookArtists(facebookWSResponse: WSResponse): Future[Seq[ArtistWithWeightedGenres]] = {
     val collectOnlyArtistsWithCover: Reads[Future[Seq[ArtistWithWeightedGenres]]] = Reads.seq(readArtist) map { artists =>
       Future.sequence(artists.collect {
-       case (name, facebookId, category, Some(cover: String), maybeOffsetX, maybeOffsetY, websites, link,
-       maybeDescription, maybeGenre, maybeLikes, maybeCountry)
-         if category.equalsIgnoreCase("Musician/Band") | category.equalsIgnoreCase("Artist") =>
-         makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
-           maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten)
-      }.toVector)
+        case (name, facebookId, category, cover, maybeOffsetX, maybeOffsetY, websites, link,
+        maybeDescription, maybeGenre, maybeLikes, maybeCountry)
+          if category.equalsIgnoreCase("Musician/Band") | category.equalsIgnoreCase("Artist") =>
+
+          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten) map Option.apply
+
+      }.toVector) map (_.flatten)
     }
     (facebookWSResponse.json \ "data")
      .asOpt[Future[Seq[ArtistWithWeightedGenres]]](collectOnlyArtistsWithCover)
      .getOrElse(Future(Seq.empty))
+  }
+
+  def readFacebookArtist(facebookJsonResponse: JsValue): Future[Option[ArtistWithWeightedGenres]] = {
+    facebookJsonResponse
+     .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
+     Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
+    match {
+      case Some((name, facebookId, category: String, cover, maybeOffsetX, maybeOffsetY, maybeWebsites, link,
+      maybeDescription, maybeGenre, maybeLikes, maybeCountry: Option[Option[String]]))
+        if category.equalsIgnoreCase("Musician/Band") | category.equalsIgnoreCase("Artist") =>
+
+       makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
+         link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten) map(Option(_))
+
+     case _ =>
+       Future(None)
+    }
   }
 
   def splitArtistNamesInTitle(title: String): List[String] =
@@ -493,34 +512,17 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       _.toLowerCase.replace("live", "").replace("djset", "").replace("dj set", "").replace("set", "").trim()
     }
 
-  def readFacebookArtist(facebookWSResponse: WSResponse): Future[Option[ArtistWithWeightedGenres]] = {
-    facebookWSResponse.json
-     .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
-     Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
-    match {
-     case Some((name, facebookId, "Musician/Band", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
-     link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
-       makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-         link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten) map(Option(_))
-     case Some((name, facebookId, "Artist", Some(cover: String), maybeOffsetX, maybeOffsetY, maybeWebsites,
-     link, maybeDescription, maybeGenre, maybeLikes, maybeCountry)) =>
-       makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), maybeWebsites,
-         link, maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten) map(Option(_))
-     case _ =>
-       Future(None)
-    }
-  }
-
-  def makeArtist(name: String, facebookId: String, cover: String, maybeWebsites: Option[String], link: String,
+  def makeArtist(name: String, facebookId: String, cover: Option[String], maybeWebsites: Option[String], link: String,
                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
                 maybeCountry: Option[String]): Future[ArtistWithWeightedGenres] = {
     val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val eventuallyWebsitesSet: Future[Set[String]] = maybeWebsites match {
       case Some(websites) =>
-          utilities.getNormalizedWebsitesInText(websites) map { setWebsites =>
+        utilities.getNormalizedWebsitesInText(websites) map { setWebsites =>
           setWebsites.filterNot(_.contains("facebook.com")).filterNot(_ == "")
         }
-      case None => Future(Set.empty)
+      case None =>
+        Future(Set.empty)
     }
     val description = utilities.formatDescription(maybeDescription)
     val genres = maybeGenre match {
@@ -529,13 +531,16 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
 
     eventuallyWebsitesSet map { websitesSet =>
-      ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, Option(cover), description, facebookUrl, websitesSet),
+      ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, cover, description, facebookUrl, websitesSet),
         genres.toSeq.map{genre => GenreWithWeight(genre, 0) }.toVector)
     }
   }
 
-  def aggregateImageAndOffset(imgUrl: String, offsetX: Option[Int], offsetY: Option[Int]): String =
-    imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString
+  def aggregateImageAndOffset(maybeImgUrl: Option[String], offsetX: Option[Int], offsetY: Option[Int]): Option[String] = maybeImgUrl match {
+    case Some(imgUrl) =>
+      Option(imgUrl + """\""" + offsetX.getOrElse(0).toString + """\""" + offsetY.getOrElse(0).toString)
+    case None => None
+  }
 
   def addWebsitesFoundOnSoundCloud(track: Track, artist: Artist): Future[Seq[String]] = track.redirectUrl match {
     case Some(redirectUrl) =>
