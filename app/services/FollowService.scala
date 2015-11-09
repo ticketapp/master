@@ -8,11 +8,10 @@ import models._
 import play.api.Logger
 import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
 import silhouette.DBTableDefinitions
-
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
+trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions with TrackTransformTrait {
   
   //////////////////////////////////////////// artist ///////////////////////////////////////////////////////////////
   
@@ -183,20 +182,6 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
       if track.uuid === trackFollowed.trackId
     } yield (track, genre)
 
-    db.run(query.result) map { trackGenreArtistTuples =>
-      val groupedByTracks = trackGenreArtistTuples.groupBy(_._1)
-
-      val tracksWithGenres = groupedByTracks map { trackWithOptionalGenres =>
-        val track = trackWithOptionalGenres._1
-        val genreArtistRelations = trackWithOptionalGenres._2
-        val genres = genreArtistRelations.collect { case (_, Some((_, genre))) =>
-          genre
-        }
-
-        TrackWithGenres(track = track, genres = genres)
-      }
-
-      tracksWithGenres.toVector
-    }
+    db.run(query.result) map makeTrackWithGenres
   }
 }
