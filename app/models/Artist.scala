@@ -53,6 +53,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   val soundCloudClientId = utilities.soundCloudClientId
   val facebookApiVersion = utilities.facebookApiVersion
 
+  def findAll: Future[Vector[Artist]] = db.run(artists.result) map (_.toVector)
+
   def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
       (artist, optionalArtistGenreAndGenre) <- artists.drop(offset).take(numberToReturn) joinLeft
@@ -324,7 +326,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
        readFacebookArtists(response.json)
      } recover {
       case t: Throwable =>
-        Logger.error("ArtistModel.getEventuallyFacebookArtists :", t)
+        Logger.error(s"ArtistModel.getEventuallyFacebookArtists: for pattern $pattern\nMessage:\n" + t.getMessage)
         Seq.empty
     }
   }
@@ -521,8 +523,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val eventuallyWebsitesSet: Future[Set[String]] = maybeWebsites match {
       case Some(websites) =>
-        utilities.getNormalizedWebsitesInText(websites) map { setWebsites =>
-          setWebsites.filterNot(_.contains("facebook.com")).filterNot(_ == "")
+        utilities.getNormalizedWebsitesInText(websites) map { websites =>
+          websites.filterNot(_.contains("facebook.com")).filterNot(_ == "")
         }
       case None =>
         Future(Set.empty)

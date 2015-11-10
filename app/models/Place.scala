@@ -87,6 +87,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(tupledJoin.result.headOption) map(_ map PlaceWithAddress.tupled)
   }
 
+  def findAll: Future[Seq[Place]] = db.run(places.result)
+
   def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(organizers.filter(_.facebookId === facebookId).map(_.id).result.headOption)
 

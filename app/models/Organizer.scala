@@ -43,7 +43,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     with FollowService
     with MyDBTableDefinitions {
 
-  def find(numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] = {
+  def findAll: Future[Seq[OrganizerWithAddress]] = {
     val tupledJoin = organizers joinLeft addresses on (_.addressId === _.id)
 
     db.run(tupledJoin.result) map(_ map OrganizerWithAddress.tupled)

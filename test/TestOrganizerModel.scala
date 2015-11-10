@@ -46,7 +46,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
               id = Some(savedOrganizer.organizer.id.get),
               description = Some("<div class='column large-12'>description</div>")),
             None)
-          whenReady(organizerMethods.find(0, 0), timeout(Span(5, Seconds))) { foundOrganizers =>
+          whenReady(organizerMethods.findAll, timeout(Span(5, Seconds))) { foundOrganizers =>
             foundOrganizers should contain(savedOrganizer)
           }
         } finally {

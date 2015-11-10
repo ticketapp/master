@@ -22,7 +22,7 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     }
 
     "find a list of organizers" in {
-       val Some(organizers) = route(FakeRequest(GET, "/organizers?numberToReturn=" + 10 + "&offset=" + 0))
+       val Some(organizers) = route(FakeRequest(GET, "/organizers"))
 
        contentAsJson(organizers).toString() must contain(""""name":"name0"""")
     }

@@ -494,7 +494,9 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def readFacebookEvent: Reads[(EventWithRelations, MaybeOwnerAndPlaceIds)] = (
     (__ \ "description").readNullable[String] and
-      (__ \ "cover" \ "source").readNullable[String] and
+      (__ \ "cover").readNullable[String](
+        (__ \ "source").read[String]
+      ) and
       (__ \ "name").read[String] and
       (__ \ "id").readNullable[String] and
       (__ \ "start_time").read[String] and
@@ -504,7 +506,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       (__ \ "venue" \ "city").readNullable[String] and
       (__ \ "owner" \ "id").readNullable[String] and
       (__ \ "place" \ "id").readNullable[String]
-    )((maybeDescription: Option[String], source: Option[String], name: String, facebookId: Option[String],
+    )((maybeDescription: Option[String], maybeCover: Option[String], name: String, facebookId: Option[String],
        startTime: String, endTime: Option[String], street: Option[String], zip: Option[String],
        city: Option[String], maybeOwnerId: Option[String], maybePlaceId: Option[String]) => {
 
@@ -518,12 +520,17 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       description = utilities.formatDescription(maybeDescription),
       startTime = utilities.stringToDateTime(startTime),
       endTime = utilities.optionStringToOptionDateTime(endTime),
-      imagePath = source,
+      imagePath = maybeCover,
       tariffRange = tariffMethods.findPrices(maybeDescription))
+
+    val addresses = Try(Address(id = None, geographicPoint = None, street = street, zip = zip, city = city)) match {
+      case Success(address) => Seq(address)
+      case _ => Seq.empty
+    }
 
     val eventWithRelations = EventWithRelations(
       event = event,
-      addresses = Vector(Address(id = None, geographicPoint = None, street = street, zip = zip, city = city)))
+      addresses = addresses)
 
     val maybeOwnerIdAndMaybePlaceId = MaybeOwnerAndPlaceIds(maybeOwnerId, maybePlaceId)
 
@@ -538,7 +545,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       case s: JsSuccess[(EventWithRelations, MaybeOwnerAndPlaceIds)] =>
         Success(eventFacebookResponse.json.as[(EventWithRelations, MaybeOwnerAndPlaceIds)](readFacebookEvent))
       case e: JsError =>
-        Logger.error("Event.facebookEventResponseToEventWithRelations: " + e)
+        Logger.error("Event.facebookEventResponseToEventWithRelations: " + e.errors)
         Failure(WebServiceException("Event.facebookEventResponseToEventWithRelations: " ))
     }
   }
