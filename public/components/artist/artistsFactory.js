@@ -95,11 +95,14 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             } else {
                 $http.get('/genres/' + genre + '/artists?offset=' + offset + '&numberToReturn=12')
                     .success(function(data, status){
-                        data.forEach(ImagesFactory);
+                        var artists = data.map(function(artist) {
+                            return RefactorObjectsFactory.refactorArtistObject(artist)
+                        });
+                        artists.forEach(ImagesFactory);
                         if (offset > factory.lastGetArtistByGenre.offset) {
-                            factory.lastGetArtistByGenre.artists = factory.lastGetArtistByGenre.artists.concat(data);
+                            factory.lastGetArtistByGenre.artists = factory.lastGetArtistByGenre.artists.concat(artists);
                         } else {
-                            factory.lastGetArtistByGenre.artists = data;
+                            factory.lastGetArtistByGenre.artists = artists;
                         }
                         factory.lastGetArtistByGenre.offset = offset;
                         factory.lastGetArtistByGenre.genre = genre;

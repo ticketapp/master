@@ -383,7 +383,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         .filter(event =>
           (event.name.toLowerCase like s"%$lowercasePattern%") &&
           ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
-        .take(20)
         .sortBy(_.startTime.desc) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
@@ -405,8 +404,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses) <- events
         .filter(event => (event.name.toLowerCase like s"%$lowercasePattern%") &&
           ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
-        .sortBy(_.geographicPoint <-> geographicPoint)
-        .take(20) joinLeft
+        .sortBy(_.geographicPoint <-> geographicPoint) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -425,8 +423,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       address <- addresses.filter(_.city.toLowerCase like s"%$lowercasePattern%")
       eventAddress <- eventsAddresses if eventAddress.addressId === address.id
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-        optionalEventAddresses) <- events
-        .take(50) joinLeft (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+        optionalEventAddresses) <- events joinLeft
+          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
           (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft

@@ -478,7 +478,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                     clearInterval(changePath);
                     InfoModal.displayInfo('Une erreure c\'est produite', 'error')
                 }
-                if (connectWin.location.href.indexOf('#/connected') > -1) {
+                if (connectWin.location.href.indexOf('#/') > -1) {
                     clearInterval(changePath);
                     getConnected(connectWin);
                 }

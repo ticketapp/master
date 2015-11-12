@@ -39,7 +39,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   def insertFrenchCities() = Action {
     val lines = Source.fromFile("textFiles/villes_france.sql").getLines()
     var i = 0
-    while (lines.hasNext && i < 2000) {
+    while (lines.hasNext) {
       i = i + 1
       val line = lines.next()
       if (line != "" && line.take(1) == "(") {

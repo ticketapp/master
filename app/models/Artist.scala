@@ -92,15 +92,25 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
-  
-  def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[Artist]] = {
-    val query = for {
-      genre <- genres if genre.name === genreName
-      artistGenre <- artistsGenres if artistGenre.genreId === genre.id
-      artist <- artists if artist.id === artistGenre.artistId
+
+  def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[ArtistWithWeightedGenres]] = {
+    val artistsQuery = for {
+      genre <- genres.filter(_.name === genreName)
+      artistGenre <- artistsGenres.filter(_.genreId === genre.id)
+      artist <- artists.filter(_.id === artistGenre.artistId) map (_.id)
+
     } yield artist
 
-    db.run(query.drop(offset).take(numberToReturn).result) map { _.toVector }
+    val artistsIdFromDB = artistsQuery.drop(offset).take(numberToReturn)
+
+    val artistWithGenreQuery = for {
+      artistWithGenres <- artists.filter(_.id in artistsIdFromDB) joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+    } yield artistWithGenres
+
+    db.run(artistWithGenreQuery.result) map { seqArtistAndOptionalGenre =>
+      ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
+    } map(_.toVector)
   }
   
   def find(id: Long): Future[Option[ArtistWithWeightedGenres]] = {
@@ -136,7 +146,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       if artist.name.toLowerCase like s"%$lowercasePattern%"
     } yield (artist, optionalArtistGenreAndGenre)
 
-    db.run(query.take(20).result) map { seqArtistAndOptionalGenre =>
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
       ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }

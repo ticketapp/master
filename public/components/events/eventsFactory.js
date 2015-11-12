@@ -170,6 +170,9 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                 var placesEvents = [];
                 $http.get('/places/containing/' + pattern).
                     success(function (places, status, headers, config) {
+                        places = places.map(function(place) {
+                            return RefactorObjectsFactory.refactorPlaceObject(place)
+                        });
                         factory.lastGetPlacesEventsByContaining.pattern = pattern;
                         function getPlaceEvents(place) {
                             $http.get('/places/' + place.id + '/events ').
