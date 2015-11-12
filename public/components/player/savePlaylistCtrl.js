@@ -12,9 +12,9 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
         $timeout(function () {
             for (var i=0; i < playlist.tracks.length; i++) {
                 TracksRecommender.UpsertTrackRate(true, playlist.tracks[i].id);
-                tracksToSave.push({id: playlist.tracks[i].id, trackRank: i})
+                tracksToSave.push({trackId: playlist.tracks[i].id, trackRank: i})
             }
-            $http.post('/playlists', {name: playlist.name, tracksId: tracksToSave}).
+            $http.post('/playlists', {name: playlist.name, trackIds: tracksToSave}).
                 success(function (data) {
                     InfoModal.displayInfo('votre playlist ' + playlist.name + ' est enregistrée');
                 }).error(function (data, status) {

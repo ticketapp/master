@@ -29,8 +29,9 @@ angular.module('claudeApp').controller('toolsCtrl', ['$scope', '$modal', '$log',
 
 angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalInstance', '$rootScope',
 '$http', 'InfoModal', 'UserFactory', 'ToolsFactory', 'ArtistsFactory', 'PlaceFactory', 'OrganizerFactory', 'FollowService',
+    'RefactorObjectsFactory',
     function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, ToolsFactory, ArtistsFactory, PlaceFactory,
-              OrganizerFactory, FollowService) {
+              OrganizerFactory, FollowService, RefactorObjectsFactory) {
     $scope.suggeredPlaylists = [];
     $scope.playlists = [];
     $scope.logout = function () {
@@ -42,9 +43,11 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     };
     $scope.getPlaylists = function() {
         $http.get('/playlists').
-            success(function(data) {
-                $scope.playlists = data;
-                console.log(data)
+            success(function(playlists) {
+                playlists = playlists.map(function(playlist) {
+                    return RefactorObjectsFactory.refactorPlaylistObject(playlist)
+                });
+                $scope.playlists = playlists;
             })
     };
     $scope.getPlaylists();

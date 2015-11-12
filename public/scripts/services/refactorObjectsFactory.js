@@ -1,7 +1,7 @@
 angular.module('claudeApp').
     factory('RefactorObjectsFactory', function () {
         var factory = {
-            refactorArtistObject: function (artist) {
+            refactorArtistObject: function(artist) {
                 artist.artist.genres = artist.genres.map(function(genre) {
                     return genre.genre
                 });
@@ -23,7 +23,7 @@ angular.module('claudeApp').
                 place = place.place;
                 return place
             },
-            normalizeEventObject : function (event) {
+            normalizeEventObject : function(event) {
                 event.event.addresses = event.addresses;
                 event.event.artists = event.artists.map(function(artist) {
                     return factory.refactorArtistObject(artist)
@@ -36,6 +36,13 @@ angular.module('claudeApp').
                     return factory.refactorPlaceObject(place)
                 });
                 return event.event;
+            },
+            refactorPlaylistObject: function(playlist) {
+                var refactoredPlaylist = playlist.playlistInfo;
+                refactoredPlaylist.tracks = playlist.tracksWithRankAndGenres.map(function(track) {
+                    return factory.refactorTrackWithGenreObject(track.track);
+                });
+                return refactoredPlaylist;
             }
         };
         return factory;

@@ -52,6 +52,8 @@ class TestPlaylistController extends GlobalApplicationForControllers {
 
       val playlistSaved = await(playlistMethods.findByUserId(identity.uuid)).head
 
+      //playlistSaved.tracksWithRank should contain(track, track1, track2)
+
       val Some(delete) = route(FakeRequest(DELETE, "/playlists/" + playlistSaved.playlistInfo.playlistId.get)
         .withJsonBody(Json.parse(jsonPlaylist))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))

@@ -53,97 +53,63 @@ class TestPlaylistModel extends GlobalApplicationForModels {
         Await.result(trackMethods.save(track2), 2 seconds)
 
         whenReady(playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(playlist, trackIdWithPlaylistRankSeq.toVector)),
-          timeout(Span(5, Seconds))) { savedPlaylist =>
+          timeout(Span(5, Seconds))) { savedPlaylistId =>
 
-          val maybePlaylistId = savedPlaylist
+          whenReady(playlistMethods.find(savedPlaylistId), timeout(Span(5, Seconds))) { foundPlaylist =>
 
-          try {
-            whenReady(playlistMethods.find(savedPlaylist), timeout(Span(5, Seconds))) { foundPlaylist =>
+            foundPlaylist mustBe Option(PlaylistWithTracks(playlist.copy(playlistId = Option(savedPlaylistId)),
+              tracksWithPlaylistRank))
+          }
 
-              foundPlaylist mustBe Option(PlaylistWithTracks(playlist.copy(playlistId = Option(savedPlaylist)),
-                tracksWithPlaylistRank))
+          whenReady(playlistMethods.delete(savedPlaylistId), timeout(Span(5, Seconds))) { response =>
 
-            }
-          } finally {
-            whenReady(playlistMethods.delete(maybePlaylistId), timeout(Span(5, Seconds))) { response =>
-
-              response mustBe 1
-
-              whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { response1 =>
-
-                response1 mustBe 1
-
-                Await.result(trackMethods.delete(trackId), 2 seconds)
-                Await.result(trackMethods.delete(trackId1), 2 seconds)
-                Await.result(trackMethods.delete(trackId2), 2 seconds)
-              }
-            }
+            response mustBe 1
           }
         }
       }
     }
 
     "find playlists by userUUID" in {
-      val loginInfo: LoginInfo = LoginInfo("providerId23189", "providerKey23187")
-      val uuid: UUID = UUID.randomUUID()
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName12345"),
-        lastName = Option("lastName123"),
-        fullName = Option("fullName123"),
-        email = Option("email1234587"),
-        avatarURL = Option("avatarUrl"))
-      whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-        val playlist = Playlist(None, uuid, "name")
-        val trackId = UUID.randomUUID
-        val trackId1 = UUID.randomUUID
-        val trackId2 = UUID.randomUUID
-        val track = Track(trackId, "title", "urlPlaylistTest", 's', "thumbnailUrl",
-          "artistFacebookUrlTestPlaylistModel", "name", None)
-        val track1 = Track(trackId1, title = "title2", url = "urlPlaylistTest2", platform = 's',
-          thumbnailUrl = "thumbnailUrl", artistFacebookUrl = "artistFacebookUrlTestPlaylistModel", artistName = "name",
-          redirectUrl = None, confidence = 0.0)
-        val track2 = Track(trackId2, "title3", "urlPlaylistTest3", 's', "thumbnailUrl",
-          "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
+      val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      whenReady(playlistMethods.findByUserId(userUUID), timeout(Span(5, Seconds))) { foundPlaylist =>
+        val playlistId = foundPlaylist.head.playlistInfo.playlistId
 
-        val trackIdWithPlaylistRankSeq = Seq(
-          TrackIdWithPlaylistRank(trackId, 1.0),
-          TrackIdWithPlaylistRank(trackId1, 1.5),
-          TrackIdWithPlaylistRank(trackId2, 1.2)
-        )
-        val tracksWithPlaylistRank = Vector (
-          TrackWithPlaylistRank(track, 1.0),
-          TrackWithPlaylistRank(track2, 1.2),
-          TrackWithPlaylistRank(track1, 1.5)
-        )
-        Await.result(trackMethods.save(track), 2 seconds)
-        Await.result(trackMethods.save(track1), 2 seconds)
-        Await.result(trackMethods.save(track2), 2 seconds)
+        val track1 = TrackWithGenres(
+          track = Track(
+            uuid = UUID.fromString("02894e56-08d1-4c1f-b3e4-466c069d15ed"),
+            title = "title",
+            url = "url0",
+            platform = 'y',
+            thumbnailUrl =  "thumbnailUrl",
+            artistFacebookUrl = "facebookUrl0",
+            artistName = "artistName",
+            redirectUrl = None,
+            confidence = 0.0),
+          genres = Vector(Genre(Some(1), "genreTest0", 'a'), Genre(Some(2), "genreTest00", 'a')))
 
-        whenReady(playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(playlist, trackIdWithPlaylistRankSeq.toVector)),
-          timeout(Span(5, Seconds))) { savedPlaylist =>
+        val track2 =
+          TrackWithGenres(
+            track = Track(
+              uuid = UUID.fromString("13894e56-08d1-4c1f-b3e4-466c069d15ed"),
+              title = "title0",
+              url = "url00",
+              platform = 'y',
+              thumbnailUrl =  "thumbnailUrl",
+              artistFacebookUrl = "facebookUrl0",
+              artistName = "artistName",
+              redirectUrl = None,
+              confidence = 0.0),
+            genres = Vector(Genre(Some(1), "genreTest0", 'a'), Genre(Some(2), "genreTest00", 'a')))
 
-          val maybePlaylistId = savedPlaylist
+        val expectedPlaylistTracks = Vector(
+          TrackWithPlaylistRankAndGenres(track1, 1.0),
+          TrackWithPlaylistRankAndGenres(track2,2.0))
 
-          try {
-            whenReady(playlistMethods.findByUserId(uuid), timeout(Span(5, Seconds))) { foundPlaylist =>
+        val expectedPlaylist = PlaylistWithTracksWithGenres(
+          playlistInfo = Playlist(playlistId = playlistId, userId = userUUID, name = "playlist0"),
+          tracksWithRankAndGenres = expectedPlaylistTracks)
 
-              foundPlaylist must contain(PlaylistWithTracks(playlist.copy(playlistId = Option(savedPlaylist)),
-                tracksWithPlaylistRank))
-            }
-          } finally {
-            whenReady(playlistMethods.delete(maybePlaylistId), timeout(Span(5, Seconds))) { response =>
-
-              response mustBe 1
-
-              whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { response1 =>
-
-                response1 mustBe 1
-              }
-            }
-          }
-        }
+        foundPlaylist must contain(expectedPlaylist)
       }
     }
   }
