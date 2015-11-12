@@ -18,6 +18,7 @@ import services._
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 import scala.util.matching.Regex
 
 
@@ -325,8 +326,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .flatMap { response =>
        readFacebookArtists(response.json)
      } recover {
-      case t: Throwable =>
-        Logger.error(s"ArtistModel.getEventuallyFacebookArtists: for pattern $pattern\nMessage:\n" + t.getMessage)
+      case NonFatal(e: Exception) =>
+        Logger.error(s"ArtistModel.getEventuallyFacebookArtists: for pattern $pattern\nMessage:\n" + e.getMessage)
         Seq.empty
     }
   }

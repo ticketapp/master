@@ -3,13 +3,13 @@ package models
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Geometry
-import controllers.WebServiceException
 import org.joda.time.DateTime
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
 import play.api.libs.iteratee.Iteratee
+import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
@@ -19,9 +19,8 @@ import silhouette.DBTableDefinitions
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import play.api.libs.json.Reads._
-
-import scala.util.{Success, Failure, Try}
+import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
 
 
 case class Event(id: Option[Long],
@@ -463,32 +462,39 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def update(event: Event): Future[Int] = db.run(events.filter(_.id === event.id).update(event))
 
-  def saveFacebookEventByFacebookId(eventFacebookId: String): Future[Event] = {
+  def saveFacebookEventByFacebookId(eventFacebookId: String): Future[Option[Event]] = {
     val maybeEvent = db.run(events.filter(_.facebookId === eventFacebookId).result.headOption)
     maybeEvent flatMap {
       case Some(event) =>
-        Future(event)
+        Future(Option(event))
       case None =>
-        findEventOnFacebookByFacebookId(eventFacebookId) flatMap { event =>
-          Future {
-            event.artists.foreach { artist =>
-            val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
-            tracksEnumerator |>> Iteratee.foreach(t => t.map(trackMethods.save))
-              artist
+        findEventOnFacebookByFacebookId(eventFacebookId) flatMap {
+          case Some(event) =>
+            Future {
+              event.artists.foreach { artist =>
+              val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
+              tracksEnumerator |>> Iteratee.foreach(t => t.map(trackMethods.save))
+                artist
+              }
             }
-          }
-          save(event)
+            save(event) map Option.apply
+          case None =>
+            Future(None)
         }
     }
   }
 
-  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[EventWithRelations] =
+  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Option[EventWithRelations]] =
     WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + eventFacebookId)
       .withQueryString(
         "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
         "access_token" -> utilities.facebookToken)
       .get()
-      .flatMap(facebookEventToEventWithRelations)
+      .flatMap(facebookEventToEventWithRelations) recover {
+      case NonFatal(e) =>
+        Logger.error("Event.findEventOnFacebookByFacebookId:\nMessage:\n", e)
+        None
+    }
 
   case class MaybeOwnerAndPlaceIds(maybeOwnerId: Option[String], maybePlaceId: Option[String])
 
@@ -501,14 +507,28 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       (__ \ "id").readNullable[String] and
       (__ \ "start_time").read[String] and
       (__ \ "endTime").readNullable[String] and
-      (__ \ "venue" \ "street").readNullable[String] and
-      (__ \ "venue" \ "zip").readNullable[String] and
-      (__ \ "venue" \ "city").readNullable[String] and
-      (__ \ "owner" \ "id").readNullable[String] and
-      (__ \ "place" \ "id").readNullable[String]
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "street").readNullable[String]
+      ) and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "zip").readNullable[String]
+      ) and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "city").readNullable[String]
+      ) and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "country").readNullable[String]
+      ) and
+      (__ \ "owner").readNullable[Option[String]](
+        (__ \ "id").readNullable[String]
+      ) and
+      (__ \ "place").readNullable[Option[String]](
+        (__ \ "id").readNullable[String]
+      )
     )((maybeDescription: Option[String], maybeCover: Option[String], name: String, facebookId: Option[String],
-       startTime: String, endTime: Option[String], street: Option[String], zip: Option[String],
-       city: Option[String], maybeOwnerId: Option[String], maybePlaceId: Option[String]) => {
+       startTime: String, endTime: Option[String], street: Option[Option[String]], zip: Option[Option[String]],
+       city: Option[Option[String]], country: Option[Option[String]], maybeOwnerId: Option[Option[String]],
+       maybePlaceId: Option[Option[String]]) => {
 
     val event = Event(
       id = None,
@@ -523,7 +543,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       imagePath = maybeCover,
       tariffRange = tariffMethods.findPrices(maybeDescription))
 
-    val addresses = Try(Address(id = None, geographicPoint = None, street = street, zip = zip, city = city)) match {
+    val addresses = Try(Address(
+      id = None, geographicPoint = None,
+      street = street.flatten,
+      zip = zip.flatten,
+      city = city.flatten)) match {
       case Success(address) => Seq(address)
       case _ => Seq.empty
     }
@@ -532,62 +556,55 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       event = event,
       addresses = addresses)
 
-    val maybeOwnerIdAndMaybePlaceId = MaybeOwnerAndPlaceIds(maybeOwnerId, maybePlaceId)
+    val maybeOwnerIdAndMaybePlaceId = MaybeOwnerAndPlaceIds(maybeOwnerId.flatten, maybePlaceId.flatten)
 
     (eventWithRelations, maybeOwnerIdAndMaybePlaceId)
   })
 
-  def facebookEventResponseToEventWithRelations(eventFacebookResponse: WSResponse): Try[(EventWithRelations, MaybeOwnerAndPlaceIds)] = {
-    val eventReadResult: JsResult[(EventWithRelations, MaybeOwnerAndPlaceIds)] =
-      eventFacebookResponse.json.validate[(EventWithRelations, MaybeOwnerAndPlaceIds)](readFacebookEvent)
+  def facebookEventToEventWithRelations(eventFacebookResponse: WSResponse): Future[Option[EventWithRelations]] = {
+    Try(eventFacebookResponse.json.as[(EventWithRelations, MaybeOwnerAndPlaceIds)](readFacebookEvent)) match {
+      case Success(eventWithRelationsAndMaybePlaceAndOwnerIds) =>
+        val eventWithRelations = eventWithRelationsAndMaybePlaceAndOwnerIds._1
 
-    eventReadResult match {
-      case s: JsSuccess[(EventWithRelations, MaybeOwnerAndPlaceIds)] =>
-        Success(eventFacebookResponse.json.as[(EventWithRelations, MaybeOwnerAndPlaceIds)](readFacebookEvent))
-      case e: JsError =>
-        Logger.error("Event.facebookEventResponseToEventWithRelations: " + e.errors)
-        Failure(WebServiceException("Event.facebookEventResponseToEventWithRelations: " ))
-    }
-  }
+        val eventuallyMaybeOrganizer = organizerMethods.getOrganizerInfo(eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybeOwnerId)
 
-  def facebookEventToEventWithRelations(eventFacebookResponse: WSResponse): Future[EventWithRelations] = {
-    val eventWithRelationsAndMaybePlaceAndOwnerIds = facebookEventResponseToEventWithRelations(eventFacebookResponse).get
+        val eventuallyMaybePlace: Future[Option[PlaceWithAddress]] = eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybePlaceId match {
+          case Some(placeId) => placeMethods.getPlaceByFacebookId(placeId)
+          case None => Future(None)
+        }
 
-    val eventWithRelations = eventWithRelationsAndMaybePlaceAndOwnerIds._1
+        val eventuallyNormalizedWebsites: Future[Set[String]] = eventWithRelations.event.description match {
+          case Some(description) => utilities.getNormalizedWebsitesInText(description)
+          case None => Future(Set.empty)
+        }
 
-    val eventuallyMaybeOrganizer = organizerMethods.getOrganizerInfo(eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybeOwnerId)
+        for {
+          organizer <- eventuallyMaybeOrganizer
+          normalizedWebsites <- eventuallyNormalizedWebsites
+          artistsFromDescription <- artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
+          artistsFromTitle <- artistMethods.getEventuallyArtistsInEventTitle(
+            eventWithRelationsAndMaybePlaceAndOwnerIds._1.event.name, normalizedWebsites)
+          maybePlace <- eventuallyMaybePlace
+          nonEmptyArtists = (artistsFromDescription.toVector ++ artistsFromTitle).distinct
+          artistGenres = nonEmptyArtists.flatMap(_.genres map (_.genre))
+          overGenres <-genreMethods.findOverGenres(artistGenres)
+          genres = (artistGenres ++ overGenres).distinct
+        } yield {
 
-    val eventuallyMaybePlace: Future[Option[PlaceWithAddress]] = eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybePlaceId match {
-      case Some(placeId) => placeMethods.getPlaceByFacebookId(placeId) map (Option(_))
-      case None => Future(None)
-    }
+          val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
 
-    val eventuallyNormalizedWebsites: Future[Set[String]] = eventWithRelations.event.description match {
-      case Some(description) => utilities.getNormalizedWebsitesInText(description)
-      case None => Future(Set.empty)
-    }
+          Option(eventWithRelations.copy(
+            event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
+            artists = nonEmptyArtists,
+            organizers = Vector(organizer).flatten,
+            places = Vector(maybePlace).flatten,
+            genres = genres))
+        }
 
-    for {
-      organizer <- eventuallyMaybeOrganizer
-      normalizedWebsites <- eventuallyNormalizedWebsites
-      artistsFromDescription <- artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
-      artistsFromTitle <- artistMethods.getEventuallyArtistsInEventTitle(
-        eventWithRelationsAndMaybePlaceAndOwnerIds._1.event.name, normalizedWebsites)
-      maybePlace <- eventuallyMaybePlace
-      nonEmptyArtists = (artistsFromDescription.toVector ++ artistsFromTitle).distinct
-      artistGenres = nonEmptyArtists.flatMap(_.genres map (_.genre))
-      overGenres <-genreMethods.findOverGenres(artistGenres)
-      genres = (artistGenres ++ overGenres).distinct
-    } yield {
-
-      val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
-
-      eventWithRelations.copy(
-        event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
-        artists = nonEmptyArtists,
-        organizers = Vector(organizer).flatten,
-        places = Vector(maybePlace).flatten,
-        genres = genres)
+      case Failure(t: Throwable) =>
+        Logger.error("Event.facebookEventToEventWithRelations: from readFacebookEvent:\nMessage:\n" + t.getMessage +
+          "\nFor facebook response:\n" + eventFacebookResponse.json)
+        Future(None)
     }
   }
 
@@ -595,11 +612,19 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
       .withQueryString("access_token" -> utilities.facebookToken)
       .get()
-      .map { readEventsIdsFromWSResponse }
+      .map(readEventsIdsFromWSResponse)
+      .recover {
+        case NonFatal(e) =>
+          Logger.error("Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId:\nMessage:\n", e)
+          Seq.empty
+      }
   }
 
-  def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = {
+  def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = Try {
     val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
     (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
+  } match {
+    case Success(facebookIds) => facebookIds
+    case _ => Seq.empty
   }
 }

@@ -97,7 +97,7 @@ INSERT INTO eventsartists(eventid, artistid) VALUES
 
 -------------------------------------------------------- eventsFollowed ------------------------------------------------
 INSERT INTO eventsfollowed(eventid, userid) VALUES
-  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT userid FROM users WHERE email = 'user@facebook.com'));
+  ((SELECT eventId FROM events WHERE name = 'name0'), '077f3ea6-2272-4457-a47e-9e9111108e44');
 
 -------------------------------------------------------- frenchCities --------------------------------------------------
 INSERT INTO frenchcities(city, geographicpoint) VALUES('lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');

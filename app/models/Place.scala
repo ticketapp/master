@@ -18,6 +18,8 @@ import silhouette.DBTableDefinitions
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
 
 case class Place(id: Option[Long] = None,
                  name: String,
@@ -95,11 +97,11 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def findIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(places.filter(_.facebookId === facebookId).map(_.id).result.headOption)
 
-  def getPlaceByFacebookId(placeFacebookId : String) : Future[PlaceWithAddress] = findIdByFacebookId(placeFacebookId) flatMap {
+  def getPlaceByFacebookId(placeFacebookId : String) : Future[Option[PlaceWithAddress]] = findIdByFacebookId(placeFacebookId) flatMap {
     case Some(id) =>
       findById(id) flatMap {
         case Some(place) =>
-          Future(place)
+          Future(Option(place))
         case None =>
           getPlaceOnFacebook(placeFacebookId)
       }
@@ -107,35 +109,59 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       getPlaceOnFacebook(placeFacebookId)
   }
 
- def getPlaceOnFacebook(placeFacebookId: String): Future[PlaceWithAddress] =
+  def getPlaceOnFacebook(placeFacebookId: String): Future[Option[PlaceWithAddress]] =
    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + placeFacebookId)
      .withQueryString(
        "fields" -> "about,location,website,hours,cover,name",
        "access_token" -> utilities.facebookToken)
      .get()
-     .flatMap { readFacebookPlace }
+     .flatMap(readFacebookPlace) recover {
+     case NonFatal(exception) =>
+       Logger.error("Place.getPlaceOnFacebook:\nMessage: ", exception)
+       None
+   }
 
- def readFacebookPlace (placeFacebookResponse: WSResponse): Future[PlaceWithAddress] = {
-   val placeRead = (
-     (__ \ "about").readNullable[String] and
-       (__ \ "cover" \ "source").readNullable[String] and
-       (__ \ "name").read[String] and
-       (__ \ "id").readNullable[String] and
-       (__ \ "location" \ "street").readNullable[String] and
-       (__ \ "location" \ "zip").readNullable[String] and
-       (__ \ "location" \ "city").readNullable[String] and
-       (__ \ "location" \ "country").readNullable[String] and
-       (__ \ "website").readNullable[String]
-     ).apply((about: Option[String], source: Option[String], name: String, facebookId: Option[String],
-              street: Option[String], zip: Option[String], city: Option[String], country: Option[String],
-              website: Option[String]) => {
-     val address = Address(None, None, city, zip, street)
-     val newPlace = PlaceWithAddress(Place(None, name, facebookId, None, about, website, None, None, source), address = Option(address))
-     saveWithAddress(newPlace)
-   })
+  def placeRead: Reads[PlaceWithAddress] = (
+    (__ \ "about").readNullable[String] and
+      (__ \ "cover").readNullable[Option[String]](
+        (__ \ "source").readNullable[String]
+      ) and
+      (__ \ "name").read[String] and
+      (__ \ "id").readNullable[String] and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "street").readNullable[String]
+      ) and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "zip").readNullable[String]
+      ) and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "city").readNullable[String]
+      ) and
+      (__ \ "location").readNullable[Option[String]](
+        (__ \ "country").readNullable[String]
+      ) and
+      (__ \ "website").readNullable[String]
+    ).apply((about: Option[String], source: Option[Option[String]], name: String, facebookId: Option[String],
+             street: Option[Option[String]], zip: Option[Option[String]], city: Option[Option[String]],
+             country: Option[Option[String]], website: Option[String]) => {
+    val address = Address(None, None, city.flatten, zip.flatten, street.flatten)
+    PlaceWithAddress(
+      place = Place(None, name, facebookId, None, about, website, None, None, source.flatten),
+      address = Option(address))
+  })
 
-   placeFacebookResponse.json.as[Future[PlaceWithAddress]](placeRead)
- }
+  def readFacebookPlace (placeFacebookResponse: WSResponse): Future[Option[PlaceWithAddress]] = {
+   Try(placeFacebookResponse.json.as[PlaceWithAddress](placeRead)) match {
+     case Success(placeWithAddress) =>
+       saveWithAddress(placeWithAddress) map Option.apply
+     case Failure(exception: IllegalArgumentException) =>
+       Logger.info("Place.readFacebookPlace: address must contain at least one field")
+       Future(None)
+     case Failure(exception) =>
+       Logger.error("Place.readFacebookPlace:\nMessage:", exception)
+       Future(None)
+   }
+  }
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] = {
     val query = for {

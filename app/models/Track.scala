@@ -91,6 +91,8 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       case uuid: UUID => track.copy(uuid = uuid)
   }).transactionally)
 
+  def saveSequence(tracksToSave: Set[Track]): Future[Any] = db.run(tracks ++= tracksToSave)
+
   def delete(uuid: UUID): Future[Int] = db.run(tracks.filter(_.uuid === uuid).delete)
 
   def removeDuplicateByTitleAndArtistName(tracks: Seq[Track]): Seq[Track] = {

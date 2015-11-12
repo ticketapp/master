@@ -89,10 +89,10 @@ class TestSearchArtist extends GlobalApplicationForModels {
     }
 
     "aggregate the image path url with its offsets" in {
-      artistMethods.aggregateImageAndOffset(Option("imageUrl"), Option(1), Option(200)) mustBe """imageUrl\1\200"""
-      artistMethods.aggregateImageAndOffset(Option("imageUrl"), None, Option(200)) mustBe """imageUrl\0\200"""
-      artistMethods.aggregateImageAndOffset(Option("imageUrl"), Option(1), None) mustBe """imageUrl\1\0"""
-      artistMethods.aggregateImageAndOffset(Option("imageUrl"), None, None) mustBe """imageUrl\0\0"""
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), Option(1), Option(200)) mustBe Some("""imageUrl\1\200""")
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), None, Option(200)) mustBe Some("""imageUrl\0\200""")
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), Option(1), None) mustBe Some("""imageUrl\1\0""")
+      artistMethods.aggregateImageAndOffset(Option("imageUrl"), None, None) mustBe Some("""imageUrl\0\0""")
     }
 
     "find facebook artists from a set of website" in {
@@ -144,9 +144,10 @@ class TestSearchArtist extends GlobalApplicationForModels {
         "Defeater", "BURNING DOWN ALASKA", "Nosaj Thing", "Mono (Japan)", "SÓLSTAFIR", "The Ocean Collective", "LOHEEM",
         "woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
 
-      whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(10, Seconds))) { maybeArtists =>
-
-        maybeArtists.map{ artist => artist.artist.name } mustBe expectedArtistsName }
+      whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(10, Seconds))) { artists =>
+        val artistsNames = artists.map { artist => artist.artist.name }
+        artistsNames mustBe expectedArtistsName
+      }
     }
 
     "find artists in event's title" in {
