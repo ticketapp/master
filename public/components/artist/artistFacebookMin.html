@@ -3,7 +3,12 @@
         <div class="toGrow">
             <img ng-click="createArtist(artist)"
                  ng-src="{{artist.imagePath}}"
+                 ng-if="artist.imagePath"
                  on-error-src="assets/images/caroussel1.gif" class="min pointer"/>
+            <img ng-click="createArtist(artist)"
+                 src="assets/images/caroussel1.gif"
+                 ng-if="!artist.imagePath"
+                 class="min pointer"/>
         </div>
         <div class="absolute top0">
             <i ng-repeat="genre in artist.genres"

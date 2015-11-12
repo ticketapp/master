@@ -20,6 +20,7 @@ angular.module('claudeApp').
                 return organizer
             },
             refactorPlaceObject: function (place) {
+                console.log(place)
                 place = place.place;
                 return place
             },
@@ -29,8 +30,8 @@ angular.module('claudeApp').
                     return factory.refactorArtistObject(artist)
                 });
                 event.event.genres = event.genres;
-                event.event.organizers = event.organizers.map(function(organizer){return organizer.organizer});
-                event.event.places = event.places;
+                event.event.organizers = event.organizers.map(function(organizer){return factory.refactorOrganizerObject(organizer)});
+                event.event.places = event.places.map(function(place) {return factory.refactorPlaceObject(place)});
                 return event.event;
             }
         };
