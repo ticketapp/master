@@ -23,16 +23,12 @@ class TestArtistModel extends GlobalApplicationForModels {
           val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
             Option("description"), "facebookUrl", Set("website")), Vector.empty)
           whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-            try {
-              whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
+            whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
 
-                foundArtist mustBe Option(ArtistWithWeightedGenres(artist.artist.copy(id = Some(savedArtist.id.get),
-                  description = Some("<div class='column large-12'>description</div>")), Vector.empty))
+              foundArtist mustBe Option(ArtistWithWeightedGenres(artist.artist.copy(id = Some(savedArtist.id.get),
+                description = Some("<div class='column large-12'>description</div>")), Vector.empty))
 
-                whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
-              }
-            } finally {
-              artistMethods.delete(savedArtist.id.get)
+              whenReady(artistMethods.delete(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
             }
           }
         }
@@ -104,22 +100,17 @@ class TestArtistModel extends GlobalApplicationForModels {
 
           whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
             whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-              try {
-                whenReady(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)),
-                  timeout(Span(5, Seconds))) { resp =>
-                  whenReady(artistMethods.isFollowed(UserArtistRelation(uuid, savedArtist.id.get))) { isFollowed =>
+              whenReady(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)),
+                timeout(Span(5, Seconds))) { resp =>
+                whenReady(artistMethods.isFollowed(UserArtistRelation(uuid, savedArtist.id.get))) { isFollowed =>
 
-                    isFollowed mustBe true
+                  isFollowed mustBe true
 
-                    whenReady(artistMethods.unfollowByArtistId(UserArtistRelation(uuid, savedArtist.id.get))) { result =>
+                  whenReady(artistMethods.unfollowByArtistId(UserArtistRelation(uuid, savedArtist.id.get))) { result =>
 
-                      result mustBe 1
-                    }
+                    result mustBe 1
                   }
                 }
-              } finally {
-                artistMethods.delete(savedArtist.id.get)
-                userDAOImpl.delete(uuid)
               }
             }
           }
@@ -141,26 +132,15 @@ class TestArtistModel extends GlobalApplicationForModels {
 
           whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
             whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-              try {
-                whenReady(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)),
-                  timeout(Span(5, Seconds))) { firstResp =>
-                    try {
-                      Await.result(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)), 3 seconds)
-                    } catch {
-                      case e: PSQLException =>
+              whenReady(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)),
+                timeout(Span(5, Seconds))) { firstResp =>
+                  try {
+                    Await.result(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)), 3 seconds)
+                  } catch {
+                    case e: PSQLException =>
 
-                        e.getSQLState mustBe utilities.UNIQUE_VIOLATION
-                    }
-                }
-              } finally {
-                whenReady(artistMethods.unfollowByArtistId(UserArtistRelation(uuid,
-                  savedArtist.id.get))) { result =>
-
-                  result mustBe 1
-
-                  artistMethods.delete(savedArtist.id.get)
-                  userDAOImpl.delete(uuid)
-                }
+                      e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+                  }
               }
             }
           }

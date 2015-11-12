@@ -92,50 +92,23 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
-  /*
-  def findAllByPlace(placeId: Long): Future[Seq[EventWithRelations]] = {
-    val now = DateTime.now()
-    val twelveHoursAgo = now.minusHours(12)
-
-    val query = for {
-      place <- places if place.id === placeId
-      eventPlace <- eventsPlaces if eventPlace.placeId === place.id
-      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-        optionalEventAddresses) <- events
-        .filter(event => ((event.endTime.nonEmpty && event.endTime > now)
-          || (event.endTime.isEmpty && event.startTime > twelveHoursAgo))) joinLeft
-          (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
-          (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
-          (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
-          (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
-          (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
-
-      if eventWithOptionalEventOrganizers._1.id === eventPlace.eventId
-    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
-        optionalEventAddresses)
-
-    db.run(query.result) map(eventWithRelations =>
-      eventWithRelationsTupleToEventWithRelationClass(eventWithRelations).sortBy(-_.event.startTime.getMillis))
-  }
-   */
-
 
   def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[ArtistWithWeightedGenres]] = {
-    val query = for {
+    val artistsQuery = for {
       genre <- genres.filter(_.name === genreName)
       artistGenre <- artistsGenres.filter(_.genreId === genre.id)
-      artist <- artists.filter(_.id === artistGenre.artistId)
+      artist <- artists.filter(_.id === artistGenre.artistId) map (_.id)
 
     } yield artist
 
-    val artistsIdFromDB = query.drop(offset).take(numberToReturn) map (_.id)
+    val artistsIdFromDB = artistsQuery.drop(offset).take(numberToReturn)
 
-    val query2 = for {
+    val artistWithGenreQuery = for {
       artistWithGenres <- artists.filter(_.id in artistsIdFromDB) joinLeft
         (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield artistWithGenres
 
-    db.run(query2.result) map { seqArtistAndOptionalGenre =>
+    db.run(artistWithGenreQuery.result) map { seqArtistAndOptionalGenre =>
       ArtistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
