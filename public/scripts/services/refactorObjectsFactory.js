@@ -1,5 +1,5 @@
 angular.module('claudeApp').
-    factory('RefactorObjectsFactory', function () {
+    factory('RefactorObjectsFactory', ['RefactorGeopoint', function (RefactorGeopoint) {
         var factory = {
             refactorArtistObject: function(artist) {
                 artist.artist.genres = artist.genres.map(function(genre) {
@@ -21,10 +21,25 @@ angular.module('claudeApp').
             },
             refactorPlaceObject: function(place) {
                 place = place.place;
+                switch(place.geographicPoint) {
+                    case undefined:
+                        break;
+                    default :
+                        place.geographicPoint = RefactorGeopoint.refactorGeopoint(place.geographicPoint);
+                        break
+                }
                 return place
             },
             normalizeEventObject : function(event) {
-                event.event.addresses = event.addresses;
+                event.event.addresses = event.addresses.map(function(address) {
+                    if (address.geographicPoint) {
+                        address.geographicPoint = RefactorGeopoint.refactorGeopoint(address.geographicPoint);
+                    }
+                    return address;
+                });
+                if (event.event.geographicPoint) {
+                    event.event.geographicPoint = RefactorGeopoint.refactorGeopoint(event.event.geographicPoint);
+                }
                 event.event.artists = event.artists.map(function(artist) {
                     return factory.refactorArtistObject(artist)
                 });
@@ -46,4 +61,4 @@ angular.module('claudeApp').
             }
         };
         return factory;
-    });
+    }]);
