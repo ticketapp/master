@@ -22,10 +22,10 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         savedOrganizer mustEqual OrganizerWithAddress(
-          organizer.copy(
+          organizer = organizer.copy(
             id = Some(savedOrganizer.organizer.id.get),
             description = Some("<div class='column large-12'>description</div>")),
-          None)
+          address = None)
         whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
           _ mustBe 1
         }
@@ -38,10 +38,10 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         savedOrganizer mustEqual OrganizerWithAddress(
-          organizer.copy(
+          organizer = organizer.copy(
             id = Some(savedOrganizer.organizer.id.get),
             description = Some("<div class='column large-12'>description</div>")),
-          None)
+          address = None)
         whenReady(organizerMethods.findAll, timeout(Span(5, Seconds))) { foundOrganizers =>
           foundOrganizers should contain(savedOrganizer)
         }
@@ -54,10 +54,10 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         savedOrganizer mustEqual OrganizerWithAddress(
-          organizer.copy(
+          organizer = organizer.copy(
             id = Some(savedOrganizer.organizer.id.get),
             description = Some("<div class='column large-12'>description</div>")),
-          None)
+          address = None)
         whenReady(organizerMethods.findIdByFacebookId(savedOrganizer.organizer.facebookId), timeout(Span(5, Seconds))) { foundOrganizer =>
           foundOrganizer mustBe savedOrganizer.organizer.id
         }

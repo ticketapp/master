@@ -1,13 +1,12 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import com.vividsolutions.jts.geom.{GeometryFactory, Geometry}
+import json.JsonHelper._
 import models._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
-import json.JsonHelper._
 
 
 class TestEventController extends GlobalApplicationForControllers {
