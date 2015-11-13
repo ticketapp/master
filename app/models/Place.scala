@@ -150,17 +150,17 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       address = Option(address))
   })
 
-  def readFacebookPlace (placeFacebookResponse: WSResponse): Future[Option[PlaceWithAddress]] = {
-   Try(placeFacebookResponse.json.as[PlaceWithAddress](placeRead)) match {
-     case Success(placeWithAddress) =>
-       saveWithAddress(placeWithAddress) map Option.apply
-     case Failure(exception: IllegalArgumentException) =>
-       Logger.info("Place.readFacebookPlace: address must contain at least one field")
-       Future(None)
-     case Failure(exception) =>
-       Logger.error("Place.readFacebookPlace:\nMessage:", exception)
-       Future(None)
-   }
+  def readFacebookPlace (placeFacebookResponse: WSResponse): Future[Option[PlaceWithAddress]] = Try {
+    placeFacebookResponse.json.as[PlaceWithAddress](placeRead)
+  } match {
+    case Success(placeWithAddress) =>
+      saveWithAddress(placeWithAddress) map Option.apply
+    case Failure(exception: IllegalArgumentException) =>
+      Logger.info("Place.readFacebookPlace: address must contain at least one field")
+      Future(None)
+    case Failure(exception) =>
+      Logger.error("Place.readFacebookPlace:\nMessage:", exception)
+      Future(None)
   }
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] = {
