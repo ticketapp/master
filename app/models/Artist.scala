@@ -22,7 +22,7 @@ import scala.util.matching.Regex
 
 
 case class Artist(id: Option[Long],
-                  facebookId: Option[String],
+                  facebookId: Option[String] = None,
                   name: String,
                   imagePath: Option[String] = None,
                   description: Option[String] = None,
@@ -58,11 +58,10 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val query = for {
       (((artist), optionalArtistGenreAndGenre), maybeTrack) <- artists.drop(offset).take(numberToReturn) joinLeft
         (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId) joinLeft
-        tracks on (_._1.name === _.artistName) take 1
+        tracks.take(1) on (_._1.facebookUrl === _.artistFacebookUrl)
     } yield (artist, optionalArtistGenreAndGenre, maybeTrack)
 
     db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      println(seqArtistAndOptionalGenreAndHasTracks)
       artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.toVector)
   }
@@ -99,13 +98,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val query = for {
       e <- events if e.id === eventId
       eventArtist <- eventsArtists
-      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      (((artist), optionalArtistGenreAndGenre), maybeTrack) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId) joinLeft
+        tracks.take(1) on (_._1.facebookUrl === _.artistFacebookUrl)
       if artist.id === eventArtist.artistId
-    } yield (artist, optionalArtistGenreAndGenre)
+    } yield (artist, optionalArtistGenreAndGenre, maybeTrack)
 
-    db.run(query.result) map { seqArtistAndOptionalGenre =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenre)
+    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.toVector)
   }
 
@@ -120,36 +120,39 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val artistsIdFromDB = artistsQuery.drop(offset).take(numberToReturn)
 
     val artistWithGenreQuery = for {
-      artistWithGenres <- artists.filter(_.id in artistsIdFromDB) joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
-    } yield artistWithGenres
+      (((artist), optionalArtistGenreAndGenre), maybeTrack) <- artists.filter(_.id in artistsIdFromDB) joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId) joinLeft
+        tracks.take(1) on (_._1.facebookUrl === _.artistFacebookUrl)
+    } yield (artist, optionalArtistGenreAndGenre, maybeTrack)
 
-    db.run(artistWithGenreQuery.result) map { seqArtistAndOptionalGenre =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenre)
+    db.run(artistWithGenreQuery.result) map { seqArtistAndOptionalGenreAndHasTracks =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.toVector)
   }
   
   def find(id: Long): Future[Option[ArtistWithWeightedGenresAndHasTrack]] = {
     val query = for {
-      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      (((artist), optionalArtistGenreAndGenre), maybeTrack) <- (artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)) joinLeft
+        tracks.take(1) on (_._1.facebookUrl === _.artistFacebookUrl)
       if artist.id === id
-    } yield (artist, optionalArtistGenreAndGenre)
+    } yield (artist, optionalArtistGenreAndGenre, maybeTrack)
 
-    db.run(query.result) map { seqArtistAndOptionalGenre =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenre)
+    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.headOption)
   }
 
   def findByFacebookUrl(facebookUrl: String): Future[Option[ArtistWithWeightedGenresAndHasTrack]] = {
     val query = for {
-      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      (((artist), optionalArtistGenreAndGenre), maybeTrack) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId) joinLeft
+        tracks.take(1) on (_._1.facebookUrl === _.artistFacebookUrl)
       if artist.facebookUrl === facebookUrl
-    } yield (artist, optionalArtistGenreAndGenre)
+    } yield (artist, optionalArtistGenreAndGenre, maybeTrack)
 
-    db.run(query.result) map { seqArtistAndOptionalGenre =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenre)
+    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.headOption)
   }
 
@@ -157,13 +160,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val lowercasePattern = pattern.toLowerCase
 
     val query = for {
-      (artist, optionalArtistGenreAndGenre) <- artists joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      (((artist), optionalArtistGenreAndGenre), maybeTrack) <- artists joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId) joinLeft
+        tracks.take(1) on (_._1.facebookUrl === _.artistFacebookUrl)
       if artist.name.toLowerCase like s"%$lowercasePattern%"
-    } yield (artist, optionalArtistGenreAndGenre)
+    } yield (artist, optionalArtistGenreAndGenre, maybeTrack)
 
-    db.run(query.result) map { seqArtistAndOptionalGenre =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenre)
+    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.toVector)
   }
 
