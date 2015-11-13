@@ -74,11 +74,11 @@ angular.module('claudeApp').
                     if (connected == false) {
                         $scope.isFollowed = false;
                     } else {
-                        EventFactory.getIsFollowed(event.eventId).then(function (isFollowed) {
+                        FollowService.events.isFollowed(event.id).then(function (isFollowed) {
                             if (isFollowed == true || isFollowed == false) {
                                 $scope.isFollowed = isFollowed;
                             }
-                        })
+                        });
                     }
                 });
                 if (event.organizers != undefined && event.organizers.length > 0) {
