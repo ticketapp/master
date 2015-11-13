@@ -1,11 +1,13 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import com.vividsolutions.jts.geom.{GeometryFactory, Geometry}
 import models._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
+import json.JsonHelper._
 
 
 class TestEventController extends GlobalApplicationForControllers {
@@ -33,12 +35,12 @@ class TestEventController extends GlobalApplicationForControllers {
                         "ageRestriction": 1}"""
 
       val Some(result) = route(FakeRequest(POST, "/events/create")
-      .withJsonBody(Json.parse(jsonEvent))
-      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withJsonBody(Json.parse(jsonEvent))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       val Some(result1) = route(FakeRequest(POST, "/events/create")
-      .withJsonBody(Json.parse(jsonPassedEvent))
-      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withJsonBody(Json.parse(jsonPassedEvent))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(result) mustEqual OK
       status(result1) mustEqual OK
@@ -104,9 +106,9 @@ class TestEventController extends GlobalApplicationForControllers {
     "find one followed event by id" in {
       val eventId = await(eventMethods.findAllContaining("test") map (_.head.event.id.get))
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
-      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
       val Some(events) = route(FakeRequest(GET, "/events/" + eventId + "/isFollowed")
-      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
       val Some(response2) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -199,9 +201,26 @@ class TestEventController extends GlobalApplicationForControllers {
       contentAsString(response) must not contain """"name":"notPassedEvent""""
     }
 
-    /*
-    /events/nearCity/:city
-    */
+    "get events near geoPoint" in {
+      val Some(response) = route(FakeRequest(controllers.routes.EventController.events(
+        offset = 0,
+        numberToReturn = 1000,
+        geographicPoint = "5,5"))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      val eventsJSValue = contentAsJson(response ) \\ "event"
+      val events = eventsJSValue.map(event => event.as[Event])
+
+      status(response) mustEqual OK
+      val geoPoints = events.map(_.geographicPoint)
+
+      val centerPoint = geographicPointMethods.latAndLngToGeographicPoint(5.0, 5.0).get
+      val sortedGeoPoint = geoPoints.flatten sortBy(point => point.distance(centerPoint))
+      val numberOfEmptyValuesRemoved = geoPoints.size - sortedGeoPoint.size
+      val sortedGeoPointPlusEmptyValues = (sortedGeoPoint map Option.apply) ++ List.fill(numberOfEmptyValuesRemoved)(None)
+
+      geoPoints mustEqual sortedGeoPointPlusEmptyValues
+    }
   }
 }
 

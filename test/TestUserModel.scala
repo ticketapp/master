@@ -4,6 +4,7 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import org.scalatest.Matchers._
 
 
 class TestUserModel extends GlobalApplicationForModels {
@@ -50,21 +51,20 @@ class TestUserModel extends GlobalApplicationForModels {
 
       whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
         val placeId = savedPlace.id.get
-        try {
-          whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-            whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, placeId)),
-              timeout(Span(5, Seconds))) { resp =>
-              whenReady(placeMethods.getFollowedPlaces(uuid), timeout(Span(5, Seconds))) { followedPlaces =>
-                assert(followedPlaces.nonEmpty)
-                whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, placeId))) { isDeletePlace =>
-                  isDeletePlace mustBe 1
-                  whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
-                }
+        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
+          whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, placeId)),
+            timeout(Span(5, Seconds))) { resp =>
+            whenReady(placeMethods.getFollowedPlaces(uuid), timeout(Span(5, Seconds))) { followedPlaces =>
+
+              followedPlaces should contain (savedPlace)
+              whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, placeId))) { isDeletePlace =>
+
+                isDeletePlace mustBe 1
+
+                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
               }
             }
           }
-        } finally {
-          placeMethods.delete(placeId)
         }
       }
     }
@@ -87,29 +87,26 @@ class TestUserModel extends GlobalApplicationForModels {
         val organizerId = savedOrganizer.organizer.id.get
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
 
-          try {
-            whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, organizerId)),
-              timeout(Span(5, Seconds))) { response =>
-
-                response mustBe 1
-
-              whenReady(organizerMethods.getFollowedOrganizers(uuid), timeout(Span(5, Seconds))) { organizers =>
-
-                  organizers must contain (savedOrganizer)
-              }
-            }
-          } finally {
-            whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, organizerId)),
-              timeout(Span(5, Seconds))) { response =>
+          whenReady(organizerMethods.followByOrganizerId(UserOrganizerRelation(uuid, organizerId)),
+            timeout(Span(5, Seconds))) { response =>
 
               response mustBe 1
 
-              whenReady(organizerMethods.delete(organizerId), timeout(Span(5, Seconds))) { response1 =>
+            whenReady(organizerMethods.getFollowedOrganizers(uuid), timeout(Span(5, Seconds))) { organizers =>
 
-                response1 mustBe 1
+                organizers must contain (savedOrganizer)
+            }
+          }
+          whenReady(organizerMethods.unfollow(UserOrganizerRelation(uuid, organizerId)),
+            timeout(Span(5, Seconds))) { response =>
 
-                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
-              }
+            response mustBe 1
+
+            whenReady(organizerMethods.delete(organizerId), timeout(Span(5, Seconds))) { response1 =>
+
+              response1 mustBe 1
+
+              whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
             }
           }
         }

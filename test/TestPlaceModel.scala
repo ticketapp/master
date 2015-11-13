@@ -11,6 +11,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+
 class TestPlaceModel extends GlobalApplicationForModels {
 
   "A place" must {
