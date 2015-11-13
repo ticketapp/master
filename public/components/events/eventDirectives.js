@@ -36,7 +36,6 @@ angular.module('claudeApp').
                                 $(element).removeClass('large-4');
                                 $(element).addClass('large-12');
                                 $compile(element.contents())(scope);
-
                             }
                         }
                     }, 500)

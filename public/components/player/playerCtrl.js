@@ -127,7 +127,7 @@ angular.module('claudeApp').
                 $scope.newTrack.artist = {name: track.artistName,
                     facebookUrl: track.artistFacebookUrl};
                 $scope.newTrack.title = track.title;
-                $scope.newTrack.id = track.uuid;
+                $scope.newTrack.uuid = track.uuid;
                 $rootScope.playlist.tracks.push($scope.newTrack);
                 getNextShow($rootScope.playlist.tracks[$rootScope.playlist.tracks.length-1]);
                 $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
