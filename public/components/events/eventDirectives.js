@@ -1,5 +1,5 @@
 angular.module('claudeApp').
-    directive('eventMin', ['$window', function ($window) {
+    directive('eventMin', ['$window', '$compile', function ($window) {
         return {
             restrict : 'E',
             templateUrl: 'assets/components/events/eventMin.html',
@@ -24,7 +24,7 @@ angular.module('claudeApp').
     }]);
 
 angular.module('claudeApp').
-    directive('eventInfo', [ '$rootScope', function ($rootScope) {
+    directive('eventInfo', [ '$rootScope', '$compile', function ($rootScope, $compile) {
         return {
             restrict : 'C',
             link : function (scope, element) {
@@ -35,11 +35,12 @@ angular.module('claudeApp').
                             if ($(element).offset().left < 30) {
                                 $(element).removeClass('large-4');
                                 $(element).addClass('large-12');
+                                $compile(element.contents())(scope);
+
                             }
                         }
                     }, 500)
                 }
             }
-        }
-
+        };
     }]);

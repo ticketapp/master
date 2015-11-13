@@ -1,17 +1,14 @@
 angular.module('claudeApp').
-    controller('EventCtrl', ['$scope', 'EventsFactory', '$routeParams', 'RefactorGeopoint',
-        '$rootScope', 'UserFactory', 'InfoModal',
-        function ($scope, EventFactory, $routeParams, RefactorGeopoint, $rootScope, UserFactory,
-                  InfoModal) {
+    controller('EventCtrl', ['$scope', 'EventsFactory', '$routeParams', '$rootScope', 'UserFactory', 'InfoModal', 'FollowService',
+        function ($scope, EventFactory, $routeParams, $rootScope, UserFactory, InfoModal, FollowService) {
             $scope.event = {};
             $scope.map = false;
             $scope.isFollowed = false;
             EventFactory.getEvent($routeParams.id).then(function (event) {
                 $scope.event = event;
-                if (event.places[0] !== undefined && event.places[0].geographicPoint !== undefined) {
-                    $scope.geographicPoint =
-                        RefactorGeopoint.refactorGeopoint(event.places[0].geographicPoint);
-                    UserFactory.getIsFollowedPlace(event.places[0].placeId).then(function (isFollowed) {
+                if (event.places[0] && event.places[0].geographicPoint) {
+                    $scope.geographicPoint = event.places[0].geographicPoint;
+                    FollowService.places.isFollowed(event.places[0].id).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
                             $scope.event.places[0].isFollowed = isFollowed
                         }
@@ -19,58 +16,58 @@ angular.module('claudeApp').
                     $scope.adresses = true;
                     $scope.mapHeight = '300px';
                     $scope.map = true;
-                } else if (event.geographicPoint !== undefined) {
-                    $scope.geographicPoint = RefactorGeopoint.refactorGeopoint(event.geographicPoint);
+                } else if (event.geographicPoint) {
+                    $scope.geographicPoint = event.geographicPoint;
                     $scope.mapHeight = '300px';
                     $scope.map = true;
-                } else if (event.addresses[0] !== undefined &&
-                    event.addresses[0].geographicPoint !== undefined) {
-                    $scope.geographicPoint = RefactorGeopoint.refactorGeopoint(event.addresses[0].geographicPoint);
+                } else if (event.addresses[0] && event.addresses[0].geographicPoint) {
+                    $scope.geographicPoint = event.addresses[0].geographicPoint;
                     $scope.mapHeight = '300px';
                     $scope.map = true;
                 }
-
-                function isFollowedOrganizer(i) {
-                    UserFactory.getIsFollowedOrganizer(event.organizers[i].organizerId).then(
+                function setIsFollowedOrganizer(organizer) {
+                    FollowService.organizers.isFollowed(organizer.id).then(
                         function (isFollowed) {
                             if (isFollowed == true || isFollowed == false) {
-                                event.organizers[i].isFollowed = isFollowed
+                                organizer.isFollowed = isFollowed
                             } else {
-                                event.organizers[i].isFollowed = false;
+                                organizer.isFollowed = false;
                             }
+                            return organizer
                         }
                     )
                 }
 
-                function isFollowedArtists(i) {
-                    UserFactory.ArtistIsFollowed(event.artists[i].artistId).then(
+
+                function setIsFollowedArtist(artist) {
+                    FollowService.artists.isFollowed(artist.id).then(
                         function (isFollowed) {
                             if (isFollowed == true || isFollowed == false) {
-                                event.artists[i].isFollowed = isFollowed
+                                artist.isFollowed = isFollowed
                             } else {
-                                event.artists[i].isFollowed = false;
+                                artist.isFollowed = false;
                             }
+                            return artist
                         }
                     )
                 }
 
                 if ($rootScope.connected == true) {
-                    EventFactory.getIsFollowed(event.eventId).then(function (isFollowed) {
+                    FollowService.events.isFollowed(event.id).then(function (isFollowed) {
                         if (isFollowed == true || isFollowed == false) {
                             $scope.isFollowed = isFollowed;
-                            console.log(isFollowed)
                         }
                     });
-                    if (event.organizers != undefined && event.organizers.length > 0) {
-                        for (var i = 0; i < event.organizers.length; i++) {
-                            isFollowedOrganizer(i);
-                        }
+                    if (event.organizers && event.organizers.length > 0) {
+                        event.organizers.map(function(organizer) {
+                            return setIsFollowedOrganizer(organizer)
+                        });
                     }
 
-                    if (event.artists != undefined && event.artists.length > 0) {
-                        for (var j = 0; j < event.artists.length; j++) {
-                            isFollowedArtists(j);
-                        }
+                    if (event.artists && event.artists.length > 0) {
+                        event.artists.map(function(artist) {
+                            return setIsFollowedArtist(artist)
+                        });
                     }
                 }
                 $rootScope.$watch('connected', function (connected) {
@@ -83,21 +80,21 @@ angular.module('claudeApp').
                             }
                         })
                     }
-                })
+                });
                 if (event.organizers != undefined && event.organizers.length > 0) {
-                    for (var i = 0; i < event.organizers.length; i++) {
-                        isFollowedOrganizer(i);
-                    }
+                    event.organizers.map(function(organizer) {
+                        return setIsFollowedOrganizer(organizer)
+                    });
                 }
 
                 if (event.artists != undefined && event.artists.length > 0) {
-                    for (var j = 0; j < event.artists.length; j++) {
-                        isFollowedArtists(j);
-                    }
+                    event.artists.map(function(artist) {
+                        return setIsFollowedArtist(artist)
+                    });
                 }
             });
             $scope.follow = function () {
-                EventFactory.followEventByEventId($scope.event.eventId, $scope.event.name).then(
+                EventFactory.followEventByEventId($scope.event.id, $scope.event.name).then(
                     function (followed) {
                         if (followed != 'error') {
                             $scope.isFollowed = true;
@@ -107,7 +104,7 @@ angular.module('claudeApp').
             };
 
             $scope.unfollow = function () {
-                EventFactory.unfollowEvent($scope.event.eventId, $scope.event.name).then(
+                EventFactory.unfollowEvent($scope.event.id, $scope.event.name).then(
                     function (followed) {
                         if (followed != 'error') {
                             $scope.isFollowed = false;
