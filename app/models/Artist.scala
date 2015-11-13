@@ -18,6 +18,7 @@ import services._
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 import scala.util.matching.Regex
 
 
@@ -53,6 +54,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
   val facebookApiVersion = utilities.facebookApiVersion
+
+  def findAll: Future[Vector[Artist]] = db.run(artists.result) map (_.toVector)
 
   def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
     val query = for {
@@ -353,8 +356,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
      .flatMap { response =>
        readFacebookArtists(response.json)
      } recover {
-      case t: Throwable =>
-        Logger.error("ArtistModel.getEventuallyFacebookArtists :", t)
+      case NonFatal(e: Exception) =>
+        Logger.error(s"ArtistModel.getEventuallyFacebookArtists: for pattern $pattern\nMessage:\n" + e.getMessage)
         Seq.empty
     }
   }
@@ -551,8 +554,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val eventuallyWebsitesSet: Future[Set[String]] = maybeWebsites match {
       case Some(websites) =>
-        utilities.getNormalizedWebsitesInText(websites) map { setWebsites =>
-          setWebsites.filterNot(_.contains("facebook.com")).filterNot(_ == "")
+        utilities.getNormalizedWebsitesInText(websites) map { websites =>
+          websites.filterNot(_.contains("facebook.com")).filterNot(_ == "")
         }
       case None =>
         Future(Set.empty)

@@ -63,7 +63,7 @@ GET           /places/nearCity/:city                                         @co
 GET           /places/followed/                                              @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
-GET           /organizers                                                    @controllers.OrganizerController.find(numberToReturn: Int, offset: Int)
+GET           /organizers                                                    @controllers.OrganizerController.findAll
 GET           /organizers/:id                                                @controllers.OrganizerController.findById(id: Long)
 POST          /organizers/:organizerId/followByOrganizerId                   @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
 POST          /organizers/:organizerId/unfollowOrganizerByOrganizerId        @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)

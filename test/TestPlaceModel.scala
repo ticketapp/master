@@ -193,10 +193,7 @@ class TestPlaceModel extends GlobalApplicationForModels {
       whenReady(eventMethods.saveFacebookEventByFacebookId("933514060052903"), timeout(Span(10, Seconds))) { event =>
         whenReady(placeMethods.getPlaceByFacebookId("836137029786070"), timeout(Span(10, Seconds))) { place =>
 
-          place.place.name mustBe "Akwaba Coop Culturelle"
-
-          whenReady(placeMethods.delete(place.place.id.get), timeout(Span(5, Seconds))) { _ mustBe 1}
-          whenReady(eventMethods.delete(event.id.get), timeout(Span(5, Seconds))) { _ mustBe 1}
+          place.get.place.name mustBe "Akwaba Coop Culturelle"
         }
       }
     }
@@ -209,7 +206,7 @@ class TestPlaceModel extends GlobalApplicationForModels {
 
     "find place on facebook" in {
       whenReady(placeMethods.getPlaceOnFacebook("836137029786070"), timeout(Span(5, Seconds))) {
-        _.place.name mustBe "Akwaba Coop Culturelle"
+        _.get.place.name mustBe "Akwaba Coop Culturelle"
       }
     }
 
