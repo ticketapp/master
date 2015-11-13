@@ -1,7 +1,7 @@
 angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope', '$http',
-    '$timeout', '$filter', 'GeolocFactory', 'RefactorGeopoint', 'EventsFactory',
+    '$timeout', '$filter', 'GeolocFactory', 'RefactorGeopoint', 'EventsFactory', 'NgMap',
     function ($scope, $rootScope, $http, $timeout, $filter, GeolocFactory, RefactorGeopoint,
-              EventsFactory) {
+              EventsFactory, NgMap) {
     $scope.events = [];
     $scope.infos = [];
     $scope.time = 6;
@@ -25,7 +25,6 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
         }
         if (scopeIdList.indexOf(el.id) == -1) {
             if ( el.geographicPoint != undefined) {
-                el.geographicPoint = el.geographicPoint.replace('(', '').replace(')', '');
                 var geoPoint = el.geographicPoint;
                 var firstObject = $scope.mapBounces[Object.keys($scope.mapBounces)[0]];
                 var secondObject = $scope.mapBounces[Object.keys($scope.mapBounces)[1]];
@@ -43,23 +42,21 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
     }
 
     $scope.getEvents = function () {
-        var eventsLengthForTime = $scope.events.length;
-        var maxStartTime =  time*3600000 + new Date().getTime();
-        for (var e = 0; e < eventsLengthForTime; e++) {
-            if ($scope.events[e].startTime > maxStartTime) {
-                $timeout(function () {
-                    $scope.$apply(function () {
-                        $scope.events.splice(e, 1);
-                    })
-                }, 0);
-                e = e -1;
-                eventsLengthForTime = eventsLengthForTime - 1;
-            }
-        }
-        EventsFactory.getEvents(time, '(' + $scope.mapCenter.replace(/^.+, /,'') + ',' +
-            $scope.mapCenter.substring(0, $scope.mapCenter.indexOf(',')) + ')', offset).
+        var mapCenter = $scope.mapCenter.split(',');
+        EventsFactory.getEvents(time,  mapCenter[1] + ',' + mapCenter[0], offset).
             then(function (events) {
             events.forEach(uploadEvents);
+            var maxStartTime =  time*3600000 + new Date().getTime();
+            $scope.events = $scope.events.filter(function(event) {
+                return event.startTime <= maxStartTime
+            });
+            if ($scope.dynMarkers) {
+                $scope.dynMarkers = $scope.dynMarkers.filter(function (marker) {
+                    return $scope.events.filter(function (event) {
+                            return event.id === marker.id
+                        }).length > 0
+                });
+            }
             if (eventInBounce == false && firstShow == true) {
                 $scope.searchEventFirst = true;
                 if ($scope.time < 24) {
@@ -106,7 +103,6 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
         $scope.dynMarkers.push(new google.maps.Marker({position: latLng,
             icon: {url: '../assets/images/' + markerGenre,
                 scaledSize: new google.maps.Size(50, 50)}, id: id, placeId: placeId}));
-        console.log($scope.dynMarkers)
     }
 
     function addIcon(i) {
@@ -156,7 +152,7 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
 
     $scope.updateMarkers = function () {
         $scope.dynMarkers = [];
-        if ($scope.markerClusterer != undefined) {
+        if ($scope.markerClusterer) {
             $scope.markerClusterer.clearMarkers();
         }
         var eventsLength = $scope.events.length;
@@ -180,14 +176,13 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
             });
         }
         google.maps.event.addListener($scope.markerClusterer, 'clusterclick', function(cluster) {
-            console.log(cluster);
             var places = [];
             var markersLength = cluster.markerClusterer_.markers_.length;
             for (i = 0; i < markersLength; i ++) {
                 if (places.indexOf(cluster.markerClusterer_.markers_[i].placeId) == -1) {
                     places.push(cluster.markerClusterer_.markers_[i].placeId)
                 }
-            };
+            }
             if (places.length == 1) {
                 window.location.href =('#/places/' + places[0]);
             }
@@ -229,9 +224,10 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                         $scope.getEvents();
                     }
                 });
+
                 google.maps.event.addListener(map, 'center_changed', function() {
                     $scope.mapBounces = map.getBounds();
-                    $scope.mapCenter = map.center[Object.keys(map.center)[0]] + ', ' + map.center[Object.keys(map.center)[1]];
+                    $scope.mapCenter = map.getCenter().lat() + ', ' + map.getCenter().lng();
                 });
                 $scope.mapBounces = map.getBounds();
                 $scope.getEvents();
@@ -243,6 +239,10 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
             $scope.$apply(function() {
                 $scope.mapCenter = RefactorGeopoint.refactorGeopoint($rootScope.geoLoc);
                 $scope.map = true;
+            });
+            NgMap.getMap().then(function(repMap) {
+                map = repMap;
+                getBounds(repMap)
             });
             $scope.$on('mapInitialized', function(event, evmap) {
                 map = evmap;
@@ -256,6 +256,10 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                     $scope.$apply(function () {
                         $scope.mapCenter = RefactorGeopoint.refactorGeopoint(newVal);
                         $scope.map = true;
+                    });
+                    NgMap.getMap().then(function(repMap) {
+                        map = repMap;
+                        getBounds(repMap)
                     });
                     $scope.$on('mapInitialized', function (event, evmap) {
                         map = evmap;

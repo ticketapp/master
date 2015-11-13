@@ -39,6 +39,10 @@ angular.module('claudeApp').
                 });
                 if (event.event.geographicPoint) {
                     event.event.geographicPoint = RefactorGeopoint.refactorGeopoint(event.event.geographicPoint);
+                } else if (event.addresses[0]) {
+                    if(event.addresses[0].geographicPoint) {
+                        event.event.geographicPoint = event.addresses[0].geographicPoint
+                    }
                 }
                 event.event.artists = event.artists.map(function(artist) {
                     return factory.refactorArtistObject(artist)
