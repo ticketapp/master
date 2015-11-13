@@ -40,7 +40,7 @@ case class Event(id: Option[Long],
 
 case class EventWithRelations(event: Event,
                               organizers: Seq[OrganizerWithAddress] = Vector.empty,
-                              artists: Seq[ArtistWithWeightedGenres] = Vector.empty,
+                              artists: Seq[ArtistWithWeightedGenresAndHasTrack] = Vector.empty,
                               places: Seq[PlaceWithAddress] = Vector.empty,
                               genres: Seq[Genre] = Vector.empty,
                               addresses: Seq[Address] = Vector.empty)
@@ -105,7 +105,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       EventWithRelations(
         event,
         organizers map (OrganizerWithAddress(_)),
-        artists map (ArtistWithWeightedGenres(_)),
+        artists map (ArtistWithWeightedGenresAndHasTrack(_)),
         places map (PlaceWithAddress(_)),
         genres,
         addresses)
