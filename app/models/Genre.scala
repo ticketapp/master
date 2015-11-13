@@ -11,10 +11,12 @@ import services.{MyPostgresDriver, Utilities}
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-
 case class Genre (id: Option[Int] = None, name: String, icon: Char = 'a') {
   require(name.nonEmpty, "It is forbidden to create a genre without a name.")
 }
+
+case class GenreWithWeight(genre: Genre, weight: Int = 1)
+
 
 class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val utilities: Utilities)
