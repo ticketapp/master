@@ -5,15 +5,20 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api.{Environment, LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import jobs.Scheduler
 import models.User
-import play.api.Logger
+import play.api.{GlobalSettings, Logger}
 import play.api.i18n.MessagesApi
+import play.api.libs.concurrent.Akka
 import play.api.libs.ws._
+import scala.concurrent.duration._
+import play.api.Play.current
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Future
 
 class Application @Inject()(ws: WSClient,
                             val messagesApi: MessagesApi,
+                            val global: Global,
                             val env: Environment[User, CookieAuthenticator],
                             socialProviderRegistry: SocialProviderRegistry)
     extends Silhouette[User, CookieAuthenticator] with ConnectionTrait {

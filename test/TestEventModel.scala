@@ -21,18 +21,17 @@ class TestEventModel extends GlobalApplicationForModels {
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        try {
-          whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
-            foundEvent.get mustEqual
-              EventWithRelations(event.event.copy(
-                id = Some(savedEvent.id.get),
-                startTime = foundEvent.get.event.startTime,
-                endTime =  foundEvent.get.event.endTime))
-          }
-        } finally {
-          whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
-            _ mustBe 1
-          }
+        whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
+
+          foundEvent.get mustEqual
+            EventWithRelations(event.event.copy(
+              id = Some(savedEvent.id.get),
+              startTime = foundEvent.get.event.startTime,
+              endTime =  foundEvent.get.event.endTime))
+        }
+        whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
+
+          _ mustBe 1
         }
       }
     }
@@ -53,68 +52,45 @@ class TestEventModel extends GlobalApplicationForModels {
         genres = genres)
 
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        try {
-          whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { maybeFoundEvent =>
-            val foundEvent = maybeFoundEvent.get
+        whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { maybeFoundEvent =>
+          val foundEvent = maybeFoundEvent.get
 
-            foundEvent.event mustEqual event.event.copy(id = foundEvent.event.id)
+          foundEvent.event mustEqual event.event.copy(id = foundEvent.event.id)
 
-            foundEvent.organizers mustBe Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
-            
-            foundEvent.artists mustBe Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
-            
-            foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
-            
-            foundEvent.addresses mustBe Vector(event.addresses.head.copy(
-              id = foundEvent.addresses.head.id,
-              city = Option(event.addresses.head.city.get.toLowerCase)))
-            
-            foundEvent.genres mustBe Vector(event.genres.head.copy(id = foundEvent.genres.head.id))
-          }
-        } finally {
-          whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
-            _ mustBe 1
-          }
+          foundEvent.organizers mustBe Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
+
+          foundEvent.artists mustBe Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
+
+          foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
+
+          foundEvent.addresses mustBe Vector(event.addresses.head.copy(
+            id = foundEvent.addresses.head.id,
+            city = Option(event.addresses.head.city.get.toLowerCase)))
+
+          foundEvent.genres mustBe Vector(event.genres.head.copy(id = foundEvent.genres.head.id))
+        }
+        whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
+
+          _ mustBe 1
         }
       }
     }
 
     "be followed and unfollowed by a user" in {
-      val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
-      val uuid: UUID = UUID.randomUUID()
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName"),
-        lastName = Option("lastName"),
-        fullName = Option("fullName"),
-        email = Option("emailFollowEvent"),
-        avatarURL = Option("avatarUrl"))
+      val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name1",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description1"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-          try {
-            whenReady(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-              whenReady(eventMethods.isFollowed(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response1 =>
+        whenReady(eventMethods.follow(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
+          whenReady(eventMethods.isFollowed(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response1 =>
 
-                response1 mustBe true
-              }
-            }
-          } finally {
-            whenReady(eventMethods.unfollow(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-              response mustBe 1
-              whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) { response1 =>
-
-                response1 mustBe 1
-
-                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) {
-                  _ mustBe 1
-                }
-              }
-            }
+            response1 mustBe true
           }
+        }
+        whenReady(eventMethods.unfollow(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
+
+          response mustBe 1
         }
       }
     }
@@ -328,7 +304,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "find a complete event by facebookId" in {
       whenReady(eventMethods.findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(10, Seconds))) { event =>
-        event.event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
+        event.get.event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }
 
@@ -367,8 +343,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "have the genre of its artists" in {
       whenReady(eventMethods.findEventOnFacebookByFacebookId("758796230916379"), timeout(Span(10, Seconds))) { eventWithRelations =>
-        println(eventWithRelations.genres)
-        eventWithRelations.genres should contain allOf(Genre(None, "hip", 'a'), Genre(None, "hop", 'a'))
+        eventWithRelations.get.genres should contain allOf(Genre(None, "hip", 'a'), Genre(None, "hop", 'a'))
       }
     }
     
@@ -418,5 +393,7 @@ class TestEventModel extends GlobalApplicationForModels {
         events.head.event.name mustBe "notPassedEvent"
       }
     }
+
+    //readEventsIdsFromWSResponse
   }
 }

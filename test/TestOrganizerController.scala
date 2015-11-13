@@ -1,7 +1,9 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import models.Organizer
 import play.api.libs.json._
 import play.api.test._
+import json.JsonHelper._
 
 import scala.language.postfixOps
 
@@ -16,13 +18,14 @@ class TestOrganizerController extends GlobalApplicationForControllers {
           .withJsonBody(Json.parse("""{ "facebookId": 111, "name": "test" }"""))
           .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      contentAsJson(result) mustEqual Json.parse("""{"organizer":{"id":3,"facebookId":"111","name":"test","verified":false}}""")
+      val organizer = (contentAsJson(result) \ "organizer").as[Organizer]
+      organizer mustEqual Organizer(id = organizer.id, facebookId = Some("111"), name = "test", verified = false)
 
       status(result) mustEqual OK
     }
 
     "find a list of organizers" in {
-       val Some(organizers) = route(FakeRequest(GET, "/organizers?numberToReturn=" + 10 + "&offset=" + 0))
+       val Some(organizers) = route(FakeRequest(GET, "/organizers"))
 
        contentAsJson(organizers).toString() must contain(""""name":"name0"""")
     }

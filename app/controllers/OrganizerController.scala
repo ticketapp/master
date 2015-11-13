@@ -31,8 +31,8 @@ class OrganizerController @Inject()(ws: WSClient,
                                     socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, CookieAuthenticator] with organizerFormsTrait {
 
-  def find(numberToReturn: Int, offset: Int) = Action.async {
-    organizerMethods.find(numberToReturn: Int, offset: Int) map { organizers =>
+  def findAll = Action.async {
+    organizerMethods.findAll map { organizers =>
       Ok(Json.toJson(organizers))
     } recover { case t: Throwable =>
       Logger.error("OrganizerController.findOrganizersContaining: ", t)

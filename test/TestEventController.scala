@@ -93,13 +93,12 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "find followed events" in {
-      val Some(events) = route(FakeRequest(GET, "/events/followed/")
+      val Some(events) = route(FakeRequest(controllers.routes.EventController.getFollowedEvents())
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(events) mustEqual OK
 
-      contentAsJson(events).toString() must
-        contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
+      contentAsString(events) must contain(""""name":"name0"""")
     }
 
     "find one followed event by id" in {
@@ -123,7 +122,7 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
 
-      contentAsJson(response).toString must contain("L'OR DU COMMUN / LA MICROFAUNE / 2 LYRICISTS")
+      contentAsString(response) must contain("L'OR DU COMMUN / LA MICROFAUNE / 2 LYRICISTS")
     }
 
     "find events in interval" in {
@@ -131,9 +130,9 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
 
-      contentAsJson(response).toString must
+      contentAsString(response) must
         contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
-      contentAsJson(response).toString must not contain
+      contentAsString(response) must not contain
         """"name":"EventPassedTest","geographicPoint":"POINT (4.2 4.3)","description":"desc""""
     }
 
@@ -142,9 +141,9 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
 
-      contentAsJson(response).toString must
+      contentAsString(response) must
         contain(""""name":"EventPassedTest","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
-      contentAsJson(response).toString must not contain
+      contentAsString(response) must not contain
         """"name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc""""
     }
 
@@ -156,24 +155,24 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
 
-      contentAsJson(response).toString must contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
+      contentAsString(response) must contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
 
-      contentAsJson(response).toString must not contain
+      contentAsString(response) must not contain
         """"name":"EventPassedTest","geographicPoint":"POINT (4.2 4.3)","description":"desc""""
     }
 
     "find passed events by placeId" in {
-      val eventId = await(eventMethods.saveFacebookEventByFacebookId("11121")).id
+      val eventId = await(eventMethods.saveFacebookEventByFacebookId("11121")).get.id
       val placeId = await(placeMethods.save(Place(None, "placeTestEvent", Option("123456"), None))).id
       await(placeMethods.saveEventRelation(EventPlaceRelation(eventId.get, placeId.get)))
       val Some(response) = route(FakeRequest(GET, "/places/" + placeId.get + "/passedEvents"))
 
       status(response) mustEqual OK
 
-      contentAsJson(response).toString must
+      contentAsString(response) must
         contain(""""name":"EventPassedTest","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
 
-      contentAsJson(response).toString must not contain
+      contentAsString(response) must not contain
         """"name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc""""
     }
     
@@ -185,9 +184,9 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
 
-      contentAsJson(response).toString must contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
+      contentAsString(response) must contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
 
-      contentAsJson(response).toString must not contain """"name":"eventPassed""""
+      contentAsString(response) must not contain """"name":"eventPassed""""
     }
 
     "find passed events by organizerId" in {
@@ -195,9 +194,9 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
 
-      contentAsJson(response).toString must contain(""""name":"eventPassed"""")
+      contentAsString(response) must contain(""""name":"eventPassed"""")
 
-      contentAsJson(response).toString must not contain """"name":"notPassedEvent""""
+      contentAsString(response) must not contain """"name":"notPassedEvent""""
     }
 
     /*
