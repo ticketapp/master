@@ -51,31 +51,25 @@ class TestGenreModel extends GlobalApplicationForModels {
 
     "save and delete its relation with a track" in {
      val genre = Genre(None, "rockerdocker")
-     val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+     val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
        "artistFacebookUrlTestGenre2", Set("website")), Vector.empty)
      val trackId = UUID.randomUUID
      val track = Track(trackId, "titleTestGenreModel1", "url", 's', "thumbnailUrl", "artistFacebookUrlTestGenre2", "artistName")
      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
        whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
          whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
-           try {
-             whenReady(genreMethods.saveTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
-               timeout(Span(5, Seconds))) { trackGenreRelation =>
+           whenReady(genreMethods.saveTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
+             timeout(Span(5, Seconds))) { trackGenreRelation =>
 
-               trackGenreRelation mustBe 1
+             trackGenreRelation mustBe 1
 
-               //whenReady(trackMethods.findByGenre("rockerdocker", 1, 0), timeout(Span(5, Seconds))) { tracksSet =>
+             whenReady(trackMethods.findAllByGenre("rockerdocker", 1, 0), timeout(Span(5, Seconds))) { tracksSet =>
 
-                 //assert(tracksSet.nonEmpty)
+               assert(tracksSet.nonEmpty)
 
-                 whenReady(genreMethods.deleteTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
-                   timeout(Span(5, Seconds))) { _ mustBe 1 }
-               //}
+               whenReady(genreMethods.deleteTrackRelation(TrackGenreRelation(trackId, savedGenre.id.get)),
+                 timeout(Span(5, Seconds))) { _ mustBe 1 }
              }
-           } finally {
-             trackMethods.delete(trackId)
-             artistMethods.delete(savedArtist.id.get)
-             genreMethods.delete(savedGenre.id.get)
            }
          }
        }
@@ -83,7 +77,7 @@ class TestGenreModel extends GlobalApplicationForModels {
     }
 
     "find all genres for a track" in {
-      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestGenreModel"), "artistTest", Option("imagePath"),
+      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookIdTestGenreModel"), "artistTest", Option("imagePath"),
         Option("description"), "artistFacebookUrlTestGenreModel5", Set("website")), Vector.empty)
       val trackId = UUID.randomUUID
       val track = Track(trackId, "titleTestUserModel5", "url13", 's', "thumbnailUrl1",
@@ -111,6 +105,49 @@ class TestGenreModel extends GlobalApplicationForModels {
       whenReady(genreMethods.saveEventRelation(EventGenreRelation(1, 2)), timeout(Span(5, Seconds))) { genreEventRelation =>
 
         genreEventRelation mustBe 1
+      }
+    }
+
+    "save, update and delete its relation with an artist" in {
+      val genre = Genre(None, "rockiyadockiaaa")
+      val genre2 = Genre(None, "rockiyadockiooo")
+      val artist = ArtistWithWeightedGenresAndHasTrack(
+        artist = Artist(None, None, "artistGenreRelationTest", None, None, "artistFacebookUrlTestGenre", Set("website")),
+        genres = Vector.empty)
+
+      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { savedGenre =>
+        whenReady(genreMethods.save(genre2), timeout(Span(5, Seconds))) { savedGenre2 =>
+          whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
+            whenReady(genreMethods.saveArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
+              timeout(Span(5, Seconds))) { artistGenreRelation =>
+              whenReady(genreMethods.saveArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre2.id.get)),
+                timeout(Span(5, Seconds))) { artistGenreRelation2 =>
+
+                artistGenreRelation mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 0)
+
+                whenReady(genreMethods.saveArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
+                  timeout(Span(5, Seconds))) { artistGenreRelationUpdated =>
+
+                  artistGenreRelationUpdated mustBe ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get, 1)
+
+                  whenReady(artistMethods.findAllByGenre(genreName = genre.name, offset = 0, numberToReturn = 1),
+                    timeout(Span(5, Seconds))) { artists =>
+
+                    artists should not be empty
+
+                    val artistGenres = artists.head.genres
+                    artistGenres.size mustBe 2
+                  }
+                }
+              }
+
+              whenReady(genreMethods.deleteArtistRelation(ArtistGenreRelation(savedArtist.id.get, savedGenre.id.get)),
+                timeout(Span(5, Seconds))) {
+                _ mustBe 1
+              }
+            }
+          }
+        }
       }
     }
 

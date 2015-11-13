@@ -12,7 +12,7 @@ import scala.util.Success
 
 class TestTrackModel extends GlobalApplicationForModels {
   var artistId = -1L
-  val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
+  val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestTrack", Set("website")), Vector.empty)
 
   "A track" must {
