@@ -75,56 +75,7 @@ class TestEventModel extends GlobalApplicationForModels {
       }
     }
 
-    "be followed and unfollowed by a user" in {
-      val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
-      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name1",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description1"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(eventMethods.follow(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-          whenReady(eventMethods.isFollowed(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response1 =>
 
-            response1 mustBe true
-          }
-        }
-        whenReady(eventMethods.unfollow(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-
-          response mustBe 1
-        }
-      }
-    }
-
-    "not be followed twice" in {
-      val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
-      val uuid: UUID = UUID.randomUUID()
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName1"),
-        lastName = Option("lastName1"),
-        fullName = Option("fullName1"),
-        email = Option("email1"),
-        avatarURL = Option("avatarUrl"))
-      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name2",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description2"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-          whenReady(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-
-            response mustBe 1
-
-            try {
-              Await.result(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), 3 seconds)
-            } catch {
-              case e: PSQLException =>
-
-                e.getSQLState mustBe utilities.UNIQUE_VIOLATION
-            }
-          }
-        }
-      }
-    }
 
     "find all events by genre" in {
       whenReady(eventMethods.findAllByGenre("genreTest0", geographicPointMethods.stringToGeographicPoint("5.4,5.6").get,
@@ -158,7 +109,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "find all events by place sorted by date" in {
-      whenReady(eventMethods.findAllByPlace(2), timeout(Span(5, Seconds))) { eventsByPlace =>
+      whenReady(eventMethods.findAllByPlace(100), timeout(Span(5, Seconds))) { eventsByPlace =>
 
         assert(eventsByPlace.size > 2)
 

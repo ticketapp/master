@@ -5,29 +5,26 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import json.JsonHelper.organizerWrites
 import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-//import services.Utilities.{FOREIGN_KEY_VIOLATION, UNIQUE_VIOLATION}
-import scala.concurrent.ExecutionContext.Implicits.global
+import json.JsonHelper._
 import play.api.mvc._
 import services.Utilities
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import json.JsonHelper._
-import json.JsonHelper._
 
 class OrganizerController @Inject()(ws: WSClient,
                                     val organizerMethods: OrganizerMethods,
                                     val messagesApi: MessagesApi,
                                     val env: Environment[User, CookieAuthenticator],
                                     val utilities: Utilities,
+                                    val geographicPointMethods: SearchGeographicPoint,
                                     socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, CookieAuthenticator] with organizerFormsTrait {
 
@@ -157,6 +154,23 @@ class OrganizerController @Inject()(ws: WSClient,
   def findNearCity(city: String, numberToReturn: Int, offset: Int) = Action.async {
     organizerMethods.findNearCity(city, numberToReturn, offset) map { organizers =>
       Ok(Json.toJson(organizers))
+    }
+  }
+
+  def findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
+    geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
+      case Failure(exception) =>
+        Logger.error("OrganizerController.findOrganizersNear: ", exception)
+        Future {
+          BadRequest(Json.toJson("Invalid geographicPoint"))
+        }
+      case Success(point) =>
+        organizerMethods.findNear(point, numberToReturn: Int, offset: Int) map { organizers =>
+          Ok(Json.toJson(organizers))
+        } recover { case t: Throwable =>
+          Logger.error("OrganizerController.findOrganizersNear: ", t)
+          InternalServerError("OrganizerController.findOrganizersNear: " + t.getMessage)
+        }
     }
   }
 }

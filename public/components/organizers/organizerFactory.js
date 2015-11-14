@@ -1,19 +1,21 @@
 angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsFactory', 'StoreRequest',
-    'InfoModal', 'RoutesFactory', 'RefactorObjectsFactory',
-    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory, RefactorObjectsFactory){
+    'InfoModal', 'RoutesFactory', 'RefactorObjectsFactory', 'GeolocFactory',
+    function ($http, $q, EventsFactory, StoreRequest, InfoModal, RoutesFactory, RefactorObjectsFactory, GeolocFactory) {
     var factory = {
-        organizers : false,
+        organizers: false,
         lastOrganizer: {id: '', organizer: {}},
+
         normalizedOrganizerObject : function (organizer) {
           return organizer.organizer
         },
+
         getOrganizer : function(id) {
             var deferred = $q.defer();
             if (id == factory.lastOrganizer.id) {
                 deferred.resolve(factory.lastOrganizer.organizer)
             } else {
                 $http.get('/organizers/' + id).
-                    success(function(data, status, headers, config) {
+                    success(function(data) {
                         factory.lastOrganizer.id = id;
                         factory.lastOrganizer.organizer = factory.normalizedOrganizerObject(data);
                         deferred.resolve(factory.lastOrganizer.organizer);
@@ -21,6 +23,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             }
             return deferred.promise;
         },
+
         lastOrganizerEvents : {id: '', events: []},
         getOrganizerEvents : function(id) {
             var deferred = $q.defer();
@@ -28,7 +31,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastOrganizerEvents.events);
             } else {
                 $http.get('/organizers/' + id + '/events').
-                    success(function(events, status, headers, config) {
+                    success(function(events) {
                         events = events.map(function(event) {
                             return RefactorObjectsFactory.normalizeEventObject(event)
                         });
@@ -40,14 +43,17 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             }
             return deferred.promise;
         },
+
         lastGetOrganizers : {offset: -1, organizers: []},
         getOrganizers : function(offset) {
             var deferred = $q.defer();
             if(factory.lastGetOrganizers.offset >= offset) {
                 deferred.resolve(factory.lastGetOrganizers.organizers);
             } else {
-                $http.get('/organizers?numberToReturn=12&offset='+offset).
-                    success(function(data, status, headers, config) {
+                GeolocFactory.getGeolocation().then(function(geographicPoint) {
+                    $http.get('/organizers/findNearGeoPoint/?geographicPoint=' + geographicPoint +
+                        '&numberToReturn=12&offset=' + offset).
+                    success(function(data) {
                         var organizers = data.map(function (organizer) {
                             return factory.normalizedOrganizerObject(organizer)
                         });
@@ -56,19 +62,21 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                             factory.lastGetOrganizers.organizers.concat(organizers);
                         deferred.resolve(factory.lastGetOrganizers.organizers);
                     })
+                });
             }
             return deferred.promise;
         },
+
         lastGetOrganizersByContaining: {pattern: '', organizers: []},
         getOrganizersByContaining : function(pattern) {
             var deferred = $q.defer();
-            if(factory.lastGetOrganizersByContaining.pattern ==pattern) {
+            if(factory.lastGetOrganizersByContaining.pattern === pattern) {
                 deferred.resolve(factory.lastGetOrganizersByContaining.organizers);
             } else {
                 $http.get('/organizers/containing/'+ pattern).
-                    success(function(data, status, headers, config) {
+                    success(function(data) {
                         var organizers = data.map(function (organizer) {
-                            return organizer.organizer;
+                            return factory.normalizedOrganizerObject(organizer);
                         });
                         factory.lastGetOrganizersByContaining.organizers = organizers;
                         factory.lastGetOrganizersByContaining.pattern = pattern;
@@ -77,10 +85,11 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
             }
             return deferred.promise;
         },
+
         followOrganizerByFacebookId : function(id) {
             var deferred = $q.defer();
             $http.post('/organizers/' + id + '/followByFacebookId ').
-                success(function(data, status, headers, config) {
+                success(function(data) {
                     deferred.resolve(data);
                 }).error(function (data, status) {
                     if (status === 401) {
@@ -90,7 +99,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 });
             return deferred.promise;
         },
-        followOrganizerByOrganizerId : function (id, organizerName) {
+        followOrganizerByOrganizerId : function(id, organizerName) {
             var deferred = $q.defer();
             $http.post('/organizers/' + id +'/followByOrganizerId').
                 success(function (data) {
@@ -125,10 +134,10 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
         getIsFollowed : function (id) {
             var deferred = $q.defer();
             $http.get('/organizers/' + id + '/isFollowed')
-                .success(function(data, status){
+                .success(function(data) {
                     factory.events = data;
                     deferred.resolve(factory.events);
-                }).error(function(data, status){
+                }).error(function() {
                     deferred.reject('erreur');
                 });
             return deferred.promise;
@@ -136,9 +145,9 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
         createOrganizer : function(organizer) {
             var deferred = $q.defer();
             $http.post('/organizers/create', organizer).
-                success(function(data, status, headers, config) {
+                success(function(data) {
                     deferred.resolve(data);
-                }).error(function (data, status) {
+                }).error(function () {
                     deferred.resolve('error');
                 });
             return deferred.promise;
@@ -146,11 +155,11 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
         lastGetPlaceEvents: {id: '', events: []},
         getPlaceEvents : function(id) {
             var deferred = $q.defer();
-            if(factory.lastGetPlaceEvents.id == id) {
+            if(factory.lastGetPlaceEvents.id === id) {
                 deferred.resolve(factory.lastGetPlaceEvents.events);
             } else {
                 $http.get('/places/' + id + '/events').
-                    success(function(events, status, headers, config) {
+                    success(function(events) {
                         events = events.map(function(event) {
                             return RefactorObjectsFactory.normalizeEventObject(event)
                         });
@@ -169,7 +178,7 @@ angular.module('claudeApp').factory ('OrganizerFactory',['$http', '$q', 'EventsF
                 deferred.resolve(factory.lastGetPassedEvents.events);
             } else {
                 $http.get(RoutesFactory.organizers.getOrganizersPassedEvents(id)).
-                    success(function(events, status, headers, config) {
+                    success(function(events) {
                         events = events.map(function(event) {
                             return RefactorObjectsFactory.normalizeEventObject(event)
                         });
