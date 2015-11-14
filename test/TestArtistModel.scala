@@ -126,68 +126,6 @@ class TestArtistModel extends GlobalApplicationForModels {
       }
     }
 
-    "be followed and unfollowed by a user" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId2"), "artistTest2", Option("imagePath"), Option("description"),
-        "facebookUrl2", Set("website")), Vector.empty)
-      val uuid: UUID = UUID.randomUUID()
-      val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName1"),
-        lastName = Option("lastName1"),
-        fullName = Option("fullName1"),
-        email = Option("email1"),
-        avatarURL = Option("avatarUrl1"))
-
-      whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-          whenReady(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)),
-            timeout(Span(5, Seconds))) { resp =>
-            whenReady(artistMethods.isFollowed(UserArtistRelation(uuid, savedArtist.id.get))) { isFollowed =>
-
-              isFollowed mustBe true
-
-              whenReady(artistMethods.unfollowByArtistId(UserArtistRelation(uuid, savedArtist.id.get))) { result =>
-
-                result mustBe 1
-              }
-            }
-          }
-        }
-      }
-    }
-
-    "not be followed twice" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId3"), "artistTest3", Option("imagePath"),
-        Option("description"), "facebookUrl3", Set("website")), Vector.empty)
-      val uuid: UUID = UUID.randomUUID()
-      val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName"),
-        lastName = Option("lastName"),
-        fullName = Option("fullName"),
-        email = Option("emailArtistFollowTwice"),
-        avatarURL = Option("avatarUrl"))
-
-      whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
-        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-          whenReady(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)),
-            timeout(Span(5, Seconds))) { firstResp =>
-              try {
-                Await.result(artistMethods.followByArtistId(UserArtistRelation(uuid, savedArtist.id.get)), 3 seconds)
-              } catch {
-                case e: PSQLException =>
-
-                  e.getSQLState mustBe utilities.UNIQUE_VIOLATION
-              }
-          }
-        }
-      }
-    }
-
     "be updated" in {
       val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId4"), "artistTest4", Option("imagePath"), Option("description"),
         "facebookUrl4", Set("website")), Vector.empty)
@@ -288,13 +226,6 @@ class TestArtistModel extends GlobalApplicationForModels {
         facebookUrl = "facebookUrl00")
       whenReady(artistMethods.findByFacebookUrl("facebookUrl00"), timeout(Span(5, Seconds))) { artist =>
         artist.get.artist mustBe expectedArtist
-      }
-    }
-
-    "follow an artist by facebookId" in {
-      val userUUID = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
-      whenReady(artistMethods.followByFacebookId(userUUID, "testFindIdByFacebookId"), timeout(Span(5, Seconds))) { response =>
-        response mustBe 1
       }
     }
 
