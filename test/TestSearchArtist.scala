@@ -1,5 +1,6 @@
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import org.scalatest.Matchers._
 
 
 class TestSearchArtist extends GlobalApplicationForModels {
@@ -138,15 +139,16 @@ class TestSearchArtist extends GlobalApplicationForModels {
         "soundcloud.com/kuna-maze",
         "soundcloud.com/paulatemple",
         "facebook.com/musicseptembre?fref=ts",
-        "facebook.com/paulatempleofficial")
+        "facebook.com/paulatempleofficial",
+        "soundcloud.com/combe")
 
       val expectedArtistsName = Set("The Amity Affliction", "Kuna Maze", "Being As An Ocean", "Nemo Nebbia", "Fit For A King",
         "Defeater", "BURNING DOWN ALASKA", "Nosaj Thing", "Mono (Japan)", "SÓLSTAFIR", "The Ocean Collective", "LOHEEM",
-        "woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI")
+        "woodwire","Paula Temple","septembre", "Alex Smoke","Diane","Cruel Hand","LOTFI","Combe")
 
       whenReady(artistMethods.getFacebookArtistsByWebsites(websites), timeout(Span(10, Seconds))) { artists =>
         val artistsNames = artists.map { artist => artist.artist.name }
-        artistsNames mustBe expectedArtistsName
+        artistsNames should contain theSameElementsAs expectedArtistsName
       }
     }
 
@@ -163,10 +165,48 @@ class TestSearchArtist extends GlobalApplicationForModels {
         "discogs.com/artist/1156643-lee-holman",
         "discogs.com/artist/2922409-binny-2",
         "discogs.com/label/447040-clft")
-      val expectedArtistNames = List("SHXCXCHCXSH","Osúnlade", "LOTFI", "CLFT", "Hein Cooper")
+      val expectedArtistNames = List("SHXCXCHCXSH", "Kangding Ray", "Osúnlade", "Osunlade", "LOTFI", "CLFT", "Hein Cooper")
 
       whenReady(artistMethods.getEventuallyArtistsInEventTitle(title, websites),
-        timeout(Span(5, Seconds))) {
+        timeout(Span(20, Seconds))) {
+
+        _.map{ artist => artist.artist.name } mustBe expectedArtistNames
+      }
+    }
+
+    "find artists for an event" in {
+      val artistName = "LOTFI"
+      val websites = Set(
+        "facebook.com/lotfilafaceb",
+        "mixcloud.com/la_face_b",
+        "yorubarecords.net",
+        "soundcloud.com/osunlade",
+        "discogs.com/artist/1156643-lee-holman",
+        "discogs.com/artist/2922409-binny-2",
+        "discogs.com/label/447040-clft")
+      val expectedArtistNames = List("LOTFI")
+
+      whenReady(artistMethods.getArtistsForAnEvent(artistName, websites),
+        timeout(Span(20, Seconds))) {
+
+        _.map{ artist => artist.artist.name } mustBe expectedArtistNames
+      }
+    }
+
+    "find facebook artists for a string" in {
+      val artistName = "LOTFI CLFT"
+      val websites = Set(
+        "facebook.com/lotfilafaceb",
+        "mixcloud.com/la_face_b",
+        "yorubarecords.net",
+        "soundcloud.com/osunlade",
+        "discogs.com/artist/1156643-lee-holman",
+        "discogs.com/artist/2922409-binny-2",
+        "discogs.com/label/447040-clft")
+      val expectedArtistNames = List("LOTFI", "CLFT")
+
+      whenReady(artistMethods.getFacebookArtist(artistName, websites),
+        timeout(Span(20, Seconds))) {
 
         _.map{ artist => artist.artist.name } mustBe expectedArtistNames
       }
