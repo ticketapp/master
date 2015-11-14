@@ -12,7 +12,7 @@ class TestPlaylistController extends GlobalApplicationForControllers {
 
   "playlist controller" should {
 
-    "create and delete an playlist" in {
+    "create and delete a playlist" in {
       val trackId = UUID.randomUUID
       val trackId1 = UUID.randomUUID
       val trackId2 = UUID.randomUUID
@@ -50,143 +50,40 @@ class TestPlaylistController extends GlobalApplicationForControllers {
 
       status(result) mustEqual OK
 
-      val playlistSaved = await(playlistMethods.findByUserId(identity.uuid)).head
-
-      val Some(delete) = route(FakeRequest(DELETE, "/playlists/" + playlistSaved.playlistInfo.playlistId.get)
+      val Some(delete) = route(FakeRequest(controllers.routes.PlaylistController.delete(2))
         .withJsonBody(Json.parse(jsonPlaylist))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(delete) mustEqual OK
 
       await(trackMethods.delete(trackId)) mustEqual 1
-      await(trackMethods.delete(trackId1)) mustEqual 1
-      await(trackMethods.delete(trackId2)) mustEqual 1
     }
 
     "find playlists by user" in {
-      val trackId = UUID.randomUUID
-      val trackId1 = UUID.randomUUID
-      val trackId2 = UUID.randomUUID
-      val track = Track(trackId, "title", "urlPlaylistControllerTestFindByUser", 's', "thumbnailUrl",
-        "artistFacebookUrlTestPlaylistModel", "name", None)
-      val track1 = Track(trackId1, title = "title2", url = "urlPlaylistControllerTestFindByUser2", platform = 's',
-        thumbnailUrl = "thumbnailUrl", artistFacebookUrl = "artistFacebookUrlTestPlaylistModel", artistName = "name",
-        redirectUrl = None, confidence = 0.0)
-      val track2 = Track(trackId2, "title3", "urlPlaylistControllerTestFindByUser3", 's', "thumbnailUrl",
-        "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
-
-      await(trackMethods.save(track))
-      await(trackMethods.save(track1))
-      await(trackMethods.save(track2))
-
-      val jsonPlaylist =
-        """{ "name": "PlaylistTest",
-           "trackIds": [
-             {
-               "trackId": """" + trackId + """",
-               "trackRank": 1
-             },
-             {
-               "trackId": """" + trackId1 + """",
-               "trackRank": 3
-             },
-             {
-               "trackId": """" + trackId2 + """",
-               "trackRank": 2
-             }
-           ]
-          }"""
-
-      val Some(result) = route(FakeRequest(POST, "/playlists")
-        .withJsonBody(Json.parse(jsonPlaylist))
+      val Some(playlists) = route(FakeRequest(controllers.routes.PlaylistController.findByUser())
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(result) mustEqual OK
-
-      val Some(playlists) = route(FakeRequest(GET, "/playlists")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      contentAsJson(playlists).toString() must contain(""""title":"title","url":"urlPlaylistControllerTestFindByUser"""")
+      contentAsString(playlists) must contain(""""name":"playlist0"""")
     }
 
     "update a playlist" in {
-      val trackId = UUID.randomUUID
-      val trackId1 = UUID.randomUUID
-      val trackId2 = UUID.randomUUID
-      val trackId3 = UUID.randomUUID
-      val track = Track(trackId, "title", "urlPlaylistControllerTestFindByUser", 's', "thumbnailUrl",
-        "artistFacebookUrlTestPlaylistModel", "name", None)
-      val track1 = Track(trackId1, title = "title2", url = "urlPlaylistControllerTestFindByUser2", platform = 's',
-        thumbnailUrl = "thumbnailUrl", artistFacebookUrl = "artistFacebookUrlTestPlaylistModel", artistName = "name",
-        redirectUrl = None, confidence = 0.0)
-      val track2 = Track(trackId2, "title3", "urlPlaylistControllerTestFindByUser3", 's', "thumbnailUrl",
-        "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
-      val track3 = Track(trackId3, "title4", "urlPlaylistControllerTestFindByUser4", 's', "thumbnailUrl",
-        "artistFacebookUrlTestPlaylistModel", "name", None, 2.0)
-
-      await(trackMethods.save(track))
-      await(trackMethods.save(track1))
-      await(trackMethods.save(track2))
-      await(trackMethods.save(track3))
-
-      val jsonPlaylist =
-        """{ "name": "PlaylistTest",
-           "trackIds": [
-             {
-               "trackId": """" + trackId + """",
-               "trackRank": 1
-             },
-             {
-               "trackId": """" + trackId1 + """",
-               "trackRank": 3
-             },
-             {
-               "trackId": """" + trackId2 + """",
-               "trackRank": 2
-             }
-           ]
-          }"""
-
-      val Some(result) = route(FakeRequest(POST, "/playlists")
-        .withJsonBody(Json.parse(jsonPlaylist))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      status(result) mustEqual OK
-
-
-      val jsonUpdatedPlaylist =
+      val jsonUpdatedPlaylist = Json.parse(
         """{
-           "name": "PlaylistTest",
-           "trackIds": [
-             {
-               "trackId": """" + trackId + """",
-               "trackRank": 1
-             },
-             {
-               "trackId": """" + trackId1 + """",
-               "trackRank": 3
-             },
-             {
-               "trackId": """" + trackId2 + """",
-               "trackRank": 2
-             },
-             {
-               "trackId": """" + trackId3 + """",
-               "trackRank": 4
-             }
-           ]
-          }"""
+          "id": 1,
+          "name": "PlaylistTest",
+          "trackIds": [
+            {
+              "trackId": "02894e56-08d1-4c1f-b3e4-466c069d15ed",
+              "trackRank": 1
+            }
+          ]
+        }""")
 
-      val Some(update) = route(FakeRequest(PUT, "/playlists/" + contentAsString(result))
-        .withJsonBody(Json.parse(jsonUpdatedPlaylist))
+      val Some(update) = route(FakeRequest(controllers.routes.PlaylistController.update(1))
+        .withJsonBody(jsonUpdatedPlaylist)
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(update) mustEqual OK
-
-      val Some(playlists) = route(FakeRequest(GET, "/playlists")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      contentAsJson(playlists).toString() must contain(""""title":"title4","url":"urlPlaylistControllerTestFindByUser4"""")
     }
   }
 }

@@ -15,6 +15,7 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 class PlaylistController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
@@ -69,18 +70,24 @@ class PlaylistController @Inject() (ws: WSClient,
   def update(playlistId: Long) = SecuredAction.async { implicit request =>
     playlistBindingForm.bindFromRequest().fold(
       formWithErrors => {
-        Logger.error(formWithErrors.errorsAsJson.toString())
+        Logger.error("PlaylistController.update: wrong input: " + formWithErrors.errorsAsJson)
         Future(BadRequest(formWithErrors.errorsAsJson))
       },
       playlistNameAndTracksId => {
         val userId = request.identity.uuid
-        playlistMethods.update(PlaylistWithTracksIdAndRank(Playlist(Option(playlistId), userId, playlistNameAndTracksId.name),
-          playlistNameAndTracksId.tracksIdAndRank)) map {
+        val playlistToUpdate = PlaylistWithTracksIdAndRank(Playlist(Option(playlistId), userId,
+          playlistNameAndTracksId.name), playlistNameAndTracksId.tracksIdAndRank)
+
+        playlistMethods.update(playlistToUpdate) map {
           case 0 =>
             Logger.error("PlaylistController.update: no id for this playlist")
             NotModified
           case id =>
             Ok(Json.toJson(id))
+        } recover {
+          case NonFatal(e) =>
+            Logger.error("PlaylistController.update:\nMessage: ", e)
+            InternalServerError
         }
       }
     )
