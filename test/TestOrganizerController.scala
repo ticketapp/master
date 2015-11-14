@@ -1,9 +1,9 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import json.JsonHelper._
 import models.Organizer
 import play.api.libs.json._
 import play.api.test._
-import json.JsonHelper._
 
 import scala.language.postfixOps
 
@@ -79,7 +79,7 @@ class TestOrganizerController extends GlobalApplicationForControllers {
       val Some(organizers) = route(FakeRequest(GET, "/organizers/followed/")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      contentAsJson(organizers).toString() must contain(""""facebookId":"facebookId","name":"name1"""")
+      contentAsString(organizers) must contain(""""facebookId":"facebookId","name":"name1"""")
     }
 
     "find one followed organizer by id" in {
@@ -91,7 +91,26 @@ class TestOrganizerController extends GlobalApplicationForControllers {
       contentAsJson(organizers) mustEqual Json.parse("true")
     }
 
-    /*"find organizers near city"*/
+    "get organizers near geoPoint" in {
+      val Some(response) = route(FakeRequest(controllers.routes.OrganizerController.findOrganizersNear(
+        geographicPoint = "5,5",
+        numberToReturn = 1000,
+        offset = 0))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      val organizersJSValue = contentAsJson(response ) \\ "organizer"
+      val organizers = organizersJSValue.map(organizer => organizer.as[Organizer])
+
+      status(response) mustEqual OK
+      val geoPoints = organizers.map(_.geographicPoint)
+
+      val centerPoint = geographicPointMethods.latAndLngToGeographicPoint(5.0, 5.0).get
+      val sortedGeoPoint = geoPoints.flatten sortBy(point => point.distance(centerPoint))
+      val numberOfEmptyValuesRemoved = geoPoints.size - sortedGeoPoint.size
+      val sortedGeoPointPlusEmptyValues = (sortedGeoPoint map Option.apply) ++ List.fill(numberOfEmptyValuesRemoved)(None)
+
+      geoPoints mustEqual sortedGeoPointPlusEmptyValues
+    }
   }
 }
 

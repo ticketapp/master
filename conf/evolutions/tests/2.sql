@@ -58,6 +58,8 @@ INSERT INTO organizers(name, facebookid, geographicpoint) VALUES('name2', 'faceb
 -------------------------------------------------------- places --------------------------------------------------------
 INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO places(name, facebookid, geographicpoint) VALUES('Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO places(name, facebookid) VALUES('testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
+INSERT INTO places(name, facebookid) VALUES('testId5', 'facebookIdTestFollowController2');
 
 -------------------------------------------------------- addresses -----------------------------------------------------
 INSERT INTO addresses(city) VALUES('lyon');
@@ -69,7 +71,6 @@ INSERT INTO eventsplaces(eventid, placeid) VALUES
   ((SELECT eventId FROM events WHERE name = 'notPassedEvent'), (SELECT placeid FROM places WHERE name = 'Test'));
 INSERT INTO eventsplaces(eventid, placeid) VALUES
   ((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT placeid FROM places WHERE name = 'Test'));
-
 
   -------------------------------------------------------- eventsOrganizers --------------------------------------------
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
@@ -100,6 +101,9 @@ INSERT INTO eventsartists(eventid, artistid) VALUES
 -------------------------------------------------------- eventsFollowed ------------------------------------------------
 INSERT INTO eventsfollowed(eventid, userid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), '077f3ea6-2272-4457-a47e-9e9111108e44');
+
+-------------------------------------------------------- placesFollowed ------------------------------------------------
+INSERT INTO placesfollowed(placeid, userid) VALUES (4, '077f3ea6-2272-4457-a47e-9e9111108e44');
 
 -------------------------------------------------------- frenchCities --------------------------------------------------
 INSERT INTO frenchcities(city, geographicpoint) VALUES('lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');

@@ -74,6 +74,7 @@ POST          /organizers/create                                             @co
 GET           /organizers/:organizerId/events                                @controllers.EventController.findByOrganizer(organizerId: Long)
 GET           /organizers/:organizerId/passedEvents                          @controllers.EventController.findPassedByOrganizer(organizerId: Long)
 GET           /organizers/findNearCity/:city                                 @controllers.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+GET           /organizers/findNearGeoPoint/                                  @controllers.OrganizerController.findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET           /organizers/followed/                                          @controllers.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
@@ -84,8 +85,8 @@ DELETE        /playlists/:playlistId                                         @co
 #
 ################################## Genres ############################################
 GET           /genres/:genre/artists                                         @controllers.ArtistController.artistsByGenre(genre: String, numberToReturn: Int, offset: Int)
-GET          /genres/:genre/events                                            @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
-GET          /genres/:genre                                                  @controllers.GenreController.isAGenre(genre: String)
+GET           /genres/:genre/events                                          @controllers.EventController.findByGenre(genre: String, geographicPoint: String, offset: Int, numberToReturn: Int)
+GET           /genres/:genre                                                 @controllers.GenreController.isAGenre(genre: String)
 
 ################################# Tracks ############################################
 POST          /tracks/create                                                 @controllers.TrackController.createTrack

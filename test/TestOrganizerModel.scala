@@ -21,16 +21,13 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
-        try {
-          savedOrganizer mustEqual OrganizerWithAddress(
-            organizer.copy(
-              id = Some(savedOrganizer.organizer.id.get),
-              description = Some("<div class='column large-12'>description</div>")),
-            None)
-        } finally {
-          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
-            _ mustBe 1
-          }
+        savedOrganizer mustEqual OrganizerWithAddress(
+          organizer = organizer.copy(
+            id = Some(savedOrganizer.organizer.id.get),
+            description = Some("<div class='column large-12'>description</div>")),
+          address = None)
+        whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
+          _ mustBe 1
         }
       }
     }
@@ -40,19 +37,13 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
-        try {
-          savedOrganizer mustEqual OrganizerWithAddress(
-            organizer.copy(
-              id = Some(savedOrganizer.organizer.id.get),
-              description = Some("<div class='column large-12'>description</div>")),
-            None)
-          whenReady(organizerMethods.findAll, timeout(Span(5, Seconds))) { foundOrganizers =>
-            foundOrganizers should contain(savedOrganizer)
-          }
-        } finally {
-          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
-            _ mustBe 1
-          }
+        savedOrganizer mustEqual OrganizerWithAddress(
+          organizer = organizer.copy(
+            id = Some(savedOrganizer.organizer.id.get),
+            description = Some("<div class='column large-12'>description</div>")),
+          address = None)
+        whenReady(organizerMethods.findAll, timeout(Span(5, Seconds))) { foundOrganizers =>
+          foundOrganizers should contain(savedOrganizer)
         }
       }
     }
@@ -62,19 +53,13 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
-        try {
-          savedOrganizer mustEqual OrganizerWithAddress(
-            organizer.copy(
-              id = Some(savedOrganizer.organizer.id.get),
-              description = Some("<div class='column large-12'>description</div>")),
-            None)
-          whenReady(organizerMethods.findIdByFacebookId(savedOrganizer.organizer.facebookId), timeout(Span(5, Seconds))) { foundOrganizer =>
-            foundOrganizer mustBe savedOrganizer.organizer.id
-          }
-        } finally {
-          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
-            _ mustBe 1
-          }
+        savedOrganizer mustEqual OrganizerWithAddress(
+          organizer = organizer.copy(
+            id = Some(savedOrganizer.organizer.id.get),
+            description = Some("<div class='column large-12'>description</div>")),
+          address = None)
+        whenReady(organizerMethods.findIdByFacebookId(savedOrganizer.organizer.facebookId), timeout(Span(5, Seconds))) { foundOrganizer =>
+          foundOrganizer mustBe savedOrganizer.organizer.id
         }
       }
     }
@@ -92,24 +77,28 @@ class TestOrganizerModel extends GlobalApplicationForModels {
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer1, None)), timeout(Span(5, Seconds))) { savedOrganizer1 =>
           whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer2, None)), timeout(Span(5, Seconds))) { savedOrganizer2 =>
-            try {
-              whenReady(organizerMethods.findNear(geographicPointMethods.stringToGeographicPoint("7.4,7.6").get, 10, 0),
-                timeout(Span(5, Seconds))) { foundOrganizers =>
-                foundOrganizers should contain inOrder(savedOrganizer2, savedOrganizer1, savedOrganizer)
-              }
-            } finally {
-              whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
-                _ mustBe 1
-              }
-              whenReady(organizerMethods.delete(savedOrganizer1.organizer.id.get), timeout(Span(5, Seconds))) {
-                _ mustBe 1
-              }
-              whenReady(organizerMethods.delete(savedOrganizer2.organizer.id.get), timeout(Span(5, Seconds))) {
-                _ mustBe 1
-              }
+            whenReady(organizerMethods.findNear(geographicPointMethods.stringToGeographicPoint("7.4,7.6").get, 10, 0),
+              timeout(Span(5, Seconds))) { foundOrganizers =>
+              foundOrganizers should contain inOrder(savedOrganizer2, savedOrganizer1, savedOrganizer)
             }
           }
         }
+      }
+    }
+
+    "be found near city" in {
+      whenReady (organizerMethods.findNearCity("lyon", 10, 0),  timeout(Span(5,  Seconds))) { response =>
+        val organizer = OrganizerWithAddress(
+          organizer = Organizer(Some(3), Some("facebookId1"), "name2", None, None, None, None, None, verified = false,
+            None, Some(geographicPointMethods.stringToGeographicPoint("45.783808, 4.860598").get), None),
+          address = None)
+        val organizer2 = OrganizerWithAddress(
+          organizer = Organizer(Some(2), Some("facebookId"), "name1", None, None, None, None, None, verified = false,
+            None, Some(geographicPointMethods.stringToGeographicPoint(
+              "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get), None),
+          address = None)
+
+        response must contain inOrder(organizer, organizer2)
       }
     }
 
@@ -118,11 +107,13 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
         geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
-        try {
-          whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds)))
-          { _ mustBe savedOrganizer }
-        } finally {
-          whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) { _ mustBe 1 }
+        whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) {
+
+          _ mustBe savedOrganizer
+        }
+        whenReady(organizerMethods.delete(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
+
+          _ mustBe 1
         }
       }
     }
@@ -133,16 +124,11 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         val placeId = tryPlace.id.get
         whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(Organizer(None, Some("1234567891"), "organizerTest2"), None)),
           timeout(Span(5, Seconds))) { savedOrganizer =>
-          try {
-            whenReady(organizerMethods.findById(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
-              case Some(organizerWithAddress: OrganizerWithAddress) =>
-                organizerWithAddress.organizer.linkedPlaceId mustBe Some(placeId)
-              case _ =>
-                throw new Exception("TestOrganizerModel.musBeLinkedToAPlace: error on save or find")
-            }
-          } finally {
-            organizerMethods.delete(savedOrganizer.organizer.id.get)
-            placeMethods.delete(placeId)
+          whenReady(organizerMethods.findById(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
+            case Some(organizerWithAddress: OrganizerWithAddress) =>
+              organizerWithAddress.organizer.linkedPlaceId mustBe Some(placeId)
+            case _ =>
+              throw new Exception("TestOrganizerModel.musBeLinkedToAPlace: error on save or find")
           }
         }
       }
@@ -179,14 +165,10 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         organizerInfos.get.organizer.name mustBe "Le Transbordeur"
 
         whenReady(organizerMethods.saveWithAddress(organizerInfos.get), timeout(Span(5, Seconds))) { savedOrganizer =>
-          try {
-            savedOrganizer.organizer.name mustBe "Le Transbordeur"
-            savedOrganizer.address.get mustBe Address(savedOrganizer.address.get.id,
-              Option(geographicPointMethods.stringToGeographicPoint("45.7839103,4.860398399999999").get),
-            Some("villeurbanne"),Some("69100"),Some("3 boulevard de la bataille de stalingrad"))
-          } finally {
-           organizerMethods.delete(savedOrganizer.organizer.id.get)
-          }
+          savedOrganizer.organizer.name mustBe "Le Transbordeur"
+          savedOrganizer.address.get mustBe Address(savedOrganizer.address.get.id,
+            Option(geographicPointMethods.stringToGeographicPoint("45.7839103,4.860398399999999").get),
+          Some("villeurbanne"),Some("69100"),Some("3 boulevard de la bataille de stalingrad"))
         }
       }
     }
@@ -203,17 +185,6 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         response mustBe true
       }
     }
-
-    "be found near city" in {
-      whenReady (organizerMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { response =>
-        response must contain inOrder(OrganizerWithAddress(Organizer(Some(3),Some("facebookId1"),"name2",None,None,None,None,None,false,None,
-          Some(geographicPointMethods.stringToGeographicPoint("45.783808,4.860598").get),None),None),
-        OrganizerWithAddress(Organizer(Some(2),Some("facebookId"),"name1",None,None,None,None,None,false,None,
-          Some(geographicPointMethods.stringToGeographicPoint(
-            "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get),None),None))
-      }
-    }
-    //find nearCity
   }
 }
 
