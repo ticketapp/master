@@ -10,7 +10,6 @@ angular.module('claudeApp')
             for (var j = 0; j < $scope.infos.length; j++) {
                 if ($localStorage.removedInfosMsg.indexOf($scope.infos[j].id) > -1) {
                     $scope.infos[j].animation = '';
-                    console.log($localStorage.removedInfosMsg)
                 }
             }
         } else {

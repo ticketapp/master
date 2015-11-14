@@ -11,7 +11,10 @@ import silhouette.DBTableDefinitions
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions with TrackTransformTrait {
+trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
+with MyDBTableDefinitions
+with TrackTransformTrait
+with eventWithRelationsTupleToEventWithRelationsClass {
   
   //////////////////////////////////////////// artist ///////////////////////////////////////////////////////////////
   
@@ -22,7 +25,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
       .filter(artistFollowed =>
         artistFollowed.userId === userArtistRelation.userId && artistFollowed.artistId === userArtistRelation.artistId)
       .delete)
-  
+
 
   def getFollowedArtists(userId: UUID): Future[Seq[Artist] ]= {
     val query = for {
@@ -51,13 +54,22 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
         eventFollowed.userId === userEventRelation.userId && eventFollowed.eventId === userEventRelation.eventId)
       .delete)
 
-  def getFollowedEvents(userId: UUID): Future[Seq[Event] ]= {
+  def getFollowedEvents(userId: UUID): Future[Seq[EventWithRelations] ]= {
     val query = for {
       eventFollowed <- eventsFollowed if eventFollowed.userId === userId
-      event <- events if event.id === eventFollowed.eventId
-    } yield event
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events joinLeft
+        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+        if (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+          optionalEventAddresses)._1._1._1._1._1.id === eventFollowed.eventId
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
 
-    db.run(query.result)
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
   def isFollowed(userEventRelation: UserEventRelation): Future[Boolean] = {
@@ -144,13 +156,13 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver] with MyD
     db.run(query.head)
   }
 
-  def getFollowedPlaces(userId: UUID): Future[Seq[Place]]= {
+  def getFollowedPlaces(userId: UUID): Future[Seq[PlaceWithAddress]]= {
     val query = for {
       placeFollowed <- placesFollowed if placeFollowed.userId === userId
-      place <- places if place.id === placeFollowed.placeId
+      place <- places joinLeft addresses on (_.addressId === _.id) if place._1.id === placeFollowed.placeId
     } yield place
 
-    db.run(query.result)
+    db.run(query.result) map(_ map PlaceWithAddress.tupled)
   }
 
   //////////////////////////////////////////// track ///////////////////////////////////////////////////////////////

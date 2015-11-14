@@ -37,7 +37,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "be saved with relations and deleted in database" in {
-      val artists = Vector(ArtistWithWeightedGenres(Artist(None, None, "nameEventRelations", facebookUrl = "saveEventRelations")))
+      val artists = Vector(ArtistWithWeightedGenresAndHasTrack(Artist(None, None, "nameEventRelations", facebookUrl = "saveEventRelations")))
       val organizers = Vector(OrganizerWithAddress(Organizer(None, None, "nameEventRelations")))
       val addresses = Vector(Address(None, None, Option("cityEventRelations")))
       val places = Vector(PlaceWithAddress(Place(name = "nameEventRelations")))
@@ -59,7 +59,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
           foundEvent.organizers mustBe Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
 
-          foundEvent.artists mustBe Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
+          foundEvent.artists mustBe Vector(ArtistWithWeightedGenresAndHasTrack(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
 
           foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
 
@@ -70,62 +70,12 @@ class TestEventModel extends GlobalApplicationForModels {
           foundEvent.genres mustBe Vector(event.genres.head.copy(id = foundEvent.genres.head.id))
         }
         whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
-
           _ mustBe 1
         }
       }
     }
 
-    "be followed and unfollowed by a user" in {
-      val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
-      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name1",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description1"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(eventMethods.follow(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-          whenReady(eventMethods.isFollowed(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response1 =>
 
-            response1 mustBe true
-          }
-        }
-        whenReady(eventMethods.unfollow(UserEventRelation(userUUID, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-
-          response mustBe 1
-        }
-      }
-    }
-
-    "not be followed twice" in {
-      val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
-      val uuid: UUID = UUID.randomUUID()
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName1"),
-        lastName = Option("lastName1"),
-        fullName = Option("fullName1"),
-        email = Option("email1"),
-        avatarURL = Option("avatarUrl"))
-      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name2",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
-        Option("description2"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-          whenReady(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), timeout(Span(5, Seconds))) { response =>
-
-            response mustBe 1
-
-            try {
-              Await.result(eventMethods.follow(UserEventRelation(uuid, savedEvent.id.get)), 3 seconds)
-            } catch {
-              case e: PSQLException =>
-
-                e.getSQLState mustBe utilities.UNIQUE_VIOLATION
-            }
-          }
-        }
-      }
-    }
 
     "find all events by genre" in {
       whenReady(eventMethods.findAllByGenre("genreTest0", geographicPointMethods.stringToGeographicPoint("5.4,5.6").get,
@@ -199,7 +149,7 @@ class TestEventModel extends GlobalApplicationForModels {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
+      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
         "facebookUrl123"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
@@ -211,7 +161,7 @@ class TestEventModel extends GlobalApplicationForModels {
             whenReady(eventMethods.findAllByArtist(savedArtist.facebookUrl), timeout(Span(5, Seconds))) { eventsByArtist =>
 
               eventsByArtist must
-                contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenres(savedArtist))))
+                contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenresAndHasTrack(savedArtist))))
             }
           }
         }
@@ -222,7 +172,7 @@ class TestEventModel extends GlobalApplicationForModels {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None))
-      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"),
+      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"),
         Option("description"), "facebookUrl1234"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
@@ -238,7 +188,7 @@ class TestEventModel extends GlobalApplicationForModels {
               whenReady(eventMethods.findAllPassedByArtist(savedArtist.id.get), timeout(Span(5, Seconds))) { passedEventsByArtist =>
 
                 passedEventsByArtist must
-                  contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenres(savedArtist))))
+                  contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenresAndHasTrack(savedArtist))))
               }
             }
           }
@@ -349,12 +299,13 @@ class TestEventModel extends GlobalApplicationForModels {
     
     "find events in period near" in {
       whenReady(eventMethods.findInPeriodNear(
-        hourInterval = 100000,
-        geographicPointMethods.stringToGeographicPoint("45, 4").get,
-        numberToReturn = 1,
+        hourInterval = 4380000,
+        geographicPointMethods.stringToGeographicPoint("45.7579555,4.8351209").get,
+        numberToReturn = 10,
         offset = 0), timeout(Span(5, Seconds))) { events =>
 
-        events should not be empty
+        events map { _.event.name } should contain inOrder("notPassedEvent2", "name0", "notPassedEvent", "inProgressEvent")
+        events map { _.event.name } should not contain allOf("eventPassed", "eventPassedWithoutEndTime")
 
         assert(DateTime.now.minusHours(12).compareTo(events.head.event.startTime) < 0)
       }
@@ -390,7 +341,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "be found near city" in {
       whenReady(eventMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { events =>
-        events.head.event.name mustBe "notPassedEvent"
+        events.head.event.name mustBe "notPassedEvent2"
       }
     }
 

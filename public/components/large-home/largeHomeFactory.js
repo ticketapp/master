@@ -1,7 +1,7 @@
 angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootScope', '$sce',
-    'ArtistsFactory', 'RoutesFactory', 'OrganizerFactory', '$filter', 'PlaceFactory',
+    'ArtistsFactory', 'RoutesFactory', 'OrganizerFactory', '$filter', 'PlaceFactory', 'FollowService', 'TrackService',
     function ($http, $q, $rootScope, $sce, ArtistsFactory, RoutesFactory, OrganizerFactory, $filter,
-              PlaceFactory) {
+              PlaceFactory, FollowService, TrackService) {
     var factory = {
         infos : [],
         getInfos : function () {
@@ -95,79 +95,98 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
 
                             }
                             pushConnectedInfo(info, title, artist, false);
-                        } else if (artist.tracks.length > 0) {
-                            title = 'Ecoutez vos musiques favorites et enregistrez vos playlists avec Claude';
-                            pushConnectedInfo(info, title, artist, true);
+                        } else if (artist.hasTracks) {
+                            TrackService.getArtistTracks(artist.facebookUrl).then(function (tracks) {
+                                artist.tracks = tracks;
+                                title = 'Ecoutez vos musiques favorites et enregistrez vos playlists avec Claude';
+                                pushConnectedInfo(info, title, artist, true);
+                            });
                         }
                     });
                 }
-                ArtistsFactory.getFollowArtists().then(function (artists) {
-                    artists.forEach(getEventsArtist)
-                });
 
                 function getOrganizerEvents (organizer) {
                     OrganizerFactory.getOrganizerEvents(organizer.id).then(function (events) {
                         events = $filter('orderBy')(events, 'startTime', false);
-                        var eventsLength = events.length;
-                        for (var i = 0; i < eventsLength; i ++) {
-                            if (events[i].artists.length > 0) {
-                                events[i].tracks = [];
-                                for (var j = 0; j < events[i].artists.length; j++) {
-                                    for (var k = 0; k < 5; k++) {
-                                        if (events[i].artists[j].tracks[k] != undefined) {
-                                            events[i].tracks.push(events[i].artists[j].tracks[k])
+                        events.map(function(event) {
+                            var timeout;
+                            var time = 2000;
+                            event.tracks = [];
+                            if(event.artists) {
+                                event.artists.map(function (artist) {
+                                    TrackService.getArtistTracks(artist.facebookUrl).then(function (tracks) {
+                                        for (var k = 0; k < 5; k++) {
+                                            if (tracks[k] != undefined) {
+                                                tracks[k].genres = artist.genres;
+                                                event.tracks.push(tracks[k])
+                                            }
                                         }
-                                    }
-                                }
-                                if (events[i].tracks.length > 0) {
-                                    events[i].tracks = $filter('orderBy')(events[i].tracks, 'confidence', true);
-                                    var title = 'Ecouter la playliste des événements de ' + organizer.name + ' avec Claude';
-                                    var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].eventId +'">'+ events[i].name + '</a>';
-                                    events[i].name = 'La playlist de l\'événements';
-                                    console.log(events[i]);
-                                    pushConnectedInfo(info, title, events[i], true);
-                                }
+                                    });
+                                    clearTimeout(timeout);
+                                    timeout = setTimeout(function() {
+                                        if (event.tracks.length > 0) {
+                                            event.tracks = $filter('orderBy')(event.tracks, 'confidence', true);
+                                            var title = 'Ecouter la playliste des événements de ' + organizer.name + ' avec Claude';
+                                            var info = '<a style="font-size:25px; color: white;" href="#/events/' + event.id + '">' +
+                                                event.name + '</a>';
+                                            var eventCopy = angular.copy(event);
+                                            eventCopy.name = "la playlist de l'événement";
+                                            pushConnectedInfo(info, title, eventCopy, true);
+                                        }
+                                    }, time)
+                                });
                             }
-                        }
+                        });
                     })
                 }
 
                 function getPlaceEvents (place) {
                     PlaceFactory.getPlaceEvents(place.id).then(function (events) {
                         events = $filter('orderBy')(events, 'startTime', false);
-                        var eventsLength = events.length;
-                        for (var i = 0; i < eventsLength; i ++) {
-                            if (events[i].artists.length > 0) {
-                                events[i].tracks = [];
-                                for (var j = 0; j < events[i].artists.length; j++) {
-                                    for (var k = 0; k < 5; k++) {
-                                        if (events[i].artists[j].tracks[k] != undefined) {
-                                            events[i].tracks.push(events[i].artists[j].tracks[k])
+                        events.map(function(event) {
+                            var timeout;
+                            var time = 2000;
+                            event.tracks = [];
+                            if(event.artists) {
+                                event.artists.map(function (artist) {
+                                    TrackService.getArtistTracks(artist.facebookUrl).then(function (tracks) {
+                                        for (var k = 0; k < 5; k++) {
+                                            if (tracks[k] != undefined) {
+                                                tracks[k].genres = artist.genres;
+                                                event.tracks.push(tracks[k])
+                                            }
                                         }
-                                    }
-                                }
-                                if (events[i].tracks.length > 0) {
-                                    events[i].tracks = $filter('orderBy')(events[i].tracks, 'confidence', true);
-                                    var title = 'Ecouter les playliste des événements de ' + place.name + ' avec Claude';
-                                    var info = '<a style="font-size:25px; color: white;" href="#/events/' + events[i].id +'">'+
-                                        events[i].name + '</a>';
-                                    events[i].name = 'La playlist de l\'événements';
-                                    pushConnectedInfo(info, title, events[i], true);
-                                }
+                                    });
+                                    clearTimeout(timeout);
+                                    timeout = setTimeout(function() {
+                                        if (event.tracks.length > 0) {
+                                            event.tracks = $filter('orderBy')(event.tracks, 'confidence', true);
+                                            var title = 'Ecouter la playliste des événements de ' + place.name + ' avec Claude';
+                                            var info = '<a style="font-size:25px; color: white;" href="#/events/' + event.id + '">' +
+                                                event.name + '</a>';
+                                            var eventCopy = angular.copy(event);
+                                            eventCopy.name = "la playlist de l'événement";
+                                            pushConnectedInfo(info, title, eventCopy, true);
+                                        }
+                                    }, time)
+                                });
                             }
-                        }
+                        });
                     })
                 }
 
-                $http.get(RoutesFactory.organizers.getFollowedOrganizers()).
-                    success(function (organizers) {
-                        organizers.forEach(getOrganizerEvents)
+                FollowService.organizers.followed().then(function(organizers) {
+                    organizers.forEach(getOrganizerEvents)
                 });
 
-                $http.get(RoutesFactory.places.getFollowedPlaces()).
-                    success(function (places) {
-                        places.forEach(getPlaceEvents)
+                FollowService.places.followed().then(function(places) {
+                    places.forEach(getPlaceEvents)
                 });
+
+                FollowService.artists.followed().then(function (artists) {
+                    artists.forEach(getEventsArtist)
+                });
+
                 deferred.resolve(factory.infos);
                 return deferred.promise;
             }

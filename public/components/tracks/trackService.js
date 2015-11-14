@@ -1,5 +1,5 @@
-angular.module('claudeApp').factory('TrackService', ['$localStorage', '$filter', 'FollowService', '$q',
-    function($localStorage, $filter, FollowService, $q) {
+angular.module('claudeApp').factory('TrackService', ['$localStorage', '$filter', 'FollowService', '$q', '$http',
+    function($localStorage, $filter, FollowService, $q, $http) {
     var factory = {
         /*
          class Track {
@@ -26,6 +26,18 @@ angular.module('claudeApp').factory('TrackService', ['$localStorage', '$filter',
                     return track;
                 }
             })
+        },
+
+        getArtistTracks: function(facebookUrl) {
+            var deferred = $q.defer();
+            $http.get('/artists/' + facebookUrl + '/tracks?numberToReturn=0&offset=0').
+                success(function(tracks) {
+                    deferred.resolve(tracks);
+                }).error(function (error) {
+                    deferred.resolve([]);
+                });
+
+            return deferred.promise;
         },
 
         countRates: function(tracks) {

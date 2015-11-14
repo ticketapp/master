@@ -27,19 +27,19 @@ trait artistFormsTrait extends genreFormsTrait {
 
   def artistFormApply(facebookId: Option[String], name: String, imagePath: Option[String], description: Option[String],
                 facebookUrl: String, websites: scala.Seq[String], genres: scala.Seq[GenreWithWeight], likes: Option[Int],
-                country: Option[String]): ArtistWithWeightedGenres =
-    ArtistWithWeightedGenres(
+                country: Option[String]): ArtistWithWeightedGenresAndHasTrack =
+    ArtistWithWeightedGenresAndHasTrack(
       Artist(None, facebookId, name, imagePath, description, facebookUrl, websites.toSet, likes, country),
       genres.toVector)
 
-  def artistFormUnapply(artistWithWeightedGenre: ArtistWithWeightedGenres) = {
+  def artistFormUnapply(artistWithWeightedGenre: ArtistWithWeightedGenresAndHasTrack) = {
     val artist = artistWithWeightedGenre.artist
     Option((artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
       artist.websites.toSeq, artistWithWeightedGenre.genres, artist.likes, artist.country))
 
   }
 
-  def formWithPatternApply(searchPattern: String, artist: ArtistWithWeightedGenres) =
+  def formWithPatternApply(searchPattern: String, artist: ArtistWithWeightedGenresAndHasTrack) =
     PatternAndArtist(searchPattern, artist)
 
   def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =

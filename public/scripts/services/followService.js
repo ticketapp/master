@@ -207,6 +207,9 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                         defered.resolve(factory.followedPlaces)
                     } else {
                         $http.get(RoutesFactory.follow.places.followed()).success(function (places) {
+                            places = places.map(function(place) {
+                                return RefactorObjectsFactory.refactorPlaceObject(place)
+                            });
                             factory.followedPlaces = places;
                             defered.resolve(factory.followedPlaces)
                         }).error(function (error, status) {

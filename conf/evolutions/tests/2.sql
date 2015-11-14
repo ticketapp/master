@@ -9,11 +9,11 @@ INSERT INTO users(userID, firstName, lastName, fullName, email, avatarURL) VALUE
 INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');
 
 -------------------------------------------------------- artists -------------------------------------------------------
-INSERT INTO artists(name, facebookurl) VALUES('name', 'facebookUrl0');
-INSERT INTO artists(name, facebookurl) VALUES('name0', 'facebookUrl00');
-INSERT INTO artists(facebookid, name, facebookurl) VALUES('facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
-
+INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
+INSERT INTO artists(artistid, name, facebookurl) VALUES('200', 'name0', 'facebookUrl00');
+INSERT INTO artists(artistid, facebookid, name, facebookurl) VALUES('300', 'facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
 INSERT INTO artists(facebookid, name, facebookurl) VALUES('withoutEventRelation', 'withoutEventRelation', 'withoutEventRelation');
+INSERT INTO artists(facebookid, name, facebookurl) VALUES('testFindIdByFacebookId', 'name00', 'testFindIdByFacebookId');
 
 -------------------------------------------------------- tracks --------------------------------------------------------
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
@@ -43,18 +43,20 @@ INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
   ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'), (SELECT genreid FROM genres WHERE name = 'genreTest00'), 1);
 
 -------------------------------------------------------- events --------------------------------------------------------
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'name0', current_timestamp, '0101000020E6100000ED2B0FD253E446401503249A40711350');
+INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
 INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent', timestamp '2040-08-24 14:00:00', '0101000020E6100000ED2B0FD253E446401503249A40711340');
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');
+INSERT INTO events(ispublic, isactive, name, starttime) VALUES(true, true, 'eventPassedWithoutEndTime', timestamp '2012-08-24 14:00:00');
+INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent', timestamp '2040-08-24 14:00:00', '0101000000654D87A9886F4840D146640E38D10240');
+INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint) VALUES(100, true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00', '01010000008906CEBE97E346405187156EF9581340');
 
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
-INSERT INTO organizers(name, facebookid, geographicpoint) VALUES('name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+INSERT INTO organizers(organizerid, name, facebookid, geographicpoint) VALUES(100, 'name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO organizers(name, facebookid, geographicpoint) VALUES('name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
 -------------------------------------------------------- places --------------------------------------------------------
-INSERT INTO places(name, facebookid, geographicpoint) VALUES('Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO places(name, facebookid, geographicpoint) VALUES('Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 INSERT INTO places(name, facebookid) VALUES('testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
 INSERT INTO places(name, facebookid) VALUES('testId5', 'facebookIdTestFollowController2');
