@@ -28,9 +28,9 @@ angular.module('claudeApp').controller('toolsCtrl', ['$scope', '$modal', '$log',
 // It is not the same as the $modal service used above.
 
 angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalInstance', '$rootScope',
-'$http', 'InfoModal', 'UserFactory', 'ToolsFactory', 'ArtistsFactory', 'PlaceFactory', 'OrganizerFactory', 'FollowService',
+'$http', 'InfoModal', 'UserFactory', 'PlaylistService', 'ArtistsFactory', 'PlaceFactory', 'OrganizerFactory', 'FollowService',
     'RefactorObjectsFactory',
-    function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, ToolsFactory, ArtistsFactory, PlaceFactory,
+    function ($scope, $modalInstance, $rootScope, $http, InfoModal, UserFactory, PlaylistService, ArtistsFactory, PlaceFactory,
               OrganizerFactory, FollowService, RefactorObjectsFactory) {
     $scope.suggeredPlaylists = [];
     $scope.playlists = [];
@@ -53,32 +53,71 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     $scope.getPlaylists();
     $scope.viewPlaylists = true;
 
-    ToolsFactory.getEventsPlaylist().then(function (playlist) {
-        $scope.suggeredPlaylists.push(playlist)
+    function updatePlaylist(update) {
+        var playlistToUpdate = $scope.suggeredPlaylists.filter(function (playlist) {
+            return playlist.uuid === update.uuid
+        });
+        if (playlistToUpdate.length > 0) {
+            $scope.suggeredPlaylists[$scope.suggeredPlaylists.indexOf(playlistToUpdate[0])] = update
+        } else {
+            $scope.suggeredPlaylists.push(update)
+        }
+    }
+
+    PlaylistService.getEventsPlaylist().then(function (completePlaylist) {
+        updatePlaylist(completePlaylist);
+    }, function(error) {
+
+    }, function(update) {
+        updatePlaylist(update);
     });
 
-    ToolsFactory.getEventsGenrePlaylist('electro').then(function (playlist) {
-        $scope.suggeredPlaylists.push(playlist)
+    PlaylistService.getEventsGenrePlaylist('electro').then(function (completePlaylist) {
+        updatePlaylist(completePlaylist);
+    }, function(error) {
+
+    }, function(update) {
+        updatePlaylist(update);
     });
 
-    ToolsFactory.getEventsGenrePlaylist('reggae').then(function (playlist) {
-        $scope.suggeredPlaylists.push(playlist)
+    PlaylistService.getEventsGenrePlaylist('reggae').then(function (completePlaylist) {
+        updatePlaylist(completePlaylist);
+    }, function(error) {
+
+    }, function(update) {
+        updatePlaylist(update);
     });
 
-    ToolsFactory.getEventsGenrePlaylist('rock').then(function (playlist) {
-        $scope.suggeredPlaylists.push(playlist)
+    PlaylistService.getEventsGenrePlaylist('rock').then(function (completePlaylist) {
+        updatePlaylist(completePlaylist);
+    }, function(error) {
+
+    }, function(update) {
+        updatePlaylist(update);
     });
 
-    ToolsFactory.getEventsGenrePlaylist('jazz').then(function (playlist) {
-        $scope.suggeredPlaylists.push(playlist)
+    PlaylistService.getEventsGenrePlaylist('jazz').then(function (completePlaylist) {
+        updatePlaylist(completePlaylist);
+    }, function(error) {
+
+    }, function(update) {
+        updatePlaylist(update);
     });
 
-    ToolsFactory.getEventsGenrePlaylist('hip-hop').then(function (playlist) {
-        $scope.suggeredPlaylists.push(playlist)
+    PlaylistService.getEventsGenrePlaylist('hip-hop').then(function (completePlaylist) {
+        updatePlaylist(completePlaylist);
+    }, function(error) {
+
+    }, function(update) {
+        updatePlaylist(update);
     });
 
-    ToolsFactory.getEventsGenrePlaylist('chanson').then(function (playlist) {
-        $scope.suggeredPlaylists.push(playlist)
+    PlaylistService.getEventsGenrePlaylist('chanson').then(function (completePlaylist) {
+        updatePlaylist(completePlaylist);
+    }, function(error) {
+
+    }, function(update) {
+        updatePlaylist(update);
     });
 
     $scope.favorites = {};

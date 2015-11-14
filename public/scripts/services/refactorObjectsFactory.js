@@ -2,9 +2,15 @@ angular.module('claudeApp').
     factory('RefactorObjectsFactory', ['RefactorGeopoint', function (RefactorGeopoint) {
         var factory = {
             refactorArtistObject: function(artist) {
-                artist.artist.genres = artist.genres.map(function(genre) {
-                    return genre.genre
-                });
+                if (artist.genres) {
+                    artist.artist.genres = artist.genres.map(function (genre) {
+                        return genre.genre
+                    });
+                } else {
+                    artist.artist.genres = []
+                }
+
+                artist.artist.hasTracks = artist.hasTracks;
                 artist = artist.artist;
                 return artist
             },

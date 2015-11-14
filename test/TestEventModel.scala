@@ -348,12 +348,13 @@ class TestEventModel extends GlobalApplicationForModels {
     
     "find events in period near" in {
       whenReady(eventMethods.findInPeriodNear(
-        hourInterval = 100000,
-        geographicPointMethods.stringToGeographicPoint("45, 4").get,
-        numberToReturn = 1,
+        hourInterval = 4380000,
+        geographicPointMethods.stringToGeographicPoint("45.7579555,4.8351209").get,
+        numberToReturn = 10,
         offset = 0), timeout(Span(5, Seconds))) { events =>
 
-        events should not be empty
+        events map { _.event.name } should contain inOrder("notPassedEvent2", "name0", "notPassedEvent", "inProgressEvent")
+        events map { _.event.name } should not contain allOf("eventPassed", "eventPassedWithoutEndTime")
 
         assert(DateTime.now.minusHours(12).compareTo(events.head.event.startTime) < 0)
       }
@@ -389,7 +390,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "be found near city" in {
       whenReady(eventMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { events =>
-        events.head.event.name mustBe "notPassedEvent"
+        events.head.event.name mustBe "notPassedEvent2"
       }
     }
 

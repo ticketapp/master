@@ -43,10 +43,12 @@ INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
   ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'), (SELECT genreid FROM genres WHERE name = 'genreTest00'), 1);
 
 -------------------------------------------------------- events --------------------------------------------------------
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'name0', current_timestamp, '0101000020E6100000ED2B0FD253E446401503249A40711350');
+INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
 INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent', timestamp '2040-08-24 14:00:00', '0101000020E6100000ED2B0FD253E446401503249A40711340');
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');
+INSERT INTO events(ispublic, isactive, name, starttime) VALUES(true, true, 'eventPassedWithoutEndTime', timestamp '2012-08-24 14:00:00');
+INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent', timestamp '2040-08-24 14:00:00', '0101000000654D87A9886F4840D146640E38D10240');
+INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00', '01010000008906CEBE97E346405187156EF9581340');
 
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');

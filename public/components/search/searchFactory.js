@@ -133,8 +133,11 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
             return deferred.promise;
         },
         filterByTime: function (start, event) {
-            var maxStartTime = start * 3600000 + new Date().getTime();
-            return event.startTime < maxStartTime
+            var now = new Date().getTime();
+            var twelveHoursAgo = new Date().getTime() - 3600000*12;
+            var xHoursLater = start * 3600000 + new Date().getTime();
+            return ((event.endTime !== undefined && event.endTime < xHoursLater && event.endTime > now) ||
+                (event.endTime === undefined && event.startTime < xHoursLater && event.startTime >= twelveHoursAgo ))
         },
         getEvents: function(start, offset) {
             var deferred = $q.defer();

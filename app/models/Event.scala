@@ -58,6 +58,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
     with DBTableDefinitions
+    with eventWithRelationsTupleToEventWithRelationsClass
     with MyDBTableDefinitions {
 
   def find(id: Long): Future[Option[EventWithRelations]] = {
@@ -78,38 +79,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def eventWithRelationsTupleToEventWithRelationClass(eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]), Option[(EventArtistRelation, Artist)], Option[(EventPlaceRelation, Place)], Option[(EventGenreRelation, Genre)], Option[(EventAddressRelation, Address)])])
-  : Vector[EventWithRelations] = {
-    val groupedByEvents = eventWithRelations.groupBy(_._1._1)
 
-    groupedByEvents.map { eventWithOptionalRelations =>
-      val event = eventWithOptionalRelations._1
-      val relations = eventWithOptionalRelations._2
-      val organizers = (relations collect {
-        case ((_, Some((_, organizer: Organizer))), _, _, _, _) => organizer
-      }).distinct
-      val artists = (relations collect {
-        case ((_, _), Some((_, artist: Artist)), _, _, _) => artist
-      }).distinct
-      val places = (relations collect {
-        case ((_, _), _, Some((_, place: Place)), _, _) => place
-      }).distinct
-      val genres = (relations collect {
-        case ((_, _), _, _, Some((_, genre: Genre)), _) => genre
-      }).distinct
-      val addresses = (relations collect {
-        case ((_, _), _, _, _, Some((_, address: Address))) => address
-      }).distinct
-
-      EventWithRelations(
-        event,
-        organizers map (OrganizerWithAddress(_)),
-        artists map (ArtistWithWeightedGenresAndHasTrack(_)),
-        places map (PlaceWithAddress(_)),
-        genres,
-        addresses)
-    }.toVector
-  }
 
   def sortEventWithRelationsNearPoint(geographicPoint: Geometry, eventsWihRelations: Vector[EventWithRelations]): Vector[EventWithRelations] = {
     val eventsWihRelationsWithoutGeoPoint = eventsWihRelations
@@ -153,13 +123,15 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def findInPeriodNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
   : Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
-    val xHoursAgo = now.minusHours(hourInterval)
+    val xHoursLater = now.plusHours(hourInterval)
+    val twelveHoursAgo = now.minusHours(12)
 
     val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
       optionalEventAddresses) <- events
         .filter(event =>
-          (event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > xHoursAgo))
+          (event.endTime.nonEmpty && event.endTime < xHoursLater && event.endTime > now) ||
+            (event.endTime.isEmpty && event.startTime < xHoursLater && event.startTime >= twelveHoursAgo ))
         .sortBy(_.geographicPoint <-> geographicPoint)
         .drop(offset)
         .take(numberToReturn) joinLeft
@@ -171,7 +143,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations =>
+      sortEventWithRelationsNearPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
   }
 
   def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
