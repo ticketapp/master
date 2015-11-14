@@ -70,68 +70,6 @@ class TestPlaceModel extends GlobalApplicationForModels {
       }
     }
 
-    "be followed and unfollowed by a user" in {
-      val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
-      val uuid: UUID = UUID.randomUUID()
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName"),
-        lastName = Option("lastName"),
-        fullName = Option("fullName"),
-        email = Option("email"),
-        avatarURL = Option("avatarUrl"))
-      val place = Place(None, "test", Some("123"), None,
-        Some("""Ancienne usine"""),
-        Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
-      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
-        whenReady(userDAOImpl.save(user), timeout(Span(2, Seconds))) { userSaved =>
-          whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get))) { resp =>
-            whenReady(placeMethods.isFollowed(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp1 =>
-             resp1 mustBe true
-              whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
-                resp2 mustBe 1
-                userDAOImpl.delete(uuid)
-                placeMethods.delete(savedPlace.id.get)
-              }
-            }
-          }
-        }
-      }
-    }
-
-    "not be able to be followed twice" in {
-      val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
-      val uuid: UUID = UUID.randomUUID()
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName"),
-        lastName = Option("lastName"),
-        fullName = Option("fullName"),
-        email = Option("email"),
-        avatarURL = Option("avatarUrl"))
-      val place = Place(None, "test", Some("123"), None,
-        Some("""Ancienne usine"""),
-        Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
-      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
-        whenReady(userDAOImpl.save(user), timeout(Span(2, Seconds))) { userSaved =>
-          whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get))) { resp =>
-            try {
-              Await.result(placeMethods.followByPlaceId(UserPlaceRelation(uuid, savedPlace.id.get)), 3 seconds)
-            } catch {
-              case e: PSQLException =>
-
-                e.getSQLState mustBe utilities.UNIQUE_VIOLATION
-            }
-
-            whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, savedPlace.id.get)), timeout(Span(5, Seconds))) { resp2 =>
-              resp2 mustBe 1
-            }
-          }
-        }
-      }
-    }
 
     "be linked to an organizer if one with the same facebookId already exists" in {
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(Organizer(None, Some("1234567"), "organizerTestee"),
@@ -207,13 +145,6 @@ class TestPlaceModel extends GlobalApplicationForModels {
     "find place on facebook" in {
       whenReady(placeMethods.getPlaceOnFacebook("836137029786070"), timeout(Span(5, Seconds))) {
         _.get.place.name mustBe "Akwaba Coop Culturelle"
-      }
-    }
-
-    "be followed by facebookId" in {
-      whenReady(placeMethods.followByFacebookId(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), "776137029786070"),
-        timeout(Span(5, Seconds))) {
-        _ mustBe 1
       }
     }
 
