@@ -75,8 +75,6 @@ class TestEventModel extends GlobalApplicationForModels {
       }
     }
 
-
-
     "find all events by genre" in {
       whenReady(eventMethods.findAllByGenre("genreTest0", geographicPointMethods.stringToGeographicPoint("5.4,5.6").get,
         offset = 0, numberToReturn = 100000), timeout(Span(5, Seconds))) { eventsByGenre =>

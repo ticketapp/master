@@ -1,16 +1,12 @@
 import java.util.UUID
 
-import com.mohiva.play.silhouette.api.LoginInfo
 import models._
-import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import play.api.libs.json.Json
 
 import scala.collection.immutable.Seq
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
@@ -271,7 +267,7 @@ class TestArtistModel extends GlobalApplicationForModels {
     "find all containing pattern" in {
       whenReady(artistMethods.findAllContaining("name0"), timeout(Span(5, Seconds))) { foundArtists =>
         foundArtists map(_.artist.name) should contain allOf("name0", "name00")
-        foundArtists map(_.artist.name) should not contain ("name")
+        foundArtists map(_.artist.name) should not contain "name"
       }
     }
 
