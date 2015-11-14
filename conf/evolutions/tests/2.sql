@@ -18,13 +18,10 @@ INSERT INTO artists(facebookid, name, facebookurl) VALUES('testFindIdByFacebookI
 -------------------------------------------------------- tracks --------------------------------------------------------
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
   ('02894e56-08d1-4c1f-b3e4-466c069d15ed', 'title', 'url0', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
-
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
   ('13894e56-08d1-4c1f-b3e4-466c069d15ed', 'title0', 'url00', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
-
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
   ('24894e56-08d1-4c1f-b3e4-466c069d15ed', 'title00', 'url000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
-
 INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname) VALUES
   ('35894e56-08d1-4c1f-b3e4-466c069d15ed', 'title000', 'url0000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
 
@@ -57,9 +54,9 @@ INSERT INTO organizers(name, facebookid, geographicpoint) VALUES('name2', 'faceb
 
 -------------------------------------------------------- places --------------------------------------------------------
 INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
-INSERT INTO places(name, facebookid, geographicpoint) VALUES('Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
-INSERT INTO places(name, facebookid) VALUES('testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
-INSERT INTO places(name, facebookid) VALUES('testId5', 'facebookIdTestFollowController2');
+INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(3, 'Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO places(placeid, name, facebookid) VALUES(4, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
+INSERT INTO places(placeid, name, facebookid) VALUES(5, 'testId5', 'facebookIdTestFollowController2');
 
 -------------------------------------------------------- addresses -----------------------------------------------------
 INSERT INTO addresses(city) VALUES('lyon');

@@ -109,7 +109,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "find all events by place sorted by date" in {
-      whenReady(eventMethods.findAllByPlace(2), timeout(Span(5, Seconds))) { eventsByPlace =>
+      whenReady(eventMethods.findAllByPlace(100), timeout(Span(5, Seconds))) { eventsByPlace =>
 
         assert(eventsByPlace.size > 2)
 

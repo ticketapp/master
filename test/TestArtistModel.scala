@@ -216,19 +216,19 @@ class TestArtistModel extends GlobalApplicationForModels {
 
     "find an artist id by facebookId" in {
       whenReady(artistMethods.findIdByFacebookId("testFindIdByFacebookId"), timeout(Span(5, Seconds))) { id =>
-        id mustBe Some(5L)
+        id mustBe Some(2L)
       }
     }
 
     "find an artist id by facebookUrl" in {
       whenReady(artistMethods.findIdByFacebookUrl("facebookUrl0"), timeout(Span(5, Seconds))) { id =>
-        id mustBe Some(1.toLong)
+        id mustBe Some(100.toLong)
       }
     }
 
     "find an artist by facebookUrl" in {
       val expectedArtist = Artist(
-        id = Option(2L),
+        id = Option(200L),
         name = "name0",
         facebookUrl = "facebookUrl00")
       whenReady(artistMethods.findByFacebookUrl("facebookUrl00"), timeout(Span(5, Seconds))) { artist =>
@@ -257,10 +257,10 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "return hasTracks set to true if he as some tracks and vice-versa" in {
-      whenReady(artistMethods.find(1), timeout(Span(5, Seconds))) { foundArtist =>
+      whenReady(artistMethods.find(100), timeout(Span(5, Seconds))) { foundArtist =>
         foundArtist.get.hasTracks mustBe true
       }
-      whenReady(artistMethods.find(2), timeout(Span(5, Seconds))) { foundArtist =>
+      whenReady(artistMethods.find(200), timeout(Span(5, Seconds))) { foundArtist =>
         foundArtist.get.hasTracks mustBe true
       }
       whenReady(artistMethods.find(4), timeout(Span(5, Seconds))) { foundArtist =>
@@ -271,7 +271,7 @@ class TestArtistModel extends GlobalApplicationForModels {
     "find all containing pattern" in {
       whenReady(artistMethods.findAllContaining("name0"), timeout(Span(5, Seconds))) { foundArtists =>
         foundArtists map(_.artist.name) should contain allOf("name0", "name00")
-        foundArtists map(_.artist.name) should not contain ("name")
+        foundArtists map(_.artist.name) should not contain "name"
       }
     }
 

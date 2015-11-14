@@ -71,15 +71,18 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
     db.run(query)
   }
 
-  // need to do a transaction
-  def update(playlist: PlaylistWithTracksIdAndRank): Future[Long] = {
-    playlist.playlistInfo.playlistId match {
-      case Some(playlistId) =>
-        delete(playlistId)
-        saveWithTrackRelations(playlist)
-      case None =>
-        Future(0)
-    }
+  def update(playlist: PlaylistWithTracksIdAndRank): Future[Long] = playlist.playlistInfo.playlistId match {
+    case Some(playlistId) =>
+      val query = (for {
+        result <- playlists.filter(_.id === playlistId).delete
+        if result == 1
+        playlistId <- playlists returning playlists.map(_.id) += playlist.playlistInfo
+        playlistTrackRelation <- playlistsTracks ++= playlist.tracksWithRank.map(trackWithPlaylistRank =>
+          PlaylistTrack(playlistId, trackWithPlaylistRank.trackId, trackWithPlaylistRank.rank))
+      } yield playlistId).transactionally
+      db.run(query)
+    case None =>
+      Future(0)
   }
 
   def findByUserId(userUUID: UUID): Future[Vector[PlaylistWithTracksWithGenres]] = {
@@ -97,7 +100,6 @@ class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
       groupedByPlaylist map { playlistWithTracksWithRelations =>
         val playlist = playlistWithTracksWithRelations._1
         val playlistWithTrackWithRelation = playlistWithTracksWithRelations._2
-
 
         val optionalTracksWithRelation = playlistWithTrackWithRelation.map(_._2)
 

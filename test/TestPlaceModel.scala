@@ -1,14 +1,8 @@
-import java.util.UUID
-
-import com.mohiva.play.silhouette.api.LoginInfo
 import models._
-import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
@@ -17,9 +11,8 @@ class TestPlaceModel extends GlobalApplicationForModels {
   "A place" must {
 
     "be saved and deleted in database and return the new id" in {
-      val place = Place(None, "test", Some("123"), None,
-        Some("""Ancienne usine"""),
-        Some("transbordeur.fr"), Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
+      val place = Place(None, "test", Some("123"), None, Some("""Ancienne usine"""), Some("transbordeur.fr"),
+        Some(9099), None, Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
       whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
         whenReady(placeMethods.findById(savedPlace.id.get), timeout(Span(5, Seconds))) { foundPlace =>
 
@@ -71,7 +64,6 @@ class TestPlaceModel extends GlobalApplicationForModels {
       }
     }
 
-
     "be linked to an organizer if one with the same facebookId already exists" in {
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(Organizer(None, Some("1234567"), "organizerTestee"),
         None)), timeout(Span(5, Seconds))) { savedOrganizer =>
@@ -119,11 +111,6 @@ class TestPlaceModel extends GlobalApplicationForModels {
           timeout(Span(5, Seconds))) { resp =>
 
           resp mustBe 1
-
-          whenReady(placeMethods.delete(placeId), timeout(Span(5, Seconds))) { resp1 =>
-
-            resp1 mustBe 1
-          }
         }
       }
     }
@@ -151,11 +138,14 @@ class TestPlaceModel extends GlobalApplicationForModels {
 
     "be found near city" in {
       whenReady(placeMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { places =>
-        places map(p => p.place) should contain inOrder (Place(Some(3),"Test1",Some("666137029786070"),
-          Some(geographicPointMethods.stringToGeographicPoint("45.783808,4.860598").get),None,None,None,None,None,None,None),
-          Place(Some(2),"Test",Some("776137029786070"),Some(geographicPointMethods.stringToGeographicPoint(
-              "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get),
-            None,None,None,None,None,None,None))
+        val expectedPlace1 = Place(Some(3),"Test1",Some("666137029786070"),
+          Some(geographicPointMethods.stringToGeographicPoint("45.783808,4.860598").get), None, None, None, None, None,
+          None, None)
+        val expectedPlace2 = Place(Some(2),"Test",Some("776137029786070"),Some(geographicPointMethods.stringToGeographicPoint(
+          "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get), None, None,
+          None, None, None, None, None)
+
+        places map(p => p.place) should contain inOrder(expectedPlace1, expectedPlace2)
       }
     }
   }

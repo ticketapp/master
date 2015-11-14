@@ -8,6 +8,7 @@ import org.scalatest.time.{Seconds, Span}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import org.scalatest.Matchers._
 
 
 class TestPlaylistModel extends GlobalApplicationForModels {
@@ -110,6 +111,34 @@ class TestPlaylistModel extends GlobalApplicationForModels {
           tracksWithRankAndGenres = expectedPlaylistTracks)
 
         foundPlaylist must contain(expectedPlaylist)
+      }
+    }
+
+    "be updated" in {
+      val userUUID =  UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      val playlistToUpdate = PlaylistWithTracksIdAndRank(
+        playlistInfo = Playlist(
+          playlistId = Some(1),
+          userId = userUUID,
+          name = "playlistUpdated"),
+        tracksWithRank = Vector(TrackIdWithPlaylistRank(
+          trackId = UUID.fromString("02894e56-08d1-4c1f-b3e4-466c069d15ed"),
+          rank = 1.0)))
+
+      whenReady(playlistMethods.update(playlist = playlistToUpdate), timeout(Span(5, Seconds))) { result =>
+        assert(result > 0)
+        whenReady(playlistMethods.findByUserId(userUUID), timeout(Span(5, Seconds))) { foundPlaylists =>
+          val expectedUpdatedPlaylist = PlaylistWithTracksWithGenres(
+            playlistInfo = playlistToUpdate.playlistInfo.copy(playlistId = Option(result)),
+            tracksWithRankAndGenres = Vector(
+              TrackWithPlaylistRankAndGenres(
+                track = TrackWithGenres(
+                  Track(UUID.fromString("02894e56-08d1-4c1f-b3e4-466c069d15ed"), "title", "url0", 'y', "thumbnailUrl",
+                    "facebookUrl0", "artistName", None, 0.0),
+                genres = Vector(Genre(Some(1), "genreTest0", 'a'), Genre(Some(2), "genreTest00", 'a'))),1.0)))
+
+          foundPlaylists should contain only expectedUpdatedPlaylist
+        }
       }
     }
   }
