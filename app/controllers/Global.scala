@@ -14,17 +14,17 @@ import scala.concurrent.duration._
 @Singleton
 class Global @Inject()(val scheduler: Scheduler) {
 
-  Akka.system.scheduler.schedule(initialDelay = 10.seconds, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 10.hours, interval = 12.hours) {
     Logger.info("Scheduler.findEventsForPlaces started")
     scheduler.findEventsForPlaces()
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 20.minutes, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 20.hours, interval = 12.hours) {
     Logger.info("Scheduler.findEventsForOrganizers started")
     scheduler.findEventsForOrganizers()
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 40.minutes, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 40.hours, interval = 12.hours) {
     Logger.info("Scheduler.findTracksForArtists started")
     scheduler.findTracksForArtists()
   }

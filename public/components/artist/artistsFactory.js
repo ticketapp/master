@@ -1,22 +1,11 @@
 angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$rootScope',
-    '$timeout', 'EventsFactory', 'StoreRequest', 'InfoModal', 'ImagesFactory', 'RefactorObjectsFactory',
+    '$timeout', 'EventsFactory', 'StoreRequest', 'InfoModal', 'ImagesFactory', 'RefactorObjectsFactory', 'TrackService',
     function ($http, $q, oboe, $rootScope, $timeout, EventsFactory, StoreRequest, InfoModal,
-              ImagesFactory, RefactorObjectsFactory) {
+              ImagesFactory, RefactorObjectsFactory, TrackService) {
 
     var factory = {
         artists : false,
         lastGetArtist: {url: '', artist: {tracks: []}},
-        getArtistTracks: function(facebookUrl) {
-            var deferred = $q.defer();
-            $http.get('/artists/' + facebookUrl + '/tracks?numberToReturn=0&offset=0').
-                success(function(tracks) {
-                    deferred.resolve(tracks);
-                }).error(function (error) {
-                    deferred.resolve([]);
-                });
-
-            return deferred.promise;
-        },
         getArtist : function (url) {
             var deferred = $q.defer();
             if (url === factory.lastGetArtist.url) {
@@ -26,7 +15,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                     .success(function (data, status) {
                         data = RefactorObjectsFactory.refactorArtistObject(data);
                         data = ImagesFactory(data);
-                        factory.getArtistTracks(data.facebookUrl).then(function(tracks) {
+                        TrackService.getArtistTracks(data.facebookUrl).then(function(tracks) {
                             data.tracks = tracks.map(function (track) {
                                 track.genres = data.genres;
                                 return track
@@ -311,7 +300,7 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
             })
             .fail(function (error) {
                 if (error.statusCode === 409 && factory.lastGetArtist.url === artist.facebookUrl) {
-                    factory.getArtistTracks(artist.facebookUrl).then(function(tracks) {
+                    TrackService.getArtistTracks(artist.facebookUrl).then(function(tracks) {
                         artist.tracks = tracks.map(function (track) {
                             track.genres = artist.genres;
                             return track

@@ -1,8 +1,8 @@
 angular.module('claudeApp').
     controller('PlayerCtrl', ['$scope', '$rootScope', '$timeout', '$filter', 'EventsFactory',
-        '$modal', 'TracksRecommender', 'UserFactory', 'ArtistsFactory', '$localStorage',
+        '$modal', 'TracksRecommender', 'UserFactory', 'ArtistsFactory', '$localStorage', 'PlaylistService',
         function ($scope, $rootScope, $timeout, $filter, EventsFactory, $modal, TracksRecommender,
-                  UserFactory, ArtistsFactory, $localStorage) {
+                  UserFactory, ArtistsFactory, $localStorage, PlaylistService) {
             $rootScope.playlist = {
                 name : '',
                 genres: [],
@@ -68,31 +68,16 @@ angular.module('claudeApp').
                 });
             };
 
-            function eventsPlaylist () {
-                function getEventsByGenre (genre) {
-                    EventsFactory.getEventsByGenre(genre, offset, $rootScope.geoLoc).then(
-                    function (events) {
-                        function getEventsArtists(event) {
-                            var evArtLenght = event.artists.length;
-                            for (var a = 0; a < evArtLenght; a++) {
-                                if (artNames.toString().indexOf(event.artists[a].name) == -1) {
-                                    artNames.push(event.artists[a].name);
-                                    for (var t = 0; t < 4; t++) {
-                                        if (event.artists[a].tracks[t] != undefined) {
-                                            if (played.indexOf(event.artists[a].tracks[t].title) == -1) {
-                                                event.artists[a].tracks[t].art = event.artists[a];
-                                                event.artists[a].tracks[t].nextShow = event;
-                                                playlistEvents.push(event.artists[a].tracks[t]);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        events.forEach(getEventsArtists);
-                    });
-                }
-                $rootScope.playlist.genres.forEach(getEventsByGenre)
+            function eventsPlaylist() {
+                $rootScope.playlist.genres.map(function(genre) {
+                    PlaylistService.getEventsGenrePlaylist(genre).then(function (completePlaylist) {
+                        completePlaylist.tracks.map(function(track) {
+                            track.nextShow = {};
+                            track.nextShow.id = track.nextEventId;
+                            playlistEvents.push(track);
+                        })
+                    })
+                });
             }
 
             function addGenres (genre) {

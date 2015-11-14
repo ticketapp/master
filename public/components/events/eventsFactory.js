@@ -56,15 +56,22 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             start : 0,
             geoloc : 0,
             offset : -1,
+            numberToReturn: 0,
             events : []
         },
-        getEvents : function (start, geoloc, offset) {
+        getEvents : function (start, geoloc, offset, maybeNumberToReturn) {
             var deferred = $q.defer();
+            var numberToReturn;
+            if(maybeNumberToReturn) {
+                numberToReturn = maybeNumberToReturn;
+            } else {
+                numberToReturn = 12;
+            }
             if (start == factory.lastGetEvents.start && geoloc == factory.lastGetEvents.geoloc &&
-                offset <= factory.lastGetEvents.offset) {
+                offset <= factory.lastGetEvents.offset && numberToReturn <= factory.lastGetEvents.numberToReturn) {
                 deferred.resolve(factory.lastGetEvents.events);
             } else {
-                $http.get('/events/inInterval/' + start + '?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12')
+                $http.get('/events/inInterval/' + start + '?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=' + numberToReturn)
                     .success(function (events, status) {
                         events = events.map(function(event) {
                             return RefactorObjectsFactory.normalizeEventObject(event)
@@ -78,6 +85,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                         factory.lastGetEvents.start = start;
                         factory.lastGetEvents.geoloc = geoloc;
                         factory.lastGetEvents.offset = offset;
+                        factory.lastGetEvents.numberToReturn = numberToReturn;
                         deferred.resolve(factory.lastGetEvents.events);
                     }).error(function (data, status) {
                         deferred.reject('erreur');
@@ -224,15 +232,21 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
             }
             return deferred.promise;
         },
-        lastGetEventsByGenre: {pattern: '', offset: -1, geoloc: '', events: []},
-        getEventsByGenre : function (pattern, offset, geoloc) {
+        lastGetEventsByGenre: {pattern: '', offset: -1, geoloc: '', events: [], numberToReturn: 0},
+        getEventsByGenre : function (pattern, offset, geoloc, maybeNumberToReturn) {
             var deferred = $q.defer();
-            if (pattern == factory.lastGetEventsByGenre.pattern &&
+            var numberToReturn;
+            if (maybeNumberToReturn) {
+                numberToReturn = maybeNumberToReturn
+            } else {
+                numberToReturn = 12
+            }
+            if (pattern === factory.lastGetEventsByGenre.pattern &&
                 offset <= factory.lastGetEventsByGenre.offset &&
-                geoloc == factory.lastGetEventsByGenre.geoloc) {
+                geoloc === factory.lastGetEventsByGenre.geoloc && numberToReturn <= factory.lastGetEventsByGenre.numberToReturn) {
                 deferred.resolve(factory.lastGetEventsByGenre.events)
             } else {
-                $http.get('/genres/' + pattern + '/events?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=12').
+                $http.get('/genres/' + pattern + '/events?geographicPoint=' + geoloc + '&offset=' + offset + '&numberToReturn=' + numberToReturn).
                     success(function (events, status, headers, config) {
                         events = events.map(function(event) {
                             return RefactorObjectsFactory.normalizeEventObject(event)
@@ -247,6 +261,7 @@ angular.module('claudeApp').factory ('EventsFactory', ['$http', '$q', 'StoreRequ
                         factory.lastGetEventsByGenre.pattern = pattern;
                         factory.lastGetEventsByGenre.offset = offset;
                         factory.lastGetEventsByGenre.geoloc = geoloc;
+                        factory.lastGetEventsByGenre.numberToReturn = numberToReturn;
                         deferred.resolve(factory.lastGetEventsByGenre.events);
                     });
             }

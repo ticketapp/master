@@ -1,7 +1,7 @@
 angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout',
     'ArtistsFactory', 'EventsFactory', 'OrganizerFactory', 'PlaceFactory', 'SearchFactory',
     function($rootScope, $scope, $filter, $timeout, ArtistsFactory, EventsFactory, OrganizerFactory,
-             PlaceFactory, SearchFactory ){
+             PlaceFactory, SearchFactory){
         SearchFactory.init();
         $scope.limit = 12;
         $scope.artists = [];
@@ -81,7 +81,6 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         }
         function getArtistsByContaining () {
             ArtistsFactory.getArtistsByContaining(_research).then(function (artists) {
-                console.log($scope.artists);
                 var artistsFacebookInScope = $scope.artistsFb.map(function (artist) {
                     return artist.id
                 });
@@ -418,11 +417,9 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             }
         };
         if ($rootScope.geoLoc.length > 0) {
-            console.log($rootScope.geoLoc);
             search()
         } else {
             $rootScope.$watch('geoLoc', function (newVal) {
-                console.log($rootScope.geoLoc);
                 if (newVal.length > 0) {
                     $scope.events = [];
                     $scope.places = [];
