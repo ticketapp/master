@@ -337,6 +337,13 @@ class TestArtistModel extends GlobalApplicationForModels {
       }
     }
 
+    "find all containing pattern" in {
+      whenReady(artistMethods.findAllContaining("name0"), timeout(Span(5, Seconds))) { foundArtists =>
+        foundArtists map(_.artist.name) should contain allOf("name0", "name00")
+        foundArtists map(_.artist.name) should not contain ("name")
+      }
+    }
+
     /* "get tracks for an artist" in {
       val patternAndArtist = PatternAndArtistWithWeightedGenres(Artist("Feu! Chatterton",
         ArtistWithWeightedGenres(Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",

@@ -126,7 +126,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-      optionalEventAddresses) <- events
+        optionalEventAddresses) <- events
         .filter(event => event.endTime.nonEmpty && event.endTime > now ||
           event.endTime.isEmpty && event.startTime > twelveHoursAgo)
         .sortBy(_.geographicPoint <-> geographicPoint)
@@ -138,7 +138,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
           (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
-        optionalEventAddresses)
+      optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
       sortEventWithRelationsNearPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))

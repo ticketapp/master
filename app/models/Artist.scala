@@ -72,7 +72,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenre:
                                                                      scala.Seq[((Artist, Option[Track]), Option[(ArtistGenreRelation, Genre)])])
   : Iterable[ArtistWithWeightedGenresAndHasTrack] = {
-    val groupedByArtist = seqArtistAndOptionalGenre.groupBy(_._1)
+    val groupedByArtist = seqArtistAndOptionalGenre.groupBy(_._1._1)
 
     val artistsWithGenresAndHasTracks = groupedByArtist map { tupleArtistSeqTupleArtistWithMaybeGenresAndMaybeTrack =>
       val artist = tupleArtistSeqTupleArtistWithMaybeGenresAndMaybeTrack._1
@@ -89,7 +89,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
     artistsWithGenresAndHasTracks map { artistWithGenreAndHasTrack =>
       ArtistWithWeightedGenresAndHasTrack(
-        artist = artistWithGenreAndHasTrack._1._1,
+        artist = artistWithGenreAndHasTrack._1,
         genres = artistWithGenreAndHasTrack._2.to[Seq].distinct,
         hasTracks = artistWithGenreAndHasTrack._3)
     }
@@ -160,15 +160,15 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val lowercasePattern = pattern.toLowerCase
 
     val query = for {
-      (((artist), optionalArtistGenreAndGenre), maybeTrack) <- artists joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId) joinLeft
-        tracks.take(1) on (_._1.facebookUrl === _.artistFacebookUrl)
-      if artist.name.toLowerCase like s"%$lowercasePattern%"
-    } yield (artist, optionalArtistGenreAndGenre, maybeTrack)
+      artist <- artists joinLeft
+        tracks on (_.facebookUrl === _.artistFacebookUrl) joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
+
+      if artist._1._1.name.toLowerCase like s"%$lowercasePattern%"
+    } yield artist
 
     db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      Seq.empty
-//      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.toVector)
   }
 
