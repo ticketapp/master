@@ -16,17 +16,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
+
 class PlaylistController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
                                  val playlistMethods: PlaylistMethods,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry)
-  extends Silhouette[User, CookieAuthenticator] with playlistFormsTrait {
+    extends Silhouette[User, CookieAuthenticator] with playlistFormsTrait {
 
   def findByUser = SecuredAction.async { implicit request =>
-   playlistMethods.findByUserId(request.identity.uuid) map { playlists =>
-     Ok(Json.toJson(playlists))
-   }
+    playlistMethods.findByUserId(request.identity.uuid) map { playlists =>
+      Ok(Json.toJson(playlists))
+    }
   }
 
   def create = SecuredAction.async { implicit request =>
@@ -37,8 +38,9 @@ class PlaylistController @Inject() (ws: WSClient,
       },
       playlistNameAndTracksId => {
         val userId = request.identity.uuid
-        playlistMethods.saveWithTrackRelations(PlaylistWithTracksIdAndRank(Playlist(None, userId, playlistNameAndTracksId.name),
-          playlistNameAndTracksId.tracksIdAndRank)) map { playlist =>
+        playlistMethods.saveWithTrackRelations(
+          PlaylistWithTracksIdAndRank(Playlist(None, userId, playlistNameAndTracksId.name),
+            playlistNameAndTracksId.tracksIdAndRank)) map { playlist =>
           Ok(Json.toJson(playlist))
         } recover {
           case batchUpdateException: java.sql.BatchUpdateException =>
