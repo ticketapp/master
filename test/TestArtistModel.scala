@@ -86,14 +86,21 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "all be found" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, None, "artistTest0", None, None, "facebookUrl0", Set.empty), Vector.empty)
-      val artist2 = ArtistWithWeightedGenresAndHasTrack(Artist(None, None, "artistTest00", None, None, "facebookUrl00", Set.empty), Vector.empty)
+      val artist = ArtistWithWeightedGenresAndHasTrack(
+        artist = Artist(None, None, "facebookUrlAllBeFound", None, None, "facebookUrlAllBeFound", Set.empty),
+        genres = Vector.empty)
+      val artist2 = ArtistWithWeightedGenresAndHasTrack(
+        artist = Artist(None, None, "facebookUrlAllBeFound2", None, None, "facebookUrlAllBeFound2", Set.empty),
+        genres = Vector.empty)
+
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.save(artist2), timeout(Span(5, Seconds))) { savedArtist2 =>
-          whenReady(artistMethods.findSinceOffset(100000, 0), timeout(Span(5, Seconds))) { foundArtists =>
+          whenReady(artistMethods.findSinceOffset(numberToReturn = 100000, offset = 0), timeout(Span(5, Seconds))) { foundArtists =>
 
-            foundArtists should contain
-              (ArtistWithWeightedGenresAndHasTrack(savedArtist, Seq.empty), ArtistWithWeightedGenresAndHasTrack(savedArtist2, Seq.empty))
+            val expectedArtist1 = ArtistWithWeightedGenresAndHasTrack(savedArtist, Seq.empty)
+            val expectedArtist2 = ArtistWithWeightedGenresAndHasTrack(savedArtist2, Seq.empty)
+
+            foundArtists must contain allOf (expectedArtist1, expectedArtist2)
           }
         }
       }
@@ -113,7 +120,7 @@ class TestArtistModel extends GlobalApplicationForModels {
         genres = Vector.empty)
 
       whenReady(artistMethods.saveWithEventRelation(artist, 1L), timeout(Span(5, Seconds))) { savedArtist =>
-        whenReady(artistMethods.findAllByEvent(1L), timeout(Span(5, Seconds))) { artistsFound =>
+        whenReady(artistMethods.findAllByEvent(eventId = 1L), timeout(Span(5, Seconds))) { artistsFound =>
 
           artistsFound should contain(ArtistWithWeightedGenresAndHasTrack(savedArtist, Vector.empty))
         }
@@ -253,8 +260,18 @@ class TestArtistModel extends GlobalApplicationForModels {
       whenReady(artistMethods.find(1), timeout(Span(5, Seconds))) { foundArtist =>
         foundArtist.get.hasTracks mustBe true
       }
+      whenReady(artistMethods.find(2), timeout(Span(5, Seconds))) { foundArtist =>
+        foundArtist.get.hasTracks mustBe true
+      }
       whenReady(artistMethods.find(4), timeout(Span(5, Seconds))) { foundArtist =>
         foundArtist.get.hasTracks mustBe false
+      }
+    }
+
+    "find all containing pattern" in {
+      whenReady(artistMethods.findAllContaining("name0"), timeout(Span(5, Seconds))) { foundArtists =>
+        foundArtists map(_.artist.name) should contain allOf("name0", "name00")
+        foundArtists map(_.artist.name) should not contain ("name")
       }
     }
 
