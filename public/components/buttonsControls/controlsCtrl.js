@@ -83,25 +83,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                         flag = 1;
                     }
                     if (flag == 0) {
-                        var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;
-                        if (data.description != undefined) {
-                            data.description = '<div class="column large-12">' + data.description + '</div>';
-                            data.description = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
-                            data.description = data.description.replace(/(\n)/g, " <br/>");
-                            if (matchedLinks = data.description.match(links)) {
-                                var m = matchedLinks;
-                                var unique = [];
-                                for (var ii = 0; ii < m.length; ii++) {
-                                    var current = m[ii];
-                                    if (unique.indexOf(current) < 0) unique.push(current);
-                                }
-                                for (var i = 0; i < unique.length; i++) {
-                                    data.description = data.description.replace(new RegExp(unique[i], "g"),
-                                            "<a href='" + unique[i] + "'>" + unique[i] + "</a>")
-                                }
-                            }
-                        }
-
                         getPositionAndCreate(data);
                     }
                 }).
