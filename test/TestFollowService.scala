@@ -55,8 +55,8 @@ class TestFollowService extends GlobalApplicationForModels {
 
     "be returned if is followed" in {
       val userUUID = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
-      whenReady(artistMethods.getFollowedArtists(userUUID), timeout(Span(5, Seconds))) { response =>
-        response map { _.id } must contain allOf(Some(200), Some(2))
+      whenReady(artistMethods.getFollowedArtists(userUUID), timeout(Span(5, Seconds))) { artists =>
+        artists map { _.artist.id } must contain allOf(Some(200), Some(2))
       }
     }
   }

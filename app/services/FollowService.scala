@@ -2,19 +2,18 @@ package services
 
 import java.util.UUID
 
-import services.MyPostgresDriver.api._
-import controllers.ThereIsNoArtistForThisFacebookIdException
 import models._
-import play.api.Logger
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
-import silhouette.DBTableDefinitions
-import scala.concurrent.Future
+import play.api.db.slick.HasDatabaseConfigProvider
+import services.MyPostgresDriver.api._
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
-with MyDBTableDefinitions
-with TrackTransformTrait
-with eventWithRelationsTupleToEventWithRelationsClass {
+    with MyDBTableDefinitions
+    with TrackTransformTrait
+    with eventWithRelationsTupleToEventWithRelationsClass
+    with artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack {
   
   //////////////////////////////////////////// artist ///////////////////////////////////////////////////////////////
   
@@ -27,13 +26,18 @@ with eventWithRelationsTupleToEventWithRelationsClass {
       .delete)
 
 
-  def getFollowedArtists(userId: UUID): Future[Seq[Artist] ]= {
+  def getFollowedArtists(userId: UUID): Future[Seq[ArtistWithWeightedGenresAndHasTrack]]= {
     val query = for {
       artistFollowed <- artistsFollowed if artistFollowed.userId === userId
-      artist <- artists if artist.id === artistFollowed.artistId
+      artist <- artists joinLeft
+        tracks on (_.facebookUrl === _.artistFacebookUrl) joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
+      if artist._1._1.id === artistFollowed.artistId
     } yield artist
 
-    db.run(query.result)
+    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    } map(_.toVector)
   }
 
   def isFollowed(userArtistRelation: UserArtistRelation): Future[Boolean] = {
@@ -64,7 +68,7 @@ with eventWithRelationsTupleToEventWithRelationsClass {
         (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
         (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
         (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
-        if (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+        if ((((eventWithOptionalEventOrganizers, optionalEventArtists), optionalEventPlaces), optionalEventGenres),
           optionalEventAddresses)._1._1._1._1._1.id === eventFollowed.eventId
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
