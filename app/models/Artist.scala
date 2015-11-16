@@ -231,7 +231,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     artists.map { artist =>
       save(ArtistWithWeightedGenresAndHasTrack(artist, Vector.empty)) map { artistSaved =>
         getArtistTracks(PatternAndArtist(artistSaved.name, ArtistWithWeightedGenresAndHasTrack(artistSaved, Vector.empty))) |>>
-          Iteratee.foreach(_ map trackMethods.save)
+          Iteratee.foreach(tracks => trackMethods.saveSequence(tracks))
       }
     }
   }

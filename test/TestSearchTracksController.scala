@@ -1,4 +1,3 @@
-import json.JsonHelper._
 import org.scalatest.Matchers._
 import org.scalatestplus.play._
 import play.api.libs.functional.syntax._
@@ -17,7 +16,6 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
       Reads.seq((__ \ "title").read[String] and (__ \ "artistName").read[String] tupled)
 
     "find tracks on Youtube by a title and an artist" in {
-//      val artist = Artist(None, None, "brassens", None, None, "facebookUrlSearchTracksController", Set("website"))
       val eventuallyResult = route(
         FakeRequest(
           controllers.routes.SearchTracksController
@@ -27,7 +25,7 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
       status(eventuallyResult) mustBe 200
 
       val seqTitleArtistName = contentAsJson(eventuallyResult).as[Seq[(String, String)]](tupleTitleArtistNameReads)
-      println(seqTitleArtistName)
+
       seqTitleArtistName should not be empty
       seqTitleArtistName.toSet.size mustBe seqTitleArtistName.size
     }

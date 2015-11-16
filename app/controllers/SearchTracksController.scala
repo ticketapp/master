@@ -19,15 +19,18 @@ class SearchTracksController @Inject()(val utilities: Utilities,
                                         val searchYoutubeTracks: SearchYoutubeTracks) extends Controller {
   val googleKey = utilities.googleKey
 
-  def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) =
-  Action.async {
-    searchYoutubeTracks.getYoutubeTracksByArtistAndTitle(Artist(None, None, artistName, None, None, artistFacebookUrl), trackTitle)
-      .map { tracks =>
-        val tracksFiltered = trackMethods.removeDuplicateByTitleAndArtistName(tracks.filterNot(track =>
-          utilities.removeSpecialCharacters(track.title).equalsIgnoreCase(utilities.removeSpecialCharacters(trackTitle))))
+  def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) = Action.async {
+    val artist = Artist(None, None, artistName, None, None, artistFacebookUrl)
+    searchYoutubeTracks.getYoutubeTracksByArtistAndTitle(artist, trackTitle) map { tracks =>
+      val trackTitleResearched = utilities.removeSpecialCharacters(trackTitle)
+      val tracksCorrespondingToTheResearch = tracks.filterNot(track =>
+        utilities.removeSpecialCharacters(track.title).equalsIgnoreCase(trackTitleResearched))
 
-        Future { tracksFiltered map trackMethods.save }
-        Ok(Json.toJson(tracksFiltered))
+      val tracksFiltered = trackMethods.removeDuplicateByTitleAndArtistName(tracksCorrespondingToTheResearch)
+
+      Future(trackMethods.saveSequence(tracksFiltered.toSet))
+
+      Ok(Json.toJson(tracksFiltered))
     }
   }
 
