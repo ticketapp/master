@@ -36,44 +36,44 @@ class TestApplicationController extends GlobalApplicationForControllers {
       status(result) mustEqual UNAUTHORIZED
     }
 
-    val signUpForm =
-      """{
-        |  "firstName": "firstName",
-        |  "lastName": "lastName",
-        |  "email": "email@email.com",
-        |  "password": "password"
-        |}
-      """.stripMargin
-
-    "return a status seeOther when a connected user tries to sign up" in {
-
-      val Some(result) = route(FakeRequest(POST, "/signUp")
-        .withJsonBody(Json.parse(signUpForm))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      status(result) mustEqual SEE_OTHER
-    }
-
-    "return a status ok when a user not connected tries to sign up" in {
-      val Some(result) = route(FakeRequest(POST, "/signUp")
-        .withJsonBody(Json.parse(signUpForm)))
-
-      status(result) mustEqual OK
-    }
-
-    "return a status badRequest when a user tries to sign up with a wrong form" in {
-      val wrongSignOutForm =
-        """{
-          |  "email": "wrongEmail",
-          |  "password": "password",
-          |  "rememberMe": true
-          |}
-        """.stripMargin
-      val Some(result) = route(FakeRequest(POST, "/signUp")
-        .withJsonBody(Json.parse(wrongSignOutForm))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      status(result) mustEqual BAD_REQUEST
-    }
+//    val signUpForm =
+//      """{
+//        |  "firstName": "firstName",
+//        |  "lastName": "lastName",
+//        |  "email": "email@email.com",
+//        |  "password": "password"
+//        |}
+//      """.stripMargin
+//
+//    "return a status seeOther when a connected user tries to sign up" in {
+//
+//      val Some(result) = route(FakeRequest(POST, "/signUp")
+//        .withJsonBody(Json.parse(signUpForm))
+//        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+//
+//      status(result) mustEqual SEE_OTHER
+//    }
+//
+//    "return a status ok when a user not connected tries to sign up" in {
+//      val Some(result) = route(FakeRequest(POST, "/signUp")
+//        .withJsonBody(Json.parse(signUpForm)))
+//
+//      status(result) mustEqual OK
+//    }
+//
+//    "return a status badRequest when a user tries to sign up with a wrong form" in {
+//      val wrongSignOutForm =
+//        """{
+//          |  "email": "wrongEmail",
+//          |  "password": "password",
+//          |  "rememberMe": true
+//          |}
+//        """.stripMargin
+//      val Some(result) = route(FakeRequest(POST, "/signUp")
+//        .withJsonBody(Json.parse(wrongSignOutForm))
+//        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+//
+//      status(result) mustEqual BAD_REQUEST
+//    }
   }
 }
