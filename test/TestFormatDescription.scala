@@ -1,4 +1,4 @@
-class TestFormatEventDescription extends GlobalApplicationForModels {
+class TestFormatDescription extends GlobalApplicationForModels {
 
   "Format a description" must {
 
@@ -6,6 +6,7 @@ class TestFormatEventDescription extends GlobalApplicationForModels {
       val descriptions = List(Option("Hello, I'm a www.link.com, au revoir."), Option("Hello, I'm a link.fr, au revoir."),
         Option("Hello, I'm a http://www.link.com, au revoir."), Option("Hello, I'm a https://www.link.com, au revoir."),
         Option("Hello, I'm a http://link.org, au revoir."), Option("Hello, I'm a https://link.org"),
+        Option("Hello, <> goodBye"),
         Option(
           """Hello, I'm a https://link.org
             |
@@ -21,6 +22,7 @@ class TestFormatEventDescription extends GlobalApplicationForModels {
         Option("<div class='column large-12'>Hello, I'm a <a href='http://link.com'>link.com</a>, au revoir.</div>"),
         Option("<div class='column large-12'>Hello, I'm a <a href='http://link.org'>link.org</a>, au revoir.</div>"),
         Option("<div class='column large-12'>Hello, I'm a <a href='http://link.org'>link.org</a></div>"),
+        Option("<div class='column large-12'>Hello, &lt;&gt; goodBye</div>"),
         Option("<div class='column large-12'>Hello, I'm a <a href='http://link.org'>link.org</a><br/><br/></div>" +
           "<div class='column large-12'>go to the line<br/></div>"))
 
