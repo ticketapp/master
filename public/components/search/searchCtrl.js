@@ -1,7 +1,7 @@
 angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$filter', '$timeout',
-    'ArtistsFactory', 'EventsFactory', 'OrganizerFactory', 'PlaceFactory', 'SearchFactory',
+    'ArtistsFactory', 'EventsFactory', 'OrganizerFactory', 'PlaceFactory', 'SearchFactory', 'FollowService',
     function($rootScope, $scope, $filter, $timeout, ArtistsFactory, EventsFactory, OrganizerFactory,
-             PlaceFactory, SearchFactory){
+             PlaceFactory, SearchFactory, FollowService){
         SearchFactory.init();
         $scope.limit = 12;
         $scope.artists = [];
@@ -65,8 +65,8 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             });
         }
 
-        function getArtistsFolowed () {
-            ArtistsFactory.getFollowArtists().then(function (artists) {
+        function getArtistsFollowed () {
+            FollowService.artists.followed().then(function (artists) {
                 updateScope(artists, $scope.artists, 'id');
                 if (artists.length < $scope.limit) {
                     getArtists()
@@ -135,7 +135,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             if (_selArtist == true) {
                 if (_research.length == 0) {
                     if (offset == 0 && $rootScope.connected == true) {
-                        getArtistsFolowed();
+                        getArtistsFollowed();
                     } else {
                         getArtists()
                     }
@@ -277,7 +277,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                     $scope.loadingMore = true;
                     if (_research.length == 0) {
                         if ($rootScope.connected == true && offset == 0) {
-                            getArtistsFolowed();
+                            getArtistsFollowed();
                         } else {
                             getArtists()
                         }

@@ -314,6 +314,7 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                     } else {
                         $http.get(RoutesFactory.follow.artists.followed()).success(function (artists) {
                             artists = artists.map(function(artist) {
+                                artist = RefactorObjectsFactory.refactorArtistObject(artist);
                                 return ImagesFactory(artist)
                             });
                             factory.followedArtists = artists;
