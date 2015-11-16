@@ -43,9 +43,9 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     }
 
     "follow and unfollow an organizer by id" in {
-      val Some(response) = route(FakeRequest(POST, "/organizers/" + 1 + "/followByOrganizerId")
+      val Some(response) = route(FakeRequest(controllers.routes.OrganizerController.followOrganizerByOrganizerId(300))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(POST, "/organizers/" + 1 + "/unfollowOrganizerByOrganizerId")
+      val Some(response1) = route(FakeRequest(controllers.routes.OrganizerController.unfollowOrganizerByOrganizerId(300))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED
@@ -54,18 +54,10 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     }
 
     "return an error if an user try to follow an organizer twice" in {
-      val Some(response) = route(FakeRequest(POST, "/organizers/" + 1 + "/followByOrganizerId")
+      val Some(response) = route(FakeRequest(controllers.routes.OrganizerController.followOrganizerByOrganizerId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(POST, "/organizers/" + 1 + "/followByOrganizerId")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response2) = route(FakeRequest(POST, "/organizers/" + 1 + "/unfollowOrganizerByOrganizerId")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      status(response) mustEqual CREATED
-
-      status(response1) mustEqual CONFLICT
-
-      status(response2) mustEqual OK
+   
+      status(response) mustEqual CONFLICT
     }
 
     "follow an organizer by facebookId" in {
@@ -82,13 +74,17 @@ class TestOrganizerController extends GlobalApplicationForControllers {
       contentAsString(organizers) must contain(""""facebookId":"facebookId","name":"name1"""")
     }
 
-    "find one followed organizer by id" in {
-      val Some(organizers) = route(FakeRequest(GET, "/organizers/" + 2 + "/isFollowed")
+    "return true if the organizer is followed else false" in {
+      val Some(isOrganizerFollowed) = route(FakeRequest(controllers.routes.OrganizerController.isOrganizerFollowed(1))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      val Some(isOrganizerNotFollowed) = route(FakeRequest(controllers.routes.OrganizerController.isOrganizerFollowed(2))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(organizers) mustEqual OK
+      status(isOrganizerFollowed) mustEqual OK
+      status(isOrganizerNotFollowed) mustEqual OK
 
-      contentAsJson(organizers) mustEqual Json.parse("true")
+      contentAsJson(isOrganizerFollowed) mustEqual Json.parse("true")
+      contentAsJson(isOrganizerNotFollowed) mustEqual Json.parse("false")
     }
 
     "get organizers near geoPoint" in {

@@ -9,6 +9,8 @@ import org.scalatest.Matchers._
 
 class TestUserModel extends GlobalApplicationForModels {
 
+  val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+
   "A user" must {
 
     "be saved and deleted" in {
@@ -37,35 +39,9 @@ class TestUserModel extends GlobalApplicationForModels {
     }
 
     "get his followed places" in {
-      val place = Place(None, "test", None, None, None, None, None, None, None)
-      val uuid: UUID = UUID.randomUUID()
-      val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
-      val user: User = User(
-        uuid = uuid,
-        loginInfo = loginInfo,
-        firstName = Option("firstName1"),
-        lastName = Option("lastName1"),
-        fullName = Option("fullName1"),
-        email = Option("email1"),
-        avatarURL = Option("avatarUrl1"))
+      whenReady(placeMethods.getFollowedPlaces(userUUID), timeout(Span(5, Seconds))) { followedPlaces =>
 
-      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
-        val placeId = savedPlace.id.get
-        whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>
-          whenReady(placeMethods.followByPlaceId(UserPlaceRelation(uuid, placeId)),
-            timeout(Span(5, Seconds))) { resp =>
-            whenReady(placeMethods.getFollowedPlaces(uuid), timeout(Span(5, Seconds))) { followedPlaces =>
-
-              followedPlaces should contain (savedPlace)
-              whenReady(placeMethods.unfollow(UserPlaceRelation(uuid, placeId))) { isDeletePlace =>
-
-                isDeletePlace mustBe 1
-
-                whenReady(userDAOImpl.delete(uuid), timeout(Span(5, Seconds))) { _ mustBe 1}
-              }
-            }
-          }
-        }
+        followedPlaces.map (_.place.id) should contain (Some(400))
       }
     }
 

@@ -116,8 +116,8 @@ class TestPlaceModel extends GlobalApplicationForModels {
     }
 
     "get a new place by facebookId when saving new event by facebookId" in {
-      whenReady(eventMethods.saveFacebookEventByFacebookId("933514060052903"), timeout(Span(10, Seconds))) { event =>
-        whenReady(placeMethods.getPlaceByFacebookId("836137029786070"), timeout(Span(10, Seconds))) { place =>
+      whenReady(eventMethods.saveFacebookEventByFacebookId("933514060052903"), timeout(Span(15, Seconds))) { event =>
+        whenReady(placeMethods.getPlaceByFacebookId("836137029786070"), timeout(Span(15, Seconds))) { place =>
 
           place.get.place.name mustBe "Akwaba Coop Culturelle"
         }
@@ -126,7 +126,7 @@ class TestPlaceModel extends GlobalApplicationForModels {
 
     "find id by facebookId" in {
       whenReady(placeMethods.findIdByFacebookId("776137029786070"), timeout(Span(5, Seconds))) {
-        _ mustBe Some(2)
+        _ mustBe Some(100)
       }
     }
 
@@ -137,13 +137,15 @@ class TestPlaceModel extends GlobalApplicationForModels {
     }
 
     "be found near city" in {
-      whenReady(placeMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { places =>
-        val expectedPlace1 = Place(Some(3),"Test1",Some("666137029786070"),
-          Some(geographicPointMethods.stringToGeographicPoint("45.783808,4.860598").get), None, None, None, None, None,
-          None, None)
-        val expectedPlace2 = Place(Some(2),"Test",Some("776137029786070"),Some(geographicPointMethods.stringToGeographicPoint(
+      val expectedPlace1 = Place(Some(300), "Test1", Some("666137029786070"),
+        Some(geographicPointMethods.stringToGeographicPoint("45.783808,4.860598").get), None, None, None, None, None,
+        None, None)
+      val expectedPlace2 = Place(Some(100), "Test", Some("776137029786070"),
+        Some(geographicPointMethods.stringToGeographicPoint(
           "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get), None, None,
-          None, None, None, None, None)
+        None, None, None, None, None)
+
+      whenReady(placeMethods.findNearCity("lyon", 10, 0), timeout(Span(5, Seconds))) { places =>
 
         places map(p => p.place) should contain inOrder(expectedPlace1, expectedPlace2)
       }
