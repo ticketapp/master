@@ -99,6 +99,10 @@ INSERT INTO eventsartists(eventid, artistid) VALUES
 INSERT INTO eventsfollowed(eventid, userid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), '077f3ea6-2272-4457-a47e-9e9111108e44');
 
+-------------------------------------------------------- organizersFollowed --------------------------------------------
+INSERT INTO organizersfollowed(organizerid, userid) VALUES
+  (1, '077f3ea6-2272-4457-a47e-9e9111108e44');
+
 -------------------------------------------------------- placesFollowed ------------------------------------------------
 INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');
 
