@@ -37,7 +37,7 @@ case class ArtistWithWeightedGenresAndHasTrack(artist: Artist,
                                                hasTracks: Boolean = false)
 
 case class PatternAndArtist(searchPattern: String,
-                            artistWithWeightedGenre: ArtistWithWeightedGenresAndHasTrack)
+                            artistWithWeightedGenres: ArtistWithWeightedGenresAndHasTrack)
 
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -107,7 +107,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
     } map(_.toVector)
   }
-  
+
   def find(id: Long): Future[Option[ArtistWithWeightedGenresAndHasTrack]] = {
     val query = for {
       artist <- artists.filter(_.id === id) joinLeft tracks on (_.facebookUrl === _.artistFacebookUrl) take 1 joinLeft
@@ -152,7 +152,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def findIdByFacebookUrl(facebookUrl: String): Future[Option[Long]] =
     db.run(artists.filter(_.facebookUrl === facebookUrl).map(_.id).result.headOption)
-  
+
   def save(artistWithWeightedGenres: ArtistWithWeightedGenresAndHasTrack): Future[Artist] = formatArtist(artistWithWeightedGenres) flatMap {
     formattedArtist =>
       db.run((for {
@@ -213,26 +213,27 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def getArtistTracks(patternAndArtist: PatternAndArtist): Enumerator[Set[Track]] = {
     val soundCloudTracksEnumerator = Enumerator.flatten(
-      searchSoundCloudTracks.getSoundCloudTracksForArtist(patternAndArtist.artistWithWeightedGenre.artist).map { soundCloudTracks =>
+      searchSoundCloudTracks.getSoundCloudTracksForArtist(patternAndArtist.artistWithWeightedGenres.artist).map { soundCloudTracks =>
         soundCloudTracks.headOption match {
           case Some(track) =>
-            addSoundCloudUrlIfMissing(track, patternAndArtist.artistWithWeightedGenre.artist)
-            addWebsitesFoundOnSoundCloud(track, patternAndArtist.artistWithWeightedGenre.artist)
+            addSoundCloudUrlIfMissing(track, patternAndArtist.artistWithWeightedGenres.artist)
+            addWebsitesFoundOnSoundCloud(track, patternAndArtist.artistWithWeightedGenres.artist)
           case None =>
         }
+
         Enumerator(soundCloudTracks.toSet).andThen(Enumerator.eof)
       })
 
     val youtubeTracksEnumerator =
-      searchYoutubeTracks.getYoutubeTracksForArtist(patternAndArtist.artistWithWeightedGenre.artist, patternAndArtist.searchPattern).andThen(Enumerator.eof)
+      searchYoutubeTracks.getYoutubeTracksForArtist(patternAndArtist.artistWithWeightedGenres.artist, patternAndArtist.searchPattern).andThen(Enumerator.eof)
 
     val youtubeTracksFromChannel = Enumerator.flatten(
-      searchYoutubeTracks.getYoutubeTracksByChannel(patternAndArtist.artistWithWeightedGenre.artist) map { track =>
+      searchYoutubeTracks.getYoutubeTracksByChannel(patternAndArtist.artistWithWeightedGenres.artist) map { track =>
         Enumerator(track).andThen(Enumerator.eof)
       })
 
     val youtubeTracksFromYoutubeUser = Enumerator.flatten(
-      searchYoutubeTracks.getYoutubeTracksByYoutubeUser(patternAndArtist.artistWithWeightedGenre.artist) map { track =>
+      searchYoutubeTracks.getYoutubeTracksByYoutubeUser(patternAndArtist.artistWithWeightedGenres.artist) map { track =>
         Enumerator(track).andThen(Enumerator.eof)
       })
 

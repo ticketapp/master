@@ -1,11 +1,16 @@
+import java.util.UUID
+
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import models._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.test.FakeRequest
+import json.JsonHelper._
 
-import scala.language.postfixOps
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 
 class TestArtistController extends GlobalApplicationForControllers {
   sequential
@@ -25,12 +30,10 @@ class TestArtistController extends GlobalApplicationForControllers {
           "description": "artist.description"
         }
       }""")
-      val Some(result) = route(FakeRequest(POST, "/artists/createArtist")
-      .withJsonBody(artistJson))
+      val Some(result) = route(FakeRequest(controllers.routes.ArtistController.createArtist())
+        .withJsonBody(artistJson))
 
       status(result) mustEqual OK
-
-      //need to test enumerator
     }
 
     "not create an artist twice and return an error" in {

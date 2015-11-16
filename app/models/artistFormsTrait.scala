@@ -43,5 +43,5 @@ trait artistFormsTrait extends genreFormsTrait {
     PatternAndArtist(searchPattern, artist)
 
   def formWithPatternUnapply(searchPatternAndArtist: PatternAndArtist) =
-    Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artistWithWeightedGenre))
+    Option((searchPatternAndArtist.searchPattern, searchPatternAndArtist.artistWithWeightedGenres))
 }
