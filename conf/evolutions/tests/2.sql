@@ -50,7 +50,7 @@ INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint) VALUES(100, 'name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
-INSERT INTO organizers(name, facebookid, geographicpoint) VALUES('name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO organizers(organizerid, name, facebookid, geographicpoint) VALUES(300, 'name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
 -------------------------------------------------------- places --------------------------------------------------------
 INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
