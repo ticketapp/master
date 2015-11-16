@@ -54,9 +54,9 @@ INSERT INTO organizers(organizerid, name, facebookid, geographicpoint) VALUES(30
 
 -------------------------------------------------------- places --------------------------------------------------------
 INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
-INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(3, 'Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
-INSERT INTO places(placeid, name, facebookid) VALUES(4, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
-INSERT INTO places(placeid, name, facebookid) VALUES(5, 'testId5', 'facebookIdTestFollowController2');
+INSERT INTO places(placeid, name, facebookid, geographicpoint) VALUES(300, 'Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+INSERT INTO places(placeid, name, facebookid) VALUES(400, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
+INSERT INTO places(placeid, name, facebookid) VALUES(500, 'testId5', 'facebookIdTestFollowController2');
 
 -------------------------------------------------------- addresses -----------------------------------------------------
 INSERT INTO addresses(city) VALUES('lyon');
@@ -100,7 +100,7 @@ INSERT INTO eventsfollowed(eventid, userid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'), '077f3ea6-2272-4457-a47e-9e9111108e44');
 
 -------------------------------------------------------- placesFollowed ------------------------------------------------
-INSERT INTO placesfollowed(placeid, userid) VALUES (4, '077f3ea6-2272-4457-a47e-9e9111108e44');
+INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');
 
 -------------------------------------------------------- frenchCities --------------------------------------------------
 INSERT INTO frenchcities(city, geographicpoint) VALUES('lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');
