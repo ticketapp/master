@@ -92,7 +92,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
             }
             val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
 
-            Future { tracksEnumerator |>> Iteratee.foreach( a => a.map { trackMethods.save }) }
+            Future(tracksEnumerator |>> Iteratee.foreach(tracks => trackMethods.saveSequence(tracks)))
             Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
           case None =>
             Conflict
