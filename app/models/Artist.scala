@@ -338,24 +338,58 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
     val artistNames = splitArtistNamesInTitle(eventName)
     Future.sequence(
-      artistNames.map { artistName => getArtistsForAnEvent(artistName, websites) }
+      artistNames.map { artistName =>
+        getArtistsForAnEvent(artistName, websites)
+      }
     ).map { _.flatten }
   }
 
   def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+    val websitesFound = eventWebSites collect {
+      case website if website.contains("facebook") && website.contains(artistName.toLowerCase) => website
+    }
+
+    websitesFound match {
+      case nonEmptyWebsites if nonEmptyWebsites.nonEmpty =>
+        val artists = nonEmptyWebsites map { website =>
+          normalizeFacebookUrl(website) match {
+            case Some(url) =>
+              getFacebookArtistByFacebookUrl(url) flatMap {
+                case Some(artist) =>
+                  Future(Option(artist))
+                case _ =>
+                  getFacebookArtistByFacebookUrl(url)
+              }
+            case _ =>
+              Future(None)
+          }
+        }
+        Future.sequence(artists).map { _.flatten.toVector }
+      case _ =>
+        getFacebookArtist(artistName, eventWebSites)
+    }
+  }
+
+  def getFacebookArtist(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
     getEventuallyFacebookArtists(artistName).flatMap {
       case noArtist if noArtist.isEmpty && artistName.split("\\W+").size >= 2 =>
-        val nestedEventuallyArtists = artistName.split("\\W+").toSeq.map { getArtistsForAnEvent(_, eventWebSites) }
-        Future.sequence(nestedEventuallyArtists) map { _.toVector.flatten }
+        val nestedEventuallyArtists = artistName.split("\\W+").toSeq.map { name =>
+          getArtistsForAnEvent(name.trim, eventWebSites)
+        }
+        Future.sequence(nestedEventuallyArtists) map {
+          _.toVector.flatten
+        }
       case foundArtists =>
-        Future { filterFacebookArtistsForEvent(foundArtists, artistName, eventWebSites)}
+        Future {
+          filterFacebookArtistsForEvent(foundArtists, artistName, eventWebSites)
+        }
     }
   }
 
   def filterFacebookArtistsForEvent(artists: Seq[ArtistWithWeightedGenresAndHasTrack], artistName: String, eventWebsites: Set[String])
   : Seq[ArtistWithWeightedGenresAndHasTrack] = artists match {
     case onlyOneArtist: Seq[ArtistWithWeightedGenresAndHasTrack] if onlyOneArtist.size == 1 &&
-      onlyOneArtist.head.artist.name.toLowerCase == artistName =>
+      onlyOneArtist.head.artist.name.toLowerCase == artistName.toLowerCase =>
         onlyOneArtist
 
     case otherCase: Seq[ArtistWithWeightedGenresAndHasTrack] =>
@@ -442,7 +476,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenresAndHasTrack]] =  normalizeFacebookUrl(url) match {
     case Some(normalizedFacebookUrl) =>
-      WS.url("https://graph.facebook.com/"+ facebookApiVersion + "/" + normalizeFacebookUrl(url))
+      WS.url("https://graph.facebook.com/"+ facebookApiVersion + "/" + normalizedFacebookUrl)
        .withQueryString(
          "fields" -> facebookArtistFields,
          "access_token" -> facebookToken)
