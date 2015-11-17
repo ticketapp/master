@@ -120,6 +120,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
       }).transactionally)
   }
 
+  def update(organizer: Organizer): Future[Int] = db.run(organizers.filter(_.id === organizer.id).update(organizer))
+  
   def findIdByFacebookId(facebookId: Option[String]): Future[Option[Long]] = {
     val query = organizers.filter(_.facebookId === facebookId).map(_.id)
     db.run(query.result.headOption)
