@@ -22,6 +22,10 @@ object JsonHelper {
     def writes(char: Char): JsString = JsString(char.toString)
   }
 
+  implicit object CharReads extends AnyRef with Reads[Char] {
+    def reads(char: JsValue): JsResult[Char] = JsSuccess(char.toString()(0))
+  }
+
   implicit object UUIDWrites extends AnyRef with Writes[UUID] {
     def writes(UUID: UUID): JsString = JsString(UUID.toString)
   }
@@ -63,6 +67,7 @@ object JsonHelper {
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
 //  implicit val imageWrites = Json.writes[Image]
   implicit val trackWrites: Writes[Track] = Json.writes[Track]
+  implicit val trackReads: Reads[Track] = Json.reads[Track]
   implicit val trackWithGenresWrites: Writes[TrackWithGenres] = Json.writes[TrackWithGenres]
   implicit val trackWithPlaylistRankWrites = Json.writes[TrackWithPlaylistRank]
   implicit val trackWithPlaylistRankAndGenres = Json.writes[TrackWithPlaylistRankAndGenres]

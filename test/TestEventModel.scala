@@ -1,16 +1,11 @@
-import java.util.UUID
-
-import com.mohiva.play.silhouette.api.LoginInfo
 import models._
 import org.joda.time.DateTime
-import org.postgresql.util.PSQLException
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.language.postfixOps
+
 
 class TestEventModel extends GlobalApplicationForModels {
 

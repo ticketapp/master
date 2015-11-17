@@ -18,6 +18,7 @@ import services.Utilities
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 
 class ArtistController @Inject()(val messagesApi: MessagesApi,
@@ -67,40 +68,55 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   }
 
   def createArtist = Action.async { implicit request =>
-  artistBindingForm.bindFromRequest()
-    .fold(
+    artistBindingForm.bindFromRequest().fold(
       formWithErrors => {
        Logger.error(formWithErrors.errorsAsJson.toString())
        Future(BadRequest(formWithErrors.errorsAsJson))
       },
 
       patternAndArtist => {
-        artistMethods.saveOrReturnNoneIfDuplicate(ArtistWithWeightedGenresAndHasTrack(patternAndArtist.artistWithWeightedGenre.artist,
-          patternAndArtist.artistWithWeightedGenre.genres)) map {
+        artistMethods.saveOrReturnNoneIfDuplicate(ArtistWithWeightedGenresAndHasTrack(patternAndArtist.artistWithWeightedGenres.artist,
+          patternAndArtist.artistWithWeightedGenres.genres)) map {
           case Some(artist) =>
-            val artistId = artist.id
-            val artistWithArtistId = patternAndArtist.artistWithWeightedGenre.artist.copy(id = artistId)
-            val patternAndArtistWithArtistId =
-             PatternAndArtist(patternAndArtist.searchPattern, ArtistWithWeightedGenresAndHasTrack(artistWithArtistId, Vector.empty))
+            val artistWithArtistId = patternAndArtist.artistWithWeightedGenres.artist.copy(id = artist.id)
+            val patternAndArtistWithArtistId = PatternAndArtist(
+              searchPattern = patternAndArtist.searchPattern,
+              artistWithWeightedGenres = ArtistWithWeightedGenresAndHasTrack(artistWithArtistId, Vector.empty))
+
             val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
-            val toJsonTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]]{ tracks =>
-             val filteredTracks: Set[Track] = tracks.flatMap { track =>
-               trackMethods.save(track)
-               Some(track)
-             }
-             Json.toJson(filteredTracks)
-            }
-            val tracksJsonEnumerator = tracksEnumerator &> toJsonTracks
+
+            val tracksJsonEnumerator: Enumerator[JsValue] = returnEnumeratorOfTracksSaved(tracksEnumerator)
 
             Future(tracksEnumerator |>> Iteratee.foreach(tracks => trackMethods.saveSequence(tracks)))
+
             Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
+
           case None =>
             Conflict
         }
       }
     )
   }
-  
+
+  def returnEnumeratorOfTracksSaved(tracksEnumerator: Enumerator[Set[Track]]): Enumerator[JsValue] = {
+    val onlySavedTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.mapM[Set[Track]] { tracks =>
+      val nestedEventuallySavedTracks: Set[Future[Option[Track]]] = tracks.map { track =>
+        trackMethods.save(track) map { t =>
+          Option(t)
+        } recover {
+          case NonFatal(e) =>
+            Logger.info("ArtistController.create:\nMessage: " + e.getMessage)
+            None
+        }
+      }
+      val eventuallyNestedSavedTracks = Future.sequence(nestedEventuallySavedTracks)
+      eventuallyNestedSavedTracks map (maybeTracks => Json.toJson(maybeTracks.flatten))
+    }
+
+    val tracksJsonEnumerator = tracksEnumerator &> onlySavedTracks
+    tracksJsonEnumerator
+  }
+
   def followArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     Logger.info(userId.toString)

@@ -138,7 +138,12 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "find passed events in interval" in {
-      val Some(response) = route(FakeRequest(GET, "/events/passedInInterval/50000?geographicPoint=4.2,4.3&offset=0&numberToReturn=100"))
+      val Some(response) =
+        route(FakeRequest(controllers.routes.EventController.eventsPassedInHourInterval(
+          hourInterval = 50000,
+          geographicPoint = "4.2,4.3",
+          offset=0,
+          numberToReturn= 100)))
 
       status(response) mustEqual OK
 
