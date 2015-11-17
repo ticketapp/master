@@ -4,7 +4,6 @@ import java.util.UUID
 import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Geometry
-import json.JsonHelper._
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -91,7 +90,10 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(tupledJoin.result.headOption) map(_ map PlaceWithAddress.tupled)
   }
 
-  def findAll: Future[Seq[Place]] = db.run(places.result)
+  def findAll: Future[Seq[PlaceWithAddress]] = {
+    val query = places joinLeft addresses on (_.addressId === _.id)
+    db.run(query.result) map(_ map PlaceWithAddress.tupled)
+  }
 
   def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(organizers.filter(_.facebookId === facebookId).map(_.id).result.headOption)
