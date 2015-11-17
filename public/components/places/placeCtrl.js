@@ -1,7 +1,6 @@
 angular.module('claudeApp').
-    controller('PlaceCtrl', ['$scope', 'PlaceFactory', '$routeParams', 'WebsitesFactory',
-        'RefactorGeopoint', '$rootScope', 'InfoModal',
-        function ($scope, PlaceFactory, $routeParams, WebsitesFactory, RefactorGeopoint, $rootScope,
+    controller('PlaceCtrl', ['$scope', 'PlaceFactory', '$routeParams', 'WebsitesFactory', '$rootScope', 'InfoModal',
+        function ($scope, PlaceFactory, $routeParams, WebsitesFactory, $rootScope,
             InfoModal) {
             $scope.place = {};
             $scope.map = false;
@@ -10,12 +9,10 @@ angular.module('claudeApp').
             PlaceFactory.getPlace($routeParams.id).then(function (place) {
                 $scope.place = place;
                 if ($scope.place.address !== undefined && $scope.place.address.geographicPoint !== undefined) {
-                    $scope.geographicPoint =
-                        RefactorGeopoint.refactorGeopoint($scope.place.address.geographicPoint);
+                    $scope.geographicPoint = $scope.place.address.geographicPoint;
                     $scope.map = true;
                 } else if ($scope.place.geographicPoint !== undefined) {
-                    $scope.geographicPoint =
-                        RefactorGeopoint.refactorGeopoint($scope.place.geographicPoint);
+                    $scope.geographicPoint = $scope.place.geographicPoint;
                     $scope.map = true;
                 }
                 if (place.websites != undefined) {

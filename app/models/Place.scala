@@ -68,6 +68,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
+  def update(place: Place): Future[Int] = db.run(places.filter(_.id === place.id).update(place))
+
   def saveWithAddress(placeWithAddress: PlaceWithAddress): Future[PlaceWithAddress] = {
     placeWithAddress.address match {
       case Some(address) =>

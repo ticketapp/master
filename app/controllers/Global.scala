@@ -28,4 +28,9 @@ class Global @Inject()(val scheduler: Scheduler) {
     Logger.info("Scheduler.findTracksForArtists started")
     scheduler.findTracksForArtists()
   }
+
+  Akka.system.scheduler.schedule(initialDelay = 80.hours, interval = 12.hours) {
+    Logger.info("Scheduler.updateGeographicPoints started")
+    scheduler.updateGeographicPoints()
+  }
 }

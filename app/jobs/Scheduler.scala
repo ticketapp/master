@@ -15,7 +15,9 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
                           val organizerMethods: OrganizerMethods,
                           val artistMethods: ArtistMethods,
                           val trackMethods: TrackMethods,
-                          val placeMethods: PlaceMethods) {
+                          val placeMethods: PlaceMethods,
+                          val addressMethods: AddressMethods,
+                          val searchGeographicPoint: SearchGeographicPoint) {
 
   def findEventsForPlaces(): Unit = placeMethods.findAll map {
     _ map { place =>
@@ -80,6 +82,114 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
       }
       tracksEnumerator |>> toTracksWithDelay &>> Iteratee.foreach { tracks =>
         trackMethods.saveSequence(tracks)
+      }
+    }
+  }
+
+  def updateGeographicPoints(): Unit = {
+    placeMethods.findAll map { places =>
+      Thread.sleep(2000)
+      places map { place =>
+        if (place.geographicPoint.isEmpty) {
+          place.addressId match {
+            case Some(addressId) =>
+              addressMethods.find(addressId) map {
+                case Some(address) =>
+                  address.geographicPoint match {
+                    case Some(geographicPoint) =>
+                      placeMethods.update(place.copy(geographicPoint = Option(geographicPoint)));
+                    case _ =>
+                      searchGeographicPoint.getGeographicPoint(address, retry = 3) map { addressWithMaybeGeographicPoint =>
+                        addressMethods.update(addressWithMaybeGeographicPoint)
+                        addressWithMaybeGeographicPoint.geographicPoint match {
+                          case Some(geographicPoint) =>
+                            placeMethods.update(place.copy(geographicPoint = Option(geographicPoint)));
+                          case _ =>
+                            None
+                        }
+                      }
+                  }
+                case _ =>
+                  None
+              }
+            case _ =>
+              None
+          }
+        }
+      }
+    }
+    organizerMethods.findAll map { organizers =>
+      Thread.sleep(2000)
+      organizers map { organizer =>
+        if (organizer.organizer.geographicPoint.isEmpty) {
+          organizer.organizer.addressId match {
+            case Some(addressId) =>
+              addressMethods.find(addressId) map {
+                case Some(address) =>
+                  address.geographicPoint match {
+                    case Some(geographicPoint) =>
+                      organizerMethods.update(organizer.organizer.copy(geographicPoint = Option(geographicPoint)));
+                    case _ =>
+                      searchGeographicPoint.getGeographicPoint(address, retry = 3) map { addressWithMaybeGeographicPoint =>
+                        addressMethods.update(addressWithMaybeGeographicPoint)
+                        addressWithMaybeGeographicPoint.geographicPoint match {
+                          case Some(geographicPoint) =>
+                            organizerMethods.update(organizer.organizer.copy(geographicPoint = Option(geographicPoint)));
+                          case _ =>
+                            None
+                        }
+                      }
+                  }
+                case _ =>
+                  None
+              }
+            case _ =>
+              None
+          }
+        }
+      }
+    }
+    eventMethods.findAll map { events =>
+      Thread.sleep(2000)
+      events map { event =>
+        if (event.event.geographicPoint.isEmpty) {
+          if (event.addresses.nonEmpty) {
+            event.addresses.head.geographicPoint match {
+              case Some(geographicPoint) =>
+                eventMethods.update(event.event.copy(geographicPoint = Option(geographicPoint)));
+              case _ =>
+                searchGeographicPoint.getGeographicPoint(event.addresses.head, retry = 3) map { addressWithMaybeGeographicPoint =>
+                  addressMethods.update(addressWithMaybeGeographicPoint)
+                  addressWithMaybeGeographicPoint.geographicPoint match {
+                    case Some(geographicPoint) =>
+                      eventMethods.update(event.event.copy(geographicPoint = Option(geographicPoint)));
+                    case _ =>
+                      None
+                  }
+                }
+            }
+          } else if (event.places.nonEmpty) {
+            event.places.head.address match {
+              case Some(address) =>
+                address.geographicPoint match {
+                  case Some(geographicPoint) =>
+                    eventMethods.update(event.event.copy(geographicPoint = Option(geographicPoint)));
+                  case _ =>
+                    searchGeographicPoint.getGeographicPoint(address, retry = 3) map { addressWithMaybeGeographicPoint =>
+                      addressMethods.update(addressWithMaybeGeographicPoint)
+                      addressWithMaybeGeographicPoint.geographicPoint match {
+                        case Some(geographicPoint) =>
+                          eventMethods.update(event.event.copy(geographicPoint = Option(geographicPoint)));
+                        case _ =>
+                          None
+                      }
+                    }
+                }
+              case _ =>
+                None
+            }
+          }
+        }
       }
     }
   }
