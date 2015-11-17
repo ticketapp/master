@@ -61,6 +61,21 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     with eventWithRelationsTupleToEventWithRelationsClass
     with MyDBTableDefinitions {
 
+  def findAll(): Future[Seq[EventWithRelations]] = {
+    val query = for {
+      (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
+      optionalEventAddresses) <- events joinLeft
+        (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
+        (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
+        (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
+        (eventsGenres join genres on (_.genreId === _.id)) on (_._1._1._1.id === _._1.eventId) joinLeft
+        (eventsAddresses join addresses on (_.addressId === _.id)) on (_._1._1._1._1.id === _._1.eventId)
+    } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
+        optionalEventAddresses)
+
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+  }
+
   def find(id: Long): Future[Option[EventWithRelations]] = {
     val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),

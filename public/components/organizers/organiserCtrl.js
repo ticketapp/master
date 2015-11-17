@@ -1,7 +1,6 @@
 angular.module('claudeApp').
-    controller('OrganizerCtrl', ['$scope', 'OrganizerFactory', '$routeParams', 'WebsitesFactory',
-        'RefactorGeopoint', '$rootScope', 'InfoModal',
-        function ($scope, OrganizerFactory, $routeParams, WebsitesFactory, RefactorGeopoint, $rootScope,
+    controller('OrganizerCtrl', ['$scope', 'OrganizerFactory', '$routeParams', 'WebsitesFactory','$rootScope', 'InfoModal',
+        function ($scope, OrganizerFactory, $routeParams, WebsitesFactory, $rootScope,
             InfoModal) {
         $scope.organizer = {};
         $scope.map = false;
@@ -11,8 +10,7 @@ angular.module('claudeApp').
         OrganizerFactory.getOrganizer($routeParams.id).then(function (organizer) {
             $scope.organizer = organizer;
             if ($scope.organizer.geographicPoint != undefined) {
-                $scope.geographicPoint =
-                    RefactorGeopoint.refactorGeopoint($scope.organizer.geographicPoint);
+                $scope.geographicPoint = $scope.organizer.geographicPoint;
                 $scope.map = true;
             }
             if (organizer.websites != undefined) {
