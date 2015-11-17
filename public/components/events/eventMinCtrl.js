@@ -1,5 +1,5 @@
-angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory', 'InfoModal', 'SearchFactory',
-    function ($scope, UserFactory, InfoModal, SearchFactory) {
+angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory', 'InfoModal', 'SearchFactory', 'ArtistsFactory',
+    function ($scope, UserFactory, InfoModal, SearchFactory, ArtistsFactory) {
 
         $scope.isFollowedPlace = function (place) {
             UserFactory.getIsFollowedPlace(place.id).then(function (isFollowed) {
@@ -78,4 +78,10 @@ angular.module('claudeApp').controller('EventMinCtrl', ['$scope', 'UserFactory',
                 }
             })
         };
+
+        $scope.getTracksAndPlay = function(artist) {
+            ArtistsFactory.getArtistTracks(artist.facebookUrl).then(function(tracks) {
+                $rootScope.addAndPlay(tracks, artist)
+            })
+        }
     }]);

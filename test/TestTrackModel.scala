@@ -12,7 +12,7 @@ import scala.util.Success
 
 class TestTrackModel extends GlobalApplicationForModels {
   var artistId = -1L
-  val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
+  val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTrack"), "artistTest", Option("imagePath"),
     Option("description"), "artistFacebookUrlTestTrack", Set("website")), Vector.empty)
 
   "A track" must {
@@ -193,6 +193,32 @@ class TestTrackModel extends GlobalApplicationForModels {
         Track(trackId1, "titleNotduplicate", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"),
         Track(trackId2, "titleduplicaté", "urlduplicate", 'y', "thumb", "a", "artistNameDuplicate"))
       trackMethods.removeDuplicateByTitleAndArtistName(tracks) must contain theSameElementsAs expectedTracks
+    }
+
+    "set artist.hasTrack on save track" in {
+      val track = Track(uuid = randomUUID, title = "setHasTrack.title", url = "setHasTrack.url", platform = 'y',
+        thumbnailUrl = "url", artistFacebookUrl = "facebookUrl0", artistName = "a")
+      whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { savedTrack =>
+        whenReady(artistMethods.findByFacebookUrl("facebookUrl0"), timeout(Span(5, Seconds))) { artist =>
+
+          artist.get.artist.hasTracks mustBe true
+        }
+      }
+    }
+
+    "set artist.hasTrack when saving a set of tracks" in {
+      val tracks = Set(
+        Track(uuid = randomUUID, title = "setHasTrack.title2", url = "setHasTrack.url2", platform = 'y',
+          thumbnailUrl = "url", artistFacebookUrl = "facebookUrl00", artistName = "a"),
+        Track(uuid = randomUUID, title = "setHasTrack.title1", url = "setHasTrack.url1", platform = 'y',
+          thumbnailUrl = "url1", artistFacebookUrl = "facebookUrl00", artistName = "a")
+      )
+      whenReady(trackMethods.saveSequence(tracks), timeout(Span(5, Seconds))) { savedTrack =>
+        whenReady(artistMethods.findByFacebookUrl("facebookUrl00"), timeout(Span(5, Seconds))) { artist =>
+
+          artist.get.artist.hasTracks mustBe true
+        }
+      }
     }
 
     "return true if artist name is in the title and vice-versa without taking account of accentuated letters" in {

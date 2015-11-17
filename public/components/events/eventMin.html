@@ -155,10 +155,10 @@
                             </a>
                             <div class="img-circularPlayer float-right marginTop20 relative"
                                  style="background: rgba(0, 0, 0, 0.42);"
-                                 ng-if="artist.tracks.length > 0">
+                                 ng-if="artist.hasTracks">
                                 <i class="pauseInImg ng-scope fi-play"
                                    style="color: {{event.priceColor}}; font-size: 80px;"
-                                   ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
+                                   ng-click="getTracksAndPlay(artist)"></i>
                             </div>
                             <a class="absolute left column medium-4 padding0">
                                 <div class="width100p primCol padding10 textWhite text-center"

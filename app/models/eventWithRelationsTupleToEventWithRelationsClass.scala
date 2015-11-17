@@ -27,7 +27,7 @@ trait eventWithRelationsTupleToEventWithRelationsClass {
       EventWithRelations(
         event,
         organizers map (OrganizerWithAddress(_)),
-        artists map (ArtistWithWeightedGenresAndHasTrack(_)),
+        artists map (ArtistWithWeightedGenres(_)),
         places map (PlaceWithAddress(_)),
         genres,
         addresses)

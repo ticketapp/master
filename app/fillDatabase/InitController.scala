@@ -40,6 +40,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     val lines = Source.fromFile("textFiles/villes_france.sql").getLines()
     var i = 0
     while (lines.hasNext) {
+      Thread.sleep(200)
       i = i + 1
       val line = lines.next()
       if (line != "" && line.take(1) == "(") {
@@ -67,6 +68,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     val lines = Source.fromFile("textFiles/genresIcons").getLines()
 
     while (lines.hasNext) {
+      Thread.sleep(200)
       val line = lines.next()
       try {
         genreMethods.save(new Genre(None, line.split("  ")(0), line.split("  ")(1).charAt(0)))
@@ -81,6 +83,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     val chars = "abcdefghijklmnopqrstuvwxyzàçéèëêîïôöùûü0123456789?!$+".toArray
     for (c1 <- chars) {
       for (c2 <- chars) {
+        Thread.sleep(2000)
         artistMethods.getEventuallyFacebookArtists(c1.toString + c2.toString) map { artists =>
           artists map { artist => artistMethods.save(artist) }
         }
