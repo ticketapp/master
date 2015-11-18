@@ -26,25 +26,21 @@
 </div>
 <div class="parallax-content ng-search padding0">
 </div>
-<div ng-if="elementEnCours.animation && animateMsg && $root.window != 'medium' && $root.connected == false" id="infosTooltip"
+<div id="infosTooltip">
+    <div ng-if="elementEnCours.animation && animateMsg && $root.window != 'medium'"
      class="animate-show animated">
-    <div class="animate-show" style="{{elementEnCours.animation.style}}">
-        <i ng-click="removeAnimation()" class="fi-x pointer" style="
-    float: right;
-    color: white;
-    margin-right: 35px;
-"></i>
-        <div ng-bind-html="elementEnCours.animation.content"></div>
-        <div style="  margin-top: -20px;
-  overflow: hidden;
-  height: 50px;">
-        <img src="assets/images/angle6.svg" style="  width: 100px;
-  -webkit-transform: rotate(90deg);
-  -moz-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
-  margin-left: 50%;
-  margin-top: -52px;"/>
+        <div class="animate-show" style="{{elementEnCours.animation.style}}">
+            <i ng-click="removeAnimation()" class="fi-x pointer" style="float: right; color: white;margin-right: 35px;"></i>
+            <div ng-bind-html="elementEnCours.animation.content"></div>
+            <div style="  margin-top: -20px; overflow: hidden; height: 50px;">
+                <img src="assets/images/angle6.svg" style="  width: 100px;
+                  -webkit-transform: rotate(90deg);
+                  -moz-transform: rotate(90deg);
+                  -ms-transform: rotate(90deg);
+                  -o-transform: rotate(90deg);
+                  margin-left: 70%;
+                  margin-top: -50px;"/>
             </div>
+        </div>
     </div>
 </div>
