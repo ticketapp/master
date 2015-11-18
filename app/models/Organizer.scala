@@ -201,9 +201,10 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
      .apply((name: String, description: Option[String], source: Option[String], street: Option[String],
              zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
              website: Option[String]) =>
-     OrganizerWithAddress(Organizer(None, Some(organizerId), name, utilities.formatDescription(description), None, phone, public_transit,
-       website, verified = false, imagePath = source, geographicPoint = None), address = Option(Address(None, None,
-         city, zip, street)))
+     OrganizerWithAddress(organizer = Organizer(id = None, facebookId = Some(organizerId), name = name,
+       description = utilities.formatDescription(description), addressId = None, phone = phone, publicTransit = public_transit,
+       websites = utilities.normalizeMaybeWebsite(website), verified = false, imagePath = source, geographicPoint = None),
+       address = Option(Address(None, None, city, zip, street)))
      )
    organizer.json.asOpt[OrganizerWithAddress](readOrganizer)
   }
