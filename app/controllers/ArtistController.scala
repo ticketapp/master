@@ -75,13 +75,13 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       },
 
       patternAndArtist => {
-        artistMethods.saveOrReturnNoneIfDuplicate(ArtistWithWeightedGenresAndHasTrack(patternAndArtist.artistWithWeightedGenres.artist,
+        artistMethods.saveOrReturnNoneIfDuplicate(ArtistWithWeightedGenres(patternAndArtist.artistWithWeightedGenres.artist,
           patternAndArtist.artistWithWeightedGenres.genres)) map {
           case Some(artist) =>
             val artistWithArtistId = patternAndArtist.artistWithWeightedGenres.artist.copy(id = artist.id)
             val patternAndArtistWithArtistId = PatternAndArtist(
               searchPattern = patternAndArtist.searchPattern,
-              artistWithWeightedGenres = ArtistWithWeightedGenresAndHasTrack(artistWithArtistId, Vector.empty))
+              artistWithWeightedGenres = ArtistWithWeightedGenres(artistWithArtistId, Vector.empty))
 
             val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
 

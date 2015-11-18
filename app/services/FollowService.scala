@@ -13,7 +13,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
     with MyDBTableDefinitions
     with TrackTransformTrait
     with eventWithRelationsTupleToEventWithRelationsClass
-    with artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack {
+    with artistsAndOptionalGenresToArtistsWithWeightedGenresTrait {
   
   //////////////////////////////////////////// artist ///////////////////////////////////////////////////////////////
   
@@ -26,17 +26,16 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
       .delete)
 
 
-  def getFollowedArtists(userId: UUID): Future[Seq[ArtistWithWeightedGenresAndHasTrack]]= {
+  def getFollowedArtists(userId: UUID): Future[Seq[ArtistWithWeightedGenres]]= {
     val query = for {
       artistFollowed <- artistsFollowed if artistFollowed.userId === userId
       artist <- artists joinLeft
-        tracks on (_.facebookUrl === _.artistFacebookUrl) joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
-      if artist._1._1.id === artistFollowed.artistId
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      if artist._1.id === artistFollowed.artistId
     } yield artist
 
-    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
 

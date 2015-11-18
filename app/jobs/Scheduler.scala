@@ -72,7 +72,7 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
   def findTracksForArtists(): Unit = artistMethods.findAll map { artists =>
     artists map { artist =>
       Thread.sleep(2000)
-      val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.name, ArtistWithWeightedGenresAndHasTrack(artist)))
+      val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.name, ArtistWithWeightedGenres(artist)))
       val toTracksWithDelay: Enumeratee[Set[Track], Set[Track]] = Enumeratee.map[Set[Track]] { tracks: Set[Track] =>
         Thread.sleep(1000)
         tracks

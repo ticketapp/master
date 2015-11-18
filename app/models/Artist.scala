@@ -29,15 +29,14 @@ case class Artist(id: Option[Long],
                   description: Option[String] = None,
                   facebookUrl: String,
                   websites: Set[String] = Set.empty,
+                  hasTracks: Boolean = false,
                   likes: Option[Int] = None,
                   country: Option[String] = None)
 
-case class ArtistWithWeightedGenresAndHasTrack(artist: Artist,
-                                               genres: Seq[GenreWithWeight] = Seq.empty,
-                                               hasTracks: Boolean = false)
+case class ArtistWithWeightedGenres(artist: Artist, genres: Seq[GenreWithWeight] = Seq.empty)
 
 case class PatternAndArtist(searchPattern: String,
-                            artistWithWeightedGenres: ArtistWithWeightedGenresAndHasTrack)
+                            artistWithWeightedGenres: ArtistWithWeightedGenres)
 
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -50,7 +49,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     with SoundCloudHelper
     with FollowService
     with MyDBTableDefinitions
-    with artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack {
+    with artistsAndOptionalGenresToArtistsWithWeightedGenresTrait {
 
   val facebookToken = utilities.facebookToken
   val soundCloudClientId = utilities.soundCloudClientId
@@ -58,36 +57,34 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def findAll: Future[Vector[Artist]] = db.run(artists.result) map (_.toVector)
 
-  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
      artist <- artists.drop(offset).take(numberToReturn) joinLeft
-       tracks on (_.facebookUrl === _.artistFacebookUrl) joinLeft
-       (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
+       (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield artist
 
-    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
 
   def delete(id: Long): Future[Int] = db.run(artists.filter(_.id === id).delete)
 
-  def findAllByEvent(eventId: Long): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def findAllByEvent(eventId: Long): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
       e <- events if e.id === eventId
       eventArtist <- eventsArtists if eventArtist.eventId === e.id
       artist <- artists joinLeft
-        tracks on (_.facebookUrl === _.artistFacebookUrl) joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
-      if artist._1._1.id === eventArtist.artistId
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
+      if artist._1.id === eventArtist.artistId
     } yield artist
 
-    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
 
-  def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[ArtistWithWeightedGenres]] = {
     val artistsQuery = for {
       genre <- genres.filter(_.name === genreName)
       artistGenre <- artistsGenres.filter(_.genreId === genre.id)
@@ -99,51 +96,48 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
     val artistWithGenreQuery = for {
       artist <- artists.filter(_.id in artistsIdFromDB) joinLeft
-        tracks on (_.facebookUrl === _.artistFacebookUrl) take 1 joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield artist
 
-    db.run(artistWithGenreQuery.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    db.run(artistWithGenreQuery.result) map { seqArtistAndOptionalGenre =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
 
-  def find(id: Long): Future[Option[ArtistWithWeightedGenresAndHasTrack]] = {
+  def find(id: Long): Future[Option[ArtistWithWeightedGenres]] = {
     val query = for {
-      artist <- artists.filter(_.id === id) joinLeft tracks on (_.facebookUrl === _.artistFacebookUrl) take 1 joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
+      artist <- artists.filter(_.id === id) joinLeft
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield artist
 
-    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.headOption)
   }
 
-  def findByFacebookUrl(facebookUrl: String): Future[Option[ArtistWithWeightedGenresAndHasTrack]] = {
+  def findByFacebookUrl(facebookUrl: String): Future[Option[ArtistWithWeightedGenres]] = {
     val query = for {
       artist <- artists.filter(_.facebookUrl === facebookUrl) joinLeft
-        tracks on (_.facebookUrl === _.artistFacebookUrl) take 1 joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
     } yield artist
 
-    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.headOption)
   }
 
-  def findAllContaining(pattern: String): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def findAllContaining(pattern: String): Future[Seq[ArtistWithWeightedGenres]] = {
     val lowercasePattern = pattern.toLowerCase
 
     val query = for {
       artist <- artists joinLeft
-        tracks on (_.facebookUrl === _.artistFacebookUrl) joinLeft
-        (artistsGenres join genres on (_.genreId === _.id)) on (_._1.id === _._1.artistId)
+        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
 
-      if artist._1._1.name.toLowerCase like s"%$lowercasePattern%"
+      if artist._1.name.toLowerCase like s"%$lowercasePattern%"
     } yield artist
 
-    db.run(query.result) map { seqArtistAndOptionalGenreAndHasTracks =>
-      artistsAndOptionalGenresToArtistsWithWeightedGenresAndHasTrack(seqArtistAndOptionalGenreAndHasTracks)
+    db.run(query.result) map { seqArtistAndOptionalGenre =>
+      artistsAndOptionalGenresToArtistsWithWeightedGenres(seqArtistAndOptionalGenre)
     } map(_.toVector)
   }
 
@@ -153,7 +147,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def findIdByFacebookUrl(facebookUrl: String): Future[Option[Long]] =
     db.run(artists.filter(_.facebookUrl === facebookUrl).map(_.id).result.headOption)
 
-  def save(artistWithWeightedGenres: ArtistWithWeightedGenresAndHasTrack): Future[Artist] = formatArtist(artistWithWeightedGenres) flatMap {
+  def save(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[Artist] = formatArtist(artistWithWeightedGenres) flatMap {
     formattedArtist =>
       db.run((for {
         artistFound <- artists.filter(_.facebookUrl === formattedArtist.artist.facebookUrl).result.headOption
@@ -169,7 +163,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       }).transactionally)
   }
 
-  def saveOrReturnNoneIfDuplicate(artistWithWeightedGenres: ArtistWithWeightedGenresAndHasTrack): Future[Option[Artist]] =
+  def saveOrReturnNoneIfDuplicate(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[Option[Artist]] =
     formatArtist(artistWithWeightedGenres) flatMap { formattedArtist =>
 
     db.run((for {
@@ -185,7 +179,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       }).transactionally)
   }
 
-  def formatArtist(artistWithWeightedGenres: ArtistWithWeightedGenresAndHasTrack): Future[ArtistWithWeightedGenresAndHasTrack] = {
+  def formatArtist(artistWithWeightedGenres: ArtistWithWeightedGenres): Future[ArtistWithWeightedGenres] = {
     val artist = artistWithWeightedGenres.artist
     val genres = artistWithWeightedGenres.genres
     val genresWithoutWeight = genres map (_.genre)
@@ -196,7 +190,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
 
     genresWithOverGenres map { allGenres =>
-      ArtistWithWeightedGenresAndHasTrack(artistWithFormattedDescription, allGenres map (g => GenreWithWeight(g)))
+      ArtistWithWeightedGenres(artistWithFormattedDescription, allGenres map (g => GenreWithWeight(g)))
     }
   }
 
@@ -204,8 +198,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def saveArtistsAndTheirTracks(artists: Seq[Artist]): Unit = Future {
     artists.map { artist =>
-      save(ArtistWithWeightedGenresAndHasTrack(artist, Vector.empty)) map { artistSaved =>
-        getArtistTracks(PatternAndArtist(artistSaved.name, ArtistWithWeightedGenresAndHasTrack(artistSaved, Vector.empty))) |>>
+      save(ArtistWithWeightedGenres(artist, Vector.empty)) map { artistSaved =>
+        getArtistTracks(PatternAndArtist(artistSaved.name, ArtistWithWeightedGenres(artistSaved, Vector.empty))) |>>
           Iteratee.foreach(tracks => trackMethods.saveSequence(tracks))
       }
     }
@@ -269,7 +263,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         Future(0)
   }
 
-  def saveWithEventRelation(artist: ArtistWithWeightedGenresAndHasTrack, eventId: Long): Future[Artist] = save(artist) flatMap { savedArtist =>
+  def saveWithEventRelation(artist: ArtistWithWeightedGenres, eventId: Long): Future[Artist] = save(artist) flatMap { savedArtist =>
     saveEventRelation(EventArtistRelation(eventId, savedArtist.id.getOrElse(0))) map {
       case 1 =>
         savedArtist
@@ -318,7 +312,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
 
-  def getEventuallyFacebookArtists(pattern: String): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def getEventuallyFacebookArtists(pattern: String): Future[Seq[ArtistWithWeightedGenres]] = {
     WS.url("https://graph.facebook.com/" + facebookApiVersion + "/search")
      .withQueryString(
        "q" -> pattern,
@@ -336,7 +330,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
     val artistNames = splitArtistNamesInTitle(eventName)
     Future.sequence(
       artistNames.map { artistName =>
@@ -345,7 +339,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     ).map { _.flatten }
   }
 
-  def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
     val websitesFound = eventWebSites collect {
       case website if website.contains("facebook") && website.contains(artistName.toLowerCase) => website
     }
@@ -371,7 +365,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def getFacebookArtist(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
+  def getFacebookArtist(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
     getEventuallyFacebookArtists(artistName).flatMap {
       case noArtist if noArtist.isEmpty && artistName.split("\\W+").size >= 2 =>
         val nestedEventuallyArtists = artistName.split("\\W+").toSeq.map { name =>
@@ -387,14 +381,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def filterFacebookArtistsForEvent(artists: Seq[ArtistWithWeightedGenresAndHasTrack], artistName: String, eventWebsites: Set[String])
-  : Seq[ArtistWithWeightedGenresAndHasTrack] = artists match {
-    case onlyOneArtist: Seq[ArtistWithWeightedGenresAndHasTrack] if onlyOneArtist.size == 1 &&
+  def filterFacebookArtistsForEvent(artists: Seq[ArtistWithWeightedGenres], artistName: String, eventWebsites: Set[String])
+  : Seq[ArtistWithWeightedGenres] = artists match {
+    case onlyOneArtist: Seq[ArtistWithWeightedGenres] if onlyOneArtist.size == 1 &&
       onlyOneArtist.head.artist.name.toLowerCase == artistName.toLowerCase =>
         onlyOneArtist
 
-    case otherCase: Seq[ArtistWithWeightedGenresAndHasTrack] =>
-      val artists = otherCase.flatMap { artist: ArtistWithWeightedGenresAndHasTrack =>
+    case otherCase: Seq[ArtistWithWeightedGenres] =>
+      val artists = otherCase.flatMap { artist: ArtistWithWeightedGenres =>
         if ((artist.artist.websites intersect eventWebsites).nonEmpty) Option(artist)
         else None
       }
@@ -404,7 +398,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       artists
   }
 
-  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[ArtistWithWeightedGenresAndHasTrack]] = Future.sequence(
+  def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[ArtistWithWeightedGenres]] = Future.sequence(
     websites.map {
       case website if website contains "facebook" =>
         getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
@@ -475,7 +469,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenresAndHasTrack]] =  normalizeFacebookUrl(url) match {
+  def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenres]] =  normalizeFacebookUrl(url) match {
     case Some(normalizedFacebookUrl) =>
       WS.url("https://graph.facebook.com/"+ facebookApiVersion + "/" + normalizedFacebookUrl)
        .withQueryString(
@@ -514,17 +508,17 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
    (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
      maybeLikes, maybeCountry))
 
-  def readFacebookArtists(facebookJsonResponse: JsValue): Future[Seq[ArtistWithWeightedGenresAndHasTrack]] = {
-    val collectOnlyArtistsWithCover: Reads[Future[Seq[ArtistWithWeightedGenresAndHasTrack]]] = Reads.seq(readArtist) map { artists =>
+  def readFacebookArtists(facebookJsonResponse: JsValue): Future[Seq[ArtistWithWeightedGenres]] = {
+    val collectOnlyArtistsWithCover: Reads[Future[Seq[ArtistWithWeightedGenres]]] = Reads.seq(readArtist) map { artists =>
       Future.sequence(artists.map(artistTupleToArtist).toVector) map (_.flatten)
     }
 
     (facebookJsonResponse \ "data")
-     .asOpt[Future[Seq[ArtistWithWeightedGenresAndHasTrack]]](collectOnlyArtistsWithCover)
+     .asOpt[Future[Seq[ArtistWithWeightedGenres]]](collectOnlyArtistsWithCover)
      .getOrElse(Future(Seq.empty))
   }
 
-  def readFacebookArtist(facebookJsonResponse: JsValue): Future[Option[ArtistWithWeightedGenresAndHasTrack]] = {
+  def readFacebookArtist(facebookJsonResponse: JsValue): Future[Option[ArtistWithWeightedGenres]] = {
     facebookJsonResponse
      .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
      Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
@@ -537,7 +531,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def artistTupleToArtist(artist: (String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
-    Option[String], Option[String], Option[Int], Option[Option[String]])): Future[Option[ArtistWithWeightedGenresAndHasTrack]] = {
+    Option[String], Option[String], Option[Int], Option[Option[String]])): Future[Option[ArtistWithWeightedGenres]] = {
     artist match {
       case (name, facebookId, category, cover, maybeOffsetX, maybeOffsetY, websites, link,
       maybeDescription, maybeGenre, maybeLikes, maybeCountry)
@@ -558,7 +552,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def makeArtist(name: String, facebookId: String, cover: Option[String], maybeWebsites: Option[String], link: String,
                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
-                maybeCountry: Option[String]): Future[ArtistWithWeightedGenresAndHasTrack] = {
+                maybeCountry: Option[String]): Future[ArtistWithWeightedGenres] = {
     val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val eventuallyWebsitesSet: Future[Set[String]] = maybeWebsites match {
       case Some(websites) =>
@@ -575,7 +569,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
 
     eventuallyWebsitesSet map { websitesSet =>
-      ArtistWithWeightedGenresAndHasTrack(Artist(None, Option(facebookId), name, cover, description, facebookUrl, websitesSet),
+      ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, cover, description, facebookUrl, websitesSet),
         genres.toSeq.map{genre => GenreWithWeight(genre, 0) }.toVector)
     }
   }

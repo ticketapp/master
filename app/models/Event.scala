@@ -39,7 +39,7 @@ case class Event(id: Option[Long],
 
 case class EventWithRelations(event: Event,
                               organizers: Seq[OrganizerWithAddress] = Vector.empty,
-                              artists: Seq[ArtistWithWeightedGenresAndHasTrack] = Vector.empty,
+                              artists: Seq[ArtistWithWeightedGenres] = Vector.empty,
                               places: Seq[PlaceWithAddress] = Vector.empty,
                               genres: Seq[Genre] = Vector.empty,
                               addresses: Seq[Address] = Vector.empty)

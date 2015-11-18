@@ -97,6 +97,14 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                             pushConnectedInfo(info, title, artist, false);
                         } else if (artist.hasTracks) {
                             TrackService.getArtistTracks(artist.facebookUrl).then(function (tracks) {
+                                tracks = tracks.map(function(track) {
+                                    if (artist.genres) {
+                                        track.genres = artist.genres
+                                    } else {
+                                        tracks.genres = []
+                                    }
+                                    return track;
+                                });
                                 artist.tracks = tracks;
                                 title = 'Ecoutez vos musiques favorites et enregistrez vos playlists avec Claude';
                                 pushConnectedInfo(info, title, artist, true);

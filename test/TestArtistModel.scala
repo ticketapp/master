@@ -15,11 +15,10 @@ class TestArtistModel extends GlobalApplicationForModels {
   "An Artist" must {
 
     "be saved in database and return the new artist" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(
+      val artist = ArtistWithWeightedGenres(
         artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest", Option("imagePath"),
           Option("description"), "facebookUrl", Set("website")),
-        genres = Vector.empty,
-        hasTracks = true)
+        genres = Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
 
         val expectedArtist = artist.artist.copy(
@@ -38,15 +37,14 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "be found in database" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(
+      val artist = ArtistWithWeightedGenres(
         artist = Artist(None, Option("facebookIdTestArtistModel"), "artistTest",
         Option("imagePath"), Option("description"), "facebookUrl", Set("website")),
-        genres = Vector.empty,
-        hasTracks = true)
+        genres = Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
 
-          val expectedArtist = ArtistWithWeightedGenresAndHasTrack(
+          val expectedArtist = ArtistWithWeightedGenres(
             artist = artist.artist.copy(
               id = Some(savedArtist.id.get),
               description = Some("<div class='column large-12'>description</div>")),
@@ -58,7 +56,7 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "return None when trying to save an already existent artist" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(
+      val artist = ArtistWithWeightedGenres(
         artist = Artist(None, None, "artistTestSaveOrReturnNoneIfDuplicate", None, None,
           "facebookUrlTestSaveOrReturnNoneIfDuplicate", Set("website")),
         genres = Vector.empty)
@@ -72,7 +70,7 @@ class TestArtistModel extends GlobalApplicationForModels {
 
         whenReady(artistMethods.find(savedArtistId), timeout(Span(5, Seconds))) { foundArtist =>
 
-          foundArtist mustBe Option(ArtistWithWeightedGenresAndHasTrack(artist = expectedArtist))
+          foundArtist mustBe Option(ArtistWithWeightedGenres(artist = expectedArtist))
 
           whenReady(artistMethods.saveOrReturnNoneIfDuplicate(artist), timeout(Span(5, Seconds))) { savedArtist1 =>
             savedArtist1 mustBe None
@@ -82,10 +80,10 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "all be found" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(
+      val artist = ArtistWithWeightedGenres(
         artist = Artist(None, None, "facebookUrlAllBeFound", None, None, "facebookUrlAllBeFound", Set.empty),
         genres = Vector.empty)
-      val artist2 = ArtistWithWeightedGenresAndHasTrack(
+      val artist2 = ArtistWithWeightedGenres(
         artist = Artist(None, None, "facebookUrlAllBeFound2", None, None, "facebookUrlAllBeFound2", Set.empty),
         genres = Vector.empty)
 
@@ -93,8 +91,8 @@ class TestArtistModel extends GlobalApplicationForModels {
         whenReady(artistMethods.save(artist2), timeout(Span(5, Seconds))) { savedArtist2 =>
           whenReady(artistMethods.findSinceOffset(numberToReturn = 100000, offset = 0), timeout(Span(5, Seconds))) { foundArtists =>
 
-            val expectedArtist1 = ArtistWithWeightedGenresAndHasTrack(savedArtist, Seq.empty)
-            val expectedArtist2 = ArtistWithWeightedGenresAndHasTrack(savedArtist2, Seq.empty)
+            val expectedArtist1 = ArtistWithWeightedGenres(savedArtist, Seq.empty)
+            val expectedArtist2 = ArtistWithWeightedGenres(savedArtist2, Seq.empty)
 
             foundArtists must contain allOf (expectedArtist1, expectedArtist2)
           }
@@ -111,14 +109,14 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "save its relation with an event, be found by this event and delete this relation" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(
+      val artist = ArtistWithWeightedGenres(
         artist = Artist(None, None, "saveAndDeleteEventRelation", None, None, "saveAndDeleteEventRelation", Set.empty),
         genres = Vector.empty)
 
       whenReady(artistMethods.saveWithEventRelation(artist, 1L), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.findAllByEvent(eventId = 1L), timeout(Span(5, Seconds))) { artistsFound =>
 
-          artistsFound should contain(ArtistWithWeightedGenresAndHasTrack(savedArtist, Vector.empty))
+          artistsFound should contain(ArtistWithWeightedGenres(savedArtist, Vector.empty))
         }
 
         whenReady(artistMethods.deleteEventRelation(EventArtistRelation(1L, savedArtist.id.get)),
@@ -130,20 +128,20 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "be updated" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId4"), "artistTest4", Option("imagePath"), Option("description"),
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId4"), "artistTest4", Option("imagePath"), Option("description"),
         "facebookUrl4", Set("website")), Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         val updatedArtist = savedArtist.copy(id = Option(savedArtist.id.get), name = "updatedName")
         whenReady(artistMethods.update(updatedArtist), timeout(Span(5, Seconds))) { resp =>
           whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { _ mustBe
-            Option(ArtistWithWeightedGenresAndHasTrack(updatedArtist, Vector.empty))
+            Option(ArtistWithWeightedGenres(updatedArtist, Vector.empty))
           }
         }
       }
     }
 
     "have his websites updated" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId5"), "artistTest5", Option("imagePath"), Option("description"),
         "facebookUrl5", Set("website")), Vector.empty)
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.addWebsite(savedArtist.id.get, "normalizedUrl"), timeout(Span(5, Seconds))) { response =>
@@ -153,7 +151,7 @@ class TestArtistModel extends GlobalApplicationForModels {
           whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { foundArtist =>
 
             foundArtist mustBe
-              Option(ArtistWithWeightedGenresAndHasTrack(foundArtist.get.artist.copy(
+              Option(ArtistWithWeightedGenres(foundArtist.get.artist.copy(
                 id = Option(savedArtist.id.get),
                 websites = Set("website", "normalizedUrl"),
                 description = Some("<div class='column large-12'>description</div>")), Vector.empty))
@@ -180,7 +178,7 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "have another website" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId6"), "artistTest6", Option("imagePath"), Option("description"),
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId6"), "artistTest6", Option("imagePath"), Option("description"),
         "facebookUrl6", Set("website")), Vector.empty)
       val track = Track(UUID.randomUUID, "title", "url", 'S', "thumbnailUrl", "artistFacebookUrl", "artistName",
         Option("redirectUrl"))
@@ -188,7 +186,7 @@ class TestArtistModel extends GlobalApplicationForModels {
       whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
         whenReady(artistMethods.addSoundCloudUrlIfMissing(track, savedArtist), timeout(Span(5, Seconds))) { _ =>
           whenReady(artistMethods.find(savedArtist.id.get), timeout(Span(5, Seconds))) { artistFound =>
-            artistFound mustBe Option(ArtistWithWeightedGenresAndHasTrack(savedArtist.copy(websites = Set("website", "redirecturl"),
+            artistFound mustBe Option(ArtistWithWeightedGenres(savedArtist.copy(websites = Set("website", "redirecturl"),
               description = Some("<div class='column large-12'>description</div>")), Vector.empty))
           }
         }
@@ -232,35 +230,41 @@ class TestArtistModel extends GlobalApplicationForModels {
       }
     }
 
-    "read a facebook artist json" in {
+    "read a facebook artist in Json" in {
       val jsonArtist = Json.parse("""{"name": "Lino Officiel","id": "208555529263642","category": "Musician/Band",
                                  "link": "https://www.facebook.com/linofficiel/","website": "http://arsenik-shop.com",
                                  "genre": "Hip Hop / Rap","likes": 136379}""")
+
+      val expectedArtist = Artist(None, Some("208555529263642"), "Lino Officiel", None, None, "linofficiel",
+        Set("arsenik-shop.com"))
+
       whenReady(artistMethods.readFacebookArtist(jsonArtist), timeout(Span(5, Seconds))) { artist =>
-        artist.get.artist mustBe Artist(None,Some("208555529263642"),"Lino Officiel",None,None,"linofficiel",
-          Set("arsenik-shop.com"),None,None)
+        artist.get.artist mustBe expectedArtist
       }
     }
 
-    "read a set of facebook artist json" in {
+    "read a set of facebook artist in Json" in {
       val jsonArtist = Json.parse("""{"data": [{"name": "Lino Officiel","id": "208555529263642","category": "Musician/Band",
                                  "link": "https://www.facebook.com/linofficiel/","website": "http://arsenik-shop.com",
                                  "genre": "Hip Hop / Rap","likes": 136379}]}""")
+
+      val expectedArtist = Artist(None, Some("208555529263642"), "Lino Officiel", None, None, "linofficiel",
+        Set("arsenik-shop.com"))
+
       whenReady(artistMethods.readFacebookArtists(jsonArtist), timeout(Span(5, Seconds))) { artists =>
-        artists.head.artist mustBe Artist(None,Some("208555529263642"),"Lino Officiel",None,None,"linofficiel",
-          Set("arsenik-shop.com"),None,None)
+        artists.head.artist mustBe expectedArtist
       }
     }
 
     "return hasTracks set to true if he as some tracks and vice-versa" in {
       whenReady(artistMethods.find(100), timeout(Span(5, Seconds))) { foundArtist =>
-        foundArtist.get.hasTracks mustBe true
+        foundArtist.get.artist.hasTracks mustBe true
       }
       whenReady(artistMethods.find(200), timeout(Span(5, Seconds))) { foundArtist =>
-        foundArtist.get.hasTracks mustBe true
+        foundArtist.get.artist.hasTracks mustBe true
       }
       whenReady(artistMethods.find(4), timeout(Span(5, Seconds))) { foundArtist =>
-        foundArtist.get.hasTracks mustBe false
+        foundArtist.get.artist.hasTracks mustBe false
       }
     }
 

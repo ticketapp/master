@@ -143,7 +143,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val uuid = UUID.fromString("04d64aef-2baa-42b3-a0dc-07f77da9303d")
 
       val expectedTrack = Track(uuid, "Welcome to Topsify", "ISo15c2zKa4", 'y',
-        "https://i.ytimg.com/vi/ISo15c2zKa4/default.jpg", "facebookUrl3", "Skrillex", None/*, None, List()*/)
+        "https://i.ytimg.com/vi/ISo15c2zKa4/default.jpg", "facebookUrl3", "Skrillex", None)
 
       val eventuallyYoutubeTracks = searchYoutubeTrack.getYoutubeTracksByChannelId(artist, youtubeChannel)
 
@@ -153,11 +153,12 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
     }
 
     "return set of youtube tracks by websites" in {
-      val artist = Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
+      val artist = Artist(Some(236),Some("197919830269754"), "Feu! Chatterton", None, None, "kjlk",
         Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
-          "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA")/*,List(),List()*/,None,None)
-      whenReady(searchYoutubeTrack.getYoutubeTracksByYoutubeUser(artist), timeout(Span(5, Seconds))) {tracks =>
+          "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"))
+      whenReady(searchYoutubeTrack.getYoutubeTracksByYoutubeUser(artist), timeout(Span(5, Seconds))) { tracks =>
         assert(tracks.isInstanceOf[Set[Track]])
+        tracks should not be empty
       }
     }
 
@@ -165,7 +166,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val artist = Artist(Some(236),Some("197919830269754"),"Feu! Chatterton", None ,None , "kjlk",
         Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
           "youtube.com/user/feuchatterton", "youtube.com/user/feuchatterton",
-          "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA")/*,List(),List()*/,None,None)
+          "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"))
       whenReady(searchYoutubeTrack.getYoutubeTracksByChannel(artist), timeout(Span(5, Seconds))) { tracks =>
         assert(tracks.isInstanceOf[Set[Track]])
         tracks should not be empty

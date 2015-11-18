@@ -53,13 +53,14 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def description = column[Option[String]]("description")
     def facebookUrl = column[String]("facebookurl")
     def websites = column[Option[String]]("websites")
+    def hasTracks = column[Boolean]("hastracks", O.Default(false))
 
-    def * = (id.?, facebookId, name, imagePath, description, facebookUrl, websites).shaped <> (
-      { case (id, facebookId, name, imagePath, description, facebookUrl, websites) =>
-        Artist(id, facebookId, name, imagePath, description, facebookUrl, optionStringToSet(websites))
+    def * = (id.?, facebookId, name, imagePath, description, facebookUrl, websites, hasTracks).shaped <> (
+      { case (id, facebookId, name, imagePath, description, facebookUrl, websites, hasTracks) =>
+        Artist(id, facebookId, name, imagePath, description, facebookUrl, optionStringToSet(websites), hasTracks)
       }, { artist: Artist =>
       Some((artist.id, artist.facebookId, artist.name, artist.imagePath, artist.description, artist.facebookUrl,
-        Option(artist.websites.mkString(","))))
+        Option(artist.websites.mkString(",")), artist.hasTracks))
     })
   }
 

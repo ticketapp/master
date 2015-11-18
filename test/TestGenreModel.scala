@@ -51,7 +51,7 @@ class TestGenreModel extends GlobalApplicationForModels {
 
     "save and delete its relation with a track" in {
      val genre = Genre(None, "rockerdocker")
-     val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
+     val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId"), "artistTest", Option("imagePath"), Option("description"),
        "artistFacebookUrlTestGenre2", Set("website")), Vector.empty)
      val trackId = UUID.randomUUID
      val track = Track(trackId, "titleTestGenreModel1", "url", 's', "thumbnailUrl", "artistFacebookUrlTestGenre2", "artistName")
@@ -77,7 +77,7 @@ class TestGenreModel extends GlobalApplicationForModels {
     }
 
     "find all genres for a track" in {
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookIdTestGenreModel"), "artistTest", Option("imagePath"),
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestGenreModel"), "artistTest", Option("imagePath"),
         Option("description"), "artistFacebookUrlTestGenreModel5", Set("website")), Vector.empty)
       val trackId = UUID.randomUUID
       val track = Track(trackId, "titleTestUserModel5", "url13", 's', "thumbnailUrl1",
@@ -111,7 +111,7 @@ class TestGenreModel extends GlobalApplicationForModels {
     "save, update and delete its relation with an artist" in {
       val genre = Genre(None, "rockiyadockiaaa")
       val genre2 = Genre(None, "rockiyadockiooo")
-      val artist = ArtistWithWeightedGenresAndHasTrack(
+      val artist = ArtistWithWeightedGenres(
         artist = Artist(None, None, "artistGenreRelationTest", None, None, "artistFacebookUrlTestGenre", Set("website")),
         genres = Vector.empty)
 

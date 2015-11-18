@@ -26,7 +26,7 @@ class TestTrackController extends GlobalApplicationForControllers {
                            "artistName": "artistTrackTest",
                            "redirectUrl": "url" }"""
 
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest",
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest",
         Option("imagePath"), Option("description"), "artistTrackFacebookUrl", Set("website")), Vector.empty)
       await(artistMethods.save(artist))
       val Some(result) = route(FakeRequest(POST, "/tracks/create")

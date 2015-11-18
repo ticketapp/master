@@ -13,6 +13,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 case class Track (uuid: UUID,
                   title: String, 
@@ -85,13 +86,24 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def save(track: Track): Future[Track] = db.run((for {
     trackFound <- tracks.filter(trackFound => (trackFound.title === track.title &&
       trackFound.artistName === track.artistName) || trackFound.url === track.url).result.headOption
+    _ <- artists.filter(_.facebookUrl === track.artistFacebookUrl).map(_.hasTracks).update(true)
     result <- trackFound.map(DBIO.successful).getOrElse(tracks returning tracks.map(_.uuid) += track)
   } yield result match {
       case t: Track => t
       case uuid: UUID => track.copy(uuid = uuid)
   }).transactionally)
 
-  def saveSequence(tracksToSave: Set[Track]): Future[Any] = db.run(tracks ++= tracksToSave)
+  def saveSequence(tracksToSave: Set[Track]): Future[Any] = {
+    val artistFacebookUrls = tracksToSave map (_.artistFacebookUrl)
+
+    db.run(tracks ++= tracksToSave) map { _ =>
+      artistFacebookUrls map { facebookUrl =>
+        db.run(artists.filter(_.facebookUrl === facebookUrl).map(_.hasTracks).update(true))
+      }
+    } recover {
+      case NonFatal(e) => Logger.error("Track.saveSequence:\nMessage:", e)
+    }
+  }
 
   def delete(uuid: UUID): Future[Int] = db.run(tracks.filter(_.uuid === uuid).delete)
 

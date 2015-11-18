@@ -32,7 +32,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "be saved with relations and deleted in database" in {
-      val artists = Vector(ArtistWithWeightedGenresAndHasTrack(Artist(None, None, "nameEventRelations", facebookUrl = "saveEventRelations")))
+      val artists = Vector(ArtistWithWeightedGenres(Artist(None, None, "nameEventRelations", facebookUrl = "saveEventRelations")))
       val organizers = Vector(OrganizerWithAddress(Organizer(None, None, "nameEventRelations")))
       val addresses = Vector(Address(None, None, Option("cityEventRelations")))
       val places = Vector(PlaceWithAddress(Place(name = "nameEventRelations")))
@@ -54,7 +54,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
           foundEvent.organizers mustBe Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
 
-          foundEvent.artists mustBe Vector(ArtistWithWeightedGenresAndHasTrack(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
+          foundEvent.artists mustBe Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
 
           foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
 
@@ -142,7 +142,7 @@ class TestEventModel extends GlobalApplicationForModels {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
         "facebookUrl123"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
@@ -154,7 +154,7 @@ class TestEventModel extends GlobalApplicationForModels {
             whenReady(eventMethods.findAllByArtist(savedArtist.facebookUrl), timeout(Span(5, Seconds))) { eventsByArtist =>
 
               eventsByArtist must
-                contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenresAndHasTrack(savedArtist))))
+                contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenres(savedArtist))))
             }
           }
         }
@@ -165,7 +165,7 @@ class TestEventModel extends GlobalApplicationForModels {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
         Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
         Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None))
-      val artist = ArtistWithWeightedGenresAndHasTrack(Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"),
+      val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"),
         Option("description"), "facebookUrl1234"), Vector.empty)
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(artistMethods.save(artist), timeout(Span(5, Seconds))) { savedArtist =>
@@ -181,7 +181,7 @@ class TestEventModel extends GlobalApplicationForModels {
               whenReady(eventMethods.findAllPassedByArtist(savedArtist.id.get), timeout(Span(5, Seconds))) { passedEventsByArtist =>
 
                 passedEventsByArtist must
-                  contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenresAndHasTrack(savedArtist))))
+                  contain(EventWithRelations(event = savedEvent, artists = Vector(ArtistWithWeightedGenres(savedArtist))))
               }
             }
           }

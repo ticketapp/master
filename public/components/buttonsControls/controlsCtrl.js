@@ -189,7 +189,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                             if (l < lines.length) {            //  if the counter < 10, call the loop function
                                 myLoop();             //  ..  again which will trigger another
                             }                        //  ..  setTimeout()
-                        }, 100)
+                        }, 500)
                     }
 
                     myLoop();
@@ -197,7 +197,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
             }
         };
         txtFile.send(null);
-		/*var cnvList = [];
+		var cnvList = [];
 		var pageNumber = 0;
 		var page = '';
 		function getCnvList () {
@@ -223,12 +223,12 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
 								getPlacesByName(cnvList[i])
 								clearInterval(searchPlace);
 							}
-						}, 50)
+						}, 200)
 					}
 				}).error(function(error) {
 					
 				});
 		}
-		getCnvList();*/
+		getCnvList();
     }
 }]);

@@ -43,6 +43,7 @@ CREATE TABLE artists (
   description               VARCHAR,
   facebookUrl               VARCHAR(255) NOT NULL,
   websites                  VARCHAR,
+  hasTracks                 BOOLEAN DEFAULT FALSE,
   likes                     INTEGER,
   country                   VARCHAR,
   UNIQUE(facebookId),
