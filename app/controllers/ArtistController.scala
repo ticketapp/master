@@ -70,8 +70,8 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   def createArtist = Action.async { implicit request =>
     artistBindingForm.bindFromRequest().fold(
       formWithErrors => {
-       Logger.error(formWithErrors.errorsAsJson.toString())
-       Future(BadRequest(formWithErrors.errorsAsJson))
+        Logger.error(formWithErrors.errorsAsJson.toString())
+        Future(BadRequest(formWithErrors.errorsAsJson))
       },
 
       patternAndArtist => {
