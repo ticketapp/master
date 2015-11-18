@@ -36,7 +36,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
   def optionStringToSet(maybeString: Option[String]): Set[String] = maybeString match {
     case None => Set.empty
-    case Some(string) => string.split(",").filter(_.nonEmpty).toSet
+    case Some(string) => string.split(",").map(_.trim).filter(_.nonEmpty).toSet
   }
 
   implicit val jodaDateTimeMapping = {
