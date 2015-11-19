@@ -22,6 +22,18 @@ class TestGenreModel extends GlobalApplicationForModels {
       }
     }
 
+    "be saved in lowerCase" in {
+      val genre = Genre(None, "RockadocKayoU", 'r')
+      val expectedGenre = Genre(None, "rockadockayou", 'r')
+
+      whenReady(genreMethods.save(genre), timeout(Span(5, Seconds))) { genreSaved =>
+        whenReady(genreMethods.findById(genreSaved.id.get), timeout(Span(5, Seconds))) { genreFound =>
+
+          genreFound.get mustBe expectedGenre.copy(id = Option(genreSaved.id.get))
+        }
+      }
+    }
+
     "find a genre by containing" in {
       val genre = Genre(None, "rockodocki", 'r')
 

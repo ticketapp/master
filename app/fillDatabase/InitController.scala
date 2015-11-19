@@ -15,7 +15,8 @@ import services.{MyPostgresDriver, Utilities}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
-import scala.util.{Failure, Success}
+import scala.util.control.NonFatal
+import scala.util.{Try, Failure, Success}
 
 
 class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -45,7 +46,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       val line = lines.next()
       if (line != "" && line.take(1) == "(") {
         val splitedLine = line.split(",")
-        try {
+        Try {
           val cityName: String = splitedLine(4).replaceAll("'", "").trim
           val geographicPoint: String = splitedLine(19).trim + "," + splitedLine(20).trim
 
@@ -55,9 +56,10 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
             case Failure(e) =>
               Logger.error("InitController.insertFrenchCities: ", e)
           }
-        } catch {
-          case e: Exception => Logger.error(e + splitedLine(4).replaceAll("'", "") + "(" +
-            splitedLine(19).trim + "," + splitedLine(20).trim + ")")
+        } match {
+          case Failure(e: Exception) =>
+            Logger.error(e + splitedLine(4).replaceAll("'", "") + "(" + splitedLine(19).trim + "," + splitedLine(20).trim + ")")
+          case _ =>
         }
       }
     }
@@ -70,10 +72,8 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     while (lines.hasNext) {
       Thread.sleep(200)
       val line = lines.next()
-      try {
-        genreMethods.save(new Genre(None, line.split("  ")(0), line.split("  ")(1).charAt(0)))
-      } catch {
-        case e: Exception =>  Logger.warn(line + e)
+      genreMethods.save(new Genre(None, line.split("  ")(0), line.split("  ")(1).charAt(0))) recover {
+        case NonFatal(e: Exception) =>  Logger.warn("InitController.insertGenres: " + line + e)
       }
     }
     Ok
@@ -86,6 +86,8 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
         Thread.sleep(2000)
         artistMethods.getEventuallyFacebookArtists(c1.toString + c2.toString) map { artists =>
           artists map { artist => artistMethods.save(artist) }
+        } recover {
+          case NonFatal(e: Exception) =>  Logger.warn("InitController.insertTwoLettersArtists: for pattern " + c1 + c2)
         }
         Thread.sleep(120)
       }

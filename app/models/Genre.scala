@@ -22,9 +22,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val utilities: Utilities)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
-  def findAll: Future[Seq[Genre]] = {
-    db.run(genres.result)
-  }
+  def findAll: Future[Seq[Genre]] = db.run(genres.result)
 
   def findById(id: Int): Future[Option[Genre]] = {
     val query = genres.filter(_.id === id)
@@ -77,13 +75,15 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def save(genre: Genre): Future[Genre] = db.run((for {
     genreFound <- genres.filter(_.name === genre.name).result.headOption
-    result <- genreFound.map(DBIO.successful).getOrElse(genres returning genres.map(_.id) += genre)
+    result <- genreFound.map(DBIO.successful).getOrElse(genres returning genres.map(_.id) +=
+      genre.copy(name = genre.name.toLowerCase))
   } yield result match {
     case g: Genre => g
     case id: Int => genre.copy(id = Option(id))
   }).transactionally)
   
-  def findByName(name: String): Future[Option[Genre]] = db.run(genres.filter(_.name === name).result.headOption)
+  def findByName(name: String): Future[Option[Genre]] =
+    db.run(genres.filter(_.name === name.toLowerCase).result.headOption)
 
   def isAGenre(pattern: String): Future[Boolean] = db.run(genres.filter(_.name === pattern).exists.result)
 
