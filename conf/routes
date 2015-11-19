@@ -107,11 +107,11 @@ GET          /city/:city                                                  @contr
 #GET     /infos                                                            @controllers.Application.infos
 
 ################################# Issues ################################################
-#GET     /issues                                                          @controllers.GenreController.issues
-#POST    /issues                                                          @controllers.GenreController.create
-#GET     /issues/:issueId/comments                                        @controllers.GenreController.commentsForIssue(issueId: Long)
-#POST    /issues/:issueId/comments                                        @controllers.GenreController.createComment(issueId: Long)
-#
+GET     /issues                                                              @controllers.IssueController.issues
+POST    /issues                                                              @controllers.IssueController.create
+GET     /issues/:issueId/comments                                            @controllers.IssueController.commentsForIssue(issueId: Long)
+POST    /issues/:issueId/comments                                            @controllers.IssueController.createComment(issueId: Long)
+
 ################################## Mails ################################################
 #GET     /mails                                                            @controllers.MailController.mails
 #POST    /mails                                                            @controllers.MailController.create

@@ -1,3 +1,5 @@
+import java.util.UUID
+
 import akka.util.Timeout
 import org.specs2.mock.Mockito
 import org.specs2.specification.{AfterAll, BeforeAll}
@@ -12,6 +14,8 @@ import scala.concurrent._
 
 
 trait GlobalApplicationForControllers extends PlaySpecification with Mockito with BeforeAll with AfterAll with Context with Injectors {
+
+  val defaultUserUUID =  UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
 
   override def beforeAll() {
     Play.start(application)

@@ -315,6 +315,29 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("trackId", trackId, tracks)(_.uuid, onDelete = ForeignKeyAction.Cascade)
   }
 
+  class Issues(tag: Tag) extends Table[Issue](tag, "issues") {
+    def id = column[Long]("issueid", O.PrimaryKey, O.AutoInc)
+    def title = column[String]("title")
+    def content = column[String]("content")
+    def userUUID = column[UUID]("userid")
+    def fixed = column[Boolean]("fixed")
+
+    def * = (id.?, title, content, userUUID, fixed) <> ((Issue.apply _).tupled, Issue.unapply)
+
+    def aFK = foreignKey("userid", userUUID, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
+  class IssuesComments(tag: Tag) extends Table[IssueComment](tag, "issuescomments") {
+    def content = column[String]("content")
+    def userId = column[UUID]("userid")
+    def issueId = column[Long]("issueid")
+
+    def * = (content, userId, issueId) <>((IssueComment.apply _).tupled, IssueComment.unapply)
+
+    def aFK = foreignKey("userid", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("issueid", issueId, issues)(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]
   lazy val genres = TableQuery[Genres]
   lazy val genresFollowed = TableQuery[GenresFollowed]
@@ -339,4 +362,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val tracksFollowed = TableQuery[TracksFollowed]
   lazy val playlists = TableQuery[Playlists]
   lazy val playlistsTracks = TableQuery[PlaylistsTracks]
+  lazy val issues = TableQuery[Issues]
+  lazy val issuesComments = TableQuery[IssuesComments]
 }

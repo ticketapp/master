@@ -72,9 +72,6 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result)
   }
 
-  /*def save(genre: Genre): Future[Genre] =
-    db.run(genres returning genres.map(_.id) into ((genre, id) => genre.copy(id = Option(id))) += genre)*/
-
   def save(genre: Genre): Future[Genre] = db.run((for {
     genreFound <- genres.filter(_.name === genre.name).result.headOption
     result <- genreFound.map(DBIO.successful).getOrElse(genres returning genres.map(_.id) += genre)

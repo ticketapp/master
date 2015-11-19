@@ -35,6 +35,7 @@ trait Injectors {
   lazy val userDAOImpl = new UserDAOImpl(dbConfProvider)
   lazy val playlistMethods = new PlaylistMethods(dbConfProvider, utilities)
   lazy val trackRatingMethods = new TrackRatingMethods(dbConfProvider, utilities, trackMethods)
+  lazy val issueMethods = new IssueMethods(dbConfProvider)
 
   lazy val databaseApi = injector.instanceOf[DBApi]
 }

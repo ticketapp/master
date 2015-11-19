@@ -5,18 +5,14 @@ import java.util.UUID
 import com.vividsolutions.jts.io.{WKTReader, WKTWriter}
 
 //import models.Accounting._
+import com.vividsolutions.jts.geom.Geometry
 import models._
 import play.api.libs.json.{JsNumber, _}
-import com.vividsolutions.jts.geom.{Geometry, Point}
 
 object JsonHelper {
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
     def writes(bigDecimal: java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(bigDecimal))
   }
-
-//  implicit object FloatWrites extends AnyRef with Writes[Float] {
-//    def writes(float: Float): JsNumber = JsNumber(BigDecimal(float))
-//  }
 
   implicit object CharWrites extends AnyRef with Writes[Char] {
     def writes(char: Char): JsString = JsString(char.toString)
@@ -93,6 +89,8 @@ object JsonHelper {
   implicit val eventWithRelationsWrites = Json.writes[EventWithRelations]
 //  implicit val infoWrites: Writes[Info] = Json.writes[Info]
   implicit val issueWrites: Writes[Issue] = Json.writes[Issue]
+  implicit val issueReads: Reads[Issue] = Json.reads[Issue]
 //  implicit val mailWrites: Writes[Mail] = Json.writes[Mail]
   implicit val issueCommentWrites: Writes[IssueComment] = Json.writes[IssueComment]
+  implicit val issueCommentReads: Reads[IssueComment] = Json.reads[IssueComment]
 }
