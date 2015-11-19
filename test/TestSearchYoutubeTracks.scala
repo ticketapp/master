@@ -15,7 +15,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
 
     "return a list of echonestId/facebookId" in {
       val futureSeqTupleEchonestIdFacebookId = searchYoutubeTrack.getSeqTupleEchonestIdFacebookId("rone")
-      
+
       whenReady (futureSeqTupleEchonestIdFacebookId, timeout(Span(2, Seconds))) { seqTupleEchonestIdFacebookId =>
         seqTupleEchonestIdFacebookId should contain allOf (("ARWRC4A1187FB5B7D5", "114140585267550"),
           ("AR3KOM61187B99740F", "112089615877"))
@@ -98,27 +98,27 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val websites = Set("www.qds.com", "https://www.youtube.com/user/TheOfficialSkrillex",
         "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA")
 
-
       val expectedIds = Set("UCGWpjrgMylyGVRIKQdazrPA")
 
       searchYoutubeTrack.filterAndNormalizeYoutubeChannelIds(websites) mustBe expectedIds
     }
 
-    "return names of user youtube" in {
+    "return the names of the Youtube user" in {
       val websites = Set("youtube.com/user/theofficialskrillex/videos")
 
       val expectedNames = Set("theofficialskrillex")
 
-      searchYoutubeTrack.getYoutubeUserNames(websites) mustBe expectedNames
+      searchYoutubeTrack.searchYoutubeUserNames(websites) mustBe expectedNames
     }
 
-    "return tracks for YT User" in {
+    "return some tracks for a Youtube User" in {
       val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
         Option("description"), "facebookUrl3", Set("hungrymusic.fr","soundcloud.com/worakls","hungrymusic.fr",
           "youtube.com/user/worakls/videos","twitter.com/worakls","facebook.com/worakls","hungrymusic.fr",
           "youtube.com/user/worakls/videos","twitter.com/worakls","facebook.com/worakls"))
+
       whenReady(searchYoutubeTrack.getYoutubeTracksByYoutubeUser(artist), timeout(Span(10, Seconds))) {tracks =>
-        assert(tracks.isInstanceOf[Set[Track]])
+
         tracks should not be empty
       }
     }
@@ -126,21 +126,26 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
     "return ids of user youtube" in {
       val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
         Option("description"), "facebookUrl3", Set("website"))
-
       val userNames = "theofficialskrillex"
-
       val expectedIds = Set("UC_TVqp_SyG6j5hG-xVRy95A")
-      val eventuallyYoutubeId = searchYoutubeTrack.getYoutubeChannelIdsByUserName(artist, userNames)
-      whenReady(eventuallyYoutubeId, timeout(Span(10, Seconds))) { _ mustBe expectedIds }
+      val eventuallyYoutubeIds = searchYoutubeTrack.getYoutubeChannelIdsByUserName(artist, userNames)
+
+      whenReady(eventuallyYoutubeIds, timeout(Span(10, Seconds))) { _ mustBe expectedIds }
     }
 
-    "return set of youtube tracks" in {
+    "return a set of youtube tracks" in {
+      val artist = Artist(id = None,
+        facebookId = None,
+        name = "Skrillex",
+        imagePath = None,
+        description = None,
+        facebookUrl = "facebookUrl3",
+        websites = Set.empty)
+
       val youtubeChannel = "UCGWpjrgMylyGVRIKQdazrPA"
+      val youtubeChannel2 = "UCswumVYAf0SKczPSoRGHxcQ"
 
-      val artist = Artist(None, Option("139247202797113"), "Skrillex", Option("imagePath"),
-        Option("description"), "facebookUrl3", Set("website"))
-
-      val uuid = UUID.fromString("04d64aef-2baa-42b3-a0dc-07f77da9303d")
+      val uuid = UUID.randomUUID
 
       val expectedTrack = Track(uuid, "Welcome to Topsify", "ISo15c2zKa4", 'y',
         "https://i.ytimg.com/vi/ISo15c2zKa4/default.jpg", "facebookUrl3", "Skrillex", None)
@@ -148,17 +153,13 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val eventuallyYoutubeTracks = searchYoutubeTrack.getYoutubeTracksByChannelId(artist, youtubeChannel)
 
       whenReady(eventuallyYoutubeTracks, timeout(Span(10, Seconds))) { tracks =>
-        tracks.map { _.copy(uuid = uuid) } should contain (expectedTrack)
-      }
-    }
 
-    "return set of youtube tracks by websites" in {
-      val artist = Artist(Some(236),Some("197919830269754"), "Feu! Chatterton", None, None, "kjlk",
-        Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
-          "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"))
-      whenReady(searchYoutubeTrack.getYoutubeTracksByYoutubeUser(artist), timeout(Span(5, Seconds))) { tracks =>
-        assert(tracks.isInstanceOf[Set[Track]])
-        tracks should not be empty
+        tracks.map { _.copy(uuid = uuid) } should contain (expectedTrack)
+
+        whenReady(eventuallyYoutubeTracks, timeout(Span(10, Seconds))) { tracksFromYoutubeChannel2 =>
+
+          tracksFromYoutubeChannel2 should not be empty
+        }
       }
     }
 
