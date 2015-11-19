@@ -607,8 +607,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = Try {
-    val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
-    (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
+    val readFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
+    (resp.json \ "data").as[Seq[Option[String]]](readFacebookIds).flatten
   } match {
     case Success(facebookIds) => facebookIds
     case _ => Seq.empty

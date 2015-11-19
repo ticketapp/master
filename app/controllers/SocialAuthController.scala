@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject.Inject
-
+import services.GetUserLikedPagesOnFacebook
 import services.UserService
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
@@ -14,6 +14,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.Action
 
 import scala.concurrent.Future
+import scala.util.Try
 
 /**
  * The social auth controller.
@@ -29,7 +30,8 @@ class SocialAuthController @Inject() (
   val env: Environment[User, CookieAuthenticator],
   userService: UserService,
   authInfoRepository: AuthInfoRepository,
-  socialProviderRegistry: SocialProviderRegistry)
+  socialProviderRegistry: SocialProviderRegistry,
+  getUserLikedPagesOnFacebook: GetUserLikedPagesOnFacebook)
   extends Silhouette[User, CookieAuthenticator] with Logger {
 
   /**
@@ -52,6 +54,7 @@ class SocialAuthController @Inject() (
             value <- env.authenticatorService.init(authenticator)
             result <- env.authenticatorService.embed(value, Redirect(routes.Application.index()))
           } yield {
+            Try (getUserLikedPagesOnFacebook.findUserLikedPagesOnFacebook(profile.loginInfo, user.uuid))
             env.eventBus.publish(LoginEvent(user, request, request2Messages))
             result
           }
