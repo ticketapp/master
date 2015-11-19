@@ -49,7 +49,7 @@ class PlaceController @Inject() (ws: WSClient,
           Ok(Json.toJson(placeCreated))
         } recover {
           case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
-            Logger.error(s"PlaceController.followPlaceByPlaceId: this place already exist")
+            Logger.error(s"PlaceController.createPlace: this place already exist")
             Conflict
           case throwable: Throwable =>
             Logger.error("PlaceController.createPlace: INTERNAL_SERVER_ERROR: ", throwable)

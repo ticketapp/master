@@ -8,6 +8,7 @@ angular.module('claudeApp').
             $scope.showDesc = false;
             PlaceFactory.getPlace($routeParams.id).then(function (place) {
                 $scope.place = place;
+                $scope.description = place.description.trim();
                 if ($scope.place.address !== undefined && $scope.place.address.geographicPoint !== undefined) {
                     $scope.geographicPoint = $scope.place.address.geographicPoint;
                     $scope.map = true;

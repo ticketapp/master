@@ -10,31 +10,7 @@
     </h2>
     <websites></websites>
 </div>
-<div class="column large-12">
-    <div class="column large-12 float-left marginBottom10"
-         ng-if="artist.description.length > 0"
-         style="background-color: #e7e7e7">
-        <h2 class="float-left"
-            style="line-height: 50px;
-                  margin: 5px;
-                  color: rgb(105, 181, 205);
-                ">Présentation
-        </h2>
-        <div class="img-circularPlayer float-right"
-             style="background: rgba(0, 140, 186, 0.54); height: 50px; width: 50px">
-            <i class="pauseInImg ng-scope fa fa-chevron-down pointer"
-               style="font-size: 50px;"
-               ng-if="showDesc == false"
-               ng-click="$parent.showDesc = true"></i>
-            <i class="pauseInImg ng-scope fa fa-chevron-up pointer"
-               style="font-size: 50px;"
-               ng-if="showDesc == true"
-               ng-click="$parent.showDesc = false"></i>
-        </div>
-        <div ng-if="showDesc == true" class="float-left width100p" data-ng-bind-html="artist.description">
-        </div>
-    </div>
-</div>
+<ng-description class="column large-12"></ng-description>
 <md-content class="column">
     <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
         <md-tab label="Evenements">
