@@ -458,7 +458,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
             Future {
               event.artists.foreach { artist =>
               val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
-              tracksEnumerator |>> Iteratee.foreach(tracks => trackMethods.saveSequence(tracks))
+              trackMethods.saveEnumeratorWithDelay(tracksEnumerator)
                 artist
               }
             }

@@ -5,7 +5,6 @@ import javax.inject.Inject
 import models._
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.iteratee.{Enumeratee, Iteratee}
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -64,13 +63,7 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
     artists map { artist =>
       Thread.sleep(2000)
       val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.name, ArtistWithWeightedGenres(artist)))
-      val toTracksWithDelay: Enumeratee[Set[Track], Set[Track]] = Enumeratee.map[Set[Track]] { tracks: Set[Track] =>
-        Thread.sleep(1000)
-        tracks
-      }
-      tracksEnumerator |>> toTracksWithDelay &>> Iteratee.foreach { tracks =>
-        trackMethods.saveSequence(tracks)
-      }
+      trackMethods.saveEnumeratorWithDelay(tracksEnumerator)
     }
   }
 

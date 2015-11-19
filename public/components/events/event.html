@@ -87,9 +87,9 @@
                 </div>
             </a>
             <div class="img-circularPlayer float-right marginTop20 relative playProg"
-                 ng-show="artist.tracks.length > 0">
+                 ng-show="artist.hasTracks">
                 <i class="pauseInImg ng-scope fi-play"
-                   ng-click="$root.addAndPlay(artist.tracks, artist)"></i>
+                   ng-click="getTracksAndPlay(artist)"></i>
             </div>
         </li>
     </div>

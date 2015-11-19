@@ -11,7 +11,7 @@ import json.JsonHelper._
 
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.iteratee.{Enumeratee, Enumerator}
+import play.api.libs.iteratee.{Iteratee, Enumeratee, Enumerator}
 import play.api.libs.json.{Json, JsValue}
 import services.MyPostgresDriver.api._
 import services.{DistinctBy, FollowService, MyPostgresDriver, Utilities}
@@ -201,5 +201,18 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def saveTracksInFutureEnumeratee: Enumeratee[Set[Track], Set[Track]] = Enumeratee.map[Set[Track]] { tracks =>
     Future(saveSequence(tracks))
     tracks
+  }
+
+  def toTracksWithDelay: Enumeratee[Set[Track], Set[Track]] = Enumeratee.map[Set[Track]] { tracks: Set[Track] =>
+    Thread.sleep(1000)
+    tracks
+  }
+
+  def saveEnumeratorWithDelay(tracksEnumerator: Enumerator[Set[Track]]): Unit = {
+    val tracksEnumeratorWithoutDuplicates = filterDuplicateTracksEnumerator(tracksEnumerator)
+
+    tracksEnumeratorWithoutDuplicates |>> toTracksWithDelay &>> Iteratee.foreach { tracks =>
+      saveSequence(tracks)
+    }
   }
 }
