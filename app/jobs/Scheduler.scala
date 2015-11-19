@@ -26,13 +26,7 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
           eventMethods.getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId) map {
             _.map { eventId =>
               Thread.sleep(600)
-              eventMethods.findEventOnFacebookByFacebookId(eventId) map {
-                case Some(event) =>
-                  Thread.sleep(200)
-                  eventMethods.save(event)
-                case _ =>
-                  None
-              } recover {
+              eventMethods.saveFacebookEventByFacebookId(eventId) recover {
                 case NonFatal(e) => Logger.error("Scheduler.findEventsForPlaces: ", e)
               }
             }
@@ -53,10 +47,7 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
             Thread.sleep(300)
             eventFacebookIds.map { eventId: String =>
               Thread.sleep(200)
-              eventMethods.findEventOnFacebookByFacebookId(eventId) map {
-                case Some(event) => eventMethods.save(event)
-                case _ =>
-              } recover {
+              eventMethods.saveFacebookEventByFacebookId(eventId) recover {
                 case NonFatal(e) => Logger.error("Scheduler.findEventsForOrganizers: ", e)
               }
             }
