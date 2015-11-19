@@ -1,0 +1,65 @@
+import models._
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
+import org.scalatest.Matchers._
+
+
+class TestIssueModel extends GlobalApplicationForModels {
+
+  "An issue" must {
+
+    "all be found" in {
+      val expectedIssue = Issue(
+        id = Some(100),
+        title = "title",
+        content = "content",
+        userUUID = defaultUserUUID,
+        fixed = false)
+
+      whenReady(issueMethods.findAll, timeout(Span(5, Seconds))) { issues =>
+        issues mustBe Seq(expectedIssue)
+      }
+    }
+
+    "found all its comments" in {
+      val expectedComment = IssueComment(
+        content = "content",
+        userUUID = defaultUserUUID,
+        issueId = 100)
+
+      whenReady(issueMethods.findAllCommentsForIssueId(100), timeout(Span(5, Seconds))) { comments =>
+        comments mustBe Seq(expectedComment)
+      }
+    }
+
+    "save an issue" in {
+      val issue = Issue(
+        id = None,
+        title = "title",
+        content = "content",
+        userUUID = defaultUserUUID,
+        fixed = false)
+
+      whenReady(issueMethods.save(issue), timeout(Span(5, Seconds))) { savedIssue =>
+        savedIssue mustBe issue.copy(id = Some(1))
+        whenReady(issueMethods.findAll, timeout(Span(5, Seconds))) { issues =>
+          issues should contain(issue.copy(id = Some(1)))
+        }
+      }
+    }
+
+    "save a comment" in {
+      val comment = IssueComment(
+        content = "content",
+        userUUID = defaultUserUUID,
+        issueId = 100)
+
+      whenReady(issueMethods.saveComment(comment), timeout(Span(5, Seconds))) { savedComment =>
+        savedComment mustBe comment
+        whenReady(issueMethods.findAllCommentsForIssueId(100), timeout(Span(5, Seconds))) { comments =>
+          comments should contain(comment)
+        }
+      }
+    }
+  }
+}
