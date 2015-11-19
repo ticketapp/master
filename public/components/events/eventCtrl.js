@@ -1,6 +1,7 @@
 angular.module('claudeApp').
     controller('EventCtrl', ['$scope', 'EventsFactory', '$routeParams', '$rootScope', 'UserFactory', 'InfoModal', 'FollowService',
-        function ($scope, EventFactory, $routeParams, $rootScope, UserFactory, InfoModal, FollowService) {
+        "TrackService",
+        function ($scope, EventFactory, $routeParams, $rootScope, UserFactory, InfoModal, FollowService, TrackService) {
             $scope.event = {};
             $scope.map = false;
             $scope.isFollowed = false;
@@ -94,7 +95,7 @@ angular.module('claudeApp').
                 }
             });
             $scope.follow = function () {
-                EventFactory.followEventByEventId($scope.event.id, $scope.event.name).then(
+                FollowService.events.follow($scope.event.id, $scope.event.name).then(
                     function (followed) {
                         if (followed != 'error') {
                             $scope.isFollowed = true;
@@ -104,7 +105,7 @@ angular.module('claudeApp').
             };
 
             $scope.unfollow = function () {
-                EventFactory.unfollowEvent($scope.event.id, $scope.event.name).then(
+                FollowService.events.unfollow($scope.event.id, $scope.event.name).then(
                     function (followed) {
                         if (followed != 'error') {
                             $scope.isFollowed = false;
@@ -112,4 +113,14 @@ angular.module('claudeApp').
                         }
                     })
             };
+
+            $scope.getTracksAndPlay = function(artist) {
+                TrackService.getArtistTracks(artist.facebookUrl).then(function(tracks) {
+                    tracks.map(function(track) {
+                        track.genres = artist.genres;
+                        return track;
+                    });
+                    $rootScope.addAndPlay(tracks, artist)
+                })
+            }
     }]);

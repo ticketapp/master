@@ -26,7 +26,8 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
                                             val artistMethods: ArtistMethods,
                                             val placeMethods: PlaceMethods,
                                             val organizerMethods: OrganizerMethods,
-                                            val eventMethods: EventMethods)
+                                            val eventMethods: EventMethods,
+                                            val trackMethods: TrackMethods)
   extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService {
 
   val facebookApiVersion = utilities.facebookApiVersion
@@ -56,7 +57,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
   def getMusicPagesOnFacebook(facebookAccessToken: String, userUuid: UUID): Unit =
     WS.url("https://graph.facebook.com/" + facebookApiVersion + "/me")
       .withQueryString(
-        "fields" -> "id,name,events{owner,admins},likes{id, name, category, categories_list}",
+        "fields" -> "id,name,likes{id, name, category, categories_list}",
         "access_token" -> facebookAccessToken)
     .get()
     .map { response =>
@@ -68,9 +69,10 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     .get()
     .map(response => filterPages(response.json, userUuid, facebookAccessToken))
 
+
   def filterPages(pages: JsValue, userUuid: UUID, facebookAccessToken: String): Unit = {
     facebookPageToPageTuple(pages) foreach { facebookPageTuple =>
-      Thread.sleep(400)
+      Thread.sleep(600)
       facebookPageTuple._2 match {
         case Some(artist) if artist.toLowerCase == "musician/band" =>
           makeRelationArtistUser(facebookPageTuple, userUuid)
@@ -84,31 +86,14 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
         case _ =>
       }
     }
-    findEventsIds(pages) map { eventId =>
-      eventMethods.getEventOnFacebookByFacebookId(eventId) map {
-        case Some(event) =>
-          event.event.id match {
-            case Some(id) =>
-              follow(UserEventRelation(userUuid, id))
-            case _ =>
-          }
-        case _ =>
-      } recover {
-        case NonFatal(e) =>
-          Logger.error("GetUserLikedPagesOnFacebook.filterPages.getEventOnFacebookByFacebookId: ", e)
-          None
-      }
-    }
+
     searchNextLikesPage(pages) match  {
       case Some(url) =>
         getNextFacebookPages(url, facebookAccessToken, userUuid)
       case _ =>
+        Logger.info("getUserLikedPagesOnFacebook: Done")
     }
-    searchNextEventsPage(pages) match  {
-      case Some(url) =>
-        getNextFacebookPages(url, facebookAccessToken, userUuid)
-      case _ =>
-    }
+
   }
 
   def searchNextLikesPage(pages: JsValue): Option[String] = {
@@ -117,16 +102,6 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     jsonLikes match {
       case JsDefined(likes) =>
         (pages \ "likes" \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
-      case _ =>
-        (pages \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
-    }
-  }
-  def searchNextEventsPage(pages: JsValue): Option[String] = {
-    val readNextFacebookPages: Reads[Option[String]] = (__ \ "next").readNullable[String]
-    val jsonEvents: JsLookupResult = pages \ "events"
-    jsonEvents match {
-      case JsDefined(events) =>
-        (pages \ "events" \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
       case _ =>
         (pages \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
     }
@@ -147,10 +122,14 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
               savedArtist.id match {
                 case Some(id) =>
                   followByArtistId(UserArtistRelation(userId = userUuid, artistId = id))
+
                   val patternAndArtist = PatternAndArtist(
                     searchPattern = savedArtist.name,
                     artistWithWeightedGenres = ArtistWithWeightedGenres(savedArtist, Vector.empty))
                   artistMethods.getArtistTracks(patternAndArtist)
+
+                  val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtist)
+                  trackMethods.saveEnumeratorWithDelay(tracksEnumerator)
                 case _ =>
               }
             }
@@ -233,24 +212,6 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
   } match {
     case Success(Some(facebookPagesTuple)) =>
       facebookPagesTuple 
-    case _ =>
-      Seq.empty
-  }
-
-  def findEventsIds(pages: JsValue): Seq[String] = Try {
-    val readFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String]).map(_.toVector)
-    val jsonEvents: JsLookupResult = pages \ "events"
-    jsonEvents match {
-      case JsDefined(likes) =>
-        (pages \ "events" \ "data").asOpt[Seq[Option[String]]](readFacebookIds)
-      case _ =>
-        (pages \ "data").asOpt[Seq[Option[String]]](readFacebookIds)
-    }
-  } match {
-    case Success(Some(facebookIds)) =>
-      facebookIds collect {
-        case Some(id) => id
-      }
     case _ =>
       Seq.empty
   }
