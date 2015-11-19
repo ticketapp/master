@@ -246,7 +246,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "find a complete event by facebookId" in {
-      whenReady(eventMethods.findEventOnFacebookByFacebookId("809097205831013"), timeout(Span(10, Seconds))) { event =>
+      whenReady(eventMethods.getEventOnFacebookByFacebookId("809097205831013"), timeout(Span(10, Seconds))) { event =>
         event.get.event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
       }
     }
@@ -285,7 +285,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "have the genre of its artists" in {
-      whenReady(eventMethods.findEventOnFacebookByFacebookId("758796230916379"), timeout(Span(10, Seconds))) { eventWithRelations =>
+      whenReady(eventMethods.getEventOnFacebookByFacebookId("758796230916379"), timeout(Span(10, Seconds))) { eventWithRelations =>
         eventWithRelations.get.genres should contain allOf(Genre(None, "hip", 'a'), Genre(None, "hop", 'a'))
       }
     }

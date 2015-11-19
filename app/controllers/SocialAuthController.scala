@@ -2,18 +2,20 @@ package controllers
 
 import javax.inject.Inject
 
-import services.UserService
+import services.{GetUserLikedPagesOnFacebook, UserService}
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers._
 import models.User
-import play.api.i18n.{ MessagesApi, Messages }
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.Action
 
 import scala.concurrent.Future
+import scala.util.Try
+import scala.util.control.NonFatal
 
 /**
  * The social auth controller.
@@ -29,7 +31,8 @@ class SocialAuthController @Inject() (
   val env: Environment[User, CookieAuthenticator],
   userService: UserService,
   authInfoRepository: AuthInfoRepository,
-  socialProviderRegistry: SocialProviderRegistry)
+  socialProviderRegistry: SocialProviderRegistry,
+  getUserLikedPagesOnFacebook: GetUserLikedPagesOnFacebook)
   extends Silhouette[User, CookieAuthenticator] with Logger {
 
   /**
@@ -52,6 +55,11 @@ class SocialAuthController @Inject() (
             value <- env.authenticatorService.init(authenticator)
             result <- env.authenticatorService.embed(value, Redirect(routes.Application.index()))
           } yield {
+            Try (getUserLikedPagesOnFacebook.getUserLikedPagesOnFacebook(profile.loginInfo, user.uuid)) recover {
+              case NonFatal(e) =>
+                play.api.Logger.error("SocialAuthController.authenticate.findUserLikedPagesOnFacebook: ", e)
+                InternalServerError("SocialAuthController.authenticate.findUserLikedPagesOnFacebook: " + e.getMessage)
+            }
             env.eventBus.publish(LoginEvent(user, request, request2Messages))
             result
           }

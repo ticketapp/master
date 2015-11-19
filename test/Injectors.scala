@@ -3,8 +3,8 @@ import play.api.Configuration
 import play.api.db.DBApi
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.{SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
-import silhouette.UserDAOImpl
+import services.{GetUserLikedPagesOnFacebook, SearchSoundCloudTracks, SearchYoutubeTracks, Utilities}
+import silhouette.{OAuth2InfoDAO, UserDAOImpl}
 
 
 trait Injectors {
@@ -35,6 +35,8 @@ trait Injectors {
   lazy val userDAOImpl = new UserDAOImpl(dbConfProvider)
   lazy val playlistMethods = new PlaylistMethods(dbConfProvider, utilities)
   lazy val trackRatingMethods = new TrackRatingMethods(dbConfProvider, utilities, trackMethods)
-
+  lazy val oAuth2InfoDAO = new OAuth2InfoDAO(dbConfProvider)
+  lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfProvider, oAuth2InfoDAO, utilities,
+    artistMethods, placeMethods, organizerMethods, eventMethods)
   lazy val databaseApi = injector.instanceOf[DBApi]
 }
