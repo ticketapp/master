@@ -53,7 +53,7 @@ class TestPlaceModel extends GlobalApplicationForModels {
               addressId = foundPlace.head.address.get.id
             ),
             address = Option(place.address.get.copy(
-              geographicPoint = geographicPointMethods.optionStringToOptionPoint(Some("44.7053439,4.596782999999999")),
+              geographicPoint = geographicPointMethods.optionStringToOptionPoint(Some("44.735269,4.599038999999999")),
               id = foundPlace.get.address.get.id))
           ))
 

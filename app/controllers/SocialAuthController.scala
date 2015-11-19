@@ -15,6 +15,7 @@ import play.api.mvc.Action
 
 import scala.concurrent.Future
 import scala.util.Try
+import scala.util.control.NonFatal
 
 /**
  * The social auth controller.
@@ -55,9 +56,9 @@ class SocialAuthController @Inject() (
             result <- env.authenticatorService.embed(value, Redirect(routes.Application.index()))
           } yield {
             Try (getUserLikedPagesOnFacebook.getUserLikedPagesOnFacebook(profile.loginInfo, user.uuid)) recover {
-              case t: Throwable =>
-                play.api.Logger.error("SocialAuthController.authenticate.findUserLikedPagesOnFacebook: ", t)
-                InternalServerError("OrganizerController.findOrganizersContaining: " + t.getMessage)
+              case NonFatal(e) =>
+                play.api.Logger.error("SocialAuthController.authenticate.findUserLikedPagesOnFacebook: ", e)
+                InternalServerError("SocialAuthController.authenticate.findUserLikedPagesOnFacebook: " + e.getMessage)
             }
             env.eventBus.publish(LoginEvent(user, request, request2Messages))
             result

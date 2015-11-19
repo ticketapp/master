@@ -6,6 +6,7 @@ import javax.inject.Inject
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import play.api.Logger
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.libs.ws.WS
@@ -14,7 +15,9 @@ import slick.driver.PostgresDriver.api._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 import scala.util.matching.Regex
+import scala.util.{Failure, Success, Try}
 
 
 class Utilities @Inject()() {
@@ -46,6 +49,13 @@ class Utilities @Inject()() {
   def normalizeUrlWithoutLowerCase(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website, p => "").stripSuffix("/")
 
+  def normalizeMaybeWebsite(website: Option[String]): Option[String] = website match {
+    case Some(websiteMatched) =>
+      Option(normalizeUrl(websiteMatched))
+    case _ =>
+      None
+  }
+
   def optionStringToLowerCaseOptionString(maybeString: Option[String]): Option[String] = maybeString match {
     case Some(string: String) => Option(string.toLowerCase)
     case None => None
@@ -56,34 +66,54 @@ class Utilities @Inject()() {
 
   def removeSpecialCharacters(string: String): String = string.replaceAll("""[*ù$-+/*_\.\\,#'~´&]""", "")
   
-  def unshortLink(string: String): Future[String] = {
-    if (string.indexOf("bit.ly") > -1 || string.indexOf("bit.do") > -1 || string.indexOf("t.co") > -1 ||
-      string.indexOf("lnkd.in") > -1 || string.indexOf("db.tt") > -1 ||  string.indexOf("qr.ae") > -1 ||
-      string.indexOf("adf.ly") > -1 || string.indexOf("goo.gl") > -1 || string.indexOf("bitly.com") > -1 ||
-      string.indexOf("cur.lv") > -1 || string.indexOf("tinyurl.com") > - 1 || string.indexOf("ow.ly") > -1 ||
-      string.indexOf("adcrun.ch") > -1 || string.indexOf("ity.im") > -1 || string.indexOf("q.gs") > -1 ||
-      string.indexOf("viralurl.com") > -1 || string.indexOf("is.gd") > -1 || string.indexOf("vur.me") > -1 ||
-      string.indexOf("bc.vc") > -1 || string.indexOf("twitthis.com") > -1 || string.indexOf("u.to") > -1 ||
-      string.indexOf("j.mp") > -1 || string.indexOf("buzurl.com") > -1 || string.indexOf("cutt.us") > -1 ||
-      string.indexOf("u.bb") > -1 || string.indexOf("yourls.org") > -1 || string.indexOf("crisco.com") > -1 ||
-      string.indexOf("x.co") > -1 ||  string.indexOf("prettylinkpro.com") > -1 || string.indexOf("viralurl.biz") > -1 ||
-      string.indexOf("adcraft.co") > -1 || string.indexOf("virl.ws") > -1 || string.indexOf("scrnch.me") > -1 ||
-      string.indexOf("filoops.info") > -1 || string.indexOf("vurl.bz") > -1 || string.indexOf("vzturl.com") > -1 ||
-      string.indexOf("lemde.fr") > -1 || string.indexOf("qr.net") > -1 || string.indexOf("1url.com") > -1 ||
-      string.indexOf("tweez.me") > -1 || string.indexOf("7vd.cn") > -1 || string.indexOf("v.gd") > -1 ||
-      string.indexOf("dft.ba") > -1 || string.indexOf("aka.gr") > -1 || string.indexOf("tr.im") > -1) {
-      WS.url("http://expandurl.appspot.com/expand?url=http://" + string)
+  def unshortLink(url: String): Future[String] = {
+    if (url.indexOf("bit.ly") > -1 || url.indexOf("bit.do") > -1 /*|| url.indexOf("t.co") > -1*/ ||
+      url.indexOf("lnkd.in") > -1 || url.indexOf("db.tt") > -1 ||  url.indexOf("qr.ae") > -1 ||
+      url.indexOf("adf.ly") > -1 || url.indexOf("goo.gl") > -1 || url.indexOf("bitly.com") > -1 ||
+      url.indexOf("cur.lv") > -1 || url.indexOf("tinyurl.com") > - 1 || url.indexOf("ow.ly") > -1 ||
+      url.indexOf("adcrun.ch") > -1 || url.indexOf("ity.im") > -1 || url.indexOf("q.gs") > -1 ||
+      url.indexOf("viralurl.com") > -1 || url.indexOf("is.gd") > -1 || url.indexOf("vur.me") > -1 ||
+      url.indexOf("bc.vc") > -1 || url.indexOf("twitthis.com") > -1 || url.indexOf("u.to") > -1 ||
+      url.indexOf("j.mp") > -1 || url.indexOf("buzurl.com") > -1 || url.indexOf("cutt.us") > -1 ||
+      url.indexOf("u.bb") > -1 || url.indexOf("yourls.org") > -1 || url.indexOf("crisco.com") > -1 ||
+      /*url.indexOf("x.co") > -1 ||*/  url.indexOf("prettylinkpro.com") > -1 || url.indexOf("viralurl.biz") > -1 ||
+      url.indexOf("adcraft.co") > -1 || url.indexOf("virl.ws") > -1 || url.indexOf("scrnch.me") > -1 ||
+      url.indexOf("filoops.info") > -1 || url.indexOf("vurl.bz") > -1 || url.indexOf("vzturl.com") > -1 ||
+      url.indexOf("lemde.fr") > -1 || url.indexOf("qr.net") > -1 || url.indexOf("1url.com") > -1 ||
+      url.indexOf("tweez.me") > -1 || url.indexOf("7vd.cn") > -1 || url.indexOf("v.gd") > -1 ||
+      url.indexOf("dft.ba") > -1 || url.indexOf("aka.gr") > -1 || url.indexOf("tr.im") > -1) {
+      WS.url("http://expandurl.appspot.com/expand")
+        .withQueryString("url" -> ("http://" + url))
         .get()
         .map { response =>
-          val readUnshortedUrl: Reads[Option[String]] = (__ \ "end_url").readNullable[String]
-
-          response.json.as[Option[String]](readUnshortedUrl) match {
-            case Some(url) => normalizeUrl(url)
-            case None => string
+          readUnshortResponse(response.json) match {
+            case Some(shortedUrl) => shortedUrl
+            case _ => url
           }
-        }
+        } recoverWith {
+        case NonFatal(e) =>
+          Logger.error("Utilities.unshortLink: for url " + url + "\nMessage:" + e.getMessage)
+          Future(url)
+      }
     } else
-      Future(string)
+      Future(url)
+  }
+
+  def readUnshortResponse(jsonResponse: JsValue): Option[String] = Try {
+    val readUnshortedUrl: Reads[Option[String]] = (__ \ "end_url").readNullable[String]
+
+    jsonResponse.asOpt[Option[String]](readUnshortedUrl) match {
+      case Some(Some(url)) => Option(normalizeUrl(url))
+      case _ => None
+    }
+  } match {
+    case Success(Some(shortedUrl)) =>
+      Option(shortedUrl)
+    case Success(None) =>
+      None
+    case Failure(e) =>
+      Logger.error("Utilities.readUnshortResponse:\nException:", e)
+      None
   }
 
   def getNormalizedWebsitesInText(description: String): Future[Set[String]] = Future.sequence {
@@ -169,6 +199,5 @@ class Utilities @Inject()() {
     }
   }
 
-  def setToOptionString(set: Set[String]): Option[String] =
-    if (set.isEmpty) None else Option(set.mkString(","))
+  def setToOptionString(set: Set[String]): Option[String] = if (set.isEmpty) None else Option(set.mkString(","))
 }

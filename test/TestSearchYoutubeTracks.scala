@@ -63,7 +63,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val expectedTrack = Track(UUID.randomUUID, "Le Poinçonneur Des Lilas (1958)", "JHpUlLzt8_o", 'y',
           "https://i.ytimg.com/vi/JHpUlLzt8_o/default.jpg", "facebookUrl3", "Serge Gainsbourg", None)
 
-      whenReady(searchYoutubeTrack.getYoutubeTracksByArtistAndTitle(artist, "Le Poinçonneur Des Lilas"), timeout(Span(5, Seconds))) {
+      whenReady(searchYoutubeTrack.getYoutubeTracksByArtistAndTitle(artist, "Le Poinçonneur Des Lilas"), timeout(Span(10, Seconds))) {
         tracks => val tracksTitle = tracks.map { track => track.title }
           tracksTitle should contain (expectedTrack.title)
       }
@@ -77,7 +77,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val expectedTrack = Track(UUID.randomUUID, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y',
         "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg", "facebookUrl3", "Serge Gainsbourg", None)
 
-      whenReady(searchYoutubeTrack.getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(5, Seconds))) { tracks =>
+      whenReady(searchYoutubeTrack.getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(10, Seconds))) { tracks =>
         val tracksTitle = tracks.map { track => track.title}
         tracksTitle should contain (expectedTrack.title)
       }
@@ -117,7 +117,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
         Option("description"), "facebookUrl3", Set("hungrymusic.fr","soundcloud.com/worakls","hungrymusic.fr",
           "youtube.com/user/worakls/videos","twitter.com/worakls","facebook.com/worakls","hungrymusic.fr",
           "youtube.com/user/worakls/videos","twitter.com/worakls","facebook.com/worakls"))
-      whenReady(searchYoutubeTrack.getYoutubeTracksByYoutubeUser(artist), timeout(Span(5, Seconds))) {tracks =>
+      whenReady(searchYoutubeTrack.getYoutubeTracksByYoutubeUser(artist), timeout(Span(10, Seconds))) {tracks =>
         assert(tracks.isInstanceOf[Set[Track]])
         tracks should not be empty
       }
@@ -167,7 +167,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
         Set("soundcloud.com/feu-chatterton", "facebook.com/feu.chatterton", "twitter.com/feuchatterton",
           "youtube.com/user/feuchatterton", "youtube.com/user/feuchatterton",
           "https://www.youtube.com/channel/UCGWpjrgMylyGVRIKQdazrPA"))
-      whenReady(searchYoutubeTrack.getYoutubeTracksByChannel(artist), timeout(Span(5, Seconds))) { tracks =>
+      whenReady(searchYoutubeTrack.getYoutubeTracksByChannel(artist), timeout(Span(10, Seconds))) { tracks =>
         assert(tracks.isInstanceOf[Set[Track]])
         tracks should not be empty
       }

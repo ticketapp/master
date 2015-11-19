@@ -4,6 +4,7 @@ import models._
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import play.api.libs.iteratee.{Enumerator, Iteratee}
 import play.api.libs.json.Json
 
 import scala.collection.immutable.Seq
@@ -257,13 +258,24 @@ class TestArtistModel extends GlobalApplicationForModels {
     }
 
     "return hasTracks set to true if he as some tracks and vice-versa" in {
-      whenReady(artistMethods.find(100), timeout(Span(5, Seconds))) { foundArtist =>
-        foundArtist.get.artist.hasTracks mustBe true
+      val track = Track(
+        uuid = UUID.randomUUID(),
+        title = "hasTracksTest",
+        url = "hasTracksTest",
+        platform = 'a',
+        thumbnailUrl = "hasTracksTest",
+        artistFacebookUrl = "facebookUrl0",
+        artistName = "hasTracksTest")
+
+      whenReady(trackMethods.save(track), timeout(Span(5, Seconds))) { _ =>
+        whenReady(artistMethods.find(100), timeout(Span(5, Seconds))) { foundArtist =>
+
+          foundArtist.get.artist.hasTracks mustBe true
+        }
       }
-      whenReady(artistMethods.find(200), timeout(Span(5, Seconds))) { foundArtist =>
-        foundArtist.get.artist.hasTracks mustBe true
-      }
+
       whenReady(artistMethods.find(4), timeout(Span(5, Seconds))) { foundArtist =>
+
         foundArtist.get.artist.hasTracks mustBe false
       }
     }

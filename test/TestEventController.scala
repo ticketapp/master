@@ -102,20 +102,18 @@ class TestEventController extends GlobalApplicationForControllers {
       contentAsString(events) must contain(""""name":"name0"""")
     }
 
-    "find one followed event by id" in {
-      val eventId = await(eventMethods.findAllContaining("test") map (_.head.event.id.get))
-      val Some(response) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(events) = route(FakeRequest(GET, "/events/" + eventId + "/isFollowed")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response2) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
+    "return true if an event is followed else false" in {
+      val Some(result) = route(FakeRequest(controllers.routes.EventController.isEventFollowed(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      contentAsJson(events) mustEqual Json.parse("true")
+      status(result) mustEqual OK
+      contentAsJson(result) mustEqual Json.parse("true")
 
-      status(response) mustEqual CREATED
+      val Some(result2) = route(FakeRequest(controllers.routes.EventController.isEventFollowed(2))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response2) mustEqual OK
+      contentAsJson(result2) mustEqual Json.parse("false")
+      status(result2) mustEqual OK
     }
 
     "create an event by facebookId" in {

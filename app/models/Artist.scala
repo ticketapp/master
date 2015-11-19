@@ -312,23 +312,21 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   val facebookArtistFields = "name,cover{source,offset_x,offset_y},id,category,link,website,description,genre,location,likes"
 
-  def getEventuallyFacebookArtists(pattern: String): Future[Seq[ArtistWithWeightedGenres]] = {
-    WS.url("https://graph.facebook.com/" + facebookApiVersion + "/search")
-     .withQueryString(
-       "q" -> pattern,
-       "type" -> "page",
-       "limit" -> "400",
-       "fields" -> facebookArtistFields,
-       "access_token" -> facebookToken)
-     .get()
-     .flatMap { response =>
-       readFacebookArtists(response.json)
-     } recover {
+  def getEventuallyFacebookArtists(pattern: String): Future[Seq[ArtistWithWeightedGenres]] = WS
+    .url("https://graph.facebook.com/" + facebookApiVersion + "/search")
+    .withQueryString(
+      "q" -> pattern,
+      "type" -> "page",
+      "limit" -> "400",
+      "fields" -> facebookArtistFields,
+      "access_token" -> facebookToken)
+    .get()
+    .flatMap(response => readFacebookArtists(response.json))
+    .recover {
       case NonFatal(e: Exception) =>
         Logger.error(s"ArtistModel.getEventuallyFacebookArtists: for pattern $pattern\nMessage:\n" + e.getMessage)
         Seq.empty
     }
-  }
 
   def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
     val artistNames = splitArtistNamesInTitle(eventName)
@@ -482,11 +480,11 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
   val readArtist = (
-   (__ \ "name").read[String] and
-     (__ \ "category").read[String] and
-     (__ \ "id").read[String] and
-     (__ \ "cover").readNullable[String](
-       (__ \ "source").read[String]
+   (__ \ "name").readNullable[String] and
+     (__ \ "category").readNullable[String] and
+     (__ \ "id").readNullable[String] and
+     (__ \ "cover").readNullable[Option[String]](
+       (__ \ "source").readNullable[String]
      ) and
      (__ \ "cover").readNullable[Int](
        (__ \ "offset_x").read[Int]
@@ -495,50 +493,48 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
        (__ \ "offset_y").read[Int]
      ) and
      (__ \ "website").readNullable[String] and
-     (__ \ "link").read[String] and
+     (__ \ "link").readNullable[String] and
      (__ \ "description").readNullable[String] and
      (__ \ "genre").readNullable[String] and
      (__ \ "likes").readNullable[Int] and
      (__ \ "location").readNullable[Option[String]](
        (__ \ "country").readNullable[String]
      )
-   ).apply((name: String, category: String, id: String, maybeCover: Option[String], maybeOffsetX: Option[Int],
-            maybeOffsetY: Option[Int], websites: Option[String], link: String, maybeDescription: Option[String],
+   ).apply((name: Option[String], category: Option[String], id: Option[String], maybeCover: Option[Option[String]], maybeOffsetX: Option[Int],
+            maybeOffsetY: Option[Int], websites: Option[String], link: Option[String], maybeDescription: Option[String],
             maybeGenre: Option[String], maybeLikes: Option[Int], maybeCountry: Option[Option[String]]) =>
-   (name, id, category, maybeCover, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
+   (name, id, category, maybeCover.flatten, maybeOffsetX, maybeOffsetY, websites, link, maybeDescription, maybeGenre,
      maybeLikes, maybeCountry))
 
   def readFacebookArtists(facebookJsonResponse: JsValue): Future[Seq[ArtistWithWeightedGenres]] = {
-    val collectOnlyArtistsWithCover: Reads[Future[Seq[ArtistWithWeightedGenres]]] = Reads.seq(readArtist) map { artists =>
+    val artistsRead: Reads[Future[Seq[ArtistWithWeightedGenres]]] = Reads.seq(readArtist) map { artists =>
       Future.sequence(artists.map(artistTupleToArtist).toVector) map (_.flatten)
     }
 
     (facebookJsonResponse \ "data")
-     .asOpt[Future[Seq[ArtistWithWeightedGenres]]](collectOnlyArtistsWithCover)
-     .getOrElse(Future(Seq.empty))
+      .asOpt[Future[Seq[ArtistWithWeightedGenres]]](artistsRead)
+      .getOrElse(Future(Seq.empty))
   }
 
-  def readFacebookArtist(facebookJsonResponse: JsValue): Future[Option[ArtistWithWeightedGenres]] = {
-    facebookJsonResponse
-     .asOpt[(String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
-     Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist)
-    match {
-      case Some(artistTuple) =>
-        artistTupleToArtist(artistTuple)
-      case None =>
-        Future(None)
-    }
+  def readFacebookArtist(facebookJsonResponse: JsValue): Future[Option[ArtistWithWeightedGenres]] = facebookJsonResponse
+    .asOpt[(Option[String], Option[String], Option[String], Option[String], Option[Int], Option[Int], Option[String],
+    Option[String], Option[String], Option[String], Option[Int], Option[Option[String]])](readArtist) match {
+    case Some(artistTuple) =>
+      artistTupleToArtist(artistTuple)
+    case None =>
+      Future(None)
   }
 
-  def artistTupleToArtist(artist: (String, String, String, Option[String], Option[Int], Option[Int], Option[String], String,
-    Option[String], Option[String], Option[Int], Option[Option[String]])): Future[Option[ArtistWithWeightedGenres]] = {
+  def artistTupleToArtist(artist: (Option[String], Option[String], Option[String], Option[String], Option[Int],
+    Option[Int], Option[String], Option[String], Option[String], Option[String], Option[Int], Option[Option[String]]))
+  : Future[Option[ArtistWithWeightedGenres]] = {
     artist match {
-      case (name, facebookId, category, cover, maybeOffsetX, maybeOffsetY, websites, link,
+      case (Some(name), Some(facebookId), Some(category), cover, maybeOffsetX, maybeOffsetY, websites, Some(link),
       maybeDescription, maybeGenre, maybeLikes, maybeCountry)
-        if category.equalsIgnoreCase("Musician/Band") | category.equalsIgnoreCase("Artist") =>
+        if category.equalsIgnoreCase("Musician/Band") || category.equalsIgnoreCase("Artist") =>
 
-        makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
-          maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten) map Option.apply
+          makeArtist(name, facebookId, aggregateImageAndOffset(cover, maybeOffsetX, maybeOffsetY), websites, link,
+            maybeDescription, maybeGenre, maybeLikes, maybeCountry.flatten) map Option.apply
 
       case _ =>
         Future(None)
@@ -558,6 +554,10 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       case Some(websites) =>
         utilities.getNormalizedWebsitesInText(websites) map { websites =>
           websites.filterNot(_.contains("facebook.com")).filterNot(_ == "")
+        } recover {
+          case NonFatal(e) =>
+            Logger.error("Artist.makeArtist:\nMessage:", e)
+            Set.empty
         }
       case None =>
         Future(Set.empty)

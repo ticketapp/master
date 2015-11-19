@@ -93,8 +93,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       _.headOption
     }
   }
-
-
+  
 
   def sortEventWithRelationsNearPoint(geographicPoint: Geometry, eventsWihRelations: Vector[EventWithRelations]): Vector[EventWithRelations] = {
     val eventsWihRelationsWithoutGeoPoint = eventsWihRelations

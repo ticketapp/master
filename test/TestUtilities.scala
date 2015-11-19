@@ -28,6 +28,16 @@ class TestUtilities extends GlobalApplicationForModels {
     normalizedUrls mustBe expectedUrls
   }
 
+  "normalize maybe url" in {
+    val maybeUrl = Option("http://cde.org")
+
+    val expectedUrl = Option("cde.org")
+
+    val normalizedUrl = utilities.normalizeMaybeWebsite(maybeUrl)
+
+    normalizedUrl mustBe expectedUrl
+  }
+
   "refactor events or places names" in {
     val eventsName = Seq("abc", "abcdef @transbordeur abc", "abcdef@hotmail.fr")
     val expectedEventsName = Seq("abc", "abcdef", "abcdef@hotmail.fr")
@@ -280,8 +290,10 @@ class TestUtilities extends GlobalApplicationForModels {
         |         http://bit.ly/1KfXhqX
         |         -----------------------------------------------------------------------""".stripMargin
 
-    whenReady(utilities.getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) {
-      _ must contain theSameElementsAs expectedWebsites
+    whenReady(utilities.getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { a =>
+
+      expectedWebsites.diff(a) mustBe Seq.empty
+      a must contain theSameElementsAs expectedWebsites
     }
   }
 }

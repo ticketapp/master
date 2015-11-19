@@ -212,8 +212,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
     val collectOnlyValidTracks = Reads.seq(youtubeTrackReads) map { tracks =>
       tracks.collect {
         case (Some(title: String), Some(url: String), Some(thumbnailUrl: String)) =>
-          Track(randomUUID, title, url, 'y', thumbnailUrl, artist.facebookUrl,
-            artist.name)
+          Track(randomUUID, title, url, 'y', thumbnailUrl, artist.facebookUrl, artist.name)
       }
     }
 
