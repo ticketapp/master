@@ -5,7 +5,6 @@ import javax.inject.Inject
 
 import com.vividsolutions.jts.geom.Geometry
 import controllers.ThereIsNoOrganizerForThisFacebookIdException
-import json.JsonHelper._
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -14,6 +13,7 @@ import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
 import services.{FollowService, MyPostgresDriver, Utilities}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -200,21 +200,20 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     .apply((name: String, facebookId: Option[String], description: Option[String], source: Option[String], street: Option[String],
             zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
             website: Option[String]) =>
-      OrganizerWithAddress(Organizer(None, facebookId, name, utilities.formatDescription(description), None, phone, public_transit,
-        website, verified = false, imagePath = source, geographicPoint = None), address = Option(Address(None, None,
-        city, zip, street)))
+      OrganizerWithAddress(organizer = Organizer(id = None, facebookId = facebookId, name = name,
+        description = utilities.formatDescription(description), addressId = None, phone = phone, publicTransit = public_transit,
+        websites = website, verified = false, imagePath = source, geographicPoint = None),
+        address = Option(Address(id = None, geographicPoint = None, city = city, zip = zip, street = street)))
     )
-  def readOrganizer(organizer: WSResponse): Option[OrganizerWithAddress] = {
-    organizer.json.asOpt[OrganizerWithAddress](organizerRead)
-  }
+  
+  def jsonToOrganizer(organizer: JsValue): Option[OrganizerWithAddress] = organizer.asOpt[OrganizerWithAddress](organizerRead)
+  
 
-  def readOrganizers(pages: WSResponse): Seq[OrganizerWithAddress] = {
-    val collectOnlyOrganizers: Reads[Seq[OrganizerWithAddress]] = Reads.seq(organizerRead) map { organizers =>
-      organizers
-    } map(_.toVector)
+  def readOrganizers(organizers: WSResponse): Seq[OrganizerWithAddress] = {
+    val collectOnlyOrganizers: Reads[Seq[OrganizerWithAddress]] = Reads.seq(organizerRead) map(_.toVector)
 
-    (pages.json \ "data")
-    .asOpt[Seq[OrganizerWithAddress]](collectOnlyOrganizers)
+    (organizers.json \ "data")
+      .asOpt[Seq[OrganizerWithAddress]](collectOnlyOrganizers)
       .getOrElse(Seq.empty)
   }
 
@@ -226,6 +225,6 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
           "fields" -> "name,description,cover{source},location,phone,public_transit,website",
           "access_token" -> utilities.facebookToken)
         .get()
-        .map { response => readOrganizer(response) }
+        .map { response => jsonToOrganizer(response.json) }
   }
 }

@@ -1,15 +1,15 @@
 package controllers
 
 import javax.inject.Inject
-import services.GetUserLikedPagesOnFacebook
-import services.UserService
+
+import services.{GetUserLikedPagesOnFacebook, UserService}
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers._
 import models.User
-import play.api.i18n.{ MessagesApi, Messages }
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.Action
 
@@ -54,7 +54,11 @@ class SocialAuthController @Inject() (
             value <- env.authenticatorService.init(authenticator)
             result <- env.authenticatorService.embed(value, Redirect(routes.Application.index()))
           } yield {
-            Try (getUserLikedPagesOnFacebook.findUserLikedPagesOnFacebook(profile.loginInfo, user.uuid))
+            Try (getUserLikedPagesOnFacebook.getUserLikedPagesOnFacebook(profile.loginInfo, user.uuid)) recover {
+              case t: Throwable =>
+                play.api.Logger.error("SocialAuthController.authenticate.findUserLikedPagesOnFacebook: ", t)
+                InternalServerError("OrganizerController.findOrganizersContaining: " + t.getMessage)
+            }
             env.eventBus.publish(LoginEvent(user, request, request2Messages))
             result
           }

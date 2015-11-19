@@ -153,13 +153,11 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       address = Option(address))
   })
 
-  def readPlaces(pages: WSResponse): Seq[PlaceWithAddress] = {
-    val collectOnlyPlaces: Reads[Seq[PlaceWithAddress]] = Reads.seq(placeRead) map { places =>
-      places
-    } map(_.toVector)
+  def readPlaces(places: WSResponse): Seq[PlaceWithAddress] = {
+    val collectOnlyPlaces: Reads[Seq[PlaceWithAddress]] = Reads.seq(placeRead) map(_.toVector)
 
-    (pages.json \ "data")
-    .asOpt[Seq[PlaceWithAddress]](collectOnlyPlaces)
+    (places.json \ "data")
+      .asOpt[Seq[PlaceWithAddress]](collectOnlyPlaces)
       .getOrElse(Seq.empty)
   }
 
