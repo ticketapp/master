@@ -46,6 +46,13 @@ class Utilities @Inject()() {
   def normalizeUrlWithoutLowerCase(website: String): String =
     """(https?:\/\/(www\.)?)|(www\.)""".r.replaceAllIn(website, p => "").stripSuffix("/")
 
+  def normalizeMaybeWebsite(website: Option[String]): Option[String] = website match {
+    case Some(websiteMatched) =>
+      Option(normalizeUrl(websiteMatched))
+    case _ =>
+      None
+  }
+
   def optionStringToLowerCaseOptionString(maybeString: Option[String]): Option[String] = maybeString match {
     case Some(string: String) => Option(string.toLowerCase)
     case None => None

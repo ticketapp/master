@@ -148,17 +148,18 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     ).apply((about: Option[String], source: Option[Option[String]], name: String, facebookId: Option[String],
              street: Option[Option[String]], zip: Option[Option[String]], city: Option[Option[String]],
              country: Option[Option[String]], website: Option[String]) => {
-    val address = Address(None, None, city.flatten, zip.flatten, street.flatten)
-    PlaceWithAddress(
-      place = Place(None, name, facebookId, None, about, website, None, None, source.flatten),
-      address = Option(address))
+      val address = Address(None, None, city.flatten, zip.flatten, street.flatten)
+      PlaceWithAddress(
+        place = Place(id = None, name = name, facebookId = facebookId, geographicPoint = None, description = about,
+          websites = utilities.normalizeMaybeWebsite(website), capacity = None, openingHours = None, imagePath = source.flatten),
+        address = Option(address))
   })
 
   def readFacebookPlace (placeFacebookResponse: WSResponse): Future[Option[PlaceWithAddress]] = Try {
     placeFacebookResponse.json.as[PlaceWithAddress](placeRead)
   } match {
     case Success(placeWithAddress) =>
-      saveWithAddress(placeWithAddress) map Option.apply
+        saveWithAddress(placeWithAddress) map Option.apply
     case Failure(exception: IllegalArgumentException) =>
       Logger.info("Place.readFacebookPlace: address must contain at least one field")
       Future(None)
