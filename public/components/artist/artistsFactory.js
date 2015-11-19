@@ -283,19 +283,16 @@ angular.module('claudeApp').factory('ArtistsFactory', ['$http', '$q', 'oboe', '$
                                 $rootScope.loadingTracks = false;
                             });
                         }, 0);
-                    } else {
-                            if (factory.lastGetArtist.url === artist.facebookUrl) {
-                                value = value.map(function (track) {
-                                    track.genres = artist.genres;
-                                    return track
-                                });
-                                $timeout(function () {
-                                    $rootScope.$apply(function () {
-                                        factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
-                                    });
-                                }, 0);
-
-                            }
+                    } else if (factory.lastGetArtist.url === artist.facebookUrl) {
+                        value = value.map(function (track) {
+                            track.genres = artist.genres;
+                            return track
+                        });
+                        $timeout(function () {
+                            $rootScope.$apply(function () {
+                                factory.lastGetArtist.artist.tracks = factory.lastGetArtist.artist.tracks.concat(value);
+                            });
+                        }, 0);                        
                     }
             })
             .fail(function (error) {

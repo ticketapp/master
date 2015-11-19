@@ -7,11 +7,12 @@ angular.module('claudeApp').directive('ngControls', ['$rootScope', '$window', '$
         link : function (scope, element) {
             if ($rootScope.window != 'small') {
                 var visible = true;
+                var infosTooltip;
                 function otherListener() {
                     if (window.pageYOffset < 50 && visible == false) {
                         visible = true;
                         if ( document.getElementById('infosTooltip') != undefined) {
-                            var infosTooltip = document.getElementById('infosTooltip');
+                            infosTooltip = document.getElementById('infosTooltip');
                             infosTooltip.classList.remove('ng-hide');
                             infosTooltip.classList.remove('fadeOut');
                             infosTooltip.classList.add('fadeIn')
@@ -19,7 +20,7 @@ angular.module('claudeApp').directive('ngControls', ['$rootScope', '$window', '$
                     } else if (window.pageYOffset > 50 && visible == true) {
                         visible = false;
                         if ( document.getElementById('infosTooltip') != undefined) {
-                            var infosTooltip = document.getElementById('infosTooltip');
+                            infosTooltip = document.getElementById('infosTooltip');
                             infosTooltip.classList.remove('fadeIn');
                             infosTooltip.classList.add('fadeOut');
                             $timeout(function () {
