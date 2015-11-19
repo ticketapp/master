@@ -13,10 +13,20 @@ class TestPlaceController extends GlobalApplicationForControllers {
 
   "place controller" should {
 
-    "create a place" in {
-      val jsonPlace = """{ "name": "PlaceTest", "geographicPoint": "4.2,4.3", "facebookId": "111"}"""
+    "create a place with an address" in {
+      val jsonPlace =
+        """{
+          |"name": "PlaceTest", "geographicPoint": "4.2,4.3", "facebookId": "111",
+          |"address":
+          |  {
+          |    "street": "tamere",
+          |    "city": "tonpere",
+          |    "zip": "69000",
+          |    "geographicPoint": "5.6,5.4"
+          |  }
+          |}""".stripMargin
 
-      val Some(result) = route(FakeRequest(POST, "/places/create")
+      val Some(result) = route(FakeRequest(controllers.routes.PlaceController.createPlace())
         .withJsonBody(Json.parse(jsonPlace))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
