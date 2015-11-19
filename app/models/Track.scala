@@ -159,9 +159,9 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         .replaceFirstIn(title, ""),
       "")
 
+  val lockFilterDuplicateTracks: ReentrantLock = new ReentrantLock()
 
   def filterDuplicateTracksEnumerator(tracksEnumerator: Enumerator[Set[Track]]): Enumerator[Set[Track]] = {
-    val lock: ReentrantLock = new ReentrantLock()
 
     var bufferTrackUrls: ListBuffer[String] = ListBuffer.empty
     case class ArtistNameAndTrackTitle(artistName: String, trackTitle: String)
@@ -172,7 +172,7 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       implicit def toRich[A, Repr](xs: IterableLike[A, Repr]): DistinctBy[A, Repr] = new DistinctBy(xs)
 
       try {
-        if (lock.tryLock(3, TimeUnit.SECONDS)) {
+        if (lockFilterDuplicateTracks.tryLock(3, TimeUnit.SECONDS)) {
           val notDuplicateTracksFromThisSet: Set[Track] =
             removeDuplicateByTitleAndArtistName(tracks.toSeq).distinctBy(_.url).toSet
 
@@ -189,7 +189,7 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         } else
           Set.empty
       } finally {
-        lock.unlock()
+        lockFilterDuplicateTracks.unlock()
       }
     }
 
