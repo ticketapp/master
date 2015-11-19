@@ -32,31 +32,32 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
   )
 
   def getYoutubeTracksByChannel(artist: Artist): Future[Set[Track]] = Future.sequence (
-      filterAndNormalizeYoutubeChannelIds(artist.websites) map {youtubeId =>
-         getYoutubeTracksByChannelId(artist, youtubeId)
+    filterAndNormalizeYoutubeChannelIds(artist.websites) map {youtubeId =>
+      getYoutubeTracksByChannelId(artist, youtubeId)
     }
   ).map { _.flatten.toSet }
 
   def getYoutubeTracksByYoutubeUser(artist: Artist): Future[Set[Track]] = {
-    val youtubeUserNames = getYoutubeUserNames(artist.websites)
+    val youtubeUserNames = searchYoutubeUserNames(artist.websites)
 
     val eventuallyYoutubeChannelIds = Future.sequence(youtubeUserNames map { userName =>
       getYoutubeChannelIdsByUserName(artist, userName)
     }).map(_.flatten)
-    val eventuallyNestedTracks = eventuallyYoutubeChannelIds map { youtubeChannelIds =>
+
+    val eventuallyNestedEventuallyNestedTracks = eventuallyYoutubeChannelIds map { youtubeChannelIds =>
       youtubeChannelIds map { id => getYoutubeTracksByChannelId(artist, id) }
     }
 
-    eventuallyNestedTracks flatMap { c => Future.sequence(c) } map { _.flatten }
-  }
-
-  def filterAndNormalizeYoutubeChannelIds(artistWebsites: Set[String]): Set[String] = {
-    artistWebsites.filter(_.indexOf("youtube.com/channel/") > -1) map {
-      _.replaceAll(".*channel/", "")
+    eventuallyNestedEventuallyNestedTracks flatMap { nestedEventuallyNestedTracks =>
+      val eventuallyNestedTracks = Future.sequence(nestedEventuallyNestedTracks)
+      eventuallyNestedTracks map (_.flatten)
     }
   }
 
-  def getYoutubeUserNames(artistWebsites: Set[String]): Set[String] = {
+  def filterAndNormalizeYoutubeChannelIds(artistWebsites: Set[String]): Set[String] =
+    artistWebsites.filter(_.indexOf("youtube.com/channel/") > -1) map(_.replaceAll(".*channel/", ""))
+
+  def searchYoutubeUserNames(artistWebsites: Set[String]): Set[String] = {
     val userNames = artistWebsites.filter(_.indexOf("youtube.com/") > -1)
     userNames map { name =>
       if (name.indexOf("user/") > -1) {
@@ -168,32 +169,30 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
     }
   }
 
-  def getYoutubeTracksByChannelId(artist: Artist, channelId: String): Future[Set[Track]] = {
-    WS.url("https://www.googleapis.com/youtube/v3/search")
-      .withQueryString(
-        "part" -> "snippet",
-        "channelId" -> channelId,
-        "type" -> "video",
-        "maxResults" -> "50",
-        "key" -> youtubeKey)
-      .get()
-      .map { readYoutubeTracks(_, artist).toSet map { track:Track =>
-        track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
-      }
+  def getYoutubeTracksByChannelId(artist: Artist, channelId: String): Future[Set[Track]] = WS
+    .url("https://www.googleapis.com/youtube/v3/search")
+    .withQueryString(
+      "part" -> "snippet",
+      "channelId" -> channelId,
+      "type" -> "video",
+      "maxResults" -> "50",
+      "key" -> youtubeKey)
+    .get()
+    .map { readYoutubeTracks(_, artist).toSet map { track: Track =>
+      track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
     }
   }
 
-  def getYoutubeChannelIdsByUserName(artist: Artist, userName: String): Future[Set[String]] = {
-    WS.url("https://www.googleapis.com/youtube/v3/channels")
-      .withQueryString(
-        "part" -> "contentDetails",
-        "forUsername" -> userName,
-        "type" -> "video",
-        "maxResults" -> "50",
-        "key" -> youtubeKey)
-      .get()
-      .map { readYoutubeUser }
-  }
+  def getYoutubeChannelIdsByUserName(artist: Artist, userName: String): Future[Set[String]] = WS
+    .url("https://www.googleapis.com/youtube/v3/channels")
+    .withQueryString(
+      "part" -> "contentDetails",
+      "forUsername" -> userName,
+      "type" -> "video",
+      "maxResults" -> "50",
+      "key" -> youtubeKey)
+    .get()
+    .map(readYoutubeUser)
 
   def readYoutubeUser(youtubeResponse: WSResponse): Set[String] = {
     val channelIds: Reads[Option[String]] = (__ \\ "id").readNullable[String]
