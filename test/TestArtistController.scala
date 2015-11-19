@@ -1,14 +1,12 @@
-import java.util.UUID
-
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import models._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.test.FakeRequest
-import json.JsonHelper._
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 
@@ -18,6 +16,8 @@ class TestArtistController extends GlobalApplicationForControllers {
   "artist controller" should {
 
     "create an artist and return tracks found in enumerator" in {
+      val uuidPattern = """[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}""".r
+
       val artistJson = Json.parse("""{
         "searchPattern": "worakls",
         "artist": {
@@ -34,6 +34,23 @@ class TestArtistController extends GlobalApplicationForControllers {
         .withJsonBody(artistJson))
 
       status(result) mustEqual OK
+
+      val uuids = uuidPattern.findAllIn(contentAsString(result)).toSeq
+
+      val uuidsFromDB = Await.result(trackMethods.findAllByArtist(
+        artistFacebookUrl = "worakls",
+        offset = 0,
+        numberToReturn = 100000) map { tracks =>
+        tracks map(_.uuid)
+      }, 5 seconds)
+
+      val stringUUIDsFromDB = uuidsFromDB.map(_.toString)
+
+      val distinctUUIDs = stringUUIDsFromDB.diff(uuids).toList ::: uuids.diff(stringUUIDsFromDB).toList
+
+      stringUUIDsFromDB mustNotEqual Seq.empty
+
+      distinctUUIDs mustEqual Seq.empty
     }
 
     "not create an artist twice and return an error" in {
@@ -152,14 +169,6 @@ class TestArtistController extends GlobalApplicationForControllers {
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response2) mustEqual OK
-    }
-
-    "find tracks by facebookUrl" in {
-      val Some(tracks) = route(FakeRequest(GET, "/artists/worakls/tracks?numberToReturn=0&offset=0"))
-
-      status(tracks) mustEqual OK
-
-      contentAsJson(tracks).toString() must contain(""""artistFacebookUrl":"worakls","artistName":"worakls"""")
     }
 
     "find artist by facebook containing" in {

@@ -76,6 +76,16 @@ class TestTrackController extends GlobalApplicationForControllers {
 
       contentAsJson(tracks) mustEqual Json.parse("true")
     }
+
+    "find tracks by facebookUrl" in {
+      val Some(tracks) = route(FakeRequest(
+        controllers.routes.TrackController.findAllByArtist(facebookUrl = "facebookUrl0", numberToReturn = 0, offset = 0)))
+
+      status(tracks) mustEqual OK
+
+      contentAsString(tracks) must contain("""02894e56-08d1-4c1f-b3e4-466c069d15ed""")
+      contentAsString(tracks) must contain("""13894e56-08d1-4c1f-b3e4-466c069d15ed""")
+    }
   }
 }
 

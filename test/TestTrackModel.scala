@@ -5,9 +5,11 @@ import models._
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import play.api.libs.iteratee.{Iteratee, Enumerator}
 
 import scala.language.postfixOps
-import scala.util.Success
+import scala.util.{Try, Success}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 
 class TestTrackModel extends GlobalApplicationForModels {
@@ -228,6 +230,62 @@ class TestTrackModel extends GlobalApplicationForModels {
       trackMethods.isArtistNameInTrackTitle("Bràsséns trackTitle", "brassens") mustBe true
       trackMethods.isArtistNameInTrackTitle("Brâssens trackTitle", "brassêns") mustBe true
       trackMethods.isArtistNameInTrackTitle("Brassens trackTitle", "notRelatedArtist") mustBe false
+    }
+
+
+    "remove duplicates in enumerator" in {
+      val track1 = Track(
+        uuid = randomUUID,
+        title = "nothingDuplicate",
+        url = "nothingDuplicate", platform = 'y',
+        thumbnailUrl = "thumb",
+        artistFacebookUrl = "a",
+        artistName = "nothingDuplicate")
+      val track2 = Track(
+        uuid = randomUUID,
+        title = "titleduplicate1",
+        url = "urlNotduplicate1", platform = 'y',
+        thumbnailUrl = "thumb",
+        artistFacebookUrl = "a",
+        artistName = "artistNameDuplicate1")
+      val track22 = track2.copy(uuid = randomUUID, url = "notDuplicate22")
+      val track3 = Track(
+        uuid = randomUUID,
+        title = "titleDuplicate1",
+        url = "url2", platform = 'y',
+        thumbnailUrl = "thumb",
+        artistFacebookUrl = "a",
+        artistName = "artistNameDuplicate")
+      val track33 = track3.copy(uuid = randomUUID, title = "notDuplicate33")
+      val track4 = Track(
+        uuid = randomUUID,
+        title = "title2",
+        url = "urlduplicate3", platform = 'y',
+        thumbnailUrl = "thumb",
+        artistFacebookUrl = "a",
+        artistName = "artistName4")
+      val track44 = track4.copy(uuid = randomUUID, title = "notDuplicate44")
+      val track444 = track4.copy(uuid = randomUUID, url = "notDuplicate44")
+
+      val tracks1 = Set(
+        track1,
+        track4)
+      val tracks2 = Set(
+        track2,
+        track3,
+        track33,
+        track44)
+      val tracks3 = Set(track22, track444)
+
+      val expectedTracks = List(track1, track2, track3, track4)
+
+      val tracksEnumerator = Enumerator(tracks1, tracks2, tracks3)
+      val a = Iteratee.fold(List.empty[Track]) { (s: List[Track], e: Set[Track]) =>
+        s ::: e.toList
+      }
+      whenReady(trackMethods.filterDuplicateTracksEnumerator(tracksEnumerator).run(a), timeout(Span(5, Seconds))) { tracks =>
+        tracks should contain theSameElementsAs expectedTracks
+      }
     }
   }
 }

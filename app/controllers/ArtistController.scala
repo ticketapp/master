@@ -11,14 +11,13 @@ import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.iteratee.{Enumeratee, Enumerator, Iteratee}
+import play.api.libs.iteratee.Enumerator
 import play.api.libs.json._
 import play.api.mvc._
 import services.Utilities
 
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.control.NonFatal
 
 
 class ArtistController @Inject()(val messagesApi: MessagesApi,
@@ -85,36 +84,17 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
 
             val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
 
-            val tracksJsonEnumerator: Enumerator[JsValue] = returnEnumeratorOfTracksSaved(tracksEnumerator)
+            val jsonTracksEnumerator = trackMethods.filterDuplicateTracksEnumerator(tracksEnumerator) &>
+              trackMethods.saveTracksInFutureEnumeratee &>
+              trackMethods.toJsonEnumeratee
 
-            Future(tracksEnumerator |>> Iteratee.foreach(tracks => trackMethods.saveSequence(tracks)))
-
-            Ok.chunked(tracksJsonEnumerator.andThen(Enumerator(Json.toJson("end"))))
+            Ok.chunked(jsonTracksEnumerator.andThen(Enumerator(Json.toJson("end"))))
 
           case None =>
             Conflict
         }
       }
     )
-  }
-
-  def returnEnumeratorOfTracksSaved(tracksEnumerator: Enumerator[Set[Track]]): Enumerator[JsValue] = {
-    val onlySavedTracks: Enumeratee[Set[Track], JsValue] = Enumeratee.mapM[Set[Track]] { tracks =>
-      val nestedEventuallySavedTracks: Set[Future[Option[Track]]] = tracks.map { track =>
-        trackMethods.save(track) map { t =>
-          Option(t)
-        } recover {
-          case NonFatal(e) =>
-            Logger.info("ArtistController.create:\nMessage: " + e.getMessage)
-            None
-        }
-      }
-      val eventuallyNestedSavedTracks = Future.sequence(nestedEventuallySavedTracks)
-      eventuallyNestedSavedTracks map (maybeTracks => Json.toJson(maybeTracks.flatten))
-    }
-
-    val tracksJsonEnumerator = tracksEnumerator &> onlySavedTracks
-    tracksJsonEnumerator
   }
 
   def followArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
@@ -124,8 +104,8 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       case 1 =>
         Created
       case _ =>
-        Logger.error("ArtistController.followArtistByArtistId:  artistMethods.followByArtistId did not return 1!")
-        InternalServerError("ArtistController.followArtistByArtistId:  artistMethods.followByArtistId did not return 1!")
+        Logger.error("ArtistController.followArtistByArtistId: artistMethods.followByArtistId did not return 1!")
+        InternalServerError("ArtistController.followArtistByArtistId: artistMethods.followByArtistId did not return 1!")
     } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
         Logger.error(s"ArtistController.followArtistByArtistId: user with id $userId already follows artist with id $artistId")
@@ -145,8 +125,8 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       case 1 =>
         Ok
       case _ =>
-        Logger.error("ArtistController.unfollowArtistByArtistId:  artistMethods.unfollowByArtistId did not return 1!")
-        InternalServerError("ArtistController.unfollowArtistByArtistId:  artistMethods.unfollowByArtistId did not return 1!")
+        Logger.error("ArtistController.unfollowArtistByArtistId: artistMethods.unfollowByArtistId did not return 1!")
+        InternalServerError("ArtistController.unfollowArtistByArtistId: artistMethods.unfollowByArtistId did not return 1!")
     } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the artist (artistId: $artistId) or the artist does not exist.")
@@ -163,8 +143,8 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       case 1 =>
         Created
       case _ =>
-        Logger.error("ArtistController.followArtistByFacebookId:  artistMethods.followByArtistId did not return 1!")
-        InternalServerError("ArtistController.followArtistByFacebookId:  artistMethods.followByArtistId did not return 1!")
+        Logger.error("ArtistController.followArtistByFacebookId: artistMethods.followByArtistId did not return 1!")
+        InternalServerError("ArtistController.followArtistByFacebookId: artistMethods.followByArtistId did not return 1!")
     } recover {
       case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
         Logger.error(
@@ -172,7 +152,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
              |artist with facebook id $facebookId""".stripMargin)
         Conflict("This user already follows this artist.")
       case thereIsNoArtistForThisFacebookIdException: ThereIsNoArtistForThisFacebookIdException =>
-        Logger.error(s"ArtistController.followArtistByFacebookId : there is no artist with the facebook id $facebookId")
+        Logger.error(s"ArtistController.followArtistByFacebookId: there is no artist with the facebook id $facebookId")
         NotFound("There is no artist with this id.")
       case unknownException =>
         Logger.error("ArtistController.followArtistByFacebookId", unknownException)

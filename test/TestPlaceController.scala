@@ -78,7 +78,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "return true if isFollowed else false" in {
-      val Some(boolean) = route(FakeRequest(controllers.routes.PlaceController.isPlaceFollowed(4))
+      val Some(boolean) = route(FakeRequest(controllers.routes.PlaceController.isPlaceFollowed(400))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsJson(boolean) mustEqual Json.parse("true")

@@ -290,8 +290,10 @@ class TestUtilities extends GlobalApplicationForModels {
         |         http://bit.ly/1KfXhqX
         |         -----------------------------------------------------------------------""".stripMargin
 
-    whenReady(utilities.getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) {
-      _ must contain theSameElementsAs expectedWebsites
+    whenReady(utilities.getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { a =>
+
+      expectedWebsites.diff(a) mustBe Seq.empty
+      a must contain theSameElementsAs expectedWebsites
     }
   }
 }

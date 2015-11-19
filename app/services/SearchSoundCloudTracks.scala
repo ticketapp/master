@@ -34,7 +34,8 @@ class SearchSoundCloudTracks @Inject()(val utilities: Utilities,
       val listOfScWithConfidence = listOfTupleIdScAndWebsite.map(tuple => 
         computeSoundCloudConfidence(artist, tuple.websites, tuple.soundcloudId))
 
-      val soundCloudsWithBestConfidence: Seq[SoundCloudArtistConfidence] = returnSoundCloudAccountsWithBestConfidence(listOfScWithConfidence)
+      val soundCloudsWithBestConfidence: Seq[SoundCloudArtistConfidence] =
+        returnSoundCloudAccountsWithBestConfidence(listOfScWithConfidence)
 
       Future.sequence(
         soundCloudsWithBestConfidence.map(verifiedSC =>
@@ -43,13 +44,17 @@ class SearchSoundCloudTracks @Inject()(val utilities: Utilities,
     }
   }
 
-  def returnSoundCloudAccountsWithBestConfidence(listOfScWithConfidence: Seq[SoundCloudArtistConfidence]): Seq[SoundCloudArtistConfidence] = {
-    val maxConfidence = listOfScWithConfidence.maxBy(_.confidence).confidence
-    val soundCloudsWithBestConfidence = maxConfidence match {
-      case 0.0 => Seq.empty
-      case max => listOfScWithConfidence.filter(_.confidence == max)
-    }
-    soundCloudsWithBestConfidence
+  def returnSoundCloudAccountsWithBestConfidence(listOfScWithConfidence: Seq[SoundCloudArtistConfidence])
+  : Seq[SoundCloudArtistConfidence] = listOfScWithConfidence match {
+    case nonEmptyList if nonEmptyList.nonEmpty =>
+      val maxConfidence = listOfScWithConfidence.maxBy(_.confidence).confidence
+      val soundCloudsWithBestConfidence = maxConfidence match {
+        case 0.0 => Seq.empty
+        case max => listOfScWithConfidence.filter(_.confidence == max)
+      }
+      soundCloudsWithBestConfidence
+    case _ =>
+      Seq.empty
   }
 
   def computeSoundCloudConfidence(artist: Artist, soundCloudWebsites: Seq[String], soundCloudId: Long): SoundCloudArtistConfidence = {
