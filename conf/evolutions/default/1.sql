@@ -95,28 +95,33 @@ CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 
 create table users (
-  userID UUID PRIMARY KEY,
-  firstName VARCHAR,
-  lastName VARCHAR,
-  fullName VARCHAR,
-  email VARCHAR UNIQUE,
-  avatarURL VARCHAR
+  userID                    UUID PRIMARY KEY,
+  firstName                 VARCHAR,
+  lastName                  VARCHAR,
+  fullName                  VARCHAR,
+  email                     VARCHAR UNIQUE,
+  avatarURL                 VARCHAR
 );
 
 
 CREATE TABLE logininfo (
-  id SERIAL PRIMARY KEY,
-  providerID VARCHAR NOT NULL,
-  providerKey VARCHAR NOT NULL
+  id                       SERIAL PRIMARY KEY,
+  providerID               VARCHAR NOT NULL,
+  providerKey              VARCHAR NOT NULL
 );
 
 
-CREATE TABLE userlogininfo (userID UUID PRIMARY KEY, loginInfoId BIGINT NOT NULL);
+CREATE TABLE userlogininfo (
+  userID UUID PRIMARY KEY,
+  loginInfoId BIGINT NOT NULL
+);
+
+
 CREATE TABLE passwordinfo (hasher VARCHAR NOT NULL,password VARCHAR NOT NULL,salt VARCHAR,loginInfoId BIGINT NOT NULL);
 CREATE TABLE oauth1info (id SERIAL PRIMARY KEY,token VARCHAR NOT NULL,secret VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
 CREATE TABLE oauth2info (id SERIAL PRIMARY KEY,accesstoken VARCHAR NOT NULL,tokentype VARCHAR,expiresin INTEGER,refreshtoken VARCHAR,logininfoid BIGINT NOT NULL);
 CREATE TABLE openidinfo (id VARCHAR NOT NULL PRIMARY KEY,logininfoid BIGINT NOT NULL);
-create table openidattributes (id VARCHAR NOT NULL,key VARCHAR NOT NULL,value VARCHAR NOT NULL);
+CREATE TABLE openidattributes (id VARCHAR NOT NULL,key VARCHAR NOT NULL,value VARCHAR NOT NULL);
 
 
 CREATE TABLE receivedMails (
