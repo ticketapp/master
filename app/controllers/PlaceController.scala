@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import json.JsonHelper.placeWrites
+import json.JsonHelper._
 import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
@@ -15,10 +15,10 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
-import json.JsonHelper._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+
 
 class PlaceController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
@@ -45,7 +45,7 @@ class PlaceController @Inject() (ws: WSClient,
     placeBindingForm.bindFromRequest().fold(
       formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       place => {
-        placeMethods.save(place) map { placeCreated =>
+        placeMethods.saveWithAddress(place) map { placeCreated =>
           Ok(Json.toJson(placeCreated))
         } recover {
           case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
