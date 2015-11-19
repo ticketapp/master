@@ -13,7 +13,6 @@ import play.api.libs.ws.{WS, WSResponse}
 import services.MyPostgresDriver.api._
 import services.{FollowService, MyPostgresDriver, Utilities}
 import silhouette.DBTableDefinitions
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -154,6 +153,14 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           websites = utilities.normalizeMaybeWebsite(website), capacity = None, openingHours = None, imagePath = source.flatten),
         address = Option(address))
   })
+
+  def readPlaces(places: WSResponse): Seq[PlaceWithAddress] = {
+    val collectOnlyPlaces: Reads[Seq[PlaceWithAddress]] = Reads.seq(placeRead) map(_.toVector)
+
+    (places.json \ "data")
+      .asOpt[Seq[PlaceWithAddress]](collectOnlyPlaces)
+      .getOrElse(Seq.empty)
+  }
 
   def readFacebookPlace (placeFacebookResponse: WSResponse): Future[Option[PlaceWithAddress]] = Try {
     placeFacebookResponse.json.as[PlaceWithAddress](placeRead)

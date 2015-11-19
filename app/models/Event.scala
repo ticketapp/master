@@ -453,7 +453,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       case Some(event) =>
         Future(Option(event))
       case None =>
-        findEventOnFacebookByFacebookId(eventFacebookId) flatMap {
+        getEventOnFacebookByFacebookId(eventFacebookId) flatMap {
           case Some(event) =>
             Future {
               event.artists.foreach { artist =>
@@ -469,7 +469,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def findEventOnFacebookByFacebookId(eventFacebookId: String): Future[Option[EventWithRelations]] =
+  def getEventOnFacebookByFacebookId(eventFacebookId: String): Future[Option[EventWithRelations]] =
     WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + eventFacebookId)
       .withQueryString(
         "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
@@ -606,8 +606,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = Try {
-    val readSoundFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
-    (resp.json \ "data").as[Seq[Option[String]]](readSoundFacebookIds).flatten
+    val readFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
+    (resp.json \ "data").as[Seq[Option[String]]](readFacebookIds).flatten
   } match {
     case Success(facebookIds) => facebookIds
     case _ => Seq.empty

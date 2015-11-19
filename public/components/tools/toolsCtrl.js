@@ -35,7 +35,7 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     $scope.suggeredPlaylists = [];
     $scope.playlists = [];
     $scope.logout = function () {
-        $http.get('/logout').
+        $http.get('/signOut').
             success(function (data) {
                 $rootScope.connected = false;
                 InfoModal.displayInfo('vous êtes deconnecté')
