@@ -33,6 +33,7 @@ CREATE TABLE orders ( --account701
   totalPrice                INT NOT NULL
 );
 
+
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
@@ -99,18 +100,22 @@ create table users (
   lastName VARCHAR,
   fullName VARCHAR,
   email VARCHAR UNIQUE,
-  avatarURL VARCHAR);
+  avatarURL VARCHAR
+);
 
-create table logininfo (
+
+CREATE TABLE logininfo (
   id SERIAL PRIMARY KEY,
   providerID VARCHAR NOT NULL,
-  providerKey VARCHAR NOT NULL);
+  providerKey VARCHAR NOT NULL
+);
 
-create table userlogininfo (userID UUID PRIMARY KEY, loginInfoId BIGINT NOT NULL);
-create table passwordinfo (hasher VARCHAR NOT NULL,password VARCHAR NOT NULL,salt VARCHAR,loginInfoId BIGINT NOT NULL);
-create table oauth1info (id SERIAL PRIMARY KEY,token VARCHAR NOT NULL,secret VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
-create table oauth2info (id SERIAL PRIMARY KEY,accesstoken VARCHAR NOT NULL,tokentype VARCHAR,expiresin INTEGER,refreshtoken VARCHAR,logininfoid BIGINT NOT NULL);
-create table openidinfo (id VARCHAR NOT NULL PRIMARY KEY,logininfoid BIGINT NOT NULL);
+
+CREATE TABLE userlogininfo (userID UUID PRIMARY KEY, loginInfoId BIGINT NOT NULL);
+CREATE TABLE passwordinfo (hasher VARCHAR NOT NULL,password VARCHAR NOT NULL,salt VARCHAR,loginInfoId BIGINT NOT NULL);
+CREATE TABLE oauth1info (id SERIAL PRIMARY KEY,token VARCHAR NOT NULL,secret VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
+CREATE TABLE oauth2info (id SERIAL PRIMARY KEY,accesstoken VARCHAR NOT NULL,tokentype VARCHAR,expiresin INTEGER,refreshtoken VARCHAR,logininfoid BIGINT NOT NULL);
+CREATE TABLE openidinfo (id VARCHAR NOT NULL PRIMARY KEY,logininfoid BIGINT NOT NULL);
 create table openidattributes (id VARCHAR NOT NULL,key VARCHAR NOT NULL,value VARCHAR NOT NULL);
 
 
