@@ -214,5 +214,18 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     tracksEnumeratorWithoutDuplicates |>> toTracksWithDelay &>> Iteratee.foreach { tracks =>
       saveSequence(tracks)
     }
+    println("DOne1")
+  }
+
+  def saveTracksInFutureEnumeratee2: Enumeratee[Set[Track], Set[Track]] = Enumeratee.mapM[Set[Track]] { tracks =>
+    saveSequence(tracks) map { _ =>
+      tracks
+    }
+  }
+
+  def saveEnumeratorWithDelay2(tracksEnumerator: Enumerator[Set[Track]]): Enumerator[Set[Track]]= {
+    val tracksEnumeratorWithoutDuplicates = filterDuplicateTracksEnumerator(tracksEnumerator)
+
+    tracksEnumeratorWithoutDuplicates &> saveTracksInFutureEnumeratee2
   }
 }
