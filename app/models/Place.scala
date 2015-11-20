@@ -72,7 +72,9 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     placeWithAddress.address match {
       case Some(address) =>
         addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
-          save(placeWithAddress.place.copy(addressId = savedAddress.id)) map { place =>
+          save(placeWithAddress.place.copy(
+            addressId = savedAddress.id,
+            geographicPoint = savedAddress.geographicPoint)) map { place =>
             PlaceWithAddress(place, Option(savedAddress))
           }
         }
