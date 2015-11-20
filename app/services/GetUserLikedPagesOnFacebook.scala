@@ -93,18 +93,11 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
       case _ =>
         Logger.info("getUserLikedPagesOnFacebook: Done")
     }
-
   }
 
   def searchNextLikesPage(pages: JsValue): Option[String] = {
     val readNextFacebookPages: Reads[Option[String]] = (__ \ "next").readNullable[String]
-    val jsonLikes: JsLookupResult = pages \ "likes"
-    jsonLikes match {
-      case JsDefined(likes) =>
-        (pages \ "likes" \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
-      case _ =>
-        (pages \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
-    }
+    (pages \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
   }
 
   def makeRelationArtistUser(facebookPageTuple: (String, Option[String]), userUuid: UUID): Unit = {
