@@ -593,17 +593,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = {
-    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
-      .withQueryString("access_token" -> utilities.facebookToken)
-      .get()
-      .map(readEventsIdsFromWSResponse)
-      .recover {
-        case NonFatal(e) =>
-          Logger.error("Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId:\nMessage:\n", e)
-          Seq.empty
-      }
-  }
+  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = WS
+    .url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
+    .withQueryString("access_token" -> utilities.facebookToken)
+    .get()
+    .map(readEventsIdsFromWSResponse)
 
   def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = Try {
     val readFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])

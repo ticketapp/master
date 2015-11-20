@@ -128,14 +128,14 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] = {
     val query = for {
-      organizerWithAddress <- organizers joinLeft addresses on (_.addressId === _.id)
+      organizerWithAddress <- organizers
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(offset)
+        .take(numberToReturn) joinLeft
+        addresses on (_.addressId === _.id)
     } yield organizerWithAddress
 
-    db.run(query
-      .sortBy(_._1.geographicPoint <-> geographicPoint)
-      .drop(offset)
-      .take(numberToReturn)
-      .result) map(_ map OrganizerWithAddress.tupled)
+    db.run(query.result) map(_ map OrganizerWithAddress.tupled)
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] =

@@ -46,13 +46,12 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     val query = tracks
       .filter(_.artistFacebookUrl === artistFacebookUrl)
       .sortBy(_.confidence.desc)
-    val queryWithNumberToReturnAndOffset = query.drop(offset).take(numberToReturn)
 
     numberToReturn match {
       case 0 =>
         db.run(query.result)
       case strictlyPositiveNumberToReturn if strictlyPositiveNumberToReturn > 0 =>
-        db.run(queryWithNumberToReturnAndOffset.result)
+        db.run(query.drop(offset).take(numberToReturn).result)
       case _ =>
         Logger.error("Track.findAllByArtist: impossible to return a negative number of tracks")
         Future(Seq.empty)
