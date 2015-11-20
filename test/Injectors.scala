@@ -38,7 +38,7 @@ trait Injectors {
   lazy val issueMethods = new IssueMethods(dbConfProvider)
   lazy val oAuth2InfoDAO = new OAuth2InfoDAO(dbConfProvider)
   lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfProvider, oAuth2InfoDAO, utilities,
-    artistMethods, placeMethods, organizerMethods, eventMethods)
+    artistMethods, placeMethods, organizerMethods, eventMethods, trackMethods)
   
   lazy val databaseApi = injector.instanceOf[DBApi]
 }
