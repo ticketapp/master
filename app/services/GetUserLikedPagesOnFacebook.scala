@@ -72,7 +72,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
 
   def filterPages(pages: JsValue, userUuid: UUID, facebookAccessToken: String): Unit = {
     facebookPageToPageTuple(pages) foreach { facebookPageTuple =>
-      Thread.sleep(600)
+      Thread.sleep(200)
       facebookPageTuple._2 match {
         case Some(artist) if artist.toLowerCase == "musician/band" =>
           makeRelationArtistUser(facebookPageTuple, userUuid)
@@ -97,7 +97,13 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
 
   def searchNextLikesPage(pages: JsValue): Option[String] = {
     val readNextFacebookPages: Reads[Option[String]] = (__ \ "next").readNullable[String]
-    (pages \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
+    val jsonLikes: JsLookupResult = pages \ "likes"
+    jsonLikes match {
+      case JsDefined(likes) =>
+        (pages \ "likes" \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
+      case _ =>
+        (pages \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
+    }
   }
 
   def makeRelationArtistUser(facebookPageTuple: (String, Option[String]), userUuid: UUID): Unit = {
@@ -136,7 +142,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
       case Some(facebookId) =>
         eventMethods.getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId) map {
           _.map { eventId =>
-            Thread.sleep(600)
+            Thread.sleep(200)
             eventMethods.saveFacebookEventByFacebookId(eventId)
           }
         }
