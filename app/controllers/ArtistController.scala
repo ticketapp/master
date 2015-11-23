@@ -37,7 +37,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def artistsSinceOffset(number: Int, offset: Int) =  Action.async {
+  def artistsSinceOffset(number: Int, offset: Long) =  Action.async {
     artistMethods.findSinceOffset(numberToReturn = number, offset = offset).map { artists =>
       Ok(Json.toJson(artists))
     }

@@ -33,7 +33,7 @@ GET           /events/nearCity/:city                                         @co
 
 ################################### Artists ##############################################
 
-GET           /artists/since                                                 @controllers.ArtistController.artistsSinceOffset(numberToReturn: Int, offset: Int)
+GET           /artists/since                                                 @controllers.ArtistController.artistsSinceOffset(numberToReturn: Int, offset: Long)
 GET           /artists/:facebookUrl                                          @controllers.ArtistController.artistByFacebookUrl(facebookUrl: String)
 GET           /artists/:facebookUrl/tracks                                   @controllers.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
 GET           /artists/byId/:id                                              @controllers.ArtistController.artist(id: Long)
@@ -63,7 +63,7 @@ GET           /places/nearCity/:city                                         @co
 GET           /places/followed/                                              @controllers.PlaceController.getFollowedPlaces
 
 ################################## Organizers ###############################################
-GET           /organizers                                                    @controllers.OrganizerController.findAll
+GET           /organizers                                                    @controllers.OrganizerController.findAllSinceOffset(offset: Long = 0, numberToReturn: Long = 1000)
 GET           /organizers/:id                                                @controllers.OrganizerController.findById(id: Long)
 POST          /organizers/:organizerId/followByOrganizerId                   @controllers.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
 POST          /organizers/:organizerId/unfollowOrganizerByOrganizerId        @controllers.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)

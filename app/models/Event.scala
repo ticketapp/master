@@ -61,10 +61,10 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     with eventWithRelationsTupleToEventWithRelationsClass
     with MyDBTableDefinitions {
 
-  def findAll(): Future[Seq[EventWithRelations]] = {
+  def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[EventWithRelations]] = {
     val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-      optionalEventAddresses) <- events joinLeft
+      optionalEventAddresses) <- events.drop(offset).take(numberToReturn) joinLeft
         (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
         (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
         (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -593,17 +593,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = {
-    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
-      .withQueryString("access_token" -> utilities.facebookToken)
-      .get()
-      .map(readEventsIdsFromWSResponse)
-      .recover {
-        case NonFatal(e) =>
-          Logger.error("Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId:\nMessage:\n", e)
-          Seq.empty
-      }
-  }
+  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = WS
+    .url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
+    .withQueryString("access_token" -> utilities.facebookToken)
+    .get()
+    .map(readEventsIdsFromWSResponse)
 
   def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = Try {
     val readFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])
