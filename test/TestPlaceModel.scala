@@ -50,7 +50,8 @@ class TestPlaceModel extends GlobalApplicationForModels {
           foundPlace mustBe Option(PlaceWithAddress(
             place = place.place.copy(
               id = savedPlace.place.id,
-              addressId = foundPlace.head.address.get.id
+              addressId = foundPlace.head.address.get.id,
+              geographicPoint = geographicPointMethods.optionStringToOptionPoint(Some("44.735269,4.599038999999999"))
             ),
             address = Option(place.address.get.copy(
               geographicPoint = geographicPointMethods.optionStringToOptionPoint(Some("44.735269,4.599038999999999")),
