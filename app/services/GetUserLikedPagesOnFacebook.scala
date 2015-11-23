@@ -204,9 +204,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
                   artistMethods.getArtistTracks(patternAndArtist)
 
                   val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtist)
-//                  var flag = false
-                  trackMethods.saveEnumeratorWithDelay2(tracksEnumerator)//.onDoneEnumerating{flag = true; true}//andThen(Enumerator.eof)
-//                  Future{println("done2");true}
+                  trackMethods.saveEnumeratorWithDelay(tracksEnumerator)
                   true
                 case _ =>
                   false
