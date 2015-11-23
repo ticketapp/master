@@ -8,7 +8,6 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
-import play.api.libs.iteratee.Iteratee
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
@@ -578,8 +577,12 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
           val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
 
+          val eventAddresses: Vector[Address] =
+            setEventAddresses(eventWithRelations, maybePlace)
+
           Option(eventWithRelations.copy(
             event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
+            addresses = eventAddresses,
             artists = nonEmptyArtists,
             organizers = Vector(organizer).flatten,
             places = Vector(maybePlace).flatten,
@@ -591,6 +594,24 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           "\nFor facebook response:\n" + eventFacebookResponse.json)
         Future(None)
     }
+  }
+
+  def setEventAddresses(eventWithRelations: EventWithRelations, maybePlace: Option[PlaceWithAddress]): Vector[Address] =
+    eventWithRelations.addresses match {
+      case addresses if addresses.nonEmpty =>
+        eventWithRelations.addresses.toVector
+      case _ =>
+        maybePlace match {
+          case Some(place) =>
+            place.address match {
+              case Some(address) =>
+                Vector(address)
+              case _ =>
+                Vector.empty
+            }
+          case _ =>
+            Vector.empty
+        }
   }
 
   def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = {
