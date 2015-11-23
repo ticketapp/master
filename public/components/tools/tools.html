@@ -85,7 +85,7 @@
         </div>
         <md-content class="column">
             <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
-                <md-tab label="Tracks">
+                <md-tab label="Morceaux">
                     <md-content>
                         <div class="column large-12"
                              ng-show="viewFavorites && $root.connected == true && favorites.tracks.length > 0">
@@ -105,20 +105,20 @@
                         </b>
                     </md-content>
                 </md-tab>
-                <md-tab label="Artists">
+                <md-tab label="Artistes">
                     <md-content>
                         <artist-min ng-repeat="artist in favorites.artists | filter: filterFavorites"
                                     class="column large-6 small-12 marginBottom40 marginTop30 float-left"></artist-min>
                     </md-content>
                 </md-tab>
-                <md-tab label="Places">
+                <md-tab label="Lieux">
                     <md-content>
                         <place-min ng-repeat="place in favorites.places | filter: filterFavorites"
                                    class="column large-6 small-12 marginBottom40 marginTop30 float-left">
                         </place-min>
                     </md-content>
                 </md-tab>
-                <md-tab label="Organizers">
+                <md-tab label="Organisateurs">
                     <md-content>
                         <organizer-min ng-repeat="organizer in favorites.organizers | filter: filterFavorites"
                                        class="column large-6 small-12 marginBottom40 marginTop30 float-left">
