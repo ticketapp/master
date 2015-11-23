@@ -2,7 +2,6 @@ angular.module('claudeApp').
     factory('RefactorObjectsFactory', ['RefactorGeopoint', function (RefactorGeopoint) {
         var factory = {
             refactorArtistObject: function(artist) {
-                console.log(artist)
                 if (artist.genres) {
                     artist.artist.genres = artist.genres.map(function (genre) {
                         return genre.genre
@@ -23,6 +22,12 @@ angular.module('claudeApp').
                 return organizer
             },
             refactorPlaceObject: function(place) {
+                if(place.address) {
+                    if(place.address.geographicPoint) {
+                        place.address.geographicPoint = RefactorGeopoint.refactorGeopoint(place.address.geographicPoint);
+                    }
+                    place.place.address = place.address;
+                }
                 place = place.place;
                 switch(place.geographicPoint) {
                     case undefined:
