@@ -2,14 +2,8 @@ package models
 
 import javax.inject.Inject
 
-import controllers.DAOException
-import play.api.db._
-import play.api.Play.current
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
-
-
-import play.api.libs.json.Json
-import services.{MyPostgresDriver, Utilities}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import services.MyPostgresDriver
 
 /*
   infoId                    SERIAL PRIMARY KEY,
@@ -28,8 +22,7 @@ case class Info(id: Long,
 
 class InfoMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val organizerMethods: OrganizerMethods,
-                             val placeMethods: PlaceMethods,
-                             val utilities: Utilities)
+                             val placeMethods: PlaceMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
 //

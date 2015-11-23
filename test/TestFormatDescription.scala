@@ -1,4 +1,7 @@
-class TestFormatDescription extends GlobalApplicationForModels {
+import services.Utilities
+
+
+class TestFormatDescription extends GlobalApplicationForModels with Utilities {
 
   "Format a description" must {
 
@@ -13,7 +16,7 @@ class TestFormatDescription extends GlobalApplicationForModels {
             |go to the line
           """.stripMargin))
 
-      val formattedDescriptions = descriptions.map { utilities.formatDescription }
+      val formattedDescriptions = descriptions.map { formatDescription }
 
       val expectedResult = List(
         Option("<div class='column large-12'>Hello, I'm a <a href='http://link.com'>link.com</a>, au revoir.</div>"),
@@ -32,7 +35,7 @@ class TestFormatDescription extends GlobalApplicationForModels {
     "should not format mail addresses as a link" in {
       val description = Option("roman.trystram@caa.com")
 
-      val formattedDescription = utilities.formatDescription(description)
+      val formattedDescription = formatDescription(description)
 
       val expectedResult = Option("<div class='column large-12'>roman.trystram@caa.com</div>")
 
@@ -42,7 +45,7 @@ class TestFormatDescription extends GlobalApplicationForModels {
     "should not format phone numbers as a link" in {
       val description = Option("06.60.63.14.16")
 
-      val formattedDescription = utilities.formatDescription(description)
+      val formattedDescription = formatDescription(description)
 
       val expectedResult = Option("<div class='column large-12'>06.60.63.14.16</div>")
 

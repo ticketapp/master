@@ -23,10 +23,9 @@ class OrganizerController @Inject()(ws: WSClient,
                                     val organizerMethods: OrganizerMethods,
                                     val messagesApi: MessagesApi,
                                     val env: Environment[User, CookieAuthenticator],
-                                    val utilities: Utilities,
                                     val geographicPointMethods: SearchGeographicPoint,
                                     socialProviderRegistry: SocialProviderRegistry)
-  extends Silhouette[User, CookieAuthenticator] with organizerFormsTrait {
+  extends Silhouette[User, CookieAuthenticator] with organizerFormsTrait with Utilities {
 
   def findAllSinceOffset(offset: Long, numberToReturn: Long) = Action.async {
     organizerMethods.findSinceOffset(offset = offset, numberToReturn = numberToReturn) map { organizers =>
@@ -79,10 +78,10 @@ class OrganizerController @Inject()(ws: WSClient,
         Logger.error("OrganizerController.followOrganizer: organizerMethods.follow did not return 1")
         InternalServerError
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"OrganizerController.followOrganizerByOrganizerId: $organizerId is already followed")
         Conflict
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"OrganizerController.followOrganizerByOrganizerId: there is no organizer with the id $organizerId")
         NotFound
       case unknownException =>
@@ -101,7 +100,7 @@ class OrganizerController @Inject()(ws: WSClient,
         Logger.error("OrganizerController.unfollowOrganizer: organizerMethods.unfollow did not return 1")
         InternalServerError
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the organizer (organizerId: $organizerId).")
         NotFound
       case unknownException =>
@@ -119,10 +118,10 @@ class OrganizerController @Inject()(ws: WSClient,
         Logger.error("OrganizerController.followOrganizerByFacebookId: organizerMethods.followOrganizerByFacebookId did not return 1")
         InternalServerError
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the organizer (organizerFacebookId: $facebookId).")
         NotFound
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"The user (id: $userId) already follow organizerFacebookId: $facebookId).")
         Conflict
       case unknownException =>

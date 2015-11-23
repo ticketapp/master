@@ -32,11 +32,12 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "be saved with relations and deleted in database" in {
-      val artists = Vector(ArtistWithWeightedGenres(Artist(None, None, "nameEventRelations", facebookUrl = "saveEventRelations")))
+      val artists = Vector(ArtistWithWeightedGenres(
+        artist = Artist(name = "nameEventRelations", facebookUrl = "saveEventRelations")))
       val organizers = Vector(OrganizerWithAddress(Organizer(None, None, "nameEventRelations")))
       val addresses = Vector(Address(None, None, Option("cityEventRelations")))
       val places = Vector(PlaceWithAddress(Place(name = "nameEventRelations")))
-      val genres = Vector(Genre(name = "nameEventRelations"))
+      val genres = Vector(Genre(name = "nameeventrelations"))
       val event = EventWithRelations(
         event = Event(None, None, isPublic = true, isActive = true, "nameEventRelations", None, None,
         new DateTime(), None, 16, None, None, None),

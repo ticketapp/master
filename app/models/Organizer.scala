@@ -36,11 +36,11 @@ case class OrganizerWithAddress(organizer: Organizer, address: Option[Address] =
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,
                                  val addressMethods: AddressMethods,
-                                 val utilities: Utilities,
                                  val geographicPointMethods: SearchGeographicPoint)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
-    with MyDBTableDefinitions {
+    with MyDBTableDefinitions
+    with Utilities {
 
   def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[OrganizerWithAddress]] = {
     val tupledJoin = organizers.drop(offset).take(numberToReturn) joinLeft addresses on (_.addressId === _.id)
@@ -102,8 +102,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
 
     eventuallyMaybePlaceId flatMap { maybePlaceId =>
       doSave(organizer.copy(
-        description = utilities.formatDescription(organizer.description),
-        phone = utilities.phoneNumbersSetToOptionString(utilities.phoneNumbersStringToSet(organizer.phone)),
+        description = formatDescription(organizer.description),
+        phone = phoneNumbersSetToOptionString(phoneNumbersStringToSet(organizer.phone)),
         linkedPlaceId = maybePlaceId
       ))
     }
@@ -201,7 +201,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
             zip: Option[String], city: Option[String], phone: Option[String], public_transit: Option[String],
             website: Option[String]) =>
       OrganizerWithAddress(organizer = Organizer(id = None, facebookId = facebookId, name = name,
-        description = utilities.formatDescription(description), addressId = None, phone = phone, publicTransit = public_transit,
+        description = formatDescription(description), addressId = None, phone = phone, publicTransit = public_transit,
         websites = website, verified = false, imagePath = source, geographicPoint = None),
         address = Option(Address(id = None, geographicPoint = None, city = city, zip = zip, street = street)))
     )
@@ -220,10 +220,10 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def getOrganizerInfo(maybeOrganizerFacebookId: Option[String]): Future[Option[OrganizerWithAddress]] = maybeOrganizerFacebookId match {
     case None => Future { None }
     case Some(organizerId) =>
-      WS.url("https://graph.facebook.com/"+ utilities.facebookApiVersion +"/" + organizerId)
+      WS.url("https://graph.facebook.com/"+ facebookApiVersion +"/" + organizerId)
         .withQueryString(
           "fields" -> "name,description,cover{source},location,phone,public_transit,website",
-          "access_token" -> utilities.facebookToken)
+          "access_token" -> facebookToken)
         .get()
         .map { response => jsonToOrganizer(response.json) }
   }

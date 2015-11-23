@@ -8,8 +8,8 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import services.Utilities
 
-class Admin @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                      val utilities: Utilities) extends Controller {
+class Admin @Inject()(dbConfigProvider: DatabaseConfigProvider)
+    extends Controller {
 
   def indexAdmin = Action {
     Ok(views.html.admin.indexAdmin())

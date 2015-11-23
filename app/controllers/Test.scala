@@ -1,26 +1,15 @@
 package controllers
 
-import java.io.{IOException, FileNotFoundException}
-import java.math.MathContext
-import java.text.Normalizer
-import java.util.Date
-import java.util.regex.Pattern
-
-import play.api.libs.iteratee.{Concurrent, Iteratee, Enumerator}
-import play.api.libs.ws.WS
-import play.api.libs.ws.WSResponse
+import play.api.Logger
 import play.api.mvc._
-import play.libs.F.Promise
-import scala.collection.mutable.ListBuffer
+import akka.actor._
+import javax.inject._
+
+import actors.DuplicateTracksActor
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
-import play.api.libs.json._
-import play.api.libs.concurrent.Execution.Implicits._
-import models.{Track, Artist, Event}
-import scala.io.Source
-import play.api.mvc.Results._
-import scala.util.{Success, Failure}
-import play.api.libs.functional.syntax._
-import play.api.Play.current
+import scala.concurrent.duration._
+import akka.pattern.ask
 /*
  follower counts SC
  regarder le next de facebook
@@ -28,28 +17,39 @@ import play.api.Play.current
  enlever 0.1 par lettre en plus au temps de latence à partir de trois
  un seul match echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
  hendrix : bug si getechoSongs recursif
+
+ test implicit timeouts
  */
 
 
-class Test extends Controller {
-  /*def test1 = WebSocket.using[String] { request =>
-    //Concurrent.broadcast returns (Enumerator, Concurrent.Channel)
-    val (out,channel) = Concurrent.broadcast[String]
+@Singleton
+class Test @Inject()(system: ActorSystem) extends Controller {
 
+  implicit val timeout: akka.util.Timeout = 5.seconds
 
-    //log the message to stdout and send response back to client
-    val in = Iteratee.foreach[String] {
-      msg => println(msg)
-        //the Enumerator returned by Concurrent.broadcast subscribes to the channel and will
-        //receive the pushed messages
-        channel push("c'est toi le : " + msg)
-    }
-    (in,out)
-  }*/
+//  val helloActor = system.actorOf(DuplicateTracksActor.props, "duplicateTracksActor")
 
-  def test1 = Action  {
-
-
-    Ok
+  def sayHello(name: String) = Action.async {
+    Future(Ok)
+//    (helloActor ? SayHello(name)).mapTo[String].map { message =>
+//      Logger.info(message)
+//      Ok(message)
+//    }
   }
 }
+//    "a" in {
+//      val actorRef = TestActorRef[DuplicateTracksActor]
+//      val future = (actorRef ? SayHello("msg")).mapTo[String]
+//      val result = Await.result(future, actorTimeout.duration)
+//
+//      val trackId = UUID.randomUUID
+//      val track = Track(trackId, "title100", "url", 's', "thumbnailUrl", "facebookUrl0", "artistName")
+//
+//
+//
+//      val future2 = (test ? FilterTracks(Set(track))).mapTo[Set[Track]]
+//      val result2 = Await.result(future2, actorTimeout.duration)
+//
+//      result mustBe "Hello, msg"
+//      result2 mustBe "processed the tick message"
+//    }

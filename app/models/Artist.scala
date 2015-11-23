@@ -22,7 +22,7 @@ import scala.util.control.NonFatal
 import scala.util.matching.Regex
 
 
-case class Artist(id: Option[Long],
+case class Artist(id: Option[Long] = None,
                   facebookId: Option[String] = None,
                   name: String,
                   imagePath: Option[String] = None,
@@ -42,17 +42,14 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
                        val genreMethods: GenreMethods,
                        val searchSoundCloudTracks: SearchSoundCloudTracks,
                        val searchYoutubeTracks: SearchYoutubeTracks,
-                       val trackMethods: TrackMethods,
-                       val utilities: Utilities)
+                       val trackMethods: TrackMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with SoundCloudHelper
     with FollowService
     with MyDBTableDefinitions
-    with artistsAndOptionalGenresToArtistsWithWeightedGenresTrait {
+    with artistsAndOptionalGenresToArtistsWithWeightedGenresTrait
+    with Utilities {
 
-  val facebookToken = utilities.facebookToken
-  val soundCloudClientId = utilities.soundCloudClientId
-  val facebookApiVersion = utilities.facebookApiVersion
 
   def findAll: Future[Vector[Artist]] = db.run(artists.result) map (_.toVector)
 
@@ -182,7 +179,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     val artist = artistWithWeightedGenres.artist
     val genres = artistWithWeightedGenres.genres
     val genresWithoutWeight = genres map (_.genre)
-    val artistWithFormattedDescription = artist.copy(description = utilities.formatDescription(artist.description))
+    val artistWithFormattedDescription = artist.copy(description = formatDescription(artist.description))
 
     val genresWithOverGenres = genreMethods.findOverGenres(genresWithoutWeight) map { overGenres =>
       (genresWithoutWeight ++ overGenres).distinct
@@ -251,7 +248,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     case None =>
       Future(0)
     case Some(redirectUrl) =>
-      val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl))
+      val refactoredRedirectUrl = removeUselessInSoundCloudWebsite(normalizeUrl(redirectUrl))
       if (!artist.websites.contains(refactoredRedirectUrl) && artist.id.nonEmpty)
         addWebsite(artist.id.get, refactoredRedirectUrl) recover {
           case e: Exception =>
@@ -298,7 +295,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       followByArtistId(UserArtistRelation(userId, artistId))
   }
 
-  def normalizeArtistName(artistName: String): String = utilities.normalizeString(artistName)
+  def normalizeArtistName(artistName: String): String = normalizeString(artistName)
     .toLowerCase
     .replaceAll("officiel", "")
     .replaceAll("fanpage", "")
@@ -414,7 +411,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
-      .withQueryString("client_id" -> utilities.soundCloudClientId)
+      .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { readMaybeFacebookUrl }
   }
@@ -426,7 +423,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       )((url: String, service: String) => (url, service))
 
     val collectOnlyFacebookUrls = Reads.seq(facebookUrlReads).map { urlService =>
-      urlService.collect { case (url: String, "facebook") => utilities.normalizeUrl(url) }
+      urlService.collect { case (url: String, "facebook") => normalizeUrl(url) }
     }
 
     soundCloudWebProfilesResponse.json.asOpt[scala.Seq[String]](collectOnlyFacebookUrls) match {
@@ -548,10 +545,10 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def makeArtist(name: String, facebookId: String, cover: Option[String], maybeWebsites: Option[String], link: String,
                 maybeDescription: Option[String], maybeGenre: Option[String], maybeLikes: Option[Int],
                 maybeCountry: Option[String]): Future[ArtistWithWeightedGenres] = {
-    val facebookUrl = utilities.normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
+    val facebookUrl = normalizeUrl(link).substring("facebook.com/".length).replace("pages/", "").replace("/", "")
     val eventuallyWebsitesSet: Future[Set[String]] = maybeWebsites match {
       case Some(websites) =>
-        utilities.getNormalizedWebsitesInText(websites) map { websites =>
+        getNormalizedWebsitesInText(websites) map { websites =>
           websites.filterNot(_.contains("facebook.com")).filterNot(_ == "")
         } recover {
           case NonFatal(e) =>
@@ -561,7 +558,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       case None =>
         Future(Set.empty)
     }
-    val description = utilities.formatDescription(maybeDescription)
+    val description = formatDescription(maybeDescription)
     val genres = maybeGenre match {
      case Some(genre) => genreMethods.genresStringToGenresSet(genre)
      case None => Set.empty
@@ -582,13 +579,13 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def addWebsitesFoundOnSoundCloud(track: Track, artist: Artist): Future[Seq[String]] = track.redirectUrl match {
     case Some(redirectUrl) =>
-      val normalizedUrl = removeUselessInSoundCloudWebsite(utilities.normalizeUrl(redirectUrl)).substring("soundcloud.com/".length)
+      val normalizedUrl = removeUselessInSoundCloudWebsite(normalizeUrl(redirectUrl)).substring("soundcloud.com/".length)
       WS.url("http://api.soundcloud.com/users/" + normalizedUrl + "/web-profiles")
-        .withQueryString("client_id" -> utilities.soundCloudClientId)
+        .withQueryString("client_id" -> soundCloudClientId)
         .get()
         .map { soundCloudResponse =>
         readSoundCloudWebsites(soundCloudResponse) foreach { website =>
-          val normalizedWebsite = utilities.normalizeUrl(website)
+          val normalizedWebsite = normalizeUrl(website)
           if (!artist.websites.contains(normalizedWebsite) && normalizedWebsite.indexOf("facebook") == -1 && artist.id.nonEmpty)
             addWebsite(artist.id.get, normalizedWebsite) map {
               case res if res != 1 =>

@@ -22,15 +22,13 @@ import scala.util.{Success, Try}
 
 class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                             protected val oAuth2InfoDAO: OAuth2InfoDAO,
-                                            val utilities: Utilities,
                                             val artistMethods: ArtistMethods,
                                             val placeMethods: PlaceMethods,
                                             val organizerMethods: OrganizerMethods,
                                             val eventMethods: EventMethods,
                                             val trackMethods: TrackMethods)
-  extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with Utilities {
 
-  val facebookApiVersion = utilities.facebookApiVersion
 
   def getUserLikedPagesOnFacebook(loginInfo: LoginInfo, userUuid: UUID): Unit = findAccessToken(loginInfo) map {
     case Some(accessToken) =>

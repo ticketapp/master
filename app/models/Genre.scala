@@ -18,8 +18,7 @@ case class Genre (id: Option[Int] = None, name: String, icon: Char = 'a') {
 case class GenreWithWeight(genre: Genre, weight: Int = 1)
 
 
-class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val utilities: Utilities)
+class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def findAll: Future[Seq[Genre]] = db.run(genres.result)

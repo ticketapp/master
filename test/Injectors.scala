@@ -1,3 +1,5 @@
+import actors.{DuplicateTracksActorInstance, DuplicateTracksActor}
+import akka.actor.{ActorSystem, Props}
 import models._
 import play.api.Configuration
 import play.api.db.DBApi
@@ -18,27 +20,28 @@ trait Injectors {
         "slick.dbs.default.db.connectionPool" -> "disabled")))
   lazy val injector = appBuilder.injector()
   lazy val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
-  lazy val utilities = new Utilities()
-  lazy val trackMethods = new TrackMethods(dbConfProvider, utilities)
-  lazy val genreMethods = new GenreMethods(dbConfProvider, utilities)
-  lazy val searchSoundCloudTracks = new SearchSoundCloudTracks(utilities, trackMethods, genreMethods)
-  lazy val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, utilities, trackMethods)
-  lazy val geographicPointMethods = new SearchGeographicPoint(dbConfProvider, utilities)
-  lazy val tariffMethods = new TariffMethods(dbConfProvider, utilities)
-  lazy val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, addressMethods, utilities)
-  lazy val addressMethods = new AddressMethods(dbConfProvider, utilities, geographicPointMethods)
-  lazy val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, utilities, geographicPointMethods)
+  lazy val actorSystem = ActorSystem()
+  lazy val duplicateTracksActorInstance = new DuplicateTracksActorInstance(actorSystem)
+  lazy val trackMethods = new TrackMethods(dbConfProvider, duplicateTracksActorInstance)
+  lazy val genreMethods = new GenreMethods(dbConfProvider)
+  lazy val searchSoundCloudTracks = new SearchSoundCloudTracks(trackMethods, genreMethods)
+  lazy val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, trackMethods)
+  lazy val geographicPointMethods = new SearchGeographicPoint(dbConfProvider)
+  lazy val tariffMethods = new TariffMethods(dbConfProvider)
+  lazy val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, addressMethods)
+  lazy val addressMethods = new AddressMethods(dbConfProvider, geographicPointMethods)
+  lazy val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, geographicPointMethods)
   lazy val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods, utilities)
+    trackMethods)
   lazy val eventMethods = new EventMethods(dbConfProvider, organizerMethods, artistMethods, tariffMethods, trackMethods,
-    genreMethods, placeMethods, geographicPointMethods, addressMethods, utilities)
+    genreMethods, placeMethods, geographicPointMethods, addressMethods)
   lazy val userDAOImpl = new UserDAOImpl(dbConfProvider)
-  lazy val playlistMethods = new PlaylistMethods(dbConfProvider, utilities)
-  lazy val trackRatingMethods = new TrackRatingMethods(dbConfProvider, utilities, trackMethods)
+  lazy val playlistMethods = new PlaylistMethods(dbConfProvider)
+  lazy val trackRatingMethods = new TrackRatingMethods(dbConfProvider, trackMethods)
   lazy val issueMethods = new IssueMethods(dbConfProvider)
   lazy val oAuth2InfoDAO = new OAuth2InfoDAO(dbConfProvider)
-  lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfProvider, oAuth2InfoDAO, utilities,
-    artistMethods, placeMethods, organizerMethods, eventMethods, trackMethods)
-  
+  lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfProvider, oAuth2InfoDAO, artistMethods,
+    placeMethods, organizerMethods, eventMethods, trackMethods)
+
   lazy val databaseApi = injector.instanceOf[DBApi]
 }

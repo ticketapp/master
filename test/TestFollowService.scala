@@ -5,13 +5,14 @@ import models._
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import services.Utilities
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
-class TestFollowService extends GlobalApplicationForModels {
+class TestFollowService extends GlobalApplicationForModels with Utilities {
 
   "An Artist" must {
 
@@ -41,7 +42,7 @@ class TestFollowService extends GlobalApplicationForModels {
         } catch {
           case e: PSQLException =>
 
-            e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+            e.getSQLState mustBe UNIQUE_VIOLATION
         }
       }
     }
@@ -90,7 +91,7 @@ class TestFollowService extends GlobalApplicationForModels {
         } catch {
           case e: PSQLException =>
 
-            e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+            e.getSQLState mustBe UNIQUE_VIOLATION
         }
       }
     }
@@ -210,7 +211,7 @@ class TestFollowService extends GlobalApplicationForModels {
               } catch {
                 case e: PSQLException =>
 
-                  e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+                  e.getSQLState mustBe UNIQUE_VIOLATION
               }
             }
           }
@@ -255,7 +256,7 @@ class TestFollowService extends GlobalApplicationForModels {
         } catch {
           case e: PSQLException =>
 
-            e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+            e.getSQLState mustBe UNIQUE_VIOLATION
         }
       }
     }

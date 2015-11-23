@@ -27,8 +27,7 @@ case class TrackWithPlaylistRankAndGenres(track: TrackWithGenres, rank: Double)
 case class TrackIdWithPlaylistRank(trackId: UUID, rank: Double)
 
 
-class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                                val utilities: Utilities)
+class PlaylistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with SoundCloudHelper
     with MyDBTableDefinitions

@@ -5,11 +5,11 @@ import models._
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import play.api.libs.iteratee.{Iteratee, Enumerator}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.iteratee.{Enumerator, Iteratee}
 
 import scala.language.postfixOps
-import scala.util.{Try, Success}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.util.Success
 
 
 class TestTrackModel extends GlobalApplicationForModels {
@@ -98,12 +98,6 @@ class TestTrackModel extends GlobalApplicationForModels {
           response mustBe 1
         }
     }
-
-//    "be added to favorites and deleted from favorites" in {
-//      trackRatingMethods.addToFavorites("userTestId", trackId) mustBe Success(1)
-//      findFavorites("userTestId") mustBe Success(Seq(track.copy(confidence = Some(0))))
-//      removeFromFavorites("userTestId", trackId) mustBe Success(1)
-//    }
 
     "update rating up&down and confidence" in {
       whenReady(trackRatingMethods.persistUpdateRating(UUID.fromString("13894e56-08d1-4c1f-b3e4-466c069d15ed"), 1, 2,
@@ -283,7 +277,7 @@ class TestTrackModel extends GlobalApplicationForModels {
       val a = Iteratee.fold(List.empty[Track]) { (s: List[Track], e: Set[Track]) =>
         s ::: e.toList
       }
-      whenReady(trackMethods.filterDuplicateTracksEnumerator(tracksEnumerator).run(a), timeout(Span(5, Seconds))) { tracks =>
+      whenReady((tracksEnumerator &> trackMethods.filterDuplicateTracksEnumeratee).run(a), timeout(Span(5, Seconds))) { tracks =>
         tracks should contain theSameElementsAs expectedTracks
       }
     }

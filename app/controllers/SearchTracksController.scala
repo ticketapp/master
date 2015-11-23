@@ -14,17 +14,15 @@ import services.{SearchYoutubeTracks, Utilities}
 import scala.concurrent.Future
 
 
-class SearchTracksController @Inject()(val utilities: Utilities,
-                                        val trackMethods: TrackMethods,
-                                        val searchYoutubeTracks: SearchYoutubeTracks) extends Controller {
-  val googleKey = utilities.googleKey
+class SearchTracksController @Inject()(val trackMethods: TrackMethods,
+                                       val searchYoutubeTracks: SearchYoutubeTracks) extends Controller with Utilities {
 
   def getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String) = Action.async {
     val artist = Artist(None, None, artistName, None, None, artistFacebookUrl)
     searchYoutubeTracks.getYoutubeTracksByArtistAndTitle(artist, trackTitle) map { tracks =>
-      val trackTitleResearched = utilities.removeSpecialCharacters(trackTitle)
+      val trackTitleResearched = removeSpecialCharacters(trackTitle)
       val tracksCorrespondingToTheResearch = tracks.filterNot(track =>
-        utilities.removeSpecialCharacters(track.title).equalsIgnoreCase(trackTitleResearched))
+        removeSpecialCharacters(track.title).equalsIgnoreCase(trackTitleResearched))
 
       val tracksFiltered = trackMethods.removeDuplicateByTitleAndArtistName(tracksCorrespondingToTheResearch)
 

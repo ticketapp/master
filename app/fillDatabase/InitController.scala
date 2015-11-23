@@ -10,13 +10,13 @@ import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.MessagesApi
 import play.api.mvc.Action
+import services.MyPostgresDriver
 import services.MyPostgresDriver.api._
-import services.{MyPostgresDriver, Utilities}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 import scala.util.control.NonFatal
-import scala.util.{Try, Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 
 class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -24,7 +24,6 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
                                val genreMethods: GenreMethods,
                                val artistMethods: ArtistMethods,
                                val geographicPointMethods: SearchGeographicPoint,
-                               val utilities: Utilities,
                                val env: Environment[User, CookieAuthenticator],
                                socialProviderRegistry: SocialProviderRegistry)
     extends Silhouette[User, CookieAuthenticator]

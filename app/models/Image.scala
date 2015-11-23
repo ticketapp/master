@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import services.{MyPostgresDriver, Utilities}
+import services.MyPostgresDriver
 
 import scala.language.postfixOps
 
@@ -17,8 +17,8 @@ case class Image (id: Long,
 
 class ImageMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val organizerMethods: OrganizerMethods,
-                             val placeMethods: PlaceMethods,
-                             val utilities: Utilities) extends HasDatabaseConfigProvider[MyPostgresDriver] {
+                             val placeMethods: PlaceMethods)
+    extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
 
 //  class Images(tag: Tag) extends Table[Image](tag, "images") {

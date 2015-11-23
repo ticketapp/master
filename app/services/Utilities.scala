@@ -1,8 +1,6 @@
 package services
 
-import java.sql.Timestamp
 import java.text.Normalizer
-import javax.inject.Inject
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -10,7 +8,6 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.libs.ws.WS
-import slick.driver.PostgresDriver.api._
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,7 +17,7 @@ import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 
 
-class Utilities @Inject()() {
+trait Utilities {
   val facebookToken = "1434769156813731%7Cf2378aa93c7174712b63a24eff4cb22c"
   val googleKey = "AIzaSyDx-k7jA4V-71I90xHOXiILW3HHL0tkBYc"
   val echonestApiKey = "3ZYZKU3H3MKR2M59Z"
@@ -30,11 +27,8 @@ class Utilities @Inject()() {
 
   val UNIQUE_VIOLATION = "23505"
   val FOREIGN_KEY_VIOLATION = "23503"
-  val facebookApiVersion = "v2.4"
 
-  implicit def dateTime = MappedColumnType.base[DateTime, Timestamp](
-    dt => new Timestamp(dt.getMillis),
-    ts => new DateTime(ts.getTime))
+  val facebookApiVersion = "v2.4"
 
   def normalizeString(string: String): String = string //Should be replace accentued letters for example?
 

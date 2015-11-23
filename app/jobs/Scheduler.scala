@@ -9,6 +9,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
+
 class Scheduler @Inject()(val eventMethods: EventMethods,
                           val organizerMethods: OrganizerMethods,
                           val artistMethods: ArtistMethods,

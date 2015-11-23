@@ -9,8 +9,6 @@ import json.JsonHelper._
 import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
@@ -21,14 +19,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
+
 class EventController @Inject()(ws: WSClient,
                                 val messagesApi: MessagesApi,
-                                val utilities: Utilities,
                                 val geographicPointMethods: SearchGeographicPoint,
                                 val env: Environment[User, CookieAuthenticator],
                                 socialProviderRegistry: SocialProviderRegistry,
                                 val eventMethods: EventMethods)
-    extends Silhouette[User, CookieAuthenticator] with eventFormsTrait {
+    extends Silhouette[User, CookieAuthenticator] with eventFormsTrait with Utilities {
 
   val geographicPointPattern = play.Play.application.configuration.getString("regex.geographicPointPattern").r
 
@@ -166,10 +164,10 @@ class EventController @Inject()(ws: WSClient,
         Logger.error("EventController.followEvent: eventMethods.follow did not return 1")
         InternalServerError
      } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"EventController.followEventByEventId: $eventId is already followed")
         Conflict
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"EventController.followEventByEventId: there is no event with the id $eventId")
         NotFound
       case unknownException =>
@@ -187,7 +185,7 @@ class EventController @Inject()(ws: WSClient,
         Logger.error("EventController.unfollowEvent: eventMethods.unfollow did not return 1")
         InternalServerError
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the event (eventId: $eventId) or the event does not exist.")
         Conflict
       case unknownException =>

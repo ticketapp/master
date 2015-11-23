@@ -21,12 +21,11 @@ import scala.language.postfixOps
 
 
 class ArtistController @Inject()(val messagesApi: MessagesApi,
-                                 val utilities: Utilities,
                                  val env: Environment[User, CookieAuthenticator],
                                  val artistMethods: ArtistMethods,
                                  val trackMethods: TrackMethods,
                                  socialProviderRegistry: SocialProviderRegistry)
-    extends Silhouette[User, CookieAuthenticator] with artistFormsTrait {
+    extends Silhouette[User, CookieAuthenticator] with artistFormsTrait with Utilities {
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     artistMethods.getEventuallyFacebookArtists(pattern).map { artists =>
@@ -84,7 +83,8 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
 
             val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtistWithArtistId)
 
-            val jsonTracksEnumerator = trackMethods.filterDuplicateTracksEnumerator(tracksEnumerator) &>
+            val jsonTracksEnumerator = tracksEnumerator &>
+              trackMethods.filterDuplicateTracksEnumeratee &>
               trackMethods.saveTracksInFutureEnumeratee &>
               trackMethods.toJsonEnumeratee
 
@@ -107,10 +107,10 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
         Logger.error("ArtistController.followArtistByArtistId: artistMethods.followByArtistId did not return 1!")
         InternalServerError("ArtistController.followArtistByArtistId: artistMethods.followByArtistId did not return 1!")
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"ArtistController.followArtistByArtistId: user with id $userId already follows artist with id $artistId")
         Conflict("This user already follows this artist.")
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"ArtistController.followArtistByArtistId: there is no artist with the id $artistId")
         NotFound
       case unknownException =>
@@ -128,7 +128,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
         Logger.error("ArtistController.unfollowArtistByArtistId: artistMethods.unfollowByArtistId did not return 1!")
         InternalServerError("ArtistController.unfollowArtistByArtistId: artistMethods.unfollowByArtistId did not return 1!")
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the artist (artistId: $artistId) or the artist does not exist.")
         NotFound
       case unknownException =>
@@ -146,7 +146,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
         Logger.error("ArtistController.followArtistByFacebookId: artistMethods.followByArtistId did not return 1!")
         InternalServerError("ArtistController.followArtistByFacebookId: artistMethods.followByArtistId did not return 1!")
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(
           s"""ArtistController.followArtistByFacebookId: user with id $userId already follows
              |artist with facebook id $facebookId""".stripMargin)

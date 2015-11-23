@@ -4,26 +4,23 @@ import java.util.UUID._
 import javax.inject.Inject
 
 import models._
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
-import play.api.libs.iteratee.{Enumeratee, Iteratee, Enumerator}
-import play.api.libs.iteratee.Input.EOF
-import play.api.libs.ws.{WS, WSResponse}
-import play.api.libs.json._
+import play.api.Play.current
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
+import play.api.libs.iteratee.{Enumeratee, Enumerator}
+import play.api.libs.json._
+import play.api.libs.ws.{WS, WSResponse}
+
 import scala.concurrent.Future
 import scala.language.postfixOps
-import play.api.Play.current
 
 class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                      val genreMethods: GenreMethods,
-                                     val utilities: Utilities,
                                      val trackMethods: TrackMethods)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with Utilities {
 
-  val youtubeKey = utilities.googleKey
-  val echonestApiKey = utilities.echonestApiKey
-
+  
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Enumerator[Set[Track]] = Enumerator.flatten(
     getMaybeEchonestIdByFacebookId(artist) map {
     case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
@@ -160,7 +157,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
         "type" -> "video",
         "videoCategoryId" -> "10",
         "maxResults" -> "20",
-        "key" -> youtubeKey)
+        "key" -> googleKey)
       .get()
       .map { response =>
         removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
@@ -176,7 +173,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
       "channelId" -> channelId,
       "type" -> "video",
       "maxResults" -> "50",
-      "key" -> youtubeKey)
+      "key" -> googleKey)
     .get()
     .map { readYoutubeTracks(_, artist).toSet map { track: Track =>
       track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
@@ -190,7 +187,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
       "forUsername" -> userName,
       "type" -> "video",
       "maxResults" -> "50",
-      "key" -> youtubeKey)
+      "key" -> googleKey)
     .get()
     .map(readYoutubeUser)
 
@@ -248,7 +245,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
   }
 
   def readUrlsFromJsObject(urlsJsObject: JsObject): Set[String] = urlsJsObject.values.map { url =>
-    utilities.normalizeUrl(url.as[String])
+    normalizeUrl(url.as[String])
   }.toSet
 
   def getMaybeEchonestIdByFacebookId(artist: Artist): Future[Option[String]] = artist.facebookId match {
