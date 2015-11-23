@@ -93,7 +93,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[PlaceWithAddress]] = {
     val query = places.drop(offset).take(numberToReturn) joinLeft addresses on (_.addressId === _.id)
-    db.run(query.result) map(a => a /*map (n =>  PlaceWithAddress(n, None)))(_*/ map PlaceWithAddress.tupled)
+    db.run(query.result) map(_ map PlaceWithAddress.tupled)
   }
 
   def findOrganizerIdByFacebookId(facebookId: String): Future[Option[Long]] =

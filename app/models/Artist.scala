@@ -35,8 +35,7 @@ case class Artist(id: Option[Long],
 
 case class ArtistWithWeightedGenres(artist: Artist, genres: Seq[GenreWithWeight] = Seq.empty)
 
-case class PatternAndArtist(searchPattern: String,
-                            artistWithWeightedGenres: ArtistWithWeightedGenres)
+case class PatternAndArtist(searchPattern: String, artistWithWeightedGenres: ArtistWithWeightedGenres)
 
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -57,7 +56,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def findAll: Future[Vector[Artist]] = db.run(artists.result) map (_.toVector)
 
-  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenres]] = {
+  def findSinceOffset(numberToReturn: Int, offset: Long): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
      artist <- artists.drop(offset).take(numberToReturn) joinLeft
        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)

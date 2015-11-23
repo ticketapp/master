@@ -14,33 +14,33 @@ import scala.concurrent.duration._
 @Singleton
 class Global @Inject()(val scheduler: Scheduler) {
 
-  Akka.system.scheduler.schedule(initialDelay = 10.hours, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 200000.seconds, interval = 12.hours) {
     Logger.info("Scheduler.findEventsForPlaces started")
-    scheduler.findEventsForPlaces()
+    scheduler.findEventsForPlacesOneByOne()
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 20.hours, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 120.seconds, interval = 12.hours) {
     Logger.info("Scheduler.findEventsForOrganizers started")
-    scheduler.findEventsForOrganizers()
+    scheduler.findEventsForOrganizersOneByOne()
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 40.hours, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 60000.seconds, interval = 12.hours) {
     Logger.info("Scheduler.findTracksForArtists started")
-    scheduler.findTracksForArtists()
+    scheduler.findTracksForArtistsOneByOne()
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 3.hour, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 60.second, interval = 12.hours) {
     Logger.info("Scheduler.updateGeographicPointOfPlaces started")
-    scheduler.updateGeographicPointOfPlaces()
+    scheduler.updateGeographicPointOfPlaces50By50()
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 30.hours, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 240.seconds, interval = 12.hours) {
     Logger.info("Scheduler.updateGeographicPointOfOrganizers started")
-    scheduler.updateGeographicPointOfOrganizers()
+    scheduler.updateGeographicPointOfOrganizers50By50()
   }
 
-  Akka.system.scheduler.schedule(initialDelay = 60.hours, interval = 12.hours) {
+  Akka.system.scheduler.schedule(initialDelay = 600.seconds, interval = 12.hours) {
     Logger.info("Scheduler.updateGeographicPointOfEvents started")
-    scheduler.updateGeographicPointOfEvents()
+    scheduler.updateGeographicPointOfEvents50By50()
   }
 }
