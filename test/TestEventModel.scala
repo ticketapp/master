@@ -248,6 +248,7 @@ class TestEventModel extends GlobalApplicationForModels {
     "find a complete event by facebookId" in {
       whenReady(eventMethods.getEventOnFacebookByFacebookId("985240908201444"), timeout(Span(10, Seconds))) { event =>
         event.get.event.name mustBe "ENCORE w/ OCTAVE ONE live — MOJO — MOONRISE HILL CREW"
+        event.get.event.geographicPoint mustBe event.get.addresses.head.geographicPoint
         event.get.addresses mustBe Vector(Address(Some(3), geographicPointMethods.optionStringToOptionPoint(Option("45.7408394,4.8499501")),
           Some("lyon"),Some("69007"),Some("rue paul vivier / rue de cronstadt")))
       }

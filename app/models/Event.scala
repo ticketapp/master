@@ -577,11 +577,12 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
           val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
 
-          val eventAddresses: Vector[Address] =
-            setEventAddresses(eventWithRelations, maybePlace)
+          val eventAddresses: Vector[Address] = returnEventAddresses(eventWithRelations, maybePlace)
+
+          val maybeEventGeographicPoint = returnEventGeographicPoint(eventAddresses)
 
           Option(eventWithRelations.copy(
-            event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
+            event = eventWithRelations.event.copy(ticketSellers = ticketSellers, geographicPoint = maybeEventGeographicPoint),
             addresses = eventAddresses,
             artists = nonEmptyArtists,
             organizers = Vector(organizer).flatten,
@@ -596,7 +597,16 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def setEventAddresses(eventWithRelations: EventWithRelations, maybePlace: Option[PlaceWithAddress]): Vector[Address] =
+  def returnEventGeographicPoint(addresses: Vector[Address]): Option[Geometry] = {
+    addresses.headOption match {
+      case Some(address) =>
+        address.geographicPoint
+      case _ =>
+        None
+    }
+  }
+
+  def returnEventAddresses(eventWithRelations: EventWithRelations, maybePlace: Option[PlaceWithAddress]): Vector[Address] =
     eventWithRelations.addresses match {
       case addresses if addresses.nonEmpty =>
         eventWithRelations.addresses.toVector
