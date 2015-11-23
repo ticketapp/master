@@ -12,7 +12,7 @@
          autoscroll="true"
          ng-class="{'paddingTop50': $root.window == 'small'}">
     </div>
-    <div ng-show="$root.playlist.tracks.length > 0" class="ng-player"></div>
+    <div ng-show="$root.playlist.tracksDomain.length > 0" class="ng-player"></div>
 </div>
 <div ng-if="$root.path != 'iframe'"
      ng-class="{'ng-hide': $root.window == 'small' && $root.path == 'home'}"

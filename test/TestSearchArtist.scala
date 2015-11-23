@@ -1,6 +1,7 @@
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.Matchers._
+import testsHelper.GlobalApplicationForModels
 
 
 class TestSearchArtist extends GlobalApplicationForModels {

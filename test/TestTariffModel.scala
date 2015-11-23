@@ -1,3 +1,6 @@
+import testsHelper.GlobalApplicationForModels
+
+
 class TestTariffModel extends GlobalApplicationForModels {
 
   "Tariff" must {

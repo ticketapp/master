@@ -2,9 +2,17 @@ package services
 
 import java.util.UUID
 
+import application._
+import artistsDomain.{artistsAndOptionalGenresToArtistsWithWeightedGenresTrait, ArtistWithWeightedGenres}
+import database._
+import eventsDomain.{EventWithRelations, eventWithRelationsTupleToEventWithRelationsClass}
+import genresDomain.Genre
 import models._
+import organizersDomain.OrganizerWithAddress
+import placesDomain.PlaceWithAddress
 import play.api.db.slick.HasDatabaseConfigProvider
-import services.MyPostgresDriver.api._
+import MyPostgresDriver.api._
+import tracksDomain.{TrackTransformTrait, TrackWithGenres}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

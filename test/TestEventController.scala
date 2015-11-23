@@ -1,9 +1,13 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import json.JsonHelper._
-import models._
+import database.{EventOrganizerRelation, EventPlaceRelation}
+import eventsDomain.Event
+import organizersDomain.Organizer
+import placesDomain.Place
 import play.api.libs.json._
 import play.api.test.FakeRequest
+import testsHelper.GlobalApplicationForControllers
+import json.JsonHelper._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
@@ -33,11 +37,11 @@ class TestEventController extends GlobalApplicationForControllers {
                         "endTime": "2015-10-24 16:00",
                         "ageRestriction": 1}"""
 
-      val Some(result) = route(FakeRequest(POST, "/events/create")
+      val Some(result) = route(FakeRequest(eventsDomain.routes.EventController.createEvent())
         .withJsonBody(Json.parse(jsonEvent))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      val Some(result1) = route(FakeRequest(POST, "/events/create")
+      val Some(result1) = route(FakeRequest(eventsDomain.routes.EventController.createEvent())
         .withJsonBody(Json.parse(jsonPassedEvent))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -46,13 +50,19 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "find a list of events" in {
-      val Some(events) = route(FakeRequest(GET, "/events?geographicPoint=4.2,4.3&numberToReturn=" + 10 + "&offset=" + 0))
+      val Some(events) = route(
+        FakeRequest(
+          eventsDomain.routes.EventController.events(geographicPoint = "5,4", numberToReturn = 10000, offset = 0)))
+
       contentAsJson(events).toString() must
         contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
     }
 
     "find a list of event by containing" in {
-      val Some(events) = route(FakeRequest(GET, "/events/containing/test?geographicPoint=4.2,4.3"))
+      val Some(events) = route(
+        FakeRequest(
+          eventsDomain.routes.EventController.findAllContaining(pattern = "test", geographicPoint = "4.2,4.3")))
+
       contentAsJson(events).toString() must
         contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
     }
@@ -94,7 +104,7 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "find followed events" in {
-      val Some(events) = route(FakeRequest(controllers.routes.EventController.getFollowedEvents())
+      val Some(events) = route(FakeRequest(eventsDomain.routes.EventController.getFollowedEvents())
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(events) mustEqual OK
@@ -103,13 +113,13 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "return true if an event is followed else false" in {
-      val Some(result) = route(FakeRequest(controllers.routes.EventController.isEventFollowed(1))
+      val Some(result) = route(FakeRequest(eventsDomain.routes.EventController.isEventFollowed(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(result) mustEqual OK
       contentAsJson(result) mustEqual Json.parse("true")
 
-      val Some(result2) = route(FakeRequest(controllers.routes.EventController.isEventFollowed(2))
+      val Some(result2) = route(FakeRequest(eventsDomain.routes.EventController.isEventFollowed(2))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsJson(result2) mustEqual Json.parse("false")
@@ -117,7 +127,7 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "create an event by facebookId" in {
-      val Some(response) = route(FakeRequest(POST, "/events/create/1190535250961554"))
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.createEventByFacebookId("1190535250961554")))
 
       status(response) mustEqual OK
 
@@ -125,7 +135,12 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "find events in interval" in {
-      val Some(response) = route(FakeRequest(GET, "/events/inInterval/5?geographicPoint=4.2,4.3&offset=0&numberToReturn=100"))
+      val Some(response) = route(
+        FakeRequest(eventsDomain.routes.EventController.eventsInHourInterval(
+          hourInterval = 5,
+          geographicPoint = "4.2,4.3",
+          offset = 0,
+          numberToReturn=100)))
 
       status(response) mustEqual OK
 
@@ -137,7 +152,7 @@ class TestEventController extends GlobalApplicationForControllers {
 
     "find passed events in interval" in {
       val Some(response) =
-        route(FakeRequest(controllers.routes.EventController.eventsPassedInHourInterval(
+        route(FakeRequest(eventsDomain.routes.EventController.eventsPassedInHourInterval(
           hourInterval = 50000,
           geographicPoint = "4.2,4.3",
           offset=0,
@@ -155,7 +170,7 @@ class TestEventController extends GlobalApplicationForControllers {
       val eventId = await(eventMethods.findAllContaining("EventTest1") map (_.head.event.id.get))
       val placeId = await(placeMethods.save(Place(None, "placeTestEvent", Option("123456"), None))).id
       await(placeMethods.saveEventRelation(EventPlaceRelation(eventId, placeId.get)))
-      val Some(response) = route(FakeRequest(GET, "/places/" + placeId.get + "/events"))
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findByPlace(placeId.get)))
 
       status(response) mustEqual OK
 
@@ -169,7 +184,7 @@ class TestEventController extends GlobalApplicationForControllers {
       val eventId = await(eventMethods.saveFacebookEventByFacebookId("11121")).get.id
       val placeId = await(placeMethods.save(Place(None, "placeTestEvent", Option("123456"), None))).id
       await(placeMethods.saveEventRelation(EventPlaceRelation(eventId.get, placeId.get)))
-      val Some(response) = route(FakeRequest(GET, "/places/" + placeId.get + "/passedEvents"))
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findPassedByPlace(placeId.get)))
 
       status(response) mustEqual OK
 
@@ -184,7 +199,8 @@ class TestEventController extends GlobalApplicationForControllers {
       val eventId = await(eventMethods.findAllContaining("EventTest1") map (_.head.event.id.get))
       val organizerId = await(organizerMethods.save(Organizer(None, Option("123456"), "organizerTestEvent", None))).id
       await(organizerMethods.saveEventRelation(EventOrganizerRelation(eventId, organizerId.get)))
-      val Some(response) = route(FakeRequest(GET, "/organizers/" + organizerId.get + "/events"))
+
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findByOrganizer(organizerId.get)))
 
       status(response) mustEqual OK
 
@@ -194,7 +210,7 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "find passed events by organizerId" in {
-      val Some(response) = route(FakeRequest(GET, "/organizers/" + 1 + "/passedEvents"))
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findPassedByOrganizer(1)))
 
       status(response) mustEqual OK
 
@@ -204,7 +220,7 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "get events near geoPoint" in {
-      val Some(response) = route(FakeRequest(controllers.routes.EventController.events(
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.events(
         offset = 0,
         numberToReturn = 1000,
         geographicPoint = "5,5"))

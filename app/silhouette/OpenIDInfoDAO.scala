@@ -4,10 +4,11 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.impl.providers.OpenIDInfo
 import javax.inject.Inject
+import database.MyPostgresDriver
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.Future
-import services.MyPostgresDriver.api._
+import MyPostgresDriver.api._
 /**
  * The DAO to store the OpenID information.
  */

@@ -1,3 +1,5 @@
+import testsHelper.GlobalApplicationForModels
+
 class TestFormatDescription extends GlobalApplicationForModels {
 
   "Format a description" must {

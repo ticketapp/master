@@ -1,10 +1,13 @@
 import java.util.UUID
 
+import application._
 import com.mohiva.play.silhouette.api.LoginInfo
-import models._
+import database._
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import organizersDomain.{Organizer, OrganizerWithAddress}
+import testsHelper.GlobalApplicationForModels
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

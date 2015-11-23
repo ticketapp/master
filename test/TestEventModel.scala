@@ -1,8 +1,15 @@
-import models._
+import addresses.Address
+import artistsDomain.{Artist, ArtistWithWeightedGenres}
+import database.{EventArtistRelation, EventOrganizerRelation, EventPlaceRelation}
+import eventsDomain.{Event, EventWithRelations}
+import genresDomain.Genre
 import org.joda.time.DateTime
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import organizersDomain.{Organizer, OrganizerWithAddress}
+import placesDomain.{Place, PlaceWithAddress}
+import testsHelper.GlobalApplicationForModels
 
 import scala.language.postfixOps
 
@@ -52,9 +59,11 @@ class TestEventModel extends GlobalApplicationForModels {
 
           foundEvent.event mustEqual event.event.copy(id = foundEvent.event.id)
 
-          foundEvent.organizers mustBe Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
+          foundEvent.organizers mustBe
+            Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
 
-          foundEvent.artists mustBe Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
+          foundEvent.artists mustBe
+            Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
 
           foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
 
@@ -62,7 +71,9 @@ class TestEventModel extends GlobalApplicationForModels {
             id = foundEvent.addresses.head.id,
             city = Option(event.addresses.head.city.get.toLowerCase)))
 
-          foundEvent.genres mustBe Vector(event.genres.head.copy(id = foundEvent.genres.head.id))
+          foundEvent.genres mustBe Vector(event.genres.head.copy(
+            id = foundEvent.genres.head.id,
+            name = foundEvent.genres.head.name.toLowerCase))
         }
         whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
           _ mustBe 1

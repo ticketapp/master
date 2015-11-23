@@ -1,5 +1,6 @@
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import testsHelper.GlobalApplicationForModels
 
 
 class TestUtilities extends GlobalApplicationForModels {
@@ -292,7 +293,7 @@ class TestUtilities extends GlobalApplicationForModels {
 
     whenReady(utilities.getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { a =>
 
-      expectedWebsites.diff(a) mustBe Seq.empty
+      expectedWebsites.diff(a) mustBe Set.empty
       a must contain theSameElementsAs expectedWebsites
     }
   }

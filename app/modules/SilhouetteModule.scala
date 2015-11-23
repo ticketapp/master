@@ -1,6 +1,7 @@
 package modules
 
 import _root_.services.{UserService, UserServiceImplementation}
+import application.User
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services._

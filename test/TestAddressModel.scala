@@ -1,6 +1,7 @@
-import models._
+import addresses.Address
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import testsHelper.GlobalApplicationForModels
 
 
 class TestAddressModel extends GlobalApplicationForModels {
@@ -32,12 +33,8 @@ class TestAddressModel extends GlobalApplicationForModels {
     "not be saved twice with same city, zip, street and return database addressId on unique violation" in {
       val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
-        try {
-          whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAgainAddress =>
-            savedAgainAddress mustBe Address(Option(savedAddress.id.get),None,Some("privas"),Option("07000"),Some("avignas"))
-          }
-        } finally {
-          addressMethods.delete(savedAddress.id.get)
+        whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAgainAddress =>
+          savedAgainAddress mustBe Address(Option(savedAddress.id.get),None,Some("privas"),Option("07000"),Some("avignas"))
         }
       }
     }
@@ -46,19 +43,15 @@ class TestAddressModel extends GlobalApplicationForModels {
       val address = Address(None, None, Option("coux"), Option("07000"), Option("avignas"))
       val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("1.0,5.0"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
-        try {
-          val addressWithGeoPoint = address.copy(id = savedAddress.id, geographicPoint = geoPoint)
-          whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>
+        val addressWithGeoPoint = address.copy(id = savedAddress.id, geographicPoint = geoPoint)
+        whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>
 
-            savedAddressWithGeoPoint mustBe addressWithGeoPoint
+          savedAddressWithGeoPoint mustBe addressWithGeoPoint
 
-            whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { foundAddress =>
+          whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { foundAddress =>
 
-              foundAddress mustEqual Option(savedAddressWithGeoPoint)
-            }
+            foundAddress mustEqual Option(savedAddressWithGeoPoint)
           }
-        } finally {
-          addressMethods.delete(savedAddress.id.get)
         }
       }
     }

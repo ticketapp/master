@@ -1,8 +1,13 @@
-import models._
+import addresses.Address
+import database.EventOrganizerRelation
+import eventsDomain.{EventWithRelations, Event}
 import org.joda.time.DateTime
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import organizersDomain.{Organizer, OrganizerWithAddress}
+import placesDomain.Place
+import testsHelper.GlobalApplicationForModels
 
 import scala.language.postfixOps
 

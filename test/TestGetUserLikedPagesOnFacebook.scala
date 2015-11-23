@@ -1,4 +1,6 @@
 import play.api.libs.json.Json
+import testsHelper.GlobalApplicationForModels
+
 
 class TestGetUserLikedPagesOnFacebook extends GlobalApplicationForModels {
 

@@ -1,10 +1,13 @@
 import java.util.UUID
 
+import application.User
 import com.mohiva.play.silhouette.api.LoginInfo
-import models._
+import database.UserOrganizerRelation
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.Matchers._
+import organizersDomain.{OrganizerWithAddress, Organizer}
+import testsHelper.GlobalApplicationForModels
 
 
 class TestUserModel extends GlobalApplicationForModels {

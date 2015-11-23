@@ -2,16 +2,20 @@ package fillDatabase
 
 import javax.inject.Inject
 
+import addresses.SearchGeographicPoint
+import application.User
+import artistsDomain.ArtistMethods
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import models._
+import database.{MyPostgresDriver, FrenchCity, MyDBTableDefinitions}
+import genresDomain.{GenreMethods, Genre}
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.MessagesApi
 import play.api.mvc.Action
-import services.MyPostgresDriver.api._
-import services.{MyPostgresDriver, Utilities}
+import MyPostgresDriver.api._
+import services.Utilities
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source

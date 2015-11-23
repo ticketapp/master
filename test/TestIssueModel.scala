@@ -1,7 +1,8 @@
-import models._
+import issues.{Issue, IssueComment}
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.Matchers._
+import testsHelper.GlobalApplicationForModels
 
 
 class TestIssueModel extends GlobalApplicationForModels {

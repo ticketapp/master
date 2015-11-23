@@ -1,9 +1,13 @@
 import java.util.UUID
 
+import application.User
 import com.mohiva.play.silhouette.api.LoginInfo
-import models._
+import genresDomain.Genre
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import playlistsDomain._
+import testsHelper.GlobalApplicationForModels
+import tracksDomain.{TrackWithGenres, Track}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

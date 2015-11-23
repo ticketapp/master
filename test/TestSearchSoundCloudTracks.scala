@@ -1,10 +1,11 @@
 import java.util.UUID
 
-import models._
+import artistsDomain.Artist
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import services.SoundCloudArtistConfidence
+import testsHelper.GlobalApplicationForModels
+import tracksDomain.{SoundCloudArtistConfidence, Track}
 
 
 class TestSearchSoundCloudTracks extends GlobalApplicationForModels {

@@ -3,8 +3,12 @@ package services
 import java.util.UUID
 import javax.inject.Inject
 
+import artistsDomain.{ArtistMethods, ArtistWithWeightedGenres, PatternAndArtist}
 import com.mohiva.play.silhouette.api.LoginInfo
-import models._
+import database.{MyPostgresDriver, UserOrganizerRelation, UserPlaceRelation, UserArtistRelation}
+import eventsDomain.EventMethods
+import organizersDomain.OrganizerMethods
+import placesDomain.PlaceMethods
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -12,6 +16,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.WS
 import silhouette.OAuth2InfoDAO
+import tracksDomain.TrackMethods
 
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,6 +24,7 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.control.NonFatal
 import scala.util.{Success, Try}
+
 
 class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                             protected val oAuth2InfoDAO: OAuth2InfoDAO,
@@ -65,7 +71,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
   def getNextFacebookPages(url: String, facebookAccessToken: String, userUuid: UUID): Unit = WS
     .url(url)
     .get()
-    .map{response => println(response.json);filterPages(response.json, userUuid, facebookAccessToken)}
+    .map(response => filterPages(response.json, userUuid, facebookAccessToken))
 
   def filterPages(pages: JsValue, userUuid: UUID, facebookAccessToken: String): Unit = {
     facebookPageToPageTuple(pages) foreach { facebookPageTuple =>

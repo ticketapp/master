@@ -1,4 +1,6 @@
-import models.MyDBTableDefinitions
+import database.MyDBTableDefinitions
+import testsHelper.GlobalApplicationForModels
+
 
 class TestMyDBTableDefinition extends GlobalApplicationForModels with MyDBTableDefinitions{
 
