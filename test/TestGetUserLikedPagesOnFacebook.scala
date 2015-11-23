@@ -90,9 +90,9 @@ class TestGetUserLikedPagesOnFacebook extends GlobalApplicationForModels {
 
       facebookArtists.foreach { artistTuple =>
         whenReady(getUserLikedPagesOnFacebook.makeRelationArtistUser(artistTuple, userUuid),
-        timeout(Span(5, Seconds))) { isSaveWithRelation =>
+        timeout(Span(5, Seconds))) { isSavedWithRelation =>
 
-          isSaveWithRelation mustBe true
+          isSavedWithRelation mustBe true
         }
       }
 
