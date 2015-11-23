@@ -561,14 +561,13 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       case None =>
         Future(Set.empty)
     }
-    val description = utilities.formatDescription(maybeDescription)
     val genres = maybeGenre match {
      case Some(genre) => genreMethods.genresStringToGenresSet(genre)
      case None => Set.empty
     }
 
     eventuallyWebsitesSet map { websitesSet =>
-      ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, cover, description, facebookUrl, websitesSet),
+      ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, cover, maybeDescription, facebookUrl, websitesSet),
         genres.toSeq.map{genre => GenreWithWeight(genre, 0) }.toVector)
     }
   }
