@@ -20,6 +20,8 @@ import scala.language.postfixOps
 import scala.util.control.NonFatal
 import scala.util.{Success, Try}
 
+case class PageIdAndCategory(id: String, category: Option[String])
+
 class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                             protected val oAuth2InfoDAO: OAuth2InfoDAO,
                                             val utilities: Utilities,
@@ -71,53 +73,19 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
 
 
   def filterPages(pages: JsValue, userUuid: UUID, facebookAccessToken: String): Unit = {
-    val facebookTuples = facebookPageToPageTuple(pages)
+    val facebookTuples = facebookPageToPageIdAndCategory(pages)
 
-    val artistPages = facebookTuples.filter{ page =>
-      val maybeCategory = page._2
-      maybeCategory match {
-        case Some(category) =>
-          category.toLowerCase == "musician/band"
-        case _ =>
-          false
-      }
-    }
+    val artistPages = filterArtistPages(facebookTuples)
 
-    val placePages = facebookTuples.filter{ page =>
-      val maybeCategory = page._2
-      maybeCategory match {
-        case Some(category) =>
-          category.toLowerCase == "concert venue" ||
-            category.toLowerCase == "club" ||
-            category.toLowerCase == "bar" ||
-            category.toLowerCase == "arts/entertainment/nightlife"
-        case _ =>
-          false
-      }
-    }
+    val placePages = filterPlacePages(facebookTuples)
 
-    val organizerPages = facebookTuples.filter{ page =>
-      val maybeCategory = page._2
-      maybeCategory match {
-        case Some(category) =>
-          category.toLowerCase == "concert tour" ||
-            category.toLowerCase == "non-profit organization"
-        case _ =>
-          false
-      }
-    }
+    val organizerPages = filterOrganizerPages(facebookTuples)
     
-    val userArtists = //Akka.system.scheduler.scheduleOnce(delay = 1.seconds) {
-      makeRelationArtistUserOneByOne(artistPages, userUuid)
-    //}
+    val userArtists = makeRelationArtistUserOneByOne(artistPages, userUuid)
 
-    val userPlaces = //Akka.system.scheduler.scheduleOnce(delay = 3.seconds) {
-      makeRelationPlaceUserOneByOne(placePages, userUuid)
-    //}
+    val userPlaces = makeRelationPlaceUserOneByOne(placePages, userUuid)
 
-    val userOrganizers = //Akka.system.scheduler.scheduleOnce(delay = 5.seconds) {
-        makeRelationOrganizerUserOneByOne(organizerPages, userUuid)
-    //}
+    val userOrganizers = makeRelationOrganizerUserOneByOne(organizerPages, userUuid)
 
     for {
       artists <- userArtists
@@ -128,12 +96,49 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
         case Some(url) =>
           getNextFacebookPages(url, facebookAccessToken, userUuid)
         case _ =>
-          Logger.info("getUserLikedPagesOnFacebook: Done")
+          Logger.info("GetUserLikedPagesOnFacebook.filterPages: Done")
       }
     }
   }
 
-  def makeRelationArtistUserOneByOne(artists: Seq[(String, Option[String])], userUuid: UUID): Future[Boolean] = artists.headOption
+  def filterArtistPages(facebookTuples: Seq[PageIdAndCategory]): Seq[PageIdAndCategory] = {
+    facebookTuples.filter { page =>
+      page.category match {
+        case Some(category) =>
+          category.toLowerCase == "musician/band"
+        case _ =>
+          false
+      }
+    }
+  }
+
+  def filterPlacePages(facebookTuples: Seq[PageIdAndCategory]): Seq[PageIdAndCategory] = {
+    facebookTuples.filter { page =>
+      page.category match {
+        case Some(category) =>
+          category.toLowerCase == "concert venue" ||
+            category.toLowerCase == "club" ||
+            category.toLowerCase == "bar" ||
+            category.toLowerCase == "arts/entertainment/nightlife"
+        case _ =>
+          false
+      }
+    }
+  }
+
+  def filterOrganizerPages(facebookTuples: Seq[PageIdAndCategory]): Seq[PageIdAndCategory] = {
+    facebookTuples.filter { page =>
+      page.category match {
+        case Some(category) =>
+          category.toLowerCase == "concert tour" ||
+            category.toLowerCase == "non-profit organization"
+        case _ =>
+          false
+      }
+    }
+  }
+
+  def makeRelationArtistUserOneByOne(artists: Seq[PageIdAndCategory], userUuid: UUID): Future[Boolean] = artists.headOption
     match {
       case Some(nonEmptyPages) =>
         makeRelationArtistUser(nonEmptyPages, userUuid) map { artistRelation =>
@@ -141,11 +146,11 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
           artistRelation
         }
       case _ =>
-        Logger.info("make user artists relations done")
+        Logger.info("GetUserLikedPagesOnFacebook.makeArtistUserRelations: done")
         Future(true)
     }
   
-  def makeRelationPlaceUserOneByOne(places: Seq[(String, Option[String])], userUuid: UUID): Future[Boolean] = places.headOption
+  def makeRelationPlaceUserOneByOne(places: Seq[PageIdAndCategory], userUuid: UUID): Future[Boolean] = places.headOption
   match {
     case Some(nonEmptyPages) =>
       makeRelationPlaceUser(nonEmptyPages, userUuid) map { placeRelation =>
@@ -153,11 +158,11 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
         placeRelation
       }
     case _ =>
-      Logger.info("make user places relations done")
+      Logger.info("GetUserLikedPagesOnFacebook.makePlacesUserRelations: done")
       Future(true)
   }
   
-  def makeRelationOrganizerUserOneByOne(organizers: Seq[(String, Option[String])], userUuid: UUID): Future[Boolean] = organizers.headOption
+  def makeRelationOrganizerUserOneByOne(organizers: Seq[PageIdAndCategory], userUuid: UUID): Future[Boolean] = organizers.headOption
   match {
     case Some(nonEmptyPages) =>
       makeRelationOrganizerUser(nonEmptyPages, userUuid) map { organizerRelation =>
@@ -165,7 +170,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
         organizerRelation
       }
     case _ =>
-      Logger.info("make user organizers relations done")
+      Logger.info("GetUserLikedPagesOnFacebook.makeOrganizersUserRelations: done")
       Future(true)
   }
 
@@ -180,8 +185,8 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     }
   }
 
-  def makeRelationArtistUser(facebookPageTuple: (String, Option[String]), userUuid: UUID): Future[Boolean] = {
-    val facebookId = facebookPageTuple._1
+  def makeRelationArtistUser(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
+    val facebookId = facebookPageTuple.id
     artistMethods.findIdByFacebookId(facebookId) flatMap {
       case Some(artistId) =>
         followByArtistId(UserArtistRelation(userId = userUuid, artistId = artistId)) map {
@@ -216,8 +221,8 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     }
   }
 
-  def makeRelationPlaceUser(facebookPageTuple: (String, Option[String]), userUuid: UUID): Future[Boolean] = {
-    val facebookId = facebookPageTuple._1
+  def makeRelationPlaceUser(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
+    val facebookId = facebookPageTuple.id
     placeMethods.findIdByFacebookId(facebookId) flatMap {
       case Some(placeId) =>
         followByPlaceId(UserPlaceRelation(userId = userUuid, placeId = placeId)) map {
@@ -250,8 +255,8 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     }
   }
 
-  def makeRelationOrganizerUser(facebookPageTuple: (String, Option[String]), userUuid: UUID): Future[Boolean] = {
-    val facebookId = facebookPageTuple._1
+  def makeRelationOrganizerUser(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
+    val facebookId = facebookPageTuple.id
     organizerMethods.findIdByFacebookId(Option(facebookId)) flatMap {
       case Some(organizerId) =>
         followByOrganizerId(UserOrganizerRelation(userId = userUuid, organizerId = organizerId)) map {
@@ -299,28 +304,28 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
         saveEventsOneByOne(eventIds.tail)
       }
     case _ =>
-      Logger.info("all events saved")
+      Logger.info("GetUserLikedPagesOnFacebook.saveEvents: Done")
   }
   
-  def readFacebookPage: Reads[(String, Option[String])] = (
+  def readFacebookPage: Reads[PageIdAndCategory] = (
     (__ \ "id").read[String] and
     (__ \ "category").readNullable[String]
     )((maybeId: String, maybeCategory: Option[String]) =>
-      (maybeId, maybeCategory)
+      PageIdAndCategory(maybeId, maybeCategory)
   )
 
-  def facebookPageToPageTuple(pages: JsValue): Seq[(String, Option[String])] = Try {
-    val readFacebookPages: Reads[Seq[(String, Option[String])]] = Reads.seq(readFacebookPage).map(_.toVector)
+  def facebookPageToPageIdAndCategory(pages: JsValue): Seq[PageIdAndCategory] = Try {
+    val readFacebookPages: Reads[Seq[PageIdAndCategory]] = Reads.seq(readFacebookPage).map(_.toVector)
     val jsonLikes: JsLookupResult = pages \ "likes"
     jsonLikes match {
       case JsDefined(likes) =>
-        (pages \ "likes" \ "data").asOpt[Seq[(String, Option[String])]](readFacebookPages)
+        (pages \ "likes" \ "data").asOpt[Seq[PageIdAndCategory]](readFacebookPages)
       case _ =>
-        (pages \ "data").asOpt[Seq[(String, Option[String])]](readFacebookPages)
+        (pages \ "data").asOpt[Seq[PageIdAndCategory]](readFacebookPages)
     }
   } match {
     case Success(Some(facebookPagesTuple)) =>
-      facebookPagesTuple 
+      facebookPagesTuple
     case _ =>
       Seq.empty
   }
