@@ -1,5 +1,11 @@
+import java.util.UUID
+
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.time.{Seconds, Span}
 import play.api.libs.json.Json
 import testsHelper.GlobalApplicationForModels
+
+import services.PageIdAndCategory
 
 
 class TestGetUserLikedPagesOnFacebook extends GlobalApplicationForModels {
@@ -50,15 +56,60 @@ class TestGetUserLikedPagesOnFacebook extends GlobalApplicationForModels {
         |}
       """.stripMargin)
 
-    "transform facebook page to page tuple" in {
+    val facebookArtists = Seq(
+      PageIdAndCategory("534079613309595", Option("Musician/Band")),
+      PageIdAndCategory("493205657502998", Option("Musician/Band")),
+      PageIdAndCategory("175007802512911", Option("Musician/Band")),
+      PageIdAndCategory("198374666900337", Option("Musician/Band")),
+      PageIdAndCategory("916723911673035", Option("Musician/Band")),
+      PageIdAndCategory("312698145585982", Option("Musician/Band")),
+      PageIdAndCategory("144703482207721", Option("Musician/Band")),
+      PageIdAndCategory("546377438806185", Option("Musician/Band")),
+      PageIdAndCategory("212419688422", Option("Musician/Band")),
+      PageIdAndCategory("50860802143", Option("Musician/Band")),
+      PageIdAndCategory("36511744012", Option("Musician/Band")),
+      PageIdAndCategory("192110944137172", Option("Musician/Band")),
+      PageIdAndCategory("395337121981", Option("Musician/Band"))
+
+    )
+
+    "transform facebook page to page PageIdAndCategory" in {
       val expectedTuples = Vector(
-        ("887772324613065",Some("Concert Tour")),
-        ("1499505843697664",Some("Non-Profit Organization")),
-        ("136112080076799",Some("Arts/Entertainment/Nightlife")),
-        ("869259956491158",Some("Arts/Entertainment/Nightlife")),
-        ("534079613309595",Some("Musician/Band"))
+        PageIdAndCategory("887772324613065",Some("Concert Tour")),
+        PageIdAndCategory("1499505843697664",Some("Non-Profit Organization")),
+        PageIdAndCategory("136112080076799",Some("Arts/Entertainment/Nightlife")),
+        PageIdAndCategory("869259956491158",Some("Arts/Entertainment/Nightlife")),
+        PageIdAndCategory("534079613309595",Some("Musician/Band"))
       )
-      getUserLikedPagesOnFacebook.facebookPageToPageTuple(facebookResponse) mustBe expectedTuples
+      getUserLikedPagesOnFacebook.facebookPageToPageIdAndCategory(facebookResponse) mustBe expectedTuples
+    }
+
+    "save artists from facebook and make the relation with an user" in {
+
+      val userUuid = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
+
+      val expectedFacebookIds = Set(Some("534079613309595"), Some("493205657502998"), Some("175007802512911"),
+        Some("198374666900337"), Some("916723911673035"), Some("312698145585982"), Some("144703482207721"), Some("546377438806185"),
+        Some("212419688422"), Some("50860802143"), Some("36511744012"), Some("192110944137172"), Some("395337121981"))
+
+      facebookArtists.foreach { artistTuple =>
+        whenReady(getUserLikedPagesOnFacebook.makeRelationArtistUser(artistTuple, userUuid),
+        timeout(Span(5, Seconds))) { isSavedWithRelation =>
+
+          isSavedWithRelation mustBe true
+        }
+      }
+
+      whenReady(artistMethods.findAll, timeout(Span(5, Seconds))) { artists =>
+
+        artists map (_.facebookId) must contain allOf(Some("534079613309595"), Some("493205657502998"), Some("175007802512911"),
+          Some("198374666900337"), Some("916723911673035"), Some("312698145585982"), Some("144703482207721"), Some("546377438806185"),
+          Some("212419688422"), Some("50860802143"), Some("36511744012"), Some("192110944137172"), Some("395337121981"))
+      }
+
+      whenReady(artistMethods.getFollowedArtists(userUuid), timeout(Span(5, Seconds))) { followedArtists =>
+        followedArtists map (_.artist.facebookId) must contain theSameElementsAs expectedFacebookIds
+      }
     }
   }
 }

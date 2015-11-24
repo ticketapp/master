@@ -139,14 +139,17 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
             return ((event.endTime !== undefined && event.endTime < xHoursLater && event.endTime > now) ||
                 (event.endTime === undefined && event.startTime < xHoursLater && event.startTime >= twelveHoursAgo ))
         },
-        getEvents: function(start, offset) {
+        getEvents: function(start, offset, geolocation) {
             var deferred = $q.defer();
             factory.events = factory.events.filter(function(event) {
                 return factory.filterByTime(start, event);
             });
             factory.research = false;
             deferred.notify(factory.events);
-            EventsFactory.getEvents(start, $rootScope.geoLoc, offset).then(function (events) {
+            if (!geolocation) {
+                geolocation = $rootScope.geoLoc;
+            }
+            EventsFactory.getEvents(start, geolocation, offset).then(function (events) {
                 if (factory.eventsLocked === false) {
                     events = events.filter(function(event) {
                         return factory.filterByTime(start, event);

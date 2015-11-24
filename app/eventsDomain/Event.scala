@@ -16,7 +16,6 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
-import play.api.libs.iteratee.Iteratee
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
@@ -587,8 +586,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
           val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
 
+          val eventAddresses: Vector[Address] = returnEventAddresses(eventWithRelations, maybePlace)
+
+          val maybeEventGeographicPoint = returnEventGeographicPoint(eventAddresses)
+
           Option(eventWithRelations.copy(
-            event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
+            event = eventWithRelations.event.copy(ticketSellers = ticketSellers, geographicPoint = maybeEventGeographicPoint),
+            addresses = eventAddresses,
             artists = nonEmptyArtists,
             organizers = Vector(organizer).flatten,
             places = Vector(maybePlace).flatten,
@@ -602,11 +606,44 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = WS
-    .url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
-    .withQueryString("access_token" -> utilities.facebookToken)
-    .get()
-    .map(readEventsIdsFromWSResponse)
+  def returnEventGeographicPoint(addresses: Vector[Address]): Option[Geometry] = {
+    addresses.headOption match {
+      case Some(address) =>
+        address.geographicPoint
+      case _ =>
+        None
+    }
+  }
+
+  def returnEventAddresses(eventWithRelations: EventWithRelations, maybePlace: Option[PlaceWithAddress]): Vector[Address] =
+    eventWithRelations.addresses match {
+      case addresses if addresses.nonEmpty =>
+        eventWithRelations.addresses.toVector
+      case _ =>
+        maybePlace match {
+          case Some(place) =>
+            place.address match {
+              case Some(address) =>
+                Vector(address)
+              case _ =>
+                Vector.empty
+            }
+          case _ =>
+            Vector.empty
+        }
+  }
+
+  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = {
+    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
+      .withQueryString("access_token" -> utilities.facebookToken)
+      .get()
+      .map(readEventsIdsFromWSResponse)
+      .recover {
+        case NonFatal(e) =>
+          Logger.error("Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId:\nMessage:\n", e)
+          Seq.empty
+      }
+  }
 
   def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = Try {
     val readFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])

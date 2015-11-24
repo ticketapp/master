@@ -43,7 +43,7 @@ class TestEventModel extends GlobalApplicationForModels {
       val organizers = Vector(OrganizerWithAddress(Organizer(None, None, "nameEventRelations")))
       val addresses = Vector(Address(None, None, Option("cityEventRelations")))
       val places = Vector(PlaceWithAddress(Place(name = "nameEventRelations")))
-      val genres = Vector(Genre(name = "nameEventRelations"))
+      val genres = Vector(Genre(name = "nameeventrelations"))
       val event = EventWithRelations(
         event = Event(None, None, isPublic = true, isActive = true, "nameEventRelations", None, None,
         new DateTime(), None, 16, None, None, None),
@@ -257,8 +257,11 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "find a complete event by facebookId" in {
-      whenReady(eventMethods.getEventOnFacebookByFacebookId("809097205831013"), timeout(Span(10, Seconds))) { event =>
-        event.get.event.name mustBe "ANNULÉ /// Mad Professor vs Prince Fatty - Dub Attack Tour"
+      whenReady(eventMethods.getEventOnFacebookByFacebookId("985240908201444"), timeout(Span(10, Seconds))) { event =>
+        event.get.event.name mustBe "ENCORE w/ OCTAVE ONE live — MOJO — MOONRISE HILL CREW"
+        event.get.event.geographicPoint mustBe event.get.addresses.head.geographicPoint
+        event.get.addresses mustBe Vector(Address(Some(3), geographicPointMethods.optionStringToOptionPoint(Option("45.7408394,4.8499501")),
+          Some("lyon"),Some("69007"),Some("rue paul vivier / rue de cronstadt")))
       }
     }
 
