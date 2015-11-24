@@ -84,7 +84,9 @@ controller('ArtistCtrl', ['$scope', '$localStorage', 'ArtistsFactory', '$timeout
                     });
                 })
             }, 0);
-            $scope.description = artist.description.trim();
+            if (artist.description) {
+                $scope.description = artist.description.trim();
+            }
             normalizeWebsites(artist);
             getIsFollowed(artist);
             getArtistsEvent();
