@@ -9,7 +9,9 @@ angular.module('claudeApp').
         $scope.isFollowed = false;
         OrganizerFactory.getOrganizer($routeParams.id).then(function (organizer) {
             $scope.organizer = organizer;
-            $scope.description = organizer.description.trim();
+            if (organizer.description) {
+                $scope.description = organizer.description.trim();
+            }
             if ($scope.organizer.geographicPoint != undefined) {
                 $scope.geographicPoint = $scope.organizer.geographicPoint;
                 $scope.map = true;
