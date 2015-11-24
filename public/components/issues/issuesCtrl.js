@@ -22,9 +22,9 @@ angular.module('claudeApp').controller('issuesCtrl', ['$scope', '$rootScope',
         });
     };
     $scope.addComment = function (i) {
-        $http.post('/issues/' + $scope.issues[i].issueId + '/comments', {content: $scope.newComment.content}).
+        $http.post('/issues/' + $scope.issues[i].id + '/comments', {content: $scope.newComment.content}).
             success(function (data) {
-                $scope.getIssueComments($scope.issues[i].issueId)
+                $scope.getIssueComments($scope.issues[i].id)
                 $scope.addNewComment = false;
             }).error(function (data, status) {
                 if (status === 401) {

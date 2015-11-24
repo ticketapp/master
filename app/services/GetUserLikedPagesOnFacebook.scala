@@ -54,21 +54,18 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     }
   }
 
-  def getMusicPagesOnFacebook(facebookAccessToken: String, userUuid: UUID): Unit =
-    WS.url("https://graph.facebook.com/" + facebookApiVersion + "/me")
-      .withQueryString(
-        "fields" -> "id,name,likes{id, name, category, categories_list}",
-        "access_token" -> facebookAccessToken)
+  def getMusicPagesOnFacebook(facebookAccessToken: String, userUuid: UUID): Unit = WS
+    .url("https://graph.facebook.com/" + facebookApiVersion + "/me")
+    .withQueryString(
+      "fields" -> "id,name,likes{id,name,category}",
+      "access_token" -> facebookAccessToken)
     .get()
-    .map { response =>
-      filterPages(response.json, userUuid, facebookAccessToken)
-    }
+    .map(response => filterPages(response.json, userUuid, facebookAccessToken))
 
   def getNextFacebookPages(url: String, facebookAccessToken: String, userUuid: UUID): Unit = WS
     .url(url)
     .get()
-    .map(response => filterPages(response.json, userUuid, facebookAccessToken))
-
+    .map{response => println(response.json);filterPages(response.json, userUuid, facebookAccessToken)}
 
   def filterPages(pages: JsValue, userUuid: UUID, facebookAccessToken: String): Unit = {
     val facebookTuples = facebookPageToPageTuple(pages)

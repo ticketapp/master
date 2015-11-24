@@ -72,7 +72,9 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     placeWithAddress.address match {
       case Some(address) =>
         addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
-          save(placeWithAddress.place.copy(addressId = savedAddress.id)) map { place =>
+          save(placeWithAddress.place.copy(
+            addressId = savedAddress.id,
+            geographicPoint = savedAddress.geographicPoint)) map { place =>
             PlaceWithAddress(place, Option(savedAddress))
           }
         }
@@ -89,8 +91,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(tupledJoin.result.headOption) map(_ map PlaceWithAddress.tupled)
   }
 
-  def findAll: Future[Seq[PlaceWithAddress]] = {
-    val query = places joinLeft addresses on (_.addressId === _.id)
+  def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[PlaceWithAddress]] = {
+    val query = places.drop(offset).take(numberToReturn) joinLeft addresses on (_.addressId === _.id)
     db.run(query.result) map(_ map PlaceWithAddress.tupled)
   }
 
@@ -177,14 +179,14 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] = {
     val query = for {
-      placeWithAddress <- places joinLeft addresses on (_.addressId === _.id)
+      placeWithAddress <- places
+        .sortBy(_.geographicPoint <-> geographicPoint)
+        .drop(offset)
+        .take(numberToReturn) joinLeft
+        addresses on (_.addressId === _.id)
     } yield placeWithAddress
 
-    db.run(query
-      .sortBy(_._1.geographicPoint <-> geographicPoint)
-      .drop(offset)
-      .take(numberToReturn)
-      .result) map(_ map PlaceWithAddress.tupled)
+    db.run(query.result) map(_ map PlaceWithAddress.tupled)
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] =

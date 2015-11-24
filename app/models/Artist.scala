@@ -35,8 +35,7 @@ case class Artist(id: Option[Long],
 
 case class ArtistWithWeightedGenres(artist: Artist, genres: Seq[GenreWithWeight] = Seq.empty)
 
-case class PatternAndArtist(searchPattern: String,
-                            artistWithWeightedGenres: ArtistWithWeightedGenres)
+case class PatternAndArtist(searchPattern: String, artistWithWeightedGenres: ArtistWithWeightedGenres)
 
 
 class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -57,7 +56,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def findAll: Future[Vector[Artist]] = db.run(artists.result) map (_.toVector)
 
-  def findSinceOffset(numberToReturn: Int, offset: Int): Future[Seq[ArtistWithWeightedGenres]] = {
+  def findSinceOffset(numberToReturn: Int, offset: Long): Future[Seq[ArtistWithWeightedGenres]] = {
     val query = for {
      artist <- artists.drop(offset).take(numberToReturn) joinLeft
        (artistsGenres join genres on (_.genreId === _.id)) on (_.id === _._1.artistId)
@@ -562,14 +561,13 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       case None =>
         Future(Set.empty)
     }
-    val description = utilities.formatDescription(maybeDescription)
     val genres = maybeGenre match {
      case Some(genre) => genreMethods.genresStringToGenresSet(genre)
      case None => Set.empty
     }
 
     eventuallyWebsitesSet map { websitesSet =>
-      ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, cover, description, facebookUrl, websitesSet),
+      ArtistWithWeightedGenres(Artist(None, Option(facebookId), name, cover, maybeDescription, facebookUrl, websitesSet),
         genres.toSeq.map{genre => GenreWithWeight(genre, 0) }.toVector)
     }
   }
