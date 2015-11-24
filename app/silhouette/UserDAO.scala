@@ -2,8 +2,8 @@ package silhouette
 
 import java.util.UUID
 
+import application.User
 import com.mohiva.play.silhouette.api.LoginInfo
-import models.User
 
 import scala.concurrent.Future
 

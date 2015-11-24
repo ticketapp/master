@@ -1,9 +1,10 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import json.JsonHelper._
-import models.Organizer
+import organizersDomain.Organizer
 import play.api.libs.json._
 import play.api.test._
+import testsHelper.GlobalApplicationForControllers
 
 import scala.language.postfixOps
 
@@ -43,9 +44,9 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     }
 
     "follow and unfollow an organizer by id" in {
-      val Some(response) = route(FakeRequest(controllers.routes.OrganizerController.followOrganizerByOrganizerId(300))
+      val Some(response) = route(FakeRequest(organizersDomain.routes.OrganizerController.followOrganizerByOrganizerId(300))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(controllers.routes.OrganizerController.unfollowOrganizerByOrganizerId(300))
+      val Some(response1) = route(FakeRequest(organizersDomain.routes.OrganizerController.unfollowOrganizerByOrganizerId(300))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED
@@ -54,7 +55,7 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     }
 
     "return an error if an user try to follow an organizer twice" in {
-      val Some(response) = route(FakeRequest(controllers.routes.OrganizerController.followOrganizerByOrganizerId(1))
+      val Some(response) = route(FakeRequest(organizersDomain.routes.OrganizerController.followOrganizerByOrganizerId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
    
       status(response) mustEqual CONFLICT
@@ -75,9 +76,9 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     }
 
     "return true if the organizer is followed else false" in {
-      val Some(isOrganizerFollowed) = route(FakeRequest(controllers.routes.OrganizerController.isOrganizerFollowed(1))
+      val Some(isOrganizerFollowed) = route(FakeRequest(organizersDomain.routes.OrganizerController.isOrganizerFollowed(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(isOrganizerNotFollowed) = route(FakeRequest(controllers.routes.OrganizerController.isOrganizerFollowed(2))
+      val Some(isOrganizerNotFollowed) = route(FakeRequest(organizersDomain.routes.OrganizerController.isOrganizerFollowed(2))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(isOrganizerFollowed) mustEqual OK
@@ -88,24 +89,25 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     }
 
     "get organizers near geoPoint" in {
-      val Some(response) = route(FakeRequest(controllers.routes.OrganizerController.findOrganizersNear(
-        geographicPoint = "5,5",
-        numberToReturn = 1000,
-        offset = 0))
+      val Some(response) = route(
+        FakeRequest(organizersDomain.routes.OrganizerController.findOrganizersNear(
+          geographicPoint = "5,5",
+          numberToReturn = 1000,
+          offset = 0))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       val organizersJSValue = contentAsJson(response ) \\ "organizer"
       val organizers = organizersJSValue.map(organizer => organizer.as[Organizer])
 
       status(response) mustEqual OK
+
       val geoPoints = organizers.map(_.geographicPoint)
 
-      val centerPoint = geographicPointMethods.latAndLngToGeographicPoint(5.0, 5.0).get
-      val sortedGeoPoint = geoPoints.flatten sortBy(point => point.distance(centerPoint))
-      val numberOfEmptyValuesRemoved = geoPoints.size - sortedGeoPoint.size
-      val sortedGeoPointPlusEmptyValues = (sortedGeoPoint map Option.apply) ++ List.fill(numberOfEmptyValuesRemoved)(None)
+      val centerPoint = geographicPointMethods.latAndLngToGeographicPoint(latitude = 5.0, longitude = 5.0).get
 
-      geoPoints mustEqual sortedGeoPointPlusEmptyValues
+      val sortedGeoPoint = geoPoints.flatten sortBy(point => point.distance(centerPoint))
+
+      geoPoints.flatten mustEqual sortedGeoPoint
     }
   }
 }

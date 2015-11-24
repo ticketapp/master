@@ -1,9 +1,11 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import models._
+import database.EventArtistRelation
+import eventsDomain.{Event, EventWithRelations}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.test.FakeRequest
+import testsHelper.GlobalApplicationForControllers
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,7 +32,7 @@ class TestArtistController extends GlobalApplicationForControllers {
           "description": "artist.description"
         }
       }""")
-      val Some(result) = route(FakeRequest(controllers.routes.ArtistController.createArtist())
+      val Some(result) = route(FakeRequest(artistsDomain.routes.ArtistController.createArtist())
         .withJsonBody(artistJson))
 
       status(result) mustEqual OK
@@ -66,25 +68,25 @@ class TestArtistController extends GlobalApplicationForControllers {
           "description": "artist.description"
         }
       }""")
-      val Some(result) = route(FakeRequest(POST, "/artists/createArtist")
+      val Some(result) = route(FakeRequest(artistsDomain.routes.ArtistController.createArtist())
         .withJsonBody(artistJson))
 
       status(result) mustEqual CONFLICT
     }
 
     "find a list of artists" in {
-      val Some(artists) = route(FakeRequest(GET, "/artists/since?numberToReturn=" + 10 + "&offset=" + 0))
+      val Some(artists) = route(FakeRequest(artistsDomain.routes.ArtistController.artistsSinceOffset(numberToReturn = 10, offset = 0)))
       contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
     }
 
     "find a list of artist by containing" in {
-      val Some(artists) = route(FakeRequest(GET, "/artists/containing/worakls"))
+      val Some(artists) = route(FakeRequest(artistsDomain.routes.ArtistController.findArtistsContaining("worakls")))
       contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
     }
 
     "find one artist by id" in {
       val artistId = await(artistMethods.findAllContaining("worakls")).headOption.get.artist.id
-      val Some(artist) = route(FakeRequest(GET, "/artists/byId/" + artistId.get))
+      val Some(artist) = route(FakeRequest(artistsDomain.routes.ArtistController.artist(artistId.get)))
       contentAsJson(artist).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
     }
 
@@ -180,7 +182,7 @@ class TestArtistController extends GlobalApplicationForControllers {
     }
 
     "find events by artistFacebookUrl" in {
-      val Some(response) = route(FakeRequest(GET, "/artists/facebookUrl00/events"))
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findByArtist("facebookUrl00")))
 
       status(response) mustEqual OK
 
@@ -189,16 +191,23 @@ class TestArtistController extends GlobalApplicationForControllers {
     }
 
     "find passed events by artistId" in {
-      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "artistController.findEventByArtistId", None,
-        None, new DateTime(100000000000000L), None, 1, None, None, None))
-      val passedEvent = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "artistController.findEventByArtistIdPassedEvent",
-        None, None, new DateTime(0), Option(new DateTime(0)), 1, None, None, None))
+      val event = EventWithRelations(
+        event = Event(
+          name = "artistController.findEventByArtistId",
+          startTime = new DateTime(100000000000000L)))
+      val passedEvent = EventWithRelations(
+        event = Event(
+          name = "artistController.findEventByArtistIdPassedEvent",
+          startTime = new DateTime(0),
+          endTime = Option(new DateTime(0))))
+
       val artistId = await(artistMethods.findAllContaining("worakls")).head.artist.id
       val eventId = await(eventMethods.save(event)).id
       val passedEventId = await(eventMethods.save(passedEvent)).id
       await(artistMethods.saveEventRelation(EventArtistRelation(eventId.get, artistId.get)))
       await(artistMethods.saveEventRelation(EventArtistRelation(passedEventId.get, artistId.get)))
-      val Some(response) = route(FakeRequest(GET, "/artists/" + artistId.get + "/passedEvents"))
+
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findPassedByArtist(artistId.get)))
 
       status(response) mustEqual OK
 
@@ -207,10 +216,10 @@ class TestArtistController extends GlobalApplicationForControllers {
     }
 
     "find artists by genre" in {
-      val Some(response) = route(FakeRequest(GET, "/genres/rock/artists?numberToReturn=200&offset=0"))
+      val Some(response) = route(FakeRequest(GET, "/genres/genreTest0/artists?numberToReturn=200&offset=0"))
 
       status(response) mustEqual OK
-      contentAsJson(response).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
+      contentAsJson(response).toString() must contain("""{"artist":{"id":100,"name":"name","facebookUrl":"facebookUrl0"""")
     }
   }
 }

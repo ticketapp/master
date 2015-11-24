@@ -1,11 +1,13 @@
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-import models._
+import artistsDomain.{ArtistWithWeightedGenres, Artist}
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import play.api.libs.iteratee.{Iteratee, Enumerator}
+import testsHelper.GlobalApplicationForModels
+import tracksDomain.{Rating, Track}
 
 import scala.language.postfixOps
 import scala.util.{Try, Success}

@@ -1,15 +1,10 @@
-import java.util.UUID
-
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import play.api.libs.json._
-import play.api.mvc.{AnyContentAsEmpty, Headers}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeHeaders, FakeRequest}
-import org.specs2.matcher.Matcher._
-import play.api.test.Helpers._
-import play.mvc.Http
+import testsHelper.GlobalApplicationForControllers
+
 import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class TestUserController extends GlobalApplicationForControllers {

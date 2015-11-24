@@ -1,7 +1,7 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import play.api.libs.json._
 import play.api.test.FakeRequest
+import testsHelper.GlobalApplicationForControllers
 
 import scala.language.postfixOps
 

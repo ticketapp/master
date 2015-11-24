@@ -1,9 +1,13 @@
 import java.util.UUID
 
-import models._
+import artistsDomain.{Artist, ArtistWithWeightedGenres}
+import database.{ArtistGenreRelation, EventGenreRelation, TrackGenreRelation}
+import genresDomain.Genre
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import testsHelper.GlobalApplicationForModels
+import tracksDomain.Track
 
 
 class TestGenreModel extends GlobalApplicationForModels {

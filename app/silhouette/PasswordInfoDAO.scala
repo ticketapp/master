@@ -3,12 +3,13 @@ package silhouette
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
+import database.MyPostgresDriver
 import play.api.libs.concurrent.Execution.Implicits._
 import javax.inject.Inject
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.Future
-import services.MyPostgresDriver.api._
+import MyPostgresDriver.api._
 
 /**
  * The DAO to store the password information.

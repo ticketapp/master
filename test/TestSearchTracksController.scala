@@ -18,7 +18,7 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
     "find tracks on Youtube by a title and an artist" in {
       val eventuallyResult = route(
         FakeRequest(
-          controllers.routes.SearchTracksController
+          tracksDomain.routes.SearchTracksController
             .getYoutubeTracksForArtistAndTrackTitle("brassens", "facebookUrlSearchTracksController", "pauvre martin"))
       ).get
 
@@ -31,7 +31,7 @@ class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
     }
 
     "get youtube track info" in {
-      val Some(info) = route(FakeRequest(GET, "/tracks/youtubeTrackInfo/ujUUkrmfpis"))
+      val Some(info) = route(FakeRequest(tracksDomain.routes.SearchTracksController.getYoutubeTrackInfo("ujUUkrmfpis")))
 
       contentAsString(info) should include("author=Pan-Pot")
     }

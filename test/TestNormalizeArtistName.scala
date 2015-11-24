@@ -1,3 +1,6 @@
+import testsHelper.GlobalApplicationForModels
+
+
 class TestNormalizeArtistName extends GlobalApplicationForModels {
 
   "A sequence of artists names (strings)" must {

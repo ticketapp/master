@@ -1,7 +1,8 @@
 package silhouette
 
 import java.util.UUID
-import services.MyPostgresDriver.api._
+import database.MyPostgresDriver
+import MyPostgresDriver.api._
 import com.mohiva.play.silhouette.api.LoginInfo
 
 trait DBTableDefinitions {

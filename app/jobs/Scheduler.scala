@@ -2,9 +2,14 @@ package jobs
 
 import javax.inject.Inject
 
-import models._
+import addresses.{SearchGeographicPoint, AddressMethods, Address}
+import artistsDomain.{ArtistMethods, PatternAndArtist}
+import eventsDomain.{EventWithRelations, EventMethods}
+import organizersDomain.{OrganizerMethods, OrganizerWithAddress}
+import placesDomain.{PlaceMethods, PlaceWithAddress}
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
+import tracksDomain.TrackMethods
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal

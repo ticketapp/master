@@ -1,5 +1,7 @@
-import models.Genre
+import genresDomain.Genre
 import org.scalatest.Matchers._
+import testsHelper.GlobalApplicationForModels
+
 
 class TestGenresStringToSet extends GlobalApplicationForModels {
 

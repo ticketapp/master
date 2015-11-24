@@ -1,11 +1,8 @@
 import play.routes.compiler.InjectedRoutesGenerator
-import play.sbt.PlayScala
-
-import scalariform.formatter.preferences._
-import sbt._
-import Keys._
 import play.sbt.Play.autoImport._
-import PlayKeys._
+import play.sbt.PlayScala
+import sbt.Keys._
+import sbt._
 
 name := "Claude"
 

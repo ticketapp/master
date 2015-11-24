@@ -2,9 +2,10 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import models._
 import play.api.libs.json._
 import play.api.test.FakeRequest
+import testsHelper.GlobalApplicationForControllers
+import tracksDomain.Track
 
 
 class TestPlaylistController extends GlobalApplicationForControllers {
@@ -44,13 +45,13 @@ class TestPlaylistController extends GlobalApplicationForControllers {
            ]
           }"""
 
-      val Some(result) = route(FakeRequest(POST, "/playlists")
+      val Some(result) = route(FakeRequest(playlistsDomain.routes.PlaylistController.create())
         .withJsonBody(Json.parse(jsonPlaylist))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(result) mustEqual OK
 
-      val Some(delete) = route(FakeRequest(controllers.routes.PlaylistController.delete(2))
+      val Some(delete) = route(FakeRequest(playlistsDomain.routes.PlaylistController.delete(2))
         .withJsonBody(Json.parse(jsonPlaylist))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -60,7 +61,7 @@ class TestPlaylistController extends GlobalApplicationForControllers {
     }
 
     "find playlists by user" in {
-      val Some(playlists) = route(FakeRequest(controllers.routes.PlaylistController.findByUser())
+      val Some(playlists) = route(FakeRequest(playlistsDomain.routes.PlaylistController.findByUser())
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsString(playlists) must contain(""""name":"playlist0"""")
@@ -79,7 +80,7 @@ class TestPlaylistController extends GlobalApplicationForControllers {
           ]
         }""")
 
-      val Some(update) = route(FakeRequest(controllers.routes.PlaylistController.update(1))
+      val Some(update) = route(FakeRequest(playlistsDomain.routes.PlaylistController.update(1))
         .withJsonBody(jsonUpdatedPlaylist)
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 

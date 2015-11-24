@@ -1,12 +1,14 @@
 import java.util.UUID
 
-import models._
+import artistsDomain.Artist
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Iteratee
 import play.api.libs.json.{JsValue, Json}
+import testsHelper.GlobalApplicationForModels
+import tracksDomain.Track
 
 
 class TestSearchYoutubeTracks extends GlobalApplicationForModels {
@@ -16,7 +18,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
     "return a list of echonestId/facebookId" in {
       val futureSeqTupleEchonestIdFacebookId = searchYoutubeTrack.getSeqTupleEchonestIdFacebookId("rone")
 
-      whenReady (futureSeqTupleEchonestIdFacebookId, timeout(Span(2, Seconds))) { seqTupleEchonestIdFacebookId =>
+      whenReady (futureSeqTupleEchonestIdFacebookId, timeout(Span(5, Seconds))) { seqTupleEchonestIdFacebookId =>
         seqTupleEchonestIdFacebookId should contain allOf (("ARWRC4A1187FB5B7D5", "114140585267550"),
           ("AR3KOM61187B99740F", "112089615877"))
       }

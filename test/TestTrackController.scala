@@ -1,10 +1,11 @@
 import java.util.UUID
 
+import artistsDomain.{ArtistWithWeightedGenres, Artist}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import models._
 import play.api.libs.json._
 import play.api.test.FakeRequest
+import testsHelper.GlobalApplicationForControllers
 
 import scala.language.postfixOps
 
@@ -29,7 +30,7 @@ class TestTrackController extends GlobalApplicationForControllers {
       val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookIdTestTRackController"), "artistTrackTest",
         Option("imagePath"), Option("description"), "artistTrackFacebookUrl", Set("website")), Vector.empty)
       await(artistMethods.save(artist))
-      val Some(result) = route(FakeRequest(POST, "/tracks/create")
+      val Some(result) = route(FakeRequest(tracksDomain.routes.TrackController.createTrack())
         .withJsonBody(Json.parse(jsonTrack))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -37,14 +38,16 @@ class TestTrackController extends GlobalApplicationForControllers {
     }
 
     "find a list of tracks by artist" in {
-      val Some(tracks) = route(FakeRequest(GET, "/tracks?artistFacebookUrl=facebookUrl0&numberToReturn=0&offset=" + 0))
+      val Some(tracks) = route(
+        FakeRequest(tracksDomain.routes.TrackController.findAllByArtist("facebookUrl0", 1000, 0)))
       contentAsJson(tracks).toString() must contain(""""uuid":"13894e56-08d1-4c1f-b3e4-466c069d15ed","title":"title0"""")
     }
 
     "follow and unfollow a track by id" in {
-      val Some(response) = route(FakeRequest(POST, "/tracks/" + "13894e56-08d1-4c1f-b3e4-466c069d15ed" + "/addToFavorites")
+      val Some(response) = route(
+        FakeRequest(tracksDomain.routes.TrackController.followTrack("13894e56-08d1-4c1f-b3e4-466c069d15ed"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(POST, "/tracks/" + "13894e56-08d1-4c1f-b3e4-466c069d15ed" + "/removeFromFavorites")
+      val Some(response1) = route(FakeRequest(tracksDomain.routes.TrackController.unfollowTrack("13894e56-08d1-4c1f-b3e4-466c069d15ed"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED
@@ -53,23 +56,23 @@ class TestTrackController extends GlobalApplicationForControllers {
     }
 
     "return an error if an user try to follow a track already followed" in {
-      val Some(response) = route(FakeRequest(POST, "/tracks/" + "02894e56-08d1-4c1f-b3e4-466c069d15ed" + "/addToFavorites")
+      val Some(response) = route(
+        FakeRequest(tracksDomain.routes.TrackController.followTrack("02894e56-08d1-4c1f-b3e4-466c069d15ed"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CONFLICT
     }
 
     "find followed tracks" in {
-      val Some(tracks) = route(FakeRequest(GET, "/tracks/favorites")
+      val Some(tracks) = route(FakeRequest(tracksDomain.routes.TrackController.getFollowedTracks())
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      println(contentAsString(tracks))
       contentAsString(tracks) must contain(""""uuid":"02894e56-08d1-4c1f-b3e4-466c069d15ed","title":"title"""")
       contentAsString(tracks) must contain("""{"id":1,"name":"genreTest0","icon":"a"}""")
     }
 
     "return true if the track is followed" in {
-      val Some(tracks) = route(FakeRequest(GET, "/tracks/" + "02894e56-08d1-4c1f-b3e4-466c069d15ed" + "/isFollowed")
+      val Some(tracks) = route(FakeRequest(tracksDomain.routes.TrackController.isTrackFollowed("02894e56-08d1-4c1f-b3e4-466c069d15ed"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(tracks) mustEqual OK
@@ -79,7 +82,7 @@ class TestTrackController extends GlobalApplicationForControllers {
 
     "find tracks by facebookUrl" in {
       val Some(tracks) = route(FakeRequest(
-        controllers.routes.TrackController.findAllByArtist(facebookUrl = "facebookUrl0", numberToReturn = 0, offset = 0)))
+        tracksDomain.routes.TrackController.findAllByArtist(facebookUrl = "facebookUrl0", numberToReturn = 0, offset = 0)))
 
       status(tracks) mustEqual OK
 

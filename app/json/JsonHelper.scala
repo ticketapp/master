@@ -2,11 +2,19 @@ package json
 
 import java.util.UUID
 
+import addresses.Address
+import artistsDomain.{Artist, ArtistWithWeightedGenres}
 import com.vividsolutions.jts.io.{WKTReader, WKTWriter}
+import eventsDomain.{Event, EventWithRelations}
+import genresDomain.{Genre, GenreWithWeight}
+import issues.{Issue, IssueComment}
+import organizersDomain.{Organizer, OrganizerWithAddress}
+import others.Tariff
+import placesDomain.{Place, PlaceWithAddress}
+import playlistsDomain._
+import tracksDomain.{Track, TrackWithGenres}
 
-//import models.Accounting._
 import com.vividsolutions.jts.geom.Geometry
-import models._
 import play.api.libs.json.{JsNumber, _}
 
 object JsonHelper {
@@ -47,7 +55,6 @@ object JsonHelper {
   }
 
   implicit val geometryJsonFormat = geomJsonFormat[Geometry]
-//  implicit val pointJsonFormat = geomJsonFormat[Point]
 
 //  implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
 //  implicit val account63Writes: Writes[Account63] = Json.writes[Account63]
@@ -61,7 +68,6 @@ object JsonHelper {
 
   implicit val genreWrites = Json.writes[Genre]
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
-//  implicit val imageWrites = Json.writes[Image]
   implicit val trackWrites: Writes[Track] = Json.writes[Track]
   implicit val trackReads: Reads[Track] = Json.reads[Track]
   implicit val trackWithGenresWrites: Writes[TrackWithGenres] = Json.writes[TrackWithGenres]

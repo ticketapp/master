@@ -1,7 +1,11 @@
-import models._
+import addresses.Address
+import database.EventPlaceRelation
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import organizersDomain.{Organizer, OrganizerWithAddress}
+import placesDomain.{Place, PlaceWithAddress}
+import testsHelper.GlobalApplicationForModels
 
 import scala.language.postfixOps
 
@@ -26,15 +30,25 @@ class TestPlaceModel extends GlobalApplicationForModels {
 
     "all be found, sorted by distance" in {
       val here = geographicPointMethods.stringToGeographicPoint("5.4,5.6").get
-      val place = Place(None, "test2", Some("123"), None)
-      val place2 = Place(None, "test3", Some("1234"), Option(here))
-      val place3 = Place(None, "test4", Some("12345"), Option(geographicPointMethods.stringToGeographicPoint("50.4,50.6").get))
-      whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
-        whenReady(placeMethods.save(place2), timeout(Span(2, Seconds))) { savedPlace2 =>
-          whenReady(placeMethods.save(place3), timeout(Span(2, Seconds))) { savedPlace3 =>
-            whenReady(placeMethods.findNear(here, 10000, 0), timeout(Span(5, Seconds))) { foundPlaces =>
 
-              foundPlaces map(p => p.place) should contain inOrder(savedPlace2, savedPlace3, savedPlace)
+      val placeWithoutGeoPoint = Place(
+        name = "placeWithoutGeoPoint",
+        geographicPoint = None)
+      val placeHere = Place(
+        name = "placeHere",
+        geographicPoint = Option(here))
+      val farPlace = Place(
+        name = "farPlace",
+        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("50.4,50.6").get))
+
+      whenReady(placeMethods.save(placeWithoutGeoPoint), timeout(Span(2, Seconds))) { savedPlaceWithoutGeoPoint =>
+        whenReady(placeMethods.save(placeHere), timeout(Span(2, Seconds))) { savedPlaceHere =>
+          whenReady(placeMethods.save(farPlace), timeout(Span(2, Seconds))) { farSavedPlace =>
+
+            whenReady(placeMethods.findNear(geographicPoint = here, numberToReturn = 10000, offset = 0),
+              timeout(Span(5, Seconds))) { foundPlaces =>
+
+              foundPlaces map(p => p.place) should contain inOrder(savedPlaceHere, farSavedPlace, savedPlaceWithoutGeoPoint)
             }
           }
         }

@@ -1,7 +1,9 @@
-import models._
+import addresses.Address
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import play.api.db.evolutions.Evolutions
+import testsHelper.GlobalApplicationForModels
+
 
 class TestGeographicPointMethods extends GlobalApplicationForModels {
 

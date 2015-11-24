@@ -1,9 +1,10 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import issues.{Issue, IssueComment}
 import json.JsonHelper._
-import models._
 import play.api.libs.json._
 import play.api.test.FakeRequest
+import testsHelper.GlobalApplicationForControllers
 
 import scala.language.postfixOps
 
@@ -21,7 +22,7 @@ class TestIssueController extends GlobalApplicationForControllers {
         userUUID = defaultUserUUID,
         fixed = false)
 
-      val Some(result) = route(FakeRequest(controllers.routes.IssueController.issues()))
+      val Some(result) = route(FakeRequest(issues.routes.IssueController.issues()))
 
       status(result) mustEqual OK
       contentAsJson(result).as[Seq[Issue]] mustEqual Seq(expectedIssue)
@@ -33,7 +34,7 @@ class TestIssueController extends GlobalApplicationForControllers {
         userUUID = defaultUserUUID,
         issueId = 100)
 
-      val Some(result) = route(FakeRequest(controllers.routes.IssueController.commentsForIssue(100)))
+      val Some(result) = route(FakeRequest(issues.routes.IssueController.commentsForIssue(100)))
 
       status(result) mustEqual OK
       contentAsJson(result).as[Seq[IssueComment]] mustEqual Seq(expectedComment)
@@ -53,7 +54,7 @@ class TestIssueController extends GlobalApplicationForControllers {
         userUUID = defaultUserUUID,
         fixed = false)
 
-      val Some(result) = route(FakeRequest(controllers.routes.IssueController.create())
+      val Some(result) = route(FakeRequest(issues.routes.IssueController.create())
         .withJsonBody(jsonIssue)
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
@@ -67,7 +68,7 @@ class TestIssueController extends GlobalApplicationForControllers {
         userUUID = defaultUserUUID,
         issueId = 100)
 
-      val Some(result) = route(FakeRequest(controllers.routes.IssueController.commentsForIssue(100)))
+      val Some(result) = route(FakeRequest(issues.routes.IssueController.commentsForIssue(100)))
 
       status(result) mustEqual OK
       contentAsJson(result).as[Seq[IssueComment]] mustEqual Seq(expectedComment)

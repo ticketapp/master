@@ -3,7 +3,10 @@ import java.util.UUID
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import play.api.libs.json.Json
+import testsHelper.GlobalApplicationForModels
+
 import services.PageIdAndCategory
+
 
 class TestGetUserLikedPagesOnFacebook extends GlobalApplicationForModels {
 
