@@ -6,7 +6,6 @@ import database.MyPostgresDriver
 import organizersDomain.OrganizerMethods
 import placesDomain.PlaceMethods
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import services.Utilities
 
 /*
   infoId                    SERIAL PRIMARY KEY,
@@ -25,8 +24,7 @@ case class Info(id: Long,
 
 class InfoMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val organizerMethods: OrganizerMethods,
-                             val placeMethods: PlaceMethods,
-                             val utilities: Utilities)
+                             val placeMethods: PlaceMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver] {
 
 //

@@ -31,8 +31,8 @@ INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookur
 INSERT INTO playlists(userId, name) VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', 'playlist0');
 
 -------------------------------------------------------- genres --------------------------------------------------------
-INSERT INTO genres(name, icon) VALUES('genreTest0', 'a');
-INSERT INTO genres(name, icon) VALUES('genreTest00', 'a');
+INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
+INSERT INTO genres(name, icon) VALUES('genretest00', 'a');
 
 -------------------------------------------------------- artistsGenres -------------------------------------------------
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES

@@ -18,7 +18,7 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
     "return a list of echonestId/facebookId" in {
       val futureSeqTupleEchonestIdFacebookId = searchYoutubeTrack.getSeqTupleEchonestIdFacebookId("rone")
 
-      whenReady (futureSeqTupleEchonestIdFacebookId, timeout(Span(5, Seconds))) { seqTupleEchonestIdFacebookId =>
+      whenReady(futureSeqTupleEchonestIdFacebookId, timeout(Span(5, Seconds))) { seqTupleEchonestIdFacebookId =>
         seqTupleEchonestIdFacebookId should contain allOf (("ARWRC4A1187FB5B7D5", "114140585267550"),
           ("AR3KOM61187B99740F", "112089615877"))
       }
@@ -36,26 +36,26 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
         Option("description"), "facebookUrl3", Set("website"))
 
-      whenReady (searchYoutubeTrack.getMaybeEchonestIdByFacebookId(artist), timeout(Span(2, Seconds))) { maybeEchonestId =>
+      whenReady(searchYoutubeTrack.getMaybeEchonestIdByFacebookId(artist), timeout(Span(10, Seconds))) { maybeEchonestId =>
         maybeEchonestId mustBe Option("ARNJ7441187B999AFD")
       }
     }
 
-    "return songs" in {
-      whenReady (searchYoutubeTrack.getEchonestSongsOnEchonest(0, "ARNJ7441187B999AFD"), timeout(Span(2, Seconds))) {
+    "return some tracks" in {
+      whenReady(searchYoutubeTrack.getEchonestSongsOnEchonest(0, "ARNJ7441187B999AFD"), timeout(Span(10, Seconds))) {
         echonestSongs: JsValue =>
-        val songs = searchYoutubeTrack.readEchonestSongs(echonestSongs)
+        val tracks = searchYoutubeTrack.readEchonestSongs(echonestSongs)
 
-        songs should not be empty
+        tracks should not be empty
       }
     }
 
-    "return an Enumerator of Set[String]" in {
+    "return a Set[String] Enumerator of Youtube tracks title" in {
       val enumerateSongs = searchYoutubeTrack.getEchonestSongs("ARNJ7441187B999AFD")
 
       val iteratee = Iteratee.foreach[Set[String]](_ should not be empty)
 
-      whenReady(enumerateSongs |>> iteratee, timeout(Span(5, Seconds))) { any => any }
+      whenReady(enumerateSongs |>> iteratee, timeout(Span(30, Seconds))) { any => any }
     }
 
     "return a set of tracks for a title" in {
@@ -79,21 +79,21 @@ class TestSearchYoutubeTracks extends GlobalApplicationForModels {
       val expectedTrack = Track(UUID.randomUUID, "Le Poinçonneur Des Lilas", "f8PrD6FnSbw", 'y',
         "https://i.ytimg.com/vi/f8PrD6FnSbw/default.jpg", "facebookUrl3", "Serge Gainsbourg", None)
 
-      whenReady(searchYoutubeTrack.getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle), timeout(Span(10, Seconds))) { tracks =>
-        val tracksTitle = tracks.map { track => track.title}
+      whenReady(searchYoutubeTrack.getYoutubeTracksByTitlesAndArtistName(artist, tracksTitle),
+        timeout(Span(10, Seconds))) { tracks =>
+        val tracksTitle = tracks.map(track => track.title)
         tracksTitle should contain (expectedTrack.title)
       }
     }
 
     "return an enumerator of tracks" in {
-      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", Option("imagePath"),
-        Option("description"), "facebookUrl3", Set("website"))
+      val artist = Artist(None, Option("139247202797113"), "Serge Gainsbourg", None, None, "facebookUrl3", Set.empty)
 
       val enumerateYoutubeTracks = searchYoutubeTrack.getYoutubeTracksByEchonestId(artist, "ARNJ7441187B999AFD")
 
       val iteratee = Iteratee.foreach[Set[Track]](_ should not be empty)
 
-      whenReady(enumerateYoutubeTracks |>> iteratee, timeout(Span(10, Seconds))) { any => any }
+      whenReady(enumerateYoutubeTracks |>> iteratee, timeout(Span(30, Seconds))) { any => any }
     }
 
     "return a set of the Youtube channel Ids" in {

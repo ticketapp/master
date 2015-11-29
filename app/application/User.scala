@@ -22,7 +22,7 @@ case class User(uuid: UUID,
                 avatarURL: Option[String]) extends Identity
 
 class UserMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
-  extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
 
   implicit val userWrites = Json.writes[User]

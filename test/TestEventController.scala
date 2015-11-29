@@ -16,7 +16,7 @@ import scala.language.postfixOps
 class TestEventController extends GlobalApplicationForControllers {
   sequential
 
-  "event controller" should {
+  "Event controller" should {
 
     "create an event" in {
       val jsonEvent = """{
@@ -137,17 +137,16 @@ class TestEventController extends GlobalApplicationForControllers {
     "find events in interval" in {
       val Some(response) = route(
         FakeRequest(eventsDomain.routes.EventController.eventsInHourInterval(
-          hourInterval = 5,
+          hourInterval = 500000,
           geographicPoint = "4.2,4.3",
           offset = 0,
           numberToReturn=100)))
 
       status(response) mustEqual OK
 
-      contentAsString(response) must
-        contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
-      contentAsString(response) must not contain
-        """"name":"EventPassedTest","geographicPoint":"POINT (4.2 4.3)","description":"desc""""
+      contentAsString(response) must contain(""""name":"inProgressEvent"""")
+
+      contentAsString(response) must not contain """"name":"eventPassed""""
     }
 
     "find passed events in interval" in {

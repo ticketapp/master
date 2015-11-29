@@ -4,13 +4,12 @@ import java.util.UUID
 import javax.inject.Inject
 
 import artistsDomain.Artist
+import database.MyPostgresDriver.api._
 import database._
 import eventsDomain.Event
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
-import MyPostgresDriver.api._
-import services.Utilities
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -23,8 +22,7 @@ case class Genre (id: Option[Int] = None, name: String, icon: Char = 'a') {
 case class GenreWithWeight(genre: Genre, weight: Int = 1)
 
 
-class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val utilities: Utilities)
+class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def findAll: Future[Seq[Genre]] = db.run(genres.result)
@@ -86,6 +84,17 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   
   def findByName(name: String): Future[Option[Genre]] =
     db.run(genres.filter(_.name === name.toLowerCase).result.headOption)
+    
+  def findSequenceByName(names: Seq[String]): Future[Seq[Genre]] = {
+    val lowerCaseNames = names map (_.toLowerCase)
+    
+    val query = for {
+      genre <- genres
+      if genre.name inSetBind lowerCaseNames
+    } yield genre
+    
+    db.run(query.result)
+  }
 
   def isAGenre(pattern: String): Future[Boolean] = db.run(genres.filter(_.name === pattern).exists.result)
 
@@ -150,15 +159,15 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def deleteArtistRelation(artistGenreRelation: ArtistGenreRelation): Future[Int] = db.run(artistsGenres.filter(artistGenre =>
     artistGenre.artistId === artistGenreRelation.artistId && artistGenre.genreId === artistGenreRelation.genreId).delete)
 
-  def saveMaybeGenreOfArtist(maybeGenreName: Option[String], artistId: Long): Unit = maybeGenreName match {
-    case Some(genre) => saveGenreOfArtist(genre, artistId)
-    case _ =>
-  }
-  
   def saveGenreOfArtist(genreName: String, artistId: Long): Unit = {
     saveWithArtistRelation(new Genre(None, genreName), artistId)
 
     findOverGenres(Seq(Genre(None, genreName))) map { _.foreach(genre => saveWithArtistRelation(genre, artistId)) }
+  }
+
+  def saveMaybeGenreOfArtist(maybeGenreName: Option[String], artistId: Long): Unit = maybeGenreName match {
+    case Some(genre) => saveGenreOfArtist(genre, artistId)
+    case _ =>
   }
 
   // not used
@@ -173,40 +182,32 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
   //
 
-  def findOverGenres(genres: Seq[Genre]): Future[Seq[Genre]] = Future.sequence(genres map { genre: Genre =>
-    findByName(genre.name) flatMap {
-      case Some(genre: Genre) =>
-        findById(genre.id.getOrElse(-1)) map {
-          case Some(genreFound) if genreFound.icon == 'g' =>
-            Option(Genre(None, "reggae"))
-          case Some(genreFound) if genreFound.icon == 'e' =>
-            Option(Genre(None, "electro"))
-          case Some(genreFound) if genreFound.icon == 'h' =>
-            Option(Genre(None, "hip-hop"))
-          case Some(genreFound) if genreFound.icon == 'j' =>
-            Option(Genre(None, "jazz"))
-          case Some(genreFound) if genreFound.icon == 's' =>
-            Option(Genre(None, "classique"))
-          case Some(genreFound) if genreFound.icon == 'l' =>
-            Option(Genre(None, "musiques latines"))
-          case Some(genreFound) if genreFound.icon == 'r' =>
-            Option(Genre(None, "rock"))
-          case Some(genreFound) if genreFound.icon == 'c' =>
-            Option(Genre(None, "chanson"))
-          case Some(genreFound) if genreFound.icon == 'm' =>
-            Option(Genre(None, "musiques du monde"))
-          case Some(genreFound) if genreFound.icon == 'a' =>
-            None
-          case _ =>
-            Logger.error("Artist.findOverGenres: no genre found for this id")
-            None
-        }
+  def findOverGenres(genres: Seq[Genre]): Future[Seq[Genre]] = {
+    val overGenres = findSequenceByName(genres map(_.name))
 
-      case _ =>
-        Logger.error("Artist.findOverGenres: no genre found for this name")
-        Future(None)
+    overGenres map { genres =>
+      genres collect {
+        case genreFound if genreFound.icon == 'g' =>
+          Genre(None, "reggae")
+        case genreFound if genreFound.icon == 'e' =>
+          Genre(None, "electro")
+        case genreFound if genreFound.icon == 'h' =>
+          Genre(None, "hip-hop")
+        case genreFound if genreFound.icon == 'j' =>
+          Genre(None, "jazz")
+        case genreFound if genreFound.icon == 's' =>
+          Genre(None, "classique")
+        case genreFound if genreFound.icon == 'l' =>
+          Genre(None, "musiques latines")
+        case genreFound if genreFound.icon == 'r' =>
+          Genre(None, "rock")
+        case genreFound if genreFound.icon == 'c' =>
+          Genre(None, "chanson")
+        case genreFound if genreFound.icon == 'm' =>
+          Genre(None, "musiques du monde")
+      }
     }
-  }).map { _.flatten }
+  }
 
   def saveTrackRelation(trackGenreRelation: TrackGenreRelation): Future[Int] =
     db.run(tracksGenres += trackGenreRelation)

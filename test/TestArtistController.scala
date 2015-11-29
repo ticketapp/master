@@ -48,6 +48,8 @@ class TestArtistController extends GlobalApplicationForControllers {
 
       val stringUUIDsFromDB = uuidsFromDB.map(_.toString)
 
+      println("stringUUIDsFromDB = " + stringUUIDsFromDB)
+
       val distinctUUIDs = stringUUIDsFromDB.diff(uuids).toList ::: uuids.diff(stringUUIDsFromDB).toList
 
       stringUUIDsFromDB mustNotEqual Seq.empty
@@ -74,12 +76,15 @@ class TestArtistController extends GlobalApplicationForControllers {
       status(result) mustEqual CONFLICT
     }
 
-    "find a list of artists" in {
-      val Some(artists) = route(FakeRequest(artistsDomain.routes.ArtistController.artistsSinceOffset(numberToReturn = 10, offset = 0)))
+    "find all artists since offset" in {
+      val Some(artists) = route(FakeRequest(artistsDomain.routes.ArtistController.artistsSinceOffset(
+        numberToReturn = 10,
+        offset = 0)))
+
       contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
     }
 
-    "find a list of artist by containing" in {
+    "find all artists containing worakls" in {
       val Some(artists) = route(FakeRequest(artistsDomain.routes.ArtistController.findArtistsContaining("worakls")))
       contentAsJson(artists).toString() must contain(""""facebookId":"100297159501","name":"worakls"""")
     }

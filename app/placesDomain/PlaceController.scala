@@ -24,12 +24,11 @@ import scala.util.{Failure, Success}
 
 class PlaceController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
-                                 val utilities: Utilities,
                                  val geographicPointMethods: SearchGeographicPoint,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry,
                                  val placeMethods: PlaceMethods)
-    extends Silhouette[User, CookieAuthenticator] with addressFormsTrait with placeFormsTrait {
+    extends Silhouette[User, CookieAuthenticator] with addressFormsTrait with placeFormsTrait with Utilities {
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
     geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
@@ -50,7 +49,7 @@ class PlaceController @Inject() (ws: WSClient,
         placeMethods.saveWithAddress(place) map { placeCreated =>
           Ok(Json.toJson(placeCreated))
         } recover {
-          case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+          case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
             Logger.error(s"PlaceController.createPlace: this place already exist")
             Conflict
           case throwable: Throwable =>
@@ -87,10 +86,10 @@ class PlaceController @Inject() (ws: WSClient,
         Logger.error("PlaceController.followPlace: placeMethods.follow did not return 1")
         InternalServerError
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: $placeId is already followed")
         Conflict
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: there is no place with the id $placeId")
         NotFound
       case unknownException =>
@@ -108,7 +107,7 @@ class PlaceController @Inject() (ws: WSClient,
         Logger.error("PlaceController.unfollowPlace: placeMethods.unfollow did not return 1")
         InternalServerError
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the place (placeId: $placeId) or the place does not exist.")
         NotFound
       case unknownException =>
@@ -126,10 +125,10 @@ class PlaceController @Inject() (ws: WSClient,
         Logger.error("PlaceController.followByFacebookId: placeMethods.followByFacebookId did not return 1")
         InternalServerError
     } recover {
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"The user (id: $userId) does not follow the place (placeFacebookId: $facebookId) or the place does not exist.")
         NotFound
-      case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+      case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"The user (id: $userId) already follow placeFacebookId: $facebookId).")
         Conflict
       case unknownException =>

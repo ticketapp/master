@@ -1,16 +1,17 @@
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import testsHelper.GlobalApplicationForModels
+import services.Utilities
 
 
-class TestUtilities extends GlobalApplicationForModels {
+class TestUtilities extends GlobalApplicationForModels with Utilities {
 
   "A utilities" must {
 
     "normalize string with the method normalizeString" in {
       val strings = List("éh'=)àç_è-(aék", "abc de#f")
 
-      val normalizedString: List[String] = strings.map { utilities.normalizeString }
+      val normalizedString: List[String] = strings.map { normalizeString }
 
       val expectedResult = List("éh'=)àç_è-(aék", "abc de#f")
 
@@ -24,7 +25,7 @@ class TestUtilities extends GlobalApplicationForModels {
 
     val expectedUrls = Seq("abc.fr", "abc.com", "cde.org", "jkl.wtf", "claude.cool", "claude.music")
 
-    val normalizedUrls = urls map { utilities.normalizeUrl }
+    val normalizedUrls = urls map { normalizeUrl }
 
     normalizedUrls mustBe expectedUrls
   }
@@ -34,7 +35,7 @@ class TestUtilities extends GlobalApplicationForModels {
 
     val expectedUrl = Option("cde.org")
 
-    val normalizedUrl = utilities.normalizeMaybeWebsite(maybeUrl)
+    val normalizedUrl = normalizeMaybeWebsite(maybeUrl)
 
     normalizedUrl mustBe expectedUrl
   }
@@ -43,17 +44,17 @@ class TestUtilities extends GlobalApplicationForModels {
     val eventsName = Seq("abc", "abcdef @transbordeur abc", "abcdef@hotmail.fr")
     val expectedEventsName = Seq("abc", "abcdef", "abcdef@hotmail.fr")
 
-    eventsName map { utilities.refactorEventOrPlaceName } mustBe expectedEventsName
+    eventsName map { refactorEventOrPlaceName } mustBe expectedEventsName
   }
 
   "return an optional string from a set" in {
-    utilities.setToOptionString(Set.empty) mustBe None
-    utilities.setToOptionString(Set("a")) mustBe Some("a")
-    utilities.setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
+    setToOptionString(Set.empty) mustBe None
+    setToOptionString(Set("a")) mustBe Some("a")
+    setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
   }
 
   "convert a string to a datetime" in {
-    utilities.stringToDateTime("2015-06-05T19:30:00+0200").getHourOfDay mustBe 19
+    stringToDateTime("2015-06-05T19:30:00+0200").getHourOfDay mustBe 19
   }
 
   "return a list of normalized websites from a text" in {
@@ -291,7 +292,7 @@ class TestUtilities extends GlobalApplicationForModels {
         |         http://bit.ly/1KfXhqX
         |         -----------------------------------------------------------------------""".stripMargin
 
-    whenReady(utilities.getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { a =>
+    whenReady(getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { a =>
 
       expectedWebsites.diff(a) mustBe Set.empty
       a must contain theSameElementsAs expectedWebsites

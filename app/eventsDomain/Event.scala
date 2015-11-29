@@ -1,5 +1,6 @@
 package eventsDomain
 
+import java.sql.Timestamp
 import javax.inject.Inject
 
 import addresses.{SearchGeographicPoint, AddressMethods, Address}
@@ -7,7 +8,6 @@ import artistsDomain.{ArtistMethods, PatternAndArtist, ArtistWithWeightedGenres}
 import com.vividsolutions.jts.geom.Geometry
 import database.{MyPostgresDriver, MyDBTableDefinitions}
 import genresDomain.{GenreMethods, Genre}
-import models._
 import org.joda.time.DateTime
 import organizersDomain.{OrganizerMethods, OrganizerWithAddress}
 import others.TariffMethods
@@ -61,13 +61,17 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
                              val genreMethods: GenreMethods,
                              val placeMethods: PlaceMethods,
                              val geographicPointMethods: SearchGeographicPoint,
-                             val addressMethods: AddressMethods,
-                             val utilities: Utilities)
+                             val addressMethods: AddressMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
     with DBTableDefinitions
     with eventWithRelationsTupleToEventWithRelationsClass
-    with MyDBTableDefinitions {
+    with MyDBTableDefinitions
+    with Utilities {
+
+  implicit def dateTimeDriver = MappedColumnType.base[DateTime, Timestamp](
+    dt => new Timestamp(dt.getMillis),
+    ts => new DateTime(ts.getTime))
 
   def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[EventWithRelations]] = {
     val query = for {
@@ -466,7 +470,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
             Future {
               event.artists.foreach { artist =>
               val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
-              trackMethods.saveEnumeratorWithDelay(tracksEnumerator)
+              trackMethods.saveTracksEnumerator(tracksEnumerator)
                 artist
               }
             }
@@ -477,17 +481,17 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def getEventOnFacebookByFacebookId(eventFacebookId: String): Future[Option[EventWithRelations]] =
-    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + eventFacebookId)
-      .withQueryString(
-        "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
-        "access_token" -> utilities.facebookToken)
-      .get()
-      .flatMap(facebookEventToEventWithRelations) recover {
-      case NonFatal(e) =>
-        Logger.error("Event.findEventOnFacebookByFacebookId:\nMessage:\n", e)
-        None
-    }
+  def getEventOnFacebookByFacebookId(eventFacebookId: String): Future[Option[EventWithRelations]] = WS
+    .url("https://graph.facebook.com/" + facebookApiVersion + "/" + eventFacebookId)
+    .withQueryString(
+      "fields" -> "cover,description,name,start_time,end_time,owner,venue,place",
+      "access_token" -> facebookToken)
+    .get()
+    .flatMap(facebookEventToEventWithRelations) recover {
+    case NonFatal(e) =>
+      Logger.error("Event.findEventOnFacebookByFacebookId:\nMessage:\n", e)
+      None
+  }
 
   case class MaybeOwnerAndPlaceIds(maybeOwnerId: Option[String], maybePlaceId: Option[String])
 
@@ -528,11 +532,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       facebookId = facebookId,
       isPublic = true,
       isActive = true,
-      name = utilities.refactorEventOrPlaceName(name),
+      name = refactorEventOrPlaceName(name),
       geographicPoint = None,
-      description = utilities.formatDescription(maybeDescription),
-      startTime = utilities.stringToDateTime(startTime),
-      endTime = utilities.optionStringToOptionDateTime(endTime),
+      description = formatDescription(maybeDescription),
+      startTime = stringToDateTime(startTime),
+      endTime = optionStringToOptionDateTime(endTime),
       imagePath = maybeCover,
       tariffRange = tariffMethods.findPrices(maybeDescription))
 
@@ -567,7 +571,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         }
 
         val eventuallyNormalizedWebsites: Future[Set[String]] = eventWithRelations.event.description match {
-          case Some(description) => utilities.getNormalizedWebsitesInText(description)
+          case Some(description) => getNormalizedWebsitesInText(description)
           case None => Future(Set.empty)
         }
 
@@ -606,13 +610,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     }
   }
 
-  def returnEventGeographicPoint(addresses: Vector[Address]): Option[Geometry] = {
-    addresses.headOption match {
-      case Some(address) =>
-        address.geographicPoint
-      case _ =>
-        None
-    }
+  def returnEventGeographicPoint(addresses: Vector[Address]): Option[Geometry] = addresses.headOption match {
+    case Some(address) =>
+      address.geographicPoint
+    case _ =>
+      None
   }
 
   def returnEventAddresses(eventWithRelations: EventWithRelations, maybePlace: Option[PlaceWithAddress]): Vector[Address] =
@@ -631,19 +633,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           case _ =>
             Vector.empty
         }
-  }
+    }
 
-  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = {
-    WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + facebookId + "/events/")
-      .withQueryString("access_token" -> utilities.facebookToken)
-      .get()
-      .map(readEventsIdsFromWSResponse)
-      .recover {
-        case NonFatal(e) =>
-          Logger.error("Event.getEventsFacebookIdByPlaceOrOrganizerFacebookId:\nMessage:\n", e)
-          Seq.empty
-      }
-  }
+  def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = WS
+    .url("https://graph.facebook.com/" + facebookApiVersion + "/" + facebookId + "/events/")
+    .withQueryString("access_token" -> facebookToken)
+    .get()
+    .map(readEventsIdsFromWSResponse)
 
   def readEventsIdsFromWSResponse(resp: WSResponse): Seq[String] = Try {
     val readFacebookIds: Reads[Seq[Option[String]]] = Reads.seq((__ \ "id").readNullable[String])

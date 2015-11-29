@@ -2,9 +2,10 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.Matchers._
 import testsHelper.GlobalApplicationForModels
+import services.Utilities
 
 
-class TestSearchArtist extends GlobalApplicationForModels {
+class TestSearchArtist extends GlobalApplicationForModels with Utilities {
 
   "SearchArtist" must {
 
@@ -73,11 +74,11 @@ class TestSearchArtist extends GlobalApplicationForModels {
 
     "remove useless words in a SoundCloudUrl (even if it contains uppercase letters)" in {
       val refactoredSoundCloudWebsite1 = artistMethods.removeUselessInSoundCloudWebsite(
-        utilities.normalizeUrl("https://sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
+        normalizeUrl("https://sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
       val refactoredSoundCloudWebsite2 = artistMethods.removeUselessInSoundCloudWebsite(
-        utilities.normalizeUrl("sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
+        normalizeUrl("sounDcloud.com/nina-kraviz/live-at-space-closing-fiesta"))
       val refactoredSoundCloudWebsite3 = artistMethods.removeUselessInSoundCloudWebsite(
-        utilities.normalizeUrl("sounDcloud.com/nina-kraviz"))
+        normalizeUrl("sounDcloud.com/nina-kraviz"))
 
       refactoredSoundCloudWebsite1 mustBe "soundcloud.com/nina-kraviz"
       refactoredSoundCloudWebsite2 mustBe "soundcloud.com/nina-kraviz"
@@ -86,7 +87,7 @@ class TestSearchArtist extends GlobalApplicationForModels {
 
     "remove nothing in a non-soundCloud website" in {
       val refactoredSoundCloudWebsite = artistMethods.removeUselessInSoundCloudWebsite(
-        utilities.normalizeUrl("https://facebook.com/nina-kraviz/live-at-space-closing-fiesta"))
+        normalizeUrl("https://facebook.com/nina-kraviz/live-at-space-closing-fiesta"))
       refactoredSoundCloudWebsite mustBe "facebook.com/nina-kraviz/live-at-space-closing-fiesta"
     }
 

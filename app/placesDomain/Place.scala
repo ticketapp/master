@@ -38,12 +38,12 @@ case class PlaceWithAddress(place: Place, address: Option[Address] = None)
 
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val geographicPointMethods: SearchGeographicPoint,
-                             val addressMethods: AddressMethods,
-                             val utilities: Utilities)
+                             val addressMethods: AddressMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
     with DBTableDefinitions
-    with MyDBTableDefinitions {
+    with MyDBTableDefinitions
+    with Utilities {
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
@@ -57,7 +57,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       }).transactionally)
 
   def save(place: Place): Future[Place] = {
-    val placeWithFormattedDescription = place.copy(description = utilities.formatDescription(place.description))
+    val placeWithFormattedDescription = place.copy(description = formatDescription(place.description))
     place.facebookId match {
       case Some(facebookId) =>
         findOrganizerIdByFacebookId(facebookId) flatMap { maybePlaceId =>
@@ -118,10 +118,10 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def getPlaceOnFacebook(placeFacebookId: String): Future[Option[PlaceWithAddress]] =
-   WS.url("https://graph.facebook.com/" + utilities.facebookApiVersion + "/" + placeFacebookId)
+   WS.url("https://graph.facebook.com/" + facebookApiVersion + "/" + placeFacebookId)
      .withQueryString(
        "fields" -> "about,location,website,hours,cover,name",
-       "access_token" -> utilities.facebookToken)
+       "access_token" -> facebookToken)
      .get()
      .flatMap(readFacebookPlace) recover {
      case NonFatal(exception) =>
@@ -155,7 +155,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       val address = Address(None, None, city.flatten, zip.flatten, street.flatten)
       PlaceWithAddress(
         place = Place(id = None, name = name, facebookId = facebookId, geographicPoint = None, description = about,
-          websites = utilities.normalizeMaybeWebsite(website), capacity = None, openingHours = None, imagePath = source.flatten),
+          websites = normalizeMaybeWebsite(website), capacity = None, openingHours = None, imagePath = source.flatten),
         address = Option(address))
   })
 

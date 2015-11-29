@@ -16,8 +16,7 @@ case class Tariff (tariffId: Long,
                    endTime: Date,
                    eventId: Long)
 
-class TariffMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val utilities: Utilities)
+class TariffMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def formApply(denomination: String,  nbTicketToSell: Int, price: scala.BigDecimal, startTime: Date, endTime: Date) =

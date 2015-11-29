@@ -1,7 +1,7 @@
 # Home page
 GET           /                                                              @application.Application.index
 
-GET           /test                                                          @others.Test.test1
+GET           /test                                                          @others.Test.sayHello(message: String)
 
 POST          /signIn                                                        @application.Application.signIn
 GET           /authenticate/:provider                                        @application.SocialAuthController.authenticate(provider: String)

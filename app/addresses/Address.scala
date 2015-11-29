@@ -25,9 +25,11 @@ case class Address(id: Option[Long],
 }
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                               val utilities: Utilities,
                                val searchGeographicPoint: SearchGeographicPoint)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions with addressFormsTrait {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] 
+    with MyDBTableDefinitions 
+    with addressFormsTrait
+    with Utilities {
 
   def findAll: Future[Seq[Address]] = db.run(addresses.result)
 
@@ -54,8 +56,8 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   def save(address: Address): Future[Address] = {
     val lowerCaseAddress = address.copy(id = address.id, geographicPoint = address.geographicPoint,
-      street = utilities.optionStringToLowerCaseOptionString(address.street), zip = address.zip,
-      city = utilities.optionStringToLowerCaseOptionString(address.city))
+      street = optionStringToLowerCaseOptionString(address.street), zip = address.zip,
+      city = optionStringToLowerCaseOptionString(address.city))
 
     db.run(
       (for {

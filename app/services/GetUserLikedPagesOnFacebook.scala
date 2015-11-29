@@ -31,15 +31,13 @@ case class PageIdAndCategory(id: String, category: Option[String])
 
 class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                             protected val oAuth2InfoDAO: OAuth2InfoDAO,
-                                            val utilities: Utilities,
                                             val artistMethods: ArtistMethods,
                                             val placeMethods: PlaceMethods,
                                             val organizerMethods: OrganizerMethods,
                                             val eventMethods: EventMethods,
                                             val trackMethods: TrackMethods)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with FollowService with Utilities {
 
-  val facebookApiVersion = utilities.facebookApiVersion
 
   def getUserLikedPagesOnFacebook(loginInfo: LoginInfo, userUuid: UUID): Unit = findAccessToken(loginInfo) map {
     case Some(accessToken) =>
@@ -145,33 +143,33 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
   def makeRelationArtistUserOneByOne(artists: Seq[PageIdAndCategory], userUuid: UUID): Future[Boolean] = artists.headOption
     match {
       case Some(nonEmptyPages) =>
-        makeRelationArtistUser(nonEmptyPages, userUuid) map { artistRelation =>
+        Thread.sleep(3000)
+        getAndMakeUserFollowArtistFacebookPages(nonEmptyPages, userUuid) flatMap { artistRelation =>
           makeRelationArtistUserOneByOne(artists.tail, userUuid)
-          artistRelation
         }
       case _ =>
         Logger.info("GetUserLikedPagesOnFacebook.makeArtistUserRelations: done")
         Future(true)
     }
-  
+
   def makeRelationPlaceUserOneByOne(places: Seq[PageIdAndCategory], userUuid: UUID): Future[Boolean] = places.headOption
   match {
     case Some(nonEmptyPages) =>
-      makeRelationPlaceUser(nonEmptyPages, userUuid) map { placeRelation =>
+      Thread.sleep(3000)
+      getAndMakeUserFollowPlaceFacebookPages(nonEmptyPages, userUuid) flatMap { placeRelation =>
         makeRelationPlaceUserOneByOne(places.tail, userUuid)
-        placeRelation
       }
     case _ =>
       Logger.info("GetUserLikedPagesOnFacebook.makePlacesUserRelations: done")
       Future(true)
   }
-  
-  def makeRelationOrganizerUserOneByOne(organizers: Seq[PageIdAndCategory], userUuid: UUID): Future[Boolean] = organizers.headOption
-  match {
+
+  def makeRelationOrganizerUserOneByOne(organizers: Seq[PageIdAndCategory], userUuid: UUID): Future[Boolean] =
+    organizers.headOption match {
     case Some(nonEmptyPages) =>
-      makeRelationOrganizerUser(nonEmptyPages, userUuid) map { organizerRelation =>
+      Thread.sleep(3000)
+      getAndMakeUserFollowOrganizerFacebookPages(nonEmptyPages, userUuid) flatMap { organizerRelation =>
         makeRelationOrganizerUserOneByOne(organizers.tail, userUuid)
-        organizerRelation
       }
     case _ =>
       Logger.info("GetUserLikedPagesOnFacebook.makeOrganizersUserRelations: done")
@@ -189,7 +187,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     }
   }
 
-  def makeRelationArtistUser(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
+  def getAndMakeUserFollowArtistFacebookPages(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
     val facebookId = facebookPageTuple.id
     artistMethods.findIdByFacebookId(facebookId) flatMap {
       case Some(artistId) =>
@@ -199,6 +197,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
           case _ =>
             false
         }
+
       case _ =>
         artistMethods.getFacebookArtistByFacebookUrl(facebookId) flatMap {
           case Some(artistFound) =>
@@ -213,19 +212,20 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
                   artistMethods.getArtistTracks(patternAndArtist)
 
                   val tracksEnumerator = artistMethods.getArtistTracks(patternAndArtist)
-                  trackMethods.saveEnumeratorWithDelay(tracksEnumerator)
+                  trackMethods.saveTracksEnumerator(tracksEnumerator)
                   true
                 case _ =>
                   false
               }
             }
+
           case _ =>
             Future(false)
         }
     }
   }
 
-  def makeRelationPlaceUser(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
+  def getAndMakeUserFollowPlaceFacebookPages(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
     val facebookId = facebookPageTuple.id
     placeMethods.findIdByFacebookId(facebookId) flatMap {
       case Some(placeId) =>
@@ -259,7 +259,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     }
   }
 
-  def makeRelationOrganizerUser(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
+  def getAndMakeUserFollowOrganizerFacebookPages(facebookPageTuple: PageIdAndCategory, userUuid: UUID): Future[Boolean] = {
     val facebookId = facebookPageTuple.id
     organizerMethods.findIdByFacebookId(Option(facebookId)) flatMap {
       case Some(organizerId) =>

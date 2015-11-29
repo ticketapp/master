@@ -24,7 +24,6 @@ case class Rating(ratingUp: Int, ratingDown: Int)
 
 
 class TrackRatingMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                                   val utilities: Utilities,
                                    val trackMethods: TrackMethods)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with MyDBTableDefinitions {

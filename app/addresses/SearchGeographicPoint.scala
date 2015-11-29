@@ -17,9 +17,11 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 
-class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                                       val utilities: Utilities)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions with geographicPointTrait {
+class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with MyDBTableDefinitions
+    with geographicPointTrait
+    with Utilities {
 
   def findGeographicPointOfCity(city: String): Future[Option[Geometry]] = {
     val query = frenchCities.filter(_.city.toLowerCase === city.toLowerCase) map (_.geographicPoint)
@@ -30,7 +32,7 @@ class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseCo
     .url("https://maps.googleapis.com/maps/api/geocode/json")
     .withQueryString(
       "address" -> (address.street.getOrElse("") + " " + address.zip.getOrElse("") + " " + address.city.getOrElse("")),
-      "key" -> utilities.googleKey)
+      "key" -> googleKey)
     .get()
     .flatMap {
       readGoogleGeographicPoint(_) match {

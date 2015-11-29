@@ -20,13 +20,10 @@ import scala.language.postfixOps
 
 class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                      val genreMethods: GenreMethods,
-                                     val utilities: Utilities,
                                      val trackMethods: TrackMethods)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with Utilities {
 
-  val youtubeKey = utilities.googleKey
-  val echonestApiKey = utilities.echonestApiKey
-
+  
   def getYoutubeTracksForArtist(artist: Artist, pattern: String): Enumerator[Set[Track]] = Enumerator.flatten(
     getMaybeEchonestIdByFacebookId(artist) map {
     case Some(echonestId) => getYoutubeTracksByEchonestId(artist, echonestId)
@@ -151,24 +148,21 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
   }
 
   def getYoutubeTracksByTitlesAndArtistName(artist: Artist, tracksTitle: Set[String]): Future[Set[Track]] =
-    Future.sequence(
-      tracksTitle.map { getYoutubeTracksByArtistAndTitle(artist, _) }
-    ).map { nestedTracks => nestedTracks.flatten }
+    Future.sequence(tracksTitle.map(getYoutubeTracksByArtistAndTitle(artist, _))).map(_.flatten)
 
-  def getYoutubeTracksByArtistAndTitle(artist: Artist, trackTitle: String): Future[Seq[Track]] = {
-    WS.url("https://www.googleapis.com/youtube/v3/search")
-      .withQueryString(
-        "part" -> "snippet",
-        "q" -> (artist.name + " " + trackTitle),
-        "type" -> "video",
-        "videoCategoryId" -> "10",
-        "maxResults" -> "20",
-        "key" -> youtubeKey)
-      .get()
-      .map { response =>
-        removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
-        track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
-      }
+  def getYoutubeTracksByArtistAndTitle(artist: Artist, trackTitle: String): Future[Seq[Track]] = WS
+    .url("https://www.googleapis.com/youtube/v3/search")
+    .withQueryString(
+      "part" -> "snippet",
+      "q" -> (artist.name + " " + trackTitle),
+      "type" -> "video",
+      "videoCategoryId" -> "10",
+      "maxResults" -> "20",
+      "key" -> googleKey)
+    .get()
+    .map { response =>
+      removeTracksWithoutArtistName(readYoutubeTracks(response, artist), artist.name) map { track: Track =>
+      track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
     }
   }
 
@@ -179,7 +173,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
       "channelId" -> channelId,
       "type" -> "video",
       "maxResults" -> "50",
-      "key" -> youtubeKey)
+      "key" -> googleKey)
     .get()
     .map { readYoutubeTracks(_, artist).toSet map { track: Track =>
       track.copy(title = trackMethods.normalizeTrackTitle(track.title, artist.name))
@@ -193,7 +187,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
       "forUsername" -> userName,
       "type" -> "video",
       "maxResults" -> "50",
-      "key" -> youtubeKey)
+      "key" -> googleKey)
     .get()
     .map(readYoutubeUser)
 
@@ -251,7 +245,7 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
   }
 
   def readUrlsFromJsObject(urlsJsObject: JsObject): Set[String] = urlsJsObject.values.map { url =>
-    utilities.normalizeUrl(url.as[String])
+    normalizeUrl(url.as[String])
   }.toSet
 
   def getMaybeEchonestIdByFacebookId(artist: Artist): Future[Option[String]] = artist.facebookId match {
@@ -291,20 +285,20 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
         }
       )
     }
+
     getEchonestSongsFrom(0, echonestArtistId)
   }
 
-  def getEchonestSongsOnEchonest(start: Long, echonestArtistId: String): Future[JsValue] = {
-    WS.url("http://developer.echonest.com/api/v4/artist/songs")
-      .withQueryString(
-        "api_key" -> echonestApiKey,
-        "id" -> echonestArtistId,
-        "format" -> "json",
-        "start" -> start.toString,
-        "results" -> "100")
-      .get()
-      .map (_.json)
-  }
+  def getEchonestSongsOnEchonest(start: Long, echonestArtistId: String): Future[JsValue] = WS
+    .url("http://developer.echonest.com/api/v4/artist/songs")
+    .withQueryString(
+      "api_key" -> echonestApiKey,
+      "id" -> echonestArtistId,
+      "format" -> "json",
+      "start" -> start.toString,
+      "results" -> "100")
+    .get()
+    .map(_.json)
 
   def readEchonestSongs(result: JsValue): Set[String] = {
     val titleReads: Reads[Option[String]] = (__ \\ "title").readNullable[String]
@@ -344,22 +338,21 @@ class SearchYoutubeTracks @Inject()(protected val dbConfigProvider: DatabaseConf
       .getOrElse(Seq.empty)
   }
 
-  def getArtistGenresOnEchonest(echonestId: String, artistId: Long): Future[(Long, Array[String])] = {
-    WS.url("http://developer.echonest.com/api/v4/artist/profile")
-      .withQueryString(
-        "id" -> echonestId,
-        "format" -> "json",
-        "bucket" -> "genre",
-        "api_key" -> echonestApiKey)
-      .get()
-      .map { response => (artistId, readEchonestGenres(response.json)) }
-  }
+  def getArtistGenresOnEchonest(echonestId: String, artistId: Long): Future[(Long, Array[String])] = WS
+    .url("http://developer.echonest.com/api/v4/artist/profile")
+    .withQueryString(
+      "id" -> echonestId,
+      "format" -> "json",
+      "bucket" -> "genre",
+      "api_key" -> echonestApiKey)
+    .get()
+    .map(response => (artistId, readEchonestGenres(response.json)))
 
   def saveArtistGenres(tupleArtistIdGenres: Future[(Long, Array[String])]): Unit = {
     tupleArtistIdGenres.map { artistIdGenres =>
-      artistIdGenres._2.foreach { genre =>
-        Future(genreMethods.saveGenreOfArtist(genre, artistIdGenres._1))
-      }
+      val genres = artistIdGenres._2
+      val artist = artistIdGenres._1
+      genres.foreach { genre => Future(genreMethods.saveGenreOfArtist(genre, artist)) }
     }
   }
 

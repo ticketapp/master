@@ -2,27 +2,29 @@ package tracksDomain
 
 import java.sql.BatchUpdateException
 import java.util.UUID
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
 import java.util.regex.Pattern
 import javax.inject.Inject
-import database.{MyPostgresDriver, MyDBTableDefinitions}
+
+import actors.DuplicateTracksActor.FilterTracks
+import actors.DuplicateTracksActorInstance
+import akka.pattern.ask
+import database.MyPostgresDriver.api._
+import database.{MyDBTableDefinitions, MyPostgresDriver}
 import genresDomain.Genre
+import json.JsonHelper._
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.iteratee.{Enumeratee, Enumerator, Iteratee}
 import play.api.libs.json.{JsValue, Json}
 import playlistsDomain.TrackWithPlaylistRank
-import MyPostgresDriver.api._
-import services.{DistinctBy, FollowService, Utilities}
+import services.{FollowService, Utilities}
 
-import scala.collection.IterableLike
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.control.NonFatal
-import json.JsonHelper._
 
 
 case class Track (uuid: UUID,
@@ -37,12 +39,16 @@ case class Track (uuid: UUID,
 
 case class TrackWithGenres(track: Track, genres: Seq[Genre])
 
+
 class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
-                             val utilities: Utilities)
+                             duplicateTracksActorInstance: DuplicateTracksActorInstance)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with MyDBTableDefinitions
-    with FollowService {
+    with FollowService
+    with Utilities {
 
+
+  implicit val timeout: akka.util.Timeout = 5.seconds
 
   def findAllByArtist(artistFacebookUrl: String, numberToReturn: Int, offset: Int): Future[Seq[Track]] = {
     val query = tracks
@@ -126,8 +132,8 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     var tupleArtistNameTitle = new ListBuffer[(String, String)]()
     for {
       track <- tracks
-      artistName = utilities.replaceAccentuatedLetters(track.artistName)
-      trackTitle = utilities.replaceAccentuatedLetters(track.title)
+      artistName = replaceAccentuatedLetters(track.artistName)
+      trackTitle = replaceAccentuatedLetters(track.title)
       if !tupleArtistNameTitle.contains((artistName, trackTitle))
     } yield {
       tupleArtistNameTitle += ((artistName, trackTitle))
@@ -151,8 +157,8 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def isArtistNameInTrackTitle(trackTitle: String, artistName: String): Boolean =
-    utilities.replaceAccentuatedLetters(trackTitle.toLowerCase) contains
-      utilities.replaceAccentuatedLetters(artistName.toLowerCase)
+    replaceAccentuatedLetters(trackTitle.toLowerCase) contains
+      replaceAccentuatedLetters(artistName.toLowerCase)
 
   def normalizeTrackTitle(title: String, artistName: String): String =
     ("""(?i)""" + Pattern.quote(artistName) + """\s*[:/-]?\s*""").r.replaceFirstIn(
@@ -160,41 +166,10 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         .replaceFirstIn(title, ""),
       "")
 
-  val lockFilterDuplicateTracks: ReentrantLock = new ReentrantLock()
-
-  def filterDuplicateTracksEnumerator(tracksEnumerator: Enumerator[Set[Track]]): Enumerator[Set[Track]] = {
-
-    var bufferTrackUrls: ListBuffer[String] = ListBuffer.empty
-    case class ArtistNameAndTrackTitle(artistName: String, trackTitle: String)
-    var bufferTupleArtistNameTitle: ListBuffer[ArtistNameAndTrackTitle] = ListBuffer.empty
-
-    val filterDuplicateTracksEnumeratee: Enumeratee[Set[Track], Set[Track]] = Enumeratee.map[Set[Track]] { tracks =>
-
-      implicit def toRich[A, Repr](xs: IterableLike[A, Repr]): DistinctBy[A, Repr] = new DistinctBy(xs)
-
-      try {
-        if (lockFilterDuplicateTracks.tryLock(3, TimeUnit.SECONDS)) {
-          val notDuplicateTracksFromThisSet: Set[Track] =
-            removeDuplicateByTitleAndArtistName(tracks.toSeq).distinctBy(_.url).toSet
-
-          val notDuplicateTracksComparedToBuffer: Set[Track] = notDuplicateTracksFromThisSet.filterNot(t =>
-            bufferTrackUrls.contains(t.url) ||
-              bufferTupleArtistNameTitle.contains(ArtistNameAndTrackTitle(t.artistName, t.title)))
-
-          bufferTrackUrls ++= (notDuplicateTracksComparedToBuffer map (_.url))
-          bufferTupleArtistNameTitle ++= (notDuplicateTracksComparedToBuffer map (track => ArtistNameAndTrackTitle(
-            artistName = track.artistName,
-            trackTitle = track.title)))
-
-          notDuplicateTracksComparedToBuffer
-        } else
-          Set.empty
-      } finally {
-        lockFilterDuplicateTracks.unlock()
-      }
+  def filterDuplicateTracksEnumeratee: Enumeratee[Set[Track], Set[Track]] = Enumeratee.mapM[Set[Track]] { tracks =>
+    (duplicateTracksActorInstance.duplicateTracksActor ? FilterTracks(tracks)).mapTo[Set[Track]].map { withoutDuplicateTracks =>
+      withoutDuplicateTracks
     }
-
-    tracksEnumerator &> filterDuplicateTracksEnumeratee
   }
 
   def toJsonEnumeratee: Enumeratee[Set[Track], JsValue] = Enumeratee.map[Set[Track]](tracks => Json.toJson(tracks))
@@ -204,15 +179,8 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     tracks
   }
 
-  def toTracksWithDelay: Enumeratee[Set[Track], Set[Track]] = Enumeratee.map[Set[Track]] { tracks: Set[Track] =>
-    Thread.sleep(1000)
-    tracks
-  }
-
-  def saveEnumeratorWithDelay(tracksEnumerator: Enumerator[Set[Track]]): Unit = {
-    val tracksEnumeratorWithoutDuplicates = filterDuplicateTracksEnumerator(tracksEnumerator)
-
-    tracksEnumeratorWithoutDuplicates |>> toTracksWithDelay &>> Iteratee.foreach { tracks =>
+  def saveTracksEnumerator(tracksEnumerator: Enumerator[Set[Track]]): Unit = {
+    tracksEnumerator &> filterDuplicateTracksEnumeratee |>> Iteratee.foreach { tracks =>
       saveSequence(tracks)
     }
   }

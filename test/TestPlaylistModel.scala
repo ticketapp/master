@@ -90,7 +90,7 @@ class TestPlaylistModel extends GlobalApplicationForModels {
             artistName = "artistName",
             redirectUrl = None,
             confidence = 0.0),
-          genres = Vector(Genre(Some(1), "genreTest0", 'a'), Genre(Some(2), "genreTest00", 'a')))
+          genres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a')))
 
         val track2 =
           TrackWithGenres(
@@ -104,7 +104,7 @@ class TestPlaylistModel extends GlobalApplicationForModels {
               artistName = "artistName",
               redirectUrl = None,
               confidence = 0.0),
-            genres = Vector(Genre(Some(1), "genreTest0", 'a'), Genre(Some(2), "genreTest00", 'a')))
+            genres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a')))
 
         val expectedPlaylistTracks = Vector(
           TrackWithPlaylistRankAndGenres(track1, 1.0),
@@ -139,7 +139,7 @@ class TestPlaylistModel extends GlobalApplicationForModels {
                 track = TrackWithGenres(
                   Track(UUID.fromString("02894e56-08d1-4c1f-b3e4-466c069d15ed"), "title", "url0", 'y', "thumbnailUrl",
                     "facebookUrl0", "artistName", None, 0.0),
-                genres = Vector(Genre(Some(1), "genreTest0", 'a'), Genre(Some(2), "genreTest00", 'a'))),1.0)))
+                genres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a'))),1.0)))
 
           foundPlaylists should contain only expectedUpdatedPlaylist
         }

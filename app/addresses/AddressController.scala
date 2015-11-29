@@ -8,7 +8,7 @@ import play.api.mvc._
 import services.Utilities
 
 class AddressController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                      val addressMethods: AddressMethods,
-                      val utilities: Utilities) extends Controller {
+                      val addressMethods: AddressMethods)
+  extends Controller {
 
 }

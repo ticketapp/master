@@ -14,7 +14,6 @@ case class Order (orderId: Long,
                   totalPrice: Int)
 
 class OrderMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                       val utilities: Utilities,
                                        val artistMethods: ArtistMethods,
                                        val genreMethods: GenreMethods) {
 

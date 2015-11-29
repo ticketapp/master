@@ -68,7 +68,7 @@ class TestTrackController extends GlobalApplicationForControllers {
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsString(tracks) must contain(""""uuid":"02894e56-08d1-4c1f-b3e4-466c069d15ed","title":"title"""")
-      contentAsString(tracks) must contain("""{"id":1,"name":"genreTest0","icon":"a"}""")
+      contentAsString(tracks) must contain("""{"id":1,"name":"genretest0","icon":"a"}""")
     }
 
     "return true if the track is followed" in {

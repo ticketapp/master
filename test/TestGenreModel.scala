@@ -124,6 +124,14 @@ class TestGenreModel extends GlobalApplicationForModels {
       }
     }
 
+    "find a sequence of genres by names" in {
+      val expectedGenres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a'))
+      whenReady(genreMethods.findSequenceByName(Seq("genreTest0", "genreTest00"))) { genres =>
+
+        genres mustBe expectedGenres
+      }
+    }
+
     "save, update and delete its relation with an artist" in {
       val genre = Genre(None, "rockiyadockiaaa")
       val genre2 = Genre(None, "rockiyadockiooo")

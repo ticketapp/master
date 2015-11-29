@@ -16,6 +16,8 @@ resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
+resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+
 libraryDependencies ++= Seq(
   cache,
   evolutions,
@@ -36,10 +38,11 @@ libraryDependencies ++= Seq(
   "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
   "com.github.tminglei" %% "slick-pg" % "0.9.1",
   "com.vividsolutions" % "jts" % "1.13",
-  "com.mohiva" %% "play-silhouette-testkit" % "3.0.2" % "test",
   specs2 % Test,
   "com.github.docker-java" % "docker-java" % "1.4.0",
-  "com.zaxxer" % "HikariCP" % "2.4.1"
+  "com.zaxxer" % "HikariCP" % "2.4.1",
+//  "com.google.guava" % "guava" % "18.0",
+  "com.typesafe.akka" %% "akka-testkit" % "2.4.0" % "test"
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
@@ -58,6 +61,5 @@ scalacOptions ++= Seq(
   "-Ywarn-nullary-override", // Warn when non-nullary overrides nullary, e.g. def foo() over def foo.
   "-Ywarn-numeric-widen" // Warn when numerics are widened.
 )
-
 
 cancelable in Global := true

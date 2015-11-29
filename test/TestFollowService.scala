@@ -8,13 +8,14 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import organizersDomain.{Organizer, OrganizerWithAddress}
 import testsHelper.GlobalApplicationForModels
+import services.Utilities
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
-class TestFollowService extends GlobalApplicationForModels {
+class TestFollowService extends GlobalApplicationForModels with Utilities {
 
   "An Artist" must {
 
@@ -44,7 +45,7 @@ class TestFollowService extends GlobalApplicationForModels {
         } catch {
           case e: PSQLException =>
 
-            e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+            e.getSQLState mustBe UNIQUE_VIOLATION
         }
       }
     }
@@ -93,7 +94,7 @@ class TestFollowService extends GlobalApplicationForModels {
         } catch {
           case e: PSQLException =>
 
-            e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+            e.getSQLState mustBe UNIQUE_VIOLATION
         }
       }
     }
@@ -213,7 +214,7 @@ class TestFollowService extends GlobalApplicationForModels {
               } catch {
                 case e: PSQLException =>
 
-                  e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+                  e.getSQLState mustBe UNIQUE_VIOLATION
               }
             }
           }
@@ -258,7 +259,7 @@ class TestFollowService extends GlobalApplicationForModels {
         } catch {
           case e: PSQLException =>
 
-            e.getSQLState mustBe utilities.UNIQUE_VIOLATION
+            e.getSQLState mustBe UNIQUE_VIOLATION
         }
       }
     }

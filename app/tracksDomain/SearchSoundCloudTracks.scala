@@ -17,10 +17,9 @@ import scala.concurrent.Future
 case class SoundCloudArtistConfidence(artistId: Option[Long], soundcloudId: Long, confidence: Double)
 case class WebsitesForSoundcloudId(soundcloudId: Long, websites: Seq[String])
 
-class SearchSoundCloudTracks @Inject()(val utilities: Utilities,
-                                       val trackMethods: TrackMethods,
+class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
                                        val genreMethods: GenreMethods)
-    extends SoundCloudHelper {
+    extends SoundCloudHelper with Utilities {
 
   def getSoundCloudTracksForArtist(artist: Artist): Future[Seq[Track]] =
     artist.websites find (_ contains "soundcloud.com") match {
@@ -87,10 +86,10 @@ class SearchSoundCloudTracks @Inject()(val utilities: Utilities,
   def getSoundcloudWebsites(soundcloudIds: Seq[Long]): Future[Seq[WebsitesForSoundcloudId]] = Future.sequence(
     soundcloudIds.map { id =>
       WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles")
-        .withQueryString("client_id" -> utilities.soundCloudClientId)
+        .withQueryString("client_id" -> soundCloudClientId)
         .get()
         .map { soundCloudResponse =>
-        WebsitesForSoundcloudId(id, readSoundCloudWebsites(soundCloudResponse).map { utilities.normalizeUrl })
+        WebsitesForSoundcloudId(id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
       }
     }
   )
@@ -99,7 +98,7 @@ class SearchSoundCloudTracks @Inject()(val utilities: Utilities,
     WS.url("http://api.soundcloud.com/users")
       .withQueryString(
         "q" -> namePattern,
-        "client_id" -> utilities.soundCloudClientId)
+        "client_id" -> soundCloudClientId)
       .get()
       .map { readSoundCloudIds }
   }
@@ -113,7 +112,7 @@ class SearchSoundCloudTracks @Inject()(val utilities: Utilities,
 
   def getSoundCloudTracksWithSoundCloudLink(soundCloudLink: String, artist: Artist): Future[Seq[Track]] = {
     WS.url("http://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
-      .withQueryString("client_id" -> utilities.soundCloudClientId)
+      .withQueryString("client_id" -> soundCloudClientId)
       .get()
       .map { response => readSoundCloudTracks(response.json, artist) }
   }

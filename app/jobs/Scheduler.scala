@@ -14,6 +14,7 @@ import tracksDomain.TrackMethods
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
+
 class Scheduler @Inject()(val eventMethods: EventMethods,
                           val organizerMethods: OrganizerMethods,
                           val artistMethods: ArtistMethods,
@@ -79,7 +80,7 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
     artists.headOption match {
       case Some(artist) =>
         val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
-        trackMethods.saveEnumeratorWithDelay(tracksEnumerator)
+        trackMethods.saveTracksEnumerator(tracksEnumerator)
 
         Thread.sleep(4000)
         findTracksForArtistsOneByOne(offset + 1)

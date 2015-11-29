@@ -65,7 +65,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "return an error if a user try to follow a place twice" in {
-      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByPlaceId(2))
+      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByPlaceId(400))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CONFLICT

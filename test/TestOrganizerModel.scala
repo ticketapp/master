@@ -35,7 +35,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
 
     "find organizers" in {
       val expectedOrganizerNames = Seq("name0", "name1", "name2")
-      whenReady(organizerMethods.findSinceOffset(0, 20), timeout(Span(5, Seconds))) { foundOrganizers =>
+      whenReady(organizerMethods.findSinceOffset(0, 10000), timeout(Span(5, Seconds))) { foundOrganizers =>
 
         foundOrganizers map (_.organizer.name) should contain theSameElementsAs expectedOrganizerNames
       }

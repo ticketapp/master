@@ -11,7 +11,6 @@ import services.Utilities
 case class Mail(id: Option[Long], subject: String, message: String, read: Boolean, userId: Option[UUID])
 
 class MailMethods @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                            val utilities: Utilities,
                             val artistMethods: ArtistMethods,
                             val genreMethods: GenreMethods) {
 //  private val mailParser = {

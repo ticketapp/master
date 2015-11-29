@@ -25,13 +25,10 @@ class TrackController @Inject() (ws: WSClient,
                                  val messagesApi: MessagesApi,
                                  val trackMethods: TrackMethods,
                                  val trackRatingMethods: TrackRatingMethods,
-                                 val utilities: Utilities,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry)
-    extends Silhouette[User, CookieAuthenticator] with trackFormsTrait {
+    extends Silhouette[User, CookieAuthenticator] with trackFormsTrait with Utilities {
 
-  val FOREIGN_KEY_VIOLATION = utilities.FOREIGN_KEY_VIOLATION
-  val UNIQUE_VIOLATION = utilities.UNIQUE_VIOLATION
 
   def createTrack = Action.async { implicit request =>
     trackBindingForm.bindFromRequest().fold(
@@ -111,10 +108,10 @@ class TrackController @Inject() (ws: WSClient,
             Logger.error("TrackController.followTrack: trackMethods.follow did not return 1")
             InternalServerError
         } recover {
-          case psqlException: PSQLException if psqlException.getSQLState == utilities.UNIQUE_VIOLATION =>
+          case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
             Logger.error(s"TrackController.followTrackByTrackId: $trackId is already followed")
             Conflict
-          case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+          case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
             Logger.error(s"TrackController.followTrackByTrackId: there is no track with the id $trackId")
             NotFound
           case unknownException =>
@@ -138,7 +135,7 @@ class TrackController @Inject() (ws: WSClient,
             Logger.error("TrackController.unfollowTrack: trackMethods.unfollow did not return 1")
             InternalServerError
         } recover {
-          case psqlException: PSQLException if psqlException.getSQLState == utilities.FOREIGN_KEY_VIOLATION =>
+          case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
             Logger.error(s"The user (id: $userId) does not follow the track (trackId: $trackId).")
             NotFound
           case unknownException =>
