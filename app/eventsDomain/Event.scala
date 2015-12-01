@@ -447,7 +447,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       eventWithRelations.event.copy(id = Option(id))
   }).transactionally)
 
-  def saveEventRelations(eventWithRelations: EventWithRelations, eventId: Long): Future[Any] = Future {
+  def saveEventRelations(eventWithRelations: EventWithRelations, eventId: Long): Seq[Future[Address]] = {
     eventWithRelations.genres map(genre => genreMethods.saveWithEventRelation(genre, eventId))
     eventWithRelations.artists map(artist => artistMethods.saveWithEventRelation(artist, eventId))
     eventWithRelations.organizers map(organizer => organizerMethods.saveWithEventRelation(organizer, eventId))
