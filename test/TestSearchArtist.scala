@@ -172,7 +172,7 @@ class TestSearchArtist extends GlobalApplicationForModels with Utilities {
       whenReady(artistMethods.getEventuallyArtistsInEventTitle(title, websites),
         timeout(Span(20, Seconds))) {
 
-        _.map{ artist => artist.artist.name } mustBe expectedArtistNames
+        _.map{ artist => artist.artist.name } should contain theSameElementsAs expectedArtistNames
       }
     }
 
@@ -191,7 +191,7 @@ class TestSearchArtist extends GlobalApplicationForModels with Utilities {
       whenReady(artistMethods.getArtistsForAnEvent(artistName, websites),
         timeout(Span(20, Seconds))) {
 
-        _.map{ artist => artist.artist.name } mustBe expectedArtistNames
+        _.map{ artist => artist.artist.name } should contain theSameElementsAs expectedArtistNames
       }
     }
 
@@ -210,7 +210,7 @@ class TestSearchArtist extends GlobalApplicationForModels with Utilities {
       whenReady(artistMethods.getFacebookArtist(artistName, websites),
         timeout(Span(20, Seconds))) {
 
-        _.map{ artist => artist.artist.name } mustBe expectedArtistNames
+        _.map{ artist => artist.artist.name } should contain theSameElementsAs expectedArtistNames
       }
     }
   }
