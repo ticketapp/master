@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
   filters,
   "net.codingwell" %% "scala-guice" % "4.0.0",
   "org.webjars" %% "webjars-play" % "2.4.0-1",
-  "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
+  "org.postgresql" % "postgresql" % "9.4-1205-jdbc42",
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
   "org.scalatestplus" %% "play" % "1.4.0-M3" % "test",
   "com.mohiva" %% "play-silhouette" % "3.0.2",
