@@ -2,13 +2,12 @@ package artistsDomain
 
 import javax.inject.Inject
 
-import application.{User, ThereIsNoArtistForThisFacebookIdException}
+import application.{ThereIsNoArtistForThisFacebookIdException, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import database.UserArtistRelation
 import json.JsonHelper._
-import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.i18n.MessagesApi

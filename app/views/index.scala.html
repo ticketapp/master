@@ -1,27 +1,10 @@
 @(connected: Boolean)
-@main(title = "Ticketapp") {
+@main(title = "Claude") {
 
 <!--<nav id="pages-nav" id="top">
     <ul nav-menu="active" data-ng-controller="scrollCtrl">
 	    -->
 <header id="top" ng-init="$root.connected = @connected"></header>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
 <div id="contener">
     <ng-controls class="ng-controls"></ng-controls>
     <div data-ng-view
@@ -29,22 +12,10 @@
          autoscroll="true"
          ng-class="{'paddingTop50': $root.window == 'small'}">
     </div>
-    <div ng-show="$root.playlist.tracksDomain.length > 0" class="ng-player"></div>
+    <div ng-show="$root.playlist.tracks.length > 0" class="ng-player"></div>
 </div>
 <div ng-if="$root.path != 'iframe'"
      ng-class="{'ng-hide': $root.window == 'small' && $root.path == 'home'}"
      class="footer row-fluid">
 </div>
-    <h1>sfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
-    <h1>fdsfsdfsdf</h1>
 }

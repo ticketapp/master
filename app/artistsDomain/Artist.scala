@@ -2,10 +2,11 @@ package artistsDomain
 
 import java.util.UUID
 import javax.inject.Inject
+
 import application.ThereIsNoArtistForThisFacebookIdException
-import database.{MyPostgresDriver, EventArtistRelation, UserArtistRelation, MyDBTableDefinitions}
+import database.MyPostgresDriver.api._
+import database.{EventArtistRelation, MyDBTableDefinitions, MyPostgresDriver, UserArtistRelation}
 import genresDomain.{GenreMethods, GenreWithWeight}
-import models._
 import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -14,7 +15,6 @@ import play.api.libs.functional.syntax._
 import play.api.libs.iteratee.{Enumerator, Iteratee}
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
-import MyPostgresDriver.api._
 import services._
 import tracksDomain._
 
