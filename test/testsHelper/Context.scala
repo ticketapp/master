@@ -38,7 +38,7 @@ trait Context extends Scope {
   lazy val application = new GuiceApplicationBuilder().configure(Configuration.from(Map(
     "slick.dbs.default.driver" -> "slick.driver.PostgresDriver$",
     "slick.dbs.default.db.driver" -> "org.postgresql.Driver",
-    "slick.dbs.default.db.url" -> "jdbc:postgresql://192.168.0.10:5432/tests",
+    "slick.dbs.default.db.url" -> "jdbc:postgresql://333.168.0.10:5432/tests",
     "slick.dbs.default.db.user" -> "simon",
     "slick.dbs.default.db.password" -> "root",
     "slick.dbs.default.db.connectionTimeout" -> "5 seconds",
