@@ -15,18 +15,6 @@ import play.api.i18n.MessagesApi
 
 import scala.language.postfixOps
 
-/**
- * The credentials auth controller.
- *
- * @param messagesApi The Play messages API.
- * @param env The Silhouette environment.
- * @param userService The user service implementation.
- * @param authInfoRepository The auth info repository implementation.
- * @param credentialsProvider The credentials provider.
- * @param socialProviderRegistry The social provider registry.
- * @param configuration The Play configuration.
- * @param clock The clock instance.
- */
 class CredentialsAuthController @Inject() (
   val messagesApi: MessagesApi,
   val env: Environment[User, CookieAuthenticator],
@@ -49,11 +37,6 @@ class CredentialsAuthController @Inject() (
 
   case class Data(email: String, password: String, rememberMe: Boolean)
 
-  /**
-   * Authenticates a user against the credentials provider.
-   *
-   * @return The result to display.
-   */
 //  def authenticate = Action.async { implicit request =>
 //    signInForm.bindFromRequest.fold(
 //      formWithErrors => {
