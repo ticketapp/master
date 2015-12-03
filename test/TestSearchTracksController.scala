@@ -1,39 +1,34 @@
-import org.scalatest.Matchers._
-import org.scalatestplus.play._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-
-import scala.language.postfixOps
+import testsHelper.GlobalApplicationForControllers
 
 
-class TestSearchTracksController extends PlaySpec with OneAppPerSuite {
+class TestSearchTracksController extends GlobalApplicationForControllers {
+  sequential
 
-  "SearchTracksController" must {
-
-    val tupleTitleArtistNameReads =
-      Reads.seq((__ \ "title").read[String] and (__ \ "artistName").read[String] tupled)
+  "SearchTracksController" should {
 
     "find tracks on Youtube by a title and an artist" in {
-      val eventuallyResult = route(
-        FakeRequest(
-          tracksDomain.routes.SearchTracksController
-            .getYoutubeTracksForArtistAndTrackTitle("brassens", "facebookUrlSearchTracksController", "pauvre martin"))
-      ).get
+      val tupleTitleArtistNameReads =
+        Reads.seq((__ \ "title").read[String] and (__ \ "artistName").read[String] tupled)
 
-      status(eventuallyResult) mustBe 200
+      val Some(result) = route(FakeRequest(
+        tracksDomain.routes.SearchTracksController
+          .getYoutubeTracksForArtistAndTrackTitle("brassens", "facebookUrlSearchTracksController", "pauvre martin")))
 
-      val seqTitleArtistName = contentAsJson(eventuallyResult).as[Seq[(String, String)]](tupleTitleArtistNameReads)
+      status(result) mustEqual 200
+      
+      val seqTitleArtistName = contentAsJson(result).as[Seq[(String, String)]](tupleTitleArtistNameReads)
 
       seqTitleArtistName should not be empty
-      seqTitleArtistName.toSet.size mustBe seqTitleArtistName.size
+      seqTitleArtistName.toSet.size mustEqual seqTitleArtistName.size
     }
 
     "get youtube track info" in {
       val Some(info) = route(FakeRequest(tracksDomain.routes.SearchTracksController.getYoutubeTrackInfo("ujUUkrmfpis")))
 
-      contentAsString(info) should include("author=Pan-Pot")
+      contentAsString(info) must contain("author=Pan-Pot")
     }
   }
 }

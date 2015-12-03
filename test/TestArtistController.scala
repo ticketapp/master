@@ -48,8 +48,6 @@ class TestArtistController extends GlobalApplicationForControllers {
 
       val stringUUIDsFromDB = uuidsFromDB.map(_.toString)
 
-      println("stringUUIDsFromDB = " + stringUUIDsFromDB)
-
       val distinctUUIDs = stringUUIDsFromDB.diff(uuids).toList ::: uuids.diff(stringUUIDsFromDB).toList
 
       stringUUIDsFromDB mustNotEqual Seq.empty
