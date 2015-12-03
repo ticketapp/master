@@ -294,6 +294,7 @@ class TestUtilities extends GlobalApplicationForModels with Utilities {
     whenReady(getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { websites =>
 
       expectedWebsites.diff(websites) mustBe Set.empty
+      
       websites must contain theSameElementsAs expectedWebsites
     }
   }
