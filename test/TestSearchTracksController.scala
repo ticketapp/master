@@ -18,7 +18,7 @@ class TestSearchTracksController extends GlobalApplicationForControllers {
           .getYoutubeTracksForArtistAndTrackTitle("brassens", "facebookUrlSearchTracksController", "pauvre martin")))
 
       status(result) mustEqual 200
-      
+
       val seqTitleArtistName = contentAsJson(result).as[Seq[(String, String)]](tupleTitleArtistNameReads)
 
       seqTitleArtistName should not be empty
