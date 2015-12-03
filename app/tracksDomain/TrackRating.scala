@@ -2,11 +2,11 @@ package tracksDomain
 
 import java.util.UUID
 import javax.inject.Inject
+
 import application.DAOException
-import database.{MyPostgresDriver, MyDBTableDefinitions}
+import database.MyPostgresDriver.api._
+import database.{MyDBTableDefinitions, MyPostgresDriver}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import MyPostgresDriver.api._
-import services.Utilities
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
