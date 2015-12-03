@@ -100,8 +100,8 @@ class TestUtilities extends GlobalApplicationForModels with Utilities {
       "soundcloud.com/kuna-maze",
       "soundcloud.com/paulatemple",
       "facebook.com/musicseptembre?fref=ts",
-      "facebook.com/paulatempleofficial",
-      "lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm")
+      "facebook.com/paulatempleofficial"/*,
+      "lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm"*/)
 
     val exampleDescription =
       """La programmation d’artistes Coup de Cœur peut s’avérer être un choix cornélien. Entre le nombre accru de
@@ -289,13 +289,12 @@ class TestUtilities extends GlobalApplicationForModels with Utilities {
         |        les chances de son côté en collaborant avec des invités de marque tels que Michael McGough (Being As An Ocean)
         |         et Michael Lawler (In Vice Versa), et en publiant plusieurs clips de qualité.
         |         Facebook : facebook.com/burningdownalaska    Phantoms : youtube.com/watch?v=jesdtqr3cko
-        |         http://bit.ly/1KfXhqX
         |         -----------------------------------------------------------------------""".stripMargin
+//         http://bit.ly/1KfXhqX
+    whenReady(getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { websites =>
 
-    whenReady(getNormalizedWebsitesInText(exampleDescription), timeout(Span(5, Seconds))) { a =>
-
-      expectedWebsites.diff(a) mustBe Set.empty
-      a must contain theSameElementsAs expectedWebsites
+      expectedWebsites.diff(websites) mustBe Set.empty
+      websites must contain theSameElementsAs expectedWebsites
     }
   }
 }
