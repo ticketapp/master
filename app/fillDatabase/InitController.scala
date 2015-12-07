@@ -36,7 +36,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   def init() = {
     insertFrenchCities()
     insertGenres()
-    insertTwoLettersArtists()
+//    insertTwoLettersArtists()
   }
 
   def insertFrenchCities() = Action {
@@ -91,7 +91,6 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
         } recover {
           case NonFatal(e: Exception) =>  Logger.warn("InitController.insertTwoLettersArtists: for pattern " + c1 + c2)
         }
-        Thread.sleep(120)
       }
     }
     Ok
