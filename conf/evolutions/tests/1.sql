@@ -34,6 +34,7 @@ CREATE TABLE orders ( --account701
   totalPrice                INT NOT NULL
 );
 
+
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
@@ -90,29 +91,70 @@ CREATE TABLE tracks (
   ratingDown              INT NOT NULL DEFAULT 0,
   UNIQUE(url)
 );
-CREATE UNIQUE INDEX artistNameAndTitle ON tracks(title, artistName);
+CREATE UNIQUE INDEX artistNameAndTitle ON tracks(title, artistFacebookUrl);
 CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 
 create table users (
-  userID UUID PRIMARY KEY,
-  firstName VARCHAR,
-  lastName VARCHAR,
-  fullName VARCHAR,
-  email VARCHAR UNIQUE,
-  avatarURL VARCHAR);
+  userID                    UUID PRIMARY KEY,
+  firstName                 VARCHAR,
+  lastName                  VARCHAR,
+  fullName                  VARCHAR,
+  email                     VARCHAR UNIQUE,
+  avatarURL                 VARCHAR
+);
 
-create table logininfo (
-  id SERIAL PRIMARY KEY,
-  providerID VARCHAR NOT NULL,
-  providerKey VARCHAR NOT NULL);
 
-create table userlogininfo (userID UUID PRIMARY KEY, loginInfoId BIGINT NOT NULL);
-create table passwordinfo (hasher VARCHAR NOT NULL,password VARCHAR NOT NULL,salt VARCHAR,loginInfoId BIGINT NOT NULL);
-create table oauth1info (id SERIAL PRIMARY KEY,token VARCHAR NOT NULL,secret VARCHAR NOT NULL,loginInfoId BIGINT NOT NULL);
-create table oauth2info (id SERIAL PRIMARY KEY,accesstoken VARCHAR NOT NULL,tokentype VARCHAR,expiresin INTEGER,refreshtoken VARCHAR,logininfoid BIGINT NOT NULL);
-create table openidinfo (id VARCHAR NOT NULL PRIMARY KEY,logininfoid BIGINT NOT NULL);
-create table openidattributes (id VARCHAR NOT NULL,key VARCHAR NOT NULL,value VARCHAR NOT NULL);
+CREATE TABLE logininfo (
+  id                       SERIAL PRIMARY KEY,
+  providerID               VARCHAR NOT NULL,
+  providerKey              VARCHAR NOT NULL
+);
+
+
+CREATE TABLE userlogininfo (
+  userID                   UUID PRIMARY KEY,
+  loginInfoId              BIGINT NOT NULL
+);
+
+
+CREATE TABLE passwordinfo (
+  hasher                  VARCHAR NOT NULL,
+  password                VARCHAR NOT NULL,
+  salt                    VARCHAR,
+  loginInfoId             BIGINT NOT NULL
+);
+
+
+CREATE TABLE oauth1info (
+  id                      SERIAL PRIMARY KEY,
+  token                   VARCHAR NOT NULL,
+  secret                  VARCHAR NOT NULL,
+  loginInfoId             BIGINT NOT NULL
+);
+
+
+CREATE TABLE oauth2info (
+  id                      SERIAL PRIMARY KEY,
+  accesstoken             VARCHAR NOT NULL,
+  tokentype               VARCHAR,
+  expiresin               INTEGER,
+  refreshtoken            VARCHAR,
+  logininfoid             BIGINT NOT NULL
+);
+
+
+CREATE TABLE openidinfo (
+  id                      VARCHAR NOT NULL PRIMARY KEY,
+  logininfoid             BIGINT NOT NULL
+);
+
+
+CREATE TABLE openidattributes (
+  id                      VARCHAR NOT NULL,
+  key                     VARCHAR NOT NULL,
+  value                   VARCHAR NOT NULL
+);
 
 
 CREATE TABLE receivedMails (
@@ -159,29 +201,27 @@ CREATE TABLE places (
   UNIQUE(facebookId)
 );
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
-INSERT into places(name, geographicPoint, facebookId)
-values ('Le transbordeur', ST_GeomFromText('POINT(45.783808 4.860598)', 4326), '117030545096697');
 
 
 CREATE TABLE images (
-  imageId                   SERIAL PRIMARY KEY,
-  path                      VARCHAR NOT NULL,
-  category                  VARCHAR(31),
-  organizerId               BIGINT REFERENCES organizers(organizerId),
-  infoId                    BIGINT REFERENCES infos(infoId),
-  trackId                   UUID REFERENCES tracks(trackId),
+  imageId                     SERIAL PRIMARY KEY,
+  path                        VARCHAR NOT NULL,
+  category                    VARCHAR(31),
+  organizerId                 BIGINT REFERENCES organizers(organizerId),
+  infoId                      BIGINT REFERENCES infos(infoId),
+  trackId                     UUID REFERENCES tracks(trackId),
   UNIQUE(path)
 );
 
 CREATE TABLE tariffs (
-  tariffId                 SERIAL PRIMARY KEY,
-  denomination             VARCHAR(255) DEFAULT 'Basique' NOT NULL,
-  nbTicketToSell           INT NOT NULL,
-  nbTicketSold             INT DEFAULT 0 NOT NULL,
-  price                    NUMERIC NOT NULL,
-  startTime                TIMESTAMP NOT NULL,
-  endTime                  TIMESTAMP NOT NULL,
-  eventId                  BIGINT REFERENCES events(eventId)
+  tariffId                  SERIAL PRIMARY KEY,
+  denomination              VARCHAR(255) DEFAULT 'Basique' NOT NULL,
+  nbTicketToSell            INT NOT NULL,
+  nbTicketSold              INT DEFAULT 0 NOT NULL,
+  price                     NUMERIC NOT NULL,
+  startTime                 TIMESTAMP NOT NULL,
+  endTime                   TIMESTAMP NOT NULL,
+  eventId                   BIGINT REFERENCES events(eventId)
 );
 
 CREATE TABLE tickets (
