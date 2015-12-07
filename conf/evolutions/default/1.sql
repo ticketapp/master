@@ -200,8 +200,6 @@ CREATE TABLE places (
   UNIQUE(facebookId)
 );
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
-INSERT into places(name, geographicPoint, facebookId)
-values ('Le transbordeur', ST_GeomFromText('POINT(45.783808 4.860598)', 4326), '117030545096697');
 
 
 CREATE TABLE images (
