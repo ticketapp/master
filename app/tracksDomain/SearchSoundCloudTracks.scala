@@ -5,6 +5,7 @@ import javax.inject.Inject
 
 import artistsDomain.Artist
 import genresDomain.GenreMethods
+import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
@@ -13,6 +14,7 @@ import play.api.libs.ws.{WS, WSResponse}
 import services.Utilities
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 case class SoundCloudArtistConfidence(artistId: Option[Long], soundcloudId: Long, confidence: Double)
 case class WebsitesForSoundcloudId(soundcloudId: Long, websites: Seq[String])
@@ -94,14 +96,18 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     }
   )
 
-  def getSoundCloudIdsForName(namePattern: String): Future[Seq[Long]] = {
-    WS.url("http://api.soundcloud.com/users")
-      .withQueryString(
-        "q" -> namePattern,
-        "client_id" -> soundCloudClientId)
-      .get()
-      .map { readSoundCloudIds }
-  }
+  def getSoundCloudIdsForName(namePattern: String): Future[Seq[Long]] = WS.
+    url("http://api.soundcloud.com/users")
+    .withQueryString(
+      "q" -> namePattern,
+      "client_id" -> soundCloudClientId)
+    .get()
+    .map(readSoundCloudIds)
+    .recover {
+      case NonFatal(e) =>
+        Logger.error("SearchSoundCloudTracks.getSoundCLoudIdsForName: ", e)
+        Seq.empty
+    }
 
   def readSoundCloudIds(soundCloudWSResponse: WSResponse): Seq[Long] = {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
@@ -110,12 +116,11 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
       .getOrElse(Seq.empty)
   }
 
-  def getSoundCloudTracksWithSoundCloudLink(soundCloudLink: String, artist: Artist): Future[Seq[Track]] = {
-    WS.url("http://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
-      .withQueryString("client_id" -> soundCloudClientId)
-      .get()
-      .map { response => readSoundCloudTracks(response.json, artist) }
-  }
+  def getSoundCloudTracksWithSoundCloudLink(soundCloudLink: String, artist: Artist): Future[Seq[Track]] = WS
+    .url("http://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
+    .withQueryString("client_id" -> soundCloudClientId)
+    .get()
+    .map(response => readSoundCloudTracks(response.json, artist))
 
   def readSoundCloudTracks(soundCloudJsonWSResponse: JsValue, artist: Artist): Seq[Track] = {
     val soundCloudTrackReads = (
