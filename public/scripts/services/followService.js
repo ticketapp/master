@@ -372,7 +372,7 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                     var defered = $q.defer();
                     if (factory.favoritesTracks.length > 0) {
                         var track = factory.favoritesTracks.filter(function(track) {
-                            return track.id === trackId
+                            return track.uuid === trackId
                         });
                         if (track.length === 0) {
                            defered.resolve(false)

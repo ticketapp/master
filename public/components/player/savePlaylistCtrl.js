@@ -10,9 +10,10 @@ angular.module('claudeApp').controller('savePlaylistCtrl', ['$scope', '$rootScop
         var tracksToSave = [];
         $scope.newPlaylist = true;
         $timeout(function () {
+            console.log(playlist.tracks)
             for (var i=0; i < playlist.tracks.length; i++) {
-                TracksRecommender.UpsertTrackRate(true, playlist.tracks[i].id);
-                tracksToSave.push({trackId: playlist.tracks[i].id, trackRank: i})
+                TracksRecommender.UpsertTrackRate(true, playlist.tracks[i].uuid);
+                tracksToSave.push({trackId: playlist.tracks[i].uuid, trackRank: i})
             }
             $http.post('/playlists', {name: playlist.name, trackIds: tracksToSave}).
                 success(function (data) {
