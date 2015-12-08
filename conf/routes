@@ -1,5 +1,6 @@
 # Home page
 GET           /                                                              @application.Application.index
+GET           /googlea30e62044bb92d88.html                                   @application.Application.googleValidation
 
 GET           /test                                                          @others.Test.sayHello(message: String)
 

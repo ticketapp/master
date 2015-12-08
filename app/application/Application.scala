@@ -28,6 +28,9 @@ class Application @Inject()(ws: WSClient,
     }
     Ok(views.html.index(userConnected))
   }
+  def googleValidation = UserAwareAction { implicit request =>
+    Ok(views.html.googlea30e62044bb92d88)
+  }
 
   def signOut = SecuredAction.async { implicit request =>
     val result = Redirect(routes.Application.index())
