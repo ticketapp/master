@@ -115,7 +115,7 @@ class TestFollowService extends GlobalApplicationForModels with Utilities {
     "be followed and unfollowed by a user" in {
       val organizer = Organizer(None, Option("facebookId4"), "organizerTest4", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get)
       val loginInfo: LoginInfo = LoginInfo("providerId", "providerKey")
       val uuid: UUID = UUID.randomUUID()
       val user: User = User(
@@ -156,7 +156,7 @@ class TestFollowService extends GlobalApplicationForModels with Utilities {
     "be followed by facebookId" in {
       val organizer = Organizer(None, Option("facebookId44"), "organizerTest44", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get)
       val loginInfo: LoginInfo = LoginInfo("providerId44", "providerKey44")
       val uuid: UUID = UUID.randomUUID()
       val user: User = User(
@@ -187,7 +187,7 @@ class TestFollowService extends GlobalApplicationForModels with Utilities {
     "not be followed twice" in {
       val organizer = Organizer(None, Option("facebookId14"), "organizerTest14", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get)
       val loginInfo: LoginInfo = LoginInfo("providerId1", "providerKey1")
       val uuid: UUID = UUID.randomUUID()
       val user: User = User(

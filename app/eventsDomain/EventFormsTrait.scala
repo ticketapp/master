@@ -5,19 +5,17 @@ import org.joda.time.DateTime
 import play.api.data.Form
 import play.api.data.Forms._
 
-trait eventFormsTrait extends geographicPointTrait {
+trait EventFormsTrait extends geographicPointTrait {
 
-  def eventFormApply(facebookId: Option[String], name: String, geographicPoint: Option[String], description: Option[String],
-                startTime: DateTime, endTime: Option[DateTime], ageRestriction: Int, tariffRange: Option[String],
-                ticketSellers: Option[String], imagePath: Option[String]/*, tariffs: List[Tariff], addresses: List[Address]*/)
-  : Event =
-    Event(None, facebookId, isPublic = true, isActive = true, name, optionStringToOptionPoint(geographicPoint), description, startTime,
-      endTime, ageRestriction, tariffRange, ticketSellers, imagePath)//, List.empty, List.empty, tariffs, addresses)
+  def eventFormApply(facebookId: Option[String], name: String, geographicPoint: Option[String],
+                     description: Option[String], startTime: DateTime, endTime: Option[DateTime], ageRestriction: Int,
+                     tariffRange: Option[String], ticketSellers: Option[String], imagePath: Option[String]): Event =
+    Event(None, facebookId, isPublic = true, isActive = true, name, optionStringToPoint(geographicPoint), description, startTime,
+      endTime, ageRestriction, tariffRange, ticketSellers, imagePath)
 
   def eventFormUnapply(event: Event) = {
-    Some((event.facebookId, event.name, Option(event.geographicPoint.getOrElse("").toString), event.description,
-      event.startTime, event.endTime, event.ageRestriction, event.tariffRange, event.ticketSellers, event.imagePath/*,
-      event.tariffs, event.addresses*/))
+    Some((event.facebookId, event.name, Option(event.geographicPoint.toString), event.description,
+      event.startTime, event.endTime, event.ageRestriction, event.tariffRange, event.ticketSellers, event.imagePath))
   }
 
   val eventBindingForm = Form(

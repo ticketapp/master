@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import addresses.{SearchGeographicPoint, Address, AddressMethods}
 import application.ThereIsNoOrganizerForThisFacebookIdException
-import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Geometry}
 import database.{MyPostgresDriver, EventOrganizerRelation, UserOrganizerRelation, MyDBTableDefinitions}
 import placesDomain.PlaceMethods
 import play.api.Logger
@@ -15,7 +15,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import MyPostgresDriver.api._
-import services.{FollowService, Utilities}
+import services.{SortByDistanceToPoint, SortableByGeographicPoint, FollowService, Utilities}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -31,10 +31,13 @@ case class Organizer (id: Option[Long],
                       websites: Option[String] = None,
                       verified: Boolean = false,
                       imagePath: Option[String] = None,
-                      geographicPoint: Option[Geometry] = None,
+                      geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
                       linkedPlaceId: Option[Long] = None)
 
-case class OrganizerWithAddress(organizer: Organizer, address: Option[Address] = None)
+case class OrganizerWithAddress(organizer: Organizer, address: Option[Address] = None) extends SortableByGeographicPoint {
+  val geographicPoint = organizer.geographicPoint
+}
+
 
 class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                  val placeMethods: PlaceMethods,
@@ -43,7 +46,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
     with MyDBTableDefinitions
-    with Utilities {
+    with Utilities
+    with SortByDistanceToPoint {
 
   def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[OrganizerWithAddress]] = {
     val tupledJoin = organizers.drop(offset).take(numberToReturn) joinLeft addresses on (_.addressId === _.id)
@@ -82,7 +86,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
 
   def saveWithAddress(organizerWithAddress: OrganizerWithAddress): Future[OrganizerWithAddress] = {
     organizerWithAddress.address match {
-      case Some(address) => 
+      case Some(address) =>
         addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
           save(organizerWithAddress.organizer.copy(addressId = savedAddress.id)) map { orga =>
             OrganizerWithAddress(orga, Option(savedAddress))
@@ -94,7 +98,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
         }
     }
   }
-  
+
   def save(organizer: Organizer): Future[Organizer] = {
     val eventuallyMaybePlaceId: Future[Option[Long]] = organizer.facebookId match {
       case None =>
@@ -123,7 +127,7 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
 
   def update(organizer: Organizer): Future[Int] = db.run(organizers.filter(_.id === organizer.id).update(organizer))
-  
+
   def findIdByFacebookId(facebookId: Option[String]): Future[Option[Long]] = {
     val query = organizers.filter(_.facebookId === facebookId).map(_.id)
     db.run(query.result.headOption)
@@ -132,13 +136,12 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] = {
     val query = for {
       organizerWithAddress <- organizers
-        .sortBy(o => (o.geographicPoint <-> geographicPoint).desc)
+        .sortBy(organizer => (organizer.geographicPoint <-> geographicPoint, organizer.id))
         .drop(offset)
-        .take(numberToReturn) joinLeft
-        addresses on (_.addressId === _.id)
+        .take(numberToReturn) joinLeft addresses on (_.addressId === _.id)
     } yield organizerWithAddress
 
-    db.run(query.result) map(_ map OrganizerWithAddress.tupled)
+    db.run(query.result) map(_ map OrganizerWithAddress.tupled) map(sortByDistanceToPoint(geographicPoint, _))
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[OrganizerWithAddress]] =
@@ -205,8 +208,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
             website: Option[String]) =>
       OrganizerWithAddress(organizer = Organizer(id = None, facebookId = facebookId, name = name,
         description = formatDescription(description), addressId = None, phone = phone, publicTransit = public_transit,
-        websites = website, verified = false, imagePath = source, geographicPoint = None),
-        address = Option(Address(id = None, geographicPoint = None, city = city, zip = zip, street = street)))
+        websites = website, verified = false, imagePath = source),
+        address = Option(Address(id = None, city = city, zip = zip, street = street)))
     )
   
   def jsonToOrganizer(organizer: JsValue): Option[OrganizerWithAddress] = organizer.asOpt[OrganizerWithAddress](organizerRead)
@@ -221,13 +224,13 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
 
   def getOrganizerInfo(maybeOrganizerFacebookId: Option[String]): Future[Option[OrganizerWithAddress]] = maybeOrganizerFacebookId match {
-    case None => Future { None }
+    case None => Future(None)
     case Some(organizerId) =>
       WS.url("https://graph.facebook.com/"+ facebookApiVersion +"/" + organizerId)
         .withQueryString(
           "fields" -> "name,description,cover{source},location,phone,public_transit,website",
           "access_token" -> facebookToken)
         .get()
-        .map { response => jsonToOrganizer(response.json) }
+        .map(response => jsonToOrganizer(response.json))
   }
 }

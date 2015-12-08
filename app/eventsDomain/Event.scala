@@ -3,11 +3,12 @@ package eventsDomain
 import java.sql.Timestamp
 import javax.inject.Inject
 
-import addresses.{SearchGeographicPoint, AddressMethods, Address}
-import artistsDomain.{ArtistMethods, PatternAndArtist, ArtistWithWeightedGenres}
-import com.vividsolutions.jts.geom.Geometry
-import database.{MyPostgresDriver, MyDBTableDefinitions}
-import genresDomain.{GenreMethods, Genre}
+import addresses.{Address, AddressMethods, SearchGeographicPoint}
+import artistsDomain.{ArtistMethods, ArtistWithWeightedGenres, PatternAndArtist}
+import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
+import database.MyPostgresDriver.api._
+import database.{MyDBTableDefinitions, MyPostgresDriver}
+import genresDomain.{Genre, GenreMethods}
 import org.joda.time.DateTime
 import organizersDomain.{OrganizerMethods, OrganizerWithAddress}
 import others.TariffMethods
@@ -19,8 +20,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
-import MyPostgresDriver.api._
-import services.{FollowService, Utilities}
+import services.{FollowService, SortByDistanceToPoint, SortableByGeographicPoint, Utilities}
 import silhouette.DBTableDefinitions
 import tracksDomain.TrackMethods
 
@@ -36,7 +36,7 @@ case class Event(id: Option[Long] = None,
                  isPublic: Boolean = true,
                  isActive: Boolean = false,
                  name: String,
-                 geographicPoint: Option[Geometry] = None,
+                 geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
                  description: Option[String] = None,
                  startTime: DateTime,
                  endTime: Option[DateTime] = None,
@@ -50,7 +50,29 @@ case class EventWithRelations(event: Event,
                               artists: Seq[ArtistWithWeightedGenres] = Vector.empty,
                               places: Seq[PlaceWithAddress] = Vector.empty,
                               genres: Seq[Genre] = Vector.empty,
-                              addresses: Seq[Address] = Vector.empty)
+                              addresses: Seq[Address] = Vector.empty) extends SortableByGeographicPoint with Utilities {
+
+  private def returnEventGeographicPointInRelations(event: Event, addresses: Seq[Address], places: Seq[PlaceWithAddress])
+  : Geometry = {
+    event.geographicPoint match {
+      case notAntarcticPoint if notAntarcticPoint != antarcticPoint =>
+        notAntarcticPoint
+      case _ =>
+        val addressesGeoPoints = addresses map(_.geographicPoint)
+        val placesGeoPoint = places.map(_.geographicPoint)
+        val geoPoints = addressesGeoPoints ++ placesGeoPoint
+
+        geoPoints find(_ != antarcticPoint) match {
+          case Some(geoPoint) =>
+            geoPoint
+          case _ =>
+            antarcticPoint
+        }
+    }
+  }
+
+  val geographicPoint: Geometry = returnEventGeographicPointInRelations(event, addresses, places)
+}
 
 
 class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
@@ -67,7 +89,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     with DBTableDefinitions
     with eventWithRelationsTupleToEventWithRelationsClass
     with MyDBTableDefinitions
-    with Utilities {
+    with Utilities
+    with SortByDistanceToPoint {
 
   implicit def dateTimeDriver = MappedColumnType.base[DateTime, Timestamp](
     dt => new Timestamp(dt.getMillis),
@@ -105,16 +128,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       _.headOption
     }
   }
-  
-
-  def sortEventWithRelationsNearPoint(geographicPoint: Geometry, eventsWihRelations: Vector[EventWithRelations]): Vector[EventWithRelations] = {
-    val eventsWihRelationsWithoutGeoPoint = eventsWihRelations
-      .filter(_.event.geographicPoint.isEmpty)
-    val eventsWihRelationsSortedByGeoPoint = eventsWihRelations
-      .filter(_.event.geographicPoint.nonEmpty)
-      .sortBy(event => geographicPoint.distance(event.event.geographicPoint.get))
-    eventsWihRelationsSortedByGeoPoint ++ eventsWihRelationsWithoutGeoPoint
-  }
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
@@ -125,7 +138,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses) <- events
         .filter(event => event.endTime.nonEmpty && event.endTime > now ||
           event.endTime.isEmpty && event.startTime > twelveHoursAgo)
-        .sortBy(_.geographicPoint <-> geographicPoint)
+        .sortBy(event => (event.geographicPoint <-> geographicPoint, event.id))
         .drop(offset)
         .take(numberToReturn) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
@@ -137,7 +150,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
-      sortEventWithRelationsNearPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
+      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = geographicPointMethods
@@ -158,7 +171,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         .filter(event =>
           (event.endTime.nonEmpty && event.endTime < xHoursLater && event.endTime > now) ||
             (event.endTime.isEmpty && event.startTime < xHoursLater && event.startTime >= twelveHoursAgo ))
-        .sortBy(_.geographicPoint <-> geographicPoint)
+        .sortBy(event => (event.geographicPoint <-> geographicPoint, event.id))
         .drop(offset)
         .take(numberToReturn) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
@@ -170,7 +183,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
-      sortEventWithRelationsNearPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
+      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
   }
 
   def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
@@ -182,7 +195,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
       optionalEventAddresses) <- events
         .filter(event => (event.startTime < now) && (event.startTime > xHoursAgo))
-        .sortBy(_.geographicPoint <-> geographicPoint)
+        .sortBy(event => (event.geographicPoint <-> geographicPoint, event.id))
         .drop(offset)
         .take(numberToReturn) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
@@ -208,7 +221,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       optionalEventAddresses) <- events
         .filter(event => event.endTime.nonEmpty && event.endTime > now ||
           event.endTime.isEmpty && event.startTime > twelveHoursAgo)
-        .sortBy(_.geographicPoint <-> geographicPoint)
+        .sortBy(event => (event.geographicPoint <-> geographicPoint, event.id))
         .drop(offset)
         .take(numberToReturn) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
@@ -222,7 +235,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
-      sortEventWithRelationsNearPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
+      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
   }
 
   def findAllByPlace(placeId: Long): Future[Seq[EventWithRelations]] = {
@@ -260,7 +273,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
       optionalEventAddresses) <- events
         .filter(_.startTime < now)
-        .sortBy(_.startTime.desc) joinLeft
+        .sortBy(event => (event.startTime.desc, event.id)) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -285,7 +298,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses) <- events
         .filter(event => ((event.endTime.nonEmpty && event.endTime > now)
           || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
-        .sortBy(_.startTime.desc) joinLeft
+        .sortBy(event => (event.startTime.desc, event.id)) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -308,7 +321,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
         optionalEventAddresses) <- events
         .filter(_.startTime < now)
-        .sortBy(_.startTime.desc) joinLeft
+        .sortBy(event => (event.startTime.desc, event.id)) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -333,7 +346,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses) <- events
         .filter(event => (event.endTime.nonEmpty && event.endTime > now) ||
           (event.endTime.isEmpty && event.startTime > twelveHoursAgo))
-        .sortBy(_.startTime.desc) joinLeft
+        .sortBy(event => (event.startTime.desc, event.id)) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -357,7 +370,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
         optionalEventAddresses) <- events
         .filter(_.startTime < now)
-        .sortBy(_.startTime.desc) joinLeft
+        .sortBy(event => (event.startTime.desc, event.id)) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -381,7 +394,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         .filter(event =>
           (event.name.toLowerCase like s"%$lowercasePattern%") &&
           ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
-        .sortBy(_.startTime.desc) joinLeft
+        .sortBy(event => (event.startTime.desc, event.id)) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -402,7 +415,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses) <- events
         .filter(event => (event.name.toLowerCase like s"%$lowercasePattern%") &&
           ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
-        .sortBy(_.geographicPoint <-> geographicPoint) joinLeft
+        .sortBy(event => (event.geographicPoint <-> geographicPoint, event.id)) joinLeft
           (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
           (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
           (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -533,7 +546,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       isPublic = true,
       isActive = true,
       name = refactorEventOrPlaceName(name),
-      geographicPoint = None,
       description = formatDescription(maybeDescription),
       startTime = stringToDateTime(startTime),
       endTime = optionStringToOptionDateTime(endTime),
@@ -541,7 +553,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       tariffRange = tariffMethods.findPrices(maybeDescription))
 
     val addresses = Try(Address(
-      id = None, geographicPoint = None,
+      id = None,
       street = street.flatten,
       zip = zip.flatten,
       city = city.flatten)) match {
@@ -563,11 +575,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       case Success(eventWithRelationsAndMaybePlaceAndOwnerIds) =>
         val eventWithRelations = eventWithRelationsAndMaybePlaceAndOwnerIds._1
 
-        val eventuallyMaybeOrganizer = organizerMethods.getOrganizerInfo(eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybeOwnerId)
+        val eventuallyMaybeOrganizer =
+          organizerMethods.getOrganizerInfo(eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybeOwnerId)
 
-        val eventuallyMaybePlace: Future[Option[PlaceWithAddress]] = eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybePlaceId match {
-          case Some(placeId) => placeMethods.getPlaceByFacebookId(placeId)
-          case None => Future(None)
+        val eventuallyMaybePlace: Future[Option[PlaceWithAddress]] =
+          eventWithRelationsAndMaybePlaceAndOwnerIds._2.maybePlaceId match {
+            case Some(placeId) => placeMethods.getPlaceByFacebookId(placeId)
+            case None => Future(None)
         }
 
         val eventuallyNormalizedWebsites: Future[Set[String]] = eventWithRelations.event.description match {
@@ -576,7 +590,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         }
 
         for {
-          organizer <- eventuallyMaybeOrganizer
+          maybeOrganizerWithAddress <- eventuallyMaybeOrganizer
           normalizedWebsites <- eventuallyNormalizedWebsites
           artistsFromDescription <- artistMethods.getFacebookArtistsByWebsites(normalizedWebsites)
           artistsFromTitle <- artistMethods.getEventuallyArtistsInEventTitle(
@@ -584,21 +598,19 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           maybePlace <- eventuallyMaybePlace
           nonEmptyArtists = (artistsFromDescription.toVector ++ artistsFromTitle).distinct
           artistGenres = nonEmptyArtists.flatMap(_.genres map (_.genre))
-          overGenres <-genreMethods.findOverGenres(artistGenres)
+          overGenres <- genreMethods.findOverGenres(artistGenres)
           genres = (artistGenres ++ overGenres).distinct
         } yield {
 
           val ticketSellers = tariffMethods.findTicketSellers(normalizedWebsites)
 
-          val eventAddresses: Vector[Address] = returnEventAddresses(eventWithRelations, maybePlace)
+          val eventAddresses: Seq[Address] = eventWithRelations.addresses ++ Seq(maybePlace.flatMap(_.maybeAddress)).flatten
 
-          val maybeEventGeographicPoint = returnEventGeographicPoint(eventAddresses)
-
-          Option(eventWithRelations.copy(
-            event = eventWithRelations.event.copy(ticketSellers = ticketSellers, geographicPoint = maybeEventGeographicPoint),
+          Option(EventWithRelations(
+            event = eventWithRelations.event.copy(ticketSellers = ticketSellers),
             addresses = eventAddresses,
             artists = nonEmptyArtists,
-            organizers = Vector(organizer).flatten,
+            organizers = Vector(maybeOrganizerWithAddress).flatten,
             places = Vector(maybePlace).flatten,
             genres = genres))
         }
@@ -609,31 +621,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         Future(None)
     }
   }
-
-  def returnEventGeographicPoint(addresses: Vector[Address]): Option[Geometry] = addresses.headOption match {
-    case Some(address) =>
-      address.geographicPoint
-    case _ =>
-      None
-  }
-
-  def returnEventAddresses(eventWithRelations: EventWithRelations, maybePlace: Option[PlaceWithAddress]): Vector[Address] =
-    eventWithRelations.addresses match {
-      case addresses if addresses.nonEmpty =>
-        eventWithRelations.addresses.toVector
-      case _ =>
-        maybePlace match {
-          case Some(place) =>
-            place.address match {
-              case Some(address) =>
-                Vector(address)
-              case _ =>
-                Vector.empty
-            }
-          case _ =>
-            Vector.empty
-        }
-    }
 
   def getEventsFacebookIdByPlaceOrOrganizerFacebookId(facebookId: String): Future[Seq[String]] = WS
     .url("https://graph.facebook.com/" + facebookApiVersion + "/" + facebookId + "/events/")

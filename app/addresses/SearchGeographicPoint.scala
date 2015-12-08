@@ -37,12 +37,12 @@ class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseCo
     .flatMap {
       readGoogleGeographicPoint(_) match {
         case Success(Some(geographicPoint)) =>
-          Future { address.copy(geographicPoint = Option(geographicPoint)) }
+          Future(address.copy(geographicPoint = geographicPoint))
         case Failure(e: Exception) =>
           Logger.error("Address.getGeographicPoint: ", e)
-          Future { address }
+          Future(address)
         case _ =>
-          Future { address }
+          Future(address)
       }
     } recoverWith {
     case e: OverQueryLimit if retry > 0 =>
@@ -50,6 +50,6 @@ class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseCo
       getGeographicPoint(address, retry - 1)
     case e: Exception =>
       Logger.error("Address.getGeographicPoint: ", e)
-      Future { address }
+      Future(address)
   }
 }

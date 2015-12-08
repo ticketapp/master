@@ -5,7 +5,7 @@ import java.util.UUID
 
 import addresses.Address
 import artistsDomain.Artist
-import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Geometry}
 import eventsDomain.Event
 import genresDomain.Genre
 import issues.{Issue, IssueComment}
@@ -113,7 +113,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def isPublic = column[Boolean]("ispublic")
     def isActive = column[Boolean]("isactive")
     def name = column[String]("name")
-    def geographicPoint = column[Option[Geometry]]("geographicpoint")
+    def geographicPoint = column[Geometry]("geographicpoint")
     def description = column[Option[String]]("description")
     def startTime = column[DateTime]("starttime")
     def endTime = column[Option[DateTime]]("endtime")
@@ -190,7 +190,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def id = column[Long]("placeid", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
     def facebookId = column[Option[String]]("facebookid")
-    def geographicPoint = column[Option[Geometry]]("geographicpoint")
+    def geographicPoint = column[Geometry]("geographicpoint")
     def description = column[Option[String]]("description")
     def websites = column[Option[String]]("websites")
     def capacity = column[Option[Int]]("capacity")
@@ -224,11 +224,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def websites = column[Option[String]]("websites")
     def verified = column[Boolean]("verified")
     def imagePath = column[Option[String]]("imagepath")
-    def geographicPoint = column[Option[Geometry]]("geographicpoint")
+    def geographicPoint = column[Geometry]("geographicpoint")
     def linkedPlaceId = column[Option[Long]]("placeid")
 
-    def * = (id.?, facebookId, name, description, addressId, phone, publicTransit, websites, verified, imagePath, geographicPoint, linkedPlaceId) <>
-      ((Organizer.apply _).tupled, Organizer.unapply)
+    def * = (id.?, facebookId, name, description, addressId, phone, publicTransit, websites, verified, imagePath,
+      geographicPoint, linkedPlaceId) <> ((Organizer.apply _).tupled, Organizer.unapply)
 
     def address = foreignKey("addressFk", addressId, addresses)(_.id.?, onDelete = ForeignKeyAction.Cascade)
   }
@@ -241,7 +241,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
 
   class Tracks(tag: Tag) extends Table[Track](tag, "tracks") {
-    /*def id = column[Long]("trackid", O.PrimaryKey, O.AutoInc)*/
     def uuid = column[UUID]("trackid", O.PrimaryKey)
     def url = column[String]("url")
     def title = column[String]("title")
@@ -288,7 +287,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
 
   class Addresses(tag: Tag) extends Table[Address](tag, "addresses") {
     def id = column[Long]("addressid", O.PrimaryKey, O.AutoInc)
-    def geographicPoint = column[Option[Geometry]]("geographicpoint")
+    def geographicPoint = column[Geometry]("geographicpoint")
     def city = column[Option[String]]("city")
     def zip = column[Option[String]]("zip")
     def street = column[Option[String]]("street")

@@ -17,8 +17,8 @@ class TestGeographicPointMethods extends GlobalApplicationForModels {
 
   "A geographicPoint" must {
     "get a geographicPoint" in {
-      val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
-      val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("44.735269,4.599038999999999"))
+      val address = Address(city = Option("privas"), zip = Option("07000"), street = Option("avignas"))
+      val geoPoint = geographicPointMethods.optionStringToPoint(Option("44.735269,4.599038999999999"))
       whenReady(geographicPointMethods.getGeographicPoint(address, 3), timeout(Span(2, Seconds))) { addressWithGeoPoint =>
         addressWithGeoPoint.geographicPoint mustBe geoPoint
       }
@@ -26,7 +26,7 @@ class TestGeographicPointMethods extends GlobalApplicationForModels {
 
     "get a geographicPoint for a city" in {
       whenReady(geographicPointMethods.findGeographicPointOfCity("lyon"), timeout(Span(5, Seconds))) {
-        _ mustBe geographicPointMethods.optionStringToOptionPoint(Option("45.783808,4.860598"))
+        _ mustBe Some(geographicPointMethods.optionStringToPoint(Option("45.783808,4.860598")))
       }
     }
   }

@@ -2,7 +2,7 @@ package addresses
 
 import javax.inject.Inject
 
-import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Geometry}
 import database.{MyPostgresDriver, EventAddressRelation, MyDBTableDefinitions}
 import eventsDomain.Event
 import play.api.Logger
@@ -15,20 +15,22 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 
 
-case class Address(id: Option[Long], 
-                   geographicPoint: Option[Geometry] = None,
+case class Address(id: Option[Long] = None,
+                   geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
                    city: Option[String] = None,
                    zip: Option[String] = None,
                    street: Option[String] = None) {
-  require(!(geographicPoint.isEmpty && city.isEmpty && zip.isEmpty && street.isEmpty),
+  require(
+    !(geographicPoint == new GeometryFactory().createPoint(new Coordinate(-84, 30)) && city.isEmpty &&
+      zip.isEmpty && street.isEmpty),
     "address must contain at least one field")
 }
 
 class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                                val searchGeographicPoint: SearchGeographicPoint)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] 
-    with MyDBTableDefinitions 
-    with addressFormsTrait
+    extends HasDatabaseConfigProvider[MyPostgresDriver]
+    with MyDBTableDefinitions
+    with AddressFormsTrait
     with Utilities {
 
   def findAll: Future[Seq[Address]] = db.run(addresses.result)
@@ -55,8 +57,8 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def save(address: Address): Future[Address] = {
-    val lowerCaseAddress = address.copy(id = address.id, geographicPoint = address.geographicPoint,
-      street = optionStringToLowerCaseOptionString(address.street), zip = address.zip,
+    val lowerCaseAddress = address.copy(
+      street = optionStringToLowerCaseOptionString(address.street),
       city = optionStringToLowerCaseOptionString(address.city))
 
     db.run(
@@ -65,18 +67,20 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
           a.zip === lowerCaseAddress.zip && a.city === lowerCaseAddress.city).result.headOption
         result <- addressFound.map(DBIO.successful).getOrElse(addresses returning addresses.map(_.id) += lowerCaseAddress)
       } yield result match {
-        case addressWithoutGeographicPoint: Address
-          if addressWithoutGeographicPoint.geographicPoint.isEmpty && lowerCaseAddress.geographicPoint.nonEmpty =>
-            val updatedAddress = lowerCaseAddress.copy(id = addressWithoutGeographicPoint.id)
-            update(updatedAddress) map {
-              case int if int != 1 =>
-                Logger.error("Address.save: not exactly one row was updated")
-                addressWithoutGeographicPoint
-              case _ =>
-                updatedAddress
-            }
+        case addressWithAntarcticGeographicPoint: Address if addressWithAntarcticGeographicPoint.geographicPoint == antarcticPoint &&
+          lowerCaseAddress.geographicPoint != antarcticPoint =>
+          val updatedAddress = lowerCaseAddress.copy(id = addressWithAntarcticGeographicPoint.id)
+          update(updatedAddress) map {
+            case int if int != 1 =>
+              Logger.error("Address.save: not exactly one row was updated")
+              addressWithAntarcticGeographicPoint
+            case _ =>
+              updatedAddress
+          }
+
         case a: Address =>
           Future(a)
+
         case id: Long =>
           Future(lowerCaseAddress.copy(id = Option(id)))
         }).transactionally).flatMap(eventuallyAddress => eventuallyAddress)
@@ -85,8 +89,8 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   def update(address: Address): Future[Int] = db.run(addresses.filter(_.id === address.id).update(address))
 
   def saveAddressWithGeoPoint(address: Address): Future[Address] = address match {
-    case addressWithoutGeographicPoint if addressWithoutGeographicPoint.geographicPoint.isEmpty =>
-      searchGeographicPoint.getGeographicPoint(addressWithoutGeographicPoint, retry = 3) flatMap { save }
+    case addressWitAntarcticGeographicPoint if addressWitAntarcticGeographicPoint.geographicPoint == antarcticPoint =>
+      searchGeographicPoint.getGeographicPoint(addressWitAntarcticGeographicPoint, retry = 3) flatMap { save }
     case addressWithGeoPoint =>
       save(addressWithGeoPoint)
   }

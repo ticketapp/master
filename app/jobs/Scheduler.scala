@@ -9,6 +9,7 @@ import organizersDomain.{OrganizerMethods, OrganizerWithAddress}
 import placesDomain.{PlaceMethods, PlaceWithAddress}
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
+import services.Utilities
 import tracksDomain.TrackMethods
 
 import scala.concurrent.Future
@@ -21,7 +22,7 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
                           val trackMethods: TrackMethods,
                           val placeMethods: PlaceMethods,
                           val addressMethods: AddressMethods,
-                          val searchGeographicPoint: SearchGeographicPoint) {
+                          val searchGeographicPoint: SearchGeographicPoint) extends Utilities {
 
 
   def findEventsForPlacesOneByOne(offset: Long = 0): Unit = placeMethods.findSinceOffset(offset = 0, numberToReturn = 1) map {
@@ -103,8 +104,8 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
 
   def updateGeographicPointOfPlaces(places: Seq[PlaceWithAddress]): Seq[Any] = places map { place =>
     place.place.geographicPoint match {
-      case None =>
-        place.address match {
+      case geoPoint if geoPoint == antarcticPoint =>
+        place.maybeAddress match {
           case Some(address) =>
             getGeoPointOfPlaceIfAbsent(place, address)
           case _ =>
@@ -127,7 +128,7 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
 
   def updateGeographicPointOfOrganizers(organizers: Seq[OrganizerWithAddress]): Seq[Any] = organizers map { organizer =>
     organizer.organizer.geographicPoint match {
-      case None =>
+      case geoPoint if geoPoint == antarcticPoint =>
         organizer.address match {
           case Some(address) =>
             getGeoPointOfOrganizerIfAbsent(organizer, address)
@@ -151,13 +152,13 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
 
   def updateGeographicPointOfEvents(events: Seq[EventWithRelations]): Seq[Any] = events map { event =>
     event.event.geographicPoint match {
-      case None =>
+      case geoPoint if geoPoint == antarcticPoint =>
         event.addresses.headOption match {
           case Some(address) =>
             getGeoPointOfEventIfAbsent(event, address)
           case _ =>
             if (event.places.nonEmpty) {
-              event.places.head.address match {
+              event.places.head.maybeAddress match {
                 case Some(address) =>
                   getGeoPointOfEventIfAbsent(event, address)
                 case _ =>
@@ -169,15 +170,15 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
   }
 
   def getGeoPointOfPlaceIfAbsent(place: PlaceWithAddress, address: Address): Future[Any] = address.geographicPoint match {
-    case Some(geoPoint) =>
-      val updatedPlace = place.place.copy(geographicPoint = Option(geoPoint))
+    case geoPoint if geoPoint != antarcticPoint =>
+      val updatedPlace = place.place.copy(geographicPoint = geoPoint)
       placeMethods.update(updatedPlace)
     case _ =>
       searchGeographicPoint.getGeographicPoint(address, retry = 3) map { addressWithMaybeGeographicPoint =>
         addressWithMaybeGeographicPoint.geographicPoint match {
-          case Some(geoPoint) =>
+          case geoPoint if geoPoint != antarcticPoint =>
             addressMethods.update(addressWithMaybeGeographicPoint)
-            placeMethods.update(place.place.copy(geographicPoint = Option(geoPoint)));
+            placeMethods.update(place.place.copy(geographicPoint = geoPoint))
           case _ =>
             None
         }
@@ -187,15 +188,15 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
   }
   
   def getGeoPointOfOrganizerIfAbsent(organizer: OrganizerWithAddress, address: Address): Future[Any] = address.geographicPoint match {
-    case Some(geoPoint) =>
-      val updatedOrganizer = organizer.organizer.copy(geographicPoint = Option(geoPoint))
+    case geoPoint if geoPoint != antarcticPoint =>
+      val updatedOrganizer = organizer.organizer.copy(geographicPoint = geoPoint)
       organizerMethods.update(updatedOrganizer)
     case _ =>
       searchGeographicPoint.getGeographicPoint(address, retry = 3) map { addressWithMaybeGeographicPoint =>
         addressWithMaybeGeographicPoint.geographicPoint match {
-          case Some(geoPoint) =>
+          case geoPoint if geoPoint != antarcticPoint =>
             addressMethods.update(addressWithMaybeGeographicPoint)
-            organizerMethods.update(organizer.organizer.copy(geographicPoint = Option(geoPoint)));
+            organizerMethods.update(organizer.organizer.copy(geographicPoint = geoPoint))
           case _ =>
             None
         }
@@ -205,15 +206,15 @@ class Scheduler @Inject()(val eventMethods: EventMethods,
   }
   
   def getGeoPointOfEventIfAbsent(event: EventWithRelations, address: Address): Future[Any] = address.geographicPoint match {
-    case Some(geoPoint) =>
-      val updatedEvent = event.event.copy(geographicPoint = Option(geoPoint))
+    case geoPoint if geoPoint != antarcticPoint =>
+      val updatedEvent = event.event.copy(geographicPoint = geoPoint)
       eventMethods.update(updatedEvent)
     case _ =>
       searchGeographicPoint.getGeographicPoint(address, retry = 3) map { addressWithMaybeGeographicPoint =>
         addressWithMaybeGeographicPoint.geographicPoint match {
-          case Some(geoPoint) =>
+          case geoPoint if geoPoint != antarcticPoint =>
             addressMethods.update(addressWithMaybeGeographicPoint)
-            eventMethods.update(event.event.copy(geographicPoint = Option(geoPoint)));
+            eventMethods.update(event.event.copy(geographicPoint = geoPoint))
           case _ =>
             None
         }

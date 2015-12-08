@@ -61,7 +61,7 @@ class TestUserModel extends GlobalApplicationForModels {
         avatarURL = Option("avatarUrl11"))
       val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get)
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) { savedOrganizer =>
         val organizerId = savedOrganizer.organizer.id.get
         whenReady(userDAOImpl.save(user), timeout(Span(5, Seconds))) { savedUser =>

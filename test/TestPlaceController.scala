@@ -38,30 +38,29 @@ class TestPlaceController extends GlobalApplicationForControllers {
       val Some(places) = route(
         FakeRequest(placesDomain.routes.PlaceController.places(geographicPoint = "5,4", numberToReturn = 10000, offset = 0)))
 
-      contentAsJson(places).toString() must contain(""""name":"PlaceTest","facebookId":"111"""")
+      contentAsString(places) must contain(""""name":"PlaceTest","facebookId":"111"""")
     }
 
-    "find a list of place by containing" in {
+    "find a list of places containing" in {
       val Some(places) = route(FakeRequest(GET, "/places/containing/test"))
-      contentAsJson(places).toString() must contain(""""name":"PlaceTest","facebookId":"111"""")
+      contentAsString(places) must contain(""""name":"Test","facebookId":"776137029786070"""")
     }
 
     "find one place by id" in {
-      val placeId = await(placeMethods.findAllContaining("est")).headOption.get.place.id
-      val Some(place) = route(FakeRequest(GET, "/places/" + placeId.get))
-      contentAsJson(place).toString() must contain(""""name":"PlaceTest","facebookId":"111"""")
+      val Some(place) = route(FakeRequest(GET, "/places/" + 900))
+      contentAsString(place) must contain(""""name":"testId900","facebookId":"facebookId900"""")
     }
 
     "follow and unfollow a place by id" in {
       val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByPlaceId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response) mustEqual CREATED
-
       val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowPlaceByPlaceId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response1) mustEqual OK
+      status(response) mustEqual CREATED andThen {
+        status(response1) mustEqual OK
+      }
     }
 
     "return an error if a user try to follow a place twice" in {
@@ -72,7 +71,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "follow by facebookId" in {
-      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByFacebookId("facebookIdTestFollowController2"))
+      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByFacebookId("facebookId600"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED
@@ -97,7 +96,6 @@ class TestPlaceController extends GlobalApplicationForControllers {
       contentAsJson(boolean2) mustEqual Json.parse("false")
     }
 
-
     "get places near geoPoint" in {
       val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.places(
         offset = 0,
@@ -105,16 +103,37 @@ class TestPlaceController extends GlobalApplicationForControllers {
         geographicPoint = "5,5"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      val placesJSValue = contentAsJson(response ) \\ "place"
+      val placesJSValue = contentAsJson(response) \\ "place"
       val places = placesJSValue.map(place => place.as[Place])
 
       status(response) mustEqual OK
       val geoPoints = places.map(_.geographicPoint)
 
       val centerPoint = geographicPointMethods.latAndLngToGeographicPoint(5.0, 5.0).get
-      val sortedGeoPoint = geoPoints.flatten sortBy(point => point.distance(centerPoint))
+      val sortedGeoPoint = geoPoints sortBy(point => point.distance(centerPoint))
 
-      geoPoints.flatten mustEqual sortedGeoPoint
+      geoPoints mustEqual sortedGeoPoint
+    }
+
+    "return places 12 by 12 (and never the same with the same geographicPoint)" in {
+      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.places(
+        offset = 0,
+        numberToReturn = 12,
+        geographicPoint = "5,5"))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      val Some(response2) = route(FakeRequest(placesDomain.routes.PlaceController.places(
+        offset = 12,
+        numberToReturn = 12,
+        geographicPoint = "5,5"))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      val placesJSValue = contentAsJson(response) \\ "place"
+      val places = placesJSValue.map(place => place.as[Place])
+
+      val placesJSValue2 = contentAsJson(response2) \\ "place"
+      val places2 = placesJSValue2.map(place => place.as[Place])
+
+      places.diff(places2) ++ places2.diff(places) should have size 24
     }
   }
 }

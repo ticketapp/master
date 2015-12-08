@@ -1,4 +1,5 @@
 import addresses.Address
+import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory}
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import testsHelper.GlobalApplicationForModels
@@ -10,15 +11,20 @@ class TestAddressModel extends GlobalApplicationForModels {
 
     "not be created if empty" in {
 
-      Address(None, None, Some("jkl"), None, None)
-      Address(None, None, None, Some("jkl"), None)
-      Address(None, None, None, None, Some("jkl"))
+      Address(id = None, city = Some("jkl"), zip = None, street = None)
+      Address(id = None, city = None, zip = Some("jkl"), street = None)
+      Address(id = None, city = None, zip = None, street = Some("jkl"))
 
-      an[java.lang.IllegalArgumentException] should be thrownBy Option(Address(None, None, None, None, None))
+      an[java.lang.IllegalArgumentException] should be thrownBy Address(
+        id = None,
+        geographicPoint = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
+        city = None,
+        zip = None,
+        street = None)
     }
 
     "be saved (in lowercase) in database and return the new id then be deleted" in {
-      val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("0.0,0.0"))
+      val geoPoint = geographicPointMethods.optionStringToPoint(Option("0.0,0.0"))
       val address = Address(None, geoPoint, Option("privas"), Option("07000"), Option("Avignas"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         whenReady(addressMethods.find(savedAddress.id.get), timeout(Span(5, Seconds))) { addressFound =>
@@ -31,17 +37,27 @@ class TestAddressModel extends GlobalApplicationForModels {
     }
 
     "not be saved twice with same city, zip, street and return database addressId on unique violation" in {
-      val address = Address(None, None, Option("privas"), Option("07000"), Option("avignas"))
+      val address = Address(id = None, city = Option("privas"), zip = Option("07000"), street = Option("avignas"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAgainAddress =>
-          savedAgainAddress mustBe Address(Option(savedAddress.id.get),None,Some("privas"),Option("07000"),Some("avignas"))
+
+          val expectedAddress = Address(
+            id = Option(savedAddress.id.get),
+            city = Some("privas"),
+            zip = Option("07000"),
+            street = Some("avignas"))
+
+          savedAgainAddress mustBe expectedAddress
         }
       }
     }
 
     "update address" in {
-      val address = Address(None, None, Option("coux"), Option("07000"), Option("avignas"))
-      val geoPoint = geographicPointMethods.optionStringToOptionPoint(Option("1.0,5.0"))
+      val address = Address(id = None,
+        city = Option("coux"),
+        zip = Option("07000"),
+        street = Option("avignas"))
+      val geoPoint = geographicPointMethods.optionStringToPoint(Option("1.0,5.0"))
       whenReady(addressMethods.save(address), timeout(Span(5, Seconds))) { savedAddress =>
         val addressWithGeoPoint = address.copy(id = savedAddress.id, geographicPoint = geoPoint)
         whenReady(addressMethods.save(addressWithGeoPoint), timeout(Span(5, Seconds))) { savedAddressWithGeoPoint =>

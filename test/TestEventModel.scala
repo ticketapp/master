@@ -20,7 +20,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "be saved and deleted in database" in {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
+        geographicPointMethods.stringToTryPoint("5.4,5.6").get,
         Option("description"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { foundEvent =>
@@ -42,12 +42,20 @@ class TestEventModel extends GlobalApplicationForModels {
       val artists = Vector(ArtistWithWeightedGenres(
         artist = Artist(name = "nameEventRelations", facebookUrl = "saveEventRelations")))
       val organizers = Vector(OrganizerWithAddress(Organizer(None, None, "nameEventRelations")))
-      val addresses = Vector(Address(None, None, Option("cityEventRelations")))
+      val addresses = Vector(Address(id = None, city = Option("cityEventRelations")))
       val places = Vector(PlaceWithAddress(Place(name = "nameEventRelations")))
       val genres = Vector(Genre(name = "nameeventrelations"))
       val event = EventWithRelations(
-        event = Event(None, None, isPublic = true, isActive = true, "nameEventRelations", None, None,
-        new DateTime(), None, 16, None, None, None),
+        event = Event(
+          isPublic = true,
+          isActive = true,
+          name = "nameEventRelations",
+          startTime = new DateTime(),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
         artists = artists,
         organizers = organizers,
         addresses = addresses,
@@ -83,7 +91,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "find all events by genre" in {
-      whenReady(eventMethods.findAllByGenre("genreTest0", geographicPointMethods.stringToGeographicPoint("5.4,5.6").get,
+      whenReady(eventMethods.findAllByGenre("genreTest0", geographicPointMethods.stringToTryPoint("5.4,5.6").get,
         offset = 0, numberToReturn = 100000), timeout(Span(5, Seconds))) { eventsByGenre =>
 
         eventsByGenre map (_.event.name) must contain("name0")
@@ -92,9 +100,11 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "find all events by place" in {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
+        geographicPointMethods.stringToTryPoint("5.4,5.6").get,
         Option("description3"), new DateTime(), None, 16, None, None, None))
-      val place = Place(None, "name", Some("12345"), None, None, None, None, None, None, None)
+      val place = Place(
+        name = "name",
+        facebookId = Some("12345"))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(placeMethods.save(place), timeout(Span(5, Seconds))) { savedPlace =>
           whenReady(placeMethods.saveEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.id.get)),
@@ -126,9 +136,18 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "return passed events for a place" in {
-      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        None, None, new DateTime(0), None, 16, None, None, None))
-      val place = Place(None, "name", Some("12345"), None, None, None, None, None, None, None)
+      val event = EventWithRelations(
+        event = Event(
+          isPublic = true,
+          isActive = true,
+          name = "name3",
+          startTime = new DateTime(0),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None))
+      val place = Place(name = "name", facebookId = Some("12345"))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(placeMethods.saveWithAddress(PlaceWithAddress(place, None)), timeout(Span(5, Seconds))) { savedPlace =>
           whenReady(placeMethods.saveEventRelation(EventPlaceRelation(savedEvent.id.get, savedPlace.place.id.get)),
@@ -152,7 +171,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "return events linked to an artist" in {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
+        geographicPointMethods.stringToTryPoint("5.4,5.6").get,
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId123"), "artistTest123", Option("imagePath"), Option("description"),
         "facebookUrl123"), Vector.empty)
@@ -175,7 +194,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "return passed events for an artist" in {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
+        geographicPointMethods.stringToTryPoint("5.4,5.6").get,
         Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None))
       val artist = ArtistWithWeightedGenres(Artist(None, Option("facebookId1234"), "artistTest1234", Option("imagePath"),
         Option("description"), "facebookUrl1234"), Vector.empty)
@@ -203,7 +222,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "return events linked to an organizer" in {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
+        geographicPointMethods.stringToTryPoint("5.4,5.6").get,
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       val organizer = Organizer(None, Option("facebookId10"), "organizerTest2")
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
@@ -225,7 +244,7 @@ class TestEventModel extends GlobalApplicationForModels {
 
     "return passed events for an organizer" in {
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get),
+        geographicPointMethods.stringToTryPoint("5.4,5.6").get,
         Option("description3"), new DateTime(0), Option(new DateTime(0)), 16, None, None, None))
       val organizer = Organizer(None, Option("facebookId101"), "organizerTest21")
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
@@ -258,33 +277,42 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "find a complete event by facebookId" in {
+      val expectedGeoPoint = geographicPointMethods.optionStringToPoint(Option("45.7408394,4.8499501"))
       whenReady(eventMethods.getEventOnFacebookByFacebookId("985240908201444"), timeout(Span(10, Seconds))) { event =>
         event.get.event.name mustBe "ENCORE w/ OCTAVE ONE live — MOJO — MOONRISE HILL CREW"
-        event.get.event.geographicPoint mustBe event.get.addresses.head.geographicPoint
-        event.get.addresses mustBe Vector(Address(Some(3), geographicPointMethods.optionStringToOptionPoint(Option("45.7408394,4.8499501")),
-          Some("lyon"),Some("69007"),Some("rue paul vivier / rue de cronstadt")))
+        event.get.geographicPoint mustBe expectedGeoPoint
+        event.get.addresses mustBe Vector(Address(
+          id = Some(3),
+          geographicPoint = expectedGeoPoint,
+          city = Some("lyon"),
+          zip = Some("69007"),
+          street = Some("rue paul vivier / rue de cronstadt")))
       }
     }
 
     "find nearest events" in {
+      val here = geographicPointMethods.stringToTryPoint("45, 4").get
       val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        Option(geographicPointMethods.stringToGeographicPoint("46, 4").get),
+        geographicPointMethods.stringToTryPoint("46, 4").get,
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      val event1 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name4",
-        Option(geographicPointMethods.stringToGeographicPoint("45, 4").get),
+      val event1 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name4", here,
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
       val event2 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name5",
-        Option(geographicPointMethods.stringToGeographicPoint("120, 120").get),
+        geographicPointMethods.stringToTryPoint("66, 4").get,
         Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      val event3 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name5", None, None,
-        new DateTime(), None, 16, None, None, None))
+      val event3 = EventWithRelations(
+        event = Event(
+          isPublic = true,
+          isActive = true,
+          name = "name5",
+          startTime = new DateTime(),
+          endTime = None,
+          ageRestriction = 16))
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(eventMethods.save(event1), timeout(Span(5, Seconds))) { savedEvent1 =>
           whenReady(eventMethods.save(event2), timeout(Span(5, Seconds))) { savedEvent2 =>
             whenReady(eventMethods.save(event3), timeout(Span(5, Seconds))) { savedEvent3 =>
-              whenReady(
-                eventMethods.findNear(
-                  geographicPointMethods.stringToGeographicPoint("45, 4").get, numberToReturn = 10000, offset = 0),
+              whenReady(eventMethods.findNear(here, numberToReturn = 10000, offset = 0),
                 timeout(Span(5, Seconds))) { eventsSeq =>
 
                 eventsSeq should contain inOrder(
@@ -304,11 +332,11 @@ class TestEventModel extends GlobalApplicationForModels {
         eventWithRelations.get.genres should contain allOf(Genre(None, "hip", 'a'), Genre(None, "hop", 'a'))
       }
     }
-    
+
     "find events in period near" in {
       whenReady(eventMethods.findInPeriodNear(
         hourInterval = 4380000,
-        geographicPointMethods.stringToGeographicPoint("45.7579555,4.8351209").get,
+        geographicPointMethods.stringToTryPoint("45.7579555,4.8351209").get,
         numberToReturn = 10,
         offset = 0), timeout(Span(5, Seconds))) { events =>
 
@@ -322,7 +350,7 @@ class TestEventModel extends GlobalApplicationForModels {
     "find passed events in period near" in {
       whenReady(eventMethods.findPassedInHourIntervalNear(
         hourInterval = 100000,
-        geographicPointMethods.stringToGeographicPoint("45, 4").get,
+        geographicPointMethods.stringToTryPoint("45, 4").get,
         numberToReturn = 1,
         offset = 0), timeout(Span(5, Seconds))) { events =>
 
@@ -333,7 +361,7 @@ class TestEventModel extends GlobalApplicationForModels {
     }
 
     "find all containing pattern near a geoPoint" in {
-      whenReady(eventMethods.findAllContaining(pattern = "name", geographicPointMethods.stringToGeographicPoint("45, 4").get),
+      whenReady(eventMethods.findAllContaining(pattern = "name", geographicPointMethods.stringToTryPoint("45, 4").get),
         timeout(Span(5, Seconds))) { events =>
 
         events should not be empty

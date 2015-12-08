@@ -49,9 +49,9 @@ class TestOrganizerController extends GlobalApplicationForControllers {
       val Some(response1) = route(FakeRequest(organizersDomain.routes.OrganizerController.unfollowOrganizerByOrganizerId(300))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response) mustEqual CREATED
-
-      status(response1) mustEqual OK
+      status(response) mustEqual CREATED andThen {
+        status(response1) mustEqual OK
+      }
     }
 
     "return an error if an user try to follow an organizer twice" in {
@@ -105,9 +105,9 @@ class TestOrganizerController extends GlobalApplicationForControllers {
 
       val centerPoint = geographicPointMethods.latAndLngToGeographicPoint(latitude = 5.0, longitude = 5.0).get
 
-      val sortedGeoPoint = geoPoints.flatten sortBy(point => point.distance(centerPoint))
+      val sortedGeoPoint = geoPoints sortBy(point => point.distance(centerPoint))
 
-      geoPoints.flatten mustEqual sortedGeoPoint
+      geoPoints mustEqual sortedGeoPoint
     }
   }
 }

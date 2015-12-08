@@ -20,6 +20,7 @@ import services.Utilities
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 class OrganizerController @Inject()(ws: WSClient,
@@ -160,18 +161,19 @@ class OrganizerController @Inject()(ws: WSClient,
   }
 
   def findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
-    geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
+    geographicPointMethods.stringToTryPoint(geographicPoint) match {
       case Failure(exception) =>
         Logger.error("OrganizerController.findOrganizersNear: ", exception)
-        Future {
-          BadRequest(Json.toJson("Invalid geographicPoint"))
-        }
+        Future(BadRequest(Json.toJson("Invalid geographicPoint")))
+
       case Success(point) =>
-        organizerMethods.findNear(point, numberToReturn: Int, offset: Int) map { organizers =>
-          Ok(Json.toJson(organizers))
-        } recover { case t: Throwable =>
-          Logger.error("OrganizerController.findOrganizersNear: ", t)
-          InternalServerError("OrganizerController.findOrganizersNear: " + t.getMessage)
+        organizerMethods.findNear(geographicPoint = point, numberToReturn = numberToReturn: Int, offset = offset: Int) map {
+          organizers =>
+            Ok(Json.toJson(organizers))
+        } recover {
+          case NonFatal(e) =>
+            Logger.error("OrganizerController.findOrganizersNear: ", e)
+            InternalServerError("OrganizerController.findOrganizersNear: " + e.getMessage)
         }
     }
   }
