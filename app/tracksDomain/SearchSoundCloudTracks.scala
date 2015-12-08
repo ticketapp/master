@@ -87,7 +87,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
 
   def getSoundcloudWebsites(soundcloudIds: Seq[Long]): Future[Seq[WebsitesForSoundcloudId]] = Future.sequence(
     soundcloudIds.map { id =>
-      WS.url("http://api.soundcloud.com/users/" + id + "/web-profiles")
+      WS.url("https://api.soundcloud.com/users/" + id + "/web-profiles")
         .withQueryString("client_id" -> soundCloudClientId)
         .get()
         .map { soundCloudResponse =>
@@ -97,7 +97,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
   )
 
   def getSoundCloudIdsForName(namePattern: String): Future[Seq[Long]] = WS.
-    url("http://api.soundcloud.com/users")
+    url("https://api.soundcloud.com/users")
     .withQueryString(
       "q" -> namePattern,
       "client_id" -> soundCloudClientId)
@@ -118,7 +118,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
   }
 
   def getSoundCloudTracksWithSoundCloudLink(soundCloudLink: String, artist: Artist): Future[Seq[Track]] = WS
-    .url("http://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
+    .url("https://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
     .withQueryString("client_id" -> soundCloudClientId)
     .get()
     .map(response => readSoundCloudTracks(response.json, artist))
