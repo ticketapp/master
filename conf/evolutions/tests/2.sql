@@ -63,6 +63,8 @@ INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
   VALUES(300, 'name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
 -------------------------------------------------------- places --------------------------------------------------------
+INSERT INTO places(name, geographicPoint, facebookId)
+  VALUES ('Le transbordeur', ST_GeomFromText('POINT(45.783808 4.860598)', 4326), '117030545096697');
 INSERT INTO places(placeid, name, facebookid, geographicpoint)
   VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO places(placeid, name, facebookid, geographicpoint)
@@ -74,7 +76,7 @@ INSERT INTO places(placeid, name, facebookid) VALUES(500, 'testId5', 'facebookId
 -------------------------------------------------------- addresses -----------------------------------------------------
 INSERT INTO addresses(city) VALUES('lyon');
 
--------------------------------------------------------- issues -----------------------------------------------------
+-------------------------------------------------------- issues --------------------------------------------------------
 INSERT INTO issues(issueid, title, content, userid, fixed)
   VALUES(100, 'title', 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', false);
 
