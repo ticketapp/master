@@ -111,6 +111,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
 
   def readSoundCloudIds(soundCloudWSResponse: WSResponse): Seq[Long] = {
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
+    println(soundCloudWSResponse.json)
     soundCloudWSResponse.json
       .asOpt[Seq[Long]](readSoundCloudIds)
       .getOrElse(Seq.empty)
