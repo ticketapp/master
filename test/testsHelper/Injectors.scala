@@ -3,10 +3,12 @@ package testsHelper
 import actors.DuplicateTracksActorInstance
 import addresses.{AddressMethods, SearchGeographicPoint}
 import akka.actor.ActorSystem
+import application.Global
 import artistsDomain.ArtistMethods
 import eventsDomain.EventMethods
 import genresDomain.GenreMethods
 import issues.IssueMethods
+import jobs.Scheduler
 import organizersDomain.OrganizerMethods
 import others.TariffMethods
 import placesDomain.PlaceMethods
@@ -42,17 +44,24 @@ trait Injectors {
   lazy val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, addressMethods)
   lazy val addressMethods = new AddressMethods(dbConfProvider, geographicPointMethods)
   lazy val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, geographicPointMethods)
-  lazy val artistMethods = new ArtistMethods(dbConfProvider, genreMethods, searchSoundCloudTracks, searchYoutubeTrack,
-    trackMethods)
-  lazy val eventMethods = new EventMethods(dbConfProvider, organizerMethods, artistMethods, tariffMethods, trackMethods,
-    genreMethods, placeMethods, geographicPointMethods, addressMethods)
+  lazy val artistMethods = new ArtistMethods(dbConfigProvider = dbConfProvider, genreMethods = genreMethods,
+    searchSoundCloudTracks = searchSoundCloudTracks, searchYoutubeTracks = searchYoutubeTrack, trackMethods = trackMethods)
+  lazy val eventMethods = new EventMethods(dbConfigProvider = dbConfProvider, organizerMethods = organizerMethods,
+    artistMethods = artistMethods, tariffMethods = tariffMethods, trackMethods = trackMethods,
+    genreMethods = genreMethods, placeMethods = placeMethods, geographicPointMethods = geographicPointMethods,
+    addressMethods = addressMethods)
   lazy val userDAOImpl = new UserDAOImpl(dbConfProvider)
   lazy val playlistMethods = new PlaylistMethods(dbConfProvider)
   lazy val trackRatingMethods = new TrackRatingMethods(dbConfProvider, trackMethods)
   lazy val issueMethods = new IssueMethods(dbConfProvider)
   lazy val oAuth2InfoDAO = new OAuth2InfoDAO(dbConfProvider)
-  lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfProvider, oAuth2InfoDAO, artistMethods,
-    placeMethods, organizerMethods, eventMethods, trackMethods)
+  lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfigProvider = dbConfProvider,
+    oAuth2InfoDAO = oAuth2InfoDAO, artistMethods = artistMethods, placeMethods = placeMethods,
+    organizerMethods = organizerMethods, eventMethods = eventMethods, trackMethods = trackMethods)
+  lazy val scheduler = new Scheduler(eventMethods = eventMethods, organizerMethods = organizerMethods,
+    artistMethods = artistMethods, trackMethods = trackMethods, placeMethods = placeMethods,
+    addressMethods = addressMethods, searchGeographicPoint = geographicPointMethods)
+  lazy val globalMethods = new Global(scheduler)
 
   lazy val databaseApi = injector.instanceOf[DBApi]
 }

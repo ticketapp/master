@@ -47,10 +47,11 @@ class TestTrackController extends GlobalApplicationForControllers {
       val Some(response) = route(
         FakeRequest(tracksDomain.routes.TrackController.followTrack("13894e56-08d1-4c1f-b3e4-466c069d15ed"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(tracksDomain.routes.TrackController.unfollowTrack("13894e56-08d1-4c1f-b3e4-466c069d15ed"))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED andThen {
+        val Some(response1) = route(FakeRequest(tracksDomain.routes.TrackController.unfollowTrack("13894e56-08d1-4c1f-b3e4-466c069d15ed"))
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
         status(response1) mustEqual OK
       }
     }

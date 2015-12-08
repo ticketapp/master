@@ -55,10 +55,10 @@ class TestPlaceController extends GlobalApplicationForControllers {
       val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByPlaceId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowPlaceByPlaceId(1))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
       status(response) mustEqual CREATED andThen {
+        val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowPlaceByPlaceId(1))
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
         status(response1) mustEqual OK
       }
     }

@@ -46,10 +46,10 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     "follow and unfollow an organizer by id" in {
       val Some(response) = route(FakeRequest(organizersDomain.routes.OrganizerController.followOrganizerByOrganizerId(300))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(organizersDomain.routes.OrganizerController.unfollowOrganizerByOrganizerId(300))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED andThen {
+        val Some(response1) = route(FakeRequest(organizersDomain.routes.OrganizerController.unfollowOrganizerByOrganizerId(300))
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
         status(response1) mustEqual OK
       }
     }

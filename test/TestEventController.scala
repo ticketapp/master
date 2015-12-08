@@ -79,10 +79,10 @@ class TestEventController extends GlobalApplicationForControllers {
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
       status(response) mustEqual CREATED andThen {
+        val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
         status(response1) mustEqual OK
       }
     }
@@ -92,14 +92,14 @@ class TestEventController extends GlobalApplicationForControllers {
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId+ "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      val Some(response2) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
       status(response) mustEqual CREATED andThen {
+        val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
         status(response1) mustEqual CONFLICT andThen {
+          val Some(response2) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
+            .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
           status(response2) mustEqual OK
         }
       }
