@@ -4,7 +4,7 @@ GET           /googlea30e62044bb92d88.html                                   @ap
 
 GET           /test                                                          @others.Test.sayHello(message: String)
 
-POST          /signIn                                                        @application.Application.signIn
+#POST          /signIn                                                        @application.Application.signIn
 GET           /authenticate/:provider                                        @application.SocialAuthController.authenticate(provider: String)
 GET           /signOut                                                       @application.Application.signOut
 #POST          /authenticateByCredentials                                     @application.CredentialsAuthController.authenticate

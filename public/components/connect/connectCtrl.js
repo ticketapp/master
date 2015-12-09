@@ -6,10 +6,10 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
               TracksRecommender, $filter) {
 
         function applyLastRequest() {
-            if ($rootScope.lastReq.method == 'post') {
-                if ($rootScope.lastReq.object != "") {
+            if ($rootScope.lastReq.method === 'post') {
+                if ($rootScope.lastReq.object !== "") {
                     $http.post($rootScope.lastReq.path, $rootScope.lastReq.object).
-                        success(function (data) {
+                        success(function () {
                             InfoModal.displayInfo($rootScope.lastReq.success);
                             $rootScope.lastReq = {};
                         }).error(function (data, status) {
@@ -23,7 +23,7 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                         })
                 } else {
                     $http.post($rootScope.lastReq.path).
-                        success(function (data) {
+                        success(function () {
                             $scope.info = $rootScope.lastReq.success;
                             $rootScope.lastReq = {};
                         }).error(function (data, status) {
@@ -36,14 +36,14 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
             }
         }
 
-        $scope.updateRemoveTracks = function () {
+        function updateRemovedTracks() {
             UserFactory.getRemovedTracks().then(function (tracks) {
-                if ($localStorage.tracksSignaled == undefined) {
+                if ($localStorage.tracksSignaled === undefined) {
                     $localStorage.tracksSignaled = [];
                 }
                 var tracksLength = tracks.length;
                 for (var i = 0; i < tracksLength; i++) {
-                    if ($filter('filter')($localStorage.tracksSignaled, tracks[i].trackId, 'trackId').length == 0) {
+                    if ($filter('filter')($localStorage.tracksSignaled, tracks[i].trackId, 'trackId').length === 0) {
                         $localStorage.tracksSignaled.push(tracks[i].trackId)
                     }
                 }
@@ -52,29 +52,29 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                     console.log('AA',$localStorage.tracksSignaled[j]);
                     if ($filter('filter')(tracks, $localStorage.tracksSignaled[j].trackId).length === 0) {
                         console.log('BB', $localStorage.tracksSignaled);
-                        TracksRecommender.UpsertTrackRate(false, $localStorage.tracksSignaled[j].trackId,  $localStorage.tracksSignaled[j].reason)
+                        TracksRecommender.UpsertTrackRate(false, $localStorage.tracksSignaled[j].trackId,
+                            $localStorage.tracksSignaled[j].reason)
                     }
                 }
             })
-        };
+        }
 
-        function getConnected (connectWin) {
+        function isConnected (connectWin) {
             var waitForConnected = setInterval(function () {
-                if (connectWin.document.getElementById('top') != undefined &&
-                    connectWin.document.getElementById('top') != null) {
-                        clearInterval(waitForConnected);
-                    if (connectWin.document.getElementById('top').getAttribute("ng-init") ===
-                        '$root.connected = true') {
+                if (angular.isDefAndNotNull(connectWin.document.getElementById('top'))) {
+                    clearInterval(waitForConnected);
+
+                    if (connectWin.document.getElementById('top').getAttribute("ng-init") === '$root.connected = true') {
                         $timeout(function () {
                             $rootScope.$apply(function () {
                                 $rootScope.connected = true;
                                 connectWin.close();
-                                InfoModal.displayInfo('Vous êtes connécté')
+                                InfoModal.displayInfo('Vous êtes connecté')
                             })
                         }, 0);
                         UserFactory.makeFavoriteTracksRootScope();
-                        $scope.updateRemoveTracks();
-                        if ($rootScope.lastReq != {} && $rootScope.lastReq != undefined) {
+                        updateRemovedTracks();
+                        if ($rootScope.lastReq !== {} && angular.isDefined($rootScope.lastReq)) {
                             applyLastRequest();
                         }
                     }
@@ -86,13 +86,13 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
             var connectWin = window.open( url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");
             var changePath = setInterval(function() {
                 console.log(connectWin.location.href);
-                if (connectWin.location.href == undefined) {
+                if (angular.isDefined(connectWin.location.href)) {
                     clearInterval(changePath);
-                    InfoModal.displayInfo('Une erreure c\'est produite', 'error')
+                    InfoModal.displayInfo('Une erreur s\'est produite', 'error')
                 }
                 if (connectWin.location.href.indexOf('#/') > -1) {
                     clearInterval(changePath);
-                    getConnected(connectWin);
+                    isConnected(connectWin);
                 }
             }, 1000);
         };

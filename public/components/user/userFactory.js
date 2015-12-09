@@ -15,10 +15,10 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         getToken : function () {
             var deferred = $q.defer();
             $http.get('/users/facebookAccessToken/')
-                .success(function(data, status){
+                .success(function(data) {
                     factory.user.facebookAccessToken = data;
                     deferred.resolve(factory.user.facebookAccessToken);
-                }).error(function(data, status){
+                }).error(function() {
                     deferred.reject('erreur');
                 });
             return deferred.promise;
@@ -27,11 +27,11 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.delete('/playlists/' + id).
                 success(function (data) {
-                    var indexPlaylistToDelet = factory.user.playlists.indexOf(
+                    var indexPlaylistToDelete = factory.user.playlists.indexOf(
                         factory.user.playlists.filter(function(playlist) {
                         return playlist.id === id
                     })[0]);
-                    factory.user.playlists.splice(indexPlaylistToDelet, 1);
+                    factory.user.playlists.splice(indexPlaylistToDelete, 1);
                     deferred.resolve(data);
                 }).error (function (data) {
             });
@@ -54,7 +54,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     TracksRecommender.UpsertTrackRate(true, track.uuid);
                 }).error(function (data, status) {
                     if (status === 401) {
-                        StoreRequest.storeRequest('post', '/tracks/' + track.uuid + '/addToFavorites', "", 'le morceau a été ajouté à vos favoris')
+                        StoreRequest.storeRequest('post', '/tracks/' + track.uuid + '/addToFavorites', "", 'le morceau a été ajouté à vos favoris');
                         var connectListener = $rootScope.$watch('connected', function (newVal) {
                             if (newVal == true) {
                                 TracksRecommender.UpsertTrackRate(true, track.uuid);
@@ -145,10 +145,10 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         getIsFollowedPlace : function (id) {
             var deferred = $q.defer();
             $http.get('/places/' + id + '/isFollowed')
-                .success(function(data, status){
+                .success(function(data){
                     factory.user.isFollowedPlace = data;
                     deferred.resolve(factory.events);
-                }).error(function(data, status){
+                }).error(function(){
                     deferred.reject('erreur');
                 });
             return deferred.promise;
@@ -188,10 +188,10 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
         getIsFollowedOrganizer : function (id) {
             var deferred = $q.defer();
             $http.get('/organizers/' + id + '/isFollowed')
-                .success(function(data, status){
+                .success(function(data) {
                     factory.isFollowOrganizer = data;
                     deferred.resolve(factory.events);
-                }).error(function(data, status){
+                }).error(function() {
                     deferred.reject('erreur');
                 });
             return deferred.promise;
@@ -239,9 +239,9 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
             var deferred = $q.defer();
             $http.get('/users/isConnected').success(function(success) {
                 deferred.resolve(success)
-            }).error(function(error) {
+            }).error(function() {
                 deferred.resolve(false)
-            })
+            });
             return deferred.promise
         }
     };
