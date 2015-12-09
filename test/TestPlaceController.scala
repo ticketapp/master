@@ -5,8 +5,10 @@ import play.api.libs.json._
 import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
 
+import scala.concurrent.Await
 import scala.language.postfixOps
 import json.JsonHelper._
+import scala.concurrent.duration._
 
 
 class TestPlaceController extends GlobalApplicationForControllers {
@@ -54,13 +56,14 @@ class TestPlaceController extends GlobalApplicationForControllers {
     "follow and unfollow a place by id" in {
       val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByPlaceId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      Await.result(response, 5.seconds)
 
-      status(response) mustEqual CREATED andThen {
-        val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowPlaceByPlaceId(1))
-          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowPlaceByPlaceId(1))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-        status(response1) mustEqual OK
-      }
+      status(response) mustEqual CREATED
+
+      status(response1) mustEqual OK
     }
 
     "return an error if a user try to follow a place twice" in {

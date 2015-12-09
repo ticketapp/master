@@ -6,6 +6,8 @@ import play.api.libs.json._
 import play.api.test._
 import testsHelper.GlobalApplicationForControllers
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
@@ -46,12 +48,14 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     "follow and unfollow an organizer by id" in {
       val Some(response) = route(FakeRequest(organizersDomain.routes.OrganizerController.followOrganizerByOrganizerId(300))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      Await.result(response, 5.seconds)
 
-      status(response) mustEqual CREATED andThen {
         val Some(response1) = route(FakeRequest(organizersDomain.routes.OrganizerController.unfollowOrganizerByOrganizerId(300))
           .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-        status(response1) mustEqual OK
-      }
+
+      status(response) mustEqual CREATED
+
+      status(response1) mustEqual OK
     }
 
     "return an error if an user try to follow an organizer twice" in {

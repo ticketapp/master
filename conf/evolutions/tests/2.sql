@@ -94,7 +94,8 @@ INSERT INTO issues(issueid, title, content, userid, fixed)
 
 -------------------------------------------------------- artistsGenres -------------------------------------------------
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
-  ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'), (SELECT genreid FROM genres WHERE name = 'genreTest0'), 1);
+  ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
+   (SELECT genreid FROM genres WHERE name = 'genreTest0'), 1);
 
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
   ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'), (SELECT genreid FROM genres WHERE name = 'genreTest00'), 1);

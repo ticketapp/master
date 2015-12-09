@@ -9,8 +9,10 @@ import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
 import json.JsonHelper._
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
+import scala.concurrent.duration._
 
 
 class TestEventController extends GlobalApplicationForControllers {
@@ -79,30 +81,32 @@ class TestEventController extends GlobalApplicationForControllers {
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response) mustEqual CREATED andThen {
-        val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
-          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-        status(response1) mustEqual OK
-      }
+      Await.result(response, 5.seconds)
+
+      status(response) mustEqual CREATED
+
+      status(response1) mustEqual OK
     }
 
     "return an error if an user try to follow an event twice" in {
       val eventId = await(eventMethods.findAllContaining("test") map (_.head.event.id.get))
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId+ "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      Await.result(response, 5.seconds)
+      val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      Await.result(response, 5.seconds)
+      val Some(response2) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response) mustEqual CREATED andThen {
-        val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
-          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      status(response) mustEqual CREATED
 
-        status(response1) mustEqual CONFLICT andThen {
-          val Some(response2) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
-            .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      status(response1) mustEqual CONFLICT
 
-          status(response2) mustEqual OK
-        }
-      }
+      status(response2) mustEqual OK
     }
 
     "find followed events" in {
