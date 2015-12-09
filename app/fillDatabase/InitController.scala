@@ -52,7 +52,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
           val cityName: String = splitedLine(4).replaceAll("'", "").trim
           val geographicPoint: String = splitedLine(19).trim + "," + splitedLine(20).trim
 
-          geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
+          geographicPointMethods.stringToTryPoint(geographicPoint) match {
             case Success(point) =>
               db.run(frenchCities += FrenchCity(cityName, point))
             case Failure(e) =>

@@ -1,11 +1,11 @@
 package organizersDomain
 
-import addresses.{Address, addressFormsTrait}
+import addresses.{Address, AddressFormsTrait}
 import play.api.data.Form
 import play.api.data.Forms._
 
 
-trait organizerFormsTrait extends addressFormsTrait {
+trait organizerFormsTrait extends AddressFormsTrait {
 
   val organizerBindingForm = Form(
     mapping(

@@ -8,7 +8,6 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
-
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   city                      VARCHAR(255) NOT NULL,
@@ -20,7 +19,7 @@ CREATE INDEX frenchCityNames ON frenchCities (city);
 
 CREATE TABLE addresses (
   addressId                 SERIAL PRIMARY KEY,
-  geographicPoint           GEOMETRY,
+  geographicPoint           GEOMETRY DEFAULT ST_GeomFromText('POINT(-84 30)', 4326) NOT NULL,
   city                      VARCHAR(127),
   zip                       VARCHAR(15),
   street                    VARCHAR
@@ -63,7 +62,7 @@ CREATE TABLE organizers (
   websites                VARCHAR,
   verified                BOOLEAN DEFAULT FALSE NOT NULL,
   imagePath               VARCHAR,
-  geographicPoint         GEOMETRY,
+  geographicPoint         GEOMETRY DEFAULT ST_GeomFromText('POINT(-84 30)', 4326) NOT NULL,
   placeId                 BIGINT,
   UNIQUE(facebookId)
 );
@@ -165,6 +164,7 @@ CREATE TABLE receivedMails (
   userId                    UUID REFERENCES users(userId)
 );
 
+
 CREATE TABLE events (
   eventId                   SERIAL PRIMARY KEY,
   facebookId                VARCHAR(63),
@@ -172,7 +172,7 @@ CREATE TABLE events (
   isActive                  BOOLEAN NOT NULL,
   creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           GEOMETRY,
+  geographicPoint           GEOMETRY DEFAULT ST_GeomFromText('POINT(-84 30)', 4326) NOT NULL,
   description               VARCHAR,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP,
@@ -188,7 +188,7 @@ CREATE INDEX eventGeographicPoint ON events USING GIST (geographicPoint);
 CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
-  geographicPoint           GEOMETRY,
+  geographicPoint           GEOMETRY DEFAULT ST_GeomFromText('POINT(-84 30)', 4326) NOT NULL,
   addressId                 BIGINT references addresses(addressId),
   facebookId                VARCHAR(63),
   description               VARCHAR,
@@ -213,6 +213,7 @@ CREATE TABLE images (
   UNIQUE(path)
 );
 
+
 CREATE TABLE tariffs (
   tariffId                  SERIAL PRIMARY KEY,
   denomination              VARCHAR(255) DEFAULT 'Basique' NOT NULL,
@@ -223,6 +224,7 @@ CREATE TABLE tariffs (
   endTime                   TIMESTAMP NOT NULL,
   eventId                   BIGINT REFERENCES events(eventId)
 );
+
 
 CREATE TABLE tickets (
   ticketId                  SERIAL PRIMARY KEY,
@@ -458,6 +460,7 @@ CREATE TABLE tracksFollowed (
 );
 CREATE UNIQUE INDEX tracksFollowedIndex ON tracksFollowed (userId, trackId);
 
+
 CREATE TABLE eventsPlaces (
   eventId                 BIGINT REFERENCES events (eventId) ON DELETE CASCADE,
   placeId                 INT REFERENCES places (placeId) ON DELETE CASCADE,
@@ -603,4 +606,3 @@ DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS addresses;
 DROP TABLE IF EXISTS frenchCities;
 DROP TABLE IF EXISTS users, logininfo, userlogininfo, passwordinfo, oauth1info,  oauth2info, openidinfo, openidattributes;
-

@@ -79,28 +79,30 @@ class TestEventController extends GlobalApplicationForControllers {
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response) mustEqual CREATED
-
       val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response1) mustEqual OK
+      status(response) mustEqual CREATED andThen {
+        status(response1) mustEqual OK
+      }
     }
 
     "return an error if an user try to follow an event twice" in {
       val eventId = await(eventMethods.findAllContaining("test") map (_.head.event.id.get))
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId+ "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      status(response) mustEqual CREATED
 
       val Some(response1) = route(FakeRequest(POST, "/events/" + eventId + "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      status(response1) mustEqual CONFLICT
 
       val Some(response2) = route(FakeRequest(POST, "/events/" + eventId + "/unfollow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response2) mustEqual OK
+      status(response) mustEqual CREATED andThen {
+        status(response1) mustEqual CONFLICT andThen {
+          status(response2) mustEqual OK
+        }
+      }
     }
 
     "find followed events" in {
@@ -167,7 +169,10 @@ class TestEventController extends GlobalApplicationForControllers {
 
     "find events by placeId" in {
       val eventId = await(eventMethods.findAllContaining("EventTest1") map (_.head.event.id.get))
-      val placeId = await(placeMethods.save(Place(None, "placeTestEvent", Option("123456"), None))).id
+      val placeId = await(placeMethods.save(Place(
+        id = None,
+        name = "placeTestEvent",
+        facebookId = Option("123456")))).id
       await(placeMethods.saveEventRelation(EventPlaceRelation(eventId, placeId.get)))
       val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findByPlace(placeId.get)))
 
@@ -181,7 +186,7 @@ class TestEventController extends GlobalApplicationForControllers {
 
     "find passed events by placeId" in {
       val eventId = await(eventMethods.saveFacebookEventByFacebookId("11121")).get.id
-      val placeId = await(placeMethods.save(Place(None, "placeTestEvent", Option("123456"), None))).id
+      val placeId = await(placeMethods.save(Place(None, "placeTestEvent", Option("123456")))).id
       await(placeMethods.saveEventRelation(EventPlaceRelation(eventId.get, placeId.get)))
       val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findPassedByPlace(placeId.get)))
 
@@ -232,11 +237,9 @@ class TestEventController extends GlobalApplicationForControllers {
       val geoPoints = events.map(_.geographicPoint)
 
       val centerPoint = geographicPointMethods.latAndLngToGeographicPoint(5.0, 5.0).get
-      val sortedGeoPoint = geoPoints.flatten sortBy(point => point.distance(centerPoint))
-      val numberOfEmptyValuesRemoved = geoPoints.size - sortedGeoPoint.size
-      val sortedGeoPointPlusEmptyValues = (sortedGeoPoint map Option.apply) ++ List.fill(numberOfEmptyValuesRemoved)(None)
+      val sortedGeoPoint = geoPoints sortBy(point => point.distance(centerPoint))
 
-      geoPoints mustEqual sortedGeoPointPlusEmptyValues
+      geoPoints mustEqual sortedGeoPoint
     }
   }
 }

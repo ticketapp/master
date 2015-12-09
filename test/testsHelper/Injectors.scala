@@ -22,13 +22,13 @@ import tracksDomain.{SearchSoundCloudTracks, SearchYoutubeTracks, TrackMethods, 
 
 trait Injectors {
   lazy val appBuilder = new GuiceApplicationBuilder().configure(Configuration.from(Map(
-        "slick.dbs.default.driver" -> "slick.driver.PostgresDriver$",
-        "slick.dbs.default.db.driver" -> "org.postgresql.Driver",
-        "slick.dbs.default.db.url" -> "jdbc:postgresql://dbHost:5432/tests",
-        "slick.dbs.default.db.user" -> "simon",
-        "slick.dbs.default.db.password" -> "root",
-        "slick.dbs.default.db.connectionTimeout" -> "5 seconds",
-        "slick.dbs.default.db.connectionPool" -> "disabled")))
+    "slick.dbs.default.driver" -> "slick.driver.PostgresDriver$",
+    "slick.dbs.default.db.driver" -> "org.postgresql.Driver",
+    "slick.dbs.default.db.url" -> "jdbc:postgresql://dbHost:5432/tests",
+    "slick.dbs.default.db.user" -> "simon",
+    "slick.dbs.default.db.password" -> "root",
+    "slick.dbs.default.db.connectionTimeout" -> "5 seconds",
+    "slick.dbs.default.db.connectionPool" -> "disabled")))
   lazy val injector = appBuilder.injector()
   lazy val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
   lazy val actorSystem = ActorSystem()

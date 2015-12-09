@@ -4,11 +4,12 @@ import application.OverQueryLimit
 import com.vividsolutions.jts.geom.{Coordinate, Geometry, GeometryFactory}
 import play.api.Logger
 import play.api.libs.ws.WSResponse
+import services.Utilities
 
 import scala.util.{Failure, Success, Try}
 
 
-trait geographicPointTrait {
+trait geographicPointTrait extends Utilities {
   def readGoogleGeographicPoint(googleGeoCodeResponse: WSResponse): Try[Option[Geometry]] = googleGeoCodeResponse.statusText match {
     case "OK" =>
       val googleGeoCodeJson = googleGeoCodeResponse.json
@@ -39,7 +40,7 @@ trait geographicPointTrait {
 
   val geometryFactory = new GeometryFactory()
 
-  def stringToGeographicPoint(string: String): Try[Geometry] = Try {
+  def stringToTryPoint(string: String): Try[Geometry] = Try {
     val latitudeAndLongitude: Array[String] = string.split(",")
     latAndLngToGeographicPoint(latitudeAndLongitude(0).toDouble, latitudeAndLongitude(1).toDouble) match {
       case Success(point) => point
@@ -52,17 +53,17 @@ trait geographicPointTrait {
     geometryFactory.createPoint(coordinate)
   }
 
-  def optionStringToOptionPoint(maybeGeographicPoint: Option[String]): Option[Geometry] = maybeGeographicPoint match {
+  def optionStringToPoint(maybeGeographicPoint: Option[String]): Geometry = maybeGeographicPoint match {
     case Some(geoPoint) =>
-      stringToGeographicPoint(geoPoint) match {
+      stringToTryPoint(geoPoint) match {
         case Failure(exception) =>
           Logger.error("Utilities.optionStringToPoint: ", exception)
-          None
+          antarcticPoint
         case Success(validPoint) =>
-          Some(validPoint)
+          validPoint
       }
     case _ =>
-      None
+      antarcticPoint
   }
 
   def readFacebookGeographicPoint() = {

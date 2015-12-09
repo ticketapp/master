@@ -3,8 +3,10 @@ package addresses
 import play.api.Logger
 import play.api.data.Forms._
 
+import scala.util.{Failure, Success, Try}
 
-trait addressFormsTrait {
+
+trait AddressFormsTrait {
 
   val addressBindingForm = mapping(
     "city" -> optional(text(2)),
@@ -12,10 +14,12 @@ trait addressFormsTrait {
     "street" -> optional(text(2))
   )(addressFormApply)(addressFormUnapply)
 
-  def addressFormApply(city: Option[String], zip: Option[String], street: Option[String]): Option[Address] = try {
-    Option(Address(None, None, city, zip, street))
-  } catch {
-    case e: Exception =>
+  def addressFormApply(city: Option[String], zip: Option[String], street: Option[String]): Option[Address] = Try {
+    Address(city = city, zip = zip, street = street)
+  } match {
+    case Success(validAddress) =>
+      Option(validAddress)
+    case Failure(_) =>
       Logger.error("Address.formApply: empty address has not been created")
       None
   }

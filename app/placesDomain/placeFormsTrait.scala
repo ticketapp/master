@@ -1,10 +1,11 @@
 package placesDomain
 
-import addresses.{Address, addressFormsTrait, geographicPointTrait}
+import addresses.{Address, AddressFormsTrait, geographicPointTrait}
 import play.api.data.Form
 import play.api.data.Forms._
 
-trait placeFormsTrait extends geographicPointTrait with addressFormsTrait {
+
+trait placeFormsTrait extends geographicPointTrait with AddressFormsTrait {
   val placeBindingForm = Form(mapping(
     "name" -> nonEmptyText(2),
     "facebookId" -> optional(nonEmptyText()),
@@ -20,15 +21,19 @@ trait placeFormsTrait extends geographicPointTrait with addressFormsTrait {
   def placeFormApply(name: String, facebookId: Option[String], geographicPoint: Option[String], description: Option[String],
                 webSite: Option[String], capacity: Option[Int], openingHours: Option[String],
                 imagePath: Option[String], address: Option[Address]): PlaceWithAddress = {
-    val point = optionStringToOptionPoint(geographicPoint)
+    val point = optionStringToPoint(geographicPoint)
     PlaceWithAddress(
       place = Place(
         id = None, 
-        name = name, facebookId = facebookId, geographicPoint = point, description = description, websites = webSite, 
+        name = name,
+        facebookId = facebookId,
+        geographicPoint = point,
+        description = description,
+        websites = webSite,
         capacity = capacity, 
         openingHours = openingHours, 
         imagePath = imagePath),
-      address = address)
+      maybeAddress = address)
     
   }
 
@@ -37,8 +42,8 @@ trait placeFormsTrait extends geographicPointTrait with addressFormsTrait {
       place.place.description, place.place.websites, place.place.capacity, place.place.openingHours,
       place.place.imagePath, Option(Address(
       id = None,
-      geographicPoint = place.address.get.geographicPoint,
-      city = place.address.get.city,
-      zip = place.address.get.zip,
-      street = place.address.get.street))))
+      geographicPoint = place.maybeAddress.get.geographicPoint,
+      city = place.maybeAddress.get.city,
+      zip = place.maybeAddress.get.zip,
+      street = place.maybeAddress.get.street))))
 }

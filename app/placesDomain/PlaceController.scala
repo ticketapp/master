@@ -2,7 +2,7 @@ package placesDomain
 
 import javax.inject.Inject
 
-import addresses.{SearchGeographicPoint, addressFormsTrait}
+import addresses.{SearchGeographicPoint, AddressFormsTrait}
 import application.User
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
@@ -28,15 +28,15 @@ class PlaceController @Inject() (ws: WSClient,
                                  val env: Environment[User, CookieAuthenticator],
                                  socialProviderRegistry: SocialProviderRegistry,
                                  val placeMethods: PlaceMethods)
-    extends Silhouette[User, CookieAuthenticator] with addressFormsTrait with placeFormsTrait with Utilities {
+    extends Silhouette[User, CookieAuthenticator] with AddressFormsTrait with placeFormsTrait with Utilities {
 
   def places(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
-    geographicPointMethods.stringToGeographicPoint(geographicPoint) match {
+    geographicPointMethods.stringToTryPoint(geographicPoint) match {
       case Failure(exception) =>
         Logger.error("PlaceController.places: invalid geographicPoint")
         Future(BadRequest(Json.toJson("Invalid geographicPoint")))
       case Success(point) =>
-        placeMethods.findNear(point, numberToReturn, offset) map { places =>
+        placeMethods.findNear(geographicPoint = point, numberToReturn = numberToReturn, offset = offset) map { places =>
           Ok(Json.toJson(places))
         }
     }

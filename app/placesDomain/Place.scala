@@ -4,7 +4,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 import addresses.{SearchGeographicPoint, Address, AddressMethods}
-import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.geom.{GeometryFactory, Coordinate, Geometry}
 import database.{MyPostgresDriver, UserPlaceRelation, EventPlaceRelation, MyDBTableDefinitions}
 import play.api.Logger
 import play.api.Play.current
@@ -13,7 +13,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import MyPostgresDriver.api._
-import services.{FollowService, Utilities}
+import services.{SortByDistanceToPoint, SortableByGeographicPoint, FollowService, Utilities}
 import silhouette.DBTableDefinitions
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -25,7 +25,7 @@ import scala.util.{Failure, Success, Try}
 case class Place(id: Option[Long] = None,
                  name: String,
                  facebookId: Option[String] = None,
-                 geographicPoint: Option[Geometry] = None,
+                 geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
                  description: Option[String] = None,
                  websites: Option[String] = None,
                  capacity: Option[Int] = None,
@@ -34,7 +34,26 @@ case class Place(id: Option[Long] = None,
                  addressId: Option[Long] = None,
                  linkedOrganizerId: Option[Long] = None)
 
-case class PlaceWithAddress(place: Place, address: Option[Address] = None)
+case class PlaceWithAddress(place: Place, maybeAddress: Option[Address] = None)
+    extends SortableByGeographicPoint with Utilities {
+
+  private def returnPlaceGeographicPointInRelations(place: Place, maybeAddress: Option[Address]): Geometry = {
+    place.geographicPoint match {
+      case notAntarcticPoint if notAntarcticPoint != antarcticPoint =>
+        notAntarcticPoint
+      case _ =>
+        maybeAddress map(_.geographicPoint) match {
+          case Some(notAntarcticPoint) if notAntarcticPoint != antarcticPoint =>
+            notAntarcticPoint
+          case _ =>
+            antarcticPoint
+        }
+    }
+  }
+
+  val geographicPoint: Geometry = returnPlaceGeographicPointInRelations(place, maybeAddress)
+}
+
 
 class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
                              val geographicPointMethods: SearchGeographicPoint,
@@ -43,7 +62,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     with FollowService
     with DBTableDefinitions
     with MyDBTableDefinitions
-    with Utilities {
+    with Utilities
+    with SortByDistanceToPoint {
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
@@ -72,7 +92,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def update(place: Place): Future[Int] = db.run(places.filter(_.id === place.id).update(place))
 
   def saveWithAddress(placeWithAddress: PlaceWithAddress): Future[PlaceWithAddress] = {
-    placeWithAddress.address match {
+    placeWithAddress.maybeAddress match {
       case Some(address) =>
         addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
           save(placeWithAddress.place.copy(
@@ -82,9 +102,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           }
         }
       case None =>
-        save(placeWithAddress.place) map { savedPlace =>
-          PlaceWithAddress(savedPlace, None)
-        }
+        save(placeWithAddress.place) map(PlaceWithAddress(_, None))
     }
   }
 
@@ -105,29 +123,64 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def findIdByFacebookId(facebookId: String): Future[Option[Long]] =
     db.run(places.filter(_.facebookId === facebookId).map(_.id).result.headOption)
 
+  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] = {
+    val query = for {
+      placeWithAddress <- places
+        .sortBy(place => (place.geographicPoint <-> geographicPoint, place.id))
+        .drop(offset)
+        .take(numberToReturn) joinLeft addresses on (_.addressId === _.id)
+    } yield placeWithAddress
+
+    val eventuallyPlacesWithAddress = db.run(query.result) map(_ map PlaceWithAddress.tupled)
+    eventuallyPlacesWithAddress map(sortByDistanceToPoint(geographicPoint, _))
+  }
+
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] =
+    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
+      case None => Future(Seq.empty)
+      case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
+    }
+
+  def findAllByEventId(eventId: Long): Future[Seq[PlaceWithAddress]] = {
+    val query = for {
+      eventPlace <- eventsPlaces.filter(_.eventId === eventId)
+      placeWithAddress <- places joinLeft addresses on (_.addressId === _.id)
+      if placeWithAddress._1.id === eventPlace.placeId
+    } yield placeWithAddress
+
+    db.run(query.result) map(_ map PlaceWithAddress.tupled)
+  }
+
+  def findAllContaining(pattern: String): Future[Seq[PlaceWithAddress]] = {
+    val lowercasePattern = pattern.toLowerCase
+    val query = places
+      .filter(place => place.name.toLowerCase like s"%$lowercasePattern%")
+      .take(5) joinLeft addresses on (_.addressId === _.id)
+    db.run(query.result)  map(_ map PlaceWithAddress.tupled)
+  }
+
   def getPlaceByFacebookId(placeFacebookId : String) : Future[Option[PlaceWithAddress]] = findIdByFacebookId(placeFacebookId) flatMap {
     case Some(id) =>
       findById(id) flatMap {
-        case Some(place) =>
-          Future(Option(place))
-        case None =>
-          getPlaceOnFacebook(placeFacebookId)
+        case Some(place) => Future(Option(place))
+        case None => getPlaceOnFacebook(placeFacebookId)
       }
+
     case None =>
       getPlaceOnFacebook(placeFacebookId)
   }
 
-  def getPlaceOnFacebook(placeFacebookId: String): Future[Option[PlaceWithAddress]] =
-   WS.url("https://graph.facebook.com/" + facebookApiVersion + "/" + placeFacebookId)
-     .withQueryString(
+  def getPlaceOnFacebook(placeFacebookId: String): Future[Option[PlaceWithAddress]] = WS
+    .url("https://graph.facebook.com/" + facebookApiVersion + "/" + placeFacebookId)
+    .withQueryString(
        "fields" -> "about,location,website,hours,cover,name",
        "access_token" -> facebookToken)
-     .get()
-     .flatMap(readFacebookPlace) recover {
+    .get()
+    .flatMap(readFacebookPlace) recover {
      case NonFatal(exception) =>
        Logger.error("Place.getPlaceOnFacebook:\nMessage: ", exception)
        None
-   }
+  }
 
   def placeRead: Reads[PlaceWithAddress] = (
     (__ \ "about").readNullable[String] and
@@ -152,11 +205,12 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     ).apply((about: Option[String], source: Option[Option[String]], name: String, facebookId: Option[String],
              street: Option[Option[String]], zip: Option[Option[String]], city: Option[Option[String]],
              country: Option[Option[String]], website: Option[String]) => {
-      val address = Address(None, None, city.flatten, zip.flatten, street.flatten)
+      val address = Address(None, antarcticPoint, city.flatten, zip.flatten, street.flatten)
       PlaceWithAddress(
-        place = Place(id = None, name = name, facebookId = facebookId, geographicPoint = None, description = about,
-          websites = normalizeMaybeWebsite(website), capacity = None, openingHours = None, imagePath = source.flatten),
-        address = Option(address))
+        place = Place(id = None, name = name, facebookId = facebookId, geographicPoint = antarcticPoint,
+          description = about, websites = normalizeMaybeWebsite(website), capacity = None, openingHours = None,
+          imagePath = source.flatten),
+        maybeAddress = Option(address))
   })
 
   def readPlaces(places: WSResponse): Seq[PlaceWithAddress] = {
@@ -172,49 +226,14 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   } match {
     case Success(placeWithAddress) =>
         saveWithAddress(placeWithAddress) map Option.apply
+
     case Failure(exception: IllegalArgumentException) =>
       Logger.info("Place.readFacebookPlace: address must contain at least one field")
       Future(None)
+
     case Failure(exception) =>
       Logger.error("Place.readFacebookPlace:\nMessage:", exception)
       Future(None)
-  }
-
-  def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] = {
-    val query = for {
-      placeWithAddress <- places
-        .sortBy(p => (p.geographicPoint <-> geographicPoint).desc)
-        .drop(offset)
-        .take(numberToReturn) joinLeft
-        addresses on (_.addressId === _.id)
-    } yield placeWithAddress
-
-    db.run(query.result) map(_ map PlaceWithAddress.tupled)
-  }
-
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] =
-    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
-      case None => Future(Seq.empty)
-      case Some(geographicPoint) =>
-        findNear(geographicPoint, numberToReturn, offset)
-  }
-
-  def findAllByEventId(eventId: Long): Future[Seq[PlaceWithAddress]] = {
-    val query = for {
-      eventPlace <- eventsPlaces.filter(_.eventId === eventId)
-      placeWithAddress <- places joinLeft addresses on (_.addressId === _.id)
-      if placeWithAddress._1.id === eventPlace.placeId
-    } yield placeWithAddress
-
-    db.run(query.result) map(_ map PlaceWithAddress.tupled)
-  }
-
-  def findAllContaining(pattern: String): Future[Seq[PlaceWithAddress]] = {
-    val lowercasePattern = pattern.toLowerCase
-    val query = places
-      .filter(place => place.name.toLowerCase like s"%$lowercasePattern%")
-      .take(5) joinLeft addresses on (_.addressId === _.id)
-    db.run(query.result)  map(_ map PlaceWithAddress.tupled)
   }
 
   def followByFacebookId(userId : UUID, facebookId: String): Future[Int] = findIdByFacebookId(facebookId) flatMap {

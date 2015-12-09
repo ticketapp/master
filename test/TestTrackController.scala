@@ -50,9 +50,9 @@ class TestTrackController extends GlobalApplicationForControllers {
       val Some(response1) = route(FakeRequest(tracksDomain.routes.TrackController.unfollowTrack("13894e56-08d1-4c1f-b3e4-466c069d15ed"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      status(response) mustEqual CREATED
-
-      status(response1) mustEqual OK
+      status(response) mustEqual CREATED andThen {
+        status(response1) mustEqual OK
+      }
     }
 
     "return an error if an user try to follow a track already followed" in {

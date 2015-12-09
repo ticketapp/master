@@ -19,7 +19,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
     "be saved and deleted in database" in {
       val organizer = Organizer(None, Option("facebookId2"), "organizerTest2", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get)
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)),
         timeout(Span(5, Seconds))) { savedOrganizer =>
         savedOrganizer mustEqual OrganizerWithAddress(
@@ -50,13 +50,13 @@ class TestOrganizerModel extends GlobalApplicationForModels {
     "find organizers near geoPoint" in {
       val organizer = Organizer(None, Option("facebookId2222"), "organizerTest2222", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("150,56").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("150,56").get)
       val organizer1 = Organizer(None, Option("facebookId22222"), "organizerTest22222", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("6.4,6.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("6.4,6.6").get)
       val organizer2 = Organizer(None, Option("facebookId222222"), "organizerTest222222", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("7.4,7.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("7.4,7.6").get)
 
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)),
         timeout(Span(5, Seconds))) { savedOrganizer =>
@@ -64,7 +64,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
           timeout(Span(5, Seconds))) { savedOrganizer1 =>
           whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer2, None)),
             timeout(Span(5, Seconds))) { savedOrganizer2 =>
-            whenReady(organizerMethods.findNear(geographicPointMethods.stringToGeographicPoint("6.4,6.6").get, 10, 0),
+            whenReady(organizerMethods.findNear(geographicPointMethods.stringToTryPoint("6.4,6.6").get, 10, 0),
               timeout(Span(5, Seconds))) { foundOrganizers =>
 
               foundOrganizers should contain inOrder(savedOrganizer1, savedOrganizer2, savedOrganizer)
@@ -78,12 +78,12 @@ class TestOrganizerModel extends GlobalApplicationForModels {
       whenReady (organizerMethods.findNearCity("lyon", 10, 0),  timeout(Span(5,  Seconds))) { response =>
         val organizer = OrganizerWithAddress(
           organizer = Organizer(Some(300), Some("facebookId1"), "name2", None, None, None, None, None, verified = false,
-            None, Some(geographicPointMethods.stringToGeographicPoint("45.783808, 4.860598").get), None),
+            None, geographicPointMethods.stringToTryPoint("45.783808, 4.860598").get, None),
           address = None)
         val organizer2 = OrganizerWithAddress(
           organizer = Organizer(Some(100), Some("facebookId"), "name1", None, None, None, None, None, verified = false,
-            None, Some(geographicPointMethods.stringToGeographicPoint(
-              "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get), None),
+            None, geographicPointMethods.stringToTryPoint(
+              "45.783808,562818797362720700000000000000000000000000000000000000000000000000000000000000").get, None),
           address = None)
 
         response must contain inOrder(organizer, organizer2)
@@ -93,7 +93,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
     "not be saved twice and return the organizerId" in {
       val organizer = Organizer(None, Option("facebookId3"), "organizerTest3", Option("description"), None,
         None, Option("publicTransit"), Option("websites"), imagePath = Option("imagePath"),
-        geographicPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get))
+        geographicPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get)
       whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)),
         timeout(Span(5, Seconds))) { savedOrganizer =>
         whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(organizer, None)), timeout(Span(5, Seconds))) {
@@ -108,8 +108,16 @@ class TestOrganizerModel extends GlobalApplicationForModels {
     }
 
     "be linked to a place if one with the same facebookId already exists" in {
-      whenReady (placeMethods.save(Place(None, "Name1", Some("1234567891"), None, None, None, None, None, None, None)),
-        timeout(Span(2, Seconds)))  { tryPlace =>
+      whenReady (placeMethods.save(Place(
+        id = None,
+        name = "Name1",
+        facebookId = Some("1234567891"),
+        description = None,
+        websites = None,
+        capacity = None,
+        openingHours = None,
+        imagePath = None,
+        addressId = None)), timeout(Span(2, Seconds)))  { tryPlace =>
         val placeId = tryPlace.id.get
         whenReady(organizerMethods.saveWithAddress(OrganizerWithAddress(
           organizer = Organizer(None, Some("1234567891"), "organizerTest2"),
@@ -128,7 +136,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
     }
 
     "save organizer with event relation" in {
-      val geoPoint = Option(geographicPointMethods.stringToGeographicPoint("5.4,5.6").get)
+      val geoPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get
       val organizer = OrganizerWithAddress(Organizer(None, None, "organizerTest2", geographicPoint = geoPoint))
 
       val event = Event(None, None, isPublic = true, isActive = true, "name", geoPoint, None, new DateTime(), None, 16,
@@ -163,7 +171,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
         whenReady(organizerMethods.saveWithAddress(organizerInfos.get), timeout(Span(5, Seconds))) { savedOrganizer =>
           savedOrganizer.organizer.name mustBe "Le Transbordeur"
           savedOrganizer.address.get mustBe Address(savedOrganizer.address.get.id,
-            Option(geographicPointMethods.stringToGeographicPoint("45.7839103,4.860398399999999").get),
+            geographicPointMethods.stringToTryPoint("45.7839103,4.860398399999999").get,
           Some("villeurbanne"),Some("69100"),Some("3 boulevard de la bataille de stalingrad"))
         }
       }
