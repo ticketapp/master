@@ -1,9 +1,9 @@
 angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '$http',
     'ArtistsFactory', 'UserFactory', 'OrganizerFactory', 'EventsFactory', 'PlaceFactory',
-    'StoreRequest', '$timeout', 'InfoModal', '$location', '$localStorage', 'TracksRecommender', '$filter',
+    'StoreRequest', '$timeout', 'InfoModal', '$location', '$localStorage', 'TracksRecommender', '$filter', '$auth',
     function ($scope, $rootScope, $http, ArtistsFactory, UserFactory, OrganizerFactory,
               EventsFactory, PlaceFactory, StoreRequest, $timeout, InfoModal, $location, $localStorage,
-              TracksRecommender, $filter) {
+              TracksRecommender, $filter, $auth) {
 
         function applyLastRequest() {
             if ($rootScope.lastReq.method === 'post') {
@@ -81,6 +81,12 @@ angular.module('claudeApp').controller('connectCtrl', ['$scope', '$rootScope', '
                 }
             }, 500);
         }
+
+        $scope.authenticate = function(provider) {
+            $timeout(function() {
+                console.log($auth.authenticate(provider));
+            }, 0);
+        };
 
         $scope.connectLink = function (url) {
             var connectWin = window.open( url, "", "toolbar=no, scrollbars=no, resizable=no, width=500, height=500");

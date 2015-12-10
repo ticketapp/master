@@ -1,14 +1,15 @@
 # Home page
-GET           /                                                              @application.Application.index
-GET           /googlea30e62044bb92d88.html                                   @application.Application.googleValidation
+GET           /                                                  @application.Application.index
+GET           /googlea30e62044bb92d88.html                       @application.Application.googleValidation
 
-GET           /test                                                          @others.Test.sayHello(message: String)
+GET           /test                                              @others.Test.sayHello(message: String)
 
-#POST          /signIn                                                        @application.Application.signIn
-GET           /authenticate/:provider                                        @application.SocialAuthController.authenticate(provider: String)
-GET           /signOut                                                       @application.Application.signOut
-#POST          /authenticateByCredentials                                     @application.CredentialsAuthController.authenticate
-#POST          /signUp                                                        @application.SignUpController.signUp
+#POST          /signIn                                            @application.Application.signIn
+POST           /authenticate/:provider                           @application.SocialAuthController.authenticate(provider: String)
+GET            /authenticate/:provider                           @application.SocialAuthController.authenticate(provider: String)
+GET            /signOut                                          @application.Application.signOut
+#POST          /authenticateByCredentials                         @application.CredentialsAuthController.authenticate
+#POST          /signUp                                            @application.SignUpController.signUp
 
 ################################## fill database ################################################
 GET           /initDatabase                                      @fillDatabase.InitController.init

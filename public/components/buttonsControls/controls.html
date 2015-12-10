@@ -1,5 +1,5 @@
-<div class="zIndex1 generalControlsContener" id="generalControlsContener" ng-if="$root.window != 'small'">
-    <li ng-if="$root.path != 'iframe'"
+<div class="zIndex1 generalControlsContener" id="generalControlsContener" ng-if="$root.window !== 'small'">
+    <li ng-if="$root.path !== 'iframe'"
         class="generalControls float-right controlsArrow"
         ng-class="{'hidden': hide, 'show': !hide}"
         data-ng-click="$parent.hide = !$parent.hide">
@@ -14,15 +14,15 @@
         <li ng-if="!$root.home" class="generalControls float-right">
             <button ng-click="back()" class="alert"><i class="fi-x"></i></button>
         </li>-->
-        <li ng-if="$root.path != 'iframe'" class="generalControls float-right"
+        <li ng-if="$root.path !== 'iframe'" class="generalControls float-right"
             data-ng-controller="toolsCtrl" ng-click="open()">
             <a><i class="fa fa-th"></i></a>
         </li>
-        <li ng-if="$root.path != 'home' && $root.path != 'search' && $root.path != 'iframe'" class="generalControls float-right">
+        <li ng-if="$root.path !== 'home' && $root.path !== 'search' && $root.path != 'iframe'" class="generalControls float-right">
             <a href="#/search"><i class="fa fa-search"></i></a>
         </li>
-        <li ng-if="$root.connected == false" ng-controller="connectCtrl" class="generalControls float-right">
-            <a ng-click="connectLink('/authenticate/facebook')">
+        <li ng-if="$root.connected === false" ng-controller="connectCtrl" class="generalControls float-right">
+            <a ng-click="authenticate('facebook')">
                 <i class="fa fa-facebook"></i>
             </a>
         </li>
@@ -31,10 +31,10 @@
         </li>
     </ul>
 </div>
-<div ng-if="$root.window == 'small' && $root.path != 'home' && $root.path != 'iframe'" class="fixed">
+<div ng-if="$root.window === 'small' && $root.path !== 'home' && $root.path !== 'iframe'" class="fixed">
     <a class="button column small-4 margin0 float-left" href="#/"><i class="fi-map"></i></a>
     <a class="button column small-4 margin0 float-left" href="#/search"><i class="fi-magnifying-glass"></i></a>
-    <a ng-if="$root.path != 'iframe'" class="button column small-4 margin0 float-left"
+    <a ng-if="$root.path !== 'iframe'" class="button column small-4 margin0 float-left"
        data-ng-controller="toolsCtrl" ng-click="open()">
         <i class="fi-thumbnails"></i>
     </a>

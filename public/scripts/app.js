@@ -23,9 +23,10 @@ angular
     'ng-oboe',
     'ngMaterial',
     'ngMap',
-    'ui.sortable'
+    'ui.sortable',
+    'satellizer'
   ])
-  .config(function ($routeProvider) {
+  .config(function ($routeProvider, $authProvider) {
     $routeProvider
       .when('/', {
         templateUrl: 'assets/views/main.html'
@@ -66,4 +67,29 @@ angular
       .otherwise({
         redirectTo: '/'
       });
+
+      $authProvider.httpInterceptor = true; // Add Authorization header to HTTP request
+      $authProvider.loginRedirect = '/';
+      $authProvider.logoutRedirect = '/';
+      //$authProvider.loginRoute = '/signIn';
+      $authProvider.tokenName = 'token';
+      $authProvider.tokenPrefix = 'satellizer'; // Local Storage name prefix
+      $authProvider.authHeader = 'X-Auth-Token';
+      $authProvider.platform = 'browser';
+      $authProvider.storage = 'localStorage';
+
+      $authProvider.facebook({
+          clientId: '1434764716814175',
+          authorizationEndpoint: 'https://www.facebook.com/v2.4/dialog/oauth',
+          url: '/authenticate/facebook',
+          scope: 'email public_profile user_likes',
+          scopeDelimiter: ',',
+          requiredUrlParams: ['display', 'scope'],
+          display: 'popup',
+          type: '2.0',
+          popupOptions: { width: 481, height: 269 }
+      });
   });
+
+
+
