@@ -53,8 +53,8 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
             place.address = { city: place.location.city,
                 zip: place.location.zip,
                 street: place.location.street };
-            console.log(place.address)
-            if (place.cover != undefined) {
+
+            if (place.cover !== undefined) {
                 var newPlace = {
                     name: place.name,
                     facebookId: place.id,
@@ -73,10 +73,10 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         function getInfoPlace(place) {
             $http.get('https://graph.facebook.com/v2.2/' + place.id + '/?fields=checkins,cover,description,' +
                 'hours,id,likes,link,location,name,phone,website,picture&access_token=' + token).
-                success(function (data, status, headers, config) {
+                success(function (data) {
                     var flag = 0;
-                    if (data.location != undefined) {
-                        if (data.location.country === undefined || data.location.country != 'France') {
+                    if (data.location !== undefined) {
+                        if (data.location.country === undefined || data.location.country !== 'France') {
                             flag = 1;
                         }
                     } else {
@@ -86,10 +86,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                         getPositionAndCreate(data);
                     }
                 }).
-                error(function (data, status, headers, config) {
-
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
+                error(function() {
                 });
         }
 
@@ -140,10 +137,10 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
         function getOrganizerPage (id) {
             $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=checkins,cover,description,' +
                 'hours,id,likes,link,location,name,phone,website,picture&access_token=' + token).
-                success(function (data, status, headers, config) {
+                success(function (data) {
                     var flag = 0;
                     if (data.location != undefined) {
-                        if (data.location.country === undefined || data.location.country != 'France') {
+                        if (data.location.country === undefined || data.location.country !== 'France') {
                             flag = 1;
                         }
                     } else {
@@ -153,16 +150,13 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                         postOrganizer(data);
                     }
                 }).
-                error(function (data, status, headers, config) {
-
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
+                error(function () {
                 });
         }
 
         function getPlacesByName(placeName) {
             $http.get('https://graph.facebook.com/v2.2/search?q=' + placeName + '&type=page&access_token=' + token).
-                success(function (data, status, headers, config) {
+                success(function (data) {
                     data = data.data;
                     for (var iv = 0; iv < data.length; iv++) {
                         if (data[iv].category.toLowerCase() === 'concert venue' ||
@@ -170,8 +164,6 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                             data[iv].category.toLowerCase() === 'bar' ||
                             data[iv].category.toLowerCase() === 'arts/entertainment/nightlife') {
                             getPlacePage(data[iv].id);
-                            //count = count + 1;
-                            //
                         } else if (data[iv].category.toLowerCase() === 'concert tour') {
 			    			getOrganizerPage(data[iv].id);
 						} else if (data[iv].category_list != undefined) {
@@ -188,10 +180,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
                         }
                     }
                 }).
-                error(function (data, status, headers, config) {
-
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
+                error(function() {
                 });
         }
 
@@ -227,13 +216,12 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
 		function getCnvList () {
 			$http.get('https://www.cnv.fr/liste-des-affiliés' + page).success(
 				function (data) {
-					var listNamesPlaces = [];
 					var names = data.match(/<td class="active">([^<]*)/g);
 					names = names.map(function(name) {
 						return name.replace('<td class="active">', '')				
 					});
 					if (cnvList.indexOf(names[0]) === -1) {
-						cnvList = cnvList.concat(names)
+						cnvList = cnvList.concat(names);
 						pageNumber++;
 						page = '?page=' + pageNumber;
 						getCnvList();
@@ -249,8 +237,7 @@ angular.module('claudeApp').controller('controlsCtrl', ['$scope', '$http', 'Plac
 							}
 						}, 600)
 					}
-				}).error(function(error) {
-					
+				}).error(function() {
 				});
 		}
 		getCnvList();
