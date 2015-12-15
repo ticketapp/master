@@ -56,7 +56,7 @@ CREATE TABLE organizers (
   facebookId              VARCHAR(63),
   name                    VARCHAR(255) NOT NULL,
   description             VARCHAR,
-  addressId               BIGINT references addresses(addressId),
+  addressId               BIGINT REFERENCES addresses(addressId) ON DELETE CASCADE,
   phone                   VARCHAR(255),
   publicTransit           VARCHAR,
   websites                VARCHAR,
@@ -189,7 +189,7 @@ CREATE TABLE places (
   placeId                   SERIAL PRIMARY KEY,
   name                      VARCHAR(255) NOT NULL,
   geographicPoint           GEOMETRY DEFAULT ST_GeomFromText('POINT(-84 30)', 4326) NOT NULL,
-  addressId                 BIGINT references addresses(addressId),
+  addressId                 BIGINT REFERENCES addresses(addressId) ON DELETE CASCADE,
   facebookId                VARCHAR(63),
   description               VARCHAR,
   webSites                  VARCHAR,
@@ -273,7 +273,7 @@ CREATE TABLE clients (
   name                    VARCHAR(255),
   contactName             VARCHAR(255),
   socialDenomination      VARCHAR(255),
-  addressID               BIGINT references addresses(addressID),
+  addressID               BIGINT REFERENCES addresses(addressID) ON DELETE CASCADE,
   email                   VARCHAR(255),
   UNIQUE(email)
 );
@@ -342,8 +342,8 @@ CREATE TABLE account63 (
   datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
-  orderId                 BIGINT references orders(orderId),
-  account708Id            BIGINT references account708(id)
+  orderId                 BIGINT REFERENCES orders(orderId),
+  account708Id            BIGINT REFERENCES account708(id)
 );
 
 --diverses charges à payer
@@ -353,7 +353,7 @@ CREATE TABLE account4686 (
   name                    VARCHAR(255),
   amount                  NUMERIC NOT NULL,
   debit                   BOOLEAN NOT NULL,
-  account63Id             BIGINT references account63(id)
+  account63Id             BIGINT REFERENCES account63(id)
 );
 
 
