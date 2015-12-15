@@ -33,6 +33,7 @@ trait Injectors {
     "slick.dbs.default.db.connectionPool" -> "disabled")))
   lazy val injector = appBuilder.injector()
   lazy val dbConfProvider = injector.instanceOf[DatabaseConfigProvider]
+  lazy val databaseApi = injector.instanceOf[DBApi]
   lazy val actorSystem = ActorSystem()
   lazy val duplicateTracksActorInstance = new DuplicateTracksActorInstance(actorSystem)
   lazy val trackMethods = new TrackMethods(dbConfProvider, duplicateTracksActorInstance)
@@ -61,7 +62,4 @@ trait Injectors {
   lazy val scheduler = new Scheduler(eventMethods = eventMethods, organizerMethods = organizerMethods,
     artistMethods = artistMethods, trackMethods = trackMethods, placeMethods = placeMethods,
     addressMethods = addressMethods, searchGeographicPoint = geographicPointMethods)
-  lazy val globalMethods = new Global(scheduler)
-
-  lazy val databaseApi = injector.instanceOf[DBApi]
 }

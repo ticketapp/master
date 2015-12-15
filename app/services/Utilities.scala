@@ -198,4 +198,11 @@ trait Utilities {
   }
 
   def setToOptionString(set: Set[String]): Option[String] = if (set.isEmpty) None else Option(set.mkString(","))
+
+  def returnNumberOfHoursBetween4AMAndNow(hoursSinceMidnight: Int): Int = {
+    4 - hoursSinceMidnight match {
+      case positive if positive >= 0 => positive
+      case negative if negative < 0 => 24 + negative
+    }
+  }
 }

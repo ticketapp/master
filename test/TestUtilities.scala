@@ -298,4 +298,11 @@ class TestUtilities extends GlobalApplicationForModels with Utilities {
       websites must contain theSameElementsAs expectedWebsites
     }
   }
+
+  "return the number of hours separating us from 4 A.M." in {
+    returnNumberOfHoursBetween4AMAndNow(4) mustBe 0
+    returnNumberOfHoursBetween4AMAndNow(1) mustBe 3
+    returnNumberOfHoursBetween4AMAndNow(21) mustBe 7
+    returnNumberOfHoursBetween4AMAndNow(5) mustBe 23
+  }
 }

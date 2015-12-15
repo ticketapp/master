@@ -9,19 +9,13 @@ import play.api.Play.current
 import play.api._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.concurrent._
+import services.Utilities
 
 import scala.concurrent.duration._
 
 
 @Singleton
-class Global @Inject()(val scheduler: Scheduler) {
-
-  def returnNumberOfHoursBetween4AMAndNow(hoursSinceMidnight: Int): Int = {
-    4 - hoursSinceMidnight match {
-      case positive if positive >= 0 => positive
-      case negative if negative < 0 => 24 + negative
-    }
-  }
+class Global @Inject()(val scheduler: Scheduler) extends Utilities {
 
   val hoursSinceMidnight: Int = DateTime.now().hourOfDay().get()
 

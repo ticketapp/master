@@ -98,7 +98,8 @@ INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
    (SELECT genreid FROM genres WHERE name = 'genreTest0'), 1);
 
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
-  ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'), (SELECT genreid FROM genres WHERE name = 'genreTest00'), 1);
+  ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
+   (SELECT genreid FROM genres WHERE name = 'genreTest00'), 1);
 
 -------------------------------------------------------- eventsPlaces --------------------------------------------------
 INSERT INTO eventsplaces(eventid, placeid) VALUES
@@ -114,7 +115,8 @@ INSERT INTO eventsorganizers(eventid, organizerid) VALUES
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
   ((SELECT eventId FROM events WHERE name = 'eventPassed'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
 INSERT INTO eventsorganizers(eventid, organizerid) VALUES
-  ((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+  ((SELECT eventId FROM events WHERE name = 'notPassedEvent2'),
+   (SELECT organizerid FROM organizers WHERE name = 'name0'));
 
 -------------------------------------------------------- eventsGenres --------------------------------------------------
 INSERT INTO eventsgenres(eventid, genreid) VALUES
@@ -126,7 +128,8 @@ INSERT INTO eventsaddresses(eventid, addressid) VALUES
 
 -------------------------------------------------------- eventsArtists -------------------------------------------------
 INSERT INTO eventsartists(eventid, artistid) VALUES
-  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
+  ((SELECT eventId FROM events WHERE name = 'name0'),
+   (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
 
 INSERT INTO eventsartists(eventid, artistid) VALUES
   ((SELECT eventId FROM events WHERE name = 'eventPassed'),
