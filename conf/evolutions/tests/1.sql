@@ -82,7 +82,7 @@ CREATE TABLE tracks (
   url                     VARCHAR NOT NULL,
   platform                CHAR NOT NULL,
   thumbnailUrl            VARCHAR NOT NULL,
-  artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) NOT NULL,
+  artistFacebookUrl       VARCHAR(255) REFERENCES artists(facebookUrl) ON DELETE CASCADE NOT NULL,
   artistName              VARCHAR(255) NOT NULL,
   redirectUrl             VARCHAR(255),
   confidence              DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -161,7 +161,7 @@ CREATE TABLE receivedMails (
   subject                   VARCHAR NOT NULL,
   message                   VARCHAR NOT NULL,
   read                      BOOLEAN NOT NULL DEFAULT FALSE,
-  userId                    UUID REFERENCES users(userId)
+  userId                    UUID REFERENCES users(userId) ON DELETE CASCADE
 );
 
 
@@ -207,9 +207,9 @@ CREATE TABLE images (
   imageId                     SERIAL PRIMARY KEY,
   path                        VARCHAR NOT NULL,
   category                    VARCHAR(31),
-  organizerId                 BIGINT REFERENCES organizers(organizerId),
-  infoId                      BIGINT REFERENCES infos(infoId),
-  trackId                     UUID REFERENCES tracks(trackId),
+  organizerId                 BIGINT REFERENCES organizers(organizerId) ON DELETE CASCADE,
+  infoId                      BIGINT REFERENCES infos(infoId) ON DELETE CASCADE,
+  trackId                     UUID REFERENCES tracks(trackId) ON DELETE CASCADE,
   UNIQUE(path)
 );
 
@@ -222,7 +222,7 @@ CREATE TABLE tariffs (
   price                     NUMERIC NOT NULL,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP NOT NULL,
-  eventId                   BIGINT REFERENCES events(eventId)
+  eventId                   BIGINT REFERENCES events(eventId) ON DELETE CASCADE
 );
 
 
@@ -247,21 +247,21 @@ CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
   content                   VARCHAR,
-  userId                    UUID REFERENCES users (userId),
+  userId                    UUID REFERENCES users (userId) ON DELETE CASCADE,
   fixed                     BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE issuesComments (
   commentId                 SERIAL PRIMARY KEY,
   content                   VARCHAR,
-  userId                    UUID REFERENCES users (userId),
-  issueId                   BIGINT REFERENCES issues(issueId)
+  userId                    UUID REFERENCES users (userId) ON DELETE CASCADE,
+  issueId                   BIGINT REFERENCES issues(issueId) ON DELETE CASCADE
 );
 
 CREATE TABLE usersTools (
   tableId                   SERIAL PRIMARY KEY,
   tools                     VARCHAR(255) NOT NULL,
-  userId                    UUID REFERENCES users(userId)
+  userId                    UUID REFERENCES users(userId) ON DELETE CASCADE
 );
 
 ---############################## ACCOUNTING ###################################
@@ -419,23 +419,23 @@ CREATE TABLE account623 (
 
 CREATE TABLE eventsFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   UUID REFERENCES users(userId),
-  eventId                  BIGINT REFERENCES events(eventId)
+  userId                   UUID REFERENCES users(userId) ON DELETE CASCADE,
+  eventId                  BIGINT REFERENCES events(eventId) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX eventsFollowedIndex ON eventsFollowed (userId, eventId);
 
 CREATE TABLE artistsFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   UUID REFERENCES users(userId),
-  artistId                 INT REFERENCES artists(artistId)
+  userId                   UUID REFERENCES users(userId) ON DELETE CASCADE,
+  artistId                 INT REFERENCES artists(artistId) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX artistsFollowedIndex ON artistsFollowed (userId, artistId);
 
 
 CREATE TABLE placesFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   UUID REFERENCES users(userId),
-  placeId                  INT REFERENCES places(placeId)  NOT NULL
+  userId                   UUID REFERENCES users(userId) ON DELETE CASCADE,
+  placeId                  INT REFERENCES places(placeId) ON DELETE CASCADE NOT NULL
 );
 CREATE UNIQUE INDEX placesFollowedIndex ON placesFollowed (userId, placeId);
 
@@ -448,18 +448,17 @@ CREATE UNIQUE INDEX usersFollowedIndex ON usersFollowed (userIdFollower, userIdF
 
 CREATE TABLE organizersFollowed (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  UUID REFERENCES users(userId),
-  organizerId             INT REFERENCES organizers(organizerId)  NOT NULL
+  userId                  UUID REFERENCES users(userId) ON DELETE CASCADE,
+  organizerId             INT REFERENCES organizers(organizerId) ON DELETE CASCADE NOT NULL
 );
 CREATE UNIQUE INDEX organizersFollowedIndex ON organizersFollowed (userId, organizerId);
 
 CREATE TABLE tracksFollowed (
   tableId                  SERIAL PRIMARY KEY,
-  userId                   UUID REFERENCES users(userId),
-  trackId                  UUID REFERENCES tracks(trackId)
+  userId                   UUID REFERENCES users(userId) ON DELETE CASCADE,
+  trackId                  UUID REFERENCES tracks(trackId) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX tracksFollowedIndex ON tracksFollowed (userId, trackId);
-
 
 CREATE TABLE eventsPlaces (
   eventId                 BIGINT REFERENCES events (eventId) ON DELETE CASCADE,
@@ -491,8 +490,8 @@ CREATE TABLE eventsAddresses (
 
 CREATE TABLE usersOrganizers (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  UUID REFERENCES users(userId),
-  organizerId             INT REFERENCES organizers(organizerId)
+  userId                  UUID REFERENCES users(userId) ON DELETE CASCADE,
+  organizerId             INT REFERENCES organizers(organizerId) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX usersOrganizersIndex ON usersOrganizers (userId, organizerId);
 
@@ -505,8 +504,8 @@ CREATE TABLE eventsArtists (
 
 
 CREATE TABLE tracksGenres (
-  trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
-  genreId                 INT REFERENCES genres (genreId) NOT NULL,
+  trackId                 UUID REFERENCES tracks (trackId) ON DELETE CASCADE NOT NULL,
+  genreId                 INT REFERENCES genres (genreId) ON DELETE CASCADE NOT NULL,
   weight                  BIGINT NOT NULL,
   PRIMARY KEY (genreId)
 );
@@ -514,8 +513,8 @@ CREATE UNIQUE INDEX tracksGenresIndex ON tracksGenres (trackId, genreId);
 
 
 CREATE TABLE artistsGenres (
-  artistId                INT REFERENCES artists (artistId),
-  genreId                 INT REFERENCES genres (genreId),
+  artistId                INT REFERENCES artists (artistId) ON DELETE CASCADE,
+  genreId                 INT REFERENCES genres (genreId) ON DELETE CASCADE,
   weight                  INT NOT NULL,
   PRIMARY KEY (artistId, genreId)
 );
@@ -540,8 +539,8 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
-  userId                  UUID REFERENCES users(userId) NOT NULL,
-  trackId                 UUID REFERENCES tracks (trackId) NOT NULL,
+  userId                  UUID REFERENCES users(userId) ON DELETE CASCADE NOT NULL,
+  trackId                 UUID REFERENCES tracks (trackId) ON DELETE CASCADE NOT NULL,
   ratingUp                INT,
   ratingDown              INT,
   reason                  CHAR
@@ -550,8 +549,7 @@ CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
 
 
 # --- !Downs
-DROP TABLE IF EXISTS tracksFollowed;
-DROP TABLE IF EXISTS tracksRating;
+DROP TABLE IF EXISTS tracksFollowed, tracksRating;
 DROP TABLE IF EXISTS usersPlaylists;
 DROP TABLE IF EXISTS playlistsTracks;
 DROP TABLE IF EXISTS eventsGenres;
@@ -606,3 +604,4 @@ DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS addresses;
 DROP TABLE IF EXISTS frenchCities;
 DROP TABLE IF EXISTS users, logininfo, userlogininfo, passwordinfo, oauth1info,  oauth2info, openidinfo, openidattributes;
+

@@ -28,11 +28,11 @@ INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookur
   ('35894e56-08d1-4c1f-b3e4-466c069d15ed', 'title000', 'url0000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
 
 -------------------------------------------------------- playlists -----------------------------------------------------
-INSERT INTO playlists(userId, name) VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', 'playlist0');
+INSERT INTO playlists(playlistid, userId, name) VALUES(1, '077f3ea6-2272-4457-a47e-9e9111108e44', 'playlist0');
 
 -------------------------------------------------------- genres --------------------------------------------------------
-INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
-INSERT INTO genres(name, icon) VALUES('genretest00', 'a');
+INSERT INTO genres(genreid, name, icon) VALUES(1, 'genretest0', 'a');
+INSERT INTO genres(genreid, name, icon) VALUES(2, 'genretest00', 'a');
 
 -------------------------------------------------------- events --------------------------------------------------------
 INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(
@@ -50,7 +50,7 @@ INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint
          '01010000008906CEBE97E346405187156EF9581340');
 
 -------------------------------------------------------- organizers ----------------------------------------------------
-INSERT INTO organizers(name) VALUES('name0');
+INSERT INTO organizers(organizerId, name) VALUES(1, 'name0');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
   VALUES(100, 'name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
@@ -96,7 +96,6 @@ INSERT INTO issues(issueid, title, content, userid, fixed)
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
   ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
    (SELECT genreid FROM genres WHERE name = 'genreTest0'), 1);
-
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
   ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
    (SELECT genreid FROM genres WHERE name = 'genreTest00'), 1);
@@ -130,13 +129,12 @@ INSERT INTO eventsaddresses(eventid, addressid) VALUES
 INSERT INTO eventsartists(eventid, artistid) VALUES
   ((SELECT eventId FROM events WHERE name = 'name0'),
    (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
-
 INSERT INTO eventsartists(eventid, artistid) VALUES
   ((SELECT eventId FROM events WHERE name = 'eventPassed'),
    (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
-
 INSERT INTO eventsartists(eventid, artistid) VALUES
-  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl00'));
+  ((SELECT eventId FROM events WHERE name = 'name0'),
+   (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl00'));
 
 -------------------------------------------------------- eventsFollowed ------------------------------------------------
 INSERT INTO eventsfollowed(eventid, userid) VALUES
@@ -170,3 +168,30 @@ INSERT INTO tracksrating(userId, trackId, reason)
 -------------------------------------------------------- issuesComments ------------------------------------------------
 INSERT INTO issuescomments(commentId, content, userid, issueid)
   VALUES(100, 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', 100);
+
+
+# --- !Downs
+DELETE FROM tracksrating *;
+DELETE FROM issuescomments *;
+DELETE FROM tracksfollowed *;
+DELETE FROM tracksgenres *;
+DELETE FROM playliststracks *;
+DELETE FROM frenchcities *;
+DELETE FROM placesfollowed *;
+DELETE FROM organizersfollowed *;
+DELETE FROM eventsfollowed *;
+DELETE FROM eventsartists *;
+DELETE FROM eventsaddresses *;
+DELETE FROM eventsgenres *;
+DELETE FROM eventsorganizers *;
+DELETE FROM eventsplaces *;
+DELETE FROM artistsgenres *;
+DELETE FROM addresses *;
+DELETE FROM places *;
+DELETE FROM organizers *;
+DELETE FROM events *;
+DELETE FROM genres *;
+DELETE FROM playlists *;
+DELETE FROM tracks *;
+DELETE FROM artists *;
+DELETE FROM users *;
