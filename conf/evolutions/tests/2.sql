@@ -35,16 +35,16 @@ INSERT INTO genres(genreid, name, icon) VALUES(1, 'genretest0', 'a');
 INSERT INTO genres(genreid, name, icon) VALUES(2, 'genretest00', 'a');
 
 -------------------------------------------------------- events --------------------------------------------------------
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(
-  true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
-INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(
-  true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
-INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(
-  true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');
-INSERT INTO events(ispublic, isactive, name, starttime) VALUES(
-  true, true, 'eventPassedWithoutEndTime', timestamp '2012-08-24 14:00:00');
-INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
-  VALUES(true, true, 'notPassedEvent', timestamp '2040-08-24 14:00:00', '0101000000654D87A9886F4840D146640E38D10240');
+INSERT INTO events(eventId, ispublic, isactive, name, starttime, geographicpoint) VALUES(
+  1, true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
+INSERT INTO events(eventId, ispublic, isactive, name, starttime, endtime) VALUES(
+  2, true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+INSERT INTO events(eventId, ispublic, isactive, name, starttime, endtime) VALUES(
+  3, true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');
+INSERT INTO events(eventId, ispublic, isactive, name, starttime) VALUES(
+  4, true, true, 'eventPassedWithoutEndTime', timestamp '2012-08-24 14:00:00');
+INSERT INTO events(eventId, ispublic, isactive, name, starttime, geographicpoint) VALUES(
+  5, true, true, 'notPassedEvent', timestamp '2040-08-24 14:00:00', '0101000000654D87A9886F4840D146640E38D10240');
 INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
   VALUES(100, true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00',
          '01010000008906CEBE97E346405187156EF9581340');

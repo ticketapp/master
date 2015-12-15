@@ -135,7 +135,7 @@ class TestOrganizerModel extends GlobalApplicationForModels {
       }
     }
 
-    "save organizer with event relation" in {
+    "save an organizer with its event relation" in {
       val geoPoint = geographicPointMethods.stringToTryPoint("5.4,5.6").get
       val organizer = OrganizerWithAddress(Organizer(None, None, "organizerTest2", geographicPoint = geoPoint))
 
