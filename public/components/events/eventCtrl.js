@@ -10,7 +10,7 @@ angular.module('claudeApp').
                 if (event.places[0] && event.places[0].geographicPoint) {
                     $scope.geographicPoint = event.places[0].geographicPoint;
                     FollowService.places.isFollowed(event.places[0].id).then(function (isFollowed) {
-                        if (isFollowed == true || isFollowed == false) {
+                        if (isFollowed === true || isFollowed === false) {
                             $scope.event.places[0].isFollowed = isFollowed
                         }
                     });
@@ -43,7 +43,7 @@ angular.module('claudeApp').
                 function setIsFollowedArtist(artist) {
                     FollowService.artists.isFollowed(artist.id).then(
                         function (isFollowed) {
-                            if (isFollowed == true || isFollowed == false) {
+                            if (isFollowed === true || isFollowed === false) {
                                 artist.isFollowed = isFollowed
                             } else {
                                 artist.isFollowed = false;

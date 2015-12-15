@@ -58,7 +58,7 @@
                         <b  ng-if="selectedTop > 0"
                             class="column pointer"
                             ng-click="selectTop(0); playTop(); $parent.$parent.showTop = false">
-                            {{artist.tracks.length}} moceaux
+                            {{artist.tracks.length}} morceaux
                         </b>
                         <b ng-repeat="top in numberOfTop track by $index"
                            class="column pointer"
@@ -84,7 +84,7 @@
                           ng-submit="suggestQuery($parent.trackTitle, artist.name, artist.facebookUrl)"
                           class="column large-12">
                         <b class="column medium-7">
-                            Faîtes découvrir de nouveaux morceaux à Claude !
+                            Faites découvrir de nouveaux morceaux à Claude !
                         </b>
                         <input type="submit" class="button column small-3 medium-2 float-right"/>
                         <input ng-model="$parent.trackTitle"
@@ -99,8 +99,8 @@
                 </div>
                 <div ng-if="artist.tracks.length == 0 && trackTitle.length == 0 && !$root.loadingTracks"
                      class="column large-12 text-center">
-                    <b>Désolé, Claude ne connait pour le moment aucun morceau pour cet artist.
-                        <br/>Vous pouvez ici lui en suggerer</b><br/>
+                    <b>Désolé, Claude ne connaît pour le moment aucun morceau pour cet artiste.
+                        <br/>Vous pouvez lui en suggérer ici</b><br/>
                     <form ng-submit="suggestQuery(trackTitleSuggest, artist.name, artist.facebookUrl)">
                         <input placeholder="Titre du morceau à ajouter" ng-model="trackTitleSuggest">
                         <input class="button" type="submit" />
@@ -108,10 +108,10 @@
                 </div>
                 <div ng-if="tracksFiltered.length == 0 && trackTitle.length > 0"
                      class="column large-12 text-center">
-                    <b>Désolé, Claude ne connait pas "{{trackTitle}}" pour cet artist. <br/>
-                        Demendez-lui d'aller la chercher pour vous en cliquant sur le boutton "suggérer"</b><br/>
+                    <b>Désolé, Claude ne connaît pas "{{trackTitle}}" pour cet artiste. <br/>
+                        Demandez-lui d'aller la chercher pour vous en cliquant sur le boutton "suggérer"</b><br/>
                     <a class="button" ng-click="suggestQuery(trackTitle, artist.name, artist.facebookUrl)">
-                        Suggérer la track {{trackTitle}}
+                        Suggérer le morceaux {{trackTitle}}
                     </a>
                 </div>
                 <div ng-repeat="track in tracksFiltered = (artist.tracks | limitTo: trackLimit) track by $index"

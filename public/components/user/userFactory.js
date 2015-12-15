@@ -54,7 +54,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     TracksRecommender.UpsertTrackRate(true, track.uuid);
                 }).error(function (data, status) {
                     if (status === 401) {
-                        StoreRequest.storeRequest('post', '/tracks/' + track.uuid + '/addToFavorites', "", 'le morceau a été ajouté à vos favoris');
+                        StoreRequest.storeRequest('post', '/tracks/' + track.uuid + '/addToFavorites', "", 'Le morceau a bien été ajouté à vos favoris');
                         var connectListener = $rootScope.$watch('connected', function (newVal) {
                             if (newVal == true) {
                                 TracksRecommender.UpsertTrackRate(true, track.uuid);
@@ -81,7 +81,7 @@ angular.module('claudeApp').factory ('UserFactory', ['$http', '$q', 'StoreReques
                     }
                 }).error(function (data, status) {
                     if (status === 401) {
-                        StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'le morceau a été ajouté à vos favoris')
+                        StoreRequest.storeRequest('post', '/tracks/' + trackId + '/addToFavorites', "", 'Le morceau a bien été ajouté à vos favoris')
                     } else {
                         InfoModal.displayInfo('Désolé une erreur s\'est produite', 'error');
                     }

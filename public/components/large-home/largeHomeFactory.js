@@ -12,14 +12,14 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                            id: 40,
                            displayIfConnected: true,
                            animation: {content: $sce.trustAsHtml('<p style="color: white; text-align: center">' +
-                               'Poster vos messages dans la rubrique bug/FAQ'),
+                               'Postez vos messages dans la rubrique bug/FAQ'),
                                style : 'right: 40px;padding: 10px;' +
                                    'position: fixed;top: 92px;width: 25%;'
 
                            },
                            content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Claude a besoin de vos suggestions</h3><p>' +
                                '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
-                               'Claude est en version Beta, aidez-le à s\'ammeliorer en reportant les bugs ou en laissant vos suggestions ' +
+                               'Claude est en version Beta, aidez-le à s\'améliorer en reportant les bugs ou en laissant vos suggestions ' +
                                '</b>' +
                                '</p>')
                        },
@@ -34,7 +34,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                        },
                        content: $sce.trustAsHtml('<h3 class="textColorWhite margin10">Connectez-vous</h3> <p>' +
                            '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
-                           'Pour enregistrer vos playlists et faire connaitre à Claude vos artistes et vos lieux favoris ' +
+                           'Pour enregistrer vos playlists et faire connaître à Claude vos artistes et vos lieux favoris ' +
                            '</b>' +
                            '</p>')
                    }
@@ -49,14 +49,14 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                         title: 'Claude a besoin de vos suggestions',
                         fixedTitle : false,
                         animation: {content: $sce.trustAsHtml('<p style="color: white; text-align: center">' +
-                            'Poster vos messages dans la rubrique bug/FAQ'),
+                            'Postez vos messages dans la rubrique bug/FAQ'),
                             style : 'right: 40px;padding: 10px;' +
                             'position: fixed;top: 92px;width: 25%;'
 
                         },
                         content: $sce.trustAsHtml('<p>' +
                             '<b class="column large-6 large-offset-3 textColorWhite medium-11">' +
-                            'Claude est en version Beta, aidez-le à s\'ammeliorer en reportant les bugs ou en laissant vos suggestions ' +
+                            'Claude est en version Beta, aidez-le à s\'améliorer en reportant les bugs ou en laissant vos suggestions ' +
                             '</b>' +
                             '</p>')
                     }
@@ -128,7 +128,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                     timeout = setTimeout(function() {
                                         if (event.tracks.length > 0) {
                                             event.tracks = $filter('orderBy')(event.tracks, 'confidence', true);
-                                            var title = 'Ecouter la playliste des événements de ' + organizer.name + ' avec Claude';
+                                            var title = 'Écouter la playlist des événements de ' + organizer.name + ' avec Claude';
                                             var info = '<a style="font-size:25px; color: white;" href="#/events/' + event.id + '">' +
                                                 event.name + '</a>';
                                             var eventCopy = angular.copy(event);
@@ -163,7 +163,7 @@ angular.module('claudeApp').factory('LargeHomeFactory', ['$http', '$q', '$rootSc
                                     timeout = setTimeout(function() {
                                         if (event.tracks.length > 0) {
                                             event.tracks = $filter('orderBy')(event.tracks, 'confidence', true);
-                                            var title = 'Ecouter la playliste des événements de ' + place.name + ' avec Claude';
+                                            var title = 'Ecouter la playlist des événements de ' + place.name + ' avec Claude';
                                             var info = '<a style="font-size:25px; color: white;" href="#/events/' + event.id + '">' +
                                                 event.name + '</a>';
                                             var eventCopy = angular.copy(event);

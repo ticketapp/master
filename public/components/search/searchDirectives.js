@@ -13,7 +13,7 @@ angular.module('claudeApp').directive('ngSearch', function(){
         link : function(scope, element){
             var positionElementInPage;
             var flag = false;
-            if (window.location.hash.indexOf('search')>-1) {
+            if (window.location.hash.indexOf('search') > -1) {
                 $(document).find('#searchTopBlock').removeClass("hiddenBlock");
                 $(document).find('#searchTopBar').focus();
             } else {
@@ -22,7 +22,7 @@ angular.module('claudeApp').directive('ngSearch', function(){
                         positionElementInPage = $(element).find('#searchBar').offset().top;
                         flag = true;
                     }
-                    if ($(window).scrollTop()>= positionElementInPage - 10) {
+                    if ($(window).scrollTop() >= positionElementInPage - 10) {
                         // fixed
                         $(element).find('#searchBlock').addClass("hiddenBlock");
                         $(document).find('#searchTopBlock').removeClass("hiddenBlock");

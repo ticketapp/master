@@ -13,7 +13,7 @@ angular.module('claudeApp').
                 return artist
             },
             refactorTrackWithGenreObject: function(track) {
-                track.track.genres = track.genres
+                track.track.genres = track.genres;
                 track = track.track;
                 return track
             },

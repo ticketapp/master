@@ -33,7 +33,7 @@ angular.module('claudeApp').directive('Wysiwygcontent', ['$sce', function($sce) 
                 var html = element.html();
                 // When we clear the content editable the browser leaves a <br> behind
                 // If strip-br attribute is provided then we strip this out
-                if ( attrs.stripBr && html == '<br>' ) {
+                if ( attrs.stripBr && html === '<br>' ) {
                     html = '';
                 }
                 ngModel.$setViewValue(html);
@@ -42,7 +42,7 @@ angular.module('claudeApp').directive('Wysiwygcontent', ['$sce', function($sce) 
     };
 }]);
 
-angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout, $location){
+angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout){
     $scope.styles = [
         {
             'type':'button',
@@ -266,8 +266,8 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
     ];
     $scope.maxlargeClass = 12;
     $scope.$watch("newSize", function(newval) {
-        if (newval != undefined) {
-            var val = newval.toString()
+        if (newval !== undefined) {
+            var val = newval.toString();
             val = val.replace('.0', '');
             if (val <= 12 && val >= 1) {
                 $scope.ElementSize('large-', val);
@@ -275,8 +275,8 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
         }
     }, true);
     $scope.$watch("newOffset", function(newval) {
-        if (newval != undefined) {
-            var val = newval.toString()
+        if (newval !== undefined) {
+            var val = newval.toString();
             val = val.replace('.0', '');
             if (val <= 12 && val >= 1) {
                 $scope.ElementSize('large-offset-', val - 1);
@@ -319,7 +319,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
         $scope.useTemps = function (name) {
             for (var i = 0; i < $scope.template.length; i++) {
 
-                if (name == $scope.template[i].name) {
+                if (name === $scope.template[i].name) {
                     document.getElementById("content").innerHTML = $scope.template[i].code;
                 }
             }
@@ -340,9 +340,9 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
         };
         $scope.addElement = function () {
             document.getElementById('content').innerHTML = document.getElementById('content').innerHTML + "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
-        }
+        };
         $scope.addClass = function (a) {
-            if (document.getSelection().anchorNode.parentNode.className == a) {
+            if (document.getSelection().anchorNode.parentNode.className === a) {
                 var content = document.getSelection().anchorNode.parentNode.classList;
                 content.remove(a);
             } else {
@@ -382,7 +382,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                     if (document.getElementById("content").getElementsByTagName('img')[ii].parentNode.className.indexOf("imgContain") > -1) {
                         searchM = document.getElementById("content").getElementsByTagName('img')[ii].parentNode;
                     } else {
-                        document.getElementById("content").getElementsByTagName('img')[ii].outerHTML = '<div class="imgContain padding0">' + document.getElementById("content").getElementsByTagName('img')[ii].outerHTML + '</div>'
+                        document.getElementById("content").getElementsByTagName('img')[ii].outerHTML = '<div class="imgContain padding0">' + document.getElementById("content").getElementsByTagName('img')[ii].outerHTML + '</div>';
                         if (document.getElementById("content").getElementsByTagName('img')[ii].className.indexOf("width100p") <= -1) {
                             document.getElementById("content").getElementsByTagName('img')[ii].classList.add("width100p");
                         }
@@ -393,18 +393,18 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
             $timeout(function () {
                 var searchParent = true;
                 var m = false;
-                if (imgFind == true) {
+                if (imgFind === true) {
                     m = searchM;
                     searchParent = false;
                 } else {
-                    if (document.getSelection().anchorNode != null  && document.getSelection().anchorNode.parentElement.tagName != 'A'){
+                    if (document.getSelection().anchorNode !== null  && document.getSelection().anchorNode.parentElement.tagName !== 'A'){
                         searchM = document.getSelection().anchorNode.parentElement;
                     } else {
                         searchM = document.getElementById('content');
 
                     }
                 }
-                while (searchParent == true) {
+                while (searchParent === true) {
                     switch (searchM.tagName) {
                         case 'DIV':
                         case 'WYSIWYG':
@@ -422,7 +422,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                 }
                 var rect = m.getBoundingClientRect();
                 function initControl () {
-                    if (m != undefined && document.getElementById('remEl') != null) {
+                    if (m !== undefined && document.getElementById('remEl') !== null) {
                         var posEl = m.getBoundingClientRect();
                         document.getElementById('remEl').style.position = "fixed";
                         document.getElementById('remEl').style.zIndex = 10;
@@ -456,29 +456,29 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                     m.style.backgroundColor = bc;
                 };
                 $scope.ElementSize = function (a, b) {
-                    $scope.sizeEl = b +"/12"
-                    /*if (small == true) {
+                    $scope.sizeEl = b +"/12";
+                    /*if (small === true) {
                      a = "small-"
-                     } else if (medium == true) {
+                     } else if (medium === true) {
                      a = "medium-"
-                     }else if (large == true) {
+                     }else if (large === true) {
                      a = "large-"
                      }*/
-                    if (imgFind == true) {
+                    if (imgFind === true) {
                         range = m;
                         changeColumnClass()
                     } else {
                         range = document.getSelection().getRangeAt(0);
-                        if (range == range.commonAncestorContainer.data || range.endOffset == range.startOffset || range.commonAncestorContainer.parentElement.localName == 'a') {
-                            if (range.commonAncestorContainer.parentElement.localName != "div") {
+                        if (range === range.commonAncestorContainer.data || range.endOffset === range.startOffset || range.commonAncestorContainer.parentElement.localName === 'a') {
+                            if (range.commonAncestorContainer.parentElement.localName !== "div") {
                                 var flag = true;
                                 var rangeSave = range.commonAncestorContainer.parentElement;
-                                while (flag == true) {
-                                    if (rangeSave.outerHTML == rangeSave.parentElement.innerHTML || range.commonAncestorContainer.parentElement.localName == 'a') {
-                                        if (rangeSave.parentElement.localName == "div") {
+                                while (flag === true) {
+                                    if (rangeSave.outerHTML === rangeSave.parentElement.innerHTML || range.commonAncestorContainer.parentElement.localName === 'a') {
+                                        if (rangeSave.parentElement.localName === "div") {
                                             flag = false;
                                             range = rangeSave;
-                                            if (range.parentElement.id == "content") {
+                                            if (range.parentElement.id === "content") {
                                                 range = range.outerHTML;
                                                 createNewColumn();
                                             } else {
@@ -495,7 +495,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                                     }
                                 }
                             } else {
-                                /*if (range.commonAncestorContainer.parentElement.id == "content") {
+                                /*if (range.commonAncestorContainer.parentElement.id === "content") {
                                  var div = document.createElement("div");
                                  div.innerHTML = "<div  class='column float-left " + a + b + "'>" + range + "</div>";
                                  range.deleteContents();
@@ -525,7 +525,6 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                     function changeColumnClass() {
                         var gridClass = range.className;
                         var css = a + b;
-                        var del = gridClass.indexOf(css);
                         var change = gridClass.indexOf(a);
                         if (off = range.className.match(/offset-\d+/)) {
                             $scope.maxlargeClass = 12 -  parseInt(off[0].match(/\d+/))
@@ -543,10 +542,9 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                                         $scope.maxlargeClass = 12 - parseInt(b);
                                         if(parseInt(sizeMatched[0].match(/\d+/)) + parseInt(b) >= 12) {
                                             //range.classList.remove(sizeMatched[0]);
-                                            var maxSize = 'large-' + (12 - parseInt(b)).toString();
+                                            //maxSize = 'large-' + (12 - parseInt(b)).toString();
                                             //range.classList.add(maxSize);
                                             $scope.newSize = (12 - parseInt(b)).toString() + '.0';
-                                            console.log($scope.newSize)
                                         }
                                     }
                                 }
@@ -565,10 +563,8 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                                 if (sizeMatched = range.className.match(/large-\d+/)) {
                                     if(parseInt(sizeMatched[0].match(/\d+/))) {
                                         $scope.maxlargeClass = 12 - parseInt(b);
-                                        console.log($scope.maxlargeClass)
                                         if(parseInt(sizeMatched[0].match(/\d+/)) + parseInt(b) >= 12) {
                                             //range.classList.remove(sizeMatched[0]);
-                                            var maxSize = 'large-' + (12 - parseInt(b)).toString();
                                             //range.classList.add(maxSize);
                                             $scope.newSize = (12 - parseInt(b)).toString() + '.0';
                                         }
@@ -588,22 +584,22 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                     initControl();
                 };
                 $scope.ElementFloat = function (a, b) {
-                    if (imgFind == true) {
+                    if (imgFind === true) {
                         range = m;
                         changeFloatClass();
                     }
                     else {
                         range = document.getSelection().getRangeAt(0);
-                        if (range == range.commonAncestorContainer.data || range.endOffset == range.startOffset) {
-                            if (range.commonAncestorContainer.parentElement.localName != "div") {
+                        if (range === range.commonAncestorContainer.data || range.endOffset === range.startOffset) {
+                            if (range.commonAncestorContainer.parentElement.localName !== "div") {
                                 var flag = true;
                                 var rangeSave = range.commonAncestorContainer.parentElement;
-                                while (flag == true) {
-                                    if (rangeSave.outerHTML == rangeSave.parentElement.innerHTML) {
-                                        if (rangeSave.parentElement.localName == "div") {
+                                while (flag === true) {
+                                    if (rangeSave.outerHTML === rangeSave.parentElement.innerHTML) {
+                                        if (rangeSave.parentElement.localName === "div") {
                                             flag = false;
                                             range = rangeSave;
-                                            if (range.parentElement.id == "content") {
+                                            if (range.parentElement.id === "content") {
                                                 range = range.outerHTML;
                                                 createNewFloat();
                                             } else {
@@ -620,11 +616,11 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                                     }
                                 }
                             } else {
-                                if (range.commonAncestorContainer.parentElement.id == "content") {
-                                    var div = document.createElement("div");
+                                if (range.commonAncestorContainer.parentElement.id === "content") {
+                                    div = document.createElement("div");
                                     div.innerHTML = "<div  class='" + a + b + "'>" + range + "</div>";
                                     range.deleteContents();
-                                    var frag = document.createDocumentFragment(), child;
+                                    frag = document.createDocumentFragment(), child;
                                     while ((child = div.firstChild)) {
                                         frag.appendChild(child);
                                     }
@@ -673,22 +669,16 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                         initControl();
                     }
                 };
-                if (m.id == "content") {
-                    if (document.getElementById('content').innerHTML.length == 0) {
-
-                        var inner = m.innerHTML;
+                if (m.id === "content") {
+                    if (document.getElementById('content').innerHTML.length === 0) {
                         document.getElementById('content').innerHTML = "<div  class='column large-12' contenteditable='true'>Ecrire ici</div>";
                     }
-                } else if (m.tagName == "WYSIWYG" || m.tagName == "BODY") {
-
-                    var contentElement = document.getElementById('content').innerHTML;
-                    if (document.getElementById('content').innerHTML.length == 0) {
+                } else if (m.tagName === "WYSIWYG" || m.tagName === "BODY") {
+                    if (document.getElementById('content').innerHTML.length === 0) {
                         document.getElementById('content').innerHTMLL = "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
                     }
-                } else if (document.getElementById('content').innerHTML.indexOf(m.outerHTML) == -1) {
-
-                    var contentElement = document.getElementById('content').innerHTML;
-                    if (document.getElementById('content').innerHTML.length == 0) {
+                } else if (document.getElementById('content').innerHTML.indexOf(m.outerHTML) === -1) {
+                    if (document.getElementById('content').innerHTML.length === 0) {
                         document.getElementById('content').innerHTML = "<div contenteditable='true' class='column large-12'>Ecrire ici</div>";
                     }
                 } else {
@@ -704,13 +694,13 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                     var parentRect = m.parentElement.getBoundingClientRect();
                     var offset = parentRect.width * 8 / 100;
                     if (sidePoint > rect.left && sidePoint < rect.left + 5) {
-                        if (right == false) {
+                        if (right === false) {
                             onResize = true;
                             m.style.cursor = "col-resize";
                             left = true;
                         }
                     } else if (sidePoint < rect.right && sidePoint > rect.right - 5) {
-                        if (left == false) {
+                        if (left === false) {
                             onResize = true;
                             m.style.cursor = "col-resize";
                             right = true;
@@ -738,28 +728,28 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                      var cursorPosition = event.clientX;
                      if (event.clientX > rect.left && event.clientX < rect.left + 5) {
                      m.style.cursor = "col-resize";
-                     if (imgFind == true) {
+                     if (imgFind === true) {
                      m.title = "Utilisez le bouton ElementSize pour redimentionner une image"
                      }
                      } else if (event.clientX < rect.right && event.clientX > rect.right - 5) {
                      m.style.cursor = "col-resize";
-                     if (imgFind == true) {
+                     if (imgFind === true) {
                      m.title = "Utilisez le bouton ElementSize pour redimentionner une image"
                      }
-                     } else if (onResize == false) {
+                     } else if (onResize === false) {
                      m.style.cursor = "auto";
-                     if (imgFind == true) {
+                     if (imgFind === true) {
                      m.title = ""
                      }
                      }
-                     if (onResize == true) {
-                     if (left == true && cursorPosition > sidePoint + offset) {
+                     if (onResize === true) {
+                     if (left === true && cursorPosition > sidePoint + offset) {
                      sidePoint = sidePoint + offset;
                      var typeClass = respClass + "offset-";
                      var gridClass = m.className;
                      var pattern = new RegExp(typeClass + "\\w*");
                      if (matched = gridClass.match(pattern)) {
-                     if (matched[0] != respClass + "offset-11") {
+                     if (matched[0] !== respClass + "offset-11") {
                      var largeClass = respClass;
                      var large = new RegExp(largeClass + "[0-9][0-9]?");
                      var number = Number(matched[0].match(/\d+/)) + 1;
@@ -801,14 +791,14 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                      //rect = m.getBoundingClientRect();
                      }
                      }
-                     if (left == true && cursorPosition < sidePoint - offset) {
+                     if (left === true && cursorPosition < sidePoint - offset) {
                      sidePoint = sidePoint - offset;
                      console.log('remove offset');
                      typeClass = respClass + "offset-";
                      gridClass = m.className;
                      pattern = new RegExp(typeClass + "\\w*");
                      if (matched = gridClass.match(pattern)) {
-                     if (matched[0] != respClass + "offset-1") {
+                     if (matched[0] !== respClass + "offset-1") {
                      number = Number(matched[0].match(/\d+/)) - 1;
                      css = respClass + "offset-" + number;
                      m.classList.remove(matched[0]);
@@ -821,7 +811,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                      console.log('here')
                      }
                      }
-                     if (right == true && cursorPosition > sidePoint + offset) {
+                     if (right === true && cursorPosition > sidePoint + offset) {
                      sidePoint = sidePoint + offset;
                      console.log('addlarge');
                      var LargeClass = respClass;
@@ -843,7 +833,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                      $scope.sizeEl = maxLargeClass +"/12";
                      initControl();
                      }
-                     } else if (matched[0] != respClass + "12") {
+                     } else if (matched[0] !== respClass + "12") {
                      var numberLarge = Number(matched[0].match(/\d+/)) + 1;
                      var cssLarge = respClass + numberLarge;
                      m.classList.remove(matched[0]);
@@ -853,7 +843,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
                      }
                      }
                      }
-                     if (right == true && cursorPosition < sidePoint - offset) {
+                     if (right === true && cursorPosition < sidePoint - offset) {
                      sidePoint = sidePoint - offset;
                      console.log('remove large');
                      LargeClass = respClass;
@@ -900,7 +890,7 @@ angular.module('claudeApp').controller('wysiwygCtrl', function($scope, $timeout,
         document.getElementById("content").addEventListener("mouseup", ActiveElement, false);
     }
     var waitForIframe = setInterval(function () {
-        if (document.getElementById("content") != null) {
+        if (document.getElementById("content") !== null) {
             wysinit();
             clearInterval(waitForIframe)
         }

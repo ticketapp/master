@@ -12,11 +12,11 @@ angular.module('claudeApp').
             if (organizer.description) {
                 $scope.description = organizer.description.trim();
             }
-            if ($scope.organizer.geographicPoint != undefined) {
+            if ($scope.organizer.geographicPoint !== undefined) {
                 $scope.geographicPoint = $scope.organizer.geographicPoint;
                 $scope.map = true;
             }
-            if (organizer.websites != undefined) {
+            if (organizer.websites !== undefined) {
                 if (organizer.websites.indexOf(',') > -1) {
                     organizer.websites.split(',');
                 } else {
@@ -39,20 +39,20 @@ angular.module('claudeApp').
                     }
                 })
             }*/
-            if ($rootScope.connected == true) {
+            if ($rootScope.connected === true) {
                 OrganizerFactory.getIsFollowed(organizer.id).then(function (isFollowed) {
-                    if (isFollowed == true || isFollowed == false) {
+                    if (isFollowed === true || isFollowed === false) {
                         $scope.isFollowed = isFollowed;
                     }
                 })
             }
             $rootScope.$watch('connected', function (connected) {
-                if (connected == false) {
+                if (connected === false) {
                     $scope.isFollowed = false;
                 } else {
                     OrganizerFactory.getIsFollowed(organizer.id).then(function (isFollowed) {
-                        if (isFollowed == true || isFollowed == false) {
-                            if (isFollowed == true || isFollowed == false) {
+                        if (isFollowed === true || isFollowed === false) {
+                            if (isFollowed === true || isFollowed === false) {
                                 $scope.isFollowed = isFollowed;
                             }
                         }
@@ -70,7 +70,7 @@ angular.module('claudeApp').
             OrganizerFactory.followOrganizerByOrganizerId($scope.organizer.id, $scope.organizer.name).
                 then(
                 function (followed) {
-                    if (followed != 'error') {
+                    if (followed !== 'error') {
                         $scope.isFollowed = true;
                         InfoModal.displayInfo('Vous suivez ' + $scope.organizer.name)
                     }
@@ -81,7 +81,7 @@ angular.module('claudeApp').
             OrganizerFactory.unfollowOrganizer($scope.organizer.id, $scope.organizer.name).
                 then(
                 function (followed) {
-                    if (followed != 'error') {
+                    if (followed !== 'error') {
                         $scope.isFollowed = false;
                         InfoModal.displayInfo('Vous ne suivez plus ' + $scope.organizer.name)
                     }

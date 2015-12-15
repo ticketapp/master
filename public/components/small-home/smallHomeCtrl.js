@@ -156,7 +156,7 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                 });
                 var counter=[];
                 var bestIcon='';
-                var maxi=0;
+                var maxi = 0;
                 for(var icon in icons) {
                     if (icon !== 'a') {
                         if (counter[icon]) {
@@ -164,9 +164,9 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                         } else {
                             counter[icon] = 1
                         }
-                        if (maxi<counter[icon]) {
-                            bestIcon=icon;
-                            maxi=counter[icon]
+                        if (maxi < counter[icon]) {
+                            bestIcon = icon;
+                            maxi = counter[icon]
                         }
                     }
                 }
@@ -208,7 +208,7 @@ angular.module('claudeApp').controller('SmallHomeCtrl', ['$scope', '$rootScope',
                     }
                 }
                 if (places.length === 1 || positions.length === 1) {
-                    window.location.href =('#/places/' + places[0]);
+                    window.location.href = ('#/places/' + places[0]);
                 }
             });
         }

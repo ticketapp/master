@@ -36,7 +36,7 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     $scope.playlists = [];
     $scope.logout = function () {
         $http.get('/signOut').
-            success(function (data) {
+            success(function () {
                 $rootScope.connected = false;
                 InfoModal.displayInfo('vous êtes deconnecté')
             })
@@ -142,7 +142,7 @@ angular.module('claudeApp').controller('ModalInstanceCtrl', ['$scope', '$modalIn
     };
     $scope.deletePlaylist = function (playlistId, index) {
         $http.delete('/playlists/' + playlistId).
-            success(function (data) {
+            success(function () {
                 $scope.playlists.splice(index, 1)
             }).
             error (function (data) {

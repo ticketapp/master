@@ -19,12 +19,12 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 followByIdAndPushToFollowedOrganizers: function(organizer) {
                     var defered = $q.defer();
-                    factory.organizers.followById(organizer.id).then(function(isFollowed, status) {
+                    factory.organizers.followById(organizer.id).then(function(isFollowed) {
                         if (factory.followedOrganizers.length === 0) {
                             factory.organizers.followed().then(function () {
                                 factory.followedOrganizers.push(organizer);
                                 defered.resolve(isFollowed)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(isFollowed)
                             });
                         } else {
@@ -59,12 +59,12 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 followByFacebookIdAndPushToFollowedOrganizers: function(organizer) {
                     var defered = $q.defer();
-                    factory.organizers.followByFacebookId(organizer.facebookId).then(function(isFollowed, status) {
+                    factory.organizers.followByFacebookId(organizer.facebookId).then(function(isFollowed) {
                         if (factory.followedOrganizers.length === 0) {
                             factory.organizers.followed().then(function () {
                                 factory.followedOrganizers.push(organizer);
                                 defered.resolve(isFollowed)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(isFollowed)
                             });
                         } else {
@@ -125,12 +125,12 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 followByIdAndPushToFollowedPlaces: function(place) {
                     var defered = $q.defer();
-                    factory.places.followById(place.id).then(function(isFollowed, status) {
+                    factory.places.followById(place.id).then(function(isFollowed) {
                         if (factory.followedPlaces.length === 0) {
                             factory.places.followed().then(function () {
                                 factory.followedPlaces.push(place);
                                 defered.resolve(isFollowed)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(isFollowed)
                             });
                         } else {
@@ -165,12 +165,12 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 followByFacebookIdAndPushToFollowedPlaces: function(place) {
                     var defered = $q.defer();
-                    factory.places.followByFacebookId(place.facebookId).then(function(isFollowed, status) {
+                    factory.places.followByFacebookId(place.facebookId).then(function(isFollowed) {
                         if (factory.followedPlaces.length === 0) {
                             factory.places.followed().then(function () {
                                 factory.followedPlaces.push(place);
                                 defered.resolve(isFollowed)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(isFollowed)
                             });
                         } else {
@@ -231,12 +231,12 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 followByIdAndPushToFollowedArtists: function(artist) {
                     var defered = $q.defer();
-                    factory.artists.followById(artist.id).then(function(isFollowed, status) {
+                    factory.artists.followById(artist.id).then(function(isFollowed) {
                         if (factory.followedArtists.length === 0) {
                             factory.artists.followed().then(function () {
                                 factory.followedArtists.push(artist);
                                 defered.resolve(isFollowed)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(isFollowed)
                             });
                         } else {
@@ -271,12 +271,12 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 followByFacebookIdAndPushToFollowedArtists: function(artist) {
                     var defered = $q.defer();
-                    factory.artists.followByFacebookId(artist.facebookId).then(function(isFollowed, status) {
+                    factory.artists.followByFacebookId(artist.facebookId).then(function(isFollowed) {
                         if (factory.followedArtists.length === 0) {
                             factory.artists.followed().then(function () {
                                 factory.followedArtists.push(artist);
                                 defered.resolve(isFollowed)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(isFollowed)
                             });
                         } else {
@@ -346,7 +346,7 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                             factory.tracks.favorites().then(function() {
                                 factory.favoritesTracks.push(track);
                                 defered.resolve(response)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(response)
                             });
                         }
@@ -420,12 +420,12 @@ angular.module('claudeApp').factory('FollowService', ['$localStorage', 'RoutesFa
                 },
                 followByIdAndPushToFollowedEvents: function(event) {
                     var defered = $q.defer();
-                    factory.events.follow(event.id).then(function(isFollowed, status) {
+                    factory.events.follow(event.id).then(function(isFollowed) {
                         if (factory.followedEvents.length === 0) {
                             factory.events.followed().then(function () {
                                 factory.followedEvents.push(event);
                                 defered.resolve(isFollowed)
-                            }, function errorCallback(error) {
+                            }, function errorCallback() {
                                 defered.resolve(isFollowed)
                             });
                         } else {

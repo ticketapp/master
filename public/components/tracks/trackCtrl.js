@@ -19,7 +19,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                     'vous proppose</b>' +
                     '<select ng-model="reason">'+
                     '<option value="B">Mauvais artiste</option>'+
-                    '<option value="Q">Mauvaise qualitée</option>'+
+                    '<option value="Q">Mauvaise qualité</option>'+
                     '</select><b class="column large-12">{{error}}</b>'+
                     '<input type="submit" class="button">'+
                     '<a class="button float-right" ng-click="cancel()">Annuler</a>'+
@@ -27,7 +27,7 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
                 controller: 'SignalTrackCtrl'
             });
             modalInstance.result.then(function (reason) {
-                if (trackId != null && trackId != undefined) {
+                if (angular.isDefAndNotNull(trackId)) {
                     $localStorage.tracksSignaled.push({trackId: trackId, reason: reason});
                     TracksRecommender.UpsertTrackRate(false, trackId, reason);
                 }
@@ -42,10 +42,10 @@ angular.module('claudeApp').controller('TrackCtrl', ['$scope', 'UserFactory', '$
 angular.module('claudeApp').controller('SignalTrackCtrl', ['$scope', '$modalInstance',
     function ($scope, $modalInstance) {
         $scope.ok = function (reason) {
-            if (reason != undefined) {
+            if (reason !== undefined) {
                 $modalInstance.close(reason);
             } else {
-                $scope.error = 'veuyez renseigner ce champs'
+                $scope.error = 'Veuillez renseigner ce champ'
             }
         };
         $scope.cancel = function () {

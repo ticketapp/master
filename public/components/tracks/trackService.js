@@ -59,7 +59,7 @@ angular.module('claudeApp').factory('TrackService', ['$localStorage', '$filter',
                     return track;
                 });
                 defered.resolve(tracksWithFavorites);
-            }, function error (error) {
+            }, function error () {
                 defered.resolve(tracks)
             });
             return defered.promise;

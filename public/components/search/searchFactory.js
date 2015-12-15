@@ -1,6 +1,6 @@
 angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location', '$q', 'EventsFactory', 'UserFactory',
-    'GenresFactory', 'GeolocFactory', 'CityFactory', '$localStorage',
-    function ($rootScope, $location, $q, EventsFactory, UserFactory, GenresFactory, GeolocFactory, CityFactory, $localStorage) {
+    'GenresFactory', 'GeolocFactory', 'CityFactory',
+    function ($rootScope, $location, $q, EventsFactory, UserFactory, GenresFactory, GeolocFactory, CityFactory) {
     var factory = {
         initSearch : false,
         research : false,
@@ -9,7 +9,7 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
         isConnected: false,
         eventsOffset: 0,
         init : function () {
-            if (factory.initSearch == false) {
+            if (factory.initSearch === false) {
                 $rootScope.activArtist = false;
                 $rootScope.activEvent = true;
                 $rootScope.activPlace = false;
@@ -19,7 +19,7 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
                 $rootScope.redirectToSearch = function (research) {
                     factory.research = research;
                     $rootScope.storeSearch = research;
-                    if ($location.path() != '/') {
+                    if ($location.path() !== '/') {
                         $location.path('/search')
                     }
                 };
@@ -35,7 +35,6 @@ angular.module('claudeApp').factory('SearchFactory', ['$rootScope', '$location',
         },
         storeSearch : function (search) {
             $rootScope.storeSearch = search;
-            //factory.research = search;
         },
         filterEventArtists: function (event, research) {
             return event.artists.filter(function (artist) {

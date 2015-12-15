@@ -68,7 +68,7 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
             },0)
         }
 
-        function errorPosition(error) {
+        function errorPosition() {
             $http.get('/users/geographicPoint').success(function (data) {
                 if (data.status !== 'fail') {
                     $rootScope.geoLoc = data.lat + "," + data.lon;
@@ -97,7 +97,7 @@ angular.module('claudeApp').factory('GeolocFactory', ['$rootScope', '$http', '$t
                 } else {
                     $rootScope.geoLoc = $localStorage.geoloc
                 }
-            }).error(function(error) {
+            }).error(function() {
                 $rootScope.geoLoc = $localStorage.geoloc
             })
         }

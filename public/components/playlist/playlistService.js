@@ -4,7 +4,7 @@ angular.module('claudeApp').service('PlaylistService', ['$q', '$rootScope', 'Eve
         var factory = {
             eventsPlaylist : {
                 geopoint: '',
-                playlist: {uuid: UUID.guid(), name: 'Evenements aux alentours', tracks: []}
+                playlist: {uuid: UUID.guid(), name: 'Événements aux alentours', tracks: []}
             },
             getEventsPlaylist : function () {
                 var deferred = $q.defer();
@@ -47,7 +47,7 @@ angular.module('claudeApp').service('PlaylistService', ['$q', '$rootScope', 'Eve
                 uuid: UUID.guid(),
                 geopoint: '',
                 genre : '',
-                playlist: {name: 'Playlist des evénéments ', tracks: []}
+                playlist: {name: 'Playlist des événements ', tracks: []}
             },
             getEventsGenrePlaylist : function (genre) {
                 var deferred = $q.defer();
@@ -74,7 +74,7 @@ angular.module('claudeApp').service('PlaylistService', ['$q', '$rootScope', 'Eve
                                             factory.eventsGenrePlaylist.playlist.tracks = $filter('orderBy')(collectedTracks, 'confidence', true);
                                             factory.eventsGenrePlaylist.geopoint = $rootScope.geoLoc;
                                             factory.eventsGenrePlaylist.genre = genre;
-                                            factory.eventsGenrePlaylist.playlist.name = 'Playlist des evénéments ' + genre;
+                                            factory.eventsGenrePlaylist.playlist.name = 'Playlist des événements ' + genre;
                                             deferred.notify(angular.copy(factory.eventsGenrePlaylist.playlist))
                                         }
                                     })

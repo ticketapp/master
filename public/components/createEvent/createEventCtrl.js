@@ -18,20 +18,20 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
     $scope.newEvent.adresses = [];
     $scope.addArt = false;
     $scope.addNewArt = [];
-    $scope.content = '<div class="column large-12">ecrire ici</div>'
+    $scope.content = '<div class="column large-12">Ecrire ici</div>';
     $scope.imgSize = '100';
     $scope.maxlargeClass = 12;
     $scope.infoG = true;
     $scope.startTour = $tour.start;
     $scope.goTop = function () {
         window.scrollTo(0, 0);
-    }
+    };
     $scope.currencyFormatting = function(value) {
         return value.toString()
     };
     $scope.testResp = function () {
         window.innerWidth = 950;
-    }
+    };
     function imagePlace () {
 
     }
@@ -56,7 +56,7 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
         if ($scope.addNewArt.name.length > 1) {
             $scope.addArt = false;
             $scope.newEvent.artists.push($scope.addNewArt);
-            $scope.addNewArt = []
+            $scope.addNewArt = [];
             console.log( $scope.newEvent.artists)
         }
     };
@@ -82,14 +82,11 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
     };
     $scope.searchEvent = function(){
         $http.get('https://graph.facebook.com/v2.2/search?q='+ $scope.eventFbName + '&limit=15&type=event&access_token=CAAUY6TFIL18BAP1ir9hDkv5EqRZCMJ1hAZA1niWapeCQUNTUXQHNF0ofKPyGN2QZBQiHwMCQOaYzMPB0KD9oGRyrdL7T0gfz6dYM5xDQ9ZC2R4aPRvE1ZBKGYozfDhGRj7Vxb2ToeZAFXBYm7ZCPaCP96aIirwpEiyWjtAJJnjnj7WY5ymc25xt0ZBYaYIs73wab1YIpCtSy8KcB8WTlmHrxv0tS6wEgyzIZD').
-            success(function(data, status, headers, config) {
+            success(function(data) {
 
                 $scope.searchEvents = data.data;
             }).
-            error(function(data, status, headers, config) {
-
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
+            error(function() {
             });
     };
     $scope.GetEventById = function(id) {
@@ -97,9 +94,8 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
         var scopeReady = false;
         var cover = false;
         $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=ticket_uri,id,name,start_time,owner,end_time,description,admins,venue,location&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
-            success(function(data, status, headers, config) {
+            success(function(data) {
 
-                //$scope.newEvent = data;
                 var links = /((?:(http|https|Http|Https|rtsp|Rtsp):\/\/(?:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,64}(?:\:(?:[a-zA-Z0-9\$\-\_\.\+\!\*\'\(\)\,\;\?\&\=]|(?:\%[a-fA-F0-9]{2})){1,25})?\@)?)?((?:(?:[a-zA-Z0-9][a-zA-Z0-9\-]{0,64}\.)+(?:(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])|(?:biz|b[abdefghijmnorstvwyz])|(?:cat|com|coop|c[acdfghiklmnoruvxyz])|d[ejkmoz]|(?:edu|e[cegrstu])|f[ijkmor]|(?:gov|g[abdefghilmnpqrstuwy])|h[kmnrtu]|(?:info|int|i[delmnoqrst])|(?:jobs|j[emop])|k[eghimnrwyz]|l[abcikrstuvy]|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])|(?:name|net|n[acefgilopruz])|(?:org|om)|(?:pro|p[aefghklmnrstwy])|qa|r[eouw]|s[abcdeghijklmnortuvyz]|(?:tel|travel|t[cdfghjklmnoprtvwz])|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]))|(?:(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[0-9])))(?:\:\d{1,5})?)(\/(?:(?:[a-zA-Z0-9\;\/\?\:\@\&\=\#\~\-\.\+\!\*\'\(\)\,\_])|(?:\%[a-fA-F0-9]{2}))*)?(?:\b|$)/gi;;
                 $scope.content = data.description.replace(/(\n\n)/g, " <br/><br/></div><div class='column large-12'>");
                 $scope.content = '<div class="column large-12">' + $scope.content.replace(/(\n)/g, " <br/>") + '</div>';
@@ -111,7 +107,7 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                         if (unique.indexOf(current) < 0) unique.push(current);
                     }
 
-                    for (var i=0; i < unique.length; i++) {
+                    for (var i = 0; i < unique.length; i++) {
                         $scope.content = $scope.content.replace(new RegExp(unique[i],"g"),
                                 "<a href='" + unique[i]+ "'>" + unique[i] + "</a>")
                     }
@@ -129,17 +125,15 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                     zips: data.venue.zip
                 });
                 $scope.newEvent.ticketSeller = data.ticket_uri;
-                console.log($scope.newEvent.adresses)
+                console.log($scope.newEvent.adresses);
                 scopeReady = true;
                 insert();
                 console.log($scope.newEvent.startDate)
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
+            error(function() {
             });
         $http.get('https://graph.facebook.com/v2.2/' + id + '/?fields=cover&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8').
-            success(function(data, status, headers, config) {
+            success(function(data) {
                 var img = {
                     paths : data.cover.source
                 };
@@ -147,30 +141,26 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                 cover = true;
                 insert();
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
+            error(function() {
                 cover = true;
                 insert();
             });
         function insert () {
-            if (scopeReady == true && cover == true) {
+            if (scopeReady === true && cover === true) {
                 function searchArtist (artist) {
                     $http.get('/artists/contaning/'+ artist).
-                        success(function(data, status, headers, config) {
-                            //
+                        success(function(data) {
                             $scope.artists.push(data);
-                            console.log($scope.artists)
                         }).
-                        error(function(data, status, headers, config) {
+                        error(function() {
                             $http.get('https://graph.facebook.com/v2.2/search?q='+ artist + '&limit=400&type=page&fields=id,category,name,link,website,likes&access_token=1434764716814175|X00ioyz2VNtML_UW6E8hztfDEZ8 ').
-                                success(function(data, status, headers, config) {
+                                success(function(data) {
                                     $scope.data = data.data;
                                     var flag = 0;
-                                    for (var i=0; i < $scope.data.length; i++) {
-                                        if ($scope.data[i].category == 'Musician/band' || $scope.data[i].category == 'Artist') {
+                                    for (var i = 0; i < $scope.data.length; i++) {
+                                        if ($scope.data[i].category === 'Musician/band' || $scope.data[i].category === 'Artist') {
                                             for (var j=0; j < $scope.artists.length; j++) {
-                                                if($scope.artists[j].facebookId == $scope.data[i].id) {
+                                                if($scope.artists[j].facebookId === $scope.data[i].id) {
                                                     flag = 1;
                                                     break;
                                                 }
@@ -179,14 +169,14 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                                                 if ($scope.content.indexOf($scope.data[i].id) > -1 || $scope.content.indexOf($scope.data[i].link.replace('https://www.', '')) > -1) {
                                                     $scope.data[i].verified = true;
                                                     for (var iv = 0; iv < $scope.newEvent.artists.length; iv++) {
-                                                        var otherArt = $scope.newEvent.artists[iv].name.replace(/ /g, "").toLowerCase()
-                                                        var nameRefactor = $scope.data[i].name.replace(/ /g, "").toLowerCase()
+                                                        var otherArt = $scope.newEvent.artists[iv].name.replace(/ /g, "").toLowerCase();
+                                                        var nameRefactor = $scope.data[i].name.replace(/ /g, "").toLowerCase();
                                                         if (otherArt == nameRefactor) {
                                                             $scope.newEvent.artists.splice(iv, 1);
                                                         }
                                                     }
                                                     if ($scope.data[i].website != undefined) {
-                                                        $scope.data[i].website = $scope.data[i].website.split(" ")
+                                                        $scope.data[i].website = $scope.data[i].website.split(" ");
                                                         if ($scope.data[i].website.isString) {
                                                             console.log($scope.data[i].website)
                                                         }
@@ -198,11 +188,11 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                                                         var findArt = false;
                                                         var notSearch = false;
                                                         function moreLike (artToCompar, ind){
-                                                            if (notSearch == false){
+                                                            if (notSearch === false){
                                                                 if (artToCompar.likes < $scope.data[i].likes) {
                                                                     $scope.newEvent.artists.splice(ind, 1);
-                                                                    if ($scope.data[i].website != undefined) {
-                                                                        $scope.data[i].website = $scope.data[i].website.split(" ")
+                                                                    if ($scope.data[i].website !== undefined) {
+                                                                        $scope.data[i].website = $scope.data[i].website.split(" ");
                                                                         if ($scope.data[i].website.isString) {
                                                                             console.log($scope.data[i].website)
                                                                         }
@@ -213,12 +203,11 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                                                             }
                                                         }
                                                         for (var ii = 0; ii < $scope.newEvent.artists.length; ii++) {
-                                                            var otherArt = $scope.newEvent.artists[ii].name.replace(/ /g, "").toLowerCase()
+                                                            var otherArt = $scope.newEvent.artists[ii].name.replace(/ /g, "").toLowerCase();
                                                             var nameRefactor = $scope.data[i].name.replace(/ /g, "").toLowerCase()
                                                             if (otherArt == nameRefactor && $scope.newEvent.artists[ii].verified == true) {
                                                                 notSearch = true;
                                                                 findArt = true;
-                                                                console.log('find')
                                                             }
                                                             if (otherArt == nameRefactor && $scope.newEvent.artists[ii].verified != true) {
                                                                 findArt = true;
@@ -227,17 +216,14 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                                                         }
                                                         if (findArt == false) {
                                                             $scope.newEvent.artists.push($scope.data[i]);
-                                                            console.log($scope.newEvent.artists);
                                                         }
                                                     } else {
                                                         if ($scope.data[i].website != undefined) {
-                                                            $scope.data[i].website = $scope.data[i].website.split(" ")
+                                                            $scope.data[i].website = $scope.data[i].website.split(" ");
                                                             if ($scope.data[i].website.isString) {
-                                                                console.log($scope.data[i].website)
                                                             }
                                                         }
-                                                        $scope.newEvent.artists.push($scope.data[i])
-                                                        console.log($scope.newEvent.artists);
+                                                        $scope.newEvent.artists.push($scope.data[i]);
                                                     }
                                                 }
                                             } else {
@@ -247,9 +233,7 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                                     }
 
                                 }).
-                                error(function(data, status, headers, config) {
-                                    // called asynchronously if an error occurs
-                                    // or server returns response with an error status.
+                                error(function() {
                                 });
                         });
                 }
@@ -292,7 +276,6 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                 "HH:mm");
         }
         if ($scope.newEvent.endTime != 'Invalid Date') {
-            console.log($scope.newEvent.endTime);
             $scope.newEvent.endTime = $filter('date')($scope.newEvent.endTime, "yyyy-MM-dd HH:mm")
         }
         console.log($scope.newEvent.place);
@@ -311,7 +294,7 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
             artists: $scope.artists,
             addresses: $scope.newEvent.adresses
         }).
-            success(function(data, status, headers, config) {
+            success(function(data) {
                 window.location.href =('#/event/' + data.eventId);
             }).
             error(function(data, status, headers, config) {
@@ -328,7 +311,7 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                         facebookId: $scope.newEvent.facebookId,
                         isPublic: $scope.newEvent.isPublic,
                         artists: $scope.artists,
-                        addresses: $scope.newEvent.adresses}
+                        addresses: $scope.newEvent.adresses};
                     $rootScope.storeLastReq('post', '/events/create', object, 'votre événement est bien enregistrer')
                 } else {
                     $scope.info = 'Désolé une erreur s\'est produite';
@@ -345,8 +328,6 @@ angular.module('claudeApp').controller('CreateEventCtrl',['$scope', '$http', '$f
                         $log.info('Modal dismissed at: ' + new Date());
                     });
                 }
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
             });
     }
 }]);

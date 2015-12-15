@@ -11,7 +11,7 @@ angular.module('claudeApp').
                             if ($(element).innerWidth() > 50) {
                                 clearInterval(waitForElem);
                                 $(element).find('.img_min').css('height', Math.ceil($(element).innerWidth() * 0.35));
-                                if ($rootScope.window != 'small') {
+                                if ($rootScope.window !== 'small') {
                                     $(element).css('height', 94 + Math.ceil(($(element).innerWidth() * 0.35) / 2));
                                 }
                             }

@@ -16,13 +16,13 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
         var _selOrganizer = $rootScope.activUsr;
         var _selPlace = $rootScope.activPlace;
         var _selStart;
+
+        var _research = '';
         if ($rootScope.storeSearch != undefined && $rootScope.storeSearch.length > 0) {
-            var _research = $rootScope.storeSearch;
+            _research = $rootScope.storeSearch;
             $rootScope.remStoreSearch();
         } else if (document.getElementById('searchBar') != null) {
-            var _research = document.getElementById('searchBar').value.trim();
-        } else {
-            var _research = '';
+            _research = document.getElementById('searchBar').value.trim();
         }
 
         function updateScope (data, scope, idName, otherScopeToCheck) {
@@ -50,7 +50,7 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
                 return false;
             }
 
-            function pushEl (el, index, array) {
+            function pushEl (el) {
                 if (isInScope(el) == false) {
                     scope.push(el);
                 }
@@ -195,11 +195,11 @@ angular.module('claudeApp').controller('searchCtrl', ['$scope', '$rootScope', '$
             }
             _selStart = newName;
             var waitForSearchBar = setInterval(function () {
+                var textSlider = [];
                 if ($rootScope.window == 'small' || $rootScope.window == 'medium') {
-                    var textSlider = document.getElementById('timeSearchSliderPhone').getElementsByClassName('md-thumb');
+                    textSlider = document.getElementById('timeSearchSliderPhone').getElementsByClassName('md-thumb');
                 } else {
                     var slider = document.getElementsByClassName('bigSlider');
-                    var textSlider = [];
                     for (var ii =0; ii < slider.length; ii++) {
                         textSlider.push(slider[ii].getElementsByClassName('md-thumb')[0]);
                     }

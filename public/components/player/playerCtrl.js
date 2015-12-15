@@ -20,20 +20,19 @@ angular.module('claudeApp').
             var offset = 0;
             var playlistEvents = [];
             var played = [];
-            var artNames = [];
             var i = 0;
             var updateProgressYt;
             var player;
             var stopPush = false;
-            if ($localStorage.tracksSignaled == undefined) {
+            if ($localStorage.tracksSignaled === undefined) {
                 $localStorage.tracksSignaled = [];
             }
             function calculeNumberToDisplay () {
-                if ($rootScope.window == 'large') {
+                if ($rootScope.window === 'large') {
                     $scope.numberToDisplay = 4;
-                } else if ($rootScope.window == 'medium') {
+                } else if ($rootScope.window === 'medium') {
                     $scope.numberToDisplay = 3;
-                } else if ($rootScope.window == 'small') {
+                } else if ($rootScope.window === 'small') {
                     $scope.numberToDisplay = 1;
                 }
             }
@@ -100,10 +99,10 @@ angular.module('claudeApp').
                         $scope.newTrack.isFavorite = true;
                     }
                 }
-                if (track.platform == 's') {
+                if (track.platform === 's') {
                     $scope.newTrack.redirectUrl = track.redirectUrl;
                 }
-                if (track.nextShow != undefined) {
+                if (track.nextShow !== undefined) {
                     $scope.newTrack.nextShow = track.nextShow;
                 }
                 $scope.newTrack.platform = track.platform;
@@ -121,7 +120,7 @@ angular.module('claudeApp').
             function pushListOfTracks (tracks, play) {
                 var tracksLenght = tracks.length;
                 pushTrack(tracks[0]);
-                if (play == true) {
+                if (play === true) {
                     $scope.play($rootScope.playlist.tracks.length-1);
                 }
                 if (tracksLenght < 10) {
@@ -133,14 +132,14 @@ angular.module('claudeApp').
                     var end = 10;
                     function addLotOfTracks (start, end) {
                         for (var tr = start; tr < end; tr++) {
-                            if (stopPush == true) {
+                            if (stopPush === true) {
                                 return;
                             }
-                            if (tracks[tr] != undefined) {
+                            if (tracks[tr] !== undefined) {
                                 pushTrack(tracks[tr])
                             }
                         }
-                        if (end < tracksLenght && stopPush == false) {
+                        if (end < tracksLenght && stopPush === false) {
                             $timeout(function () {
                                 addLotOfTracks(end, end + 10)
                             },10)
@@ -154,11 +153,11 @@ angular.module('claudeApp').
             $rootScope.addToPlaylist = function (tracks) {
                 stopPush = false;
                 offset = 0;
-                if ($rootScope.playlist.tracks.length == 0) {
+                if ($rootScope.playlist.tracks.length === 0) {
                     pushListOfTracks(tracks, true);
                     played = [];
                     $scope.playlistEnd = false;
-                } else if ( $scope.playlistEnd == true) {
+                } else if ( $scope.playlistEnd === true) {
                     pushListOfTracks(tracks, true);
                     $scope.playlistEnd = false;
                 } else {
@@ -196,7 +195,7 @@ angular.module('claudeApp').
 
             // Player functions //
 
-            function alreadyPlayed (element, index, array) {
+            function alreadyPlayed (element) {
                 return played.indexOf(element.title) > -1;
             }
 
@@ -205,7 +204,7 @@ angular.module('claudeApp').
                     i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                     shuffle()
                 } else if (played.indexOf($rootScope.playlist.tracks[i].title) > -1) {
-                    if ($rootScope.playlist.tracks.every(alreadyPlayed) == true) {
+                    if ($rootScope.playlist.tracks.every(alreadyPlayed) === true) {
                         var lastT = $rootScope.playlist.tracks.length;
                         if (playlistEvents.length > 0) {
                             for (var t = 0; t < playlistEvents.length; t++) {
@@ -248,17 +247,17 @@ angular.module('claudeApp').
 
             $scope.nextTrack = function () {
                 $scope.onPlay = false;
-                if ($rootScope.playlist.tracks[i].platform == 's' || $rootScope.window == 'small'
-                    || $rootScope.window == 'medium') {
+                if ($rootScope.playlist.tracks[i].platform === 's' || $rootScope.window === 'small'
+                    || $rootScope.window === 'medium') {
                     TracksRecommender.trackRateByTime(document.getElementById('musicPlayer').duration,
                         document.getElementById('musicPlayer').currentTime,
                         $rootScope.playlist.tracks[i].id);
-                } else if (player != undefined) {
+                } else if (player !== undefined) {
                     TracksRecommender.trackRateByTime(player.getDuration(),
                     player.getCurrentTime(),
                         $rootScope.playlist.tracks[i].id);
                 }
-                if ($scope.shuffle == true) {
+                if ($scope.shuffle === true) {
                     i = (Math.floor((Math.random() * $rootScope.playlist.tracks.length) + 1));
                     shuffle()
                 } else {
@@ -283,15 +282,15 @@ angular.module('claudeApp').
             $scope.closeTrack = function (index) {
                 $scope.limitedTracks.splice(index, 1);
                 $rootScope.playlist.tracks.splice(index + $scope.indexToStart, 1);
-                $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay)
-                if (index + $scope.indexToStart == $rootScope.playlist.tracks.length &&
-                    index + $scope.indexToStart == i) {
+                $scope.limitedTracks = $filter('slice')($rootScope.playlist.tracks, $scope.indexToStart, $scope.indexToStart+ $scope.numberToDisplay);
+                if (index + $scope.indexToStart === $rootScope.playlist.tracks.length &&
+                    index + $scope.indexToStart === i) {
                     $rootScope.playlist.tracks = [];
                     played = [];
                     playlistEvents = [];
                     document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                     document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
-                    document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>'
+                    document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>';
                     $scope.showVideo = false;
                 }
             };
@@ -306,7 +305,7 @@ angular.module('claudeApp').
                 playlistEvents = [];
                 document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                 document.getElementById('musicPlayer').outerHTML = '<audio class="width100p ng-hide" id="musicPlayer" style="position: fixed" autoplay></audio>';
-                document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>'
+                document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>';
                 $scope.showVideo = false;
                 document.getElementById('musicPlayer').removeEventListener('ended', $scope.nextTrack);
                 document.getElementById('musicPlayer').removeEventListener("timeupdate", updateProgress);
@@ -314,7 +313,7 @@ angular.module('claudeApp').
             };
 
             function error () {
-                $scope.error = 'Désolé une erreur de lecture s\'est produite.'
+                $scope.error = 'Désolé une erreur de lecture s\'est produite.';
                 $timeout(function () {
                     $scope.error = ''
                 }, 2000);
@@ -342,7 +341,7 @@ angular.module('claudeApp').
                 i = trackIndex;
                 $scope.changeIndexToStart(trackIndex);
                 //display nextShow info//
-                if ( $rootScope.playlist.tracks[i].nextShow != undefined) {
+                if ( $rootScope.playlist.tracks[i].nextShow !== undefined) {
                     $timeout(function () {
                         $scope.$apply(function () {
                             $scope.showInfo = true;
@@ -363,15 +362,15 @@ angular.module('claudeApp').
 
                 $scope.trackActive = $rootScope.playlist.tracks[i];
 
-                if ($rootScope.playlist.tracks[i].platform == 's' || $rootScope.window == 'small' || $rootScope.window == 'medium') {
+                if ($rootScope.playlist.tracks[i].platform === 's' || $rootScope.window === 'small' || $rootScope.window === 'medium') {
                     document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
-                    if ($rootScope.playlist.tracks[i].url != undefined) {
-                        if ($rootScope.playlist.tracks[i].platform == 's') {
+                    if ($rootScope.playlist.tracks[i].url !== undefined) {
+                        if ($rootScope.playlist.tracks[i].platform === 's') {
                             document.getElementById('musicPlayer').setAttribute('src', $rootScope.playlist.tracks[i].url + '?client_id=f297807e1780623645f8f858637d4abb');
                         } else {
                             var youtubeId = $rootScope.playlist.tracks[i].url;
                             YoutubeVideo(youtubeId, function (video) {
-                                if (video.status == 'ok') {
+                                if (video.status === 'ok') {
                                     var webm = video.getSource("video/webm", "medium");
                                     var mp4 = video.getSource("video/mp4", "medium");
                                     document.getElementById('musicPlayer').setAttribute('src', mp4.url);
@@ -380,13 +379,13 @@ angular.module('claudeApp').
                                         $scope.onPlay = true;
                                     });
                                     $scope.insertVideo = function () {
-                                        if ($scope.showVideo == true) {
+                                        if ($scope.showVideo === true) {
                                             document.getElementById('minVideoPlayer').setAttribute('src', mp4.url);
                                             document.getElementById('minVideoPlayer').play();
                                             document.getElementById('minVideoPlayer').currentTime = document.getElementById('musicPlayer').currentTime;
                                             document.getElementById('musicPlayer').pause();
                                             $scope.playPause = function () {
-                                                if ($scope.onPlay == false) {
+                                                if ($scope.onPlay === false) {
                                                     document.getElementById('minVideoPlayer').play();
                                                     $timeout(function(){
                                                         $scope.$apply(function () {
@@ -400,10 +399,10 @@ angular.module('claudeApp').
                                             };
                                         } else {
                                             document.getElementById('musicPlayer').currentTime = document.getElementById('minVideoPlayer').currentTime;
-                                            document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>'
+                                            document.getElementById('minVideoPlayer').outerHTML = '<video id="minVideoPlayer" class="marginAuto width100p" controls="controls" style="height: 200px"></video>';
                                             document.getElementById('musicPlayer').play();
                                             $scope.playPause = function () {
-                                                if ($scope.onPlay == false) {
+                                                if ($scope.onPlay === false) {
                                                     document.getElementById('musicPlayer').play();
                                                     $timeout(function(){
                                                         $scope.$apply(function () {
@@ -436,7 +435,7 @@ angular.module('claudeApp').
                         });
                     },0);
                     $scope.playPause = function () {
-                        if ($scope.onPlay == false) {
+                        if ($scope.onPlay === false) {
                             document.getElementById('musicPlayer').play();
                             $timeout(function(){
                                 $scope.$apply(function () {
@@ -459,7 +458,7 @@ angular.module('claudeApp').
                     document.getElementById('musicPlayer').addEventListener('error', error);
                     document.getElementById('musicPlayer').addEventListener("timeupdate", updateProgress);
                     document.getElementById('musicPlayer').play();
-                } else if ($rootScope.playlist.tracks[i].platform == 'y') {
+                } else if ($rootScope.playlist.tracks[i].platform === 'y') {
                     document.getElementById('musicPlayer').pause();
                     document.getElementById('youtubePlayer').outerHTML = "<div id='youtubePlayer'></div>";
                     document.getElementById('youtubePlayer').setAttribute('src', $rootScope.playlist.tracks[i].url);
@@ -467,7 +466,7 @@ angular.module('claudeApp').
                     function onPlayerReady(event) {
                         clearInterval(updateProgressYt);
                         $scope.playPause = function () {
-                            if ($scope.onPlay == false) {
+                            if ($scope.onPlay === false) {
                                 event.target.playVideo();
                                 $scope.onPlay = true;
                             } else {
@@ -510,7 +509,7 @@ angular.module('claudeApp').
                                 document.getElementById('currentTime').innerHTML =
                                     readableDuration(curentDuration) +
                                     ' / ' + readableDuration(duration);
-                                if (val == 100) {
+                                if (val === 100) {
                                     clearInterval(updateProgressYt);
                                 }
                             }, 100);

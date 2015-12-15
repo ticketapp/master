@@ -1,7 +1,7 @@
 angular.module('claudeApp')
 .controller('LargeHomeCtrl', ['$scope', '$localStorage', '$timeout', 'LargeHomeFactory', '$rootScope',
         '$location',
-    function ($scope, $localStorage, $timeout, LargeHomeFactory, $rootScope, $location) {
+    function ($scope, $localStorage, $timeout, LargeHomeFactory, $rootScope) {
 
     $scope.infos = [];
     $scope.animateMsg = true;

@@ -6,11 +6,11 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         lastGetPlace: {id: 0, place: []},
         getPlace : function(id) {
             var deferred = $q.defer();
-            if(factory.lastGetPlace.id == id) {
+            if(factory.lastGetPlace.id === id) {
                 deferred.resolve(factory.lastGetPlace.place);
             } else {
                 $http.get('/places/' + id).
-                    success(function(place, status, headers, config) {
+                    success(function(place) {
                         place = RefactorObjectsFactory.refactorPlaceObject(place);
                         factory.lastGetPlace.place = place;
                         factory.lastGetPlace.id = id;
@@ -22,11 +22,11 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         lastGetPlaceEvents: {id: 0, events: []},
         getPlaceEvents : function(id) {
             var deferred = $q.defer();
-            if(factory.lastGetPlaceEvents.id == id) {
+            if(factory.lastGetPlaceEvents.id === id) {
                 deferred.resolve(factory.lastGetPlaceEvents.events);
             } else {
                 $http.get('/places/' + id + '/events').
-                    success(function(events, status, headers, config) {
+                    success(function(events) {
                         events = events.map(function(event) {
                             return RefactorObjectsFactory.normalizeEventObject(event)
                         });
@@ -42,7 +42,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         getPlaces : function (offset, geoLoc) {
             var deferred = $q.defer();
             if(factory.lastGetPlaces.offset >= offset &&
-                factory.lastGetPlaces.geoloc == geoLoc && new Date() < factory.lastGetPlaces.timestamp + 180000) {
+                factory.lastGetPlaces.geoloc === geoLoc && new Date() < factory.lastGetPlaces.timestamp + 180000) {
                 deferred.resolve(factory.lastGetPlaces.places);
             } else {
                 $http.get('/places?geographicPoint='+geoLoc+'&numberToReturn=12&offset='+offset)
@@ -59,7 +59,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         factory.lastGetPlaces.geoloc = geoLoc;
                         factory.lastGetPlaces.timestamp = new Date();
                         deferred.resolve(factory.lastGetPlaces.places);
-                    }).error(function(data, status) {
+                    }).error(function() {
                         deferred.reject('error');
                     });
             }
@@ -68,18 +68,18 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         lastGetPlacesByContaining: {pattern: '', places: []},
         getPlacesByContaining : function (pattern) {
             var deferred = $q.defer();
-            if(factory.lastGetPlacesByContaining.pattern == pattern) {
+            if(factory.lastGetPlacesByContaining.pattern === pattern) {
                 deferred.resolve(factory.lastGetPlacesByContaining.places);
             } else {
                 $http.get('/places/containing/'+ pattern)
-                    .success(function(places, status) {
+                    .success(function(places) {
                         places = places.map(function(place) {
                             return RefactorObjectsFactory.refactorPlaceObject(place);
                         });
                         factory.lastGetPlacesByContaining.places = places;
                         factory.lastGetPlacesByContaining.pattern = pattern;
                         deferred.resolve(factory.lastGetPlacesByContaining.places);
-                    }).error(function(data, status) {
+                    }).error(function() {
                         deferred.reject('erreur');
                     });
             }
@@ -88,12 +88,12 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         lastGetPlacesByCity: {pattern: '', offset: -1, places: []},
         getPlacesByCity : function (pattern, offset) {
             var deferred = $q.defer();
-            if(factory.lastGetPlacesByCity.pattern == pattern &&
+            if(factory.lastGetPlacesByCity.pattern === pattern &&
                 factory.lastGetPlacesByCity.offset >= offset) {
                 deferred.resolve(factory.lastGetPlacesByCity.places);
             } else {
                 $http.get('/places/nearCity/'+pattern+'?numberToReturn=12&offset='+offset)
-                    .success(function(places, status) {
+                    .success(function(places) {
                         places = places.map(function(place) {
                             return RefactorObjectsFactory.refactorPlaceObject(place);
                         });
@@ -105,7 +105,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
                         factory.lastGetPlacesByCity.pattern = pattern;
                         factory.lastGetPlacesByCity.offset = offset;
                         deferred.resolve(factory.lastGetPlacesByCity.places);
-                    }).error(function(data, status) {
+                    }).error(function() {
                         deferred.reject('erreur');
                     });
             }
@@ -114,7 +114,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         followPlaceByFacebookId : function (id) {
             var deferred = $q.defer();
             $http.post('/places/' +  id + '/followByFacebookId')
-                .success(function(data, status) {
+                .success(function(data) {
                     factory.places = data;
                     deferred.resolve(factory.places);
                 }).error(function (data, status) {
@@ -160,10 +160,10 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         getIsFollowed : function (id) {
             var deferred = $q.defer();
             $http.get('/places/' + id + '/isFollowed')
-                .success(function(data, status){
+                .success(function(data) {
                     factory.events = data;
                     deferred.resolve(factory.events);
-                }).error(function(data, status){
+                }).error(function() {
                     deferred.reject('erreur');
                 });
             return deferred.promise;
@@ -171,10 +171,10 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         postPlace : function (place) {
             var deferred = $q.defer();
             $http.post('/places/create', place )
-                .success(function(data, status) {
+                .success(function(data) {
                     factory.places = data;
                     deferred.resolve(factory.places);
-                }).error(function(data, status) {
+                }).error(function() {
                     deferred.resolve('error');
                 });
             return deferred.promise;
@@ -182,7 +182,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         lastPassedEvents : {id: '', events: []},
         getPassedEvents : function (placeId) {
             var defered = $q.defer();
-            if (placeId == factory.getPassedEvents.id) {
+            if (placeId === factory.getPassedEvents.id) {
                 defered.resolve(factory.getPassedEvents.events)
             } else {
                 $http.get(RoutesFactory.places.getPlacesPassedEvents(placeId)).success(
