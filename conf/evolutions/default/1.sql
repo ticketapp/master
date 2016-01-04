@@ -8,6 +8,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
+
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   city                      VARCHAR(255) NOT NULL,
@@ -251,12 +252,14 @@ CREATE TABLE issues (
   fixed                     BOOLEAN DEFAULT FALSE NOT NULL
 );
 
+
 CREATE TABLE issuesComments (
   commentId                 SERIAL PRIMARY KEY,
   content                   VARCHAR,
   userId                    UUID REFERENCES users (userId) ON DELETE CASCADE,
   issueId                   BIGINT REFERENCES issues(issueId) ON DELETE CASCADE
 );
+
 
 CREATE TABLE usersTools (
   tableId                   SERIAL PRIMARY KEY,
