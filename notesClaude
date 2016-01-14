@@ -1,0 +1,170 @@
+testProd instead of test ?
+
+
+refaire landing page façon foursquare et toutes les apges qu'on ne puisse rien faire sans que ça popup
+
+question création boite :
+capital ? endettement ? problème ? possible ? 
+activité principale ?
+IS : impôt sur les sociétés (le plus fréquent) ou IR : impôt sur le revenu
+
+banque ?
+
+
+vidéos à revoir : saas métrics, vie entrepreunariale et erreurs à ne pas faire sur la landing page
+
+
+twitter/fb/métas
+LandingPage -> mobile first
+Connection
+LandingPage
+https
+achat/vente de billets -> législation, irma dossier (jauges), nb de participants facebook mis à jour + éventuellement enregistrer activités des users de ces events
+LandingPage
+app (faut-il obliger les gens à télécharger l'app pour avoir le billet ?) vérification/vente billet
+LandingPage
+événements près de chez soi
+LandingPage
+SoundCloud
+
+---------------------------------
+
+
+LandingPage
+billeterie
+LandingPage
+
+
+
+---------------------------------
+
+
+
+scheduler
+
+
+
+
+---------------------------------
+
+
+
+
+description de achat/vente de billets :
+penser à mettre nos contacts persos à plusieurs endroits (peut-être un chat direct sur le site/app)
+payline
+création entreprise/compte en banque (penser à vérifier les coûts des virements)
+affiche événements avec des billets les plus proches de chez soi et les plus populaires
+sur tous les événenements : acheter un billet sur + différence prix si possible d'acheter sur Claude + possibilité de vendre un billet sur cet événement (donc table BDD ticket lié à un user qui le vent, à un event et maybe à un client) acteur pour vente + table de blocage du billet pendant 15 minutes si c'est la première fois que je vends un billet il faut envoyer une carte d'identité et un rib + l'endroit où il l'a acheté
+limitation : x billets par concert
+x billets par personne
+x billets par salle
+x heures avant le début du concert
+max de 500/600€ en circulation
+
+il faut pouvoir en BE, modifier les événements (artistes, tracks, description, tarif, etc)
+valider les orgas, les ventes de billets + analytics des users (simple mais genre billets achetés, vendus, validés + quelques infos qui nous permettent de ségmenter [events où il est allé, followed trucs, âge, genre, etc]
+
+avant validation : nous envoyer demande de validation + notif/mail pour le vendreur comme quoi ça a bien été pris en compte
+envoyer validation sur site/app + mail au vendeur + éventuellement tweeter billet en vente
+
+refuser ou pas = ranking de l'user
+
+accepté = faire le virement + notifier + si acheté et validé (entrer en concert) 1€
+
+compta
+
+posibilité de télécharger l'app (appstore + androïd + téléchargement sur claude.wtf)
+lier à un concert (soit il existe [rechercher par nom], soit identifiant fb ou url fb de l'event pour l'enregistrer), scan de flash code
+1€ gratuit pour tout vrai billet vendu + 1€ le partage fb
+
+
+achat ---> enregistrer une carte bleue, (comme über), télécharger l'appli ensuite après paiement validé le billet est disponible sur l'app en hors ligne, facture envoyé par mail, 
+
+
+permettre de valider qu'un billet soit passé ou pas si oui ---> enregistrer géoloc + créditer 1€ au vendeur et 1 € à l'acheteur (à détailler)
+si faux billet --> ça nous notifie + enregistrer géoloc pour une ou deux heures + mettre ban tous ses amis FB
+(tester à quel point la géoloc est précise pour savoir si le mec a pu racheter une autre place si la sienne était fausse) 
+si vraiment faux billet, virement vers le compte de l'acheteur,
+
+être assez flou dans les conditions pour pouvoir ne pas rembourser 
+
+
+système d'organisateurs labellisés Claude donc création de contenu à la main pour chaque event + du coup possibilité de voir avec les orgas pour vérif des trucs
+arguments poru vendre : flexibiltié d'achat pour les acheteurs qui vont donc acheter plus tôt puisqu'ils peuvent revendre, possibilité de mettre x billets sur notre plateforme avec des frais bien inférieurs, possibilité de revente = meilleur remplissage (par rapport aux personnes qui ne peut pas y aller pour une raison x, pourra revendre son billet en cas de Sold-out [en parler peut être seuelemtn aux salles qui font bcp de sold out]) donc plus de recette bar + si ils nous ont donnés de sbillets à vendre, les billets d'occasion sont vendus qu'une fois que tous les autres sont vendus + vendeurs prioritaires sur Claude (mentir sur le trafic, ou pour Totaal rez leur montrer une capture d'écran d'analytics après avoir envoyé le truc à tous nos potes, ce qui fait qu'on sera sûrement 1000 visiteurs uniques), éventuellement pirater leur soirée 
+on rachete les billets des orgas (on est pas une plateforme de vente)
+total reez ---> préparer deux trois données intéréssantes pour eux et leur parler d'un partenariat
+s'il y a des reticences : s'engager à ne pas dire le partenariat en cas de pbs, c'est pas leur faute pour la première soirée
+
+(au moment de la vente de billet checker si amis du vendeur dans le concert intéréssé et proposer de leur proposer)
+
+
+landing page, tarifs
+
+
+
+permet de faire dématérialisation avec une bière offerte plutot que deux europs en deal avec les orgas
+
+
+
+bitcoin
+
+------------------------------
+
+
+plus tard : permettre de valider les billets digiticks ou autre avec notre app, permet de revendre des billets jusqu'au dernier moment
+avec accor de l'orga : revendre des billets pendant le concert
+
+avec utilisateurs sûrs, posssibilité de revendre pendant le concert sans changer le code barre
+
+
+plus le gars a vendu plus on lui rachête cher = carotte 
+
+
+15€ de stickers
+750€ création entreprise
+75€ de soirées
+soit pour lancer l'application 840€  
+
+
+si ça ne marche pas la première soirée, essayer de trouver un autre orga pour la soirée d'après
+
+500€ max de perdu environ avt de chercher de la maille
+ce qui fait un minimum de 5 places par semaine pendant deux mois environ
+15€/mois de frais de carte bleu + 5€ de serveur frais négligeables si ça marche
+
+
+si on vend tout sur un mois on fait environ 
+
+
+5 (-> 6 -> 7 -> 8) -> 10 -> 12 -> 15 -> 18 -> 22 -> 26 -> 31 -> 37 -> 44 -> 53 -> 64 -> 77 -> 92 -> 110 -> 132 4 mois = 132 tickets vendus si on passe direct de 5 à 10 = 800€ - 80€ 
+
+
+132 -> 158 -> 180 -> 216 -> 260 -> 312 -> 373 -> 550 -> 660 => 5000€
+						prévisions de %age d'utilisation
+frais de digitick :	1€45 + 10% soit 3.45/20                 50%  		75%
+frais de weezevent :	1€					25%		15%
+frais de yurplan :	0.5€					25% 		10%
+soit un total de recette moyenne si vente après achat par nous :1.3€ moyenne	1.7€/moyenne
+
+recette moyenne si vente par un utilisateur : (ancienneté = moins de revenu mais plus de sûreté)
+
+Estimations de fraude : 2% 
++regarder fraude Payline
+
+donc une estimation assez cool de 5% par billet
+il faut vendre 40K€ par mois de billets pour faire 2K€ soit 2k billets
+
+
+soit en partant par 15billets/ semaine (sans yield management) si on fait 10% de croissance/semaine on arrive à 2K€ de bénéfice à la fin de l'année
+
+première chose : targeter Digitick !!!!!!!!!!!!!!!
+
+
+
+si on est optimiste et qu'on vise 20 billets d'occaz vendu semaine au bout de 6 mois ça ferait quelque chose 
+
+
+au bout d'un moment, qu'on aura des metrics, on pourra faire du yield management et faire bcp plus par billet
+
+
