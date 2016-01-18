@@ -14,17 +14,20 @@
         <script src="@routes.Assets.at("plugins/angular-animate.min.js")"></script>
         <script src="@routes.Assets.at("plugins/angular-aria.min.js")"></script>
         <script src="@routes.Assets.at("plugins/angular-material.js")"></script>
-        <script src="@routes.Assets.at("plugins/mm-foundation.js")"></script>
+        <script src="@routes.Assets.at("plugins/mm-foundation.min.js")"></script>
         <script src="@routes.Assets.at("plugins/angular-route.min.js")"></script>
         <script src="@routes.Assets.at("plugins/ng-map.min.js")"></script>
-        <script src="@routes.Assets.at("plugins/fileUploader.js")"></script>
-
         <title>Claude</title>
     </head>
     <body ng-app="app">
 
         <h1>Hello!</h1>
 
+        <md-content ng-view="">
+
+        </md-content>
+
+        @playscalajs.html.scripts("client")
 
     </body>
 </html>
