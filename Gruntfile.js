@@ -24,23 +24,27 @@ module.exports = function (grunt) {
 
         // Watches files for changes and runs tasks based on the changed files
         watch: {
-            bower: {
-                files: ['bower.json'],
-                tasks: ['wiredep']
-            },
-
             compass: {
-                files: ['client/src/main/scala/{,*/}*.{scss,sass}', 'server/app/public/scss/*.{scss,sass}'],
-                tasks: 'compass'
+                files: ['server/public/scss/*.{scss,sass}'],
+                tasks: 'compass',
+                options: {
+                    livereload: true
+                }
             },
 
             htmlmin: {
-                files: ['client/src/main/scala/{,*/}*.html'],
-                tasks: 'htmlmin'
+                files: ['client/src/main/scala/{,*/}*.html', 'server/app/views/*'],
+                tasks: 'htmlmin',
+                options: {
+                    livereload: true
+                }
             },
 
             gruntfile: {
-                files: ['Gruntfile.js']
+                files: ['Gruntfile.js'],
+                options: {
+                    reload: true
+                }
             },
 
             concat: {
@@ -49,47 +53,6 @@ module.exports = function (grunt) {
             }
         },
 
-        // Empties folders to start fresh
-        /*clean: {
-         dist: {
-         files: [{
-         dot: true,
-         src: [
-         '.tmp',
-         '<%= yeoman.dist %>/{,*!/}*',
-         '!<%= yeoman.dist %>/.git{,*!/}*'
-         ]
-         }]
-         },
-         server: '.tmp'
-         },*/
-
-        // Add vendor prefixed styles
-        /*autoprefixer: {
-         options: {
-         browsers: ['last 1 version']
-         },
-         dist: {
-         files: [{
-         expand: true,
-         cwd: '.tmp/stylesheets/',
-         src: '{,*!/}*.css',
-         dest: '.tmp/stylesheets/'
-         }]
-         }
-         },*/
-
-        // Automatically inject Bower components into the app
-        /*wiredep: {
-         app: {
-         src: ['server/app/views/index.scala.html'],
-         ignorePath:  /\.\.\//
-         },
-         sass: {
-         src: ['stylesheets/{,*!/}*.{scss,sass}'],
-         ignorePath: /(\.\.\/){1,2}bower_components\//
-         }
-         },*/
 
         // Compiles Sass to CSS and generates necessary files if requested
         compass: {
@@ -107,11 +70,6 @@ module.exports = function (grunt) {
                 assetCacheBuster: false,
                 raw: 'Sass::Script::Number.precision = 10\n'
             },
-            dist: {
-                options: {
-                    generatedImagesDir: '<%= yeoman.dist %>/server/public/images/generated'
-                }
-            },
             server: {
                 options: {
                     debugInfo: true
@@ -119,23 +77,7 @@ module.exports = function (grunt) {
             }
         },
 
-        // Renames files for browser caching purposes
-        /*filerev: {
-         dist: {
-         src: [
-         '<%= yeoman.dist %>/server/public/stylesheets/{,*!/}*.css',
-         '<%= yeoman.dist %>/server/public/images/{,*!/}*.{png,jpg,jpeg,gif,webp,svg}',
-         '<%= yeoman.dist %>/server/public/stylesheets/fonts/!*'
-         ]
-         }
-         },*/
-
         concat: {
-            options: {
-                banner: '<%= banner %><%= jqueryCheck %>',
-                stripBanners: false
-            },
-
             angularMaterial: {
                 src: 'bower_components/angular-material/angular-material.js',
                 dest: 'server/public/plugins/angular-material.js'
@@ -172,6 +114,7 @@ module.exports = function (grunt) {
             }
 
         },
+
         htmlmin: {
             dist: {
                 options: {
@@ -193,7 +136,6 @@ module.exports = function (grunt) {
         },
 
 
-        // Replace Google CDN references
         cdnify: {
             dist: {
                 html: ['server/public/templates/*.html']
@@ -202,20 +144,20 @@ module.exports = function (grunt) {
     });
 
 
-    grunt.registerTask('build', [
-        'clean:dist',
-        'wiredep',
-        'useminPrepare',
-        'concurrent:dist',
-        'autoprefixer',
-        'concat',
-        'ngAnnotate',
-        'copy:dist',
-        'cdnify',
-        'cssmin',
-        'uglify',
-        'filerev',
-        'usemin',
-        'htmlmin'
-    ]);
+    //grunt.registerTask('build', [
+    //    'clean:dist',
+    //    'wiredep',
+    //    'useminPrepare',
+    //    'concurrent:dist',
+    //    'autoprefixer',
+    //    'concat',
+    //    'ngAnnotate',
+    //    'copy:dist',
+    //    'cdnify',
+    //    'cssmin',
+    //    'uglify',
+    //    'filerev',
+    //    'usemin',
+    //    'htmlmin'
+    //]);
 };

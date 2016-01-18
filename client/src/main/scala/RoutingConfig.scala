@@ -13,7 +13,7 @@ object RoutingConfig extends Config {
       .when(
         path = "/",
         route = Route(
-          templateUrl = "/assets/templates/home.html",
+          templateUrl = "/assets/templates/landingPage.html",
           title = "Main"))
   }
 }
