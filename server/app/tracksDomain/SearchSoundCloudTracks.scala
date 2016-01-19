@@ -129,6 +129,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     }
 
   def readSoundCloudTracks(soundCloudJsonWSResponse: JsValue, artist: Artist): Seq[Track] = {
+    Logger.debug(Json.stringify(soundCloudJsonWSResponse))
     val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
