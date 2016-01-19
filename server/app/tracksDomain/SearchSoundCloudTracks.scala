@@ -105,7 +105,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     .map(readSoundCloudIds)
     .recover {
       case NonFatal(e) =>
-        Logger.error("SearchSoundCloudTracks.getSoundCLoudIdsForName: ", e)
+        Logger.error("SearchSoundCloudTracks.getSoundCLoudIdsForName: " + namePattern, e)
         Seq.empty
     }
 
