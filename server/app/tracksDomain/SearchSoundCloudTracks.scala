@@ -110,6 +110,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     }
 
   def readSoundCloudIds(soundCloudWSResponse: WSResponse): Seq[Long] = {
+    Logger.debug("SearchSouncloudTracks.readSoundCloudIds: " + Json.stringify(soundCloudWSResponse.json))
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     soundCloudWSResponse.json
       .asOpt[Seq[Long]](readSoundCloudIds)
