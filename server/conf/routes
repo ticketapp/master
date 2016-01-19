@@ -3,6 +3,7 @@ GET           /                                                  @application.Ap
 GET           /googlea30e62044bb92d88.html                       @application.Application.googleValidation
 
 GET           /test                                              @others.Test.sayHello(message: String)
+GET           /messages                                          @messages.MessagesController.openSocket
 
 #POST          /signIn                                            @application.Application.signIn
 POST           /authenticate/:provider                           @application.SocialAuthController.authenticate(provider: String)

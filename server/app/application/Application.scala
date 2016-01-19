@@ -11,7 +11,7 @@ import play.api.libs.ws._
 import play.api.mvc.Action
 
 
-class Application @Inject()(ws: WSClient,
+class   Application @Inject()(ws: WSClient,
                             val messagesApi: MessagesApi,
                             val global: Global,
                             val env: Environment[User, CookieAuthenticator],

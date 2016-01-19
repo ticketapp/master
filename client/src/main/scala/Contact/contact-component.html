@@ -1,0 +1,32 @@
+<div class=" contact-component float-right absolute right0 bottom0 paddingLeft20 animated"
+     ng-mouseleave="showSmallContact = false;"
+     data-ng-controller="contactController"
+     ng-class="{'full': full}">
+    <div class="md-whiteframe-z1 blackTrans animated padding20"
+         style="width: 300px"
+         ng-if="showSmallContact || full"
+         ng-click="$parent.full = true"
+         ng-class="{'full': $parent.full, 'zoomIn': $parent.showSmallContact}">
+        <i data-ng-click="$parent.showSmallContact = false; $parent.full = false;"
+           class="column right" >Close</i>
+            <span ng-click="$parent.full = true">
+                <md-button ng-click="$parent.full = true" class="md-fab md-primary">
+                    S
+                </md-button>
+                <b>Online</b>
+            </span>
+        <md-input-container
+                ng-click="$parent.full = true"
+                class="width100p">
+            <label>Contact us</label>
+            <input type="text" ng-click="$parent.full = true">
+        </md-input-container>
+        <span data-ng-repeat="message in messages">{{message.content}}</span>
+    </div>
+    <md-button class="md-fab float-right contact-button"
+               ng-class="{'ng-hide': full}"
+               ng-mouseenter="showSmallContact = true"
+               ng-click="full = true" aria-label="Contact">
+        <img src="assets/images/contact.png" alt="Contact">
+    </md-button>
+</div>

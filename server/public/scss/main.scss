@@ -27,6 +27,28 @@ md-content {
   right: 5px;
 }
 
+@keyframes contactGrow {
+  from {height: 10%;}
+  to {height: 100%;}
+}
+
+contact-component > div.full {
+  height: 100%;
+  max-width: 100%;
+  animation-name: zoomIn;
+  animation-duration: 1s;
+}
+
+.contact-component > div.full {
+  max-width: 100%;
+  overflow: auto;
+  height: 100%;
+}
+
+.contact-component > div.ng-leave {
+  animation-name: zoomOut;
+  animation-duration: 1s;
+}
 .contact-tooltip-content {
   background: $white;
   border-radius: 6px;

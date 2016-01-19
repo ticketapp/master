@@ -120,7 +120,13 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     .url("https://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
     .withQueryString("client_id" -> soundCloudClientId)
     .get()
-    .map(response => readSoundCloudTracks(response.json, artist))
+    .map{ response =>
+      readSoundCloudTracks(response.json, artist)
+    } recover {
+      case NonFatal(e) =>
+        Logger.error("SearchSoundcloudTracks.getSoundCloudTracksWithSoundCloudLink:\nMessage:\n", e)
+        Seq.empty
+    }
 
   def readSoundCloudTracks(soundCloudJsonWSResponse: JsValue, artist: Artist): Seq[Track] = {
     val soundCloudTrackReads = (
