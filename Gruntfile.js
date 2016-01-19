@@ -111,6 +111,11 @@ module.exports = function (grunt) {
             angularMap: {
                 src: 'bower_components/ngmap/build/scripts/ng-map.min.js',
                 dest: 'server/public/plugins/ng-map.min.js'
+            },
+
+            angularWebsocket: {
+                src: 'bower_components/angular-websocket/angular-websocket.js',
+                dest: 'server/public/plugins/angular-websocket.js'
             }
 
         },
