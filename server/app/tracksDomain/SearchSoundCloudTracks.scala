@@ -102,7 +102,10 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
       "q" -> namePattern,
       "client_id" -> soundCloudClientId)
     .get()
-    .map(readSoundCloudIds)
+    .map{response =>
+      Logger.debug("SearchSouncloudTracks.getSoundCloudIdsForName.response: " + Json.stringify(response.json))
+      readSoundCloudIds(response)
+    }
     .recover {
       case NonFatal(e) =>
         Logger.error("SearchSoundCloudTracks.getSoundCLoudIdsForName: " + namePattern, e)
