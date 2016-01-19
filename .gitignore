@@ -1,4 +1,5 @@
 logs
+server/public/stylesheets/main_scsslint*
 .sass-cache/
 shared/target
 client/target
