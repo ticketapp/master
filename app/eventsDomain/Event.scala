@@ -45,6 +45,10 @@ case class Event(id: Option[Long] = None,
                  ticketSellers: Option[String] = None,
                  imagePath: Option[String] = None)
 
+case class UserWithEventRelation(facebookUser: FacebookUser, eventFacebookId: String, relation: Char)
+
+case class FacebookUser(id: String, name: String)
+
 case class EventWithRelations(event: Event,
                               organizers: Seq[OrganizerWithAddress] = Vector.empty,
                               artists: Seq[ArtistWithWeightedGenres] = Vector.empty,
@@ -493,6 +497,18 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         }
     }
   }
+
+  /*def facebookUsersToUserWithEventRelation(facebookResponse: WSResponse): Seq[UserWithEventRelation] = {
+  }*/
+
+  /*def getUsersByEventFacebookId(eventFacebookId: String): Future[Option[UserWithEventRelation]] = WS
+    .url("https://graph.facebook.com/" + facebookApiVersion + "/" + eventFacebookId)
+    .withQueryString(
+      "fields" -> "attending,maybe,declined,admins,owner",
+      "access_token" -> facebookToken
+    )
+  .get()
+  .flatMap(facebookUsersToUserWithEventRelation)*/
 
   def getEventOnFacebookByFacebookId(eventFacebookId: String): Future[Option[EventWithRelations]] = WS
     .url("https://graph.facebook.com/" + facebookApiVersion + "/" + eventFacebookId)

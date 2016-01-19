@@ -7,6 +7,7 @@ import application.User
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import cors.WithCors
 import database.UserEventRelation
 import json.JsonHelper._
 import org.postgresql.util.PSQLException
@@ -15,11 +16,13 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
+import upickle.Js
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-
+import upickle.default._
+import org.joda.time.DateTime
 
 class EventController @Inject()(ws: WSClient,
                                 val messagesApi: MessagesApi,
@@ -29,19 +32,30 @@ class EventController @Inject()(ws: WSClient,
                                 val eventMethods: EventMethods)
     extends Silhouette[User, CookieAuthenticator] with EventFormsTrait {
 
-  def events(offset: Int, numberToReturn: Int, geographicPoint: String) = Action.async {
-    geographicPointMethods.stringToTryPoint(geographicPoint) match {
-      case Failure(exception) =>
-        Logger.error("EventController.events: ", exception)
-        Future(BadRequest(Json.toJson("Invalid geographicPoint")))
-      case Success(point) =>
-        eventMethods.findNear(point, numberToReturn: Int, offset: Int) map { events =>
-          Ok(Json.toJson(events))
-        } recover {
-          case t: Throwable =>
-            Logger.error("EventController.events: ", t)
-            InternalServerError("EventController.events: " + t.getMessage)
-        }
+/*
+  implicit val dateTimeWriter = upickle.default.Writer[DateTime]{
+        case t => Js.Str(t.toString)
+      }
+  implicit val dateTimeReader = upickle.default.Reader[DateTime]{
+        case Js.Str(str) =>
+          new DateTime(str)
+      }*/
+
+  def events(offset: Int, numberToReturn: Int, geographicPoint: String) = WithCors("GET") {
+    Action.async {
+      geographicPointMethods.stringToTryPoint(geographicPoint) match {
+        case Failure(exception) =>
+          Logger.error("EventController.events: ", exception)
+          Future(BadRequest(Json.toJson("Invalid geographicPoint")))
+        case Success(point) =>
+          eventMethods.findNear(point, numberToReturn: Int, offset: Int) map { events =>
+            Ok(Json.toJson(events))
+          } recover {
+            case t: Throwable =>
+              Logger.error("EventController.events: ", t)
+              InternalServerError("EventController.events: " + t.getMessage)
+          }
+      }
     }
   }
 

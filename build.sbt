@@ -35,6 +35,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % "1.0.1",
   "joda-time" % "joda-time" % "2.7",
   "org.joda" % "joda-convert" % "1.7",
+  "com.lihaoyi" %% "upickle" % "0.3.4",
+  "org.mdedetrich" %% "soda-time" % "0.0.1-SNAPSHOT",
   "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
   "com.github.tminglei" %% "slick-pg" % "0.9.1",
   "com.vividsolutions" % "jts" % "1.13",

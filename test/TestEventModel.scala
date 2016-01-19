@@ -381,6 +381,12 @@ class TestEventModel extends GlobalApplicationForModels {
       }
     }
 
+    "get users by event's facebook id" in {
+      whenReady(eventMethods.getUsersByEventFacebookId("1740865666143460"), timeout(Span(5, Seconds))) { users =>
+        users should not be empty
+      }
+    }
+
     //readEventsIdsFromWSResponse
   }
 }
