@@ -121,11 +121,11 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     .withQueryString("client_id" -> soundCloudClientId)
     .get()
     .map{ response =>
-      Logger.debug("readSouncloudTracks:" + Json.stringify(response.json))
+      Logger.debug("getSoundCloudTracksWithSoundCloudLink.response" + Json.stringify(response.json))
       readSoundCloudTracks(response.json, artist)
     } recover {
       case NonFatal(e) =>
-        Logger.error("SearchSoundcloudTracks.getSoundCloudTracksWithSoundCloudLink:\nMessage:\n", e)
+        Logger.error("SearchSoundcloudTracks.getSoundCloudTracksWithSoundCloudLink: for: " + soundCloudLink + "\nMessage:\n", e)
         Seq.empty
     }
 
