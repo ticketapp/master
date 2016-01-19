@@ -103,7 +103,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
       "client_id" -> soundCloudClientId)
     .get()
     .map{response =>
-      Logger.info("SearchSouncloudTracks.getSoundCloudIdsForName.response: " + Json.stringify(response.json))
+      println("SearchSouncloudTracks.getSoundCloudIdsForName.response: " + Json.stringify(response.json))
       readSoundCloudIds(response)
     }
     .recover {
@@ -113,7 +113,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     }
 
   def readSoundCloudIds(soundCloudWSResponse: WSResponse): Seq[Long] = {
-    Logger.info("SearchSouncloudTracks.readSoundCloudIds: " + Json.stringify(soundCloudWSResponse.json))
+    println("SearchSouncloudTracks.readSoundCloudIds: " + Json.stringify(soundCloudWSResponse.json))
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     soundCloudWSResponse.json
       .asOpt[Seq[Long]](readSoundCloudIds)
@@ -125,7 +125,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     .withQueryString("client_id" -> soundCloudClientId)
     .get()
     .map{ response =>
-      Logger.error("getSoundCloudTracksWithSoundCloudLink.response" + Json.stringify(response.json))
+      println("getSoundCloudTracksWithSoundCloudLink.response" + Json.stringify(response.json))
       readSoundCloudTracks(response.json, artist)
     } recover {
       case NonFatal(e) =>
@@ -134,7 +134,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     }
 
   def readSoundCloudTracks(soundCloudJsonWSResponse: JsValue, artist: Artist): Seq[Track] = {
-    Logger.info("readSouncloudTracks:" + Json.stringify(soundCloudJsonWSResponse))
+    println("readSouncloudTracks:" + Json.stringify(soundCloudJsonWSResponse))
     val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
