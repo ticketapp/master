@@ -16,7 +16,12 @@
     "ngmap": "~1.14.12",
     "angular-foundation": "",
     "angular-material": "",
-    "angular-websocket": ""
+    "angular-websocket": "",
+    "angular-cookies": "",
+    "angular-messages": "",
+    "angular-resource": "",
+    "angular-sanitize": "",
+    "angular-touch": ""
   },
   "devDependencies": {
     "angular-mocks": "~1.3.0",
