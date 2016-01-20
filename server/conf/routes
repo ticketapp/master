@@ -131,7 +131,7 @@ GET           /users/tracksRemoved                                           @ap
 GET           /users/isConnected                                           @application.UserController.isConnected
 
 ################################## Buy ticket ###########################################
-GET           /buyTicket                                                     @others.TicketController.buyTicket
+#GET           /buyTicket                                                     @others.TicketController.buyTicket
 
 ################################## Accounting ###########################################
 #GET     /orgaPayment       @controllers.AccountingController.orgaPayment

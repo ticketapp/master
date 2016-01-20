@@ -17,6 +17,8 @@ import playlistsDomain.Playlist
 import silhouette.DBTableDefinitions
 import slick.jdbc.{PositionedParameters, SetParameter}
 import slick.model.ForeignKeyAction
+import tariffsDomain.Tariff
+import ticketsDomain.{BlockedTicket, TicketStatus, Ticket}
 import tracksDomain.{TrackRating, Track}
 
 
@@ -347,6 +349,50 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("issueid", issueId, issues)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
+  class Tickets(tag: Tag) extends Table[Ticket](tag, "tickets") {
+    def ticketId = column[Long]("ticketid", O.PrimaryKey, O.AutoInc)
+    def qrCode = column[String]("qrcode")
+    def eventId = column[Long]("eventid")
+    def tariffId = column[Long]("tariffid")
+
+    def * = (qrCode, eventId, tariffId) <> ((Ticket.apply _).tupled, Ticket.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id)
+    def bFK = foreignKey("tariffid", tariffId, tariffs)(_.tariffId)
+  }
+  class TicketStatuses(tag: Tag) extends Table[TicketStatus](tag, "ticketstatuses") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def ticketId = column[Long]("ticketid")
+    def status = column[Char]("status")
+    def date = column[DateTime]("date")
+
+    def * = (ticketId, status, date) <> ((TicketStatus.apply _).tupled, TicketStatus.unapply)
+
+    def aFK = foreignKey("ticketid", ticketId, tickets)(_.ticketId)
+  }
+  class BlockedTickets(tag: Tag) extends Table[BlockedTicket](tag, "blockedtickets") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def ticketId = column[Long]("ticketid")
+    def expirationDate = column[DateTime]("expirationdate")
+
+    def * = (ticketId, expirationDate) <> ((BlockedTicket.apply _).tupled, BlockedTicket.unapply)
+
+    def aFK = foreignKey("ticketid", ticketId, tickets)(_.ticketId)
+  }
+
+  class Tariffs(tag: Tag) extends Table[Tariff](tag, "tariffs") {
+    def tariffId = column[Long]("tariffid", O.PrimaryKey, O.AutoInc)
+    def denomination = column[String]("denomination")
+    def eventId = column[Long]("eventid")
+    def startTime = column[DateTime]("starttime")
+    def endTime = column[DateTime]("endtime")
+    def price = column[BigDecimal]("price")
+
+    def * = (denomination, eventId, startTime, endTime, price) <> ((Tariff.apply _).tupled, Tariff.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id)
+  }
+
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]
   lazy val genres = TableQuery[Genres]
   lazy val genresFollowed = TableQuery[GenresFollowed]
@@ -373,4 +419,8 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val playlistsTracks = TableQuery[PlaylistsTracks]
   lazy val issues = TableQuery[Issues]
   lazy val issuesComments = TableQuery[IssuesComments]
+  lazy val tickets = TableQuery[Tickets]
+  lazy val ticketStatuses = TableQuery[TicketStatuses]
+  lazy val blockedTickets = TableQuery[BlockedTickets]
+  lazy val tariffs = TableQuery[Tariffs]
 }

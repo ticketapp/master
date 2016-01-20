@@ -9,9 +9,10 @@ import eventsDomain.{Event, EventWithRelations}
 import genresDomain.{Genre, GenreWithWeight}
 import issues.{Issue, IssueComment}
 import organizersDomain.{Organizer, OrganizerWithAddress}
-import others.Tariff
 import placesDomain.{Place, PlaceWithAddress}
 import playlistsDomain._
+import tariffsDomain.Tariff
+import ticketsDomain.Ticket
 import tracksDomain.{Track, TrackWithGenres}
 
 import com.vividsolutions.jts.geom.Geometry
@@ -99,4 +100,6 @@ object JsonHelper {
 //  implicit val mailWrites: Writes[Mail] = Json.writes[Mail]
   implicit val issueCommentWrites: Writes[IssueComment] = Json.writes[IssueComment]
   implicit val issueCommentReads: Reads[IssueComment] = Json.reads[IssueComment]
+  implicit val ticketWrites: Writes[Ticket] = Json.writes[Ticket]
+  implicit val ticketRead: Reads[Ticket] = Json.reads[Ticket]
 }

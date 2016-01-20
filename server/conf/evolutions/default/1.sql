@@ -218,8 +218,6 @@ CREATE TABLE images (
 CREATE TABLE tariffs (
   tariffId                  SERIAL PRIMARY KEY,
   denomination              VARCHAR(255) DEFAULT 'Basique' NOT NULL,
-  nbTicketToSell            INT NOT NULL,
-  nbTicketSold              INT DEFAULT 0 NOT NULL,
   price                     NUMERIC NOT NULL,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP NOT NULL,
@@ -229,20 +227,24 @@ CREATE TABLE tariffs (
 
 CREATE TABLE tickets (
   ticketId                  SERIAL PRIMARY KEY,
-  isValid                   BOOLEAN DEFAULT TRUE,
   qrCode                    VARCHAR(255) NOT NULL,
-  firstName                 VARCHAR(255),
-  lastName                  VARCHAR(255),
-  tariffId                  INT REFERENCES tariffs(tariffId),
-  orderId                   INT REFERENCES orders(orderId)
+  eventId                   INT REFERENCES events(eventId),
+  tariffId                  INT REFERENCES tariffs(tariffId)
 );
---INSERT INTO tickets (tariffId, orderId) VALUES (1, 1);
 
----CREATE TABLE tariffsBlocked (
----  tariffsBlockedId         SERIAL PRIMARY KEY,
----  endTime                  TIMESTAMP DEFAULT current_timestamp + time '00:15' NOT NULL,
----  tariffId                 BIGINT REFERENCES tariffs(tariffId)
----);
+CREATE TABLE ticketStatuses (
+  id                        SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId),
+  status                    CHAR NOT NULL,
+  date                      TIMESTAMP
+);
+
+CREATE TABLE blockedTickets (
+  id                        SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId),
+  expirationDate            TIMESTAMP
+);
+
 
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
@@ -569,8 +571,9 @@ DROP TABLE IF EXISTS placesFollowed;
 DROP TABLE IF EXISTS usersFollowed;
 DROP TABLE IF EXISTS organizersFollowed;
 DROP TABLE IF EXISTS usersTools;
+DROP TABLE IF EXISTS ticketStatuses;
+DROP TABLE IF EXISTS blockedTickets;
 DROP TABLE IF EXISTS tickets;
-DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;
 DROP TABLE IF EXISTS account411;

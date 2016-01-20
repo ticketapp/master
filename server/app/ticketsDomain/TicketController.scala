@@ -1,7 +1,4 @@
-package others
-
-import models._
-import play.api.Play.current
+package ticketsDomain
 
 import play.api.mvc._
 
