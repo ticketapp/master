@@ -1,4 +1,6 @@
 logs
+shared/.idea
+shared/.idea/modules/
 server/public/stylesheets/main_scsslint*
 .sass-cache/
 shared/target
