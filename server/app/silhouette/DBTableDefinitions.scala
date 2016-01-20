@@ -5,6 +5,7 @@ import database.MyPostgresDriver
 import MyPostgresDriver.api._
 import com.mohiva.play.silhouette.api.LoginInfo
 
+
 trait DBTableDefinitions {
   
   case class DBUser (
@@ -16,7 +17,7 @@ trait DBTableDefinitions {
     avatarURL: Option[String]
   )
 
-  class Users(tag: Tag) extends Table[DBUser](tag, "attendees") {
+  class Users(tag: Tag) extends Table[DBUser](tag, "users") {
     def id = column[UUID]("userid", O.PrimaryKey)
     def firstName = column[Option[String]]("firstname")
     def lastName = column[Option[String]]("lastname")

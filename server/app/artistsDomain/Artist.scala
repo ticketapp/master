@@ -329,11 +329,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def getEventuallyArtistsInEventTitle(eventName: String, websites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
     val artistNames = splitArtistNamesInTitle(eventName)
-    Future.sequence(
-      artistNames.map { artistName =>
-        getArtistsForAnEvent(artistName, websites)
-      }
-    ).map { _.flatten }
+
+    Future.sequence(artistNames.map(artistName => getArtistsForAnEvent(artistName, websites))).map { _.flatten }
   }
 
   def getArtistsForAnEvent(artistName: String, eventWebSites: Set[String]): Future[Seq[ArtistWithWeightedGenres]] = {
@@ -468,15 +465,17 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def getFacebookArtistByFacebookUrl(url: String): Future[Option[ArtistWithWeightedGenres]] =  normalizeFacebookUrl(url) match {
     case Some(normalizedFacebookUrl) =>
-      WS.url("https://graph.facebook.com/"+ facebookApiVersion + "/" + normalizedFacebookUrl)
-       .withQueryString(
-         "fields" -> facebookArtistFields,
-         "access_token" -> facebookToken)
-       .get()
-       .flatMap(response => readFacebookArtist(response.json))
+      getFacebookArtist(normalizedFacebookUrl).flatMap(response => readFacebookArtist(response.json))
     case _ =>
       Future(None)
   }
+
+  def getFacebookArtist(normalizedFacebookUrl: String): Future[WSResponse] = WS
+    .url("https://graph.facebook.com/" + facebookApiVersion + "/" + normalizedFacebookUrl)
+    .withQueryString(
+      "fields" -> facebookArtistFields,
+      "access_token" -> facebookToken)
+    .get()
 
   val readArtist = (
    (__ \ "name").readNullable[String] and

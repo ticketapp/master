@@ -96,7 +96,7 @@ CREATE INDEX artistFacebookUrl ON tracks(artistFacebookUrl);
 
 
 create table users (
-  userID                    UUID PRIMARY KEY,
+  userId                    UUID PRIMARY KEY,
   firstName                 VARCHAR,
   lastName                  VARCHAR,
   fullName                  VARCHAR,
@@ -107,13 +107,13 @@ create table users (
 
 CREATE TABLE logininfo (
   id                       SERIAL PRIMARY KEY,
-  providerID               VARCHAR NOT NULL,
+  providerId               VARCHAR NOT NULL,
   providerKey              VARCHAR NOT NULL
 );
 
 
 CREATE TABLE userlogininfo (
-  userID                   UUID PRIMARY KEY,
+  userId                   UUID PRIMARY KEY,
   loginInfoId              BIGINT NOT NULL
 );
 

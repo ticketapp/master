@@ -11,26 +11,26 @@ class TestAttendeesModel extends GlobalApplicationForModels {
   "Attendee" must {
 
     "be saved" in {
-      whenReady(attendeesMethods.save(FacebookAttendee("abcdefghij", "name100"))) { attendee =>
+      whenReady(attendeesMethods.save(FacebookAttendee("testSave0", "name100"))) { attendee =>
         attendee mustBe 1
       }
     }
 
-//    "be found by its facebook id" in {
-//      val expectedAttendee = FacebookAttendee("abcdefghij", "name100")
-//
-//      whenReady(attendeesMethods.findByFacebookId("abcdefghij")) { attendee =>
-//        attendee mustBe Some(expectedAttendee)
-//      }
-//    }
-//
-//    "all be found by an event facebook id" in {
-//      val expectedAttendee = FacebookAttendee("abcdefghij", "name100")
-//
-//      whenReady(attendeesMethods.findAllByEventFacebookId("facebookidattendeetest")) { attendee =>
-//        attendee mustBe Seq(expectedAttendee)
-//      }
-//    }
+    "be found by its facebook id" in {
+      val expectedAttendee = FacebookAttendee("abcdefghij", "name100")
+
+      whenReady(attendeesMethods.findByFacebookId("abcdefghij")) { attendee =>
+        attendee mustBe Some(expectedAttendee)
+      }
+    }
+
+    "all be found by an event facebook id" in {
+      val expectedAttendee = FacebookAttendee("abcdefghij", "name100")
+
+      whenReady(attendeesMethods.findAllByEventFacebookId("facebookidattendeetest")) { attendee =>
+        attendee mustBe Seq(expectedAttendee)
+      }
+    }
 
     "read a json sequence of attendees" in {
 

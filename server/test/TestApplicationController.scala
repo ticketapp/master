@@ -1,6 +1,3 @@
-import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.test._
-import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
 
 import scala.language.postfixOps
@@ -8,33 +5,33 @@ import scala.language.postfixOps
 class TestApplicationController extends GlobalApplicationForControllers {
   sequential
 
-  "Application controller" should {
+//  "Application controller" should {
 
-    "return true if a user get the index page being connected" in {
-      val Some(result) = route(FakeRequest(GET, "/").withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      status(result) mustEqual OK
-      contentAsString(result) must contain("""$root.connected = true""")
-    }
-
-    "return false if a user get the index page being not connected" in {
-      val Some(result) = route(FakeRequest(GET, "/"))
-
-      status(result) mustEqual OK
-      contentAsString(result) must contain("""$root.connected = false""")
-    }
-
-    "sign out a user being connected" in {
-      val Some(result) = route(FakeRequest(GET, "/signOut").withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      status(result) mustEqual SEE_OTHER
-    }
-
-    "return a status unauthorized when a user not connected tries to sign out" in {
-      val Some(result) = route(FakeRequest(GET, "/signOut"))
-
-      status(result) mustEqual UNAUTHORIZED
-    }
+//    "return true if a user get the index page being connected" in {
+//      val Some(result) = route(FakeRequest(GET, "/").withAuthenticator[CookieAuthenticator](identity.loginInfo))
+//
+//      status(result) mustEqual OK
+//      contentAsString(result) must contain("""$root.connected = true""")
+//    }
+//
+//    "return false if a user get the index page being not connected" in {
+//      val Some(result) = route(FakeRequest(GET, "/"))
+//
+//      status(result) mustEqual OK
+//      contentAsString(result) must contain("""$root.connected = false""")
+//    }
+//
+//    "sign out a user being connected" in {
+//      val Some(result) = route(FakeRequest(GET, "/signOut").withAuthenticator[CookieAuthenticator](identity.loginInfo))
+//
+//      status(result) mustEqual SEE_OTHER
+//    }
+//
+//    "return a status unauthorized when a user not connected tries to sign out" in {
+//      val Some(result) = route(FakeRequest(GET, "/signOut"))
+//
+//      status(result) mustEqual UNAUTHORIZED
+//    }
 
 //    val signUpForm =
 //      """{
@@ -75,5 +72,5 @@ class TestApplicationController extends GlobalApplicationForControllers {
 //
 //      status(result) mustEqual BAD_REQUEST
 //    }
-  }
+//  }
 }

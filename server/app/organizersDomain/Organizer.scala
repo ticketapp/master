@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-case class Organizer (id: Option[Long],
+case class Organizer (id: Option[Long] = None,
                       facebookId: Option[String] = None,
                       name: String,
                       description: Option[String] = None,

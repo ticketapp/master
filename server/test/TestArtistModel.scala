@@ -242,6 +242,7 @@ class TestArtistModel extends GlobalApplicationForModels {
         Set("arsenik-shop.com"))
 
       whenReady(artistMethods.readFacebookArtist(jsonArtist), timeout(Span(5, Seconds))) { artist =>
+
         artist.get.artist mustBe expectedArtist
       }
     }

@@ -15,14 +15,14 @@ class TestUserController extends GlobalApplicationForControllers {
     "find the geographicPoint for the user" in {
 
       val Some(geopoint) = route(
-        new FakeRequest("GET", "/attendees/geographicPoint", FakeHeaders(), AnyContentAsEmpty, remoteAddress = "81.220.239.243"))
+        new FakeRequest("GET", "/users/geographicPoint", FakeHeaders(), AnyContentAsEmpty, remoteAddress = "81.220.239.243"))
+
       contentAsString(geopoint) mustEqual
         """{"as":"AS21502 NC Numericable S.A.","city":"Villeurbanne","country":"France","countryCode":"FR","isp":"Numericable","lat":45.7667,"lon":4.8833,"org":"Numericable","query":"81.220.239.243","region":"V","regionName":"Rhône-Alpes","status":"success","timezone":"Europe/Paris","zip":"69100"}""".stripMargin
-
     }
 
     "get removed tracks for an user" in {
-      val Some(removedTracks) = route(FakeRequest(GET, "/attendees/tracksRemoved")
+      val Some(removedTracks) = route(FakeRequest(GET, "/users/tracksRemoved")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsString(removedTracks) must contain("13894e56-08d1-4c1f-b3e4-466c069d15ed")
