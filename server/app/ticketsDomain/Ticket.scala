@@ -3,7 +3,7 @@ package ticketsDomain
 import javax.inject.Inject
 import database.{MyDBTableDefinitions, MyPostgresDriver}
 import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
-import org.joda.time.DateTime
+import org.joda.time.{Duration, DateTime}
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import scala.concurrent.Future
@@ -29,9 +29,9 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
 
   def findAllByEventId(eventId: Long): Future[Seq[TicketWithStatus]] = {
     val query = for {
-      ticket <- tickets.filter(_.eventId === eventId)
-      ticketStatus <- ticketStatuses if ticketStatus.ticketId === ticket.ticketId
-    } yield (ticket, ticketStatus)
+      ticket <- tickets joinLeft ticketStatuses on (_.ticketId === _.ticketId)
+      if ticket._1.eventId === eventId
+    } yield ticket
 
     db.run(query.result) map { seqTupleTicketAndStatus =>
       SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus)
@@ -40,9 +40,9 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
 
   def findAllByTariffId(tariffId: Long): Future[Seq[TicketWithStatus]] = {
     val query = for {
-      ticket <- tickets.filter(_.tariffId === tariffId)
-      ticketStatus <- ticketStatuses if ticketStatus.ticketId === ticket.ticketId
-    } yield (ticket, ticketStatus)
+      ticket <- tickets joinLeft ticketStatuses on (_.ticketId === _.ticketId)
+      if ticket._1.tariffId === tariffId
+    } yield ticket
 
     db.run(query.result) map { seqTupleTicketAndStatus =>
       SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus)
@@ -50,34 +50,50 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def findUnblockedByTariffId(tariffId: Long): Future[Seq[TicketWithStatus]] = {
+    val currentDateTime = new DateTime()
+    val blockedTicketIds = blockedTickets.filter(_.expirationDate >= currentDateTime).map(_.ticketId)
+
     val query = for {
-      ticket <- tickets.filter(_.tariffId === tariffId)
-      ticketStatus <- ticketStatuses if ticketStatus.ticketId === ticket.ticketId
-    } yield (ticket, ticketStatus)
+      ticket <- tickets.filterNot(_.ticketId in blockedTicketIds) joinLeft ticketStatuses on (_.ticketId === _.ticketId)
+      if ticket._1.tariffId === tariffId
+
+    } yield ticket
 
     db.run(query.result) map { seqTupleTicketAndStatus =>
       SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus)
     }
   }
+
+  def findUnblockedByEventId(eventId: Long): Future[Seq[TicketWithStatus]] = {
+    val currentDateTime = new DateTime()
+    val blockedTicketIds = blockedTickets.filter(_.expirationDate >= currentDateTime).map(_.ticketId)
+
+    val query = for {
+      ticket <- tickets.filterNot(_.ticketId in blockedTicketIds) joinLeft ticketStatuses on (_.ticketId === _.ticketId)
+      if ticket._1.eventId === eventId
+
+    } yield ticket
+
+    db.run(query.result) map { seqTupleTicketAndStatus =>
+      SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus)
+    }
+  }
+
+  def blockTicket(duration: Int, ticketId: Long): Future[Int] = db.run(
+    blockedTickets += BlockedTicket(ticketId = ticketId, expirationDate = new DateTime().plusSeconds(duration))
+  )
   
   def addStatus(ticketStatus: TicketStatus): Future[Int] = db.run(ticketStatuses += ticketStatus)
 
-  def maybeTicketAndTicketStatusToOptionTicketStatus(maybeTicketAndStatus: Option[(Ticket, TicketStatus)]):
-  Option[TicketStatus] =
-    maybeTicketAndStatus match {
-      case Some((ticket, ticketStatus)) =>
-        Some(ticketStatus)
-      case _ =>
-        None
-    }
-
-  def SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus: Seq[(Ticket, TicketStatus)]):
+  def SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus: Seq[(Ticket, Option[TicketStatus])]):
   Seq[TicketWithStatus] = {
     seqTupleTicketAndStatus.groupBy(_._1) map { ticketAndSeqTicketAndStatus =>
       val ticketAndStatuses = ticketAndSeqTicketAndStatus._2
-      val statusSortedByDate = ticketAndStatuses.sortBy(_._2.date.getMillis).reverse
-      val mostRecentStatusTuple: Option[(Ticket, TicketStatus)] = statusSortedByDate.take(1).headOption
-      val mostRecentStatus = maybeTicketAndTicketStatusToOptionTicketStatus(mostRecentStatusTuple)
+      val ticketsStatus = ticketAndStatuses collect {
+        case (_, Some(ticketStatus)) => ticketStatus
+      }
+      val statusSortedByDate = ticketsStatus.sortBy(_.date.getMillis).reverse
+      val mostRecentStatus: Option[TicketStatus] = statusSortedByDate.take(1).headOption
       TicketWithStatus(ticketAndSeqTicketAndStatus._1, mostRecentStatus)
     }
   }.toSeq

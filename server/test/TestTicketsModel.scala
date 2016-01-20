@@ -1,3 +1,4 @@
+import org.scalatest.time
 import testsHelper.GlobalApplicationForModels
 import ticketsDomain.{TicketStatus, TicketWithStatus, Ticket}
 import scala.concurrent.Await
@@ -6,7 +7,7 @@ import scala.language.postfixOps
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.joda.time.DateTime
+import org.joda.time.{Duration, DateTime}
 
 class TestTicketsModel extends GlobalApplicationForModels {
 
@@ -26,8 +27,8 @@ class TestTicketsModel extends GlobalApplicationForModels {
 
     "pass a Seq of Tuple of Ticket And Status to Seq of TicketWithStatus with the most recent status" in {
       val newTicket = Ticket("newTicket", 100, 10000)
-      val tupleTicketAndStatus1 = (savedTicket, oldSavedStatus)
-      val tupleTicketAndStatus2 = (savedTicket, newSavedStatus)
+      val tupleTicketAndStatus1 = (savedTicket, Some(oldSavedStatus))
+      val tupleTicketAndStatus2 = (savedTicket, Some(newSavedStatus))
       val seqOfTicketWithStatus = ticketMethods.SeqTupleTicketAndStatusToSeqTicketWithStatus(
         Seq(tupleTicketAndStatus1, tupleTicketAndStatus2)
       )
@@ -63,9 +64,36 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "find only unblocked tickets by tariffId" in {
-        whenReady(ticketMethods.findUnblockedByTariffId(10000)) { unblockedTickets =>
-          unblockedTickets mustBe Seq.empty
+        whenReady(ticketMethods.findUnblockedByTariffId(10000)) { unblockedTicketsWithStatus =>
+          val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
+          unblockedTickets must contain (savedTicket)
+          unblockedTickets must not contain savedBlockedTicket
         }
+    }
+
+    "find only unblocked tickets by eventId" in {
+        whenReady(ticketMethods.findUnblockedByEventId(100)) { unblockedTicketsWithStatus =>
+          val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
+          unblockedTickets must contain (savedTicket)
+          unblockedTickets must not contain savedBlockedTicket
+        }
+    }
+
+    "block a ticket during a time laps" in {
+      whenReady(ticketMethods.blockTicket(2, 1000)) { response =>
+        response mustBe 1
+        whenReady(ticketMethods.findUnblockedByEventId(100)) { unblockedTicketsWithStatus =>
+          val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
+          unblockedTickets must not contain savedTicket
+          unblockedTickets must not contain savedBlockedTicket
+        }
+        Thread.sleep(2000)
+        whenReady(ticketMethods.findUnblockedByEventId(100)) { unblockedTicketsWithStatus =>
+          val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
+          unblockedTickets must contain (savedTicket)
+          unblockedTickets must not contain savedBlockedTicket
+        }
+      }
     }
   }
 }
