@@ -543,12 +543,27 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
   userId                  UUID REFERENCES users(userId) ON DELETE CASCADE NOT NULL,
-  trackId                 UUID REFERENCES tracks (trackId) ON DELETE CASCADE NOT NULL,
+  trackId                 UUID REFERENCES tracks(trackId) ON DELETE CASCADE NOT NULL,
   ratingUp                INT,
   ratingDown              INT,
   reason                  CHAR
 );
-CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
+CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating(userId, trackId);
+
+
+CREATE TABLE facebookAttendees (
+  id                      SERIAL PRIMARY KEY,
+  attendeeFacebookId      VARCHAR(255) NOT NULL UNIQUE,
+  name                    VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE facebookAttendeeEventRelations (
+  attendeeFacebookId      VARCHAR REFERENCES facebookAttendees(attendeeFacebookId) NOT NULL,
+  eventFacebookId         VARCHAR(63) REFERENCES events(facebookId) NOT NULL,
+  attendeeStatus          CHAR,
+  PRIMARY KEY (attendeeFacebookId, eventFacebookId)
+);
 
 
 # --- !Downs
@@ -563,7 +578,7 @@ DROP TABLE IF EXISTS usersOrganizers;
 DROP TABLE IF EXISTS eventsArtists;
 DROP TABLE IF EXISTS artistsGenres;
 DROP TABLE IF EXISTS tracksGenres;
-DROP TABLE IF EXISTS eventsFollowed;
+DROP TABLE IF EXISTS eventsFollowed, facebookAttendeeEventRelations;
 DROP TABLE IF EXISTS artistsFollowed;
 DROP TABLE IF EXISTS placesFollowed;
 DROP TABLE IF EXISTS usersFollowed;
@@ -607,4 +622,5 @@ DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS addresses;
 DROP TABLE IF EXISTS frenchCities;
 DROP TABLE IF EXISTS users, logininfo, userlogininfo, passwordinfo, oauth1info,  oauth2info, openidinfo, openidattributes;
+DROP TABLE IF EXISTS facebookAttendees;
 

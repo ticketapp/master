@@ -3,8 +3,8 @@ package testsHelper
 import actors.DuplicateTracksActorInstance
 import addresses.{AddressMethods, SearchGeographicPoint}
 import akka.actor.ActorSystem
-import application.Global
 import artistsDomain.ArtistMethods
+import attendees.AttendeeMethods
 import eventsDomain.EventMethods
 import genresDomain.GenreMethods
 import issues.IssueMethods
@@ -41,6 +41,7 @@ trait Injectors {
   lazy val searchSoundCloudTracks = new SearchSoundCloudTracks(trackMethods, genreMethods)
   lazy val searchYoutubeTrack = new SearchYoutubeTracks(dbConfProvider, genreMethods, trackMethods)
   lazy val geographicPointMethods = new SearchGeographicPoint(dbConfProvider)
+  lazy val attendeesMethods = new AttendeeMethods(dbConfProvider)
   lazy val tariffMethods = new TariffMethods(dbConfProvider)
   lazy val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, addressMethods)
   lazy val addressMethods = new AddressMethods(dbConfProvider, geographicPointMethods)

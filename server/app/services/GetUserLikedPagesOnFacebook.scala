@@ -67,14 +67,14 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
       "fields" -> "id,name,likes{id,name,category}",
       "access_token" -> facebookAccessToken)
     .get()
-    .map(response => filterPages(response.json, userUuid, facebookAccessToken))
+    .map(response => filterPages(response.json, userUuid))
 
-  def getNextFacebookPages(url: String, facebookAccessToken: String, userUuid: UUID): Unit = WS
+  def getNextFacebookPages(url: String, userUuid: UUID): Unit = WS
     .url(url)
     .get()
-    .map(response => filterPages(response.json, userUuid, facebookAccessToken))
+    .map(response => filterPages(response.json, userUuid))
 
-  def filterPages(pages: JsValue, userUuid: UUID, facebookAccessToken: String): Unit = {
+  def filterPages(pages: JsValue, userUuid: UUID): Unit = {
     val facebookTuples = facebookPageToPageIdAndCategory(pages)
 
     val artistPages = filterArtistPages(facebookTuples)
@@ -96,7 +96,7 @@ class GetUserLikedPagesOnFacebook @Inject()(protected val dbConfigProvider: Data
     } yield {
       searchNextLikesPage(pages) match  {
         case Some(url) =>
-          getNextFacebookPages(url, facebookAccessToken, userUuid)
+          getNextFacebookPages(url, userUuid)
         case _ =>
           Logger.info("GetUserLikedPagesOnFacebook.filterPages: Done")
       }

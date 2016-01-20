@@ -16,7 +16,7 @@ trait DBTableDefinitions {
     avatarURL: Option[String]
   )
 
-  class Users(tag: Tag) extends Table[DBUser](tag, "users") {
+  class Users(tag: Tag) extends Table[DBUser](tag, "attendees") {
     def id = column[UUID]("userid", O.PrimaryKey)
     def firstName = column[Option[String]]("firstname")
     def lastName = column[Option[String]]("lastname")

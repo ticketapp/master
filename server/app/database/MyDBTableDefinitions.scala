@@ -5,19 +5,21 @@ import java.util.UUID
 
 import addresses.Address
 import artistsDomain.Artist
-import com.vividsolutions.jts.geom.{Coordinate, GeometryFactory, Geometry}
+import attendees.{FacebookAttendee, FacebookAttendeeEventRelation}
+import com.vividsolutions.jts.geom.Geometry
+import database.MyPostgresDriver.api._
 import eventsDomain.Event
 import genresDomain.Genre
 import issues.{Issue, IssueComment}
 import org.joda.time.DateTime
-import MyPostgresDriver.api._
 import organizersDomain.Organizer
 import placesDomain.Place
+import play.api.Logger
 import playlistsDomain.Playlist
 import silhouette.DBTableDefinitions
 import slick.jdbc.{PositionedParameters, SetParameter}
 import slick.model.ForeignKeyAction
-import tracksDomain.{TrackRating, Track}
+import tracksDomain.{Track, TrackRating}
 
 
 case class UserArtistRelation(userId: UUID, artistId: Long)
@@ -346,6 +348,31 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("userid", userId, slickUsers)(_.id, onDelete = ForeignKeyAction.Cascade)
     def bFK = foreignKey("issueid", issueId, issues)(_.id, onDelete = ForeignKeyAction.Cascade)
   }
+
+  class FacebookAttendees(tag: Tag) extends Table[FacebookAttendee](tag, "facebookattendees") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def attendeeFacebookId = column[String]("attendeefacebookid")
+    def name = column[String]("name")
+
+    def * = (attendeeFacebookId, name) <> ((FacebookAttendee.apply _).tupled, FacebookAttendee.unapply)
+  }
+  lazy val facebookAttendees = TableQuery[FacebookAttendees]
+
+  class FacebookAttendeeEventRelations(tag: Tag) extends Table[FacebookAttendeeEventRelation](tag, "facebookattendeeeventrelations") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def attendeeFacebookId = column[String]("attendeefacebookid")
+    def eventFacebookId = column[String]("eventfacebookid")
+    def attendeeStatus = column[Char]("attendeestatus")
+
+    def * = (attendeeFacebookId, eventFacebookId, attendeeStatus) <>
+      ((FacebookAttendeeEventRelation.apply _).tupled, FacebookAttendeeEventRelation.unapply)
+
+    def aFK = foreignKey("attendeefacebookid", attendeeFacebookId, facebookAttendees)(_.attendeeFacebookId, onDelete = ForeignKeyAction.Cascade)
+    def bFK = foreignKey("eventfacebookid", eventFacebookId, events)(_.facebookId.getOrElse{Logger.error("Attendee not linked to an event"); "0"},
+      onDelete = ForeignKeyAction.Cascade)
+  }
+  lazy val facebookAttendeeEventRelations = TableQuery[FacebookAttendeeEventRelations]
+
 
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]
   lazy val genres = TableQuery[Genres]

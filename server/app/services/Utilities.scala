@@ -16,6 +16,8 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
+import play.api.libs.functional.syntax._
+
 
 
 trait Utilities {
@@ -203,6 +205,16 @@ trait Utilities {
     4 - hoursSinceMidnight match {
       case positive if positive >= 0 => positive
       case negative if negative < 0 => 24 + negative
+    }
+  }
+
+  def returnMaybeNextPage(facebookResponse: JsValue, objectToGetKey: String): Option[String] = {
+    val readNextFacebookPages: Reads[Option[String]] = (__ \ "next").readNullable[String]
+    facebookResponse \ objectToGetKey match {
+      case JsDefined(objectFound) =>
+        (facebookResponse \ objectToGetKey \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
+      case _ =>
+        (facebookResponse \ "paging").asOpt[Option[String]](readNextFacebookPages).flatten
     }
   }
 }

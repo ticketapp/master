@@ -1,5 +1,6 @@
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import play.api.libs.json.Json
 import testsHelper.GlobalApplicationForModels
 import services.Utilities
 
@@ -304,5 +305,27 @@ class TestUtilities extends GlobalApplicationForModels with Utilities {
     returnNumberOfHoursBetween4AMAndNow(1) mustBe 3
     returnNumberOfHoursBetween4AMAndNow(21) mustBe 7
     returnNumberOfHoursBetween4AMAndNow(5) mustBe 23
+  }
+
+  "return the url of the next facebook pages when there is one" in {
+    val facebookJsonResponse =  Json.parse(
+      """{"attending":{"data":[{"name":"Bli Tz","id":"165378400498201","rsvp_status":"attending"},
+        |{"name":"Luis Florencio","id":"177250825964864","rsvp_status":"attending"}],
+        |"paging":{"cursors":{"before":"TVRBd01ERXdOemd4TWpZAd05EYzFPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD",
+        |"after":"TVRBd01EQTBNRFkzTURZAeU5UQTJPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD"},
+        |"next":"https://graph.facebook.com/v2.4/866684910095368/attending?access_token=1434769156813731%257Cf2378aa93c7174712b63a24eff4cb22c&limit=25&after=TVRBd01EQTBNRFkzTURZAeU5UQTJPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD"}},"id":"866684910095368"}""".stripMargin)
+
+    val expectedNextPage = "https://graph.facebook.com/v2.4/866684910095368/attending?access_token=1434769156813731%257Cf2378aa93c7174712b63a24eff4cb22c&limit=25&after=TVRBd01EQTBNRFkzTURZAeU5UQTJPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD"
+
+    returnMaybeNextPage(facebookJsonResponse, "attending") mustBe Some(expectedNextPage)
+  }
+
+  "return None when there is no next pages" in {
+    val facebookJsonResponse =  Json.parse(
+      """{"data":[{"name":"Julien Merion","id":"10153699973946072","rsvp_status":"attending"}],
+        |"paging":{"cursors":{"before":"TVRBd01ERXhNREkyTmprNE16WXlPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD",
+        |"after":"TlRJeU1qUXhNRGN4T2pFME5UTTBPVFkwTURBNk1UWTFNRGcwT0RrMk9EUTROVGd4"}}}""".stripMargin)
+
+    returnMaybeNextPage(facebookJsonResponse, "attending") mustBe None
   }
 }
