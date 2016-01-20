@@ -14,8 +14,7 @@ import scala.scalajs.js.annotation.JSExport
 object App extends JSApp {
 
   override def main() {
-    val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap",
-      "websocketService"))
+    val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap"))
 
     module.config(RoutingConfig)
     module.controller[ContactController]

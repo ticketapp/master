@@ -175,3 +175,16 @@ si on est optimiste et qu'on vise 20 billets d'occaz vendu semaine au bout de 6 
 au bout d'un moment, qu'on aura des metrics, on pourra faire du yield management et faire bcp plus par billet
 
 
+
+vielles notes de Test.scala : /*
+ follower counts SC
+ regarder le next de facebook
+ aller chercher les artistes d'une lettre et deux lettres
+ enlever 0.1 par lettre en plus au temps de latence à partir de trois
+ un seul match echonest : la prendre et lier à la page fb qi à le plus de followers (exemple ibeyi)
+ hendrix : bug si getechoSongs recursif
+
+ test implicit timeouts
+ */
+
+

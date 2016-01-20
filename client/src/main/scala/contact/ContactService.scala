@@ -8,6 +8,7 @@ class ContactService(http: HttpService) extends Service {
   require(http != null, "Missing argument 'http'.")
 
 }
+
 @injectable("contactService")
 class ContactServiceFactory(http: HttpService) extends Factory[ContactService] {
 
