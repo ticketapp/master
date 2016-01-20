@@ -11,7 +11,7 @@ import play.api.libs.ws._
 import play.api.mvc.Action
 
 
-class Application @Inject()(ws: WSClient,
+class   Application @Inject()(ws: WSClient,
                             val messagesApi: MessagesApi,
                             val global: Global,
                             val env: Environment[User, CookieAuthenticator],
@@ -32,6 +32,10 @@ class Application @Inject()(ws: WSClient,
 
   def index = Action { implicit request =>
     Ok(views.html.landingPage())
+  }
+
+  def claude = Action { implicit request =>
+    Ok(views.html.index(false))
   }
 
   def googleValidation = UserAwareAction { implicit request =>

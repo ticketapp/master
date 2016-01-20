@@ -111,6 +111,36 @@ module.exports = function (grunt) {
             angularMap: {
                 src: 'bower_components/ngmap/build/scripts/ng-map.min.js',
                 dest: 'server/public/plugins/ng-map.min.js'
+            },
+
+            angularWebsocket: {
+                src: 'bower_components/angular-websocket/angular-websocket.js',
+                dest: 'server/public/plugins/angular-websocket.js'
+            },
+
+            angularCookies: {
+                src: 'bower_components/angular-cookies/angular-cookies.min.js',
+                dest: 'server/public/plugins/angular-cookies.min.js'
+            },
+
+            angularMessages: {
+                src: 'bower_components/angular-messages/angular-messages.min.js',
+                dest: 'server/public/plugins/angular-messages.min.js'
+            },
+
+            angularRessource: {
+                src: 'bower_components/angular-resource/angular-resource.min.js',
+                dest: 'server/public/plugins/angular-resource.min.js'
+            },
+
+            angularSanitize: {
+                src: 'bower_components/angular-sanitize/angular-sanitize.min.js',
+                dest: 'server/public/plugins/angular-sanitize.min.js'
+            },
+
+            angularTouch: {
+                src: 'bower_components/angular-touch/angular-touch.min.js',
+                dest: 'server/public/plugins/angular-touch.min.js'
             }
 
         },

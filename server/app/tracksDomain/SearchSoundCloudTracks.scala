@@ -102,14 +102,18 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
       "q" -> namePattern,
       "client_id" -> soundCloudClientId)
     .get()
-    .map(readSoundCloudIds)
+    .map{response =>
+      println("SearchSouncloudTracks.getSoundCloudIdsForName.response: " + Json.stringify(response.json))
+      readSoundCloudIds(response)
+    }
     .recover {
       case NonFatal(e) =>
-        Logger.error("SearchSoundCloudTracks.getSoundCLoudIdsForName: ", e)
+        Logger.error("SearchSoundCloudTracks.getSoundCLoudIdsForName: " + namePattern, e)
         Seq.empty
     }
 
   def readSoundCloudIds(soundCloudWSResponse: WSResponse): Seq[Long] = {
+    println("SearchSouncloudTracks.readSoundCloudIds: " + Json.stringify(soundCloudWSResponse.json))
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     soundCloudWSResponse.json
       .asOpt[Seq[Long]](readSoundCloudIds)
@@ -120,9 +124,17 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     .url("https://api.soundcloud.com/users/" + soundCloudLink + "/tracks")
     .withQueryString("client_id" -> soundCloudClientId)
     .get()
-    .map(response => readSoundCloudTracks(response.json, artist))
+    .map{ response =>
+      println("getSoundCloudTracksWithSoundCloudLink.response" + Json.stringify(response.json))
+      readSoundCloudTracks(response.json, artist)
+    } recover {
+      case NonFatal(e) =>
+        Logger.error("SearchSoundcloudTracks.getSoundCloudTracksWithSoundCloudLink: for: " + soundCloudLink + "\nMessage:\n", e)
+        Seq.empty
+    }
 
   def readSoundCloudTracks(soundCloudJsonWSResponse: JsValue, artist: Artist): Seq[Track] = {
+    println("readSouncloudTracks:" + Json.stringify(soundCloudJsonWSResponse))
     val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
