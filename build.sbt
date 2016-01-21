@@ -1,4 +1,4 @@
-import _root_.playscalajs.PlayScalaJS.autoImport._
+import playscalajs.PlayScalaJS.autoImport._
 import com.typesafe.sbt.gzip.Import._
 import com.typesafe.sbt.web.Import._
 import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._

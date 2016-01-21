@@ -23,16 +23,32 @@ case class TicketWithStatus(ticket: Ticket, ticketStatus: Option[TicketStatus])
 
 case class BlockedTicket(ticketId: Long, expirationDate: DateTime, userId: UUID)
 
-case class SellableEvent(eventId: Long)
+case class SalableEvent(eventId: Long)
 
 case class TicketBill(ticketId: Long, userId: UUID, date: DateTime, amount: BigDecimal)
 
-case class PendingTicket(pendingTicketId: Option[Long], userId: UUID, tariffId: Long, date: DateTime, amount: BigDecimal, qrCode: String, isValidated: Option[Boolean] = None)
+case class PendingTicket(pendingTicketId: Option[Long],
+                         userId: UUID,
+                         tariffId: Long,
+                         date: DateTime,
+                         amount: BigDecimal,
+                         qrCode: String,
+                         isValidated: Option[Boolean] = None)
 
 class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends
   HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
   def save(ticket: Ticket): Future[Long] = db.run(tickets returning tickets.map(_.ticketId) += ticket)
+
+  def findAll(): Future[Seq[TicketWithStatus]] = {
+    val query = for {
+      ticket <- tickets joinLeft ticketStatuses on (_.ticketId === _.ticketId)
+    } yield ticket
+
+    db.run(query.result) map { seqTupleTicketAndStatus =>
+      SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus)
+    }
+  }
 
   def findAllByEventId(eventId: Long): Future[Seq[TicketWithStatus]] = {
     val query = for {
@@ -113,6 +129,10 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     boughtTicketBills.filter(_.ticketId === ticketId).result
   )
 
+  def findAllBoughtTicketBill: Future[Seq[TicketBill]] = db.run(boughtTicketBills.result)
+
+  def findAllSoldTicketBill: Future[Seq[TicketBill]] = db.run(soldTicketBills.result)
+
   def addSoldTicketBill(soldTicketBill: TicketBill): Future[Int] = db.run(
     soldTicketBills += soldTicketBill
   )
@@ -142,5 +162,5 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
       db.run(pendingTickets.filter(_.isValidated.isEmpty).result)
   }
 
-  def findSellableEvents: Future[Seq[SellableEvent]] = db.run(sellableEvents.result)
+  def findSalableEvents: Future[Seq[SalableEvent]] = db.run(sellableEvents.result)
 }

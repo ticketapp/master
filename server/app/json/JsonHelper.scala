@@ -12,7 +12,7 @@ import organizersDomain.{Organizer, OrganizerWithAddress}
 import placesDomain.{Place, PlaceWithAddress}
 import playlistsDomain._
 import tariffsDomain.Tariff
-import ticketsDomain.{SellableEvent, Ticket}
+import ticketsDomain._
 import tracksDomain.{Track, TrackWithGenres}
 
 import com.vividsolutions.jts.geom.Geometry
@@ -28,7 +28,7 @@ object JsonHelper {
   }
 
   implicit object CharReads extends AnyRef with Reads[Char] {
-    def reads(char: JsValue): JsResult[Char] = JsSuccess(char.toString()(0))
+    def reads(char: JsValue): JsResult[Char] = JsSuccess(Json.stringify(char)(1))
   }
 
   implicit object UUIDWrites extends AnyRef with Writes[UUID] {
@@ -102,8 +102,19 @@ object JsonHelper {
   implicit val issueCommentReads: Reads[IssueComment] = Json.reads[IssueComment]
   implicit val ticketWrites: Writes[Ticket] = Json.writes[Ticket]
   implicit val ticketRead: Reads[Ticket] = Json.reads[Ticket]
-  implicit val sellableEventReads: Reads[SellableEvent] = Json.reads[SellableEvent]
-  implicit val sellableEventWrites: Writes[SellableEvent] = Json.writes[SellableEvent]
-  val readSellableEventReads: Reads[Seq[SellableEvent]] = Reads.seq(__.read[SellableEvent])
+  implicit val statusWrites: Writes[TicketStatus] = Json.writes[TicketStatus]
+  implicit val statusRead: Reads[TicketStatus] = Json.reads[TicketStatus]
+  implicit val ticketWithStatusWrites: Writes[TicketWithStatus] = Json.writes[TicketWithStatus]
+  implicit val ticketWithStatusRead: Reads[TicketWithStatus] = Json.reads[TicketWithStatus]
+  implicit val salableEventReads: Reads[SalableEvent] = Json.reads[SalableEvent]
+  implicit val salableEventWrites: Writes[SalableEvent] = Json.writes[SalableEvent]
+  implicit val pendingTicketReads: Reads[PendingTicket] = Json.reads[PendingTicket]
+  implicit val pendingTicketWrites: Writes[PendingTicket] = Json.writes[PendingTicket]
+  implicit val ticketBillReads: Reads[TicketBill] = Json.reads[TicketBill]
+  implicit val ticketBillWrites: Writes[TicketBill] = Json.writes[TicketBill]
+  val readSalableEventReads: Reads[Seq[SalableEvent]] = Reads.seq(__.read[SalableEvent])
+  val readTicketWithStatusReads: Reads[Seq[TicketWithStatus]] = Reads.seq(__.read[TicketWithStatus])
+  val readPendingTicketReads: Reads[Seq[PendingTicket]] = Reads.seq(__.read[PendingTicket])
+  val readTicketBillReads: Reads[Seq[TicketBill]] = Reads.seq(__.read[TicketBill])
 
 }

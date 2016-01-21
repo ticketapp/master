@@ -436,10 +436,10 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("userid", userId, slickUsers)(_.id)
   }
 
-  class SellableEvents(tag: Tag) extends Table[SellableEvent](tag, "sellableevents") {
+  class SellableEvents(tag: Tag) extends Table[SalableEvent](tag, "sellableevents") {
     def eventId = column[Long]("eventid")
 
-    def * = (eventId) <> ((SellableEvent.apply _), SellableEvent.unapply)
+    def * = (eventId) <> ((SalableEvent.apply _), SalableEvent.unapply)
 
     def aFK = foreignKey("eventid", eventId, events)(_.id)
   }

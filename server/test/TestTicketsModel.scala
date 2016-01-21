@@ -11,7 +11,7 @@ class TestTicketsModel extends GlobalApplicationForModels {
 
   "A ticket" must {
 
-    val savedSellableEvent = SellableEvent(eventId = 100)
+    val savedSellableEvent = SalableEvent(eventId = 100)
     val savedTicket:Ticket = Ticket(ticketId = Some(1000L), qrCode = "savedTicket",eventId = 100,tariffId = 10000)
     val savedBlockedTicket:Ticket = Ticket(ticketId = Some(1100L), qrCode = "savedBlockedTicket",eventId = 100,tariffId = 10000)
     val oldSavedStatus = TicketStatus(ticketId = 1000,status = 'a', date = new DateTime("2015-09-22T14:00:00.000+02:00"))
@@ -23,6 +23,18 @@ class TestTicketsModel extends GlobalApplicationForModels {
       date = new DateTime("2015-09-24T14:00:00.000+02:00"),
       amount = 10,
       qrCode = "pendingTicket"
+    )
+    val savedBoughtBill = TicketBill(
+      ticketId = 1100,
+      userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+      date = new DateTime("2015-09-24T14:00:00.000+02:00"),
+      amount = 10
+    )
+    val savedSoldBill = TicketBill(
+      ticketId = 1100,
+      userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+      date = new DateTime("2015-09-24T14:00:00.000+02:00"),
+      amount = 10
     )
 
     "return id on save" in {
@@ -44,6 +56,14 @@ class TestTicketsModel extends GlobalApplicationForModels {
 
     "find all tickets by eventId" in {
       whenReady(ticketMethods.findAllByEventId(100)) { tickets =>
+        tickets must contain (TicketWithStatus(savedTicket, Some(newSavedStatus)))
+        tickets must contain (TicketWithStatus(savedBlockedTicket, None))
+        tickets must not contain TicketWithStatus(savedTicket, Some(oldSavedStatus))
+      }
+    }
+
+    "find all tickets" in {
+      whenReady(ticketMethods.findAll()) { tickets =>
         tickets must contain (TicketWithStatus(savedTicket, Some(newSavedStatus)))
         tickets must contain (TicketWithStatus(savedBlockedTicket, None))
         tickets must not contain TicketWithStatus(savedTicket, Some(oldSavedStatus))
@@ -121,6 +141,18 @@ class TestTicketsModel extends GlobalApplicationForModels {
       }
     }
 
+    "find all bought bills" in {
+      whenReady(ticketMethods.findAllBoughtTicketBill) {response =>
+          response must contain (savedBoughtBill)
+      }
+    }
+
+    "find all sold bills" in {
+      whenReady(ticketMethods.findAllSoldTicketBill) {response =>
+          response must contain (savedSoldBill)
+      }
+    }
+
     "add sold bill for a ticket" in {
       whenReady(ticketMethods.addSoldTicketBill
         (TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))))
@@ -186,7 +218,7 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "find sellable event's ids" in {
-      whenReady(ticketMethods.findSellableEvents) { eventIds =>
+      whenReady(ticketMethods.findSalableEvents) { eventIds =>
         eventIds must contain (savedSellableEvent)
       }
     }

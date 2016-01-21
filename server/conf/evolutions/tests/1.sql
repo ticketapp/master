@@ -266,7 +266,7 @@ CREATE TABLE soldTicketBills (
 );
 
 CREATE TABLE pendingTickets (
-  pendingTicketId           SERIAL PRIMARY KEY,
+  pendingTicketId             SERIAL PRIMARY KEY,
   userId                    UUID REFERENCES users (userId) NOT NULL,
   tariffId                  INT REFERENCES tariffs(tariffId)  NOT NULL,
   date                      TIMESTAMP NOT NULL,
@@ -659,6 +659,15 @@ INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
 INSERT INTO pendingTickets(pendingTicketId, userId, tariffId, date, amount, qrCode) VALUES
   (1000, 'a4aea509-1002-47d0-b55c-593c91cb32ae', 10000, timestamp '2015-09-24 14:00:00', 10, 'pendingTicket');
 
+
+
+-------------------------------------------------------- bought tickets bills----------------------------------------------------
+INSERT INTO boughtTicketBills(billId, ticketId, userId, date, amount) VALUES
+  (1000, 1100, 'a4aea509-1002-47d0-b55c-593c91cb32ae', timestamp '2015-09-24 14:00:00', 10);
+
+-------------------------------------------------------- sold tickets bills----------------------------------------------------
+INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
+  (1000, 1100, 'a4aea509-1002-47d0-b55c-593c91cb32ae', timestamp '2015-09-24 14:00:00', 10);
 
 
 -------------------------------------------------------- blocked tickets ----------------------------------------------------
