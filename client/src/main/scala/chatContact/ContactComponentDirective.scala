@@ -1,4 +1,4 @@
-package contact
+package chatContact
 
 import com.greencatsoft.angularjs.extensions.material.Sidenav
 import com.greencatsoft.angularjs.{TemplatedDirective, ElementDirective, injectable}
@@ -10,7 +10,7 @@ import scala.scalajs.js.annotation.JSExport
 @injectable("contactComponent")
 class ContactComponentDirective(sidenav: Sidenav) extends ElementDirective with TemplatedDirective {
 
-  override val templateUrl = "assets/templates/Contact/contact-component.html"
+  override val templateUrl = "assets/templates/chatContact/contact-component.html"
 
   @JSExport
   def toggleRight() = {

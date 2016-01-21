@@ -25,7 +25,7 @@ module.exports = function (grunt) {
         // Watches files for changes and runs tasks based on the changed files
         watch: {
             compass: {
-                files: ['server/public/scss/*.{scss,sass}'],
+                files: ['server/public/scss/*.{scss,sass}', 'client/src/main/scala/{,*/}*.scss'],
                 tasks: 'compass',
                 options: {
                     livereload: true

@@ -2,6 +2,11 @@ remettre 2.sql ?
 log4j
 cassandra ?
 next page attendees
+Internationalization
+
+
+blocked tickets : regarder expiration datetime auto delete et donc unique ticket id
+
 
 
 testProd instead of test ?

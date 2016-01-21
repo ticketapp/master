@@ -1,0 +1,90 @@
+contact-component > div.full {
+  animation-duration: 1s;
+  animation-name: zoomIn;
+  height: 100%;
+  //max-width: 100%;
+  width: 300px;
+}
+
+.contact-button {
+  background-color: $info-color !important;
+}
+
+.contact-button-container {
+  bottom: 5px;
+  position: fixed;
+  right: 5px;
+}
+
+@keyframes contactGrow {
+  from {
+    height: 10%;
+  }
+
+  to {
+    height: 100%;
+  }
+}
+
+.contact-component > div.ng-enter {
+  //position: absolute;
+  animation-duration: 1s;
+  animation-name: zoomIn;
+}
+
+.contact-component > div.full {
+  height: 100%;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.contact-component > div.ng-leave {
+  animation-duration: 1s;
+  animation-name: zoomOut;
+  bottom: 50px;
+  left: 0;
+  position: absolute;
+  width: 300px;
+}
+
+.contact-tooltip-content {
+  background: $white;
+  border-radius: 6px;
+  color: $black;
+  height: 100px;
+  margin-bottom: 55px;
+  margin-left: 75px;
+  position: absolute;
+  text-align: center;
+  visibility: hidden;
+  width: 140px;
+}
+
+.contact-tooltip-content:hover {
+  visibility: visible;
+  z-index: 999;
+}
+
+.messageFromUser {
+  background-color: $info-color;
+  border-radius: 10px;
+  display: block;
+  float: left;
+  margin-bottom: 5px;
+  margin-left: 4px;
+  margin-right: 24px;
+  margin-top: 5px;
+  text-align: left;
+  width: inherit;
+}
+
+.messageFromUs {
+  background-color: $info-color;
+  border-radius: 10px;
+  display: block;
+  float: right;
+  margin-left: 24px;
+  margin-right: 4px;
+  text-align: left;
+  width: inherit;
+}
