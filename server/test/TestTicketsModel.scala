@@ -12,13 +12,14 @@ class TestTicketsModel extends GlobalApplicationForModels {
   "A ticket" must {
 
     val savedSellableEvent = SellableEvent(eventId = 100)
-    val savedTicket:Ticket = Ticket("savedTicket",100,10000)
-    val savedBlockedTicket:Ticket = Ticket("savedBlockedTicket",100,10000)
-    val oldSavedStatus = TicketStatus(1000,'a',new DateTime("2015-09-22T14:00:00.000+02:00"))
-    val newSavedStatus = TicketStatus(1000,'b',new DateTime("2015-09-24T14:00:00.000+02:00"))
+    val savedTicket:Ticket = Ticket(ticketId = Some(1000L), qrCode = "savedTicket",eventId = 100,tariffId = 10000)
+    val savedBlockedTicket:Ticket = Ticket(ticketId = Some(1100L), qrCode = "savedBlockedTicket",eventId = 100,tariffId = 10000)
+    val oldSavedStatus = TicketStatus(ticketId = 1000,status = 'a', date = new DateTime("2015-09-22T14:00:00.000+02:00"))
+    val newSavedStatus = TicketStatus(ticketId = 1000,status = 'b', date = new DateTime("2015-09-24T14:00:00.000+02:00"))
     val savedPendingTicket = PendingTicket(
+      pendingTicketId = Some(1000L),
       userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
-      eventId = 100,
+      tariffId = 10000,
       date = new DateTime("2015-09-24T14:00:00.000+02:00"),
       amount = 10,
       qrCode = "pendingTicket"
@@ -32,7 +33,7 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "pass a Seq of Tuple of Ticket And Status to Seq of TicketWithStatus with the most recent status" in {
-      val newTicket = Ticket("newTicket", 100, 10000)
+      val newTicket = Ticket(None, "newTicket", 100, 10000)
       val tupleTicketAndStatus1 = (savedTicket, Some(oldSavedStatus))
       val tupleTicketAndStatus2 = (savedTicket, Some(newSavedStatus))
       val seqOfTicketWithStatus = ticketMethods.SeqTupleTicketAndStatusToSeqTicketWithStatus(
@@ -86,7 +87,7 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "block a ticket during a time laps" in {
-      whenReady(ticketMethods.blockTicket(2, 1000)) { response =>
+      whenReady(ticketMethods.blockTicket(2, 1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"))) { response =>
         response mustBe 1
         whenReady(ticketMethods.findUnblockedByEventId(100)) { unblockedTicketsWithStatus =>
           val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
@@ -151,21 +152,36 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "add pending tickets" in {
-      val pendingTicketToSave = PendingTicket(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), 100, new DateTime,
-      10, "pendingTicketToSave")
+      val pendingTicketToSave = PendingTicket(pendingTicketId = None,userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+        tariffId = 10000, date = new DateTime, amount = 10, qrCode = "pendingTicketToSave")
       whenReady(ticketMethods.addPendingTicket(pendingTicketToSave)) { response =>
         response mustBe 1
       }
     }
 
+    "not add two pending tickets with th same qrCode" in {
+      val pendingTicketToSave = PendingTicket(pendingTicketId = None,userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+        tariffId = 10000, date = new DateTime, amount = 10, qrCode = "duplicate qrCode")
+      val pendingTicketDuplicate = PendingTicket(pendingTicketId = None,userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+        tariffId = 10000, date = new DateTime, amount = 10, qrCode = "duplicate qrCode")
+      whenReady(ticketMethods.addPendingTicket(pendingTicketToSave)) { response =>
+        response mustBe 1
+        ticketMethods.addPendingTicket(pendingTicketToSave).failed.futureValue mustBe a [Exception]
+      }
+    }
+
     "update pending tickets" in {
-      val pendingTicketToUpdate = PendingTicket(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), 100, new DateTime,
-      10, "pendingTicket", Some(true))
-      whenReady(ticketMethods.updatePendingTicket(pendingTicketToUpdate)) { response =>
+      whenReady(ticketMethods.updatePendingTicket(savedPendingTicket.pendingTicketId, true)) { response =>
         response mustBe 1
         whenReady(ticketMethods.findUntreatedPendingTickets) { response =>
           response must not contain savedPendingTicket
         }
+      }
+    }
+
+    "find pending ticket by Id" in {
+      whenReady(ticketMethods.findPendingTicketById(1000)) { response =>
+        response mustBe Some(response.head.copy(pendingTicketId = savedPendingTicket.pendingTicketId, qrCode = savedPendingTicket.qrCode))
       }
     }
 

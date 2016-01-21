@@ -1,7 +1,6 @@
 # Home page
 GET           /                                                  @application.Application.index
 GET            /claude                                           @application.Application.claude
-GET            /admin                                           @application.Application.admin
 GET           /googlea30e62044bb92d88.html                       @application.Application.googleValidation
 
 GET           /test                                              @others.Test.sayHello(message: String)
@@ -18,10 +17,17 @@ GET            /signOut                                          @application.Ap
 GET           /initDatabase                                      @fillDatabase.InitController.init
 
 ################################## Admin ################################################
-GET           /indexAdmin                                             @application.Admin.indexAdmin
+GET            /admin                                           @application.Application.admin
+GET            /sellableEvents                                  @ticketsDomain.TicketController.findSellableEvents()
 #POST     /admin/createTariff           @application.Admin.createTariff
-#
-################################### Events ###############################################
+
+#################################### Tickets ###############################################
+POST            /tickets/propose                                  @ticketsDomain.TicketController.proposeTicket(eventId: Long, amount: Double, qrCode: String)
+POST            /tickets/blockForUser                             @ticketsDomain.TicketController.blockTicketForUser(tarrifId: Long)
+POST            /tickets/addTicketToSale                          @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
+POST            /tickets/acceptPenddingTicket                     @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
+
+#################################### Events ###############################################
 GET           /events                                            @eventsDomain.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
 GET           /events/inInterval/:hourInterval                   @eventsDomain.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET           /events/passedInInterval/:hourInterval             @eventsDomain.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)

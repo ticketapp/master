@@ -244,7 +244,8 @@ CREATE TABLE ticketStatuses (
 CREATE TABLE blockedTickets (
   id                        SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
-  expirationDate            TIMESTAMP NOT NULL
+  expirationDate            TIMESTAMP NOT NULL,
+  userId                    UUID REFERENCES users(userID) NOT NULL
 );
 CREATE INDEX blockedTicketDate ON blockedTickets (expirationDate);
 
@@ -265,9 +266,9 @@ CREATE TABLE soldTicketBills (
 );
 
 CREATE TABLE pendingTickets (
-  pendingTicketsId          SERIAL PRIMARY KEY,
+  pendingTicketId           SERIAL PRIMARY KEY,
   userId                    UUID REFERENCES users (userId) NOT NULL,
-  eventId                   INT REFERENCES events(eventId) NOT NULL,
+  tariffId                  INT REFERENCES tariffs(tariffId)  NOT NULL,
   date                      TIMESTAMP NOT NULL,
   amount                    NUMERIC NOT NULL,
   qrCode                    VARCHAR UNIQUE NOT NULL,
@@ -655,13 +656,14 @@ INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
   (1100, 1000, 'b', timestamp '2015-09-24 14:00:00');
 
 -------------------------------------------------------- pending tickets ----------------------------------------------------
-INSERT INTO pendingTickets(pendingTicketsId, userId, eventId, date, amount, qrCode) VALUES
-  (1000, 'a4aea509-1002-47d0-b55c-593c91cb32ae', 100, timestamp '2015-09-24 14:00:00', 10, 'pendingTicket');
+INSERT INTO pendingTickets(pendingTicketId, userId, tariffId, date, amount, qrCode) VALUES
+  (1000, 'a4aea509-1002-47d0-b55c-593c91cb32ae', 10000, timestamp '2015-09-24 14:00:00', 10, 'pendingTicket');
 
 
 
 -------------------------------------------------------- blocked tickets ----------------------------------------------------
-INSERT INTO blockedTickets(id, ticketId, expirationDate) VALUES (1000, 1100, timestamp '2055-09-24 14:00:00');
+INSERT INTO blockedTickets(id, ticketId, expirationDate, userId) VALUES
+  (1000, 1100, timestamp '2055-09-24 14:00:00', 'a4aea509-1002-47d0-b55c-593c91cb32ae');
 
 
 -------------------------------------------------------- sellable events ----------------------------------------------------

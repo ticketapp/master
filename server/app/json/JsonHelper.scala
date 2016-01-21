@@ -12,7 +12,7 @@ import organizersDomain.{Organizer, OrganizerWithAddress}
 import placesDomain.{Place, PlaceWithAddress}
 import playlistsDomain._
 import tariffsDomain.Tariff
-import ticketsDomain.Ticket
+import ticketsDomain.{SellableEvent, Ticket}
 import tracksDomain.{Track, TrackWithGenres}
 
 import com.vividsolutions.jts.geom.Geometry
@@ -102,4 +102,8 @@ object JsonHelper {
   implicit val issueCommentReads: Reads[IssueComment] = Json.reads[IssueComment]
   implicit val ticketWrites: Writes[Ticket] = Json.writes[Ticket]
   implicit val ticketRead: Reads[Ticket] = Json.reads[Ticket]
+  implicit val sellableEventReads: Reads[SellableEvent] = Json.reads[SellableEvent]
+  implicit val sellableEventWrites: Writes[SellableEvent] = Json.writes[SellableEvent]
+  val readSellableEventReads: Reads[Seq[SellableEvent]] = Reads.seq(__.read[SellableEvent])
+
 }

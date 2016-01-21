@@ -355,7 +355,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def eventId = column[Long]("eventid")
     def tariffId = column[Long]("tariffid")
 
-    def * = (qrCode, eventId, tariffId) <> ((Ticket.apply _).tupled, Ticket.unapply)
+    def * = (ticketId.?, qrCode, eventId, tariffId) <> ((Ticket.apply _).tupled, Ticket.unapply)
 
     def aFK = foreignKey("eventid", eventId, events)(_.id)
     def bFK = foreignKey("tariffid", tariffId, tariffs)(_.tariffId)
@@ -374,10 +374,12 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def ticketId = column[Long]("ticketid")
     def expirationDate = column[DateTime]("expirationdate")
+    def userId = column[UUID]("userid")
 
-    def * = (ticketId, expirationDate) <> ((BlockedTicket.apply _).tupled, BlockedTicket.unapply)
+    def * = (ticketId, expirationDate, userId) <> ((BlockedTicket.apply _).tupled, BlockedTicket.unapply)
 
     def aFK = foreignKey("ticketid", ticketId, tickets)(_.ticketId)
+    def bFK = foreignKey("userid", userId, slickUsers)(_.id)
   }
 
   class Tariffs(tag: Tag) extends Table[Tariff](tag, "tariffs") {
@@ -422,15 +424,15 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   class PendingTickets(tag: Tag) extends Table[PendingTicket](tag, "pendingtickets") {
     def pendingTicketId = column[Long]("pendingticketid", O.PrimaryKey, O.AutoInc)
     def userId = column[UUID]("userid")
-    def eventId = column[Long]("eventid")
+    def tariffId = column[Long]("tariffid")
     def date = column[DateTime]("date")
     def amount = column[BigDecimal]("amount")
     def qrCode = column[String]("qrcode")
     def isValidated = column[Option[Boolean]]("isvalidated")
 
-    def * = (userId, eventId, date, amount, qrCode, isValidated) <> ((PendingTicket.apply _).tupled, PendingTicket.unapply)
+    def * = (pendingTicketId.?, userId, tariffId, date, amount, qrCode, isValidated) <> ((PendingTicket.apply _).tupled, PendingTicket.unapply)
 
-    def aFK = foreignKey("eventid", eventId, events)(_.id)
+    def aFK = foreignKey("tariffid", tariffId, tariffs)(_.tariffId)
     def bFK = foreignKey("userid", userId, slickUsers)(_.id)
   }
 

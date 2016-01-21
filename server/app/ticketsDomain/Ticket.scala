@@ -12,7 +12,8 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 
 
-case class Ticket (qrCode: String,
+case class Ticket ( ticketId: Option[Long] = None,
+                    qrCode: String,
                    eventId: Long,
                    tariffId: Long)
 
@@ -20,13 +21,13 @@ case class TicketStatus(ticketId: Long, status: Char, date: DateTime)
 
 case class TicketWithStatus(ticket: Ticket, ticketStatus: Option[TicketStatus])
 
-case class BlockedTicket(ticketId: Long, expirationDate: DateTime)
+case class BlockedTicket(ticketId: Long, expirationDate: DateTime, userId: UUID)
 
 case class SellableEvent(eventId: Long)
 
 case class TicketBill(ticketId: Long, userId: UUID, date: DateTime, amount: BigDecimal)
 
-case class PendingTicket(userId: UUID, eventId: Long, date: DateTime, amount: BigDecimal, qrCode: String, isValidated: Option[Boolean] = None)
+case class PendingTicket(pendingTicketId: Option[Long], userId: UUID, tariffId: Long, date: DateTime, amount: BigDecimal, qrCode: String, isValidated: Option[Boolean] = None)
 
 class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends
   HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
@@ -85,8 +86,8 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     }
   }
 
-  def blockTicket(duration: Int, ticketId: Long): Future[Int] = db.run(
-    blockedTickets += BlockedTicket(ticketId = ticketId, expirationDate = new DateTime().plusSeconds(duration))
+  def blockTicket(durationInSecond: Int, ticketId: Long, userId: UUID): Future[Int] = db.run(
+    blockedTickets += BlockedTicket(ticketId = ticketId, expirationDate = new DateTime().plusSeconds(durationInSecond), userId)
   )
   
   def addStatus(ticketStatus: TicketStatus): Future[Int] = db.run(ticketStatuses += ticketStatus)
@@ -124,11 +125,18 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     db.run(pendingTickets.result)
   }
 
+  def findPendingTicketById(pendingTicketId:Long): Future[Option[PendingTicket]] = {
+    db.run(pendingTickets.filter(_.pendingTicketId === pendingTicketId).result) map (_.headOption)
+  }
+
   def addPendingTicket(pendingTicket: PendingTicket): Future[Int] = db.run(pendingTickets += pendingTicket)
 
-  def updatePendingTicket(pendingTicket: PendingTicket): Future[Int] = db.run(
-    pendingTickets.filter(_.qrCode === pendingTicket.qrCode).filter(_.userId === pendingTicket.userId).update(pendingTicket)
-  )
+  def updatePendingTicket(pendingTicketId: Option[Long], isValidate: Boolean): Future[Int] = {
+    val q = for { c <- pendingTickets if c.pendingTicketId === pendingTicketId } yield c.isValidated
+    db.run(
+      q.update(Some(isValidate))
+    )
+  }
   
   def findUntreatedPendingTickets: Future[Seq[PendingTicket]] = {
       db.run(pendingTickets.filter(_.isValidated.isEmpty).result)

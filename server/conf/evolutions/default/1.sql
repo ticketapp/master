@@ -243,7 +243,8 @@ CREATE TABLE ticketStatuses (
 CREATE TABLE blockedTickets (
   id                        SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
-  expirationDate            TIMESTAMP NOT NULL
+  expirationDate            TIMESTAMP NOT NULL,
+  userId                    UUID REFERENCES users(userId) NOT NULL
 );
 
 CREATE TABLE boughtTicketBills (
@@ -263,9 +264,9 @@ CREATE TABLE soldTicketBills (
 );
 
 CREATE TABLE pendingTickets (
-  pendingTicketsId          SERIAL PRIMARY KEY,
+  pendingTicketId          SERIAL PRIMARY KEY,
   userId                    UUID REFERENCES users (userId) NOT NULL,
-  eventId                   INT REFERENCES events(eventId) NOT NULL,
+  tariffId                  INT REFERENCES tariffs(tariffId)  NOT NULL,
   date                      TIMESTAMP NOT NULL,
   amount                    NUMERIC NOT NULL,
   qrCode                    VARCHAR UNIQUE NOT NULL,
