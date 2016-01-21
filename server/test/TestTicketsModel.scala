@@ -1,13 +1,11 @@
-import org.scalatest.time
-import testsHelper.GlobalApplicationForModels
-import ticketsDomain.{TicketStatus, TicketWithStatus, Ticket}
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import scala.language.postfixOps
-import org.scalatest.Matchers._
+import java.util.UUID
+
+import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.time.{Seconds, Span}
-import org.joda.time.{Duration, DateTime}
+import testsHelper.GlobalApplicationForModels
+import ticketsDomain._
+
+import scala.language.postfixOps
 
 class TestTicketsModel extends GlobalApplicationForModels {
 
@@ -17,6 +15,13 @@ class TestTicketsModel extends GlobalApplicationForModels {
     val savedBlockedTicket:Ticket = Ticket("savedBlockedTicket",100,10000)
     val oldSavedStatus = TicketStatus(1000,'a',new DateTime("2015-09-22T14:00:00.000+02:00"))
     val newSavedStatus = TicketStatus(1000,'b',new DateTime("2015-09-24T14:00:00.000+02:00"))
+    val savedPendingTicket = PendingTicket(
+      userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+      eventId = 100,
+      date = new DateTime("2015-09-24T14:00:00.000+02:00"),
+      amount = 10,
+      qrCode = "pendingTicket"
+    )
 
     "return id on save" in {
       val ticket = Ticket(qrCode = "test", eventId = 100, tariffId = 10000)
@@ -92,6 +97,73 @@ class TestTicketsModel extends GlobalApplicationForModels {
           val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
           unblockedTickets must contain (savedTicket)
           unblockedTickets must not contain savedBlockedTicket
+        }
+      }
+    }
+
+    "add bought bill for a ticket" in {
+      whenReady(ticketMethods.addBoughtTicketBill
+        (TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))))
+      { response =>
+          response mustBe 1
+      }
+    }
+
+    "find bought bill by ticketId" in {
+      val boughtBill = TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))
+      whenReady(ticketMethods.addBoughtTicketBill(boughtBill)) { response =>
+        response mustBe 1
+        whenReady(ticketMethods.findBoughtTicketBillByTicketId(1000)) { response =>
+          response must contain (boughtBill)
+        }
+      }
+    }
+
+    "add sold bill for a ticket" in {
+      whenReady(ticketMethods.addSoldTicketBill
+        (TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))))
+      { response =>
+          response mustBe 1
+      }
+    }
+
+    "find sold bill by ticketId" in {
+      val soldBill = TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))
+      whenReady(ticketMethods.addSoldTicketBill(soldBill)) { response =>
+        response mustBe 1
+        whenReady(ticketMethods.findSoldTicketBillByTicketId(1000)) { response =>
+          response must contain (soldBill)
+        }
+      }
+    }
+
+    "find pendding tickets" in {
+      whenReady(ticketMethods.findPendingTickets) { response =>
+        response must contain (savedPendingTicket)
+      }
+    }
+
+    "find untreated pending tickets" in {
+      whenReady(ticketMethods.findUntreatedPendingTickets) { response =>
+        response must contain (savedPendingTicket)
+      }
+    }
+
+    "add pending tickets" in {
+      val pendingTicketToSave = PendingTicket(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), 100, new DateTime,
+      10, "pendingTicketToSave")
+      whenReady(ticketMethods.addPendingTicket(pendingTicketToSave)) { response =>
+        response mustBe 1
+      }
+    }
+
+    "update pending tickets" in {
+      val pendingTicketToUpdate = PendingTicket(UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), 100, new DateTime,
+      10, "pendingTicket", Some(true))
+      whenReady(ticketMethods.updatePendingTicket(pendingTicketToUpdate)) { response =>
+        response mustBe 1
+        whenReady(ticketMethods.findUntreatedPendingTickets) { response =>
+          response must not contain savedPendingTicket
         }
       }
     }

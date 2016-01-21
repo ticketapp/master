@@ -227,24 +227,51 @@ CREATE TABLE tariffs (
 
 CREATE TABLE tickets (
   ticketId                  SERIAL PRIMARY KEY,
-  qrCode                    VARCHAR(255) NOT NULL,
-  eventId                   INT REFERENCES events(eventId),
-  tariffId                  INT REFERENCES tariffs(tariffId)
+  qrCode                    VARCHAR(255) UNIQUE NOT NULL,
+  eventId                   INT REFERENCES events(eventId) NOT NULL,
+  tariffId                  INT REFERENCES tariffs(tariffId) NOT NULL
 );
+CREATE INDEX ticketQrCode ON tickets (qrCode);
 
 CREATE TABLE ticketStatuses (
   id                        SERIAL PRIMARY KEY,
-  ticketId                  INT REFERENCES tickets(ticketId),
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   status                    CHAR NOT NULL,
-  date                      TIMESTAMP
+  date                      TIMESTAMP NOT NULL
 );
 
 CREATE TABLE blockedTickets (
   id                        SERIAL PRIMARY KEY,
-  ticketId                  INT REFERENCES tickets(ticketId),
-  expirationDate            TIMESTAMP
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  expirationDate            TIMESTAMP NOT NULL
 );
 
+CREATE TABLE boughtTicketBills (
+  billId                    SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL
+);
+
+CREATE TABLE soldTicketBills (
+  billId                    SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL
+);
+
+CREATE TABLE pendingTickets (
+  pendingTicketsId          SERIAL PRIMARY KEY,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  eventId                   INT REFERENCES events(eventId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL,
+  qrCode                    VARCHAR UNIQUE NOT NULL,
+  isValidated               BOOLEAN
+);
+CREATE INDEX pendingTicketQrCode ON pendingTickets (qrCode);
 
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
@@ -573,6 +600,9 @@ DROP TABLE IF EXISTS organizersFollowed;
 DROP TABLE IF EXISTS usersTools;
 DROP TABLE IF EXISTS ticketStatuses;
 DROP TABLE IF EXISTS blockedTickets;
+DROP TABLE IF EXISTS boughtTicketBills;
+DROP TABLE IF EXISTS soldTicketBills;
+DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;

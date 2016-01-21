@@ -1,15 +1,15 @@
 package ticketsDomain
 
+import java.util.UUID
 import javax.inject.Inject
+
+import database.MyPostgresDriver.api._
 import database.{MyDBTableDefinitions, MyPostgresDriver}
-import play.api.db.slick.{HasDatabaseConfigProvider, DatabaseConfigProvider}
-import org.joda.time.{Duration, DateTime}
-import play.api.libs.json.Json
-import play.api.mvc.Controller
+import org.joda.time.DateTime
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import MyPostgresDriver.api._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class Ticket (qrCode: String,
@@ -21,6 +21,10 @@ case class TicketStatus(ticketId: Long, status: Char, date: DateTime)
 case class TicketWithStatus(ticket: Ticket, ticketStatus: Option[TicketStatus])
 
 case class BlockedTicket(ticketId: Long, expirationDate: DateTime)
+
+case class TicketBill(ticketId: Long, userId: UUID, date: DateTime, amount: BigDecimal)
+
+case class PendingTicket(userId: UUID, eventId: Long, date: DateTime, amount: BigDecimal, qrCode: String, isValidated: Option[Boolean] = None)
 
 class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends
   HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
@@ -97,5 +101,35 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
       TicketWithStatus(ticketAndSeqTicketAndStatus._1, mostRecentStatus)
     }
   }.toSeq
+
+  def addBoughtTicketBill(boughtTicketBill: TicketBill): Future[Int] = db.run(
+    boughtTicketBills += boughtTicketBill
+  )
+
+  def findBoughtTicketBillByTicketId(ticketId: Long): Future[Seq[TicketBill]] = db.run(
+    boughtTicketBills.filter(_.ticketId === ticketId).result
+  )
+
+  def addSoldTicketBill(soldTicketBill: TicketBill): Future[Int] = db.run(
+    soldTicketBills += soldTicketBill
+  )
+
+  def findSoldTicketBillByTicketId(ticketId: Long): Future[Seq[TicketBill]] =  db.run(
+    soldTicketBills.filter(_.ticketId === ticketId).result
+  )
+
+  def findPendingTickets: Future[Seq[PendingTicket]] = {
+    db.run(pendingTickets.result)
+  }
+
+  def addPendingTicket(pendingTicket: PendingTicket): Future[Int] = db.run(pendingTickets += pendingTicket)
+
+  def updatePendingTicket(pendingTicket: PendingTicket): Future[Int] = db.run(
+    pendingTickets.filter(_.qrCode === pendingTicket.qrCode).filter(_.userId === pendingTicket.userId).update(pendingTicket)
+  )
+  
+  def findUntreatedPendingTickets: Future[Seq[PendingTicket]] = {
+      db.run(pendingTickets.filter(_.isValidated.isEmpty).result)
+  }
 
 }

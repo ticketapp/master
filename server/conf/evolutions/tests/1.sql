@@ -227,33 +227,54 @@ CREATE TABLE tariffs (
 
 
 CREATE TABLE tickets (
-ticketId                  SERIAL PRIMARY KEY,
-qrCode                    VARCHAR(255) NOT NULL,
-eventId                   INT REFERENCES events(eventId),
-tariffId                  INT REFERENCES tariffs(tariffId)
+  ticketId                  SERIAL PRIMARY KEY,
+  qrCode                    VARCHAR(255) UNIQUE NOT NULL,
+  eventId                   INT REFERENCES events(eventId) NOT NULL,
+  tariffId                  INT REFERENCES tariffs(tariffId) NOT NULL
 );
+CREATE INDEX ticketQrCode ON tickets (qrCode);
 
 CREATE TABLE ticketStatuses (
   id                        SERIAL PRIMARY KEY,
-  ticketId                  INT REFERENCES tickets(ticketId),
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   status                    CHAR NOT NULL,
-  date                      TIMESTAMP
+  date                      TIMESTAMP NOT NULL
 );
 
 CREATE TABLE blockedTickets (
   id                        SERIAL PRIMARY KEY,
-  ticketId                  INT REFERENCES tickets(ticketId),
-  expirationDate            TIMESTAMP
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  expirationDate            TIMESTAMP NOT NULL
+);
+CREATE INDEX blockedTicketDate ON blockedTickets (expirationDate);
+
+CREATE TABLE boughtTicketBills (
+  billId                    SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL
 );
 
+CREATE TABLE soldTicketBills (
+  billId                    SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL
+);
 
---INSERT INTO tickets (tariffId, orderId) VALUES (1, 1);
+CREATE TABLE pendingTickets (
+  pendingTicketsId          SERIAL PRIMARY KEY,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  eventId                   INT REFERENCES events(eventId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL,
+  qrCode                    VARCHAR UNIQUE NOT NULL,
+  isValidated               BOOLEAN
+);
+CREATE INDEX pendingTicketQrCode ON pendingTickets (qrCode);
 
----CREATE TABLE tariffsBlocked (
----  tariffsBlockedId         SERIAL PRIMARY KEY,
----  endTime                  TIMESTAMP DEFAULT current_timestamp + time '00:15' NOT NULL,
----  tariffId                 BIGINT REFERENCES tariffs(tariffId)
----);
 
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
@@ -629,6 +650,12 @@ INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
 INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
   (1100, 1000, 'b', timestamp '2015-09-24 14:00:00');
 
+-------------------------------------------------------- pending tickets ----------------------------------------------------
+INSERT INTO pendingTickets(pendingTicketsId, userId, eventId, date, amount, qrCode) VALUES
+  (1000, 'a4aea509-1002-47d0-b55c-593c91cb32ae', 100, timestamp '2015-09-24 14:00:00', 10, 'pendingTicket');
+
+
+
 -------------------------------------------------------- blocked tickets ----------------------------------------------------
 INSERT INTO blockedTickets(id, ticketId, expirationDate) VALUES (1000, 1100, timestamp '2055-09-24 14:00:00');
 
@@ -779,6 +806,9 @@ DROP TABLE IF EXISTS organizersFollowed;
 DROP TABLE IF EXISTS usersTools;
 DROP TABLE IF EXISTS ticketStatuses;
 DROP TABLE IF EXISTS blockedTickets;
+DROP TABLE IF EXISTS boughtTicketBills;
+DROP TABLE IF EXISTS soldTicketBills;
+DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
