@@ -19,11 +19,10 @@ GET           /initDatabase                                      @fillDatabase.I
 ################################## Admin ################################################
 GET            /admin                                           @application.Application.admin
 GET            /salableEvents                                   @ticketsDomain.TicketController.findSalableEvents()
-#POST     /admin/createTariff           @application.Admin.createTariff
 
 #################################### Tickets ###############################################
 POST            /tickets/propose                                  @ticketsDomain.TicketController.proposeTicket(eventId: Long, amount: Double, qrCode: String)
-POST            /tickets/blockForUser                             @ticketsDomain.TicketController.blockTicketForUser(tarrifId: Long)
+POST            /tickets/blockForUser                             @ticketsDomain.TicketController.blockTicketForUser(tariffId: Long)
 POST            /tickets/addTicketToSale                          @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
 POST            /tickets/acceptPenddingTicket                     @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
 POST            /tickets/rejectPenddingTicket                     @ticketsDomain.TicketController.rejectPendingTicket(pendingTicketId: Long)

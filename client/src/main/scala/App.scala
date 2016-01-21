@@ -1,6 +1,7 @@
-import AdminClient.{AdminController, AdminServiceFactory}
+import AdminClient.AdminController
 import com.greencatsoft.angularjs._
 import Contact.{ContactController, ContactComponentDirective}
+import httpServiceFactory.HttpServiceFactory
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
@@ -15,7 +16,7 @@ object App extends JSApp {
     module.config(RoutingConfig)
     module.directive[ContactComponentDirective]
     module.controller[ContactController]
-    module.factory[AdminServiceFactory]
+    module.factory[HttpServiceFactory]
     module.controller[AdminController]
   }
 }
