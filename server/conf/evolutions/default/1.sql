@@ -273,6 +273,10 @@ CREATE TABLE pendingTickets (
 );
 CREATE INDEX pendingTicketQrCode ON pendingTickets (qrCode);
 
+CREATE TABLE sellableEvents (
+  eventId                   INT PRIMARY KEY REFERENCES events(eventId) NOT NULL
+);
+
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
@@ -603,6 +607,7 @@ DROP TABLE IF EXISTS blockedTickets;
 DROP TABLE IF EXISTS boughtTicketBills;
 DROP TABLE IF EXISTS soldTicketBills;
 DROP TABLE IF EXISTS pendingTickets;
+DROP TABLE IF EXISTS sellableEvents;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;

@@ -22,6 +22,8 @@ case class TicketWithStatus(ticket: Ticket, ticketStatus: Option[TicketStatus])
 
 case class BlockedTicket(ticketId: Long, expirationDate: DateTime)
 
+case class SellableEvent(eventId: Long)
+
 case class TicketBill(ticketId: Long, userId: UUID, date: DateTime, amount: BigDecimal)
 
 case class PendingTicket(userId: UUID, eventId: Long, date: DateTime, amount: BigDecimal, qrCode: String, isValidated: Option[Boolean] = None)
@@ -132,4 +134,5 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
       db.run(pendingTickets.filter(_.isValidated.isEmpty).result)
   }
 
+  def findSellableEvents: Future[Seq[SellableEvent]] = db.run(sellableEvents.result)
 }

@@ -434,6 +434,14 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def bFK = foreignKey("userid", userId, slickUsers)(_.id)
   }
 
+  class SellableEvents(tag: Tag) extends Table[SellableEvent](tag, "sellableevents") {
+    def eventId = column[Long]("eventid")
+
+    def * = (eventId) <> ((SellableEvent.apply _), SellableEvent.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id)
+  }
+
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]
   lazy val genres = TableQuery[Genres]
   lazy val genresFollowed = TableQuery[GenresFollowed]
@@ -466,5 +474,6 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val pendingTickets = TableQuery[PendingTickets]
   lazy val soldTicketBills = TableQuery[SoldTicketBills]
   lazy val blockedTickets = TableQuery[BlockedTickets]
+  lazy val sellableEvents = TableQuery[SellableEvents]
   lazy val tariffs = TableQuery[Tariffs]
 }

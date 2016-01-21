@@ -1,6 +1,7 @@
 # Home page
 GET           /                                                  @application.Application.index
 GET            /claude                                           @application.Application.claude
+GET            /admin                                           @application.Application.admin
 GET           /googlea30e62044bb92d88.html                       @application.Application.googleValidation
 
 GET           /test                                              @others.Test.sayHello(message: String)
@@ -17,7 +18,7 @@ GET            /signOut                                          @application.Ap
 GET           /initDatabase                                      @fillDatabase.InitController.init
 
 ################################## Admin ################################################
-GET           /admin                                             @application.Admin.indexAdmin
+GET           /indexAdmin                                             @application.Admin.indexAdmin
 #POST     /admin/createTariff           @application.Admin.createTariff
 #
 ################################### Events ###############################################

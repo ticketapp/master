@@ -276,6 +276,10 @@ CREATE TABLE pendingTickets (
 CREATE INDEX pendingTicketQrCode ON pendingTickets (qrCode);
 
 
+CREATE TABLE sellableEvents (
+  eventId                   INT PRIMARY KEY REFERENCES events(eventId) NOT NULL
+);
+
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
@@ -660,6 +664,11 @@ INSERT INTO pendingTickets(pendingTicketsId, userId, eventId, date, amount, qrCo
 INSERT INTO blockedTickets(id, ticketId, expirationDate) VALUES (1000, 1100, timestamp '2055-09-24 14:00:00');
 
 
+-------------------------------------------------------- sellable events ----------------------------------------------------
+INSERT INTO sellableEvents(eventId) VALUES (100);
+
+
+
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
@@ -810,6 +819,7 @@ DROP TABLE IF EXISTS boughtTicketBills;
 DROP TABLE IF EXISTS soldTicketBills;
 DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS sellableEvents;
 DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;

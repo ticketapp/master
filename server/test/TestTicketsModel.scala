@@ -11,6 +11,7 @@ class TestTicketsModel extends GlobalApplicationForModels {
 
   "A ticket" must {
 
+    val savedSellableEvent = SellableEvent(eventId = 100)
     val savedTicket:Ticket = Ticket("savedTicket",100,10000)
     val savedBlockedTicket:Ticket = Ticket("savedBlockedTicket",100,10000)
     val oldSavedStatus = TicketStatus(1000,'a',new DateTime("2015-09-22T14:00:00.000+02:00"))
@@ -165,6 +166,12 @@ class TestTicketsModel extends GlobalApplicationForModels {
         whenReady(ticketMethods.findUntreatedPendingTickets) { response =>
           response must not contain savedPendingTicket
         }
+      }
+    }
+
+    "find sellable event's ids" in {
+      whenReady(ticketMethods.findSellableEvents) { eventIds =>
+        eventIds must contain (savedSellableEvent)
       }
     }
   }
