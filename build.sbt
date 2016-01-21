@@ -57,6 +57,7 @@ lazy val server = (project in file("server")).settings(
     "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
     "com.github.tminglei" %% "slick-pg" % "0.9.1",
     "com.vividsolutions" % "jts" % "1.13",
+    "com.typesafe.play" %% "play-mailer" % "3.0.1",
     specs2 % Test,
     "com.github.docker-java" % "docker-java" % "1.4.0",
     "com.zaxxer" % "HikariCP" % "2.4.1",
