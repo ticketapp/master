@@ -52,6 +52,11 @@ class TestTicketController extends GlobalApplicationForControllers {
           error mustEqual 0
       }
     }
+    "add a salable event" in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addSalableEvents(1000))
+      .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      contentAsString(info).toInt mustEqual 1
+    }
 
     "propose new ticket" in {
       val Some(info) = route(FakeRequest(

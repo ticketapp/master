@@ -1,68 +1,141 @@
 package AdminClient
 
-import java.util.UUID
-
-import com.greencatsoft.angularjs.core.Scope
+import com.greencatsoft.angularjs.core.{Timeout, Scope}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import httpServiceFactory.HttpGeneralService
+import materialDesign.MdToastService
+import upickle.Js
+import upickle.Js.Num
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.scalajs.js
+import org.scalajs.dom.console
 import scala.scalajs.js.Date
 import scala.scalajs.js.annotation.JSExportAll
-import scala.util.Success
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
+import upickle.default._
 
 @JSExportAll
-case class Ticket ( ticketId: Option[Long] = None,
-                    qrCode: String,
-                    eventId: Long,
-                    tariffId: Long)
-
-case class TicketStatus(ticketId: Long, status: Char, date: Date)
-
-case class TicketWithStatus(ticket: Ticket, ticketStatus: Option[TicketStatus])
-
-case class BlockedTicket(ticketId: Long, expirationDate: Date, userId: UUID)
-
-
-sealed trait A
-case class SalableEvent(eventId: Long) extends A
-
-case class TicketBill(ticketId: Long, userId: UUID, date: Date, amount: BigDecimal)
-
-case class PendingTicket(pendingTicketId: Option[Long],
-                         userId: UUID,
-                         tariffId: Long,
-                         date: Date,
-                         amount: BigDecimal,
-                         qrCode: String,
-                         isValidated: Option[Boolean] = None)
-
-@injectable("contactController")
-class AdminController(scope: Scope, httpService: HttpGeneralService, adminRoutes: AdminRoutes)
+@injectable("adminController")
+class AdminController(scope: Scope, service: HttpGeneralService, timeout: Timeout, mdToast: MdToastService)
   extends AbstractController[Scope](scope) {
 
-  def getSalableEvents: Future[Seq[A]] = {
-    httpService.getJsonAndRead(adminRoutes.salableEvents) map { salableEvents =>
-        println(salableEvents)
-        salableEvents
-    } recover { case t: Throwable =>
-        println(throw t)
-        Seq.empty
+  implicit val dateTimeWriter = upickle.default.Writer[Date]{
+      case t => Js.Str(t.toString)
+    }
+  implicit val dateTimeReader = upickle.default.Reader[Date]{
+      case Js.Str(str) =>
+        new Date(str)
+        case a =>
+        console.log(new Date(a.value.toString))
+        console.log(new Date(write(a.value)))
+        new Date(a.value.toString)
+    }
+
+  var salableEvents: js.Array[SalableEvent] = new js.Array[SalableEvent]
+  var ticketsWithStatus: js.Array[TicketWithStatus] = new js.Array[TicketWithStatus]
+  var pendingTickets: js.Array[PendingTicket] = new js.Array[PendingTicket]
+  var boughtBills: js.Array[TicketBill] = new js.Array[TicketBill]
+  var soldBills: js.Array[TicketBill] = new js.Array[TicketBill]
+  val validationMessage = "Ok"
+
+  def findSalableEvents: Unit = {
+    service.getJson(AdminRoutes.salableEvents) map { foundSalableEvents =>
+      println(foundSalableEvents)
+      timeout(() => salableEvents = read[Seq[SalableEvent]](foundSalableEvents).toJSArray)
+    }
+  }
+
+  def findTariffsByEventId(eventId: Int): Future[js.Array[Tariff]] = {
+    service.getJson(AdminRoutes.findTariffsByEventId(eventId)) map { tariffs =>
+      console.log(tariffs)
+      timeout( () => read[Seq[Tariff]](tariffs).toJSArray)
+      read[Seq[Tariff]](tariffs).toJSArray
+    }
+  }
+
+  def addTariff(denomination: String, eventId: Int, startTime: Date, endTime: Date, price: Double): Unit = {
+    service.postJsonAndRead(AdminRoutes.addTariff(
+      denomination: String, eventId: Int, startTime.toISOString(): String, endTime.toISOString(): String, price: Double
+    )) map { response =>
+      val toast = mdToast.simple(validationMessage)
+      mdToast.show(toast)
+
+    }
+  }
+
+  def findTicketsWithStatus: Unit = {
+    service.getJson(AdminRoutes.findTicketsWithStatus) map { ticketsWithStatusFound =>
+        println(ticketsWithStatusFound)
+        timeout(() => ticketsWithStatus = read[Seq[TicketWithStatus]](ticketsWithStatusFound).toJSArray)
+    }
+  }
+  def findPendingTickets: Unit = {
+    service.getJson(AdminRoutes.findPendingTickets) map { pendingTicketsFound =>
+        println(pendingTicketsFound)
+        timeout( () => pendingTickets = read[Seq[PendingTicket]](pendingTicketsFound).toJSArray)
+    }
+  }
+  def findBoughtBills: Unit = {
+    service.getJson(AdminRoutes.findBoughtBills) map { boughtBillsFind =>
+        println(boughtBillsFind)
+        timeout( () => boughtBills = read[Seq[TicketBill]](boughtBillsFind).toJSArray)
+    }
+  }
+
+  def findSoldBills: Unit = {
+    service.getJson(AdminRoutes.findSoldBills) map { soldBillsFound =>
+        println(soldBillsFound)
+      timeout( () => soldBills = read[Seq[TicketBill]](soldBillsFound).toJSArray)
+    }
+  }
+
+  def addSalableEvent(eventId: Int): Unit = {
+    service.postJsonAndRead(AdminRoutes.salableEvents(eventId: Int)) map { response =>
+      println(response)
+      val toast = mdToast.simple(validationMessage)
+      mdToast.show(toast)
+    }
+  }
+
+  def proposeTicket(tariffId: Int, amount: Double, qrCode: String): Unit = {
+    service.postJsonAndRead(AdminRoutes.proposeTicket(tariffId: Int, amount: Double, qrCode: String)) map { response =>
+      println(response)
+      val toast = mdToast.simple(validationMessage)
+      mdToast.show(toast)
+    }
+  }
+
+  def blockTicketForUser(tariffId: Int): Unit = {
+    service.postJsonAndRead(AdminRoutes.blockTicketForUser(tariffId: Int)) map { response =>
+      println(response)
+      val toast = mdToast.simple(validationMessage)
+      mdToast.show(toast)
+    }
+  }
+
+  def addTicketToSale(qrCode: String, eventId: Int, tariffId: Int): Unit = {
+    service.postJsonAndRead(AdminRoutes.addTicketToSale(qrCode: String, eventId: Int, tariffId: Int))map { response =>
+      println(response)
+      val toast = mdToast.simple(validationMessage)
+      mdToast.show(toast)
+    }
+  }
+
+  def acceptPendingTicket(pendingTicketId: Int): Unit = {
+    service.postJsonAndRead(AdminRoutes.acceptPendingTicket(pendingTicketId: Int)) map { response =>
+      println(response)
+      val toast = mdToast.simple(validationMessage)
+      mdToast.show(toast)
+    }
+  }
+
+  def rejectPendingTicket(pendingTicketId: Int): Unit = {
+    service.postJsonAndRead(AdminRoutes.rejectPendingTicket(pendingTicketId: Int)) map { response =>
+      println(response)
+      val toast = mdToast.simple(validationMessage)
+      mdToast.show(toast)
     }
   }
 }
-
-
-/*def salableEvents: String = "/salableEvents"
-  def proposeTicket(eventId: Long, amount: Double, qrCode: String): String =
-    "/tickets/propose?eventId=" + eventId + "&amount=" + amount + "&qrCode=" + qrCode
-  def blockTicketForUser(tariffId: Long): String = "/tickets/blockForUser?tariffId=" + tariffId
-  def addTicketToSale(qrCode: String, eventId: Long, tariffId: Long): String =
-    "/tickets/addTicketToSale?qrCode=" + qrCode + "&eventId=" + eventId + "&tariffId=" + tariffId
-  def acceptPendingTicket(pendingTicketId: Long): String = "/tickets/propose?pendingTicketId=" + pendingTicketId
-  def rejectPendingTicket(pendingTicketId: Long): String = "/tickets/rejectPenddingTicket?pendingTicketId=" + pendingTicketId
-  def findTicketsWithStatus: String = "/tickets/findAll"
-  def findPendingTickets: String = "/tickets/pending"
-  def findBoughtBills: String = "/bills/bought"
-  def findSoldBills:String = "/bills/sold "*/

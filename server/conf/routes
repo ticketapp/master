@@ -19,9 +19,10 @@ GET           /initDatabase                                      @fillDatabase.I
 ################################## Admin ################################################
 GET            /admin                                           @application.Application.admin
 GET            /salableEvents                                   @ticketsDomain.TicketController.findSalableEvents()
+POST           /salableEvents                                   @ticketsDomain.TicketController.addSalableEvents(eventId: Long)
 
 #################################### Tickets ###############################################
-POST            /tickets/propose                                  @ticketsDomain.TicketController.proposeTicket(eventId: Long, amount: Double, qrCode: String)
+POST            /tickets/propose                                  @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
 POST            /tickets/blockForUser                             @ticketsDomain.TicketController.blockTicketForUser(tariffId: Long)
 POST            /tickets/addTicketToSale                          @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
 POST            /tickets/acceptPenddingTicket                     @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
@@ -30,6 +31,10 @@ GET             /tickets/findAll                                  @ticketsDomain
 GET             /tickets/pending                                  @ticketsDomain.TicketController.findPendingTickets
 GET             /bills/bought                                     @ticketsDomain.TicketController.findBoughtBills
 GET             /bills/sold                                       @ticketsDomain.TicketController.findSoldBills
+
+#################################### tariffs ###############################################
+GET             /tariffs                                          @tariffsDomain.TariffController.findTariffsByEventId(eventId: Long)
+POST            /tariffs                                          @tariffsDomain.TariffController.save(denomination: String, eventId: Long, startTime: String, endTime: String, price: Double)
 
 #################################### Events ###############################################
 GET           /events                                            @eventsDomain.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)

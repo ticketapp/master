@@ -105,7 +105,7 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
   def blockTicket(durationInSecond: Int, ticketId: Long, userId: UUID): Future[Int] = db.run(
     blockedTickets += BlockedTicket(ticketId = ticketId, expirationDate = new DateTime().plusSeconds(durationInSecond), userId)
   )
-  
+
   def addStatus(ticketStatus: TicketStatus): Future[Int] = db.run(ticketStatuses += ticketStatus)
 
   def SeqTupleTicketAndStatusToSeqTicketWithStatus(seqTupleTicketAndStatus: Seq[(Ticket, Option[TicketStatus])]):
@@ -163,4 +163,6 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def findSalableEvents: Future[Seq[SalableEvent]] = db.run(sellableEvents.result)
+
+  def addSalableEvents(salableEvent: SalableEvent): Future[Int] = db.run(sellableEvents += salableEvent)
 }

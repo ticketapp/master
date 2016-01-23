@@ -1,32 +1,54 @@
 package httpServiceFactory
 
-import AdminClient.A
+
 import com.greencatsoft.angularjs.core.HttpService
 import com.greencatsoft.angularjs.{Factory, Service, injectable}
+import materialDesign.MdToastService
+import org.scalajs.dom.console
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSON
-import scala.util.{Failure, Success, Try}
-import upickle.default._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js.annotation.JSExport
 
-@injectable("adminService")
-class HttpGeneralService(http: HttpService) extends Service {
+
+@injectable("httpGeneralService")
+class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Service {
   require(http != null, "Missing argument 'http'.")
 
 
-  def getJsonAndRead(url: String): Future[Seq[A]] = {
-    val getFuture = http.get[js.Any](url) // implicit conversion occurs here.
-    getFuture.onFailure {
-      case err =>
+  val errors = (error: Any, status: Int) => {
+    var message = ""
+    status match {
+      case 401 =>
+        message = "Unauthorized"
+      case 404 =>
+        message = "Not found"
     }
-    val intermediateFuture: Future[Seq[A]] = getFuture.map(JSON.stringify(_)).map(read[Seq[A]])
+    val toast = mdToast.simple(message)
+    mdToast.show(toast)
+    console.error(s"An error has occured: $error")
+    console.log(status)
+  }
+
+  @JSExport
+  def getJson(url: String): Future[String] = {
+    val getFuture = http.get[js.Any](url) // implicit conversion occurs here.
+    getFuture.error(errors)
+    getFuture.map(JSON.stringify(_))
+  }
+
+  def postJsonAndRead(url: String): Future[String] = {
+    val postFuture = http.post[js.Any](url) // implicit conversion occurs here.
+    postFuture.error(errors)
+    val intermediateFuture: Future[String] = postFuture.map(JSON.stringify(_))
     intermediateFuture
   }
 
 }
-@injectable("adminServiceFactory")
-class HttpServiceFactory(http: HttpService) extends Factory[HttpGeneralService] {
+@injectable("httpGeneralService")
+class HttpGeneralServiceFactory(http: HttpService, mdToast: MdToastService) extends Factory[HttpGeneralService] {
 
-  override def apply(): HttpGeneralService = new HttpGeneralService(http)
+  override def apply(): HttpGeneralService = new HttpGeneralService(http, mdToast)
 }

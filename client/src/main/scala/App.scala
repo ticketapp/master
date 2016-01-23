@@ -1,7 +1,7 @@
 import AdminClient.AdminController
 import com.greencatsoft.angularjs._
 import Contact.{ContactController, ContactComponentDirective}
-import httpServiceFactory.HttpServiceFactory
+import httpServiceFactory.HttpGeneralServiceFactory
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
@@ -14,9 +14,9 @@ object App extends JSApp {
       "websocketService"))
 
     module.config(RoutingConfig)
-    module.directive[ContactComponentDirective]
     module.controller[ContactController]
-    module.factory[HttpServiceFactory]
+    module.directive[ContactComponentDirective]
+    module.factory[HttpGeneralServiceFactory]
     module.controller[AdminController]
   }
 }

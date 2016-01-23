@@ -75,11 +75,14 @@ lazy val client = (project in file("client")).settings(
   testFrameworks := Seq(new TestFramework("com.greencatsoft.greenlight.Greenlight")),
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.8.0",
-    "com.lihaoyi" %%% "upickle" % "0.3.4",
+    "com.lihaoyi" %%% "upickle" % "0.3.6",
     "com.greencatsoft" %%% "scalajs-angular" % "0.6",
     "com.greencatsoft" %%% "greenlight" % "0.3" % "test",
     "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
-  )
+  ),
+  jsDependencies += RuntimeDOM,
+  jsDependencies += "org.webjars" % "angularjs" % "1.3.8" / "angular.min.js" % "test",
+  jsDependencies += ("org.webjars" % "angularjs" % "1.3.8" / "angular-mocks.js" dependsOn "angular.min.js") % "test"
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
   dependsOn(sharedJs)
 

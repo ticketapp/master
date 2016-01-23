@@ -29,16 +29,47 @@
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("favicon.ico")" />
     </head>
     <body ng-app="app">
-        <section layout="row" flex class=" height100p">
+        <section layout="row" flex class=" height100p" data-ng-controller="adminController as controller">
             <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
                 <md-toolbar class="md-theme-indigo">
                     <h1 class="md-toolbar-tools">Admin</h1>
                 </md-toolbar>
                 <md-content layout-padding >
-
+                <md-list>
+                    <md-list-item ng-click="controller.findSalableEvents(); template = 'assets/templates/AdminClient/salableEvents.html'">
+                        Show salable events
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findTicketsWithStatus(); template = 'assets/templates/AdminClient/tickets.html'">
+                        Show tickets
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findPendingTickets(); template = 'assets/templates/AdminClient/pendingTickets.html'">
+                        Show pending tickets
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findBoughtBills(); template = 'assets/templates/AdminClient/boughtBills.html'">
+                        Show bought bills
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findSoldBills(); template = 'assets/templates/AdminClient/soldBills.html'">
+                        Show sold bills
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/addSalableEvent.html'">
+                        Add salable event
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/proposeTicket.html'">
+                        Propose ticket
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/blockTicketForUser.html'">
+                        block Ticket For User
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/addTicketToSale.html'">
+                        add Ticket To Sale
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/addTariff.html'">
+                        add Tariff
+                    </md-list-item>
+                </md-list>
                 </md-content>
             </md-sidenav>
-            <md-content flex ng-include="'assets/templates/AdminClient/admin.html'" class="column large-12">
+            <md-content flex ng-include="template" class="column large-12">
 
             </md-content>
         </section>

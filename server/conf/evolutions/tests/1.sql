@@ -636,6 +636,9 @@ INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(
 INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
 VALUES(100, true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00',
        '01010000008906CEBE97E346405187156EF9581340');
+INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
+VALUES(1000, true, true, 'notPassedEvent3', timestamp '2050-08-24 14:00:00',
+       '01010000008906CEBE97E346405187156EF9581340');
 
 -------------------------------------------------------- tariffs  ------------------------------------------------------
 INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId) VALUES

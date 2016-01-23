@@ -390,7 +390,7 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def endTime = column[DateTime]("endtime")
     def price = column[BigDecimal]("price")
 
-    def * = (denomination, eventId, startTime, endTime, price) <> ((Tariff.apply _).tupled, Tariff.unapply)
+    def * = (tariffId.?, denomination, eventId, startTime, endTime, price) <> ((Tariff.apply _).tupled, Tariff.unapply)
 
     def aFK = foreignKey("eventid", eventId, events)(_.id)
   }

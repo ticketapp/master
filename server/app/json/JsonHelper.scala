@@ -68,7 +68,6 @@ object JsonHelper {
 //  implicit val account4686Writes: Writes[Account4686] = Json.writes[Account4686]
 
   implicit val genreWrites = Json.writes[Genre]
-  implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
   implicit val trackWrites: Writes[Track] = Json.writes[Track]
   implicit val trackReads: Reads[Track] = Json.reads[Track]
   implicit val trackWithGenresWrites: Writes[TrackWithGenres] = Json.writes[TrackWithGenres]
@@ -112,9 +111,12 @@ object JsonHelper {
   implicit val pendingTicketWrites: Writes[PendingTicket] = Json.writes[PendingTicket]
   implicit val ticketBillReads: Reads[TicketBill] = Json.reads[TicketBill]
   implicit val ticketBillWrites: Writes[TicketBill] = Json.writes[TicketBill]
+  implicit val tariffReads: Reads[Tariff] = Json.reads[Tariff]
+  implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
   val readSalableEventReads: Reads[Seq[SalableEvent]] = Reads.seq(__.read[SalableEvent])
   val readTicketWithStatusReads: Reads[Seq[TicketWithStatus]] = Reads.seq(__.read[TicketWithStatus])
   val readPendingTicketReads: Reads[Seq[PendingTicket]] = Reads.seq(__.read[PendingTicket])
   val readTicketBillReads: Reads[Seq[TicketBill]] = Reads.seq(__.read[TicketBill])
+  val readTariffReads: Reads[Seq[Tariff]] = Reads.seq(__.read[Tariff])
 
 }

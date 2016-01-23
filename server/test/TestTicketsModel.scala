@@ -222,5 +222,11 @@ class TestTicketsModel extends GlobalApplicationForModels {
         eventIds must contain (savedSellableEvent)
       }
     }
+    "add sellable event" in {
+      val newSalableEvent = SalableEvent(1000)
+      whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { eventIds =>
+        eventIds mustBe 1
+      }
+    }
   }
 }

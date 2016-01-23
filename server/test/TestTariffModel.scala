@@ -6,11 +6,13 @@ import org.joda.time.DateTime
 
 class TestTariffModel extends GlobalApplicationForModels {
 
-  val savedTariff = Tariff("test",
-    100,
-    new DateTime("2040-08-24T14:00:00.000+02:00"),
-    new DateTime("2040-09-24T14:00:00.000+02:00"),
-    10)
+  val savedTariff = Tariff(
+    tariffId = Some(10000),
+    denomination = "test",
+    eventId = 100,
+    startTime = new DateTime("2040-08-24T14:00:00.000+02:00"),
+    endTime = new DateTime("2040-09-24T14:00:00.000+02:00"),
+    price = 10.0)
 
   "Tariff" must {
 

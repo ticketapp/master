@@ -1,4 +1,5 @@
 
+import AdminClient.AdminController
 import com.greencatsoft.angularjs.{Module, Angular}
 import com.greencatsoft.greenlight.{BeforeAndAfterAll, BeforeAndAfter, TestSuite}
 import org.scalajs.dom.window
@@ -22,49 +23,52 @@ object JasmineAdapter extends GlobalScope {
 
 @js.native
 trait AngularMockTest extends TestSuite with BeforeAndAfter with BeforeAndAfterAll with JasmineAdapter {
+  /*
+    import AngularMockTest._
+    import JasmineAdapter._
 
-  import AngularMockTest._
-  import JasmineAdapter._
+    override def name: String = "app"
 
-  def name: String
 
-  def modules: Seq[String] = Nil
 
-  private var moduleCallbacks: Seq[Function1[Module, Unit]] = Nil
+    private var moduleCallbacks: Seq[Function1[Module, Unit]] = Seq()
 
-  beforeAll {
-    val module = Angular.module(name, modules)
-
-    moduleCallbacks foreach {
-      callback => callback(module)
+    beforeAll {
+      println("module")
+      val module = Angular.module(name, modules)
+      println(module)
+      moduleCallbacks foreach {
+        callback => callback(module)
+      }
     }
-  }
 
-  before {
-    beforeEachHooks.foreach(_(window))
+  /*  before {
+      beforeEachHooks.foreach(_(window))
 
-    module(name)
-  }
+      module(name)
+    }
 
-  after {
-    afterEachHooks.foreach(_(window))
-  }
+    after {
+      afterEachHooks.foreach(_(window))
+    }*/
 
-  def withModule(callback: Module => Unit) {
-    this.moduleCallbacks :+= callback
-  }
+    def withModule(callback: Module => Unit) {
+      println(callback)
+      this.moduleCallbacks :+= callback
+    }
 
-  def withService[A](name: String)(callback: A => Unit): Unit = {
-    val handler: js.Function1[A, Unit] = callback
+    /*def withService[A](name: String)(callback: A => Unit): Unit = {
+      val handler: js.Function1[A, Unit] = callback
 
-    inject(js.Array(name, handler))
-  }
+      inject(js.Array(name, handler))
+    }*/
+    def withController[A](name: String)(callback: A => Unit): Unit = {
+      println(callback)
+      println(name)
+      val handler: js.Function1[A, Unit] = callback
 
-  def withController[A](name: String)(callback: A => Unit): Unit = {
-    val handler: js.Function1[A, Unit] = callback
-
-    inject(js.Array(name, handler))
-  }
+      inject(js.Array(name, handler))
+    }*/
 }
 
 object AngularMockTest extends GlobalScope {

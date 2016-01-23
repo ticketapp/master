@@ -9,7 +9,8 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import scala.concurrent.Future
 import MyPostgresDriver.api._
 
-case class Tariff (denomination: String,
+case class Tariff (tariffId: Option[Long] = None,
+                    denomination: String,
                    eventId: Long,
                    startTime: DateTime,
                    endTime: DateTime,
