@@ -36,6 +36,18 @@
                 </md-toolbar>
                 <md-content layout-padding >
                 <md-list>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/adminEvents.html'">
+                        Events management
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/adminArtists.html'">
+                        Artists management
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/adminOrganizers.html'">
+                        Organizers management
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/AdminClient/adminPlaces.html'">
+                        Places management
+                    </md-list-item>
                     <md-list-item ng-click="controller.findSalableEvents(); template = 'assets/templates/AdminClient/salableEvents.html'">
                         Show salable events
                     </md-list-item>

@@ -2,6 +2,7 @@ package AdminClient
 
 import com.greencatsoft.angularjs.core.{Timeout, Scope}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
+import events.EventsRoutes
 import httpServiceFactory.HttpGeneralService
 import materialDesign.MdToastService
 import upickle.Js
@@ -29,8 +30,8 @@ class AdminController(scope: Scope, service: HttpGeneralService, timeout: Timeou
         new Date(str)
         case a =>
         console.log(new Date(a.value.toString))
-        console.log(new Date(write(a.value)))
-        new Date(a.value.toString)
+        //console.log(new Date(write(a.value)))
+        new Date(a.value.toString.toLong)
     }
 
   var salableEvents: js.Array[SalableEvent] = new js.Array[SalableEvent]
@@ -39,6 +40,7 @@ class AdminController(scope: Scope, service: HttpGeneralService, timeout: Timeou
   var boughtBills: js.Array[TicketBill] = new js.Array[TicketBill]
   var soldBills: js.Array[TicketBill] = new js.Array[TicketBill]
   val validationMessage = "Ok"
+
 
   def findSalableEvents: Unit = {
     service.getJson(AdminRoutes.salableEvents) map { foundSalableEvents =>

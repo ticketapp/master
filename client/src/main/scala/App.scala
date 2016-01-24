@@ -1,6 +1,10 @@
 import AdminClient.AdminController
+import Artists.ArtistsController
+import Organizers.OrganizersController
+import Places.PlacesController
 import com.greencatsoft.angularjs._
 import Contact.{ContactController, ContactComponentDirective}
+import events.EventsController
 import httpServiceFactory.HttpGeneralServiceFactory
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -18,5 +22,9 @@ object App extends JSApp {
     module.directive[ContactComponentDirective]
     module.factory[HttpGeneralServiceFactory]
     module.controller[AdminController]
+    module.controller[EventsController]
+    module.controller[ArtistsController]
+    module.controller[OrganizersController]
+    module.controller[PlacesController]
   }
 }
