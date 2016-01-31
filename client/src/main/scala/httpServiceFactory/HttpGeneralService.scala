@@ -33,13 +33,13 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
   }
 
   @JSExport
-  def getJson(url: String): Future[String] = {
+  def get(url: String): Future[String] = {
     val getFuture = http.get[js.Any](url) // implicit conversion occurs here.
     getFuture.error(errors)
     getFuture.map(JSON.stringify(_))
   }
 
-  def postJsonAndRead(url: String): Future[String] = {
+  def post(url: String): Future[String] = {
     val postFuture = http.post[js.Any](url) // implicit conversion occurs here.
     postFuture.error(errors)
     val intermediateFuture: Future[String] = postFuture.map(JSON.stringify(_))

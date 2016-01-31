@@ -25,8 +25,8 @@ class TariffController @Inject()(val messagesApi: MessagesApi,
     tariffMethods.findByEventId(eventId) map { tariffs =>
       Ok(Json.toJson(tariffs))
     } recover { case t: Throwable =>
-      Logger.error("TicketController.findSalableEvents: ", t)
-      InternalServerError("TicketController.findSalableEvents: " + t.getMessage)
+      Logger.error("TicketController.findTariffsByEventId: ", t)
+      InternalServerError("TariffController.findSalableEvents: " + t.getMessage)
     }
   }
 
@@ -36,7 +36,7 @@ class TariffController @Inject()(val messagesApi: MessagesApi,
       Ok(Json.toJson(response))
     } recover { case t: Throwable =>
       Logger.error("TicketController.addSalableEvents: ", t)
-      InternalServerError("TicketController.addSalableEvents: " + t.getMessage)
+      InternalServerError("TariffController.save: " + t.getMessage)
     }
   }
 }

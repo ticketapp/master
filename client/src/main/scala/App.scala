@@ -1,9 +1,9 @@
-import AdminClient.AdminController
-import Artists.ArtistsController
-import Organizers.OrganizersController
-import Places.PlacesController
+import adminClient.AdminController
+import artists.ArtistsController
+import organizers.OrganizersController
+import places.PlacesController
 import com.greencatsoft.angularjs._
-import Contact.{ContactController, ContactComponentDirective}
+import contact.{ContactController, ContactComponentDirective}
 import events.EventsController
 import httpServiceFactory.HttpGeneralServiceFactory
 import scala.scalajs.js.JSApp

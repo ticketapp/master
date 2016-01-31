@@ -42,9 +42,9 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "get all salable events" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findSalableEvents()))
-      val validatedJsonSellableEvents: JsResult[Seq[SalableEvent]] =
+      val validatedJsonSalableEvents: JsResult[Seq[SalableEvent]] =
         contentAsJson(info).validate[Seq[SalableEvent]](JsonHelper.readSalableEventReads)
-      validatedJsonSellableEvents match {
+      validatedJsonSalableEvents match {
         case events: JsSuccess[Seq[SalableEvent]] =>
           events.get must contain (savedSalableEvent)
         case error: JsError =>
@@ -55,7 +55,7 @@ class TestTicketController extends GlobalApplicationForControllers {
     "add a salable event" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addSalableEvents(1000))
       .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      contentAsString(info).toInt mustEqual 1
+        contentAsString(info).toInt mustEqual 1
     }
 
     "propose new ticket" in {

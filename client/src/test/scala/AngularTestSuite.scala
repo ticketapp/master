@@ -1,5 +1,5 @@
 
-import AdminClient.AdminController
+import adminClient.AdminController
 import com.greencatsoft.angularjs.{Module, Angular}
 import com.greencatsoft.greenlight.{BeforeAndAfterAll, BeforeAndAfter, TestSuite}
 import org.scalajs.dom.window

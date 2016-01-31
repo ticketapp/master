@@ -1,4 +1,4 @@
-import AdminClient.{AdminRoutes, AdminController}
+import adminClient.{AdminRoutes, AdminController}
 import com.greencatsoft.angularjs._
 import com.greencatsoft.angularjs.core.{HttpService, Scope}
 import httpServiceFactory.{HttpGeneralServiceFactory, HttpGeneralService}

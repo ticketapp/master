@@ -1,10 +1,10 @@
 package events
 
-import Addresses.Address
-import Artists.ArtistWithWeightedGenres
-import Genres.Genre
-import Organizers.OrganizerWithAddress
-import Places.PlaceWithAddress
+import addresses.Address
+import artists.ArtistWithWeightedGenres
+import genres.Genre
+import organizers.OrganizerWithAddress
+import places.PlaceWithAddress
 
 import scala.scalajs.js.Date
 import scala.scalajs.js.annotation.JSExportAll

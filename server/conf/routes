@@ -22,13 +22,13 @@ GET            /salableEvents                                   @ticketsDomain.T
 POST           /salableEvents                                   @ticketsDomain.TicketController.addSalableEvents(eventId: Long)
 
 #################################### Tickets ###############################################
-POST            /tickets/propose                                  @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
-POST            /tickets/blockForUser                             @ticketsDomain.TicketController.blockTicketForUser(tariffId: Long)
-POST            /tickets/addTicketToSale                          @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
-POST            /tickets/acceptPenddingTicket                     @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
-POST            /tickets/rejectPenddingTicket                     @ticketsDomain.TicketController.rejectPendingTicket(pendingTicketId: Long)
-GET             /tickets/findAll                                  @ticketsDomain.TicketController.findTicketsWithStatus
-GET             /tickets/pending                                  @ticketsDomain.TicketController.findPendingTickets
+POST            /proposed                                         @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
+POST            /blockedTicket                                    @ticketsDomain.TicketController.blockTicketForUser(tariffId: Long)
+POST            /ticketToSale                                     @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
+POST            /acceptedPendingTicket                            @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
+POST            /rejectedPendingTicket                            @ticketsDomain.TicketController.rejectPendingTicket(pendingTicketId: Long)
+GET             /tickets                                          @ticketsDomain.TicketController.findTicketsWithStatus
+GET             /pending                                          @ticketsDomain.TicketController.findPendingTickets
 GET             /bills/bought                                     @ticketsDomain.TicketController.findBoughtBills
 GET             /bills/sold                                       @ticketsDomain.TicketController.findSoldBills
 
