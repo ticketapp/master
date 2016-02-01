@@ -9,9 +9,10 @@ import eventsDomain.{Event, EventWithRelations}
 import genresDomain.{Genre, GenreWithWeight}
 import issues.{Issue, IssueComment}
 import organizersDomain.{Organizer, OrganizerWithAddress}
-import others.Tariff
 import placesDomain.{Place, PlaceWithAddress}
 import playlistsDomain._
+import tariffsDomain.Tariff
+import ticketsDomain._
 import tracksDomain.{Track, TrackWithGenres}
 
 import com.vividsolutions.jts.geom.Geometry
@@ -27,7 +28,7 @@ object JsonHelper {
   }
 
   implicit object CharReads extends AnyRef with Reads[Char] {
-    def reads(char: JsValue): JsResult[Char] = JsSuccess(char.toString()(0))
+    def reads(char: JsValue): JsResult[Char] = JsSuccess(Json.stringify(char)(1))
   }
 
   implicit object UUIDWrites extends AnyRef with Writes[UUID] {
@@ -67,7 +68,6 @@ object JsonHelper {
 //  implicit val account4686Writes: Writes[Account4686] = Json.writes[Account4686]
 
   implicit val genreWrites = Json.writes[Genre]
-  implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
   implicit val trackWrites: Writes[Track] = Json.writes[Track]
   implicit val trackReads: Reads[Track] = Json.reads[Track]
   implicit val trackWithGenresWrites: Writes[TrackWithGenres] = Json.writes[TrackWithGenres]
@@ -99,4 +99,24 @@ object JsonHelper {
 //  implicit val mailWrites: Writes[Mail] = Json.writes[Mail]
   implicit val issueCommentWrites: Writes[IssueComment] = Json.writes[IssueComment]
   implicit val issueCommentReads: Reads[IssueComment] = Json.reads[IssueComment]
+  implicit val ticketWrites: Writes[Ticket] = Json.writes[Ticket]
+  implicit val ticketRead: Reads[Ticket] = Json.reads[Ticket]
+  implicit val statusWrites: Writes[TicketStatus] = Json.writes[TicketStatus]
+  implicit val statusRead: Reads[TicketStatus] = Json.reads[TicketStatus]
+  implicit val ticketWithStatusWrites: Writes[TicketWithStatus] = Json.writes[TicketWithStatus]
+  implicit val ticketWithStatusRead: Reads[TicketWithStatus] = Json.reads[TicketWithStatus]
+  implicit val salableEventReads: Reads[SalableEvent] = Json.reads[SalableEvent]
+  implicit val salableEventWrites: Writes[SalableEvent] = Json.writes[SalableEvent]
+  implicit val pendingTicketReads: Reads[PendingTicket] = Json.reads[PendingTicket]
+  implicit val pendingTicketWrites: Writes[PendingTicket] = Json.writes[PendingTicket]
+  implicit val ticketBillReads: Reads[TicketBill] = Json.reads[TicketBill]
+  implicit val ticketBillWrites: Writes[TicketBill] = Json.writes[TicketBill]
+  implicit val tariffReads: Reads[Tariff] = Json.reads[Tariff]
+  implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
+  val readSalableEventReads: Reads[Seq[SalableEvent]] = Reads.seq(__.read[SalableEvent])
+  val readTicketWithStatusReads: Reads[Seq[TicketWithStatus]] = Reads.seq(__.read[TicketWithStatus])
+  val readPendingTicketReads: Reads[Seq[PendingTicket]] = Reads.seq(__.read[PendingTicket])
+  val readTicketBillReads: Reads[Seq[TicketBill]] = Reads.seq(__.read[TicketBill])
+  val readTariffReads: Reads[Seq[Tariff]] = Reads.seq(__.read[Tariff])
+
 }

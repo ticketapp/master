@@ -10,7 +10,6 @@ import genresDomain.GenreMethods
 import issues.IssueMethods
 import jobs.Scheduler
 import organizersDomain.OrganizerMethods
-import others.TariffMethods
 import placesDomain.PlaceMethods
 import play.api.Configuration
 import play.api.db.DBApi
@@ -19,6 +18,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import playlistsDomain.PlaylistMethods
 import services.GetUserLikedPagesOnFacebook
 import silhouette.{OAuth2InfoDAO, UserDAOImpl}
+import tariffsDomain.TariffMethods
+import ticketsDomain.TicketMethods
 import tracksDomain.{SearchSoundCloudTracks, SearchYoutubeTracks, TrackMethods, TrackRatingMethods}
 
 
@@ -44,6 +45,7 @@ trait Injectors {
   lazy val tariffMethods = new TariffMethods(dbConfProvider)
   lazy val placeMethods = new PlaceMethods(dbConfProvider, geographicPointMethods, addressMethods)
   lazy val addressMethods = new AddressMethods(dbConfProvider, geographicPointMethods)
+  lazy val ticketMethods = new TicketMethods(dbConfProvider)
   lazy val organizerMethods = new OrganizerMethods(dbConfProvider, placeMethods, addressMethods, geographicPointMethods)
   lazy val artistMethods = new ArtistMethods(dbConfigProvider = dbConfProvider, genreMethods = genreMethods,
     searchSoundCloudTracks = searchSoundCloudTracks, searchYoutubeTracks = searchYoutubeTrack, trackMethods = trackMethods)

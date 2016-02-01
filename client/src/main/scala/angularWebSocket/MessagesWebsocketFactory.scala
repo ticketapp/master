@@ -1,4 +1,4 @@
-package AngularWebSocket
+package angularWebSocket
 
 import com.greencatsoft.angularjs.core.Promise
 import com.greencatsoft.angularjs.injectable

@@ -1,5 +1,11 @@
+import adminClient.AdminController
+import artists.ArtistsController
+import organizers.OrganizersController
+import places.PlacesController
 import com.greencatsoft.angularjs._
-import Contact.{ContactController, ContactComponentDirective}
+import contact.{ContactController, ContactComponentDirective}
+import events.EventsController
+import httpServiceFactory.HttpGeneralServiceFactory
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
@@ -12,7 +18,13 @@ object App extends JSApp {
       "websocketService"))
 
     module.config(RoutingConfig)
-    module.directive[ContactComponentDirective]
     module.controller[ContactController]
+    module.directive[ContactComponentDirective]
+    module.factory[HttpGeneralServiceFactory]
+    module.controller[AdminController]
+    module.controller[EventsController]
+    module.controller[ArtistsController]
+    module.controller[OrganizersController]
+    module.controller[PlacesController]
   }
 }

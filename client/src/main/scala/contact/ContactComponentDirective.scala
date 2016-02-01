@@ -1,4 +1,4 @@
-package Contact
+package contact
 
 import com.greencatsoft.angularjs.extensions.material.Sidenav
 import com.greencatsoft.angularjs.{TemplatedDirective, ElementDirective, injectable}

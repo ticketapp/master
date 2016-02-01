@@ -1,4 +1,4 @@
-package Contact
+package contact
 
 import scala.scalajs.js.annotation.JSExport
 

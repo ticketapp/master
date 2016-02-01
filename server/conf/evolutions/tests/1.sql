@@ -217,8 +217,6 @@ CREATE TABLE images (
 CREATE TABLE tariffs (
   tariffId                  SERIAL PRIMARY KEY,
   denomination              VARCHAR(255) DEFAULT 'Basique' NOT NULL,
-  nbTicketToSell            INT NOT NULL,
-  nbTicketSold              INT DEFAULT 0 NOT NULL,
   price                     NUMERIC NOT NULL,
   startTime                 TIMESTAMP NOT NULL,
   endTime                   TIMESTAMP NOT NULL,
@@ -226,22 +224,62 @@ CREATE TABLE tariffs (
 );
 
 
+
+
 CREATE TABLE tickets (
   ticketId                  SERIAL PRIMARY KEY,
-  isValid                   BOOLEAN DEFAULT TRUE,
-  qrCode                    VARCHAR(255) NOT NULL,
-  firstName                 VARCHAR(255),
-  lastName                  VARCHAR(255),
-  tariffId                  INT REFERENCES tariffs(tariffId),
-  orderId                   INT REFERENCES orders(orderId)
+  qrCode                    VARCHAR(255) UNIQUE NOT NULL,
+  eventId                   INT REFERENCES events(eventId) NOT NULL,
+  tariffId                  INT REFERENCES tariffs(tariffId) NOT NULL
 );
---INSERT INTO tickets (tariffId, orderId) VALUES (1, 1);
+CREATE INDEX ticketQrCode ON tickets (qrCode);
 
----CREATE TABLE tariffsBlocked (
----  tariffsBlockedId         SERIAL PRIMARY KEY,
----  endTime                  TIMESTAMP DEFAULT current_timestamp + time '00:15' NOT NULL,
----  tariffId                 BIGINT REFERENCES tariffs(tariffId)
----);
+CREATE TABLE ticketStatuses (
+  id                        SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  status                    CHAR NOT NULL,
+  date                      TIMESTAMP NOT NULL
+);
+
+CREATE TABLE blockedTickets (
+  id                        SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  expirationDate            TIMESTAMP NOT NULL,
+  userId                    UUID REFERENCES users(userID) NOT NULL
+);
+CREATE INDEX blockedTicketDate ON blockedTickets (expirationDate);
+
+CREATE TABLE boughtTicketBills (
+  billId                    SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL
+);
+
+CREATE TABLE soldTicketBills (
+  billId                    SERIAL PRIMARY KEY,
+  ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL
+);
+
+CREATE TABLE pendingTickets (
+  pendingTicketId             SERIAL PRIMARY KEY,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  tariffId                  INT REFERENCES tariffs(tariffId)  NOT NULL,
+  date                      TIMESTAMP NOT NULL,
+  amount                    NUMERIC NOT NULL,
+  qrCode                    VARCHAR UNIQUE NOT NULL,
+  isValidated               BOOLEAN
+);
+CREATE INDEX pendingTicketQrCode ON pendingTickets (qrCode);
+
+
+CREATE TABLE sellableEvents (
+  eventId                   INT PRIMARY KEY REFERENCES events(eventId) NOT NULL
+);
 
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
@@ -598,6 +636,52 @@ INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(
 INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
 VALUES(100, true, true, 'notPassedEvent2', timestamp '2050-08-24 14:00:00',
        '01010000008906CEBE97E346405187156EF9581340');
+INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
+VALUES(1000, true, true, 'notPassedEvent3', timestamp '2050-08-24 14:00:00',
+       '01010000008906CEBE97E346405187156EF9581340');
+
+-------------------------------------------------------- tariffs  ------------------------------------------------------
+INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId) VALUES
+  (10000, 'test', 10, timestamp '2040-08-24 14:00:00', timestamp '2040-09-24 14:00:00', 100);
+
+-------------------------------------------------------- tickets  ------------------------------------------------------
+INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES
+  (1000, 'savedTicket', 100, 10000);
+
+INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES
+  (1100, 'savedBlockedTicket', 100, 10000);
+
+-------------------------------------------------------- ticketStatuses  ------------------------------------------------------
+INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
+  (1000, 1000, 'a', timestamp '2015-09-22 14:00:00');
+
+INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
+  (1100, 1000, 'b', timestamp '2015-09-24 14:00:00');
+
+-------------------------------------------------------- pending tickets ----------------------------------------------------
+INSERT INTO pendingTickets(pendingTicketId, userId, tariffId, date, amount, qrCode) VALUES
+  (1000, 'a4aea509-1002-47d0-b55c-593c91cb32ae', 10000, timestamp '2015-09-24 14:00:00', 10, 'pendingTicket');
+
+
+
+-------------------------------------------------------- bought tickets bills----------------------------------------------------
+INSERT INTO boughtTicketBills(billId, ticketId, userId, date, amount) VALUES
+  (1000, 1100, 'a4aea509-1002-47d0-b55c-593c91cb32ae', timestamp '2015-09-24 14:00:00', 10);
+
+-------------------------------------------------------- sold tickets bills----------------------------------------------------
+INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
+  (1000, 1100, 'a4aea509-1002-47d0-b55c-593c91cb32ae', timestamp '2015-09-24 14:00:00', 10);
+
+
+-------------------------------------------------------- blocked tickets ----------------------------------------------------
+INSERT INTO blockedTickets(id, ticketId, expirationDate, userId) VALUES
+  (1000, 1100, timestamp '2055-09-24 14:00:00', 'a4aea509-1002-47d0-b55c-593c91cb32ae');
+
+
+-------------------------------------------------------- sellable events ----------------------------------------------------
+INSERT INTO sellableEvents(eventId) VALUES (100);
+
+
 
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
@@ -743,7 +827,13 @@ DROP TABLE IF EXISTS placesFollowed;
 DROP TABLE IF EXISTS usersFollowed;
 DROP TABLE IF EXISTS organizersFollowed;
 DROP TABLE IF EXISTS usersTools;
+DROP TABLE IF EXISTS ticketStatuses;
+DROP TABLE IF EXISTS blockedTickets;
+DROP TABLE IF EXISTS boughtTicketBills;
+DROP TABLE IF EXISTS soldTicketBills;
+DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS sellableEvents;
 DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;
@@ -781,4 +871,5 @@ DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS addresses;
 DROP TABLE IF EXISTS frenchCities;
 DROP TABLE IF EXISTS users, logininfo, userlogininfo, passwordinfo, oauth1info,  oauth2info, openidinfo, openidattributes;
+
 

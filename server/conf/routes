@@ -17,10 +17,26 @@ GET            /signOut                                          @application.Ap
 GET           /initDatabase                                      @fillDatabase.InitController.init
 
 ################################## Admin ################################################
-GET           /admin                                             @application.Admin.indexAdmin
-#POST     /admin/createTariff           @application.Admin.createTariff
-#
-################################### Events ###############################################
+GET            /admin                                           @application.Application.admin
+GET            /salableEvents                                   @ticketsDomain.TicketController.findSalableEvents()
+POST           /salableEvents                                   @ticketsDomain.TicketController.addSalableEvents(eventId: Long)
+
+#################################### Tickets ###############################################
+POST            /proposed                                         @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
+POST            /blockedTicket                                    @ticketsDomain.TicketController.blockTicketForUser(tariffId: Long)
+POST            /ticketToSale                                     @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
+POST            /acceptedPendingTicket                            @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
+POST            /rejectedPendingTicket                            @ticketsDomain.TicketController.rejectPendingTicket(pendingTicketId: Long)
+GET             /tickets                                          @ticketsDomain.TicketController.findTicketsWithStatus
+GET             /pending                                          @ticketsDomain.TicketController.findPendingTickets
+GET             /bills/bought                                     @ticketsDomain.TicketController.findBoughtBills
+GET             /bills/sold                                       @ticketsDomain.TicketController.findSoldBills
+
+#################################### tariffs ###############################################
+GET             /tariffs                                          @tariffsDomain.TariffController.findTariffsByEventId(eventId: Long)
+POST            /tariffs                                          @tariffsDomain.TariffController.save(denomination: String, eventId: Long, startTime: String, endTime: String, price: Double)
+
+#################################### Events ###############################################
 GET           /events                                            @eventsDomain.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
 GET           /events/inInterval/:hourInterval                   @eventsDomain.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET           /events/passedInInterval/:hourInterval             @eventsDomain.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
@@ -131,7 +147,7 @@ GET           /users/tracksRemoved                                           @ap
 GET           /users/isConnected                                           @application.UserController.isConnected
 
 ################################## Buy ticket ###########################################
-GET           /buyTicket                                                     @others.TicketController.buyTicket
+#GET           /buyTicket                                                     @others.TicketController.buyTicket
 
 ################################## Accounting ###########################################
 #GET     /orgaPayment       @controllers.AccountingController.orgaPayment

@@ -37,6 +37,9 @@ class   Application @Inject()(ws: WSClient,
   def claude = Action { implicit request =>
     Ok(views.html.index(false))
   }
+  def admin = Action { implicit request =>
+    Ok(views.html.admin.indexAdmin())
+  }
 
   def googleValidation = UserAwareAction { implicit request =>
     Ok(views.html.googlea30e62044bb92d88())

@@ -11,7 +11,6 @@ import database.{MyDBTableDefinitions, MyPostgresDriver}
 import genresDomain.{Genre, GenreMethods}
 import org.joda.time.DateTime
 import organizersDomain.{OrganizerMethods, OrganizerWithAddress}
-import others.TariffMethods
 import placesDomain.{PlaceMethods, PlaceWithAddress}
 import play.api.Logger
 import play.api.Play.current
@@ -22,6 +21,7 @@ import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import services.{FollowService, SortByDistanceToPoint, SortableByGeographicPoint, Utilities}
 import silhouette.DBTableDefinitions
+import tariffsDomain.TariffMethods
 import tracksDomain.TrackMethods
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -550,7 +550,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       startTime = stringToDateTime(startTime),
       endTime = optionStringToOptionDateTime(endTime),
       imagePath = maybeCover,
-      tariffRange = tariffMethods.findPrices(maybeDescription))
+      tariffRange = tariffMethods.findPricesInDescription(maybeDescription))
 
     val addresses = Try(Address(
       id = None,

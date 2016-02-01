@@ -1,4 +1,4 @@
-package Contact
+package contact
 
 import com.greencatsoft.angularjs.core.HttpService
 import com.greencatsoft.angularjs.{Factory, Service, injectable}
