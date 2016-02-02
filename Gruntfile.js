@@ -16,16 +16,13 @@ module.exports = function (grunt) {
     };
 
 
-    // Define the configuration for all the tasks
     grunt.initConfig({
 
-        // Project settings
         yeoman: appConfig,
 
-        // Watches files for changes and runs tasks based on the changed files
         watch: {
             compass: {
-                files: ['server/public/scss/*.{scss,sass}', 'client/src/main/scala/{,*/}*.scss'],
+                files: ['server/public/scss/*.scss', 'client/src/main/scala/{,*/}*.scss'],
                 tasks: 'compass',
                 options: {
                     livereload: true
@@ -53,8 +50,6 @@ module.exports = function (grunt) {
             }
         },
 
-
-        // Compiles Sass to CSS and generates necessary files if requested
         compass: {
             options: {
                 sassDir: 'server/public/scss',
