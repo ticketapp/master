@@ -1,73 +1,91 @@
-<h1>Index Administrateurs</h1>
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>Claude</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/tools.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/angular-material.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/animate.min.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("scripts/librairies/tooltipster-master/css/tooltipster.css")"/>
 
-    <h2>Test sign-up</h2>
-    <form method="post" action="/signUp">
-        firstName: <input type="text" name="firstName"> <br>
-        lastName: <input type="text" name="lastName"> <br>
-        email: <input type="email" name="email"> <br>
-        password: <input type="text" name="password"> <br>
-        <input type="submit" value="submit"/>
-    </form>
+        <script src="@routes.Assets.at("lib/jquery/jquery.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("plugins/css3-animate-it.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("scripts/angular.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("scripts/librairies/tooltipster-master/js/jquery.tooltipster.min.js")"> </script>
+        <script src="@routes.Assets.at("plugins/angular-animate.min.js")"></script>
+        <script src="@routes.Assets.at("plugins/angular-aria.min.js")"></script>
+        <script src="@routes.Assets.at("plugins/angular-material.js")"></script>
+        <script src="@routes.Assets.at("plugins/mm-foundation.min.js")"></script>
+        <script src="@routes.Assets.at("plugins/angular-route.min.js")"></script>
+        <script src="@routes.Assets.at("plugins/ng-map.min.js")"></script>
+        <script src="@routes.Assets.at("plugins/angular-websocket.js")"></script>
+        <script src="@routes.Assets.at("plugins/WebSocketService.js")"></script>
 
-    <h2>Test sign-in</h2>
-    <form method="post" action="/authenticateByCredentials">
-        email: <input type="email" name="email"> <br>
-        password: <input type="text" name="password"> <br>
-        rememberMe: <input type="checkbox" name="rememberMe" checked> <br>
-        <input type="submit" value="submit"/>
-    </form>
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("favicon.ico")" />
+    </head>
+    <body ng-app="app">
+        <section layout="row" flex class=" height100p" data-ng-controller="adminController as controller">
+            <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+                <md-toolbar class="md-theme-indigo">
+                    <h1 class="md-toolbar-tools">Admin</h1>
+                </md-toolbar>
+                <md-content layout-padding >
+                <md-list>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminEvents.html'">
+                        Events management
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminArtists.html'">
+                        Artists management
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminOrganizers.html'">
+                        Organizers management
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminPlaces.html'">
+                        Places management
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findSalableEvents(); template = 'assets/templates/adminClient/salableEvents.html'">
+                        Show salable events
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findTicketsWithStatus(); template = 'assets/templates/adminClient/tickets.html'">
+                        Show tickets
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findPendingTickets(); template = 'assets/templates/adminClient/pendingTickets.html'">
+                        Show pending tickets
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findBoughtBills(); template = 'assets/templates/adminClient/boughtBills.html'">
+                        Show bought bills
+                    </md-list-item>
+                    <md-list-item ng-click="controller.findSoldBills(); template = 'assets/templates/adminClient/soldBills.html'">
+                        Show sold bills
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/createSalableEvent.html'">
+                        Add salable event
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/proposeTicket.html'">
+                        Propose ticket
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/blockTicketForUser.html'">
+                        block Ticket For User
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/createTicketToSale.html'">
+                        add Ticket To Sale
+                    </md-list-item>
+                    <md-list-item ng-click="template = 'assets/templates/adminClient/createTariff.html'">
+                        add Tariff
+                    </md-list-item>
+                </md-list>
+                </md-content>
+            </md-sidenav>
+            <md-content flex ng-include="template" class="column large-12">
 
+            </md-content>
+        </section>
+        @playscalajs.html.scripts("client")
 
-    <h2>test nested form</h2>
-    <form method="post" action="/admin/test2">
-        first name : <input type="text" name="firstname"> <br>
-        info 0 : <input type="text" name="informations[0].label"> <br>
-        info 1 : <input type="text" name="informations[1].label"> <br>
-        <input type="submit" value="test nested form" />
-    </form>
-
-    <h2>test date form</h2>
-    <form method="post" action="/admin/test2">
-        dateTime : <input type="datetime" name="date"> <br>
-        <input type="submit" value="test date form" />
-    </form>
-
-
-    <h2>Créer des tarifs</h2>
-    <form name="tariffsForm" method="post" enctype="multipart/form-data" action="/upload">
-        <input type="file" name="picture">
-        <input type="submit" value="Valider"/>
-    </form>
-
-    <h2>Créer un artiste</h2>
-    <form name="createArtistForm" method="post" action="/artistsDomain/createArtist">
-        facebookId de l'artiste : <input type="text" name="facebookId">
-        Nom de l'artiste : <input type="text" name="artistName">
-        <input type="submit" value="Valider"/>
-    </form>
-
-    <h2>Supprimer l'artiste 2</h2>
-    <form name="deleteArtistForm" method="delete" action="/artist/2">
-        <input type="submit" value="Supprimer l'artiste d'id 2" />
-    </form>
-
-    <h2>Faire suivre l'artiste 2 par l'user 2</h2>
-    <form name="followArtistForm" method="post" action="/artist/2/2"> <!-- userId/artistId -->
-        <input type="submit" value="Faire suivre l'artiste 2 par l'user 2" />
-    </form>
-
-    <h2>Faire suivre la place 2 par l'user 2</h2>
-    <form name="followArtistForm" method="post" action="/lieu/2/2">
-        <input type="submit" value="Faire suivre la place 2 par l'user 2" />
-    </form>
-
-    <h2>Faire suivre l'event 4 par l'user 1</h2>
-    <form name="followArtistForm" method="post" action="/event/2/2">
-        <input type="submit" value="Faire suivre l'event 4 par l'user 1" />
-    </form>
-
-<img src="https://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap
-&markers=color:blue%7Clabel:S%7C40.702147,-74.015794&markers=color:green%7Clabel:G%7C40.711614,-74.012318
-&markers=color:red%7Clabel:C%7C40.718217,-73.998284" />
-
+    </body>
+</html>

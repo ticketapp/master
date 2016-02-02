@@ -1,6 +1,6 @@
-package Contact
+package contact
 
-import AngularWebSocket.MessagesWebsocketFactory
+import angularWebSocket.MessagesWebsocketFactory
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom.console
 import scala.scalajs.js

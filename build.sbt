@@ -1,4 +1,4 @@
-import _root_.playscalajs.PlayScalaJS.autoImport._
+import playscalajs.PlayScalaJS.autoImport._
 import com.typesafe.sbt.gzip.Import._
 import com.typesafe.sbt.web.Import._
 import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
@@ -48,6 +48,7 @@ lazy val server = (project in file("server")).settings(
     "org.scalatestplus" %% "play" % "1.4.0-M3" % "test",
     "com.mohiva" %% "play-silhouette" % "3.0.2",
     "com.mohiva" %% "play-silhouette-testkit" % "3.0.2" % "test",
+    "com.greencatsoft" %% "greenlight" % "0.3" % "test",
     "net.ceedubs" %% "ficus" % "1.1.2",
     "com.typesafe.play" %% "play-slick" % "1.0.1",
     "com.typesafe.play" %% "play-slick-evolutions" % "1.0.1",
@@ -70,11 +71,18 @@ lazy val client = (project in file("client")).settings(
   scalaVersion := scalaV,
   persistLauncher := true,
   persistLauncher in Test := false,
+  scalaJSStage in Test := FastOptStage,
+  testFrameworks := Seq(new TestFramework("com.greencatsoft.greenlight.Greenlight")),
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.8.0",
-    "com.lihaoyi" %%% "upickle" % "0.3.4",
-    "com.greencatsoft" %%% "scalajs-angular" % "0.6"
-  )
+    "com.lihaoyi" %%% "upickle" % "0.3.6",
+    "com.greencatsoft" %%% "scalajs-angular" % "0.6",
+    "com.greencatsoft" %%% "greenlight" % "0.3" % "test",
+    "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
+  ),
+  jsDependencies += RuntimeDOM,
+  jsDependencies += "org.webjars" % "angularjs" % "1.3.8" / "angular.min.js" % "test",
+  jsDependencies += ("org.webjars" % "angularjs" % "1.3.8" / "angular-mocks.js" dependsOn "angular.min.js") % "test"
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
   dependsOn(sharedJs)
 

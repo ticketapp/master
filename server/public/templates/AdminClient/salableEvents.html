@@ -1,0 +1,1 @@
+<md-list> <md-list-item ng-repeat="event in controller.salableEvents$2"> {{event}} <span data-ng-init="tariffs = controller.findTariffsByEventId(event.eventId$1)"> <p data-ng-repeat="tariff in tariffs">{{tariff}}</p> </span> </md-list-item> </md-list>

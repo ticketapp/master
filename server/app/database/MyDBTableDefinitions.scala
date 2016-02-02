@@ -20,6 +20,9 @@ import silhouette.DBTableDefinitions
 import slick.jdbc.{PositionedParameters, SetParameter}
 import slick.model.ForeignKeyAction
 import tracksDomain.{Track, TrackRating}
+import tariffsDomain.Tariff
+import ticketsDomain._
+import tracksDomain.{TrackRating, Track}
 
 
 case class UserArtistRelation(userId: UUID, artistId: Long)
@@ -373,6 +376,104 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   }
   lazy val facebookAttendeeEventRelations = TableQuery[FacebookAttendeeEventRelations]
 
+  class Tickets(tag: Tag) extends Table[Ticket](tag, "tickets") {
+    def ticketId = column[Long]("ticketid", O.PrimaryKey, O.AutoInc)
+    def qrCode = column[String]("qrcode")
+    def eventId = column[Long]("eventid")
+    def tariffId = column[Long]("tariffid")
+
+    def * = (ticketId.?, qrCode, eventId, tariffId) <> ((Ticket.apply _).tupled, Ticket.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id)
+    def bFK = foreignKey("tariffid", tariffId, tariffs)(_.tariffId)
+  }
+
+  class TicketStatuses(tag: Tag) extends Table[TicketStatus](tag, "ticketstatuses") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def ticketId = column[Long]("ticketid")
+    def status = column[Char]("status")
+    def date = column[DateTime]("date")
+
+    def * = (ticketId, status, date) <> ((TicketStatus.apply _).tupled, TicketStatus.unapply)
+
+    def aFK = foreignKey("ticketid", ticketId, tickets)(_.ticketId)
+  }
+
+  class BlockedTickets(tag: Tag) extends Table[BlockedTicket](tag, "blockedtickets") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def ticketId = column[Long]("ticketid")
+    def expirationDate = column[DateTime]("expirationdate")
+    def userId = column[UUID]("userid")
+
+    def * = (ticketId, expirationDate, userId) <> ((BlockedTicket.apply _).tupled, BlockedTicket.unapply)
+
+    def aFK = foreignKey("ticketid", ticketId, tickets)(_.ticketId)
+    def bFK = foreignKey("userid", userId, slickUsers)(_.id)
+  }
+
+  class Tariffs(tag: Tag) extends Table[Tariff](tag, "tariffs") {
+    def tariffId = column[Long]("tariffid", O.PrimaryKey, O.AutoInc)
+    def denomination = column[String]("denomination")
+    def eventId = column[Long]("eventid")
+    def startTime = column[DateTime]("starttime")
+    def endTime = column[DateTime]("endtime")
+    def price = column[BigDecimal]("price")
+
+    def * = (tariffId.?, denomination, eventId, startTime, endTime, price) <> ((Tariff.apply _).tupled, Tariff.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id)
+  }
+
+  class BoughtTicketBills(tag: Tag) extends Table[TicketBill](tag, "boughtticketbills") {
+    def billId = column[Long]("billid", O.PrimaryKey, O.AutoInc)
+    def ticketId = column[Long]("ticketid")
+    def userId = column[UUID]("userid")
+    def date = column[DateTime]("date")
+    def amount = column[BigDecimal]("amount")
+
+    def * = (ticketId, userId, date, amount) <> ((TicketBill.apply _).tupled, TicketBill.unapply)
+
+    def aFK = foreignKey("ticketid", ticketId, tickets)(_.ticketId)
+    def bFK = foreignKey("userid", userId, slickUsers)(_.id)
+  }
+
+  class SoldTicketBills(tag: Tag) extends Table[TicketBill](tag, "soldticketbills") {
+    def billId = column[Long]("billid", O.PrimaryKey, O.AutoInc)
+    def ticketId = column[Long]("ticketid")
+    def userId = column[UUID]("userid")
+    def date = column[DateTime]("date")
+    def amount = column[BigDecimal]("amount")
+
+    def * = (ticketId, userId, date, amount) <> ((TicketBill.apply _).tupled, TicketBill.unapply)
+
+    def aFK = foreignKey("ticketid", ticketId, tickets)(_.ticketId)
+    def bFK = foreignKey("userid", userId, slickUsers)(_.id)
+  }
+
+  class PendingTickets(tag: Tag) extends Table[PendingTicket](tag, "pendingtickets") {
+    def pendingTicketId = column[Long]("pendingticketid", O.PrimaryKey, O.AutoInc)
+    def userId = column[UUID]("userid")
+    def tariffId = column[Long]("tariffid")
+    def date = column[DateTime]("date")
+    def amount = column[BigDecimal]("amount")
+    def qrCode = column[String]("qrcode")
+    def isValidated = column[Option[Boolean]]("isvalidated")
+
+    def * = (pendingTicketId.?, userId, tariffId, date, amount, qrCode, isValidated) <> ((PendingTicket.apply _).tupled, PendingTicket.unapply)
+
+    def aFK = foreignKey("tariffid", tariffId, tariffs)(_.tariffId)
+    def bFK = foreignKey("userid", userId, slickUsers)(_.id)
+  }
+
+  class SalableEvents(tag: Tag) extends Table[SalableEvent](tag, "salableevents") {
+    def eventId = column[Long]("eventid")
+
+    def * = eventId <> (SalableEvent.apply, SalableEvent.unapply)
+
+    def aFK = foreignKey("eventid", eventId, events)(_.id)
+  }
+  lazy val salableEvents = TableQuery[SalableEvents]
+
 
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]
   lazy val genres = TableQuery[Genres]
@@ -400,4 +501,11 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val playlistsTracks = TableQuery[PlaylistsTracks]
   lazy val issues = TableQuery[Issues]
   lazy val issuesComments = TableQuery[IssuesComments]
+  lazy val tickets = TableQuery[Tickets]
+  lazy val ticketStatuses = TableQuery[TicketStatuses]
+  lazy val boughtTicketBills = TableQuery[BoughtTicketBills]
+  lazy val pendingTickets = TableQuery[PendingTickets]
+  lazy val soldTicketBills = TableQuery[SoldTicketBills]
+  lazy val blockedTickets = TableQuery[BlockedTickets]
+  lazy val tariffs = TableQuery[Tariffs]
 }
