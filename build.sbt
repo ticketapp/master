@@ -1,17 +1,16 @@
-import playscalajs.PlayScalaJS.autoImport._
 import com.typesafe.sbt.gzip.Import._
 import com.typesafe.sbt.web.Import._
-import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.scalajs.sbtplugin.cross.CrossType
 import play.routes.compiler.InjectedRoutesGenerator
 import play.sbt.Play.autoImport._
 import play.sbt.PlayScala
-import sbt.Keys._
-import sbt._
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.cross.CrossType
+import playscalajs.PlayScalaJS.autoImport._
 import playscalajs.ScalaJSPlay
+import sbt.Keys._
 import sbt.Project.projectToRef
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import sbt._
 
 name := "Claude"
 
@@ -103,7 +102,6 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
-// loads the Play project at sbt startup
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
 
 routesGenerator := InjectedRoutesGenerator
