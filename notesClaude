@@ -1,10 +1,16 @@
+Apparently you can configure SBT projects with multiple sub-projects pointing at the same source dirs, provided you have different targets.
+
+
 remettre 2.sql ?
 log4j
 cassandra ?
 next page attendees
 Internationalization
+scalaTags
 
 
+proxima-nova (http://www.thefamily.co/oussama-ammar/)
+ALDINE 721
 
 entrer = poster message, regarde pour fermer le chat
 backend avec son si possible
@@ -36,7 +42,6 @@ vidéos à revoir : saas métrics, vie entrepreunariale et erreurs à ne pas fai
 twitter/fb/métas/stackoverflow photo + site
 LandingPage -> mobile first
 LandingPage
-https
 achat/vente de billets -> législation, irma dossier (jauges), nb de participants facebook mis à jour + éventuellement enregistrer activités des users de ces events
 LandingPage
 app (faut-il obliger les gens à télécharger l'app pour avoir le billet ?) vérification/vente billet

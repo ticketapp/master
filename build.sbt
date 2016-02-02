@@ -78,6 +78,7 @@ lazy val client = (project in file("client")).settings(
     "org.scala-js" %%% "scalajs-dom" % "0.8.0",
     "com.lihaoyi" %%% "upickle" % "0.3.6",
     "com.greencatsoft" %%% "scalajs-angular" % "0.6",
+    "be.doeraene" %%% "scalajs-jquery" % "0.8.0",
     "com.greencatsoft" %%% "greenlight" % "0.3" % "test",
     "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
   ),

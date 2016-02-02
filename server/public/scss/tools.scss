@@ -860,3 +860,7 @@
   -o-animation-name: fadeOut;
   -webkit-animation-name: fadeOut;
 }
+
+.notClickable {
+  pointer-events: none;
+}

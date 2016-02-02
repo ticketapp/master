@@ -4,9 +4,12 @@ import com.greencatsoft.angularjs.core.{HttpService, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom
 import org.scalajs.dom.MessageEvent
+import org.scalajs.dom.ext.KeyCode
+import org.scalajs.jquery.jQuery
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
+
 
 case class Message(content: String, fromClient: Boolean)
 
