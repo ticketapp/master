@@ -1,10 +1,7 @@
-import adminClient.{AdminRoutes, AdminController}
-import com.greencatsoft.angularjs._
-import com.greencatsoft.angularjs.core.{HttpService, Scope}
-import httpServiceFactory.{HttpGeneralServiceFactory, HttpGeneralService}
+import com.greencatsoft.angularjs.core.Scope
+
 import scala.scalajs.js
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+
 
 @js.native
 trait TestScope extends Scope {
@@ -62,8 +59,6 @@ object TestAdminClientController extends AngularMockTest {
 
     ("A" + "B") should be ("AB")
 
-    "Scala.js" must not be ("overlooked!")
+    "Scala.js" must not be "overlooked!"
   }
-
-
 }

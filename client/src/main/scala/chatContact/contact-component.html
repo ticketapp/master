@@ -1,0 +1,52 @@
+<div class="contact-component float-right absolute right0 bottom0 animated column large-3 medium-5"
+     ng-mouseleave="showSmallContact = false;"
+     data-ng-controller="chatContactController"
+     ng-class="{'full': full}">
+
+    <div ng-if="showSmallContact || full"
+         ng-click="$parent.full = true"
+         ng-class="{'full': $parent.full}">
+
+        <i data-ng-click="$parent.showSmallContact = false; $parent.full = false;" class="fa fa-lg fa-times close-icon">
+            Close
+        </i>
+
+        <span ng-click="$parent.full = true">
+            <md-button ng-click="$parent.full = true" class="md-fab md-primary notClickable">
+                S
+            </md-button>
+
+            <b>Connecté</b>
+        </span>
+
+        <p ng-repeat="message in messages"
+              class="column small-12"
+              ng-class="{'messageFromUser': message.fromClient$1, 'messageFromUs': message.fromClient$1 == false}">
+
+            {{message.content$1}}
+        </p>
+
+        <form class="column small-12 chat-form" ng-click="$parent.full = true"
+              ng-submit="controller.send(message); message=''">
+
+            <input type="text"
+                   ng-click="$parent.full = true"
+                   ng-model="message"
+                   class="contact-text-input width100p"
+                   placeholder="Démarrer une conversation">
+
+        </form>
+
+    </div>
+
+    <md-button class="md-fab float-right contact-button"
+               ng-class="{'ng-hide': full}"
+               ng-mouseenter="showSmallContact = true"
+               ng-click="full = true"
+               aria-label="Contact">
+        <img src="assets/images/contact.png" alt="Contact">
+    </md-button>
+
+</div>
+
+

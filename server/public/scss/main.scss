@@ -1,5 +1,6 @@
 @import '../componentsSettings/foundation';
 @import 'tools';
+@import '../../../client/src/main/scala/chatContact/contact';
 
 body,
 html {
@@ -17,57 +18,11 @@ md-content {
   width: 100%;
 }
 
-.contact-button {
-  background-color: $info-color !important;
-}
-
-.contact-button-container {
-  bottom: 5px;
-  position: fixed;
-  right: 5px;
-}
-
-@keyframes contactGrow {
-  from {height: 10%;}
-  to {height: 100%;}
-}
-
-contact-component > div.full {
-  height: 100%;
-  max-width: 100%;
-  animation-name: zoomIn;
-  animation-duration: 1s;
-}
-
-.contact-component > div.full {
-  max-width: 100%;
-  overflow: auto;
-  height: 100%;
-}
-
-.contact-component > div.ng-leave {
-  animation-name: zoomOut;
-  animation-duration: 1s;
-}
-.contact-tooltip-content {
-  background: $white;
-  border-radius: 6px;
-  color: $black;
-  height: 100px;
-  margin-bottom: 55px;
-  margin-left: 75px;
-  position: absolute;
-  text-align: center;
-  visibility: hidden;
-  width: 140px;
-}
-
-.contact-tooltip-content:hover {
-  visibility: visible;
-  z-index: 999;
-}
-
 h3 {
   color: $info-color;
   //font-family: "LLCircularWeb-Bold", sans-serif;
+}
+
+md-content {
+  overflow-x: hidden !important;
 }

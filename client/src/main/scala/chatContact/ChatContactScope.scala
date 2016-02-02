@@ -1,10 +1,11 @@
-package contact
+package chatContact
 
 import com.greencatsoft.angularjs.core.Scope
 
 import scala.scalajs.js
 
+
 @js.native
-trait ContactScope extends Scope {
+trait ChatContactScope extends Scope {
   var messages: js.Array[Message] = js.native
 }

@@ -1,0 +1,80 @@
+.chat-form {
+  z-index: 999;
+}
+
+.close-icon {
+  float: right;
+}
+
+contact-component > div.full {
+  animation-duration: .3s;
+  animation-name: zoomIn;
+  box-shadow: -1px 0px 5px 0px #888888;
+  height: 100%;
+}
+
+.contact-button {
+  background-color: $info-color !important;
+}
+
+.contact-button-container {
+  bottom: 5px;
+  position: fixed;
+  right: 5px;
+}
+
+.contact-component {
+  background-color: white;
+}
+
+.contact-component > div.ng-enter {
+  animation-duration: .4s;
+  animation-name: zoomIn;
+}
+
+.contact-component > div.full {
+  height: 100%;
+
+  .chat-form {
+    bottom: 0;
+    position: absolute;
+  }
+}
+
+.contact-component > div.ng-leave {
+  animation-duration: 1s;
+  animation-name: zoomOut;
+  bottom: 50px;
+  left: 0;
+  position: absolute;
+}
+
+.contact-text-input {
+  border: 1px solid #51cbee !important;
+  border-radius: 4px !important;
+  box-shadow: (0 0 1px #51cbee) !important;
+}
+
+.messageFromUser {
+  background-color: $info-color;
+  border-radius: 5px;
+  display: block;
+  float: left;
+  margin-bottom: 5px;
+  margin-left: 4px;
+  margin-right: 68px;
+  margin-top: 5px;
+  text-align: left;
+  width: inherit;
+}
+
+.messageFromUs {
+  background-color: $info-color;
+  border-radius: 5px;
+  display: block;
+  float: right;
+  margin-left: 68px;
+  margin-right: 4px;
+  text-align: left;
+  width: inherit;
+}

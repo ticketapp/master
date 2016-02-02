@@ -1,15 +1,14 @@
 # Home page
-GET           /                                                  @application.Application.index
-GET            /claude                                           @application.Application.claude
-GET           /googlea30e62044bb92d88.html                       @application.Application.googleValidation
+GET           /                                   @application.Application.index
+GET           /claude                             @application.Application.claude
+GET           /googlea30e62044bb92d88.html        @application.Application.googleValidation
 
-GET           /test                                              @others.Test.sayHello(message: String)
-GET           /messages                                          @messages.MessagesController.openSocket
+GET           /chatContact                        @chatContact.MessagesController.openSocket
 
 #POST          /signIn                                            @application.Application.signIn
-POST           /authenticate/:provider                           @application.SocialAuthController.authenticate(provider: String)
-GET            /authenticate/:provider                           @application.SocialAuthController.authenticate(provider: String)
-GET            /signOut                                          @application.Application.signOut
+POST          /authenticate/:provider             @application.SocialAuthController.authenticate(provider: String)
+GET           /authenticate/:provider             @application.SocialAuthController.authenticate(provider: String)
+GET           /signOut                            @application.Application.signOut
 #POST          /authenticateByCredentials                         @application.CredentialsAuthController.authenticate
 #POST          /signUp                                            @application.SignUpController.signUp
 
@@ -36,7 +35,7 @@ GET             /bills/sold                                       @ticketsDomain
 GET             /tariffs                                          @tariffsDomain.TariffController.findTariffsByEventId(eventId: Long)
 POST            /tariffs                                          @tariffsDomain.TariffController.save(denomination: String, eventId: Long, startTime: String, endTime: String, price: Double)
 
-#################################### Events ###############################################
+################################### Events ###############################################
 GET           /events                                            @eventsDomain.EventController.events(offset: Int, numberToReturn: Int, geographicPoint: String)
 GET           /events/inInterval/:hourInterval                   @eventsDomain.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET           /events/passedInInterval/:hourInterval             @eventsDomain.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)

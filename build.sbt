@@ -1,19 +1,22 @@
-import playscalajs.PlayScalaJS.autoImport._
 import com.typesafe.sbt.gzip.Import._
 import com.typesafe.sbt.web.Import._
-import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.scalajs.sbtplugin.cross.CrossType
 import play.routes.compiler.InjectedRoutesGenerator
 import play.sbt.Play.autoImport._
 import play.sbt.PlayScala
-import sbt.Keys._
-import sbt._
-import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.cross.CrossType
+import playscalajs.PlayScalaJS.autoImport._
 import playscalajs.ScalaJSPlay
+import sbt.Keys._
 import sbt.Project.projectToRef
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import sbt._
 
 name := "Claude"
+
+maintainer:= "Simon Garnier"
+
+dockerExposedPorts in Docker := Seq(88, 9443)
 
 version := "0.001"
 
@@ -57,6 +60,7 @@ lazy val server = (project in file("server")).settings(
     "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
     "com.github.tminglei" %% "slick-pg" % "0.9.1",
     "com.vividsolutions" % "jts" % "1.13",
+    "com.typesafe.play" %% "play-mailer" % "3.0.1",
     specs2 % Test,
     "com.github.docker-java" % "docker-java" % "1.4.0",
     "com.zaxxer" % "HikariCP" % "2.4.1",
@@ -77,6 +81,7 @@ lazy val client = (project in file("client")).settings(
     "org.scala-js" %%% "scalajs-dom" % "0.8.0",
     "com.lihaoyi" %%% "upickle" % "0.3.6",
     "com.greencatsoft" %%% "scalajs-angular" % "0.6",
+    "be.doeraene" %%% "scalajs-jquery" % "0.8.0",
     "com.greencatsoft" %%% "greenlight" % "0.3" % "test",
     "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
   ),
@@ -97,7 +102,6 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
-// loads the Play project at sbt startup
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
 
 routesGenerator := InjectedRoutesGenerator

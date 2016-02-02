@@ -1,4 +1,3 @@
-
 import com.greencatsoft.greenlight.{BeforeAndAfter, BeforeAndAfterAll, TestSuite}
 
 import scala.scalajs.js
