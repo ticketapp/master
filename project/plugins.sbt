@@ -23,3 +23,6 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 
 addSbtPlugin("com.jamesward" % "play-auto-refresh" % "0.0.13")
 
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.7.4")
+
+addSbtPlugin("com.softwaremill.clippy" % "plugin-sbt" % "0.1")

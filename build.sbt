@@ -15,6 +15,10 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 name := "Claude"
 
+maintainer:= "Simon Garnier"
+
+dockerExposedPorts in Docker := Seq(88, 9443)
+
 version := "0.001"
 
 lazy val clients = Seq(client)
