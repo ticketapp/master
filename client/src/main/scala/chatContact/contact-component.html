@@ -5,10 +5,11 @@
 
     <div ng-if="showSmallContact || full"
          ng-click="$parent.full = true"
-         ng-class="{'full': $parent.full}">
+         ng-class="{'full': $parent.full}"
+         class="contact-tooltip inner-contact-tooltip">
 
-        <i data-ng-click="$parent.showSmallContact = false; $parent.full = false;" class="fa fa-lg fa-times close-icon">
-            Close
+        <i data-ng-click="$parent.showSmallContact = false; $parent.full = false;"
+           class="fa fa-times close-icon">
         </i>
 
         <span ng-click="$parent.full = true">
