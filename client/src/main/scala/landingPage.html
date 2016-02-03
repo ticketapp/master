@@ -1,10 +1,111 @@
-<h3>Un billet à vendre, Claude vous le rachète immédiatemment !</h3>
-<h3>Un billet à acheter ? Claude vous le vend toujours moins cher que la billeterie officielle !</h3>
+<style>
+    .home-title {
+        background-color: #2BA8DE;
+        border-radius: 2px;
+        color: white;
+        display: inline-block;
+        box-shadow: 0.2em 0 0 #2BA8DE, -0.2em 0 0 #2BA8DE;
+        padding: 0.15em 0.2em;
+        font-family: "Gotham SSm A","Gotham SSm B", sans-serif;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 36px;
+        line-height: 1.45;
+        font-size-adjust: none;
+        font-stretch: normal;
+        font-feature-settings: normal;
+        font-language-override: normal;
+        font-kerning: auto;
+        font-synthesis: weight style;
+        font-variant-alternates: normal;
+        font-variant-caps: normal;
+        font-variant-east-asian: normal;
+        font-variant-ligatures: normal;
+        font-variant-numeric: normal;
+        font-variant-position: normal;
+        letter-spacing: -2px;
+        margin-top: 175px;
+    }
+
+    .sell-input {
+        position: relative;
+        top: 0;
+        color: #595959;
+        border: 1px solid #2ba8de !important;
+        display: inline-block;
+        font-size: 14px;
+        background: none;
+        border-radius: 3px !important;
+        vertical-align: middle;
+    }
+
+    .sell-form {
+        position: absolute;
+        top: 515px;
+    }
+
+    .home-subtitle {
+        color: white;
+        font-family: "proxima-nova","Whitney SSm B",sans-serif;
+        font-size: 20px;
+        top: 255px;
+        position: relative;
+        text-align: center;
+        height: 60px !important;
+    }
+
+    .image-container {
+        /*max-height: 600px;*/
+        background-image: url('assets/images/concertLandingPage.jpg');
+        top: 0;
+        float: left;
+        width: 100%;
+        height: 100%;
+        background-repeat: no-repeat;
+        background-size: 100%;
+        position: fixed;
+    }
+</style>
+
+<!--<div style="background-image: url('@routes.Assets.at(images/concertLandingPage.jpg)')"></div>-->
+<div class="parallax-background image-container">
+    <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
+        <b>Vendez nous votre billet de concert</b>
+        <!--Vendez nous votre billet, nous faisons le reste.-->
+        <!--faisons le<-> nous occupons du-->
+    </h1>
 
 
-<md-button type="submit" class="column large-4 md-button">
-    Je suis intéressé
-</md-button>
+    <h4 class="home-subtitle">
+        Récuperez instantanément votre argent, sans vous soucier qu'un acheteur soit trouvé
+    </h4>
+
+    <form class="sell-form column medium-10 medium-offset-1 large-8 large-offset-2" method="post" novalidate="">
+
+        <input type="text"
+               ng-model="query"
+               class="sell-input"
+               placeholder="Entrez un nom d'événement ou un lieu">
+        <!--ng-model-options="{ debounce: 100 }"-->
+        <!--ng-keydown="keydown($event)"-->
+        <!--<a href="#" class="od-xhr-progress button submit ng-binding" ng-click="fire()" ng-show="buttonText">-->
+        <!--← Get An Offer Today-->
+        <!--</a>-->
+    </form>
+</div>
 
 
-<contact-component></contact-component>
+<div class="parallax-content" style="margin-top: 600px">
+
+    Un billet à acheter ? Claude vous le vend toujours moins cher que la billeterie officielle !
+
+
+    Obtenir une offre maintenant
+
+</div>
+
+
+<contact-component>
+
+</contact-component>
+
