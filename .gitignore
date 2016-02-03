@@ -12,6 +12,7 @@ bower_components/
 project/project
 project/target
 server/public/templates
+server/public/stylesheets/*.css
 target
 tmp
 public/bower_components
