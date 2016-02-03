@@ -394,29 +394,28 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def getFacebookArtistsByWebsites(websites: Set[String]): Future[Set[ArtistWithWeightedGenres]] = Future.sequence(
     websites.map {
-      case website if website contains "facebook" =>
-        getFacebookArtistByFacebookUrl(website).map { maybeFacebookArtist => maybeFacebookArtist }
-      case website if website contains "soundcloud" =>
-        getMaybeFacebookUrlBySoundCloudUrl(website) flatMap {
-          case None =>
-            Future { None }
-          case Some(facebookUrl) =>
-            getFacebookArtistByFacebookUrl(facebookUrl).map { maybeFacebookArtist => maybeFacebookArtist }
-        }
-      case _ =>
-        Future { None }
+      case website if website contains "facebook" => getFacebookArtistByFacebookUrl(website)
+
+      case website if website contains "soundcloud" => getFacebookUrlBySoundCloudUrl(website) map { response =>
+        readMaybeFacebookUrl(response.json)
+      } flatMap {
+        case None => Future(None)
+        case Some(facebookUrl) => getFacebookArtistByFacebookUrl(facebookUrl)
+      }
+
+      case _ => Future(None)
     }
   ) map(_.flatten)
 
-  def getMaybeFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[Option[String]] = {
+  def getFacebookUrlBySoundCloudUrl(soundCloudUrl: String): Future[WSResponse] = {
     val soundCloudName = soundCloudUrl.substring(soundCloudUrl.indexOf("/") + 1)
+
     WS.url("http://api.soundcloud.com/users/" + soundCloudName + "/web-profiles")
       .withQueryString("client_id" -> soundCloudClientId)
       .get()
-      .map { readMaybeFacebookUrl }
   }
 
-  def readMaybeFacebookUrl(soundCloudWebProfilesResponse: WSResponse): Option[String] = {
+  def readMaybeFacebookUrl(soundCloudWebProfilesResponse: JsValue): Option[String] = {
     val facebookUrlReads = (
       (__ \ "url").read[String] and
         (__ \ "service").read[String]
@@ -426,7 +425,7 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       urlService.collect { case (url: String, "facebook") => normalizeUrl(url) }
     }
 
-    soundCloudWebProfilesResponse.json.asOpt[scala.Seq[String]](collectOnlyFacebookUrls) match {
+    soundCloudWebProfilesResponse.asOpt[scala.Seq[String]](collectOnlyFacebookUrls) match {
       case Some(facebookUrls: Seq[String]) if facebookUrls.nonEmpty => Option(facebookUrls.head)
       case _ => None
     }
@@ -448,7 +447,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
             }
           } else if (normalizedUrl.indexOf("/") > -1) Option(normalizedUrl.take(normalizedUrl.indexOf("/")))
             else Option(normalizedUrl)
-        } else Option(alreadyNormalizedUrl)
+        } else
+          Option(alreadyNormalizedUrl)
       case _ =>
         None
     }
