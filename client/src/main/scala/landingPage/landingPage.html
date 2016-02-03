@@ -55,19 +55,16 @@
     }
 
     .image-container {
-        /*max-height: 600px;*/
-        background-image: url('assets/images/concertLandingPage.jpg');
         top: 0;
         float: left;
         width: 100%;
         height: 100%;
-        background-repeat: no-repeat;
+        background: url('assets/images/concertLandingPage.jpg') no-repeat;
         background-size: 100%;
         position: fixed;
     }
 </style>
 
-<!--<div style="background-image: url('@routes.Assets.at(images/concertLandingPage.jpg)')"></div>-->
 <div class="parallax-background image-container">
     <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
         <b>Vendez nous votre billet de concert</b>
@@ -93,13 +90,14 @@
         <!--</a>-->
     </form>
 </div>
-
+<!--Obtenir une offre maintenant-->
 
 <div class="parallax-content" style="margin-top: 600px">
 
-    Un billet à acheter ? Claude vous le vend toujours moins cher que la billeterie officielle !
-
-    Obtenir une offre maintenant
+    <event-min ng-if="$root.activEvent && events.length > 0"
+               class="float-left column small-12 medium-6 large-4 fade min_contener margin0"
+               data-ng-repeat="event in events | limitTo: limit">
+    </event-min>
 
 </div>
 
