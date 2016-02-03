@@ -11,6 +11,7 @@ node_modules
 bower_components/
 project/project
 project/target
+server/public/templates
 target
 tmp
 public/bower_components
