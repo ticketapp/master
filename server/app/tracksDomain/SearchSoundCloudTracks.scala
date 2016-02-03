@@ -91,7 +91,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
         .withQueryString("client_id" -> soundCloudClientId)
         .get()
         .map { soundCloudResponse =>
-        WebsitesForSoundcloudId(id, readSoundCloudWebsites(soundCloudResponse).map { normalizeUrl })
+          WebsitesForSoundcloudId(id, readSoundCloudWebsites(soundCloudResponse).map(normalizeUrl))
       }
     }
   )
@@ -102,10 +102,7 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
       "q" -> namePattern,
       "client_id" -> soundCloudClientId)
     .get()
-    .map{response =>
-      println("SearchSouncloudTracks.getSoundCloudIdsForName.response: " + Json.stringify(response.json))
-      readSoundCloudIds(response)
-    }
+    .map(readSoundCloudIds)
     .recover {
       case NonFatal(e) =>
         Logger.error("SearchSoundCloudTracks.getSoundCLoudIdsForName: " + namePattern, e)
@@ -113,7 +110,6 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     }
 
   def readSoundCloudIds(soundCloudWSResponse: WSResponse): Seq[Long] = {
-    println("SearchSouncloudTracks.readSoundCloudIds: " + Json.stringify(soundCloudWSResponse.json))
     val readSoundCloudIds: Reads[Seq[Long]] = Reads.seq((__ \ "id").read[Long])
     soundCloudWSResponse.json
       .asOpt[Seq[Long]](readSoundCloudIds)
@@ -125,7 +121,6 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     .withQueryString("client_id" -> soundCloudClientId)
     .get()
     .map{ response =>
-      println("getSoundCloudTracksWithSoundCloudLink.response" + Json.stringify(response.json))
       readSoundCloudTracks(response.json, artist)
     } recover {
       case NonFatal(e) =>
@@ -134,7 +129,6 @@ class SearchSoundCloudTracks @Inject()(val trackMethods: TrackMethods,
     }
 
   def readSoundCloudTracks(soundCloudJsonWSResponse: JsValue, artist: Artist): Seq[Track] = {
-    println("readSouncloudTracks:" + Json.stringify(soundCloudJsonWSResponse))
     val soundCloudTrackReads = (
       (__ \ "stream_url").readNullable[String] and
         (__ \ "title").readNullable[String] and
