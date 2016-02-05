@@ -1,4 +1,4 @@
-package adminClient
+package admin
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport

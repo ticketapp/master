@@ -29,7 +29,7 @@ case class Geometry(point: String)
 
 
 @JSExportAll
-case class EventWithRelations(event: Happening,
+case class HappeningWithRelations(event: Happening,
                               organizers: Seq[OrganizerWithAddress],
                               artists: Seq[ArtistWithWeightedGenres],
                               places: Seq[PlaceWithAddress],

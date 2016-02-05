@@ -1,4 +1,4 @@
-package adminClient
+package admin
 import java.util.UUID
 import scala.scalajs.js.Date
 import scala.scalajs.js.annotation.JSExportAll

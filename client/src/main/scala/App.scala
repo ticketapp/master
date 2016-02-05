@@ -1,4 +1,4 @@
-import adminClient.AdminController
+import admin.AdminController
 import artists.ArtistsController
 import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._

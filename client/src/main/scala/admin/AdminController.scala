@@ -1,4 +1,4 @@
-package adminClient
+package admin
 
 import com.greencatsoft.angularjs.core.{Scope, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
@@ -6,6 +6,7 @@ import httpServiceFactory.HttpGeneralService
 import materialDesign.MdToastService
 import upickle.Js
 import upickle.default._
+import utilities.jsonHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,17 +18,8 @@ import scala.scalajs.js.annotation.JSExportAll
 @JSExportAll
 @injectable("adminController")
 class AdminController(scope: Scope, service: HttpGeneralService, timeout: Timeout, mdToast: MdToastService)
-  extends AbstractController[Scope](scope) {
+  extends AbstractController[Scope](scope) with jsonHelper {
 
-  implicit val dateTimeWriter = upickle.default.Writer[Date]{
-      case date => Js.Str(date.toString)
-    }
-  implicit val dateTimeReader = upickle.default.Reader[Date]{
-      case Js.Str(str) =>
-        new Date(str)
-        case a =>
-        new Date(a.value.toString.toLong)
-    }
 
   var salableEvents: js.Array[SalableEvent] = new js.Array[SalableEvent]
   var ticketsWithStatus: js.Array[TicketWithStatus] = new js.Array[TicketWithStatus]
