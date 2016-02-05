@@ -1,6 +1,5 @@
 package events
 
-
 import com.greencatsoft.angularjs.core.{Timeout, Scope}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import httpServiceFactory.HttpGeneralService
@@ -14,6 +13,7 @@ import scala.scalajs.js.annotation.JSExportAll
 @injectable("eventsController")
 class EventsController(scope: EventsScopeType, service: HttpGeneralService, timeout: Timeout)
   extends AbstractController[EventsScopeType](scope) {
+
   var events: js.Array[String] = new js.Array[String]
 
   def findById(id: Int): Unit = {
@@ -29,14 +29,14 @@ class EventsController(scope: EventsScopeType, service: HttpGeneralService, time
     }
   }
 
-  def FindInHourInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
+  def findInHourInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.FindInHourInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
       timeout( () => events = js.Array(foundEvents))
     }
   }
 
-  def FindPassedInInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
+  def findPassedInInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.FindPassedInInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
       timeout( () => events = js.Array(foundEvents))
@@ -67,8 +67,6 @@ class EventsController(scope: EventsScopeType, service: HttpGeneralService, time
       timeout( () => events = js.Array(foundEvents))
     }
   }
-
-
 }
 
 @js.native

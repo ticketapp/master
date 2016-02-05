@@ -121,13 +121,11 @@ class TestEventController extends GlobalApplicationForControllers {
     "return true if an event is followed else false" in {
       val Some(result) = route(FakeRequest(eventsDomain.routes.EventController.isEventFollowed(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
-      status(result) mustEqual OK
-      contentAsJson(result) mustEqual Json.parse("true")
-
       val Some(result2) = route(FakeRequest(eventsDomain.routes.EventController.isEventFollowed(2))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
+      status(result) mustEqual OK
+      contentAsJson(result) mustEqual Json.parse("true")
       contentAsJson(result2) mustEqual Json.parse("false")
       status(result2) mustEqual OK
     }

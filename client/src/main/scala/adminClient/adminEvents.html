@@ -58,7 +58,7 @@
         <md-button ng-show="offset > 0 && nav" ng-click="offset = offset - numberToReturn" type="submit" class="md-raised md-primary">Prev</md-button>
     </form>
 
-    <form ng-submit="controller.FindInHourInterval(hourInterval, lat, lng, offset, numberToReturn);
+    <form ng-submit="controller.findInHourInterval(hourInterval, lat, lng, offset, numberToReturn);
         nav = true" ng-show="eventRequest == 'eventsInHourInterval'">
         <md-input-container>
             <label>Offset</label>
@@ -88,7 +88,7 @@
         <md-button ng-show="offset > 0 && nav" ng-click="offset = offset - numberToReturn" type="submit" class="md-raised md-primary">Prev</md-button>
     </form>
 
-    <form ng-submit="controller.FindPassedInInterval(hourInterval, lat, lng, offset, numberToReturn);
+    <form ng-submit="controller.findPassedInInterval(hourInterval, lat, lng, offset, numberToReturn);
         nav = true" ng-show="eventRequest == 'eventsPassedInInterval'">
         <md-input-container>
             <label>Offset</label>

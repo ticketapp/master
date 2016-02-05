@@ -49,8 +49,7 @@ class AttendeeMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
       "access_token" -> facebookToken,
       "limit" -> "400")
     .get()
-    .map(facebookResponse => { readJsonAttendees(facebookResponse.json) }
-      .map(attendeeReadToFacebookAttendee))
+    .map(facebookResponse => readJsonAttendees(facebookResponse.json).map(attendeeReadToFacebookAttendee))
 
   def readJsonAttendees(facebookAttendees: JsValue): Seq[AttendeeRead] = {
     implicit val attendeeRead: Reads[AttendeeRead] = Json.reads[AttendeeRead]

@@ -1,0 +1,181 @@
+<style>
+    .home-title {
+        background-color: #2BA8DE;
+        border-radius: 2px;
+        color: white;
+        display: inline-block;
+        box-shadow: 0.2em 0 0 #2BA8DE, -0.2em 0 0 #2BA8DE;
+        padding: 0.15em 0.2em;
+        font-family: "Gotham SSm A","Gotham SSm B", sans-serif;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 36px;
+        line-height: 1.45;
+        font-size-adjust: none;
+        font-stretch: normal;
+        font-feature-settings: normal;
+        font-language-override: normal;
+        font-kerning: auto;
+        font-synthesis: weight style;
+        font-variant-alternates: normal;
+        font-variant-caps: normal;
+        font-variant-east-asian: normal;
+        font-variant-ligatures: normal;
+        font-variant-numeric: normal;
+        font-variant-position: normal;
+        letter-spacing: -2px;
+        position: absolute;
+        top: 200px;
+        text-align: center;
+    }
+
+    .landing-page-footer {
+        background-color: #76D3B6;
+        /*background-color: #888888;*/
+        color: white;
+        width: 100%;
+        bottom: 0;
+        position: absolute;
+        padding: 50px;
+    }
+
+    .sell-input {
+        border: 1px solid #2ba8de !important;
+        display: inline-block;
+        background: none;
+        border-radius: 3px !important;
+        vertical-align: middle;
+        color: #2ba8de;
+        font-weight: bold;
+        height: 52px !important;
+        /*color: #595959; when the user is typing*/
+    }
+
+    .sell-input::-webkit-input-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+    }
+
+    .sell-input:-moz-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+    }
+
+    .sell-input:-ms-input-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+    }
+
+    .sell-input::-webkit-input-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+    }
+
+    .sell-input:-moz-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+    }
+
+    .sell-input:-ms-input-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+    }
+
+    .sell-form {
+        position: absolute;
+        top: 515px;
+    }
+
+    .form-container {
+        position: relative;
+    }
+
+    .home-subtitle {
+        color: white;
+        font-family: "proxima-nova","Whitney SSm B", sans-serif;
+        text-shadow: 0 0 25px #595959;
+        font-size: 22px;
+        top: 275px;
+        position: relative;
+        text-align: center;
+        height: 60px !important;
+    }
+
+    .image-container {
+        top: 0;
+        float: left;
+        width: 100%;
+        height: 100%;
+        background: url('assets/images/concertLandingPage.jpg') no-repeat;
+        background-size: 100%;
+        position: fixed;
+    }
+
+    .sell-form-link {
+        position: absolute;
+        top: 17px;
+        right: 17px;
+        color: #2ba8de;
+        font-size: 13px;
+    }
+</style>
+
+
+<div class="parallax-background image-container">
+
+    <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
+        <b>Vendez nous votre billet de concert</b>
+        <!--Vendez nous votre billet, nous faisons le reste.-->
+        <!--faisons le<-> nous occupons du-->
+    </h1>
+
+
+    <h4 class="home-subtitle">
+        Récuperez instantanément votre argent, sans vous soucier qu'un acheteur soit trouvé
+    </h4>
+
+
+    <form class="sell-form column medium-10 medium-offset-1 large-8 large-offset-2" method="post" novalidate="">
+        <div class="form-container">
+
+            <input type="text"
+                   ng-model="query"
+                   class="sell-input"
+                   placeholder="Entrez un nom d'événement ou un lieu">
+
+            <a class="sell-form-link">← Obtenir une offre maintenant</a>
+
+        </div>
+    </form>
+
+</div>
+
+
+
+<div class="parallax-content" style="margin-top: 600px; height: 250px;">
+
+    <event-min ng-if="$root.activEvent && events.length > 0"
+               class="float-left column small-12 medium-6 large-4 fade min_contener margin0"
+               data-ng-repeat="event in events | limitTo: limit">
+    </event-min>
+
+</div>
+
+
+
+<contact-component>
+
+</contact-component>
+
+
+
+<div class="landing-page-footer">
+
+    <div class="column medium-12">
+        <span class="column medium-4">2016 - Claude</span>
+        <span class="column medium-4"><a>Mentions légales</a></span>
+        <span class="column medium-4"><a>Conditions générales de vente</a></span>
+    </div>
+
+</div>
+

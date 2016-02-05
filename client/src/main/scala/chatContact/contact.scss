@@ -24,7 +24,8 @@ contact-component > div.full {
 }
 
 .contact-component {
-  background-color: white;
+  background-color: transparent;
+  padding: 0 !important;
 }
 
 .contact-component > div.ng-enter {
@@ -53,6 +54,16 @@ contact-component > div.full {
   border: 1px solid #51cbee !important;
   border-radius: 4px !important;
   box-shadow: (0 0 1px #51cbee) !important;
+}
+
+.contact-tooltip {
+  float: left;
+  padding: 10px;
+  background: white;
+}
+
+.inner-contact-tooltip.full {
+  width: 100%;
 }
 
 .messageFromUser {

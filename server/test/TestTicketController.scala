@@ -48,7 +48,7 @@ class TestTicketController extends GlobalApplicationForControllers {
         case events: JsSuccess[Seq[SalableEvent]] =>
           events.get must contain (savedSalableEvent)
         case error: JsError =>
-          Logger.error("get all sallable events:" + error)
+          Logger.error("get all salable events:" + error)
           error mustEqual 0
       }
     }
@@ -93,7 +93,7 @@ class TestTicketController extends GlobalApplicationForControllers {
         case tickets: JsSuccess[Seq[PendingTicket]] =>
           tickets.get must contain (savedPendingTicket)
         case error: JsError =>
-          Logger.error("get all sellable events:" + error)
+          Logger.error("get all salable events:" + error)
           error mustEqual 0
       }
     }
@@ -125,7 +125,7 @@ class TestTicketController extends GlobalApplicationForControllers {
         case tickets: JsSuccess[Seq[TicketWithStatus]] =>
           tickets.get must contain (TicketWithStatus(savedTicket, Some(newSavedStatus)))
         case error: JsError =>
-          Logger.error("get all sellable events:" + error)
+          Logger.error("get all salable events:" + error)
           error mustEqual 0
       }
     }
@@ -141,7 +141,7 @@ class TestTicketController extends GlobalApplicationForControllers {
         case ticketBills: JsSuccess[Seq[TicketBill]] =>
           ticketBills.get must contain (savedBoughtBill)
         case error: JsError =>
-          Logger.error("get all sellable events:" + error)
+          Logger.error("get all salable events:" + error)
           error mustEqual 0
       }
     }
@@ -157,7 +157,7 @@ class TestTicketController extends GlobalApplicationForControllers {
         case ticketBills: JsSuccess[Seq[TicketBill]] =>
           ticketBills.get must contain (savedSoldBill)
         case error: JsError =>
-          Logger.error("get all sellable events:" + error)
+          Logger.error("get all salable events:" + error)
           error mustEqual 0
       }
     }

@@ -31,6 +31,10 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
+resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
+
+resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+
 lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
   scalaJSProjects := clients,
@@ -41,9 +45,8 @@ lazy val server = (project in file("server")).settings(
     evolutions,
     ws,
     filters,
-    "org.webjars" % "jquery" % "1.11.1",
+    specs2 % Test,
     "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
-    "org.webjars" % "angularjs" % "1.4.8",
     "net.codingwell" %% "scala-guice" % "4.0.0",
     "org.webjars" %% "webjars-play" % "2.4.0-1",
     "org.postgresql" % "postgresql" % "9.4-1205-jdbc42",
@@ -51,7 +54,6 @@ lazy val server = (project in file("server")).settings(
     "org.scalatestplus" %% "play" % "1.4.0-M3" % "test",
     "com.mohiva" %% "play-silhouette" % "3.0.2",
     "com.mohiva" %% "play-silhouette-testkit" % "3.0.2" % "test",
-    "com.greencatsoft" %% "greenlight" % "0.3" % "test",
     "net.ceedubs" %% "ficus" % "1.1.2",
     "com.typesafe.play" %% "play-slick" % "1.0.1",
     "com.typesafe.play" %% "play-slick-evolutions" % "1.0.1",
@@ -61,11 +63,7 @@ lazy val server = (project in file("server")).settings(
     "com.github.tminglei" %% "slick-pg" % "0.9.1",
     "com.vividsolutions" % "jts" % "1.13",
     "com.typesafe.play" %% "play-mailer" % "3.0.1",
-    specs2 % Test,
-    "com.github.docker-java" % "docker-java" % "1.4.0",
-    "com.zaxxer" % "HikariCP" % "2.4.1",
-  //  "com.google.guava" % "guava" % "18.0",
-    "com.typesafe.akka" %% "akka-testkit" % "2.4.0" % "test"
+    "com.zaxxer" % "HikariCP" % "2.4.1"
   )
 ).enablePlugins(PlayScala).
     aggregate(clients.map(projectToRef): _*).
@@ -81,9 +79,7 @@ lazy val client = (project in file("client")).settings(
     "org.scala-js" %%% "scalajs-dom" % "0.8.0",
     "com.lihaoyi" %%% "upickle" % "0.3.6",
     "com.greencatsoft" %%% "scalajs-angular" % "0.6",
-    "be.doeraene" %%% "scalajs-jquery" % "0.8.0",
-    "com.greencatsoft" %%% "greenlight" % "0.3" % "test",
-    "org.scala-js" %% "scalajs-test-interface" % scalaJSVersion
+    "com.greencatsoft" %%% "greenlight" % "0.3" % "test"
   ),
   jsDependencies += RuntimeDOM,
   jsDependencies += "org.webjars" % "angularjs" % "1.3.8" / "angular.min.js" % "test",

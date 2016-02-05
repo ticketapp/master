@@ -1,55 +1,55 @@
 /*Positions*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\000034}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\000034}}
 .fixed {
   position: fixed !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\000038}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\000038}}
 .relative {
   position: relative !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000312}}
 .absolute {
   position: absolute !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000316}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000316}}
 .top0 {
   top: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000320}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000320}}
 .bottom0 {
   bottom: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000324}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000324}}
 .left0 {
   left: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000328}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000328}}
 .right0 {
   right: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000332}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000332}}
 .float-left {
   float: left !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000336}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000336}}
 .float-right {
   float: right !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000340}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000340}}
 .float-none {
   float: none !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000344}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000344}}
 .hiddenBlock {
   opacity: 0;
   position: absolute;
@@ -57,893 +57,893 @@
 }
 
 /*Colors*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000351}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000351}}
 .primCol {
   background-color: #E1F1F7 !important;
   color: #ffffff !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000356}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000356}}
 .primCol > a {
   color: #ffffff;
 }
 
 /*.primCol:hover {background: #007095}*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000361}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000361}}
 .white {
   background: #ffffff;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000365}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000365}}
 .button.active {
   background: #E1F1F7;
   color: #ffffff !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000370}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000370}}
 .BlackTrans {
   background: rgba(0, 0, 0, 0.66);
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000374}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000374}}
 .transparent {
   background: transparent !important;
 }
 
 /*z-index*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000379}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000379}}
 .zIndex1 {
   z-index: 1;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000383}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000383}}
 .zIndex2 {
   z-index: 2;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000387}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000387}}
 .zIndex3 {
   z-index: 3;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000391}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000391}}
 .zIndex4 {
   z-index: 4;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000395}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000395}}
 .zIndex5 {
   z-index: 5;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\0000399}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\0000399}}
 .zIndex6 {
   z-index: 6;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003103}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003103}}
 .shadow {
   box-shadow: 0px 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003107}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003107}}
 .rounded {
   border-radius: 3px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003111}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003111}}
 .scrollAuto {
   overflow-y: auto;
 }
 
 /*text*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003116}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003116}}
 .center {
   text-align: center !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003120}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003120}}
 .justify {
   text-align: justify !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003124}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003124}}
 .textLeft {
   text-align: left !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003128}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003128}}
 .textRight {
   text-align: right !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003132}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003132}}
 .textColorWhite {
   color: white;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003136}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003136}}
 .textPrimColor {
   color: #E1F1F7;
 }
 
 /*effects*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003141}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003141}}
 .pointer {
   cursor: pointer;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003145}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003145}}
 .cursorHelp {
   cursor: help;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003149}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003149}}
 .cursorAuto {
   cursor: auto;
 }
 
 /*margin*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003154}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003154}}
 .marginList {
   margin-left: 0.85% !important;
   margin-right: 0.85%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003159}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003159}}
 .marginAuto {
   margin-left: auto !important;
   margin-right: auto !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003164}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003164}}
 .margin0 {
   margin: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003168}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003168}}
 .margin10 {
   margin: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003172}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003172}}
 .margin20 {
   margin: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003176}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003176}}
 .margin30 {
   margin: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003180}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003180}}
 .margin40 {
   margin: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003184}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003184}}
 .margin50 {
   margin: 50px !important;
 }
 
 /*left*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003189}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003189}}
 .marginLeft0 {
   margin-left: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003193}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003193}}
 .marginLeft10 {
   margin-left: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003197}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003197}}
 .marginLeft20 {
   margin-left: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003201}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003201}}
 .marginLeft30 {
   margin-left: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003205}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003205}}
 .marginLeft40 {
   margin-left: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003209}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003209}}
 .marginLeft50 {
   margin-left: 50px !important;
 }
 
 /*right*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003214}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003214}}
 .marginRight0 {
   margin-right: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003218}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003218}}
 .marginRight10 {
   margin-right: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003222}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003222}}
 .marginRight20 {
   margin-right: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003226}}
 .marginRight30 {
   margin-right: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003230}}
 .marginRight40 {
   margin-right: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003234}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003234}}
 .marginRight50 {
   margin-right: 50px !important;
 }
 
 /*top*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003239}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003239}}
 .marginTop0 {
   margin-top: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003243}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003243}}
 .marginTop10 {
   margin-top: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003247}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003247}}
 .marginTop20 {
   margin-top: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003251}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003251}}
 .marginTop30 {
   margin-top: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003255}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003255}}
 .marginTop40 {
   margin-top: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003259}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003259}}
 .marginTop50 {
   margin-top: 50px !important;
 }
 
 /*bottom*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003264}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003264}}
 .marginBottom0 {
   margin-bottom: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003268}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003268}}
 .marginBottom10 {
   margin-bottom: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003272}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003272}}
 .marginBottom20 {
   margin-bottom: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003276}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003276}}
 .marginBottom30 {
   margin-bottom: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003280}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003280}}
 .marginBottom40 {
   margin-bottom: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003284}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003284}}
 .marginBottom50 {
   margin-bottom: 50px !important;
 }
 
 /*padding*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003289}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003289}}
 .padding0 {
   padding: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003293}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003293}}
 .padding10 {
   padding: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003297}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003297}}
 .padding20 {
   padding: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003301}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003301}}
 .padding30 {
   padding: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003305}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003305}}
 .padding40 {
   padding: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003309}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003309}}
 .padding50 {
   padding: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003313}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003313}}
 .padding1 {
   padding: 1em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003317}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003317}}
 .padding2 {
   padding: 2em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003321}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003321}}
 .padding3 {
   padding: 3em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003325}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003325}}
 .padding4 {
   padding: 4em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003329}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003329}}
 .padding5 {
   padding: 5em !important;
 }
 
 /*left*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003334}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003334}}
 .paddingLeft0 {
   padding-left: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003338}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003338}}
 .paddingLeft10 {
   padding-left: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003342}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003342}}
 .paddingLeft20 {
   padding-left: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003346}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003346}}
 .paddingLeft30 {
   padding-left: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003350}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003350}}
 .paddingLeft40 {
   padding-left: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003354}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003354}}
 .paddingLeft50 {
   padding-left: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003358}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003358}}
 .paddingLeft1 {
   padding-left: 1em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003362}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003362}}
 .paddingLeft2 {
   padding-left: 2em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003366}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003366}}
 .paddingLeft3 {
   padding-left: 3em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003370}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003370}}
 .paddingLeft4 {
   padding-left: 4em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003374}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003374}}
 .paddingLeft5 {
   padding-left: 5em !important;
 }
 
 /*right*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003379}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003379}}
 .paddingRight0 {
   padding-right: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003383}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003383}}
 .paddingRight10 {
   padding-right: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003387}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003387}}
 .paddingRight20 {
   padding-right: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003391}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003391}}
 .paddingRight30 {
   padding-right: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003395}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003395}}
 .paddingRight40 {
   padding-right: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003399}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003399}}
 .paddingRight50 {
   padding-right: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003403}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003403}}
 .paddingRight1 {
   padding-right: 1em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003407}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003407}}
 .paddingRight2 {
   padding-right: 2em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003411}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003411}}
 .paddingRight3 {
   padding-right: 3em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003415}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003415}}
 .paddingRight4 {
   padding-right: 4em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003419}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003419}}
 .paddingRight5 {
   padding-right: 5em !important;
 }
 
 /*top*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003424}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003424}}
 .paddingTop0 {
   padding-top: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003428}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003428}}
 .paddingTop10 {
   padding-top: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003432}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003432}}
 .paddingTop20 {
   padding-top: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003436}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003436}}
 .paddingTop30 {
   padding-top: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003440}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003440}}
 .paddingTop40 {
   padding-top: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003444}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003444}}
 .paddingTop50 {
   padding-top: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003448}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003448}}
 .paddingTop1 {
   padding-top: 1em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003452}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003452}}
 .paddingTop2 {
   padding-top: 2em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003456}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003456}}
 .paddingTop3 {
   padding-top: 3em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003460}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003460}}
 .paddingTop4 {
   padding-top: 4em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003464}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003464}}
 .paddingTop5 {
   padding-top: 5em !important;
 }
 
 /*bottom*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003469}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003469}}
 .paddingBottom0 {
   padding-bottom: 0 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003473}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003473}}
 .paddingBottom10 {
   padding-bottom: 10px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003477}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003477}}
 .paddingBottom20 {
   padding-bottom: 20px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003481}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003481}}
 .paddingBottom30 {
   padding-bottom: 30px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003485}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003485}}
 .paddingBottom40 {
   padding-bottom: 40px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003489}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003489}}
 .paddingBottom50 {
   padding-bottom: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003493}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003493}}
 .paddingBottom1 {
   padding-bottom: 1em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003497}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003497}}
 .paddingBottom2 {
   padding-bottom: 2em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003501}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003501}}
 .paddingBottom3 {
   padding-bottom: 3em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003505}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003505}}
 .paddingBottom4 {
   padding-bottom: 4em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003509}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003509}}
 .paddingBottom5 {
   padding-bottom: 5em !important;
 }
 
 /*height*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003514}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003514}}
 .height50 {
   height: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003518}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003518}}
 .height5 {
   height: 5em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003522}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003522}}
 .height100 {
   height: 100px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003526}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003526}}
 .height10 {
   height: 10em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003530}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003530}}
 .height150 {
   height: 150px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003534}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003534}}
 .height15 {
   height: 15em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003538}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003538}}
 .height200 {
   height: 200px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003542}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003542}}
 .height20 {
   height: 20em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003546}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003546}}
 .height50 {
   height: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003550}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003550}}
 .height5 {
   height: 5em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003554}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003554}}
 .height250 {
   height: 250px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003558}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003558}}
 .height25 {
   height: 25em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003562}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003562}}
 .height300 {
   height: 300px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003566}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003566}}
 .height30 {
   height: 30em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003570}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003570}}
 .height350 {
   height: 350px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003574}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003574}}
 .height35 {
   height: 35em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003578}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003578}}
 .height400 {
   height: 400px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003582}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003582}}
 .height40 {
   height: 40em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003586}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003586}}
 .height450 {
   height: 450px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003590}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003590}}
 .height45 {
   height: 45em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003594}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003594}}
 .maxHeight50 {
   max-height: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003598}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003598}}
 .maxHeight5 {
   max-height: 5em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003602}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003602}}
 .maxHeight100 {
   max-height: 100px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003606}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003606}}
 .maxHeight10 {
   max-height: 10em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003610}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003610}}
 .maxHeight150 {
   max-height: 150px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003614}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003614}}
 .maxHeight15 {
   max-height: 15em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003618}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003618}}
 .maxHeight200 {
   max-height: 200px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003622}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003622}}
 .maxHeight20 {
   max-height: 20em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003626}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003626}}
 .maxHeight50 {
   max-height: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003630}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003630}}
 .maxHeight5 {
   max-height: 5em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003634}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003634}}
 .maxHeight250 {
   max-height: 250px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003638}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003638}}
 .maxHeight25 {
   max-height: 25em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003642}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003642}}
 .maxHeight300 {
   max-height: 300px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003646}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003646}}
 .maxHeight30 {
   max-height: 30em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003650}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003650}}
 .maxHeight350 {
   max-height: 350px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003654}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003654}}
 .maxHeight35 {
   max-height: 35em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003658}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003658}}
 .maxHeight400 {
   max-height: 400px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003662}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003662}}
 .maxHeight40 {
   max-height: 40em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003666}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003666}}
 .maxHeight450 {
   max-height: 450px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003670}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003670}}
 .maxHeight45 {
   max-height: 45em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003674}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003674}}
 .height100p {
   height: 100% !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003678}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003678}}
 .minHeight50 {
   min-height: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003682}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003682}}
 .minHeight5 {
   min-height: 5em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003686}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003686}}
 .minHeight100 {
   min-height: 100px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003690}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003690}}
 .minHeight10 {
   min-height: 10em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003694}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003694}}
 .minHeight150 {
   min-height: 150px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003698}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003698}}
 .minHeight15 {
   min-height: 15em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003702}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003702}}
 .minHeight200 {
   min-height: 200px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003706}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003706}}
 .minHeight20 {
   min-height: 20em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003710}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003710}}
 .minHeight50 {
   min-height: 50px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003714}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003714}}
 .minHeight5 {
   min-height: 5em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003718}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003718}}
 .minHeight250 {
   min-height: 250px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003722}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003722}}
 .minHeight25 {
   min-height: 25em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003726}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003726}}
 .minHeight300 {
   min-height: 300px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003730}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003730}}
 .minHeight30 {
   min-height: 30em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003734}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003734}}
 .minHeight350 {
   min-height: 350px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003738}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003738}}
 .minHeight35 {
   min-height: 35em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003742}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003742}}
 .minHeight400 {
   min-height: 400px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003746}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003746}}
 .minHeight40 {
   min-height: 40em !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003750}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003750}}
 .minHeight450 {
   min-height: 450px !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003754}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003754}}
 .minHeight45 {
   min-height: 45em !important;
 }
 
 /*resp height*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003759}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003759}}
 .heightResp {
   height: 400px !important;
 }
 
 @media (max-width: 767px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003764}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003764}}
   [class*="heightResp"], .uneditable-input[class*="heightResp"], .row-fluid [class*="heightResp"] {
     display: block;
     float: none;
@@ -951,24 +951,24 @@
   }
 }
 /*resp width*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003773}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003773}}
 .width100p {
   width: 100% !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003777}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003777}}
 .width {
   margin-left: 0.5% !important;
   width: 33.6% !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003782}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003782}}
 .width2 {
   float: left !important;
   width: 50% !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003787}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003787}}
 .width3 {
   float: left;
   margin-bottom: 5px;
@@ -976,7 +976,7 @@
 }
 
 @media (max-width: 767px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003794}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003794}}
   [class*="width"], .uneditable-input[class*="width"], .row-fluid [class*="width"] {
     display: block;
     float: none;
@@ -989,7 +989,7 @@
 }
 /*annimations*/
 /*slide*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003807}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003807}}
 .rightSlide.ng-enter, .rightSlide.ng-leave {
   -moz-animation-duration: .8s;
   -ms-animation-duration: .8s;
@@ -1002,7 +1002,7 @@
   -animation-fill-mode: both;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003819}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003819}}
 .rightSlide.ng-enter {
   -moz-animation-name: slideInRight;
   -ms-animation-name: slideInRight;
@@ -1012,7 +1012,7 @@
   top: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003828}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003828}}
 .rightSlide.ng-leave {
   -moz-animation-name: slideOutLeft;
   -ms-animation-name: slideOutLeft;
@@ -1021,7 +1021,7 @@
 }
 
 /*fade*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003836}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003836}}
 .fadeSlide.ng-enter, .fadeSlide.ng-leave {
   -moz-animation-duration: .8s;
   -ms-animation-duration: .8s;
@@ -1034,7 +1034,7 @@
   -animation-fill-mode: both;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003848}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003848}}
 .fadeSlide.ng-enter {
   -moz-animation-name: fadeIn;
   -ms-animation-name: fadeIn;
@@ -1044,10 +1044,15 @@
   top: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/loann\/Desktop\/claude\/master\/server\/public\/scss\/tools\.scss}line{font-family:\00003857}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003857}}
 .fadeSlide.ng-leave {
   -moz-animation-name: fadeOut;
   -ms-animation-name: fadeOut;
   -o-animation-name: fadeOut;
   -webkit-animation-name: fadeOut;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/simon\/dev\/claude\/server\/public\/scss\/tools\.scss}line{font-family:\00003864}}
+.notClickable {
+  pointer-events: none;
 }
