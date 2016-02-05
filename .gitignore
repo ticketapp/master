@@ -1,6 +1,7 @@
 logs
 shared/.idea
 shared/.idea/modules/
+shared/project
 server/public/stylesheets/main_scsslint*
 .sass-cache/
 shared/target
@@ -32,6 +33,8 @@ node_modules/*
 project/.sbtserver
 project/.sbtserver.lock
 project/play-fork-run.sbt
+server/public/templates
+server/public/stylesheets/*.css
 project/sbt-ui.sbt
 projectFilesBackup*/*
 projectFilesBackup/*
