@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.{Date, JSON}
-import scala.scalajs.js.annotation.JSExportAll
+import scala.scalajs.js.annotation.{JSExport, JSExportAll}
 import org.scalajs.dom.console
 import upickle.Js
 import upickle.default._
@@ -19,6 +19,7 @@ import upickle.default._
 class EventsController(scope: EventsScopeType, service: HttpGeneralService, timeout: Timeout)
   extends AbstractController[EventsScopeType](scope) with jsonHelper {
 
+  @JSExport
   var events: js.Array[HappeningWithRelations] = new js.Array[HappeningWithRelations]
 
 
@@ -31,7 +32,7 @@ class EventsController(scope: EventsScopeType, service: HttpGeneralService, time
   def find(offset: Int, numberToReturn: Int, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.find(offset, numberToReturn, geographicPoint)) map { foundEvents =>
-      timeout( () => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout( () => {events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray; println(events)})
     }
   }
 

@@ -174,7 +174,9 @@
         <md-button type="submit" class="md-raised md-primary">Valider</md-button>
     </form>
 
-    <div data-ng-repeat="event in controller.events">{{event}}</div>
+    {{controller.events}}
+
+    <event-min data-ng-repeat="event in controller.events"></event-min>
 
     <!-- def createEvent: String = "/events/create"
 

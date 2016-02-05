@@ -6,6 +6,8 @@ import events.{Geometry, Happening}
 import organizers.Organizer
 import places.{PlaceWithAddress, Place}
 import upickle.Js
+import upickle.Js.{Num, Str, Value}
+import scala.collection.mutable.ArrayBuffer
 import scala.scalajs.js.Date
 
 
@@ -38,40 +40,48 @@ trait jsonHelper {
 
   implicit val eventReader = upickle.default.Reader[Happening]{
       case other =>
-        val event = other.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
-        Happening(
-          id = getOptionLong(event, "id"),
-          facebookId = getOptionString(event, "facebookId"),
-          isPublic = event("isPublic").toString.toBoolean,
-          isActive = event("isActive").toString.toBoolean,
-          name = event("name").asInstanceOf[Js.Str].value.toString,
-          geographicPoint = Geometry(point = event("geographicPoint").toString),
-          description = getOptionString(event, "description"),
-          startTime = new Date(event("startTime").toString),
-          endTime = getOptionDate(event, "endTime"),
-          ageRestriction = event("ageRestriction").asInstanceOf[Js.Num].value.toInt,
-          tariffRange = getOptionString(event, "tariffRange"),
-          ticketSellers = getOptionString(event, "ticketSellers"),
-          imagePath = getOptionString(event, "imagePath")
-        )
+        jsEventToEvent(other)
     }
+
+  def jsEventToEvent(other: Value): Happening = {
+    val event = other.value.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
+    Happening(
+      id = getOptionLong(event, "id"),
+      facebookId = getOptionString(event, "facebookId"),
+      isPublic = event("isPublic").toString.toBoolean,
+      isActive = event("isActive").toString.toBoolean,
+      name = event("name").asInstanceOf[Str].value.toString,
+      geographicPoint = Geometry(point = event("geographicPoint").toString),
+      description = getOptionString(event, "description"),
+      startTime = new Date(event("startTime").toString),
+      endTime = getOptionDate(event, "endTime"),
+      ageRestriction = event("ageRestriction").asInstanceOf[Num].value.toInt,
+      tariffRange = getOptionString(event, "tariffRange"),
+      ticketSellers = getOptionString(event, "ticketSellers"),
+      imagePath = getOptionString(event, "imagePath")
+    )
+  }
 
   implicit val placeReader = upickle.default.Reader[Place]{
     case placeObject =>
-      val place: Map[String, Any] = placeObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
-      Place(
-        id = getOptionLong(place, "id"),
-        name = place("name").asInstanceOf[Js.Str].value.toString,
-        facebookId = getOptionString(place, "facebookId"),
-        geographicPoint = Geometry(point = place("geographicPoint").asInstanceOf[Js.Str].value.toString),
-        description = getOptionString(place, "description"),
-        websites = getOptionString(place, "websites"),
-        capacity = getOptionInt(place, "capacity"),
-        imagePath = getOptionString(place, "imagePath"),
-        openingHours = getOptionString(place, "openingHours"),
-        addressId = getOptionLong(place, "addressId"),
-        linkedOrganizerId = getOptionLong(place, "linkedOrganizerId")
-      )
+      placeJsValueToPlace(placeObject)
+  }
+
+  def placeJsValueToPlace(placeObject: Value): Place = {
+    val place: Map[String, Any] = placeObject.value.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
+    Place(
+      id = getOptionLong(place, "id"),
+      name = place("name").asInstanceOf[Str].value.toString,
+      facebookId = getOptionString(place, "facebookId"),
+      geographicPoint = Geometry(point = place("geographicPoint").asInstanceOf[Str].value.toString),
+      description = getOptionString(place, "description"),
+      websites = getOptionString(place, "websites"),
+      capacity = getOptionInt(place, "capacity"),
+      imagePath = getOptionString(place, "imagePath"),
+      openingHours = getOptionString(place, "openingHours"),
+      addressId = getOptionLong(place, "addressId"),
+      linkedOrganizerId = getOptionLong(place, "linkedOrganizerId")
+    )
   }
 
   implicit val organizerReader = upickle.default.Reader[Organizer]{
@@ -112,21 +122,28 @@ trait jsonHelper {
 
   implicit val addressReader = upickle.default.Reader[Address]{
     case addressObject =>
-      val address: Map[String, Any] = addressObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
-      Address(
-        id = getOptionLong(address, "id"),
-        geographicPoint = Geometry(point = address("geographicPoint").asInstanceOf[Js.Str].value.toString),
-        city = getOptionString(address, "city"),
-        zip = getOptionString(address, "zip"),
-        street = getOptionString(address, "street")
-      )
+      jsAddressToAddress(addressObject)
   }
 
-  /*PlaceWithAddress(place: Place, maybeAddress: Option[Address])*/
- /* implicit val placeWithAddressReader = upickle.default.Reader[PlaceWithAddress]{
+  def jsAddressToAddress(addressObject: Value): Address = {
+    val address: Map[String, Any] = addressObject.value.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
+    Address(
+      id = getOptionLong(address, "id"),
+      geographicPoint = Geometry(point = address("geographicPoint").asInstanceOf[Str].value.toString),
+      city = getOptionString(address, "city"),
+      zip = getOptionString(address, "zip"),
+      street = getOptionString(address, "street")
+    )
+  }
+
+  implicit val placeWithAddressReader = upickle.default.Reader[PlaceWithAddress]{
     case placeObject =>
       val placeWithRelation: Map[String, Any] = placeObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
-
-  }*/
+      PlaceWithAddress(
+        place = placeJsValueToPlace(placeWithRelation("place").asInstanceOf[Js.Value]),
+        maybeAddress = if(placeWithRelation.isDefinedAt("maybeAddress"))
+        Some(jsAddressToAddress(placeWithRelation("maybeAddress").asInstanceOf[Js.Value])) else None
+      )
+  }
 
 }
