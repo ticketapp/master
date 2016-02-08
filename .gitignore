@@ -28,7 +28,7 @@ dist
 /RUNNING_PID
 /.settings
 export-bin.sh
-node_modules/*
+node_modules/
 .sbtserver/
 project/.sbtserver
 project/.sbtserver.lock

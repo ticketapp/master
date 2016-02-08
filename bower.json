@@ -17,11 +17,7 @@
     "angular-foundation": "",
     "angular-material": "",
     "angular-websocket": "",
-    "angular-cookies": "",
-    "angular-messages": "",
-    "angular-resource": "",
-    "angular-sanitize": "",
-    "angular-touch": ""
+    "foundation": "~5.4.7"
   },
   "devDependencies": {
     "angular-mocks": "~1.3.0",
