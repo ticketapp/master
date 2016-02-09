@@ -31,7 +31,6 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
 
   def findSalableEvents: Unit = {
     service.get(AdminRoutes.salableEvents) map { foundSalableEvents =>
-      println(foundSalableEvents)
       timeout(() => salableEvents = read[Seq[SalableEvent]](foundSalableEvents).toJSArray)
     }
   }
@@ -55,35 +54,30 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
 
   def findTicketsWithStatus: Unit = {
     service.get(AdminRoutes.findTicketsWithStatus) map { ticketsWithStatusFound =>
-        println(ticketsWithStatusFound)
         timeout(() => ticketsWithStatus = read[Seq[TicketWithStatus]](ticketsWithStatusFound).toJSArray)
     }
   }
 
   def findPendingTickets: Unit = {
     service.get(AdminRoutes.findPendingTickets) map { pendingTicketsFound =>
-        println(pendingTicketsFound)
         timeout( () => pendingTickets = read[Seq[PendingTicket]](pendingTicketsFound).toJSArray)
     }
   }
 
   def findBoughtBills: Unit = {
     service.get(AdminRoutes.findBoughtBills) map { boughtBillsFind =>
-        println(boughtBillsFind)
         timeout( () => boughtBills = read[Seq[TicketBill]](boughtBillsFind).toJSArray)
     }
   }
 
   def findSoldBills: Unit = {
     service.get(AdminRoutes.findSoldBills) map { soldBillsFound =>
-        println(soldBillsFound)
       timeout( () => soldBills = read[Seq[TicketBill]](soldBillsFound).toJSArray)
     }
   }
 
   def createSalableEvent(eventId: Int): Unit = {
     service.post(AdminRoutes.salableEvents(eventId: Int)) map { response =>
-      println(response)
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
     }
@@ -91,7 +85,6 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
 
   def proposeTicket(tariffId: Int, amount: Double, qrCode: String): Unit = {
     service.post(AdminRoutes.proposeTicket(tariffId: Int, amount: Double, qrCode: String)) map { response =>
-      println(response)
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
     }
@@ -99,7 +92,6 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
 
   def blockTicketForUser(tariffId: Int): Unit = {
     service.post(AdminRoutes.blockTicketForUser(tariffId: Int)) map { response =>
-      println(response)
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
     }
@@ -107,7 +99,6 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
 
   def createTicketToSale(qrCode: String, eventId: Int, tariffId: Int): Unit = {
     service.post(AdminRoutes.addTicketToSale(qrCode: String, eventId: Int, tariffId: Int))map { response =>
-      println(response)
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
     }
@@ -115,7 +106,6 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
 
   def acceptPendingTicket(pendingTicketId: Int): Unit = {
     service.post(AdminRoutes.acceptPendingTicket(pendingTicketId: Int)) map { response =>
-      println(response)
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
     }
@@ -123,7 +113,6 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
 
   def rejectPendingTicket(pendingTicketId: Int): Unit = {
     service.post(AdminRoutes.rejectPendingTicket(pendingTicketId: Int)) map { response =>
-      println(response)
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
     }

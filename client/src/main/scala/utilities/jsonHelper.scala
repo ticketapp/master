@@ -1,17 +1,15 @@
 package utilities
 
 import addresses.Address
-import admin.{TicketStatus, Ticket, TicketWithStatus}
+import admin.{Ticket, TicketStatus, TicketWithStatus}
 import artists.Artist
 import events.{Geometry, Happening}
 import organizers.Organizer
-import places.{PlaceWithAddress, Place}
+import places.{Place, PlaceWithAddress}
 import upickle.Js
-import upickle.default._
 import upickle.Js.{Num, Str, Value}
 import scala.collection.mutable.ArrayBuffer
-import scala.scalajs.js
-import scala.scalajs.js.{JSON, Date}
+import scala.scalajs.js.Date
 
 
 trait jsonHelper {
