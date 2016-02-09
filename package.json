@@ -9,7 +9,9 @@
     "grunt-contrib-compass": "^0.7.2",
     "grunt-contrib-concat": "^0.4.0",
     "grunt-contrib-htmlmin": "^0.3.0",
-    "grunt-contrib-watch": "^0.6.1"
+    "grunt-contrib-watch": "^0.6.1",
+    "time-grunt": "^0.3.1",
+    "load-grunt-tasks": "^0.4.0"
   },
   "engines": {
     "node": ">=0.10.0"
