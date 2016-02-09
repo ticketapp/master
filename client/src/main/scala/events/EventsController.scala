@@ -8,20 +8,17 @@ import utilities.jsonHelper
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.scalajs.js.{Date, JSON}
+import scala.scalajs.js.{UndefOr, Date, JSON}
 import scala.scalajs.js.annotation.{JSExport, JSExportAll}
 import org.scalajs.dom.console
 import upickle.Js
 import upickle.default._
-
 @JSExportAll
 @injectable("eventsController")
-class EventsController(scope: EventsScopeType, service: HttpGeneralService, timeout: Timeout)
-  extends AbstractController[EventsScopeType](scope) with jsonHelper {
+class EventsController(eventScope: EventsScopeType, service: HttpGeneralService, timeout: Timeout)
+  extends AbstractController[EventsScopeType](eventScope) with jsonHelper {
 
-  @JSExport
   var events: js.Array[HappeningWithRelations] = new js.Array[HappeningWithRelations]
-
 
   def findById(id: Int): Unit = {
     service.get(EventsRoutes.find(id)) map { foundEvent =>
@@ -32,7 +29,7 @@ class EventsController(scope: EventsScopeType, service: HttpGeneralService, time
   def find(offset: Int, numberToReturn: Int, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.find(offset, numberToReturn, geographicPoint)) map { foundEvents =>
-      timeout( () => {events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray; println(events)})
+      timeout( () => {eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray})
     }
   }
 
@@ -78,6 +75,6 @@ class EventsController(scope: EventsScopeType, service: HttpGeneralService, time
 
 @js.native
 trait EventsScopeType extends Scope {
-  var events: js.Array[Happening] = js.native
-  var remove: js.Function1[Happening, _] = js.native
+  var events: js.Array[HappeningWithRelations] = js.native
+  var remove: js.Function1[HappeningWithRelations, _] = js.native
 }

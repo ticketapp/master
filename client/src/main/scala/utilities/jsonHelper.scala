@@ -1,14 +1,17 @@
 package utilities
 
 import addresses.Address
+import admin.{TicketStatus, Ticket, TicketWithStatus}
 import artists.Artist
 import events.{Geometry, Happening}
 import organizers.Organizer
 import places.{PlaceWithAddress, Place}
 import upickle.Js
+import upickle.default._
 import upickle.Js.{Num, Str, Value}
 import scala.collection.mutable.ArrayBuffer
-import scala.scalajs.js.Date
+import scala.scalajs.js
+import scala.scalajs.js.{JSON, Date}
 
 
 trait jsonHelper {
@@ -35,7 +38,7 @@ trait jsonHelper {
   }
 
   def getOptionDate(map: Map[String, Any], key: String): Option[Date] = {
-    if (!map.isDefinedAt(key)) None else Some(new Date(map(key).toString))
+    if (!map.isDefinedAt(key)) None else Some(new Date(map(key).asInstanceOf[Js.Num].value))
   }
 
   implicit val eventReader = upickle.default.Reader[Happening]{
@@ -53,7 +56,7 @@ trait jsonHelper {
       name = event("name").asInstanceOf[Str].value.toString,
       geographicPoint = Geometry(point = event("geographicPoint").toString),
       description = getOptionString(event, "description"),
-      startTime = new Date(event("startTime").toString),
+      startTime = new Date(event("startTime").asInstanceOf[Js.Num].value),
       endTime = getOptionDate(event, "endTime"),
       ageRestriction = event("ageRestriction").asInstanceOf[Num].value.toInt,
       tariffRange = getOptionString(event, "tariffRange"),
@@ -144,6 +147,44 @@ trait jsonHelper {
         maybeAddress = if(placeWithRelation.isDefinedAt("maybeAddress"))
         Some(jsAddressToAddress(placeWithRelation("maybeAddress").asInstanceOf[Js.Value])) else None
       )
+  }
+
+  def jsTicketToTicket(ticketObject: Value): Ticket = {
+    val ticket: Map[String, Any] = ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+    Ticket(
+      ticketId = getOptionInt(ticket, "ticketId"),
+      qrCode = ticket("qrCode").asInstanceOf[Str].value.toString,
+      eventId = ticket("eventId").asInstanceOf[Js.Num].value.toInt,
+      tariffId = ticket("tariffId").asInstanceOf[Js.Num].value.toInt
+    )
+  }
+
+  def jsTicketStatusToTicketStatus(ticketObject: Value): TicketStatus = {
+    val ticket: Map[String, Any] = ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+    TicketStatus(
+      ticketId = ticket("ticketId").asInstanceOf[Js.Num].value.toInt,
+      status = ticket("status").asInstanceOf[Js.Str].value.toString.charAt(0),
+      date = new Date(ticket("date").asInstanceOf[Js.Num].value)
+    )
+  }
+
+  implicit val ticketReader = upickle.default.Reader[Ticket]{
+     case ticketObject =>
+      jsTicketToTicket(ticketObject)
+  }
+
+  implicit val ticketStatusReader = upickle.default.Reader[TicketStatus]{
+     case ticketObject =>
+      jsTicketStatusToTicketStatus(ticketObject)
+  }
+
+  implicit val ticketWithStatusReader = upickle.default.Reader[TicketWithStatus]{
+    case ticketObject =>
+      val ticketWithRelation: Map[String, Any] = ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+     TicketWithStatus(ticket= jsTicketToTicket(ticketObject("ticket")),
+     ticketStatus= if(ticketWithRelation.isDefinedAt("ticketStatus"))
+     Some(jsTicketStatusToTicketStatus(ticketObject("ticketStatus"))) else None
+     )
   }
 
 }

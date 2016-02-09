@@ -4,9 +4,7 @@ import scala.scalajs.js
 
 @js.native
 object PlacesRoutes {
-  def findAllSinceOffset(offset: Long, numberToReturn: Long): String =
-    "/places?offset=" + offset + "&numberToReturn=" + numberToReturn
-  
+
   def findById(id: Long): String =
     "/places/" + id
   

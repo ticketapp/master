@@ -26,6 +26,7 @@ case class Happening(var id: Option[Long],
                      var ticketSellers: Option[String] ,
                      var imagePath: Option[String] )
 
+@JSExportAll
 case class Geometry(point: String)
 
 
