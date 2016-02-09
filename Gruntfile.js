@@ -169,20 +169,21 @@ module.exports = function (grunt) {
     });
 
 
-    //grunt.registerTask('build', [
-    //    'clean:dist',
-    //    'wiredep',
-    //    'useminPrepare',
-    //    'concurrent:dist',
-    //    'autoprefixer',
-    //    'concat',
-    //    'ngAnnotate',
-    //    'copy:dist',
-    //    'cdnify',
-    //    'cssmin',
-    //    'uglify',
-    //    'filerev',
-    //    'usemin',
-    //    'htmlmin'
-    //]);
+    grunt.registerTask('build', [
+        'concat',
+        //'clean:dist',
+        //'wiredep',
+        //'useminPrepare',
+        //'concurrent:dist',
+        //'autoprefixer',
+        //'ngAnnotate',
+        //'copy:dist',
+        //'cdnify',
+        //'cssmin',
+        //'uglify',
+        //'filerev',
+        //'usemin',
+        'htmlmin',
+        'compass'
+    ]);
 };
