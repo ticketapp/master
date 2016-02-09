@@ -1,3 +1,4 @@
+import com.jamesward.play.BrowserNotifierKeys
 import com.typesafe.sbt.gzip.Import._
 import com.typesafe.sbt.web.Import._
 import org.scalajs.sbtplugin.ScalaJSPlugin
@@ -102,6 +103,7 @@ onLoad in Global := (Command.process("project server", _: State)) compose (onLoa
 
 routesGenerator := InjectedRoutesGenerator
 
+
 scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-feature", // Emit warning and location for usages of features that should be imported explicitly.
@@ -116,3 +118,5 @@ scalacOptions ++= Seq(
 )
 
 cancelable in Global := true
+
+BrowserNotifierKeys.shouldOpenBrowser := false
