@@ -1,5 +1,7 @@
 package utilities
 
+import java.util.Observable
+
 import addresses.Address
 import admin.{Ticket, TicketStatus, TicketWithStatus}
 import artists.Artist
@@ -10,6 +12,7 @@ import upickle.Js
 import upickle.Js.{Num, Str, Value}
 import scala.collection.mutable.ArrayBuffer
 import scala.scalajs.js.Date
+import scala.reflect.runtime.universe._
 
 
 trait jsonHelper {
@@ -52,7 +55,7 @@ trait jsonHelper {
       isPublic = event("isPublic").toString.toBoolean,
       isActive = event("isActive").toString.toBoolean,
       name = event("name").asInstanceOf[Str].value.toString,
-      geographicPoint = Geometry(point = event("geographicPoint").toString),
+      geographicPoint = Geometry(point = event("geographicPoint").asInstanceOf[Js.Str].value.toString),
       description = getOptionString(event, "description"),
       startTime = new Date(event("startTime").asInstanceOf[Js.Num].value),
       endTime = getOptionDate(event, "endTime"),
