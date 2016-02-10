@@ -28,8 +28,6 @@ class TariffMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def formUnapply(tariff: Tariff) = Some((tariff.denomination, tariff.nbTicketToSell, scala.BigDecimal(tariff.price),
                                           tariff.startTime, tariff.endTime))*/
 
-
-
   def findPricesInDescription(description: Option[String]): Option[String] = description match {
     case None =>
       None

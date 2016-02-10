@@ -68,7 +68,7 @@ class TestGetUserLikedPagesOnFacebook extends GlobalApplicationForModels {
       getUserLikedPagesOnFacebook.facebookPageToPageIdAndCategory(facebookResponse) mustBe expectedTuples
     }
 
-    "save artists from facebook and make the relation with an user" in {
+    "save artists from facebook and make the relation with a user" in {
       val facebookArtists = Vector(
         PageIdAndCategory("534079613309595", Option("Musician/Band")),
         PageIdAndCategory("493205657502998", Option("Musician/Band")),
@@ -97,7 +97,7 @@ class TestGetUserLikedPagesOnFacebook extends GlobalApplicationForModels {
 
         isSavedWithRelation mustBe true
 
-        whenReady(artistMethods.findAll, timeout(Span(5, Seconds))) { artists =>
+        whenReady(artistMethods.findAll, timeout(Span(10, Seconds))) { artists =>
 
           artists map (_.facebookId) must contain allOf(Some("534079613309595"), Some("493205657502998"),
             Some("175007802512911"), Some("198374666900337"), Some("916723911673035"), Some("312698145585982"),
