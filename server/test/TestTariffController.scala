@@ -1,9 +1,8 @@
 import json.JsonHelper
-import play.api.Logger
-import play.api.libs.json.{JsError, JsSuccess, JsResult}
+import org.joda.time.DateTime
+import play.api.libs.json.{JsError, JsResult, JsSuccess}
 import play.api.test.FakeRequest
 import tariffsDomain.Tariff
-import org.joda.time.DateTime
 import testsHelper.GlobalApplicationForControllers
 
 class TestTariffController extends GlobalApplicationForControllers {
@@ -24,21 +23,20 @@ class TestTariffController extends GlobalApplicationForControllers {
       val validatedJsonSalableEvents: JsResult[Seq[Tariff]] =
         contentAsJson(info).validate[Seq[Tariff]](JsonHelper.readTariffReads)
 
-      validatedJsonSalableEvents match {
-        case error: JsError =>
-          throw new Exception("get tariffs by event id")
-
-        case events: JsSuccess[Seq[Tariff]] =>
-          events.get must contain (savedTariff)
+      val expectedEvents = validatedJsonSalableEvents match {
+        case error: JsError => throw new Exception("get tariffs by event id")
+        case events: JsSuccess[Seq[Tariff]] => events.get
       }
+
+      expectedEvents must contain(savedTariff)
     }
+
     "save a new tariffs" in {
       val Some(info) = route(FakeRequest(tariffsDomain.routes.TariffController.save(
-        "saveTest", 100, "2040-08-24T14:00:00.000+02:00", "2040-09-24T14:00:00.000+02:00",20.0
+        "saveTest", savedTariff.eventId, "2040-08-24T14:00:00.000+02:00", "2040-09-24T14:00:00.000+02:00", 20.0
       )))
 
       contentAsString(info).toInt mustEqual 1
-
     }
   }
 }

@@ -14,6 +14,7 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 class TariffController @Inject()(val messagesApi: MessagesApi,
                                  val env: Environment[User, CookieAuthenticator],
@@ -24,19 +25,22 @@ class TariffController @Inject()(val messagesApi: MessagesApi,
   def findTariffsByEventId(eventId: Long) = Action.async {
     tariffMethods.findByEventId(eventId) map { tariffs =>
       Ok(Json.toJson(tariffs))
-    } recover { case t: Throwable =>
-      Logger.error("TicketController.findTariffsByEventId: ", t)
-      InternalServerError("TariffController.findSalableEvents: " + t.getMessage)
+    } recover {
+      case NonFatal(e) =>
+        Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)
+        InternalServerError(this.getClass + "findSalableEvents: " + e.getMessage)
     }
   }
 
   def save(denomination: String, eventId: Long, startTime: String, endTime: String, price: Double) = Action.async {
     val tariff = Tariff(None, denomination, eventId, new DateTime(startTime), new DateTime(endTime), price)
+
     tariffMethods.save(tariff) map { response =>
       Ok(Json.toJson(response))
-    } recover { case t: Throwable =>
-      Logger.error("TicketController.addSalableEvents: ", t)
-      InternalServerError("TariffController.save: " + t.getMessage)
+    } recover {
+      case NonFatal(e) =>
+        Logger.error(this.getClass + " save: ", e)
+        InternalServerError(this.getClass + " save: " + e.getMessage)
     }
   }
 }

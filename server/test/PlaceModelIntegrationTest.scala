@@ -10,7 +10,9 @@ import testsHelper.GlobalApplicationForModels
 import scala.language.postfixOps
 
 
-class TestPlaceModel extends GlobalApplicationForModels {
+class PlaceModelIntegrationTest extends GlobalApplicationForModels {
+
+  val here = geographicPointMethods.stringToTryPoint("5.4,5.6").get
 
   "A place" must {
 
@@ -19,15 +21,17 @@ class TestPlaceModel extends GlobalApplicationForModels {
         id = None,
         name = "test",
         facebookId = Some("123"),
-        description = Some( """Ancienne usine"""),
+        description = Some("""Ancienne usine"""),
         websites = Some("transbordeur.fr"),
         capacity = Some(9099),
         openingHours = None,
         imagePath = Some("https://scontent.xx.fbcdn.net/hphotos.jpg"))
+
       whenReady(placeMethods.save(place), timeout(Span(2, Seconds))) { savedPlace =>
         whenReady(placeMethods.findById(savedPlace.id.get), timeout(Span(5, Seconds))) { foundPlace =>
 
-          foundPlace.get.place mustBe place.copy(id = foundPlace.get.place.id,
+          foundPlace.get.place mustBe place.copy(
+            id = foundPlace.get.place.id,
             description = Some("<div class='column large-12'>Ancienne usine</div>"))
         }
 
@@ -36,8 +40,6 @@ class TestPlaceModel extends GlobalApplicationForModels {
     }
 
     "all be found, sorted by distance" in {
-      val here = geographicPointMethods.stringToTryPoint("5.4,5.6").get
-
       val placeWithoutGeoPoint = Place(name = "placeWithoutGeoPoint")
       val placeHere = Place(
         name = "placeHere",
@@ -61,8 +63,6 @@ class TestPlaceModel extends GlobalApplicationForModels {
     }
 
     "return places 12 by 12 (and never the same with the same geographicPoint given)" in {
-      val here = geographicPointMethods.stringToTryPoint("5.4,5.6").get
-
       whenReady(placeMethods.findNear(geographicPoint = here, numberToReturn = 12, offset = 0),
         timeout(Span(5, Seconds))) { foundPlaces =>
 

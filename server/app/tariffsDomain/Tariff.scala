@@ -4,17 +4,18 @@ import javax.inject.Inject
 
 import database.{MyDBTableDefinitions, MyPostgresDriver}
 import org.joda.time.DateTime
+import org.joda.time.Instant
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 
 import scala.concurrent.Future
 import MyPostgresDriver.api._
 
-case class Tariff (tariffId: Option[Long] = None,
-                    denomination: String,
-                   eventId: Long,
-                   startTime: DateTime,
-                   endTime: DateTime,
-                   price: BigDecimal)
+case class Tariff(tariffId: Option[Long] = None,
+                  denomination: String,
+                  eventId: Long,
+                  startTime: DateTime,
+                  endTime: DateTime,
+                  price: BigDecimal)
 
 class TariffMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {

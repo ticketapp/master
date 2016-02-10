@@ -37,7 +37,7 @@ CREATE TABLE orders ( --account701
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
-  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  creationDateTime          TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
   imagePath                 VARCHAR,
@@ -171,12 +171,12 @@ CREATE TABLE events (
   facebookId                VARCHAR(63),
   isPublic                  BOOLEAN NOT NULL,
   isActive                  BOOLEAN NOT NULL,
-  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  creationDateTime          TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
   geographicPoint           GEOMETRY DEFAULT ST_GeomFromText('POINT(-84 30)', 4326) NOT NULL,
   description               VARCHAR,
-  startTime                 TIMESTAMP NOT NULL,
-  endTime                   TIMESTAMP,
+  startTime                 TIMESTAMP WITH TIME ZONE NOT NULL,
+  endTime                   TIMESTAMP WITH TIME ZONE,
   imagePath                 VARCHAR,
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
   tariffRange               VARCHAR(15),
@@ -204,28 +204,28 @@ CREATE TABLE places (
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
 
 
-CREATE TABLE images (
-  imageId                     SERIAL PRIMARY KEY,
-  path                        VARCHAR NOT NULL,
-  category                    VARCHAR(31),
-  organizerId                 BIGINT REFERENCES organizers(organizerId) ON DELETE CASCADE,
-  infoId                      BIGINT REFERENCES infos(infoId) ON DELETE CASCADE,
-  trackId                     UUID REFERENCES tracks(trackId) ON DELETE CASCADE,
+CREATE TABLE images(
+  imageId                   SERIAL PRIMARY KEY,
+  path                      VARCHAR NOT NULL,
+  category                  VARCHAR(31),
+  organizerId               BIGINT REFERENCES organizers(organizerId) ON DELETE CASCADE,
+  infoId                    BIGINT REFERENCES infos(infoId) ON DELETE CASCADE,
+  trackId                   UUID REFERENCES tracks(trackId) ON DELETE CASCADE,
   UNIQUE(path)
 );
 
 
-CREATE TABLE tariffs (
+CREATE TABLE tariffs(
   tariffId                  SERIAL PRIMARY KEY,
   denomination              VARCHAR(255) DEFAULT 'Basique' NOT NULL,
   price                     NUMERIC NOT NULL,
-  startTime                 TIMESTAMP NOT NULL,
-  endTime                   TIMESTAMP NOT NULL,
+  startTime                 TIMESTAMP WITH TIME ZONE NOT NULL,
+  endTime                   TIMESTAMP WITH TIME ZONE NOT NULL,
   eventId                   BIGINT REFERENCES events(eventId) ON DELETE CASCADE
 );
 
 
-CREATE TABLE tickets (
+CREATE TABLE tickets(
   ticketId                  SERIAL PRIMARY KEY,
   qrCode                    VARCHAR(255) UNIQUE NOT NULL,
   eventId                   INT REFERENCES events(eventId) NOT NULL,
@@ -234,17 +234,17 @@ CREATE TABLE tickets (
 CREATE INDEX ticketQrCode ON tickets (qrCode);
 
 
-CREATE TABLE ticketStatuses (
+CREATE TABLE ticketStatuses(
   id                        SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   status                    CHAR NOT NULL,
-  date                      TIMESTAMP NOT NULL
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-CREATE TABLE blockedTickets (
+CREATE TABLE blockedTickets(
   id                        SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
-  expirationDate            TIMESTAMP NOT NULL,
+  expirationDate            TIMESTAMP WITH TIME ZONE NOT NULL,
   userId                    UUID REFERENCES users(userId) NOT NULL
 );
 
@@ -252,7 +252,7 @@ CREATE TABLE boughtTicketBills (
   billId                    SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   userId                    UUID REFERENCES users (userId) NOT NULL,
-  date                      TIMESTAMP NOT NULL,
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                    NUMERIC NOT NULL
 );
 
@@ -260,7 +260,7 @@ CREATE TABLE soldTicketBills (
   billId                    SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   userId                    UUID REFERENCES users (userId) NOT NULL,
-  date                      TIMESTAMP NOT NULL,
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                    NUMERIC NOT NULL
 );
 
@@ -268,7 +268,7 @@ CREATE TABLE pendingTickets (
   pendingTicketId          SERIAL PRIMARY KEY,
   userId                    UUID REFERENCES users (userId) NOT NULL,
   tariffId                  INT REFERENCES tariffs(tariffId)  NOT NULL,
-  date                      TIMESTAMP NOT NULL,
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                    NUMERIC NOT NULL,
   qrCode                    VARCHAR UNIQUE NOT NULL,
   isValidated               BOOLEAN
@@ -319,9 +319,9 @@ CREATE TABLE clients (
 CREATE TABLE bills (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT REFERENCES clients(clientId),
-  billingDate             TIMESTAMP,
+  billingDate             TIMESTAMP WITH TIME ZONE,
   amountDue               INT,
-  endSellingTime          TIMESTAMP
+  endSellingTime          TIMESTAMP WITH TIME ZONE
   --majorations impayés
 );
 
@@ -329,7 +329,7 @@ CREATE TABLE bills (
 --Produit activités annexes = compte 708
 CREATE TABLE account708 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT  current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   clientId                BIGINT NOT NULL REFERENCES clients(clientId),
@@ -340,7 +340,7 @@ CREATE TABLE account708 (
 CREATE TABLE account411 (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT NOT NULL REFERENCES clients(clientId),
-  paymentDate             TIMESTAMP NOT NULL,
+  paymentDate             TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                  INT NOT NULL,
   paymentMean             VARCHAR(255) NOT NULL
 );
@@ -349,7 +349,7 @@ CREATE TABLE account411 (
 CREATE TABLE account413 (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT REFERENCES clients(clientId),
-  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   amount                  INT NOT NULL,
   debit                   Boolean NOT NULL
 );
@@ -359,7 +359,7 @@ CREATE TABLE account4191 (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT REFERENCES clients(clientId),
   billId                  BIGINT REFERENCES bills(id),
-  paymentDate             TIMESTAMP NOT NULL,
+  paymentDate             TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                  INT NOT NULL,
   paymentMean             VARCHAR(255) NOT NULL
 );
@@ -368,7 +368,7 @@ CREATE TABLE account4191 (
 --associés, dividendes à payer
 CREATE TABLE account457 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT  current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   paymentReference        INT NOT NULL,
   assemblyName            VARCHAR(255) NOT NULL
@@ -377,7 +377,7 @@ CREATE TABLE account457 (
 --impôts et taxes
 CREATE TABLE account63 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   orderId                 BIGINT REFERENCES orders(orderId),
@@ -387,7 +387,7 @@ CREATE TABLE account63 (
 --diverses charges à payer
 CREATE TABLE account4686 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255),
   amount                  NUMERIC NOT NULL,
   debit                   BOOLEAN NOT NULL,
@@ -398,7 +398,7 @@ CREATE TABLE account4686 (
 --achats
 CREATE TABLE account60 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   paymentReference        INT,
@@ -408,7 +408,7 @@ CREATE TABLE account60 (
 --Fournisseurs à payer
 CREATE TABLE account403 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   amount                  NUMERIC NOT NULL,
   debit                   BOOLEAN NOT NULL, --#sinon debit
   userId                  UUID REFERENCES users(userId),
@@ -418,7 +418,7 @@ CREATE TABLE account403 (
 --frais postaux et telecoms
 CREATE TABLE account626 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   paymentReference        INT NOT NULL
@@ -427,7 +427,7 @@ CREATE TABLE account626 (
 --services bancaires
 CREATE TABLE account627 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   orderId                 BIGINT REFERENCES orders(orderId)
@@ -436,7 +436,7 @@ CREATE TABLE account627 (
 
 CREATE TABLE bank ( --account512
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) DEFAULT '666' NOT NULL,
   amount                  NUMERIC NOT NULL,
   debit                   Boolean NOT NULL,
@@ -448,7 +448,7 @@ CREATE TABLE bank ( --account512
 --publicité publications et relations publiques
 CREATE TABLE account623 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT  current_timestamp NOT NULL,
   amount                  NUMERIC NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   paymentReference        INT NOT NULL,
