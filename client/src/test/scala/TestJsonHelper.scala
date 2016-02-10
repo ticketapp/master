@@ -13,8 +13,8 @@ import scala.scalajs.js.{Date, JSON}
 @js.native
 object TestJsonHelper extends AngularMockTest with jsonHelper {
 
-
-  val expectedArtist = Artist(id = Some(2),
+  val expectedArtist = Artist(
+    id = Some(2),
     facebookId = Some("230180803665585"),
     name = "dephas8",
     imagePath = Some("https://scontent.xx.fbcdn.net/hphotos-xap1/t31.0-8/s720x720/1617708_860681690615490_917336920_o.jpg"),
@@ -23,7 +23,8 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
     websites = Set("soundcloud.com/dephas8", "myspace.com/dephas8", "twitter.com/dephas8", "hiqdub.net-label.fr"),
     hasTracks = true,
     likes = None,
-    country = None)
+    country = None
+  )
 
   val expectedEvent = Happening(
     id = Some(2),
@@ -39,7 +40,7 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
     ageRestriction = 16,
     tariffRange = None,
     ticketSellers = None
-   )
+  )
 
   val expectedPlace = Place(
     id = Some(2),
@@ -53,8 +54,7 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
     openingHours = None,
     addressId = None,
     linkedOrganizerId = None
-   )
-
+  )
 
   val expectedOrganizer = Organizer(
     id = Some(2),
@@ -69,7 +69,7 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
     phone = None,
     publicTransit = None,
     verified = true
-   )
+  )
 
   val expectedTicket = Ticket(
     ticketId = Some(1),
@@ -85,17 +85,16 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
   )
 
 
-
-
   "The JsonHelper" should "read an artist" in {
     val stringArtist = "{\"id\":2," +
       "\"facebookId\":\"230180803665585\",\"name\":\"dephas8\"," +
       "\"imagePath\":\"https://scontent.xx.fbcdn.net/hphotos-xap1/t31.0-8/s720x720/1617708_860681690615490_917336920_o.jpg\"" +
       ",\"description\":\"<div class='column large-12'>Artiste Dijonnais</div>\",\"facebookUrl\":\"dephas8\",\"websites\":[\"soundcloud.com/dephas8\",\"myspace.com/dephas8\"," +
       "\"twitter.com/dephas8\",\"hiqdub.net-label.fr\"],\"hasTracks\":true}"
-
     val artistJson = JSON.parse(stringArtist)
+
     val readArtist = read[Artist](JSON.stringify(artistJson))
+
     readArtist must be(expectedArtist)
   }
 
@@ -115,14 +114,14 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
         "ageRestriction": 16
        }
       """
-
     val eventJson = JSON.parse(stringEvent)
+
     val readEvent = read[Happening](JSON.stringify(eventJson))
+
     readEvent must be(expectedEvent.copy(startTime = readEvent.startTime))
   }
 
   "The JsonHelper" should "read a place" in {
-
     val stringPlace =
       """
        {
@@ -135,15 +134,15 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
         "capacity": 400
        }
       """
-
     val placeJson = JSON.parse(stringPlace)
+
     val readPlace = read[Place](JSON.stringify(placeJson))
+
     readPlace must be(expectedPlace)
   }
   
 
   "The JsonHelper" should "read an organizer" in {
-
     val stringOrganizer =
       """
        {
@@ -156,15 +155,15 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
         "verified": true
        }
       """
-
     val organizerJson = JSON.parse(stringOrganizer)
+
     val readOrganizer = read[Organizer](JSON.stringify(organizerJson))
+
     readOrganizer must be(expectedOrganizer)
   }
 
 
   "The JsonHelper" should "read a ticket" in {
-
     val stringTicket =
       """
        {
@@ -175,14 +174,14 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
        }
 
       """
-
     val ticketJson = JSON.parse(stringTicket)
+
     val readTicket = read[Ticket](JSON.stringify(ticketJson))
+    
     readTicket must be(expectedTicket)
   }
 
   "The JsonHelper" should "read a ticket" in {
-
     val stringTicketStatus =
       """
       {
@@ -192,9 +191,10 @@ object TestJsonHelper extends AngularMockTest with jsonHelper {
       }
 
       """
-
     val ticketStatusJson = JSON.parse(stringTicketStatus)
+
     val readTicketStatus = read[TicketStatus](JSON.stringify(ticketStatusJson))
+
     readTicketStatus must be(expectedTicketStatus.copy(date = readTicketStatus.date))
   }
 

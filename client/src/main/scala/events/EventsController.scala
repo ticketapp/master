@@ -29,7 +29,7 @@ class EventsController(eventScope: EventsScopeType, service: HttpGeneralService,
   def find(offset: Int, numberToReturn: Int, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.find(offset, numberToReturn, geographicPoint)) map { foundEvents =>
-      timeout( () => {eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray})
+      timeout( () => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 

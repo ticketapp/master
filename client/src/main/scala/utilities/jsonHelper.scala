@@ -142,7 +142,8 @@ trait jsonHelper {
 
   implicit val placeWithAddressReader = upickle.default.Reader[PlaceWithAddress]{
     case placeObject =>
-      val placeWithRelation: Map[String, Any] = placeObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+      val placeWithRelation: Map[String, Any] =
+        placeObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
       PlaceWithAddress(
         place = placeJsValueToPlace(placeWithRelation("place").asInstanceOf[Js.Value]),
         maybeAddress = if(placeWithRelation.isDefinedAt("maybeAddress"))
@@ -151,7 +152,8 @@ trait jsonHelper {
   }
 
   def jsTicketToTicket(ticketObject: Value): Ticket = {
-    val ticket: Map[String, Any] = ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+    val ticket: Map[String, Any] =
+      ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
     Ticket(
       ticketId = getOptionInt(ticket, "ticketId"),
       qrCode = ticket("qrCode").asInstanceOf[Str].value.toString,
@@ -161,7 +163,8 @@ trait jsonHelper {
   }
 
   def jsTicketStatusToTicketStatus(ticketObject: Value): TicketStatus = {
-    val ticket: Map[String, Any] = ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+    val ticket: Map[String, Any] =
+      ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
     TicketStatus(
       ticketId = ticket("ticketId").asInstanceOf[Js.Num].value.toInt,
       status = ticket("status").asInstanceOf[Js.Str].value.toString.charAt(0),
@@ -169,22 +172,24 @@ trait jsonHelper {
     )
   }
 
-  implicit val ticketReader = upickle.default.Reader[Ticket]{
-     case ticketObject =>
-      jsTicketToTicket(ticketObject)
+  implicit val ticketReader = upickle.default.Reader[Ticket] {
+     case ticketObject => jsTicketToTicket(ticketObject)
   }
 
-  implicit val ticketStatusReader = upickle.default.Reader[TicketStatus]{
-     case ticketObject =>
-      jsTicketStatusToTicketStatus(ticketObject)
+  implicit val ticketStatusReader = upickle.default.Reader[TicketStatus] {
+     case ticketObject =>  jsTicketStatusToTicketStatus(ticketObject)
   }
 
-  implicit val ticketWithStatusReader = upickle.default.Reader[TicketWithStatus]{
+  implicit val ticketWithStatusReader = upickle.default.Reader[TicketWithStatus] {
     case ticketObject =>
-      val ticketWithRelation: Map[String, Any] = ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
-     TicketWithStatus(ticket= jsTicketToTicket(ticketObject("ticket")),
-     ticketStatus= if(ticketWithRelation.isDefinedAt("ticketStatus"))
-     Some(jsTicketStatusToTicketStatus(ticketObject("ticketStatus"))) else None
+      val ticketWithRelation: Map[String, Any] =
+        ticketObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+      TicketWithStatus(ticket= jsTicketToTicket(ticketObject("ticket")),
+      ticketStatus =
+        if(ticketWithRelation.isDefinedAt("ticketStatus"))
+          Some(jsTicketStatusToTicketStatus(ticketObject("ticketStatus")))
+        else
+          None
      )
   }
 
