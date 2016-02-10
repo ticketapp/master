@@ -278,6 +278,11 @@ CREATE TABLE salableEvents (
   eventId                   INT PRIMARY KEY REFERENCES events(eventId) NOT NULL
 );
 
+CREATE TABLE guestUsers (
+  ip                        VARCHAR(32) PRIMARY KEY,
+  userUuid                  UUID REFERENCES users(userId)
+);
+
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
@@ -624,6 +629,7 @@ DROP TABLE IF EXISTS boughtTicketBills;
 DROP TABLE IF EXISTS soldTicketBills;
 DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS salableEvents;
+DROP TABLE IF EXISTS guestUsers;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;
