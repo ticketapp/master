@@ -71,7 +71,7 @@ CREATE TABLE organizers (
 
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
-  name                    CITEXT NOT NULL,
+  name                    VARCHAR NOT NULL,
   icon                    CHAR NOT NULL,
   UNIQUE(name)
 );
@@ -232,6 +232,7 @@ CREATE TABLE tickets (
   tariffId                  INT REFERENCES tariffs(tariffId) NOT NULL
 );
 CREATE INDEX ticketQrCode ON tickets (qrCode);
+
 
 CREATE TABLE ticketStatuses (
   id                        SERIAL PRIMARY KEY,

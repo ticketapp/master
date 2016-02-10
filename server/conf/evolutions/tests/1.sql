@@ -70,7 +70,7 @@ CREATE TABLE organizers (
 
 CREATE TABLE genres (
   genreId                 SERIAL PRIMARY KEY,
-  name                    CITEXT NOT NULL,
+  name                    VARCHAR NOT NULL,
   icon                    CHAR NOT NULL,
   UNIQUE(name)
 );
@@ -740,10 +740,10 @@ VALUES(100, 'title', 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', false);
 -------------------------------------------------------- artistsGenres -------------------------------------------------
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
   ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
-   (SELECT genreid FROM genres WHERE name = 'genreTest0'), 1);
+   (SELECT genreid FROM genres WHERE name = 'genretest0'), 1);
 INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
   ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
-   (SELECT genreid FROM genres WHERE name = 'genreTest00'), 1);
+   (SELECT genreid FROM genres WHERE name = 'genretest00'), 1);
 
 -------------------------------------------------------- eventsPlaces --------------------------------------------------
 INSERT INTO eventsplaces(eventid, placeid) VALUES
@@ -764,7 +764,7 @@ INSERT INTO eventsorganizers(eventid, organizerid) VALUES
 
 -------------------------------------------------------- eventsGenres --------------------------------------------------
 INSERT INTO eventsgenres(eventid, genreid) VALUES
-  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT genreid FROM genres WHERE name = 'genreTest0'));
+  ((SELECT eventId FROM events WHERE name = 'name0'), (SELECT genreid FROM genres WHERE name = 'genretest0'));
 
 -------------------------------------------------------- eventsAddresses ---------------------------------------------
 INSERT INTO eventsaddresses(eventid, addressid) VALUES
@@ -803,7 +803,7 @@ INSERT INTO playliststracks(playlistId, trackid, trackrank) VALUES(
 
 -------------------------------------------------------- tracksGenres --------------------------------------------------
 INSERT INTO tracksgenres(genreid, trackid, weight) VALUES(
-  (SELECT genreid FROM genres WHERE name = 'genreTest0'), '13894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
+  (SELECT genreid FROM genres WHERE name = 'genretest0'), '13894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
 
 -------------------------------------------------------- tracksFollowed ------------------------------------------------
 INSERT INTO tracksfollowed(userId, trackId)
