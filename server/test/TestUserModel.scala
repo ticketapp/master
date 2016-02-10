@@ -13,6 +13,7 @@ import testsHelper.GlobalApplicationForModels
 class TestUserModel extends GlobalApplicationForModels {
 
   val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+  val savedIp = "127.0.0.0"
 
   "A user" must {
 
@@ -97,8 +98,9 @@ class TestUserModel extends GlobalApplicationForModels {
           response mustBe 1
         }
     }
+    
     "find a guestUser by ip" in {
-        whenReady(userMethods.findGuestUserByIp("127.0.0.0"), timeout(Span(5, Seconds))) { response =>
+        whenReady(userMethods.findGuestUserByIp(savedIp), timeout(Span(5, Seconds))) { response =>
           response mustBe Some(GuestUser("127.0.0.0", None))
         }
     }
