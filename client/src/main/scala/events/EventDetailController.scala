@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.native
 
 @injectable("EventDetailCtrl")
-class EventDetailController(scope: EventDetailScope, eventsService: EventsService) extends AbstractController[EventDetailScope](scope) {
+class EventDetailController(scope: EventDetailScope) extends AbstractController[EventDetailScope](scope) {
 
 //  scope.event = eventsService.get(cid.toInt)
 

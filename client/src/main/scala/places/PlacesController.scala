@@ -15,14 +15,8 @@ class PlacesController(scope: Scope, service: HttpGeneralService, timeout: Timeo
   extends AbstractController[Scope](scope) {
   var places: js.Array[String] = new js.Array[String]
 
-  def findById(id: Long): Unit = {
-    service.get(PlacesRoutes.findById(id: Long)) map { foundPlace =>
-      timeout(() => places = js.Array(foundPlace))
-    }
-  }
-
-  def find(offset: Long, numberToReturn: Long): Unit = {
-    service.get(PlacesRoutes.findAllSinceOffset(offset: Long, numberToReturn: Long)) map { foundPlace =>
+  def findById(id: Int): Unit = {
+    service.get(PlacesRoutes.findById(id.toLong: Long)) map { foundPlace =>
       timeout(() => places = js.Array(foundPlace))
     }
   }
