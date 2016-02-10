@@ -21,11 +21,16 @@ case class User(uuid: UUID,
                 email: Option[String],
                 avatarURL: Option[String]) extends Identity
 
+case class GuestUser(ip: String, userUuid: Option[UUID])
+
 class UserMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
 
-
   implicit val userWrites = Json.writes[User]
+
+  def findGuestUserByIp(ip: String): Future[Option[GuestUser]] = db.run(guestUsers.filter(_.ip === ip).result.headOption)
+
+  def saveGuestUser(guestUser: GuestUser): Future[Int] = db.run(guestUsers += guestUser)
 
   def findUUIDOfTracksRemoved(userUUID: UUID): Future[Seq[UUID]] = db.run((for {
     trackRating <- trackRatings if trackRating.userId === userUUID && trackRating.reason.nonEmpty

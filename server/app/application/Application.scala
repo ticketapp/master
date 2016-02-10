@@ -10,10 +10,12 @@ import play.api.i18n.MessagesApi
 import play.api.libs.ws._
 import play.api.mvc.Action
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class   Application @Inject()(ws: WSClient,
+class Application @Inject()(ws: WSClient,
                             val messagesApi: MessagesApi,
-                            val global: Global,
+                            val userMethods: UserMethods,
                             val env: Environment[User, CookieAuthenticator],
                             socialProviderRegistry: SocialProviderRegistry)
     extends Silhouette[User, CookieAuthenticator] with ConnectionTrait {
@@ -30,7 +32,14 @@ class   Application @Inject()(ws: WSClient,
 //    Ok(views.html.index(userConnected))
 //  }
 
+
   def index = Action { implicit request =>
+    userMethods.findGuestUserByIp(request.remoteAddress) flatMap {
+      case Some(guest) =>
+        Future(None)
+      case _ =>
+        userMethods.saveGuestUser(GuestUser(request.remoteAddress, None))
+    }
     Ok(views.html.landingPage())
   }
 

@@ -1,6 +1,6 @@
 import java.util.UUID
 
-import application.User
+import application.{GuestUser, User}
 import com.mohiva.play.silhouette.api.LoginInfo
 import database.UserOrganizerRelation
 import org.scalatest.concurrent.ScalaFutures._
@@ -91,6 +91,18 @@ class TestUserModel extends GlobalApplicationForModels {
         }
       }
     }
+
+    "save a guestUser" in {
+        whenReady(userMethods.saveGuestUser(GuestUser("127.0.0.1", None)), timeout(Span(5, Seconds))) { response =>
+          response mustBe 1
+        }
+    }
+    "find a guestUser by ip" in {
+        whenReady(userMethods.findGuestUserByIp("127.0.0.0"), timeout(Span(5, Seconds))) { response =>
+          response mustBe Some(GuestUser("127.0.0.0", None))
+        }
+    }
+
 //
 //    "get tracks he had removed" in {
 //      val artist = Artist(None, Option("facebookIdTestUserModel"), "artistTest", Option("imagePath"),

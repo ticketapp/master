@@ -4,6 +4,7 @@ import java.sql.{JDBCType, Timestamp}
 import java.util.UUID
 
 import addresses.Address
+import application.GuestUser
 import artistsDomain.Artist
 import attendees.{FacebookAttendee, FacebookAttendeeEventRelation}
 import com.vividsolutions.jts.geom.Geometry
@@ -473,6 +474,16 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("eventid", eventId, events)(_.id)
   }
   lazy val salableEvents = TableQuery[SalableEvents]
+
+  class GuestUsers(tag: Tag) extends Table[GuestUser](tag, "guestusers") {
+    def ip = column[String]("ip", O.PrimaryKey)
+    def userUuid = column[UUID]("useruuid")
+
+    def * = (ip, userUuid.?) <> ((GuestUser.apply _).tupled, GuestUser.unapply)
+
+    def aFK = foreignKey("useruuid", userUuid, slickUsers)(_.id)
+  }
+  lazy val guestUsers = TableQuery[GuestUsers]
 
 
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]

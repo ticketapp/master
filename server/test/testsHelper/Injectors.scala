@@ -3,6 +3,7 @@ package testsHelper
 import actors.DuplicateTracksActorInstance
 import addresses.{AddressMethods, SearchGeographicPoint}
 import akka.actor.ActorSystem
+import application.UserMethods
 import artistsDomain.ArtistMethods
 import attendees.AttendeeMethods
 import eventsDomain.EventMethods
@@ -58,6 +59,7 @@ trait Injectors {
   lazy val playlistMethods = new PlaylistMethods(dbConfProvider)
   lazy val trackRatingMethods = new TrackRatingMethods(dbConfProvider, trackMethods)
   lazy val issueMethods = new IssueMethods(dbConfProvider)
+  lazy val userMethods = new UserMethods(dbConfProvider)
   lazy val oAuth2InfoDAO = new OAuth2InfoDAO(dbConfProvider)
   lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfigProvider = dbConfProvider,
     oAuth2InfoDAO = oAuth2InfoDAO, artistMethods = artistMethods, placeMethods = placeMethods,
