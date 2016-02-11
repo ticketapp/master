@@ -288,7 +288,7 @@ CREATE TABLE guestUsers (
 );
 
 CREATE TABLE userSessions (
-  id                        UUID PRIMARY KEY ,
+  id                        UUID PRIMARY KEY,
   ip                        VARCHAR(32) REFERENCES guestUsers(ip) NOT NULL
 );
 

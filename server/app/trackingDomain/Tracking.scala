@@ -22,8 +22,10 @@ class TrackingMethods @Inject() (protected val dbConfigProvider: DatabaseConfigP
     val guestUser = db.run(
       guestUsers.filter(_.ip === userSession.ip).exists.result
     )
-    def bQuery(exist: Boolean) =
-      if (exist) db.run(userSessions += userSession)
+    def doSave(exist: Boolean) =
+      if (exist) {
+        db.run(userSessions += userSession)
+      }
       else {
         val saveGuest = db.run(guestUsers += GuestUser(userSession.ip, None))
         saveGuest flatMap { savedGuestResponse =>
@@ -31,7 +33,7 @@ class TrackingMethods @Inject() (protected val dbConfigProvider: DatabaseConfigP
         }
       }
     guestUser flatMap { exist =>
-      bQuery(exist)
+      doSave(exist)
     }
   }
 

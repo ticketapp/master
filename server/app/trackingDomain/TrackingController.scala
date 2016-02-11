@@ -62,9 +62,9 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
 
   def saveUserSession() = Action.async { request =>
     val ip = request.remoteAddress
-    val id = UUID.randomUUID()
-    trackingMethods.saveUserSession(UserSession(id, ip)) map { userSession =>
-      Ok(Json.toJson(id))
+    val sessionId = UUID.randomUUID()
+    trackingMethods.saveUserSession(UserSession(id = sessionId, ip = ip)) map { userSession =>
+      Ok(Json.toJson(sessionId))
     } recover { case t: Throwable =>
       //replace by custom logger
       Logger.error("TrackingController.saveUserSession: ", t)
