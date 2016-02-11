@@ -64,7 +64,8 @@ lazy val server = (project in file("server")).settings(
     "com.github.tminglei" %% "slick-pg" % "0.9.1",
     "com.vividsolutions" % "jts" % "1.13",
     "com.typesafe.play" %% "play-mailer" % "3.0.1",
-    "com.zaxxer" % "HikariCP" % "2.4.1"
+    "com.zaxxer" % "HikariCP" % "2.4.1",
+    "com.lihaoyi" %% "sourcecode" % "0.1.0"
   )
 ).enablePlugins(PlayScala).
     aggregate(clients.map(projectToRef): _*).
