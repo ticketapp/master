@@ -1,0 +1,20 @@
+<style>
+    tracking-view {
+        height: 100%;
+        overflow: auto;
+        width: 100%;
+    }
+    #cursor, #play {
+        position: absolute;
+        z-index: 999999;
+    }
+</style>
+<tracking-view>
+    <a class="md-button md-fab md-mini md-primary" data-ng-show="start" id="cursor"></a>
+    <button id="play" data-ng-click="start = true; directive.play()">
+        <i class="fa fa-play"  ></i>
+    </button>
+    <md-content ng-include="directive.template">
+
+    </md-content>
+</tracking-view>

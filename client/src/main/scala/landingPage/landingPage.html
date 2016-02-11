@@ -108,7 +108,6 @@
         height: 100%;
         background: url('assets/images/concertLandingPage.jpg') no-repeat;
         background-size: 100%;
-        position: fixed;
     }
 
     .sell-form-link {
@@ -121,7 +120,7 @@
 </style>
 
 
-<div class="parallax-background image-container">
+<div class="image-container">
 
     <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
         <b>Vendez nous votre billet de concert</b>
@@ -141,6 +140,7 @@
             <input type="text"
                    ng-model="query"
                    class="sell-input"
+                   id="li1"
                    placeholder="Entrez un nom d'événement ou un lieu">
 
             <a class="sell-form-link">← Obtenir une offre maintenant</a>
@@ -163,19 +163,8 @@
 
 
 
-<contact-component>
-
-</contact-component>
 
 
 
-<div class="landing-page-footer">
 
-    <div class="column medium-12">
-        <span class="column medium-4">2016 - Claude</span>
-        <span class="column medium-4"><a>Mentions légales</a></span>
-        <span class="column medium-4"><a>Conditions générales de vente</a></span>
-    </div>
-
-</div>
 
