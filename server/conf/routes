@@ -133,7 +133,7 @@ POST    /issues/:issueId/comments                                            @is
 
 ################################# Tracking ################################################
 GET     /sessions                                                            @trackingDomain.TrackingController.findSessions()
-POST    /sessions                                                            @trackingDomain.TrackingController.saveUserSession()
+POST    /sessions                                                            @trackingDomain.TrackingController.saveUserSession(screenWidth: Int, screenHeight: Int)
 GET     /actions                                                             @trackingDomain.TrackingController.findActionsBySessionId(sessionId: String)
 POST    /actions                                                             @trackingDomain.TrackingController.saveUserAction()
 

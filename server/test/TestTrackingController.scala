@@ -14,7 +14,7 @@ class TestTrackingController extends GlobalApplicationForControllers {
   sequential
 
   val savedIp = "127.0.0.0"
-  val savedSession = UserSession(UUID.fromString("a4cea509-1002-47d0-b55c-593c91cb32ae"), savedIp)
+  val savedSession = UserSession(UUID.fromString("a4cea509-1002-47d0-b55c-593c91cb32ae"), savedIp, 950, 450)
   val savedAction = UserAction("mm,30,30", new Timestamp(5), UUID.fromString("a4cea509-1002-47d0-b55c-593c91cb32ae"))
 
   "tracking controller" should {
@@ -33,7 +33,7 @@ class TestTrackingController extends GlobalApplicationForControllers {
     }
 
     "find actions by session id" in {
-      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findActionsBySessionId(savedSession.id.toString)))
+      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findActionsBySessionId(savedSession.uuid.toString)))
       val validatedJsonSalableEvents: JsResult[Seq[UserAction]] =
         contentAsJson(info).validate[Seq[UserAction]](JsonHelper.readUserActionReads)
       validatedJsonSalableEvents match {
@@ -46,12 +46,10 @@ class TestTrackingController extends GlobalApplicationForControllers {
     }
 
     "save a session" in {
-      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.saveUserSession()))
-      val stringUUID = contentAsJson(info).toString()
-      /*println(stringUUID)
-      val a = UUID.fromString(stringUUID)*/
-      stringUUID.length should be >10
-
+      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.saveUserSession(950, 450)))
+      val stringUUID = contentAsJson(info).asInstanceOf[JsString].value.toString
+      val uuid = UUID.fromString(stringUUID)
+      stringUUID.length must be >10
     }
 
     "save an action" in {
@@ -66,6 +64,5 @@ class TestTrackingController extends GlobalApplicationForControllers {
         contentAsString(info).toInt mustEqual 1
 
     }
-
-    }
+  }
 }

@@ -32,13 +32,14 @@ object JsonHelper {
   implicit object CharReads extends AnyRef with Reads[Char] {
     def reads(char: JsValue): JsResult[Char] = JsSuccess(Json.stringify(char)(1))
   }
+
   implicit object TimestampReads extends AnyRef with Reads[Timestamp] {
     def reads(char: JsValue): JsResult[Timestamp] = JsSuccess(new Timestamp(Json.stringify(char).toLong))
   }
 
-  implicit object UUIDWrites extends AnyRef with Writes[UUID] {
-    def writes(UUID: UUID): JsString = JsString(UUID.toString)
-  }
+//  implicit object UUIDWrites extends AnyRef with Writes[UUID] {
+//    def writes(UUID: UUID): JsString = JsString(UUID.toString)
+//  }
 
   def geomJsonFormat[G <: Geometry]: Format[G] = Format[G](
     fjs = Reads.StringReads.map(fromWKT[G]),

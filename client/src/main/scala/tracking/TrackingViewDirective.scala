@@ -1,49 +1,67 @@
 package tracking
 
-import com.greencatsoft.angularjs.core.{RouteParams, HttpService, Timeout}
+import com.greencatsoft.angularjs.core.{Window, RouteParams, HttpService, Timeout}
 import com.greencatsoft.angularjs.{Attributes, ElementDirective, injectable, Angular}
 import httpServiceFactory.HttpGeneralService
-import org.scalajs.dom.Element
-import org.scalajs.dom.document
+import org.scalajs.dom.{Event, Element, document, console}
 import org.scalajs.dom.html.{Input, Html}
-import org.scalajs.dom.console
 import root.RoutingConfig
 import utilities.NgCookies
 import scala.scalajs.js.JSON
+import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
 import scala.scalajs.js.annotation.JSExport
 import scala.concurrent.ExecutionContext.Implicits.global
 import upickle.default._
 
 @JSExport
 @injectable("trackingView")
-class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies, routeParams: RouteParams)
+class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies, routeParams: RouteParams, window: Window)
   extends ElementDirective {
 
   var cursor = document.getElementById("cursor").asInstanceOf[Html]
-  /*val action1 = Action("mm,20,20", 100.0, 1)
-  val action2 = Action("mm,30,30", 600.0, 1)
-  val action3 = Action("mm,40,30", 1000.0, 1)
-  val action4 = Action("mm,50,30", 1500.0, 1)
-//  val action5 = Action("cl,b1", 2000.0, 1)
-  val action6 = Action("in,li1,a", 2000.0, 1)
-  val action7 = Action("in,li1,an", 2100.0, 1)
-  val action8 = Action("a,/events", 2100.0, 1)*/
 
-  var sessions = Seq.empty[Action]
+  @JSExport
+  var session = Seq.empty[Action]
+  @JSExport
+  var sessions = Seq.empty[Session].toJSArray
+
+  var trackingViewContainer = document.getElementById("tracking-player").asInstanceOf[Html]
 
   @JSExport
   var template = "assets/templates/landingPage/landingPage.html"
+  timeout( () => {
+    val trackedItems = document.getElementsByClassName("tracking")
+    for(i <- 0 to (trackedItems.length - 1)) {
+      trackedItems.item(i).asInstanceOf[Html].classList.remove("tracking")
+    }
+    document.onmousemove = (event: Event) => {
+    }
+  })
 
-  httpService.get(TrackingRoutes.getActionsBySessionId(ngCookies.get("sessionId").toString)) map { sessionsString =>
-    sessions = read[Seq[Action]](sessionsString)
+  httpService.get(TrackingRoutes.getSessions) map { sessionsString =>
+    timeout( () => {
+      sessions = read[Seq[Session]](sessionsString).toJSArray
+      println(sessions)
+    })
+    println(sessions)
+  }
+
+  @JSExport
+  def setSession(sessionId: String): Unit = {
+    httpService.get(TrackingRoutes.getActionsBySessionId(sessionId)) map { sessionString =>
+      session = read[Seq[Action]](sessionString)
+    }
   }
 
   @JSExport
   def play(): Unit = {
-    val initTimestamp = sessions.head.timestamp.toInt
-    sessions map { action =>
+    trackingViewContainer.style.width = sessions.filter(_.uuid == session.head.sessionId).head.screenWidth + "px"
+    trackingViewContainer.style.height = sessions.filter(_.uuid == session.head.sessionId).head.screenHeight + "px"
+    val initTimestamp = session.head.timestamp
+    session map { action =>
       val seqAction = action.action.split(",").toSeq
       timeout( () => {
+        trackingViewContainer.scrollTop = seqAction.last.toDouble
         seqAction.head match {
           case mouseMouve if mouseMouve == "mm" =>
             val left = seqAction(1)
@@ -56,7 +74,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
           case link if link == "a" =>
             template = RoutingConfig.urlTemplatePath(seqAction(1))
         }
-        }, action.timestamp.toInt - initTimestamp
+        }, (action.timestamp - initTimestamp).toInt
       )
     }
   }

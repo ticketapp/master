@@ -4,28 +4,22 @@ import java.util.UUID
 import javax.inject.Inject
 
 import application.User
-import com.mohiva.play.silhouette.api.{Silhouette, Environment}
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import json.JsonHelper._
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc._
-import json.JsonHelper._
-import org.joda.time.DateTime
-import tariffsDomain.Tariff
-import ticketsDomain.{SalableEvent, TicketMethods}
-import trackingDomain.TrackingMethods
-import scala.concurrent.Future
-import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.util.{Success, Failure}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 
 class TrackingController @Inject()(val messagesApi: MessagesApi,
-                                 val env: Environment[User, CookieAuthenticator],
-                                 val trackingMethods: TrackingMethods)
+                                   val env: Environment[User, CookieAuthenticator],
+                                   val trackingMethods: TrackingMethods)
   extends Silhouette[User, CookieAuthenticator] {
 
 
@@ -49,7 +43,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def saveUserAction() = Action.async { request =>
+  def saveUserAction = Action.async { request =>
     val userAction = request.body.asJson.get.validate[UserAction](userActionReads)
     trackingMethods.saveUserAction(userAction.get) map { userActions =>
       Ok(Json.toJson(userActions))
@@ -60,18 +54,17 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def saveUserSession() = Action.async { request =>
+  def saveUserSession(screenWidth: Int, screenHeight: Int) = Action.async { request =>
     val ip = request.remoteAddress
     val sessionId = UUID.randomUUID()
-    trackingMethods.saveUserSession(UserSession(id = sessionId, ip = ip)) map { userSession =>
+    val newSession = UserSession(uuid = sessionId, ip = ip, screenWidth = screenWidth, screenHeight = screenHeight)
+    trackingMethods.saveUserSession(newSession) map { _ =>
       Ok(Json.toJson(sessionId))
-    } recover { case t: Throwable =>
+    } recover { case NonFatal(e) =>
       //replace by custom logger
-      Logger.error("TrackingController.saveUserSession: ", t)
-      InternalServerError("TrackingController.saveUserSession: " + t.getMessage)
+      Logger.error("TrackingController.saveUserSession: ", e)
+      InternalServerError("TrackingController.saveUserSession: " + e.getMessage)
     }
   }
-
-
-  }
+}
 

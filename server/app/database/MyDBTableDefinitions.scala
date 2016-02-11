@@ -489,8 +489,10 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   class UserSessions(tag: Tag) extends Table[UserSession](tag, "usersessions") {
     def id = column[UUID]("id", O.PrimaryKey)
     def ip = column[String]("ip")
+    def screenWidth = column[Int]("screenwidth")
+    def screenHeight = column[Int]("screenheight")
 
-    def * = (id, ip) <> ((UserSession.apply _).tupled, UserSession.unapply)
+    def * = (id, ip, screenWidth, screenHeight) <> ((UserSession.apply _).tupled, UserSession.unapply)
 
     def aFK = foreignKey("ip", ip, guestUsers)(_.ip)
   }

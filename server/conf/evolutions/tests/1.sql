@@ -287,9 +287,12 @@ CREATE TABLE guestUsers (
   userUuid                  UUID REFERENCES users(userId)
 );
 
+
 CREATE TABLE userSessions (
   id                        UUID PRIMARY KEY,
-  ip                        VARCHAR(32) REFERENCES guestUsers(ip) NOT NULL
+  ip                        VARCHAR(32) REFERENCES guestUsers(ip) NOT NULL,
+  screenWidth               INT NOT NULL,
+  screenHeight              INT NOT NULL
 );
 
 
@@ -719,7 +722,7 @@ INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
 
 
 -------------------------------------------------------- users sessions----------------------------------------------------
-INSERT INTO userSessions(id, ip) VALUES ('a4cea509-1002-47d0-b55c-593c91cb32ae', '127.0.0.0');
+INSERT INTO userSessions(id, ip, screenWidth, screenHeight) VALUES ('a4cea509-1002-47d0-b55c-593c91cb32ae', '127.0.0.0', 950, 450);
 
 -------------------------------------------------------- users actions----------------------------------------------------
 INSERT INTO userActions(id, action, timestamp, sessionId) VALUES

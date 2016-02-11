@@ -275,9 +275,11 @@ CREATE TABLE pendingTickets (
 );
 CREATE INDEX pendingTicketQrCode ON pendingTickets (qrCode);
 
+
 CREATE TABLE salableEvents (
   eventId                   INT PRIMARY KEY REFERENCES events(eventId) NOT NULL
 );
+
 
 CREATE TABLE guestUsers (
   ip                        VARCHAR(32) PRIMARY KEY,
@@ -286,16 +288,19 @@ CREATE TABLE guestUsers (
 
 CREATE TABLE userSessions (
   id                        UUID PRIMARY KEY,
-  ip                        VARCHAR(32) REFERENCES guestUsers(ip) NOT NULL
+  ip                        VARCHAR(32) REFERENCES guestUsers(ip) NOT NULL,
+  screenWidth               INT NOT NULL,
+  screenHeight              INT NOT NULL
 );
 
 
 CREATE TABLE userActions (
-  id                        SERIAL PRIMARY KEY,
+  id                        SERIAL PRIMARY KEY ,
   action                    VARCHAR(255) NOT NULL,
   timestamp                 TIMESTAMP NOT NULL,
   sessionId                 UUID REFERENCES userSessions(id)
 );
+
 
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
