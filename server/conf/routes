@@ -131,6 +131,12 @@ POST    /issues                                                              @is
 GET     /issues/:issueId/comments                                            @issues.IssueController.commentsForIssue(issueId: Long)
 POST    /issues/:issueId/comments                                            @issues.IssueController.createComment(issueId: Long)
 
+################################# Tracking ################################################
+GET     /sessions                                                            @trackingDomain.TrackingController.findSessions()
+POST    /sessions                                                            @trackingDomain.TrackingController.saveUserSession()
+GET     /actions                                                             @trackingDomain.TrackingController.findActionsBySessionId(sessionId: String)
+POST    /actions                                                             @trackingDomain.TrackingController.saveUserAction()
+
 ################################## Mails ################################################
 #GET     /mails                                                            @MailController.mails
 #POST    /mails                                                            @MailController.create
