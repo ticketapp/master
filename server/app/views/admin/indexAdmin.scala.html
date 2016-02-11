@@ -6,85 +6,67 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/tools.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/angular-material.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/animate.min.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("scripts/librairies/tooltipster-master/css/tooltipster.css")"/>
-
-        <script src="@routes.Assets.at("lib/jquery/jquery.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.at("plugins/css3-animate-it.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.at("scripts/angular.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.at("scripts/librairies/tooltipster-master/js/jquery.tooltipster.min.js")"> </script>
-        <script src="@routes.Assets.at("plugins/angular-animate.min.js")"></script>
-        <script src="@routes.Assets.at("plugins/angular-aria.min.js")"></script>
-        <script src="@routes.Assets.at("plugins/angular-material.js")"></script>
-        <script src="@routes.Assets.at("plugins/mm-foundation.min.js")"></script>
-        <script src="@routes.Assets.at("plugins/angular-route.min.js")"></script>
-        <script src="@routes.Assets.at("plugins/ng-map.min.js")"></script>
-        <script src="@routes.Assets.at("plugins/angular-websocket.js")"></script>
-        <script src="@routes.Assets.at("plugins/WebSocketService.js")"></script>
-
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("favicon.ico")" />
     </head>
     <body ng-app="app">
-        <section layout="row" flex class=" height100p" data-ng-controller="adminController as controller">
+        <section layout="row" flex class=" height100p" data-ng-controller="adminController">
             <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
                 <md-toolbar class="md-theme-indigo">
                     <h1 class="md-toolbar-tools">Admin</h1>
                 </md-toolbar>
                 <md-content layout-padding >
                 <md-list>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminEvents.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/adminEvents.html'">
                         Events management
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminArtists.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/adminArtists.html'">
                         Artists management
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminOrganizers.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/adminOrganizers.html'">
                         Organizers management
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/adminPlaces.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/adminPlaces.html'">
                         Places management
                     </md-list-item>
-                    <md-list-item ng-click="controller.findSalableEvents(); template = 'assets/templates/adminClient/salableEvents.html'">
+                    <md-list-item ng-click="controller.findSalableEvents(); template = 'assets/templates/admin/salableEvents.html'">
                         Show salable events
                     </md-list-item>
-                    <md-list-item ng-click="controller.findTicketsWithStatus(); template = 'assets/templates/adminClient/tickets.html'">
+                    <md-list-item ng-click="controller.findTicketsWithStatus(); template = 'assets/templates/admin/tickets.html'">
                         Show tickets
                     </md-list-item>
-                    <md-list-item ng-click="controller.findPendingTickets(); template = 'assets/templates/adminClient/pendingTickets.html'">
+                    <md-list-item ng-click="controller.findPendingTickets(); template = 'assets/templates/admin/pendingTickets.html'">
                         Show pending tickets
                     </md-list-item>
-                    <md-list-item ng-click="controller.findBoughtBills(); template = 'assets/templates/adminClient/boughtBills.html'">
+                    <md-list-item ng-click="controller.findBoughtBills(); template = 'assets/templates/admin/boughtBills.html'">
                         Show bought bills
                     </md-list-item>
-                    <md-list-item ng-click="controller.findSoldBills(); template = 'assets/templates/adminClient/soldBills.html'">
+                    <md-list-item ng-click="controller.findSoldBills(); template = 'assets/templates/admin/soldBills.html'">
                         Show sold bills
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/createSalableEvent.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/createSalableEvent.html'">
                         Add salable event
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/proposeTicket.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/proposeTicket.html'">
                         Propose ticket
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/blockTicketForUser.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/blockTicketForUser.html'">
                         block Ticket For User
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/createTicketToSale.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/createTicketToSale.html'">
                         add Ticket To Sale
                     </md-list-item>
-                    <md-list-item ng-click="template = 'assets/templates/adminClient/createTariff.html'">
+                    <md-list-item ng-click="template = 'assets/templates/admin/createTariff.html'">
                         add Tariff
                     </md-list-item>
                 </md-list>
                 </md-content>
             </md-sidenav>
+
             <md-content flex ng-include="template" class="column large-12">
 
             </md-content>
         </section>
+        @scripts()
         @playscalajs.html.scripts("client")
 
     </body>

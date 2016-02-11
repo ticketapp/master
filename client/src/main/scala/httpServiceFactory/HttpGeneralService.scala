@@ -29,7 +29,6 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
     val toast = mdToast.simple(message)
     mdToast.show(toast)
     console.error(s"An error has occured: $error")
-    console.log(status)
   }
 
   @JSExport
@@ -37,7 +36,6 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
     val getFuture = http.get[js.Any](url) // implicit conversion occurs here.
     getFuture.error(errors)
     getFuture.map { a =>
-      console.log(JSON.stringify(a))
       JSON.stringify(a)
     }
   }

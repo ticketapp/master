@@ -279,6 +279,13 @@ CREATE TABLE salableEvents (
   eventId                   INT PRIMARY KEY REFERENCES events(eventId) NOT NULL
 );
 
+
+CREATE TABLE guestUsers (
+  ip                        VARCHAR(32) PRIMARY KEY,
+  userUuid                  UUID REFERENCES users(userId)
+);
+
+
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
@@ -691,6 +698,9 @@ INSERT INTO blockedTickets(id, ticketId, expirationDate, userId) VALUES
 -------------------------------------------------------- salable events ------------------------------------------------
 INSERT INTO salableEvents(eventId) VALUES (100);
 
+-------------------------------------------------------- guest users ----------------------------------------------------
+INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
+
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
@@ -848,6 +858,8 @@ DROP TABLE IF EXISTS soldTicketBills;
 DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS salableEvents;
 DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS guestUsers;
+DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;
 DROP TABLE IF EXISTS account411;

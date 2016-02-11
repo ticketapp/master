@@ -2,7 +2,7 @@ import admin.AdminController
 import artists.ArtistsController
 import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
-import events.EventsController
+import events.{EventMinDirective, EventsController}
 import httpServiceFactory.HttpGeneralServiceFactory
 import organizers.OrganizersController
 import places.PlacesController
@@ -26,5 +26,6 @@ object App extends JSApp {
     module.controller[OrganizersController]
     module.controller[PlacesController]
     module.controller[ChatContactController]
+    module.directive[EventMinDirective]
   }
 }
