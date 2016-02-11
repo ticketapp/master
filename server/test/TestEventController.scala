@@ -22,22 +22,24 @@ class TestEventController extends GlobalApplicationForControllers {
 
     "create an event" in {
       val jsonEvent = """{
-                         "facebookId": "1111",
+                        "facebookId": "1111",
                         "name": "EventTest1",
                         "geographicPoint": "4.2,4.3",
                         "description": "desc",
                         "startTime": "2025-11-24 12:00",
                         "endTime": "2115-10-24 12:00",
-                        "ageRestriction": 1}"""
+                        "ageRestriction": 1
+                      }"""
 
       val jsonPassedEvent = """{
-                         "facebookId": "11121",
-                        "name": "EventPassedTest",
-                        "geographicPoint": "4.2,4.3",
-                        "description": "desc",
-                        "startTime": "2015-10-24 12:00",
-                        "endTime": "2015-10-24 16:00",
-                        "ageRestriction": 1}"""
+                              "facebookId": "11121",
+                              "name": "EventPassedTest",
+                              "geographicPoint": "4.2,4.3",
+                              "description": "desc",
+                              "startTime": "2015-10-24 12:00",
+                              "endTime": "2015-10-24 16:00",
+                              "ageRestriction": 1
+                            }"""
 
       val Some(result) = route(FakeRequest(eventsDomain.routes.EventController.createEvent())
         .withJsonBody(Json.parse(jsonEvent))

@@ -71,7 +71,7 @@ GET           /artists/facebookContaining/:pattern               @artistsDomain.
 GET           /places                                            @placesDomain.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET           /places/:id                                        @placesDomain.PlaceController.findById(id: Long)
 POST          /places/:placeId/followByPlaceId                   @placesDomain.PlaceController.followPlaceByPlaceId(placeId: Long)
-POST          /places/:placeId/unfollowPlaceByPlaceId             @placesDomain.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
+POST          /places/:placeId/unfollowPlaceByPlaceId            @placesDomain.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
 POST          /places/:facebookId/followByFacebookId             @placesDomain.PlaceController.followPlaceByFacebookId(facebookId: String)
 GET           /places/:placeId/isFollowed                        @placesDomain.PlaceController.isPlaceFollowed(placeId: Long)
 GET           /places/containing/:pattern                        @placesDomain.PlaceController.findPlacesContaining(pattern: String)
@@ -92,9 +92,9 @@ GET           /organizers/containing/:pattern                    @organizersDoma
 POST          /organizers/create                                 @organizersDomain.OrganizerController.createOrganizer
 GET           /organizers/:organizerId/events                    @eventsDomain.EventController.findByOrganizer(organizerId: Long)
 GET           /organizers/:organizerId/passedEvents              @eventsDomain.EventController.findPassedByOrganizer(organizerId: Long)
-GET           /organizers/findNearCity/:city        @organizersDomain.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
-GET           /organizers/findNearGeoPoint/         @organizersDomain.OrganizerController.findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int)
-GET           /organizers/followed/                 @organizersDomain.OrganizerController.getFollowedOrganizers
+GET           /organizers/findNearCity/:city                     @organizersDomain.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
+GET           /organizers/findNearGeoPoint/                      @organizersDomain.OrganizerController.findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int)
+GET           /organizers/followed/                              @organizersDomain.OrganizerController.getFollowedOrganizers
 #
 ################################## Playlists ############################################
 GET           /playlists                            @playlistsDomain.PlaylistController.findByUser

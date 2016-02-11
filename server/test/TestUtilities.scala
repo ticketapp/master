@@ -48,12 +48,6 @@ class TestUtilities extends GlobalApplicationForModels with Utilities {
     eventsName map { refactorEventOrPlaceName } mustBe expectedEventsName
   }
 
-  "return an optional string from a set" in {
-    setToOptionString(Set.empty) mustBe None
-    setToOptionString(Set("a")) mustBe Some("a")
-    setToOptionString(Set("a", "b", "c")) mustBe Some("a,b,c")
-  }
-
   "convert a string to a datetime" in {
     stringToDateTime("2015-06-05T19:30:00+0200").getHourOfDay mustBe 19
   }

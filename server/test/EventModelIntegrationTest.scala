@@ -9,12 +9,12 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import organizersDomain.{Organizer, OrganizerWithAddress}
 import placesDomain.{Place, PlaceWithAddress}
-import testsHelper.GlobalApplicationForModels
+import testsHelper.{GlobalApplicationForModelsIntegration, GlobalApplicationForModels}
 
 import scala.language.postfixOps
 
 
-class TestEventModel extends GlobalApplicationForModels {
+class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
   "An event" must {
 
@@ -84,6 +84,7 @@ class TestEventModel extends GlobalApplicationForModels {
             id = foundEvent.genres.head.id,
             name = foundEvent.genres.head.name.toLowerCase))
         }
+
         whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {
           _ mustBe 1
         }
@@ -261,8 +262,8 @@ class TestEventModel extends GlobalApplicationForModels {
               whenReady(eventMethods.findAllPassedByOrganizer(savedOrganizer.organizer.id.get), timeout(Span(5, Seconds))) {
                 passedEventsByOrganizer =>
 
-                passedEventsByOrganizer must contain(
-                  EventWithRelations(event = savedEvent, organizers = Vector(OrganizerWithAddress(savedOrganizer.organizer))))
+                  passedEventsByOrganizer must contain(
+                    EventWithRelations(event = savedEvent, organizers = Vector(OrganizerWithAddress(savedOrganizer.organizer))))
               }
             }
           }
@@ -368,7 +369,7 @@ class TestEventModel extends GlobalApplicationForModels {
       }
     }
 
-     "find all by city pattern" in {
+    "find all by city pattern" in {
       whenReady(eventMethods.findAllByCityPattern(cityPattern = "lyon"), timeout(Span(5, Seconds))) { events =>
 
         events should not be empty

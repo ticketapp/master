@@ -84,8 +84,10 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def findAllByGenre(genreName: String, offset: Int, numberToReturn: Int): Future[Seq[ArtistWithWeightedGenres]] = {
+    val lowerCaseGenre = genreName.toLowerCase
+
     val artistsQuery = for {
-      genre <- genres.filter(_.name === genreName)
+      genre <- genres.filter(_.name === lowerCaseGenre)
       artistGenre <- artistsGenres.filter(_.genreId === genre.id)
       artist <- artists.filter(_.id === artistGenre.artistId) map (_.id)
 

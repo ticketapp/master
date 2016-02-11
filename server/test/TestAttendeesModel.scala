@@ -46,7 +46,7 @@ class TestAttendeesModel extends GlobalApplicationForModels {
         AttendeeRead("Bli Tz", "165378400498201", "attending"),
         AttendeeRead("Luis Florencio", "177250825964864", "attending"))
 
-//      attendeesMethods.readJsonAttendees(jsonAttendees) mustBe expectedAttendees
+      attendeesMethods.readJsonAttendees(jsonAttendees) mustBe expectedAttendees
     }
 
     "extract json attendees value from the facebook json response" in {
@@ -61,7 +61,6 @@ class TestAttendeesModel extends GlobalApplicationForModels {
           |"paging":{"cursors":{"before":"TVRBd01ERXdOemd4TWpZAd05EYzFPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD",
           |"after":"TVRBd01EQTBNRFkzTURZAeU5UQTJPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD"},
           |"next":"https://graph.facebook.com/v2.4/866684910095368/attending?access_token=1434769156813731%257Cf2378aa93c7174712b63a24eff4cb22c&limit=25&after=TVRBd01EQTBNRFkzTURZAeU5UQTJPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD"}},"id":"866684910095368"}""".stripMargin)
-
 
       attendeesMethods.extractJsonAttendeesFromFacebookJsonResponse(jsonAttendees) should not be JsNull
       attendeesMethods.extractJsonAttendeesFromFacebookJsonResponse(jsonAttendees2) should not be JsNull

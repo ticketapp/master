@@ -92,10 +92,6 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     with Utilities
     with SortByDistanceToPoint {
 
-  implicit def dateTimeDriver = MappedColumnType.base[DateTime, Timestamp](
-    dt => new Timestamp(dt.getMillis),
-    ts => new DateTime(ts.getTime))
-
   def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[EventWithRelations]] = {
     val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
@@ -211,11 +207,12 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def findAllByGenre(genreName: String, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
   : Future[Seq[EventWithRelations]] = {
+    val lowerCaseGenre = genreName.toLowerCase
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
 
     val query = for {
-      genre <- genres if genre.name === genreName
+      genre <- genres if genre.name === lowerCaseGenre
       eventGenre <- eventsGenres if eventGenre.genreId === genre.id
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
       optionalEventAddresses) <- events

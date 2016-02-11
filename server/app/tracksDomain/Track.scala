@@ -89,8 +89,10 @@ class TrackMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   }
 
   def findAllByGenre(genreName: String, numberToReturn: Int, offset: Int): Future[Seq[Track]] = {
+    val lowerCaseGenre = genreName.toLowerCase
+
     val query = for {
-      genre <- genres if genre.name === genreName
+      genre <- genres if genre.name === lowerCaseGenre
       trackGenre <- tracksGenres if trackGenre.genreId === genre.id
       track <- tracks if track.uuid === trackGenre.trackId
     } yield track
