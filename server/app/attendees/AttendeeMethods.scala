@@ -8,7 +8,7 @@ import play.api.Logger
 import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json._
-import play.api.libs.ws.WS
+import play.api.libs.ws.{WSResponse, WS}
 import services.Utilities
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,13 +43,31 @@ class AttendeeMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
     db.run(query.result)
   }
 
-  def getAllByEventFacebookId(eventFacebookId: String): Future[Seq[FacebookAttendee]] = WS
+  def getAttendeesRecursively(path: String, attendees: Seq[FacebookAttendee] = Seq.empty): Future[Seq[FacebookAttendee]] = WS
+    .url(path)
+    .get()
+    .flatMap { facebookResponse =>
+      val foundAttendees = facebookResponseToSeqAttendees(facebookResponse.json)
+      getMaybeNextAttendees(facebookResponse.json, attendees ++ foundAttendees)
+    }
+
+  def getAllByEventFacebookId(eventFacebookId: String): Future[WSResponse] = WS
     .url("https://graph.facebook.com/" + facebookApiVersion + "/" + eventFacebookId + "/attending")
     .withQueryString(
       "access_token" -> facebookToken,
       "limit" -> "400")
     .get()
-    .map(facebookResponse => readJsonAttendees(facebookResponse.json).map(attendeeReadToFacebookAttendee))
+
+  def facebookResponseToSeqAttendees(facebookResponse: JsValue): Seq[FacebookAttendee] = {
+    readJsonAttendees(facebookResponse).map(attendeeReadToFacebookAttendee)
+  }
+
+  def getMaybeNextAttendees(facebookResponse: JsValue, foundAttendees: Seq[FacebookAttendee]): Future[Seq[FacebookAttendee]] =
+    returnMaybeNextPage(facebookResponse, "attending") match {
+      case Some(url) => getAttendeesRecursively(url, foundAttendees)
+      case _ => Future(foundAttendees)
+    }
+
 
   def readJsonAttendees(facebookAttendees: JsValue): Seq[AttendeeRead] = {
     implicit val attendeeRead: Reads[AttendeeRead] = Json.reads[AttendeeRead]

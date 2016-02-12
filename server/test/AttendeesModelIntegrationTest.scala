@@ -90,10 +90,62 @@ class AttendeesModelIntegrationTest extends GlobalApplicationForModelsIntegratio
     }
 
     "get attendees for an event (by its facebook id)" in {
-      val expectedAttendees = FacebookAttendee(attendeeFacebookId = "165378400498201", name = "Bli Tz")
-
       whenReady(attendeesMethods.getAllByEventFacebookId("866684910095368"), timeout(Span(5, Seconds))) { attendees =>
+        attendees.statusText must equal("OK")
+      }
+    }
+
+    "get attendees for a next path" in {
+      val expectedAttendees = FacebookAttendee(attendeeFacebookId = "10153907895484801",name = "Romain Paranoise Bfd")
+      val path = "https://graph.facebook.com/v2.4/866684910095368/attending?access_token=1434769156813731%257Cf2378aa93c7174712b63a24eff4cb22c&limit=100&after=T0RBeE1qTXpNVGt6T2pFME5UTTBPVFkwTURBNk1UWTFNRGcwT0RrMk9EUTROVGd4"
+
+      whenReady(attendeesMethods.getAttendeesRecursively(path), timeout(Span(5, Seconds))) { attendees =>
         attendees should contain (expectedAttendees)
+      }
+    }
+
+    "Transform a facebook response to a seq of attendees" in {
+      val expectedAttendees = FacebookAttendee(attendeeFacebookId = "165378400498201",name = "Bli Tz")
+      val facebookResponse = Json.parse("""{"data":[
+            {"name":"Bli Tz",
+            "id":"165378400498201",
+            "rsvp_status":"attending"
+            },
+            {"name":"Yohann Cvzl",
+            "id":"175122322847900",
+            "rsvp_status":"attending"
+            }
+          ]}""")
+
+      val attendees = attendeesMethods.facebookResponseToSeqAttendees(facebookResponse)
+
+      attendees should contain (expectedAttendees)
+    }
+
+    "get maybe next attendees" in {
+      val expectedAttendees = Seq(FacebookAttendee(attendeeFacebookId = "165378400498201",name = "Bli Tz"))
+      val facebookResponse = Json.parse("""{
+          "data":[
+            {"name":"Bli Tz",
+            "id":"165378400498201",
+            "rsvp_status":"attending"
+            },
+            {"name":"Yohann Cvzl",
+            "id":"175122322847900",
+            "rsvp_status":"attending"
+            }
+          ],
+          "paging":{
+            "cursors":{
+              "before":"TVRBd01ERXdOemd4TWpZAd05EYzFPakUwTlRNME9UWTBNREE2TVRZAMU1EZAzBPRGsyT0RRNE5UZA3gZD",
+              "after":"T0RBeE1qTXpNVGt6T2pFME5UTTBPVFkwTURBNk1UWTFNRGcwT0RrMk9EUTROVGd4"
+            },
+            "next":"https://graph.facebook.com/v2.4/866684910095368/attending?access_token=1434769156813731%257Cf2378aa93c7174712b63a24eff4cb22c&limit=100&after=T0RBeE1qTXpNVGt6T2pFME5UTTBPVFkwTURBNk1UWTFNRGcwT0RrMk9EUTROVGd4"
+          }
+        }""")
+
+      whenReady(attendeesMethods.getMaybeNextAttendees(facebookResponse, expectedAttendees),  timeout(Span(5, Seconds))) { attendees =>
+        attendees should contain (expectedAttendees.head)
       }
     }
   }

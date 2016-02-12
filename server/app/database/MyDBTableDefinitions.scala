@@ -20,6 +20,7 @@ import playlistsDomain.Playlist
 import silhouette.DBTableDefinitions
 import slick.jdbc.{PositionedParameters, SetParameter}
 import slick.model.ForeignKeyAction
+import trackingDomain.{UserAction, UserSession}
 import tracksDomain.{Track, TrackRating}
 import tariffsDomain.Tariff
 import ticketsDomain._
@@ -484,6 +485,30 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("useruuid", userUuid, slickUsers)(_.id)
   }
   lazy val guestUsers = TableQuery[GuestUsers]
+
+  class UserSessions(tag: Tag) extends Table[UserSession](tag, "usersessions") {
+    def sessionUuid = column[UUID]("id", O.PrimaryKey)
+    def ip = column[String]("ip")
+    def screenWidth = column[Int]("screenwidth")
+    def screenHeight = column[Int]("screenheight")
+
+    def * = (sessionUuid, ip, screenWidth, screenHeight) <> ((UserSession.apply _).tupled, UserSession.unapply)
+
+    def aFK = foreignKey("ip", ip, guestUsers)(_.ip)
+  }
+  lazy val userSessions = TableQuery[UserSessions]
+
+  class UserActions(tag: Tag) extends Table[UserAction](tag, "useractions") {
+    def actionId = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def action = column[String]("action")
+    def timestamp = column[Timestamp]("timestamp")
+    def sessionId = column[UUID]("sessionid")
+
+    def * = (action, timestamp, sessionId) <> ((UserAction.apply _).tupled, UserAction.unapply)
+
+    def aFK = foreignKey("sessionid", sessionId, userSessions)(_.sessionUuid)
+  }
+  lazy val userActions = TableQuery[UserActions]
 
 
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]

@@ -19,34 +19,19 @@ class TestEventController extends GlobalApplicationForControllers {
   override def beforeAll() {
     generalBeforeAll()
     Await.result(
-      dbConfProvider.get.db.run(
-        sqlu"""INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
           VALUES(100, true, true, 'notPassedEvent', timestamp '2050-08-24 14:00:00',
-          '01010000008906CEBE97E346405187156EF9581340');"""),
-      2.seconds)
-    Await.result(
-      dbConfProvider.get.db.run(
-        sqlu"""INSERT INTO events(ispublic, isactive, name, starttime, endtime)
-          VALUES(true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');"""),
-      2.seconds)
-    Await.result(
-      dbConfProvider.get.db.run(
-        sqlu"""INSERT INTO events(ispublic, isactive, name, starttime, endtime)
-          VALUES(true, true, 'passedEvent', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');"""),
-      2.seconds)
-    Await.result(
-      dbConfProvider.get.db.run(
-        sqlu"""INSERT INTO eventsfollowed(eventid, userid) VALUES(1, '077f3ea6-2272-4457-a47e-9e9111108e44');"""),
-      2.seconds)
-    Await.result(dbConfProvider.get.db.run(sqlu"""INSERT INTO organizers(name) VALUES('eventOrganizer');"""), 2.seconds)
-    Await.result(
-      dbConfProvider.get.db.run(
-        sqlu"""INSERT INTO eventsorganizers(eventid, organizerid)
-          VALUES((SELECT eventId FROM events WHERE name = 'passedEvent'), (SELECT organizerid FROM organizers WHERE name = 'eventOrganizer'));"""),
-      2.seconds)
-    Await.result(
-      dbConfProvider.get.db.run(
-        sqlu"""INSERT INTO eventsorganizers(eventid, organizerid)
+          '01010000008906CEBE97E346405187156EF9581340');
+        INSERT INTO events(ispublic, isactive, name, starttime, endtime)
+          VALUES(true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');
+        INSERT INTO events(ispublic, isactive, name, starttime, endtime)
+          VALUES(true, true, 'passedEvent', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+        INSERT INTO eventsfollowed(eventid, userid) VALUES(1, '077f3ea6-2272-4457-a47e-9e9111108e44');
+        INSERT INTO organizers(name) VALUES('eventOrganizer');
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'passedEvent'), (SELECT organizerid FROM organizers WHERE name = 'eventOrganizer'));
+        INSERT INTO eventsorganizers(eventid, organizerid)
           VALUES((SELECT eventId FROM events WHERE name = 'notPassedEvent'), (SELECT organizerid FROM organizers WHERE name = 'eventOrganizer'));"""),
       2.seconds)
   }

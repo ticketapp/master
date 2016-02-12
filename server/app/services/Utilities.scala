@@ -199,12 +199,11 @@ trait Utilities {
     }
   }
 
-  def returnNumberOfHoursBetween4AMAndNow(hoursSinceMidnight: Int): Int = {
-    4 - hoursSinceMidnight match {
-      case positive if positive >= 0 => positive
-      case negative if negative < 0 => 24 + negative
-    }
+  def returnNumberOfHoursBetween4AMAndNow(hoursSinceMidnight: Int): Int = 4 - hoursSinceMidnight match {
+    case positive if positive >= 0 => positive
+    case negative if negative < 0 => 24 + negative
   }
+
 
   def returnMaybeNextPage(facebookResponse: JsValue, objectToGetKey: String): Option[String] = {
     val readNextFacebookPages: Reads[Option[String]] = (__ \ "next").readNullable[String]

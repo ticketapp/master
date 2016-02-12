@@ -6,6 +6,8 @@ import events.{EventMinDirective, EventsController}
 import httpServiceFactory.HttpGeneralServiceFactory
 import organizers.OrganizersController
 import places.PlacesController
+import root.RoutingConfig
+import tracking.{TrackingDirective, TrackingViewDirective}
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -15,7 +17,7 @@ import scala.scalajs.js.annotation.JSExport
 object App extends JSApp {
 
   override def main() {
-    val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap"))
+    val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap", "angularTranslateApp"))
 
     module.config(RoutingConfig)
     module.directive[ContactComponentDirective]
@@ -27,5 +29,7 @@ object App extends JSApp {
     module.controller[PlacesController]
     module.controller[ChatContactController]
     module.directive[EventMinDirective]
+    module.directive[TrackingViewDirective]
+    module.directive[TrackingDirective]
   }
 }

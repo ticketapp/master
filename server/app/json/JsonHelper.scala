@@ -1,5 +1,6 @@
 package json
 
+import java.sql.Timestamp
 import java.util.UUID
 
 import addresses.Address
@@ -13,6 +14,7 @@ import placesDomain.{Place, PlaceWithAddress}
 import playlistsDomain._
 import tariffsDomain.Tariff
 import ticketsDomain._
+import trackingDomain.{UserSession, UserAction}
 import tracksDomain.{Track, TrackWithGenres}
 
 import com.vividsolutions.jts.geom.Geometry
@@ -31,8 +33,8 @@ object JsonHelper {
     def reads(char: JsValue): JsResult[Char] = JsSuccess(Json.stringify(char)(1))
   }
 
-  implicit object UUIDWrites extends AnyRef with Writes[UUID] {
-    def writes(UUID: UUID): JsString = JsString(UUID.toString)
+  implicit object TimestampReads extends AnyRef with Reads[Timestamp] {
+    def reads(char: JsValue): JsResult[Timestamp] = JsSuccess(new Timestamp(Json.stringify(char).toLong))
   }
 
   def geomJsonFormat[G <: Geometry]: Format[G] = Format[G](
@@ -113,6 +115,12 @@ object JsonHelper {
   implicit val ticketBillWrites: Writes[TicketBill] = Json.writes[TicketBill]
   implicit val tariffReads: Reads[Tariff] = Json.reads[Tariff]
   implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
+  implicit val userActionReads: Reads[UserAction] = Json.reads[UserAction]
+  implicit val userActionWrites: Writes[UserAction] = Json.writes[UserAction]
+  implicit val userSessionReads: Reads[UserSession] = Json.reads[UserSession]
+  implicit val userSessionWrites: Writes[UserSession] = Json.writes[UserSession]
+  val readUserActionReads: Reads[Seq[UserAction]] = Reads.seq(__.read[UserAction])
+  val readUserSessionReads: Reads[Seq[UserSession]] = Reads.seq(__.read[UserSession])
   val readSalableEventReads: Reads[Seq[SalableEvent]] = Reads.seq(__.read[SalableEvent])
   val readTicketWithStatusReads: Reads[Seq[TicketWithStatus]] = Reads.seq(__.read[TicketWithStatus])
   val readPendingTicketReads: Reads[Seq[PendingTicket]] = Reads.seq(__.read[PendingTicket])

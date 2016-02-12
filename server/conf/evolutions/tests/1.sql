@@ -286,6 +286,22 @@ CREATE TABLE guestUsers (
 );
 
 
+CREATE TABLE userSessions (
+  id                        UUID PRIMARY KEY,
+  ip                        VARCHAR(32) REFERENCES guestUsers(ip) NOT NULL,
+  screenWidth               INT NOT NULL,
+  screenHeight              INT NOT NULL
+);
+
+
+CREATE TABLE userActions (
+  id                        SERIAL PRIMARY KEY ,
+  action                    VARCHAR(255) NOT NULL,
+  timestamp                 TIMESTAMP NOT NULL,
+  sessionId                 UUID REFERENCES userSessions(id)
+);
+
+
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
@@ -632,6 +648,8 @@ DROP TABLE IF EXISTS boughtTicketBills;
 DROP TABLE IF EXISTS soldTicketBills;
 DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS salableEvents;
+DROP TABLE IF EXISTS userActions;
+DROP TABLE IF EXISTS userSessions;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS guestUsers;
 DROP TABLE IF EXISTS tariffsBlocked;

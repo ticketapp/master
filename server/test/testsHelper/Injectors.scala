@@ -21,6 +21,7 @@ import services.GetUserLikedPagesOnFacebook
 import silhouette.{OAuth2InfoDAO, UserDAOImpl}
 import tariffsDomain.TariffMethods
 import ticketsDomain.TicketMethods
+import trackingDomain.TrackingMethods
 import tracksDomain.{SearchSoundCloudTracks, SearchYoutubeTracks, TrackMethods, TrackRatingMethods}
 
 
@@ -60,6 +61,7 @@ trait Injectors {
   lazy val trackRatingMethods = new TrackRatingMethods(dbConfProvider, trackMethods)
   lazy val issueMethods = new IssueMethods(dbConfProvider)
   lazy val userMethods = new UserMethods(dbConfProvider)
+  lazy val trackingMethods = new TrackingMethods(dbConfProvider)
   lazy val oAuth2InfoDAO = new OAuth2InfoDAO(dbConfProvider)
   lazy val getUserLikedPagesOnFacebook = new GetUserLikedPagesOnFacebook(dbConfigProvider = dbConfProvider,
     oAuth2InfoDAO = oAuth2InfoDAO, artistMethods = artistMethods, placeMethods = placeMethods,
