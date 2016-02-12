@@ -3,6 +3,7 @@ import artists.ArtistsController
 import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
 import events.{EventMinDirective, EventsController}
+import focusDirective.FocusDirective
 import httpServiceFactory.HttpGeneralServiceFactory
 import organizers.OrganizersController
 import places.PlacesController
@@ -17,7 +18,8 @@ import scala.scalajs.js.annotation.JSExport
 object App extends JSApp {
 
   override def main() {
-    val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap", "angularTranslateApp"))
+    val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap",
+      "ngCookies", "angularTranslateApp"))
 
     module.config(RoutingConfig)
     module.directive[ContactComponentDirective]
@@ -31,5 +33,6 @@ object App extends JSApp {
     module.directive[EventMinDirective]
     module.directive[TrackingViewDirective]
     module.directive[TrackingDirective]
+    module.directive[FocusDirective]
   }
 }

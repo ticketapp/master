@@ -39,11 +39,11 @@
         </form>
 
     </div>
-
-    <md-button class="md-fab float-right contact-button"
+    <md-button class="md-fab float-right contact-button tracking"
                ng-class="{'ng-hide': full}"
                ng-mouseenter="showSmallContact = true"
-               ng-click="full = true"
+               id="ccb1"
+               ng-click="full = true; track('cl,ccb1'); directive.track('cl,ccb1')"
                aria-label="Contact">
         <img src="assets/images/contact.png" alt="Contact">
     </md-button>

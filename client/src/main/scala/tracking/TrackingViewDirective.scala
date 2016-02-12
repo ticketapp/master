@@ -26,6 +26,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
   var sessions = Seq.empty[Session].toJSArray
 
   var trackingViewContainer = document.getElementById("tracking-player").asInstanceOf[Html]
+  var trackingViewScroller = trackingViewContainer.getElementsByTagName("md-content").item(0).asInstanceOf[Html]
 
   @JSExport
   var template = "assets/templates/landingPage/landingPage.html"
@@ -57,10 +58,11 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
     trackingViewContainer.style.height = sessions.filter(_.uuid == session.head.sessionId).head.screenHeight + "px"
     val initTimestamp = session.head.timestamp
     session map { action =>
+      console.log(action.action)
       val seqAction = action.action.split(",").toSeq
       val timeToWait: Int = (action.timestamp - initTimestamp).toInt
       timeout(() => {
-        trackingViewContainer.scrollTop = seqAction.last.toDouble
+        trackingViewScroller.scrollTop = seqAction.last.toDouble
         seqAction.head match {
           case mouseMouve if mouseMouve == "mm" =>
             val left = seqAction(1)
@@ -69,7 +71,10 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
           case click if click == "cl" =>
             document.getElementById(seqAction(1)).asInstanceOf[Html].click()
           case input if input == "in" =>
-            document.getElementById(seqAction(1)).asInstanceOf[Input].value = seqAction(2)
+            document.getElementById(seqAction(1)) match {
+              case input1: Input => input1.value = seqAction(2)
+              case otherElement => otherElement.asInstanceOf[Html].getElementsByTagName("input").item(0).asInstanceOf[Input].value = seqAction(2)
+            }
           case link if link == "a" =>
             template = RoutingConfig.urlTemplatePath(seqAction(1))
         }

@@ -2,36 +2,42 @@
 <div class="image-container">
     <div class="column large-12 padding0">
         <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
-            <b>Vendez nous votre billet de concert</b>
-            <!--Vendez nous votre billet, nous faisons le reste.-->
-            <!--faisons le<-> nous occupons du-->
+            <b>{{ 'HEADLINE' | translate }}</b>
         </h1>
     </div>
-
     <h4 class="home-subtitle column padding0">
-        Récuperez instantanément votre argent, sans vous soucier qu'un acheteur soit trouvé
+        {{ 'INTRO_TEXT' | translate }}
     </h4>
-
-
-    <form class="column medium-10 medium-offset-1 large-8 large-offset-2 sell-form absolute" method="post" novalidate="">
-        <div class="form-container">
-
-            <input type="text"
-                   class="sell-input tracking"
-                   id="li1"
-                   ng-change="directive.track('in,li1,' + query)"
-                   ng-model="query"
-                   placeholder="Entrez un nom d'événement ou un lieu">
-
-            <a class="sell-form-link">← Obtenir une offre maintenant</a>
-
+    <form class="column medium-10 medium-offset-1 large-8 large-offset-2 sell-form absolute">
+        <div class="form-container tracking">
+            <md-autocomplete
+                    md-selected-item="ctrl.selectedItem"
+                    md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                    md-search-text="ctrl.searchText"
+                    md-selected-item-change="ctrl.selectedItemChange(item)"
+                    md-items="item in ctrl.querySearch(ctrl.searchText)"
+                    md-item-text="item.display"
+                    md-min-length="0"
+                    class="sell-input tracking"
+                    id="li1"
+                    tracker="in,li1,{{ctrl.searchText}}"
+                    focus="{{focusSearch}}"
+                    placeholder="Entrez un nom d'événement ou un lieu">
+                <md-item-template>
+                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                </md-item-template>
+                <md-not-found>
+                    No states matching "{{ctrl.searchText}}" were found.
+                    <a ng-click="ctrl.newState(ctrl.searchText)">Create a new one!</a>
+                </md-not-found>
+            </md-autocomplete>
+            <a class="sell-form-link tracking"
+               id="lb1"
+               data-ng-click="focusSearch = true; directive.track('cl,lb1')"
+               data-ng-show="!focusSearch">← Obtenir une offre maintenant</a>
         </div>
     </form>
-
 </div>
-
-
-
 <div class="parallax-content" style="margin-top: 600px; height: 250px;">
 
     <event-min ng-if="$root.activEvent && events.length > 0"
@@ -84,7 +90,8 @@
     .sell-input {
         border: 1px solid #2ba8de !important;
         display: inline-block;
-        background: none;
+        width: 100%;
+        background: white;
         border-radius: 3px !important;
         vertical-align: middle;
         color: #2ba8de;
@@ -98,29 +105,24 @@
         font-size: 13px;
     }
 
-    .sell-input:-moz-placeholder {
+    .sell-input> md-autocomplete-wrap>input::-webkit-input-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+        height: 100%;
+    }
+
+    .sell-input>md-autocomplete-wrap>input:-moz-placeholder {
+        color: #2ba8de;
+        font-size: 13px;
+        height: 100%;
+    }
+
+    .sell-input>md-autocomplete-wrap>input:-ms-input-placeholder {
         color: #2ba8de;
         font-size: 13px;
     }
-
-    .sell-input:-ms-input-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
-    }
-
-    .sell-input::-webkit-input-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
-    }
-
-    .sell-input:-moz-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
-    }
-
-    .sell-input:-ms-input-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
+    .sell-input > md-autocomplete-wrap,  .sell-input > md-autocomplete-wrap > input{
+        height: 50px;
     }
 
     .sell-form {
@@ -161,34 +163,6 @@
     }
 </style>
 
-<div class="parallax-background image-container">
-
-    <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
-        <b>{{ 'HEADLINE' | translate }}</b>
-        <!--Vendez nous votre billet, nous faisons le reste.-->
-        <!--faisons le<-> nous occupons du-->
-    </h1>
-
-
-    <h4 class="home-subtitle">
-        {{ 'INTRO_TEXT' | translate }}
-    </h4>
-
-
-    <form class="sell-form column medium-10 medium-offset-1 large-8 large-offset-2" method="post" novalidate="">
-        <div class="form-container">
-
-            <input type="text"
-                   ng-model="query"
-                   class="sell-input"
-                   placeholder="Entrez un nom d'événement ou un lieu">
-
-            <a class="sell-form-link">← Obtenir une offre maintenant</a>
-
-        </div>
-    </form>
-
-</div>
 
 
 
