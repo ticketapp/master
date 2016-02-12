@@ -487,26 +487,26 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
   lazy val guestUsers = TableQuery[GuestUsers]
 
   class UserSessions(tag: Tag) extends Table[UserSession](tag, "usersessions") {
-    def id = column[UUID]("id", O.PrimaryKey)
+    def sessionUuid = column[UUID]("id", O.PrimaryKey)
     def ip = column[String]("ip")
     def screenWidth = column[Int]("screenwidth")
     def screenHeight = column[Int]("screenheight")
 
-    def * = (id, ip, screenWidth, screenHeight) <> ((UserSession.apply _).tupled, UserSession.unapply)
+    def * = (sessionUuid, ip, screenWidth, screenHeight) <> ((UserSession.apply _).tupled, UserSession.unapply)
 
     def aFK = foreignKey("ip", ip, guestUsers)(_.ip)
   }
   lazy val userSessions = TableQuery[UserSessions]
 
   class UserActions(tag: Tag) extends Table[UserAction](tag, "useractions") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def actionId = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def action = column[String]("action")
     def timestamp = column[Timestamp]("timestamp")
     def sessionId = column[UUID]("sessionid")
 
     def * = (action, timestamp, sessionId) <> ((UserAction.apply _).tupled, UserAction.unapply)
 
-    def aFK = foreignKey("sessionid", sessionId, userSessions)(_.id)
+    def aFK = foreignKey("sessionid", sessionId, userSessions)(_.sessionUuid)
   }
   lazy val userActions = TableQuery[UserActions]
 

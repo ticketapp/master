@@ -23,33 +23,39 @@ class TestTrackingController extends GlobalApplicationForControllers {
       val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findSessions()))
       val validatedJsonSalableEvents: JsResult[Seq[UserSession]] =
         contentAsJson(info).validate[Seq[UserSession]](JsonHelper.readUserSessionReads)
-      validatedJsonSalableEvents match {
+
+      val expectedSession = validatedJsonSalableEvents match {
         case sessions: JsSuccess[Seq[UserSession]] =>
-          sessions.get must contain (savedSession)
+          sessions.get
         case error: JsError =>
-          Logger.error("find sessions:" + error)
-          error mustEqual 0
+          throw new Exception
       }
+
+      expectedSession must contain (savedSession)
     }
 
     "find actions by session id" in {
       val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findActionsBySessionId(savedSession.uuid.toString)))
       val validatedJsonSalableEvents: JsResult[Seq[UserAction]] =
         contentAsJson(info).validate[Seq[UserAction]](JsonHelper.readUserActionReads)
-      validatedJsonSalableEvents match {
+
+      val expectedAction = validatedJsonSalableEvents match {
         case actions: JsSuccess[Seq[UserAction]] =>
-          actions.get must contain (savedAction.copy(timestamp = actions.get.head.timestamp))
+          actions.get
         case error: JsError =>
-          Logger.error("find actions by session id:" + error)
-          error mustEqual 0
+          throw new Exception
       }
+
+      expectedAction must contain (savedAction)
     }
 
     "save a session" in {
       val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.saveUserSession(950, 450)))
+
       val stringUUID = contentAsJson(info).asInstanceOf[JsString].value.toString
       val uuid = UUID.fromString(stringUUID)
-      stringUUID.length must be >10
+
+      stringUUID.length must be > 10
     }
 
     "save an action" in {
@@ -60,9 +66,10 @@ class TestTrackingController extends GlobalApplicationForControllers {
           "sessionId": "a4cea509-1002-47d0-b55c-593c91cb32ae"
           }"""
       )
-      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.saveUserAction()).withJsonBody(jsonAction))
-        contentAsString(info).toInt mustEqual 1
 
+      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.saveUserAction()).withJsonBody(jsonAction))
+
+      contentAsString(info).toInt mustEqual 1
     }
   }
 }

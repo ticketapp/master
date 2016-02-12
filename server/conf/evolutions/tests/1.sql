@@ -726,7 +726,7 @@ INSERT INTO userSessions(id, ip, screenWidth, screenHeight) VALUES ('a4cea509-10
 
 -------------------------------------------------------- users actions----------------------------------------------------
 INSERT INTO userActions(id, action, timestamp, sessionId) VALUES
-  (100, 'mm,30,30', timestamp '2015-09-24 14:00:00', 'a4cea509-1002-47d0-b55c-593c91cb32ae');
+  (100, 'mm,30,30', timestamp '1970-01-01 01:00:00.005', 'a4cea509-1002-47d0-b55c-593c91cb32ae');
 
 
 -------------------------------------------------------- organizers ----------------------------------------------------

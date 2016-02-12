@@ -31,7 +31,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
   var template = "assets/templates/landingPage/landingPage.html"
   timeout( () => {
     val trackedItems = document.getElementsByClassName("tracking")
-    for(i <- 0 to (trackedItems.length - 1)) {
+    for(i <- 0 to(trackedItems.length - 1)) {
       trackedItems.item(i).asInstanceOf[Html].classList.remove("tracking")
     }
     document.onmousemove = (event: Event) => {
@@ -39,11 +39,9 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
   })
 
   httpService.get(TrackingRoutes.getSessions) map { sessionsString =>
-    timeout( () => {
+    timeout(() => {
       sessions = read[Seq[Session]](sessionsString).toJSArray
-      println(sessions)
     })
-    println(sessions)
   }
 
   @JSExport
@@ -60,13 +58,14 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
     val initTimestamp = session.head.timestamp
     session map { action =>
       val seqAction = action.action.split(",").toSeq
-      timeout( () => {
+      val timeToWait: Int = (action.timestamp - initTimestamp).toInt
+      timeout(() => {
         trackingViewContainer.scrollTop = seqAction.last.toDouble
         seqAction.head match {
           case mouseMouve if mouseMouve == "mm" =>
             val left = seqAction(1)
             val top = seqAction(2)
-            mouveCursor(top, left)
+            moveCursor(top, left)
           case click if click == "cl" =>
             document.getElementById(seqAction(1)).asInstanceOf[Html].click()
           case input if input == "in" =>
@@ -74,12 +73,11 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
           case link if link == "a" =>
             template = RoutingConfig.urlTemplatePath(seqAction(1))
         }
-        }, (action.timestamp - initTimestamp).toInt
-      )
+      }, timeToWait)
     }
   }
 
-  def mouveCursor(top: String, left: String): Unit = {
+  def moveCursor(top: String, left: String): Unit = {
     cursor.style.top = top + "px"
     cursor.style.left = left + "px"
   }

@@ -1,22 +1,18 @@
 package tracking
 
 
-import java.util.UUID
-import javafx.scene.input.ScrollEvent
-
-import com.greencatsoft.angularjs.core.Timeout
 import com.greencatsoft.angularjs._
-import com.greencatsoft.angularjs
+import com.greencatsoft.angularjs.core.Timeout
 import httpServiceFactory.HttpGeneralService
 import org.scalajs.dom._
 import org.scalajs.dom.html.Html
-import upickle.Js
 import upickle.default._
-import utilities.{CookiesOptions, NgCookies}
-import scala.scalajs.js
-import scala.scalajs.js.{Object, Date, JSON}
-import scala.scalajs.js.annotation.JSExport
+import utilities.NgCookies
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.{Date, Object}
 
 trait MousePosition extends js.Object {
   var left:Double = js.native
@@ -40,7 +36,6 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
         storedActions map { action =>
           httpService.postWithObject(TrackingRoutes.postWithActionObject, write(action))
         }
-
       }
   }
 
@@ -59,7 +54,6 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
     else storedActions :+ newAction
   }
 
-
   document.onmousemove = (event: MouseEvent) => {
     var left = 0.0
     var top = 0.0
@@ -77,12 +71,4 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
 
   var trackMouse = setInterval(() => track("mm," + mousePosition.left + "," + mousePosition.top), 300)
   if(window.location.href.indexOf("admin") > -1) clearInterval(trackMouse)
-
-
-  override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit = {
-        elements.map{_.asInstanceOf[Html]}.foreach { element =>
-
-        }
-    }
-
 }
