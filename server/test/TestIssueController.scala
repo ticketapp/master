@@ -1,16 +1,28 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import database.MyPostgresDriver.api._
 import issues.{Issue, IssueComment}
 import json.JsonHelper._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
-
 class TestIssueController extends GlobalApplicationForControllers {
-  sequential
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO issues(issueid, title, content, userid, fixed)
+          VALUES(100, 'title', 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', false);
+        INSERT INTO issuescomments(commentId, content, userid, issueid)
+          VALUES(100, 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', 100);
+        """),
+      5.seconds)
+  }
 
   "Issue controller" should {
 

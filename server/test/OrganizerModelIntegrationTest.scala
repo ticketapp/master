@@ -1,18 +1,51 @@
 import addresses.Address
 import database.EventOrganizerRelation
-import eventsDomain.{EventWithRelations, Event}
+import database.MyPostgresDriver.api._
+import eventsDomain.{Event, EventWithRelations}
 import org.joda.time.DateTime
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import organizersDomain.{Organizer, OrganizerWithAddress}
 import placesDomain.Place
-import testsHelper.GlobalApplicationForModels
+import testsHelper.GlobalApplicationForModelsIntegration
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
+class OrganizerModelIntegrationTest extends GlobalApplicationForModelsIntegration {
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO organizers(name) VALUES('name0');
+        INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
+          VALUES(100, 'name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+        INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
+          VALUES(300, 'name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
-class TestOrganizerModel extends GlobalApplicationForModels {
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
+        INSERT INTO events(ispublic, isactive, name, starttime, endtime)
+          VALUES(true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+        INSERT INTO events(eventId, ispublic, isactive, name, starttime, endtime)
+          VALUES(100, true, true, 'notPassedEvent2', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'name0'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'eventPassed'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+
+        INSERT INTO organizersfollowed(organizerid, userid)
+          VALUES((SELECT organizerId FROM organizers WHERE name = 'name0'), '077f3ea6-2272-4457-a47e-9e9111108e44');
+
+        INSERT INTO frenchcities(city, geographicpoint) VALUES('lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+        """),
+      5.seconds)
+  }
 
   "An Organizer" must {
 
@@ -159,16 +192,17 @@ class TestOrganizerModel extends GlobalApplicationForModels {
 
     "get the info about the organizer on Facebook" in {
       whenReady (organizerMethods.getOrganizerInfo(Option("164354640267171")), timeout(Span(5, Seconds))) { organizerInfos =>
+
         organizerInfos.get.organizer.name mustBe "Le Transbordeur"
       }
     }
 
     "save and find an organizer with his address" in {
       whenReady (organizerMethods.getOrganizerInfo(Option("164354640267171")), timeout(Span(5, Seconds))) { organizerInfos =>
+        whenReady(organizerMethods.saveWithAddress(organizerInfos.get), timeout(Span(5, Seconds))) { savedOrganizer =>
+
 
         organizerInfos.get.organizer.name mustBe "Le Transbordeur"
-
-        whenReady(organizerMethods.saveWithAddress(organizerInfos.get), timeout(Span(5, Seconds))) { savedOrganizer =>
           savedOrganizer.organizer.name mustBe "Le Transbordeur"
           savedOrganizer.address.get mustBe Address(savedOrganizer.address.get.id,
             geographicPointMethods.stringToTryPoint("45.7839103,4.860398399999999").get,
@@ -184,8 +218,8 @@ class TestOrganizerModel extends GlobalApplicationForModels {
     }
 
     "save events relations" in {
-      val eventOrganizerRelations = Seq(EventOrganizerRelation(100, 3), EventOrganizerRelation(3, 3))
-      whenReady (organizerMethods.saveEventRelations(eventOrganizerRelations), timeout(Span(5, Seconds))) { response =>
+      whenReady(organizerMethods.saveEventRelations(Seq(EventOrganizerRelation(100, 300))), timeout(Span(5, Seconds))) { response =>
+
         response mustBe true
       }
     }

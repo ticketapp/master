@@ -2,15 +2,29 @@ import java.util.UUID
 
 import application.{GuestUser, User}
 import com.mohiva.play.silhouette.api.LoginInfo
+import database.MyPostgresDriver.api._
 import database.UserOrganizerRelation
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.Matchers._
-import organizersDomain.{OrganizerWithAddress, Organizer}
-import testsHelper.GlobalApplicationForModels
+import organizersDomain.{Organizer, OrganizerWithAddress}
+import testsHelper.GlobalApplicationForModelsIntegration
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
-class TestUserModel extends GlobalApplicationForModels {
+class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
+        INSERT INTO places(placeid, name, facebookid)
+          VALUES(400, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
+        INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');"""),
+      5.seconds)
+  }
 
   val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
   val savedIp = "127.0.0.0"

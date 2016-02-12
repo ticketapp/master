@@ -1,16 +1,30 @@
 import java.sql.Timestamp
 import java.util.UUID
 
-import org.joda.time.DateTime
+import database.MyPostgresDriver.api._
 import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.time.Span
-import testsHelper.{GlobalApplicationForModelsIntegration, GlobalApplicationForModels}
-import ticketsDomain._
+import testsHelper.GlobalApplicationForModelsIntegration
 import trackingDomain.{UserAction, UserSession}
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class TestTrackingMethods extends GlobalApplicationForModelsIntegration {
+class TrackingMethodsIntegrationTest extends GlobalApplicationForModelsIntegration {
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO guestUsers(ip) VALUES('127.0.0.0');
+
+        INSERT INTO userSessions(id, ip, screenWidth, screenHeight)
+          VALUES('a4cea509-1002-47d0-b55c-593c91cb32ae', '127.0.0.0', 950, 450);
+
+        INSERT INTO userActions(id, action, timestamp, sessionId)
+          VALUES(100, 'mm,30,30', timestamp '1970-01-01 01:00:00.005', 'a4cea509-1002-47d0-b55c-593c91cb32ae');
+        """),
+      5.seconds)
+  }
 
   val savedIp = "127.0.0.0"
   val savedSession = UserSession(UUID.fromString("a4cea509-1002-47d0-b55c-593c91cb32ae"), savedIp, 950, 450)

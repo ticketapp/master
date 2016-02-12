@@ -1,6 +1,7 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import database.EventArtistRelation
+import database.MyPostgresDriver.api._
 import eventsDomain.{Event, EventWithRelations}
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -11,9 +12,38 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-
 class TestArtistController extends GlobalApplicationForControllers {
-  sequential
+
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('200', 'name0', 'facebookUrl00');
+
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(
+          true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
+        INSERT INTO events(ispublic, isactive, name, starttime, endtime) VALUES(
+          true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+
+        INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
+
+        INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
+          ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
+           (SELECT genreid FROM genres WHERE name = 'genretest0'), 1);
+
+        INSERT INTO eventsartists(eventid, artistid) VALUES
+          ((SELECT eventId FROM events WHERE name = 'name0'),
+           (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
+        INSERT INTO eventsartists(eventid, artistid) VALUES
+          ((SELECT eventId FROM events WHERE name = 'eventPassed'),
+           (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'));
+        INSERT INTO eventsartists(eventid, artistid) VALUES
+          ((SELECT eventId FROM events WHERE name = 'name0'),
+           (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl00'));
+        """),
+      5.seconds)
+  }
 
   "artist controller" should {
 

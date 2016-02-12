@@ -1,11 +1,27 @@
+import database.MyPostgresDriver.api._
 import issues.{Issue, IssueComment}
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import testsHelper.GlobalApplicationForModels
+import testsHelper.GlobalApplicationForModelsIntegration
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
-class TestIssueModel extends GlobalApplicationForModels {
+class TestIssueModel extends GlobalApplicationForModelsIntegration {
+
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO issues(issueid, title, content, userid, fixed)
+          VALUES(100, 'title', 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', false);
+        INSERT INTO issuescomments(commentId, content, userid, issueid)
+          VALUES(100, 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', 100);
+        """),
+      5.seconds)
+  }
 
   "An issue" must {
 

@@ -1,6 +1,5 @@
 package tracking
 
-
 import com.greencatsoft.angularjs._
 import com.greencatsoft.angularjs.core.Timeout
 import httpServiceFactory.HttpGeneralService
@@ -14,6 +13,7 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.{Date, Object}
 
+@js.native
 trait MousePosition extends js.Object {
   var left:Double = js.native
   var top:Double = js.native
@@ -57,8 +57,7 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
   document.onmousemove = (event: MouseEvent) => {
     var left = 0.0
     var top = 0.0
-    if (event.pageX == null && event.clientX != null) {
-
+    if(event.pageX == null && event.clientX != null) {
       left = event.clientX + doc.scrollLeft  - doc.clientLeft
       top = event.clientY + doc.scrollTop - doc.clientTop
     } else {

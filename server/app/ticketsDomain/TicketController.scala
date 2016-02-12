@@ -61,7 +61,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
           withStatus.ticket.ticketId match {
             case Some(ticketId) =>
               ticketMethods.blockTicket(900, ticketId, userId) map { response =>
-                  Ok(Json.toJson(response))
+                Ok(Json.toJson(response))
               }
             case _ =>
               Logger.error("TicketController.buyTicket: no id for a found ticket")

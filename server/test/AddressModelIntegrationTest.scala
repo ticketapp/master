@@ -1,9 +1,9 @@
 import addresses.Address
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import testsHelper.GlobalApplicationForModels
+import testsHelper.GlobalApplicationForModelsIntegration
 
-class AddressModelIntegrationTest extends GlobalApplicationForModels {
+class AddressModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
   "An address" must {
     "be saved (in lowercase) in database and return the new id then be deleted" in {

@@ -24,7 +24,7 @@ class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseCo
     with Utilities {
 
   def findGeographicPointOfCity(city: String): Future[Option[Geometry]] = {
-    val query = frenchCities.filter(_.city.toLowerCase === city.toLowerCase) map (_.geographicPoint)
+    val query = frenchCities.filter(_.city.toLowerCase === city.toLowerCase) map(_.geographicPoint)
     db.run(query.result.headOption)
   }
 

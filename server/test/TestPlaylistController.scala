@@ -2,14 +2,42 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import database.MyPostgresDriver.api._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
 import tracksDomain.Track
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
 
 class TestPlaylistController extends GlobalApplicationForControllers {
-  sequential
+
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO playlists(userId, name) VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', 'playlist0');
+
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
+        INSERT INTO artists(artistid, facebookid, name, facebookurl)
+          VALUES('300', 'facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
+
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('02894e56-08d1-4c1f-b3e4-466c069d15ed', 'title', 'url0', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('13894e56-08d1-4c1f-b3e4-466c069d15ed', 'title0', 'url00', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
+
+
+        INSERT INTO playliststracks(playlistId, trackid, trackrank)
+          VALUES((SELECT playlistid FROM playlists WHERE name = 'playlist0'), '02894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
+        INSERT INTO playliststracks(playlistId, trackid, trackrank)
+        VALUES( (SELECT playlistid FROM playlists WHERE name = 'playlist0'), '13894e56-08d1-4c1f-b3e4-466c069d15ed', 2);
+        """),
+      5.seconds)
+  }
 
   "playlist controller" should {
 
