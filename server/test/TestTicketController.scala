@@ -20,9 +20,11 @@ class TestTicketController extends GlobalApplicationForControllers {
     Await.result(
       dbConfProvider.get.db.run(sqlu"""
         INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime)
-          VALUES(1000, 'facebookidattendeetest0', true, true, 'notPassedEvent1', TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+          VALUES(1000, 'facebookidattendeetest0', true, true, 'notPassedEvent1',
+          TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
         INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime)
-          VALUES(100, 'facebookidattendeetest', true, true, 'notPassedEvent3', TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+          VALUES(100, 'facebookidattendeetest', true, true, 'notPassedEvent3',
+          TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
 
         INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId)
           VALUES(10000, 'test', 10, TIMESTAMP WITH TIME ZONE '2040-08-24 14:00:00+02:00',
@@ -32,16 +34,19 @@ class TestTicketController extends GlobalApplicationForControllers {
         INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES(1100, 'savedBlockedTicket', 100, 10000);
 
         INSERT INTO pendingTickets(pendingTicketId, userId, tariffId, date, amount, qrCode)
-          VALUES(1000, '077f3ea6-2272-4457-a47e-9e9111108e44', 10000, TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10, 'pendingTicket');
+          VALUES(1000, '077f3ea6-2272-4457-a47e-9e9111108e44', 10000,
+          TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10, 'pendingTicket');
 
-        INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES(1000, 1000, 'a', timestamp '2015-09-22 14:00:00');
-        INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES(1100, 1000, 'b', timestamp '2015-09-24 14:00:00');
+        INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES(1000, 1000, 'a',
+          TIMESTAMP WITH TIME ZONE '2015-09-22 14:00:00+02:00');
+        INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES(1100, 1000, 'b',
+          TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00');
 
         INSERT INTO boughtTicketBills(billId, ticketId, userId, date, amount) VALUES
-         (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', timestamp '2015-09-24 14:00:00', 10);
+         (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', TIMESTAMP WITH TIME ZONE  '2015-09-24 14:00:00+02:00', 10);
        
         INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
-         (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', timestamp '2015-09-24 14:00:00', 10);
+         (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10);
 
         INSERT INTO salableEvents(eventId) VALUES (100);"""),
       5.seconds)
