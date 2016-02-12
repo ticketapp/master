@@ -8,6 +8,7 @@ CREATE TABLE infos (
   animationStyle            VARCHAR
 );
 
+
 CREATE TABLE frenchCities (
   cityId                    SERIAL PRIMARY KEY,
   city                      VARCHAR(255) NOT NULL,
@@ -36,7 +37,7 @@ CREATE TABLE orders ( --account701
 
 CREATE TABLE artists (
   artistId                  SERIAL PRIMARY KEY,
-  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  creationDateTime          TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   facebookId                VARCHAR(63),
   name                      VARCHAR(255) NOT NULL,
   imagePath                 VARCHAR,
@@ -170,12 +171,12 @@ CREATE TABLE events (
   facebookId                VARCHAR(63),
   isPublic                  BOOLEAN NOT NULL,
   isActive                  BOOLEAN NOT NULL,
-  creationDateTime          TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  creationDateTime          TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                      VARCHAR(255) NOT NULL,
   geographicPoint           GEOMETRY DEFAULT ST_GeomFromText('POINT(-84 30)', 4326) NOT NULL,
   description               VARCHAR,
-  startTime                 TIMESTAMP NOT NULL,
-  endTime                   TIMESTAMP,
+  startTime                 TIMESTAMP WITH TIME ZONE NOT NULL,
+  endTime                   TIMESTAMP WITH TIME ZONE,
   imagePath                 VARCHAR,
   ageRestriction            SMALLINT NOT NULL DEFAULT 16,
   tariffRange               VARCHAR(15),
@@ -203,30 +204,28 @@ CREATE TABLE places (
 CREATE INDEX placeGeographicPoint ON places USING GIST (geographicPoint);
 
 
-CREATE TABLE images (
-  imageId                     SERIAL PRIMARY KEY,
-  path                        VARCHAR NOT NULL,
-  category                    VARCHAR(31),
-  organizerId                 BIGINT REFERENCES organizers(organizerId) ON DELETE CASCADE,
-  infoId                      BIGINT REFERENCES infos(infoId) ON DELETE CASCADE,
-  trackId                     UUID REFERENCES tracks(trackId) ON DELETE CASCADE,
+CREATE TABLE images(
+  imageId                   SERIAL PRIMARY KEY,
+  path                      VARCHAR NOT NULL,
+  category                  VARCHAR(31),
+  organizerId               BIGINT REFERENCES organizers(organizerId) ON DELETE CASCADE,
+  infoId                    BIGINT REFERENCES infos(infoId) ON DELETE CASCADE,
+  trackId                   UUID REFERENCES tracks(trackId) ON DELETE CASCADE,
   UNIQUE(path)
 );
 
 
-CREATE TABLE tariffs (
+CREATE TABLE tariffs(
   tariffId                  SERIAL PRIMARY KEY,
   denomination              VARCHAR(255) DEFAULT 'Basique' NOT NULL,
   price                     NUMERIC NOT NULL,
-  startTime                 TIMESTAMP NOT NULL,
-  endTime                   TIMESTAMP NOT NULL,
+  startTime                 TIMESTAMP WITH TIME ZONE NOT NULL,
+  endTime                   TIMESTAMP WITH TIME ZONE NOT NULL,
   eventId                   BIGINT REFERENCES events(eventId) ON DELETE CASCADE
 );
 
 
-
-
-CREATE TABLE tickets (
+CREATE TABLE tickets(
   ticketId                  SERIAL PRIMARY KEY,
   qrCode                    VARCHAR(255) UNIQUE NOT NULL,
   eventId                   INT REFERENCES events(eventId) NOT NULL,
@@ -234,26 +233,26 @@ CREATE TABLE tickets (
 );
 CREATE INDEX ticketQrCode ON tickets (qrCode);
 
-CREATE TABLE ticketStatuses (
+
+CREATE TABLE ticketStatuses(
   id                        SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   status                    CHAR NOT NULL,
-  date                      TIMESTAMP NOT NULL
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-CREATE TABLE blockedTickets (
+CREATE TABLE blockedTickets(
   id                        SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
-  expirationDate            TIMESTAMP NOT NULL,
-  userId                    UUID REFERENCES users(userID) NOT NULL
+  expirationDate            TIMESTAMP WITH TIME ZONE NOT NULL,
+  userId                    UUID REFERENCES users(userId) NOT NULL
 );
-CREATE INDEX blockedTicketDate ON blockedTickets (expirationDate);
 
 CREATE TABLE boughtTicketBills (
   billId                    SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   userId                    UUID REFERENCES users (userId) NOT NULL,
-  date                      TIMESTAMP NOT NULL,
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                    NUMERIC NOT NULL
 );
 
@@ -261,21 +260,20 @@ CREATE TABLE soldTicketBills (
   billId                    SERIAL PRIMARY KEY,
   ticketId                  INT REFERENCES tickets(ticketId) NOT NULL,
   userId                    UUID REFERENCES users (userId) NOT NULL,
-  date                      TIMESTAMP NOT NULL,
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                    NUMERIC NOT NULL
 );
 
 CREATE TABLE pendingTickets (
-  pendingTicketId             SERIAL PRIMARY KEY,
+  pendingTicketId          SERIAL PRIMARY KEY,
   userId                    UUID REFERENCES users (userId) NOT NULL,
   tariffId                  INT REFERENCES tariffs(tariffId)  NOT NULL,
-  date                      TIMESTAMP NOT NULL,
+  date                      TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                    NUMERIC NOT NULL,
   qrCode                    VARCHAR UNIQUE NOT NULL,
   isValidated               BOOLEAN
 );
 CREATE INDEX pendingTicketQrCode ON pendingTickets (qrCode);
-
 
 CREATE TABLE salableEvents (
   eventId                   INT PRIMARY KEY REFERENCES events(eventId) NOT NULL
@@ -312,12 +310,14 @@ CREATE TABLE issues (
   fixed                     BOOLEAN DEFAULT FALSE NOT NULL
 );
 
+
 CREATE TABLE issuesComments (
   commentId                 SERIAL PRIMARY KEY,
   content                   VARCHAR,
   userId                    UUID REFERENCES users (userId) ON DELETE CASCADE,
   issueId                   BIGINT REFERENCES issues(issueId) ON DELETE CASCADE
 );
+
 
 CREATE TABLE usersTools (
   tableId                   SERIAL PRIMARY KEY,
@@ -342,9 +342,9 @@ CREATE TABLE clients (
 CREATE TABLE bills (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT REFERENCES clients(clientId),
-  billingDate             TIMESTAMP,
+  billingDate             TIMESTAMP WITH TIME ZONE,
   amountDue               INT,
-  endSellingTime          TIMESTAMP
+  endSellingTime          TIMESTAMP WITH TIME ZONE
   --majorations impayés
 );
 
@@ -352,7 +352,7 @@ CREATE TABLE bills (
 --Produit activités annexes = compte 708
 CREATE TABLE account708 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT  current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   clientId                BIGINT NOT NULL REFERENCES clients(clientId),
@@ -363,7 +363,7 @@ CREATE TABLE account708 (
 CREATE TABLE account411 (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT NOT NULL REFERENCES clients(clientId),
-  paymentDate             TIMESTAMP NOT NULL,
+  paymentDate             TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                  INT NOT NULL,
   paymentMean             VARCHAR(255) NOT NULL
 );
@@ -372,7 +372,7 @@ CREATE TABLE account411 (
 CREATE TABLE account413 (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT REFERENCES clients(clientId),
-  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   amount                  INT NOT NULL,
   debit                   Boolean NOT NULL
 );
@@ -382,7 +382,7 @@ CREATE TABLE account4191 (
   id                      SERIAL PRIMARY KEY,
   clientId                BIGINT REFERENCES clients(clientId),
   billId                  BIGINT REFERENCES bills(id),
-  paymentDate             TIMESTAMP NOT NULL,
+  paymentDate             TIMESTAMP WITH TIME ZONE NOT NULL,
   amount                  INT NOT NULL,
   paymentMean             VARCHAR(255) NOT NULL
 );
@@ -391,7 +391,7 @@ CREATE TABLE account4191 (
 --associés, dividendes à payer
 CREATE TABLE account457 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT  current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   paymentReference        INT NOT NULL,
   assemblyName            VARCHAR(255) NOT NULL
@@ -400,7 +400,7 @@ CREATE TABLE account457 (
 --impôts et taxes
 CREATE TABLE account63 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   orderId                 BIGINT REFERENCES orders(orderId),
@@ -410,7 +410,7 @@ CREATE TABLE account63 (
 --diverses charges à payer
 CREATE TABLE account4686 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255),
   amount                  NUMERIC NOT NULL,
   debit                   BOOLEAN NOT NULL,
@@ -421,7 +421,7 @@ CREATE TABLE account4686 (
 --achats
 CREATE TABLE account60 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   paymentReference        INT,
@@ -431,7 +431,7 @@ CREATE TABLE account60 (
 --Fournisseurs à payer
 CREATE TABLE account403 (
   id                      SERIAL PRIMARY KEY,
-  date                    TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  date                    TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   amount                  NUMERIC NOT NULL,
   debit                   BOOLEAN NOT NULL, --#sinon debit
   userId                  UUID REFERENCES users(userId),
@@ -441,7 +441,7 @@ CREATE TABLE account403 (
 --frais postaux et telecoms
 CREATE TABLE account626 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   paymentReference        INT NOT NULL
@@ -450,7 +450,7 @@ CREATE TABLE account626 (
 --services bancaires
 CREATE TABLE account627 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   amount                  NUMERIC NOT NULL,
   orderId                 BIGINT REFERENCES orders(orderId)
@@ -459,7 +459,7 @@ CREATE TABLE account627 (
 
 CREATE TABLE bank ( --account512
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
   name                    VARCHAR(255) DEFAULT '666' NOT NULL,
   amount                  NUMERIC NOT NULL,
   debit                   Boolean NOT NULL,
@@ -471,7 +471,7 @@ CREATE TABLE bank ( --account512
 --publicité publications et relations publiques
 CREATE TABLE account623 (
   id                      SERIAL PRIMARY KEY,
-  datePayment             TIMESTAMP DEFAULT  current_timestamp NOT NULL,
+  datePayment             TIMESTAMP WITH TIME ZONE DEFAULT  current_timestamp NOT NULL,
   amount                  NUMERIC NOT NULL,
   name                    VARCHAR(255) NOT NULL,
   paymentReference        INT NOT NULL,
@@ -484,6 +484,7 @@ CREATE TABLE eventsFollowed (
   eventId                  BIGINT REFERENCES events(eventId) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX eventsFollowedIndex ON eventsFollowed (userId, eventId);
+
 
 CREATE TABLE artistsFollowed (
   tableId                  SERIAL PRIMARY KEY,
@@ -601,12 +602,12 @@ CREATE UNIQUE INDEX playlistsTracksIndex ON playlistsTracks (playlistId, trackId
 CREATE TABLE tracksRating (
   tableId                 SERIAL PRIMARY KEY,
   userId                  UUID REFERENCES users(userId) ON DELETE CASCADE NOT NULL,
-  trackId                 UUID REFERENCES tracks (trackId) ON DELETE CASCADE NOT NULL,
+  trackId                 UUID REFERENCES tracks(trackId) ON DELETE CASCADE NOT NULL,
   ratingUp                INT,
   ratingDown              INT,
   reason                  CHAR
 );
-CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating (userId, trackId);
+CREATE UNIQUE INDEX tracksRatingIndex ON tracksRating(userId, trackId);
 
 
 CREATE TABLE facebookAttendees (
@@ -637,9 +638,9 @@ INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44',
 INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
 INSERT INTO artists(artistid, name, facebookurl) VALUES('200', 'name0', 'facebookUrl00');
 INSERT INTO artists(artistid, facebookid, name, facebookurl)
-  VALUES('300', 'facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
+VALUES('300', 'facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
 INSERT INTO artists(facebookid, name, facebookurl)
-  VALUES('withoutEventRelation', 'withoutEventRelation', 'withoutEventRelation');
+VALUES('withoutEventRelation', 'withoutEventRelation', 'withoutEventRelation');
 INSERT INTO artists(facebookid, name, facebookurl) VALUES('testFindIdByFacebookId', 'name00', 'testFindIdByFacebookId');
 
 -------------------------------------------------------- tracks --------------------------------------------------------
@@ -686,40 +687,35 @@ INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES
 INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES
   (1100, 'savedBlockedTicket', 100, 10000);
 
--------------------------------------------------------- ticketStatuses  ------------------------------------------------------
+-------------------------------------------------------- ticketStatuses  -----------------------------------------------
 INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
   (1000, 1000, 'a', timestamp '2015-09-22 14:00:00');
 
 INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES
   (1100, 1000, 'b', timestamp '2015-09-24 14:00:00');
 
--------------------------------------------------------- pending tickets ----------------------------------------------------
+-------------------------------------------------------- pending tickets -----------------------------------------------
 INSERT INTO pendingTickets(pendingTicketId, userId, tariffId, date, amount, qrCode) VALUES
   (1000, 'a4aea509-1002-47d0-b55c-593c91cb32ae', 10000, timestamp '2015-09-24 14:00:00', 10, 'pendingTicket');
 
-
-
--------------------------------------------------------- bought tickets bills----------------------------------------------------
+-------------------------------------------------------- bought tickets bills ------------------------------------------
 INSERT INTO boughtTicketBills(billId, ticketId, userId, date, amount) VALUES
   (1000, 1100, 'a4aea509-1002-47d0-b55c-593c91cb32ae', timestamp '2015-09-24 14:00:00', 10);
 
--------------------------------------------------------- sold tickets bills----------------------------------------------------
+-------------------------------------------------------- sold tickets bills --------------------------------------------
 INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
   (1000, 1100, 'a4aea509-1002-47d0-b55c-593c91cb32ae', timestamp '2015-09-24 14:00:00', 10);
 
 
--------------------------------------------------------- blocked tickets ----------------------------------------------------
+-------------------------------------------------------- blocked tickets -----------------------------------------------
 INSERT INTO blockedTickets(id, ticketId, expirationDate, userId) VALUES
   (1000, 1100, timestamp '2055-09-24 14:00:00', 'a4aea509-1002-47d0-b55c-593c91cb32ae');
 
-
--------------------------------------------------------- salable events ----------------------------------------------------
+-------------------------------------------------------- salable events ------------------------------------------------
 INSERT INTO salableEvents(eventId) VALUES (100);
-
 
 -------------------------------------------------------- guest users ----------------------------------------------------
 INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
-
 
 -------------------------------------------------------- users sessions----------------------------------------------------
 INSERT INTO userSessions(id, ip, screenWidth, screenHeight) VALUES ('a4cea509-1002-47d0-b55c-593c91cb32ae', '127.0.0.0', 950, 450);
@@ -728,23 +724,22 @@ INSERT INTO userSessions(id, ip, screenWidth, screenHeight) VALUES ('a4cea509-10
 INSERT INTO userActions(id, action, timestamp, sessionId) VALUES
   (100, 'mm,30,30', timestamp '1970-01-01 01:00:00.005', 'a4cea509-1002-47d0-b55c-593c91cb32ae');
 
-
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
-  VALUES(100, 'name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+VALUES(100, 'name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
-  VALUES(300, 'name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+VALUES(300, 'name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 
 -------------------------------------------------------- places --------------------------------------------------------
 INSERT INTO places(name, geographicPoint, facebookId)
-  VALUES ('Le transbordeur', ST_GeomFromText('POINT(45.783808 4.860598)', 4326), '117030545096697');
+VALUES ('Le transbordeur', ST_GeomFromText('POINT(45.783808 4.860598)', 4326), '117030545096697');
 INSERT INTO places(placeid, name, facebookid, geographicpoint)
-  VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
 INSERT INTO places(placeid, name, facebookid, geographicpoint)
-  VALUES(300, 'Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+VALUES(300, 'Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
 INSERT INTO places(placeid, name, facebookid)
-  VALUES(400, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
+VALUES(400, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
 INSERT INTO places(placeid, name, facebookid) VALUES(600, 'testId5', 'facebookId600');
 INSERT INTO places(placeid, name, facebookid) VALUES(700, 'testId5', 'facebookId700');
 INSERT INTO places(placeid, name, facebookid) VALUES(800, 'testId5', 'facebookId800');
@@ -842,23 +837,23 @@ INSERT INTO tracksgenres(genreid, trackid, weight) VALUES(
 
 -------------------------------------------------------- tracksFollowed ------------------------------------------------
 INSERT INTO tracksfollowed(userId, trackId)
-  VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', '02894e56-08d1-4c1f-b3e4-466c069d15ed');
+VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', '02894e56-08d1-4c1f-b3e4-466c069d15ed');
 
 -------------------------------------------------------- tracksRemoved -------------------------------------------------
 INSERT INTO tracksrating(userId, trackId, reason)
-  VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', '13894e56-08d1-4c1f-b3e4-466c069d15ed', 'a');
+VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', '13894e56-08d1-4c1f-b3e4-466c069d15ed', 'a');
 
 -------------------------------------------------------- issuesComments ------------------------------------------------
 INSERT INTO issuescomments(commentId, content, userid, issueid)
-  VALUES(100, 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', 100);
+VALUES(100, 'content', '077f3ea6-2272-4457-a47e-9e9111108e44', 100);
 
 -------------------------------------------------------- facebookAttendees ---------------------------------------------
 INSERT INTO facebookAttendees(id, attendeeFacebookId, name)
-  VALUES(100, 'abcdefghij', 'name100');
+VALUES(100, 'abcdefghij', 'name100');
 
 -------------------------------------------------------- facebookAttendees ---------------------------------------------
 INSERT INTO facebookAttendeeEventRelations(attendeeFacebookId, eventFacebookId, attendeeStatus)
-  VALUES('abcdefghij', 'facebookidattendeetest', 'D');
+VALUES('abcdefghij', 'facebookidattendeetest', 'D');
 
 
 # --- !Downs
@@ -884,10 +879,10 @@ DROP TABLE IF EXISTS blockedTickets;
 DROP TABLE IF EXISTS boughtTicketBills;
 DROP TABLE IF EXISTS soldTicketBills;
 DROP TABLE IF EXISTS pendingTickets;
-DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS salableEvents;
 DROP TABLE IF EXISTS userActions;
 DROP TABLE IF EXISTS userSessions;
+DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS guestUsers;
 DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
@@ -927,4 +922,3 @@ DROP TABLE IF EXISTS addresses;
 DROP TABLE IF EXISTS frenchCities;
 DROP TABLE IF EXISTS users, logininfo, userlogininfo, passwordinfo, oauth1info,  oauth2info, openidinfo, openidattributes;
 DROP TABLE IF EXISTS facebookAttendees;
-

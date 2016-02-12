@@ -35,21 +35,19 @@ class TestTariffModel extends GlobalApplicationForModels {
       digitick mustBe empty
     }
 
-    "return id on save" in {
+    "return its id when saved" in {
       val tariff = Tariff(
         denomination = "test",
         eventId = 1,
         startTime = new DateTime(),
         endTime = new DateTime(),
         price = 10)
-      whenReady(tariffMethods.save(tariff)) { tariffId =>
-        tariffId mustBe 1
-      }
+
+      whenReady(tariffMethods.save(tariff)) { tariffId => tariffId mustBe 1 }
     }
-    "return tariffs by eventId" in {
-      whenReady(tariffMethods.findByEventId(100)) { tariffs =>
-        tariffs must contain (savedTariff)
-      }
+
+    "be found by eventId" in {
+      whenReady(tariffMethods.findByEventId(savedTariff.eventId)) { tariffs => tariffs must contain(savedTariff) }
     }
   }
 }

@@ -36,7 +36,7 @@ trait Utilities {
 
   val facebookApiVersion = "v2.4"
 
-  def normalizeString(string: String): String = string //Should be replace accentued letters for example?
+  def normalizeString(string: String): String = string
 
   def replaceAccentuatedLetters(string: String): String =
     Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
@@ -198,8 +198,6 @@ trait Utilities {
       case index => eventName.take(index).trim
     }
   }
-
-  def setToOptionString(set: Set[String]): Option[String] = if (set.isEmpty) None else Option(set.mkString(","))
 
   def returnNumberOfHoursBetween4AMAndNow(hoursSinceMidnight: Int): Int = {
     4 - hoursSinceMidnight match {

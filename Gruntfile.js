@@ -136,6 +136,11 @@ module.exports = function (grunt) {
             angularTouch: {
                 src: 'bower_components/angular-touch/angular-touch.min.js',
                 dest: 'server/public/plugins/angular-touch.min.js'
+            },
+
+            angularTranslate: {
+                src: 'bower_components/angular-translate/angular-translate.min.js',
+                dest: 'server/public/plugins/angular-translate.min.js'
             }
 
         },

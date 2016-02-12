@@ -161,8 +161,34 @@
     }
 </style>
 
+<div class="parallax-background image-container">
+
+    <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
+        <b>{{ 'HEADLINE' | translate }}</b>
+        <!--Vendez nous votre billet, nous faisons le reste.-->
+        <!--faisons le<-> nous occupons du-->
+    </h1>
 
 
+    <h4 class="home-subtitle">
+        {{ 'INTRO_TEXT' | translate }}
+    </h4>
+
+
+    <form class="sell-form column medium-10 medium-offset-1 large-8 large-offset-2" method="post" novalidate="">
+        <div class="form-container">
+
+            <input type="text"
+                   ng-model="query"
+                   class="sell-input"
+                   placeholder="Entrez un nom d'événement ou un lieu">
+
+            <a class="sell-form-link">← Obtenir une offre maintenant</a>
+
+        </div>
+    </form>
+
+</div>
 
 
 
