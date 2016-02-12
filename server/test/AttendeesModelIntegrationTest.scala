@@ -1,13 +1,30 @@
 import attendees.{AttendeeRead, FacebookAttendee}
-import play.api.libs.json._
-import testsHelper.GlobalApplicationForModels
+import database.MyPostgresDriver.api._
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.Matchers._
+import play.api.libs.json._
+import testsHelper.GlobalApplicationForModelsIntegration
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
-class TestAttendeesModel extends GlobalApplicationForModels {
+class AttendeesModelIntegrationTest extends GlobalApplicationForModelsIntegration {
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime) VALUES(
+          1000, 'facebookidattendeetest', true, true, 'notPassedEvent3', timestamp '2050-08-24 14:00:00');
 
+        INSERT INTO facebookAttendees(id, attendeeFacebookId, name)
+          VALUES(100, 'abcdefghij', 'name100');
+
+        INSERT INTO facebookAttendeeEventRelations(attendeeFacebookId, eventFacebookId, attendeeStatus)
+          VALUES('abcdefghij', 'facebookidattendeetest', 'D');"""),
+      5.seconds)
+  }
+  
   "Attendee" must {
 
     "be saved" in {

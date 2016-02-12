@@ -550,9 +550,8 @@ CREATE TABLE tracksGenres (
   trackId                 UUID REFERENCES tracks (trackId) ON DELETE CASCADE NOT NULL,
   genreId                 INT REFERENCES genres (genreId) ON DELETE CASCADE NOT NULL,
   weight                  BIGINT NOT NULL,
-  PRIMARY KEY (genreId)
+  PRIMARY KEY(trackId, genreId)
 );
-CREATE UNIQUE INDEX tracksGenresIndex ON tracksGenres (trackId, genreId);
 
 
 CREATE TABLE artistsGenres (

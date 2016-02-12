@@ -1,16 +1,32 @@
 import java.util.UUID
 
 import artistsDomain.{Artist, ArtistWithWeightedGenres}
+import database.MyPostgresDriver.api._
 import database.{ArtistGenreRelation, EventGenreRelation, TrackGenreRelation}
 import genresDomain.Genre
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
-import testsHelper.GlobalApplicationForModels
+import testsHelper.GlobalApplicationForModelsIntegration
 import tracksDomain.Track
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
-class TestGenreModel extends GlobalApplicationForModels {
+
+class GenreModelTestIntegration extends GlobalApplicationForModelsIntegration {
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
+        INSERT INTO genres(name, icon) VALUES('genretest00', 'a');
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
+        """),
+      5.seconds)
+  }
 
   "A genre" must {
 

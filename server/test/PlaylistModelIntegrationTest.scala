@@ -2,20 +2,52 @@ import java.util.UUID
 
 import application.User
 import com.mohiva.play.silhouette.api.LoginInfo
+import database.MyPostgresDriver.api._
 import genresDomain.Genre
+import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import playlistsDomain._
-import testsHelper.GlobalApplicationForModels
-import tracksDomain.{TrackWithGenres, Track}
+import testsHelper.GlobalApplicationForModelsIntegration
+import tracksDomain.{Track, TrackWithGenres}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import org.scalatest.Matchers._
 
+class PlaylistModelIntegrationTest extends GlobalApplicationForModelsIntegration {
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO playlists(userId, name) VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', 'playlist0');
 
-class TestPlaylistModel extends GlobalApplicationForModels {
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
+        INSERT INTO artists(artistid, facebookid, name, facebookurl)
+          VALUES('300', 'facebookIdTestTrack', 'artistTest', 'artistFacebookUrlTestPlaylistModel');
+
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('02894e56-08d1-4c1f-b3e4-466c069d15ed', 'title', 'url0', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('13894e56-08d1-4c1f-b3e4-466c069d15ed', 'title0', 'url00', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
+
+        INSERT INTO playliststracks(playlistId, trackid, trackrank)
+          VALUES((SELECT playlistid FROM playlists WHERE name = 'playlist0'), '02894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
+        INSERT INTO playliststracks(playlistId, trackid, trackrank)
+          VALUES((SELECT playlistid FROM playlists WHERE name = 'playlist0'), '13894e56-08d1-4c1f-b3e4-466c069d15ed', 2);
+
+        INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
+        INSERT INTO genres(name, icon) VALUES('genretest00', 'a');
+
+        INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
+         ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
+          (SELECT genreid FROM genres WHERE name = 'genretest0'), 1);
+        INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
+         ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
+          (SELECT genreid FROM genres WHERE name = 'genretest00'), 1);
+        """),
+      5.seconds)
+  }
 
   "A playlist" must {
 
@@ -75,11 +107,10 @@ class TestPlaylistModel extends GlobalApplicationForModels {
     }
 
     "find playlists by userUUID" in {
-      val userUUID = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
-      whenReady(playlistMethods.findByUserId(userUUID), timeout(Span(5, Seconds))) { foundPlaylist =>
-        val playlistId = foundPlaylist.head.playlistInfo.playlistId
+      whenReady(playlistMethods.findByUserId(defaultUserUUID), timeout(Span(5, Seconds))) { foundPlaylists =>
+        val playlistId = foundPlaylists.head.playlistInfo.playlistId
 
-        val track1 = TrackWithGenres(
+        val expectedTrack1 = TrackWithGenres(
           track = Track(
             uuid = UUID.fromString("02894e56-08d1-4c1f-b3e4-466c069d15ed"),
             title = "title",
@@ -92,7 +123,7 @@ class TestPlaylistModel extends GlobalApplicationForModels {
             confidence = 0.0),
           genres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a')))
 
-        val track2 =
+        val expectedTrack2 =
           TrackWithGenres(
             track = Track(
               uuid = UUID.fromString("13894e56-08d1-4c1f-b3e4-466c069d15ed"),
@@ -107,19 +138,19 @@ class TestPlaylistModel extends GlobalApplicationForModels {
             genres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a')))
 
         val expectedPlaylistTracks = Vector(
-          TrackWithPlaylistRankAndGenres(track1, 1.0),
-          TrackWithPlaylistRankAndGenres(track2,2.0))
+          TrackWithPlaylistRankAndGenres(expectedTrack1, 1.0),
+          TrackWithPlaylistRankAndGenres(expectedTrack2, 2.0))
 
         val expectedPlaylist = PlaylistWithTracksWithGenres(
-          playlistInfo = Playlist(playlistId = playlistId, userId = userUUID, name = "playlist0"),
+          playlistInfo = Playlist(playlistId = playlistId, userId = defaultUserUUID, name = "playlist0"),
           tracksWithRankAndGenres = expectedPlaylistTracks)
 
-        foundPlaylist must contain(expectedPlaylist)
+        foundPlaylists must contain(expectedPlaylist)
       }
     }
 
     "be updated" in {
-      val userUUID =  UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      val userUUID = defaultUserUUID
       val playlistToUpdate = PlaylistWithTracksIdAndRank(
         playlistInfo = Playlist(
           playlistId = Some(1),
@@ -130,17 +161,17 @@ class TestPlaylistModel extends GlobalApplicationForModels {
           rank = 1.0)))
 
       whenReady(playlistMethods.update(playlist = playlistToUpdate), timeout(Span(5, Seconds))) { result =>
-        assert(result > 0)
         whenReady(playlistMethods.findByUserId(userUUID), timeout(Span(5, Seconds))) { foundPlaylists =>
           val expectedUpdatedPlaylist = PlaylistWithTracksWithGenres(
             playlistInfo = playlistToUpdate.playlistInfo.copy(playlistId = Option(result)),
             tracksWithRankAndGenres = Vector(
               TrackWithPlaylistRankAndGenres(
                 track = TrackWithGenres(
-                  Track(UUID.fromString("02894e56-08d1-4c1f-b3e4-466c069d15ed"), "title", "url0", 'y', "thumbnailUrl",
-                    "facebookUrl0", "artistName", None, 0.0),
-                genres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a'))),1.0)))
+                  track = Track(UUID.fromString("02894e56-08d1-4c1f-b3e4-466c069d15ed"), "title", "url0", 'y',
+                    "thumbnailUrl", "facebookUrl0", "artistName", None, 0.0),
+                  genres = Vector(Genre(Some(1), "genretest0", 'a'), Genre(Some(2), "genretest00", 'a'))), 1.0)))
 
+          assert(result > 0)
           foundPlaylists should contain only expectedUpdatedPlaylist
         }
       }

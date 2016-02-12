@@ -77,7 +77,7 @@ class EventController @Inject()(ws: WSClient,
   }
 
   def findByPlace(placeId: Long) = Action.async {
-    eventMethods.findAllByPlace(placeId) map { events =>
+    eventMethods.findAllNotFinishedByPlace(placeId) map { events =>
       Ok(Json.toJson(events))
     }
   }

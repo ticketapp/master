@@ -1,19 +1,44 @@
 import java.util.UUID
 
+import database.MyPostgresDriver.api._
 import database._
 import org.postgresql.util.PSQLException
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import organizersDomain.{Organizer, OrganizerWithAddress}
 import services.Utilities
-import testsHelper.GlobalApplicationForModels
+import testsHelper.GlobalApplicationForModelsIntegration
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+class TestFollowService extends GlobalApplicationForModelsIntegration with Utilities {
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO users(userID, firstName, lastName, fullName, email, avatarURL)
+          VALUES ('a4aea509-1002-47d0-b55c-593c91cb32ae', 'simon', 'garnier', 'fullname', 'email0', 'avatarUrl');
 
-class TestFollowService extends GlobalApplicationForModels with Utilities {
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('200', 'testFindIdByFacebookId', 'facebookUrl00');
+        INSERT INTO artists(facebookid, name, facebookurl) VALUES('testFindIdByFacebookId', 'name00', 'testFindIdByFacebookId');
+
+        INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime)
+          VALUES(100, 'facebookidattendeetest', true, true, 'notPassedEvent3', timestamp '2050-08-24 14:00:00');
+
+        INSERT INTO places(placeid, name, facebookid, geographicpoint)
+          VALUES(100, 'Test', '776137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('35894e56-08d1-4c1f-b3e4-466c069d15ed', 'title000', 'url0000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
+
+        INSERT INTO places(placeid, name, facebookid, geographicpoint)
+          VALUES(300, 'Test1', '666137029786070', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+        """),
+      5.seconds)
+  }
 
   val userUUID = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
 
@@ -50,16 +75,18 @@ class TestFollowService extends GlobalApplicationForModels with Utilities {
       }
     }
 
-    "be follow by facebookId" in {
+    "be followed by facebookId" in {
       whenReady(artistMethods.followByFacebookId(userUUID, "testFindIdByFacebookId"), timeout(Span(5, Seconds))) { response =>
+
         response mustBe 1
       }
     }
 
     "be returned if is followed" in {
       val userUUID = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
+
       whenReady(artistMethods.getFollowedArtists(userUUID), timeout(Span(5, Seconds))) { artists =>
-        artists map { _.artist.id } must contain allOf(Some(200), Some(2))
+        artists map(_.artist.id) must contain allOf(Some(200), Some(1))
       }
     }
   }
@@ -99,9 +126,8 @@ class TestFollowService extends GlobalApplicationForModels with Utilities {
 
     "be returned if is followed" in {
       whenReady(eventMethods.getFollowedEvents(userUUID), timeout(Span(5, Seconds))) { response =>
-        response map {
-          _.event.id
-        } must contain(Some(100))
+
+        response map(_.event.id) must contain(Some(100))
       }
     }
   }
@@ -182,7 +208,7 @@ class TestFollowService extends GlobalApplicationForModels with Utilities {
     }
   }
   
-  "An place" must {
+  "A place" must {
 
     "be followed and unfollowed by a user" in {
       val placeId = 100L

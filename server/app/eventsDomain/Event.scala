@@ -149,9 +149,9 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
   }
 
-  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = geographicPointMethods
-    .findGeographicPointOfCity(city) flatMap {
-    case None => Future { Seq.empty }
+  def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] =
+    geographicPointMethods.findGeographicPointOfCity(city) flatMap {
+    case None => Future(Seq.empty)
     case Some(geographicPoint) => findNear(geographicPoint, numberToReturn, offset)
   }
 
@@ -235,7 +235,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
   }
 
-  def findAllByPlace(placeId: Long): Future[Seq[EventWithRelations]] = {
+  def findAllNotFinishedByPlace(placeId: Long): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
 

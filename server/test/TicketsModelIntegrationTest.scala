@@ -1,56 +1,92 @@
 import java.util.UUID
 
+import database.MyPostgresDriver.api._
 import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures._
-import testsHelper.GlobalApplicationForModels
+import testsHelper.GlobalApplicationForModelsIntegration
 import ticketsDomain._
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class TestTicketsModel extends GlobalApplicationForModels {
+class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration {
+
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime)
+          VALUES(100, 'facebookidattendeetest', true, true, 'notPassedEvent3', TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+
+        INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime)
+          VALUES(1000, 'facebookidattendeetest2', true, true, 'notPassedEvent4', TIMESTAMP WITH TIME ZONE '2030-08-24 14:00:00+02:00');
+
+        INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId)
+          VALUES(10000, 'test', 10, TIMESTAMP WITH TIME ZONE '2040-08-24T14:00:00.000+02:00',
+          TIMESTAMP WITH TIME ZONE '2040-09-24T14:00:00.000+02:00', 100);
+          
+        INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES(1000, 'savedTicket', 100, 10000);
+        INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES(1100, 'savedBlockedTicket', 100, 10000);
+
+        INSERT INTO blockedTickets(id, ticketId, expirationDate, userId)
+          VALUES(1000, 1100, TIMESTAMP WITH TIME ZONE '2055-09-24 14:00:00+02:00', '077f3ea6-2272-4457-a47e-9e9111108e44');
+
+        INSERT INTO pendingTickets(pendingTicketId, userId, tariffId, date, amount, qrCode)
+          VALUES(1000, '077f3ea6-2272-4457-a47e-9e9111108e44', 10000, TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10, 'pendingTicket');
+                                   
+        INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES(1000, 1000, 'a', TIMESTAMP WITH TIME ZONE '2015-09-22 14:00:00+02:00');
+        INSERT INTO ticketStatuses(id, ticketId, status, date) VALUES(1100, 1000, 'b', TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00');
+                                   
+         INSERT INTO boughtTicketBills(billId, ticketId, userId, date, amount) VALUES
+           (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10);
+                                          
+         INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
+           (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10);
+                                   
+         INSERT INTO salableEvents(eventId) VALUES (100);"""),
+      2.seconds)
+  }
+
+  val savedSalableEvent = SalableEvent(eventId = 100)
+  val savedTicket:Ticket = Ticket(ticketId = Some(1000L), qrCode = "savedTicket",eventId = 100,tariffId = 10000)
+  val savedBlockedTicket:Ticket = Ticket(ticketId = Some(1100L), qrCode = "savedBlockedTicket",eventId = 100,tariffId = 10000)
+  val oldSavedStatus = TicketStatus(ticketId = 1000,status = 'a', date = new DateTime("2015-09-22T14:00:00.000+02:00"))
+  val newSavedStatus = TicketStatus(ticketId = 1000,status = 'b', date = new DateTime("2015-09-24T14:00:00.000+02:00"))
+  val savedPendingTicket = PendingTicket(
+    pendingTicketId = Some(1000L),
+    userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"),
+    tariffId = 10000,
+    date = new DateTime("2015-09-24T14:00:00.000+02:00"),
+    amount = 10,
+    qrCode = "pendingTicket")
+  val savedBoughtBill = TicketBill(
+    ticketId = 1100,
+    userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"),
+    date = new DateTime("2015-09-24T14:00:00.000+02:00"),
+    amount = 10)
+  val savedSoldBill = TicketBill(
+    ticketId = 1100,
+    userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"),
+    date = new DateTime("2015-09-24T14:00:00.000+02:00"),
+    amount = 10)
 
   "A ticket" must {
 
-    val savedSellableEvent = SalableEvent(eventId = 100)
-    val savedTicket:Ticket = Ticket(ticketId = Some(1000L), qrCode = "savedTicket",eventId = 100,tariffId = 10000)
-    val savedBlockedTicket:Ticket = Ticket(ticketId = Some(1100L), qrCode = "savedBlockedTicket",eventId = 100,tariffId = 10000)
-    val oldSavedStatus = TicketStatus(ticketId = 1000,status = 'a', date = new DateTime("2015-09-22T14:00:00.000+02:00"))
-    val newSavedStatus = TicketStatus(ticketId = 1000,status = 'b', date = new DateTime("2015-09-24T14:00:00.000+02:00"))
-    val savedPendingTicket = PendingTicket(
-      pendingTicketId = Some(1000L),
-      userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
-      tariffId = 10000,
-      date = new DateTime("2015-09-24T14:00:00.000+02:00"),
-      amount = 10,
-      qrCode = "pendingTicket"
-    )
-    val savedBoughtBill = TicketBill(
-      ticketId = 1100,
-      userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
-      date = new DateTime("2015-09-24T14:00:00.000+02:00"),
-      amount = 10
-    )
-    val savedSoldBill = TicketBill(
-      ticketId = 1100,
-      userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
-      date = new DateTime("2015-09-24T14:00:00.000+02:00"),
-      amount = 10
-    )
-
-    "return id on save" in {
+    "return its id when saved" in {
       val ticket = Ticket(qrCode = "test", eventId = 100, tariffId = 10000)
       whenReady(ticketMethods.save(ticket)) { ticketId =>
         ticketId mustBe 1
       }
     }
 
-    "pass a Seq of Tuple of Ticket And Status to Seq of TicketWithStatus with the most recent status" in {
-      val newTicket = Ticket(None, "newTicket", 100, 10000)
+    "transform a sequence of tuple of Ticket And Status to a Seq of TicketWithStatus with the most recent status" in {
       val tupleTicketAndStatus1 = (savedTicket, Some(oldSavedStatus))
       val tupleTicketAndStatus2 = (savedTicket, Some(newSavedStatus))
       val seqOfTicketWithStatus = ticketMethods.SeqTupleTicketAndStatusToSeqTicketWithStatus(
         Seq(tupleTicketAndStatus1, tupleTicketAndStatus2)
       )
+
       seqOfTicketWithStatus mustBe Seq(TicketWithStatus(savedTicket, Some(newSavedStatus)))
     }
 
@@ -91,23 +127,23 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "find only unblocked tickets by tariffId" in {
-        whenReady(ticketMethods.findUnblockedByTariffId(10000)) { unblockedTicketsWithStatus =>
-          val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
-          unblockedTickets must contain (savedTicket)
-          unblockedTickets must not contain savedBlockedTicket
-        }
+      whenReady(ticketMethods.findUnblockedByTariffId(10000)) { unblockedTicketsWithStatus =>
+        val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
+        unblockedTickets must contain (savedTicket)
+        unblockedTickets must not contain savedBlockedTicket
+      }
     }
 
     "find only unblocked tickets by eventId" in {
-        whenReady(ticketMethods.findUnblockedByEventId(100)) { unblockedTicketsWithStatus =>
-          val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
-          unblockedTickets must contain (savedTicket)
-          unblockedTickets must not contain savedBlockedTicket
-        }
+      whenReady(ticketMethods.findUnblockedByEventId(100)) { unblockedTicketsWithStatus =>
+        val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
+        unblockedTickets must contain (savedTicket)
+        unblockedTickets must not contain savedBlockedTicket
+      }
     }
 
     "block a ticket during a time laps" in {
-      whenReady(ticketMethods.blockTicket(2, 1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"))) { response =>
+      whenReady(ticketMethods.blockTicket(2, 1000, UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"))) { response =>
         response mustBe 1
         whenReady(ticketMethods.findUnblockedByEventId(100)) { unblockedTicketsWithStatus =>
           val unblockedTickets = unblockedTicketsWithStatus map (_.ticket)
@@ -125,14 +161,14 @@ class TestTicketsModel extends GlobalApplicationForModels {
 
     "add bought bill for a ticket" in {
       whenReady(ticketMethods.addBoughtTicketBill
-        (TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))))
+        (TicketBill(1000, UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"), new DateTime(), BigDecimal(10))))
       { response =>
           response mustBe 1
       }
     }
 
     "find bought bill by ticketId" in {
-      val boughtBill = TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))
+      val boughtBill = TicketBill(1000, UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"), new DateTime(), BigDecimal(10))
       whenReady(ticketMethods.addBoughtTicketBill(boughtBill)) { response =>
         response mustBe 1
         whenReady(ticketMethods.findBoughtTicketBillByTicketId(1000)) { response =>
@@ -155,14 +191,14 @@ class TestTicketsModel extends GlobalApplicationForModels {
 
     "add sold bill for a ticket" in {
       whenReady(ticketMethods.addSoldTicketBill
-        (TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))))
+        (TicketBill(1000, UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"), new DateTime(), BigDecimal(10))))
       { response =>
           response mustBe 1
       }
     }
 
     "find sold bill by ticketId" in {
-      val soldBill = TicketBill(1000, UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"), new DateTime(), BigDecimal(10))
+      val soldBill = TicketBill(1000, UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"), new DateTime(), BigDecimal(10))
       whenReady(ticketMethods.addSoldTicketBill(soldBill)) { response =>
         response mustBe 1
         whenReady(ticketMethods.findSoldTicketBillByTicketId(1000)) { response =>
@@ -184,7 +220,7 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "add pending tickets" in {
-      val pendingTicketToSave = PendingTicket(pendingTicketId = None,userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+      val pendingTicketToSave = PendingTicket(pendingTicketId = None,userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"),
         tariffId = 10000, date = new DateTime, amount = 10, qrCode = "pendingTicketToSave")
       whenReady(ticketMethods.addPendingTicket(pendingTicketToSave)) { response =>
         response mustBe 1
@@ -192,18 +228,17 @@ class TestTicketsModel extends GlobalApplicationForModels {
     }
 
     "not add two pending tickets with th same qrCode" in {
-      val pendingTicketToSave = PendingTicket(pendingTicketId = None,userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
+      val pendingTicketToSave = PendingTicket(pendingTicketId = None,userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"),
         tariffId = 10000, date = new DateTime, amount = 10, qrCode = "duplicate qrCode")
-      val pendingTicketDuplicate = PendingTicket(pendingTicketId = None,userId = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae"),
-        tariffId = 10000, date = new DateTime, amount = 10, qrCode = "duplicate qrCode")
+
       whenReady(ticketMethods.addPendingTicket(pendingTicketToSave)) { response =>
         response mustBe 1
-        ticketMethods.addPendingTicket(pendingTicketToSave).failed.futureValue mustBe a [Exception]
+        ticketMethods.addPendingTicket(pendingTicketToSave).failed.futureValue mustBe an [Exception]
       }
     }
 
     "update pending tickets" in {
-      whenReady(ticketMethods.updatePendingTicket(savedPendingTicket.pendingTicketId, true)) { response =>
+      whenReady(ticketMethods.updatePendingTicket(savedPendingTicket.pendingTicketId, isValidate = true)) { response =>
         response mustBe 1
         whenReady(ticketMethods.findUntreatedPendingTickets) { response =>
           response must not contain savedPendingTicket
@@ -217,12 +252,13 @@ class TestTicketsModel extends GlobalApplicationForModels {
       }
     }
 
-    "find sellable event's ids" in {
+    "find salable event's ids" in {
       whenReady(ticketMethods.findSalableEvents) { eventIds =>
-        eventIds must contain (savedSellableEvent)
+        eventIds must contain (savedSalableEvent)
       }
     }
-    "add sellable event" in {
+
+    "add salable event" in {
       val newSalableEvent = SalableEvent(1000)
       whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { eventIds =>
         eventIds mustBe 1

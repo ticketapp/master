@@ -1,22 +1,55 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
-import database.{EventOrganizerRelation, EventPlaceRelation}
+import database.EventPlaceRelation
+import database.MyPostgresDriver.api._
 import eventsDomain.Event
-import organizersDomain.Organizer
+import json.JsonHelper._
 import placesDomain.Place
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
-import json.JsonHelper._
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.language.postfixOps
 import scala.concurrent.duration._
-
+import scala.language.postfixOps
 
 class TestEventController extends GlobalApplicationForControllers {
-  sequential
+
+  override def beforeAll() {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(
+        sqlu"""INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(100, true, true, 'notPassedEvent', timestamp '2050-08-24 14:00:00',
+          '01010000008906CEBE97E346405187156EF9581340');"""),
+      2.seconds)
+    Await.result(
+      dbConfProvider.get.db.run(
+        sqlu"""INSERT INTO events(ispublic, isactive, name, starttime, endtime)
+          VALUES(true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');"""),
+      2.seconds)
+    Await.result(
+      dbConfProvider.get.db.run(
+        sqlu"""INSERT INTO events(ispublic, isactive, name, starttime, endtime)
+          VALUES(true, true, 'passedEvent', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');"""),
+      2.seconds)
+    Await.result(
+      dbConfProvider.get.db.run(
+        sqlu"""INSERT INTO eventsfollowed(eventid, userid) VALUES(1, '077f3ea6-2272-4457-a47e-9e9111108e44');"""),
+      2.seconds)
+    Await.result(dbConfProvider.get.db.run(sqlu"""INSERT INTO organizers(name) VALUES('eventOrganizer');"""), 2.seconds)
+    Await.result(
+      dbConfProvider.get.db.run(
+        sqlu"""INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'passedEvent'), (SELECT organizerid FROM organizers WHERE name = 'eventOrganizer'));"""),
+      2.seconds)
+    Await.result(
+      dbConfProvider.get.db.run(
+        sqlu"""INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'notPassedEvent'), (SELECT organizerid FROM organizers WHERE name = 'eventOrganizer'));"""),
+      2.seconds)
+  }
 
   "Event controller" should {
 
@@ -93,7 +126,7 @@ class TestEventController extends GlobalApplicationForControllers {
       status(response1) mustEqual OK
     }
 
-    "return an error if an user try to follow an event twice" in {
+    "return an error if a user tries to follow an event twice" in {
       val eventId = await(eventMethods.findAllContaining("test") map (_.head.event.id.get))
       val Some(response) = route(FakeRequest(POST, "/events/" + eventId+ "/follow")
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
@@ -117,7 +150,7 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(events) mustEqual OK
 
-      contentAsString(events) must contain(""""name":"name0"""")
+      contentAsString(events) must contain(""""event":{"id":1""")
     }
 
     "return true if an event is followed else false" in {
@@ -152,7 +185,7 @@ class TestEventController extends GlobalApplicationForControllers {
 
       contentAsString(response) must contain(""""name":"inProgressEvent"""")
 
-      contentAsString(response) must not contain """"name":"eventPassed""""
+      contentAsString(response) must not contain """"name":"passedEvent""""
     }
 
     "find passed events in interval" in {
@@ -204,17 +237,13 @@ class TestEventController extends GlobalApplicationForControllers {
     }
     
     "find events by organizerId" in {
-      val eventId = await(eventMethods.findAllContaining("EventTest1") map (_.head.event.id.get))
-      val organizerId = await(organizerMethods.save(Organizer(None, Option("123456"), "organizerTestEvent", None))).id
-      await(organizerMethods.saveEventRelation(EventOrganizerRelation(eventId, organizerId.get)))
-
-      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findByOrganizer(organizerId.get)))
+      val Some(response) = route(FakeRequest(eventsDomain.routes.EventController.findByOrganizer(1)))
 
       status(response) mustEqual OK
 
-      contentAsString(response) must contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
+      contentAsString(response) must contain(""""name":"notPassedEvent"""")
 
-      contentAsString(response) must not contain """"name":"eventPassed""""
+      contentAsString(response) must not contain(""""name":"passedEvent"""")
     }
 
     "find passed events by organizerId" in {
@@ -222,7 +251,7 @@ class TestEventController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
 
-      contentAsString(response) must contain(""""name":"eventPassed"""")
+      contentAsString(response) must contain(""""name":"passedEvent"""")
 
       contentAsString(response) must not contain """"name":"notPassedEvent""""
     }
