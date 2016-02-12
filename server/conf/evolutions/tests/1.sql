@@ -286,6 +286,22 @@ CREATE TABLE guestUsers (
 );
 
 
+CREATE TABLE userSessions (
+  id                        UUID PRIMARY KEY,
+  ip                        VARCHAR(32) REFERENCES guestUsers(ip) NOT NULL,
+  screenWidth               INT NOT NULL,
+  screenHeight              INT NOT NULL
+);
+
+
+CREATE TABLE userActions (
+  id                        SERIAL PRIMARY KEY ,
+  action                    VARCHAR(255) NOT NULL,
+  timestamp                 TIMESTAMP NOT NULL,
+  sessionId                 UUID REFERENCES userSessions(id)
+);
+
+
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
   title                     VARCHAR NOT NULL,
@@ -701,6 +717,13 @@ INSERT INTO salableEvents(eventId) VALUES (100);
 -------------------------------------------------------- guest users ----------------------------------------------------
 INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
 
+-------------------------------------------------------- users sessions----------------------------------------------------
+INSERT INTO userSessions(id, ip, screenWidth, screenHeight) VALUES ('a4cea509-1002-47d0-b55c-593c91cb32ae', '127.0.0.0', 950, 450);
+
+-------------------------------------------------------- users actions----------------------------------------------------
+INSERT INTO userActions(id, action, timestamp, sessionId) VALUES
+  (100, 'mm,30,30', timestamp '1970-01-01 01:00:00.005', 'a4cea509-1002-47d0-b55c-593c91cb32ae');
+
 -------------------------------------------------------- organizers ----------------------------------------------------
 INSERT INTO organizers(name) VALUES('name0');
 INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
@@ -857,6 +880,8 @@ DROP TABLE IF EXISTS boughtTicketBills;
 DROP TABLE IF EXISTS soldTicketBills;
 DROP TABLE IF EXISTS pendingTickets;
 DROP TABLE IF EXISTS salableEvents;
+DROP TABLE IF EXISTS userActions;
+DROP TABLE IF EXISTS userSessions;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS guestUsers;
 DROP TABLE IF EXISTS tariffsBlocked;

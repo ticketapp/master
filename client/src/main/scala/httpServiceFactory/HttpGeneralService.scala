@@ -33,7 +33,7 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
 
   @JSExport
   def get(url: String): Future[String] = {
-    val getFuture = http.get[js.Any](url) // implicit conversion occurs here.
+    val getFuture = http.get[js.Any](url)
     getFuture.error(errors)
     getFuture.map { a =>
       JSON.stringify(a)
@@ -41,7 +41,14 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
   }
 
   def post(url: String): Future[String] = {
-    val postFuture = http.post[js.Any](url) // implicit conversion occurs here.
+    val postFuture = http.post[js.Any](url)
+    postFuture.error(errors)
+    val intermediateFuture: Future[String] = postFuture.map(JSON.stringify(_))
+    intermediateFuture
+  }
+
+  def postWithObject(url: String, objectToPost: js.Any): Future[String] = {
+    val postFuture = http.post[js.Any](url, objectToPost)
     postFuture.error(errors)
     val intermediateFuture: Future[String] = postFuture.map(JSON.stringify(_))
     intermediateFuture

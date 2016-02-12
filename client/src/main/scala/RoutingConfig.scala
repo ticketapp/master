@@ -1,3 +1,5 @@
+package root
+
 import com.greencatsoft.angularjs.core.{Route, RouteProvider}
 import com.greencatsoft.angularjs.{inject, Config}
 
@@ -13,7 +15,17 @@ object RoutingConfig extends Config {
       .when(
         path = "/",
         route = Route(
-          templateUrl = "/assets/templates/landingPage/landingPage.html",
+          templateUrl = urlTemplatePath("/"),
+          title = "Main"))
+      .when(
+        path = "/events",
+        route = Route(
+          templateUrl = urlTemplatePath("/events"),
           title = "Main"))
   }
+  
+  val urlTemplatePath = Map(
+    "/" -> "/assets/templates/landingPage/landingPage.html",
+    "/events" -> "/assets/templates/admin/adminEvents.html"
+  )
 }

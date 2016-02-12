@@ -12,7 +12,6 @@ import upickle.Js
 import upickle.Js.{Num, Str, Value}
 import scala.collection.mutable.ArrayBuffer
 import scala.scalajs.js.Date
-import scala.reflect.runtime.universe._
 
 
 trait jsonHelper {
@@ -27,19 +26,19 @@ trait jsonHelper {
   }
 
   def getOptionLong(map: Map[String, Any], key: String): Option[Long] = {
-    if (!map.isDefinedAt(key)) None else Some(map(key).asInstanceOf[Js.Num].value.toLong)
+    if(!map.isDefinedAt(key)) None else Some(map(key).asInstanceOf[Js.Num].value.toLong)
   }
 
   def getOptionInt(map: Map[String, Any], key: String): Option[Int] = {
-    if (!map.isDefinedAt(key)) None else Some(map(key).asInstanceOf[Js.Num].value.toInt)
+    if(!map.isDefinedAt(key)) None else Some(map(key).asInstanceOf[Js.Num].value.toInt)
   }
 
   def getOptionString(map: Map[String, Any], key: String): Option[String] = {
-    if (!map.isDefinedAt(key)) None else Some(map(key).asInstanceOf[Js.Str].value.toString)
+    if(!map.isDefinedAt(key)) None else Some(map(key).asInstanceOf[Js.Str].value.toString)
   }
 
   def getOptionDate(map: Map[String, Any], key: String): Option[Date] = {
-    if (!map.isDefinedAt(key)) None else Some(new Date(map(key).asInstanceOf[Js.Num].value))
+    if(!map.isDefinedAt(key)) None else Some(new Date(map(key).asInstanceOf[Js.Num].value))
   }
 
   implicit val eventReader = upickle.default.Reader[Happening]{
@@ -192,5 +191,4 @@ trait jsonHelper {
           None
      )
   }
-
 }
