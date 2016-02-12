@@ -2,6 +2,7 @@ import attendees.{AttendeeRead, FacebookAttendee}
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
+import org.specs2.control.Ok
 import play.api.libs.json._
 import testsHelper.GlobalApplicationForModels
 
@@ -73,10 +74,8 @@ class TestAttendeesModel extends GlobalApplicationForModels {
     }
 
     "get attendees for an event (by its facebook id)" in {
-      val expectedAttendees = FacebookAttendee(attendeeFacebookId = "165378400498201", name = "Bli Tz")
-
       whenReady(attendeesMethods.getAllByEventFacebookId("866684910095368"), timeout(Span(5, Seconds))) { attendees =>
-        attendees should contain (expectedAttendees)
+        attendees.statusText must equal("OK")
       }
     }
 
@@ -89,7 +88,7 @@ class TestAttendeesModel extends GlobalApplicationForModels {
       }
     }
 
-    "pass facebook response to seq of attendees" in {
+    "Transform a facebook response to a seq of attendees" in {
       val expectedAttendees = FacebookAttendee(attendeeFacebookId = "165378400498201",name = "Bli Tz")
       val facebookResponse = Json.parse("""{"data":[
             {"name":"Bli Tz",

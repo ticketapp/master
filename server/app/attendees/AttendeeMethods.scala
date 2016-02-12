@@ -51,27 +51,23 @@ class AttendeeMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPr
       getMaybeNextAttendees(facebookResponse.json, attendees ++ foundAttendees)
     }
 
-  def getAllByEventFacebookId(eventFacebookId: String): Future[Seq[FacebookAttendee]] = WS
+  def getAllByEventFacebookId(eventFacebookId: String): Future[WSResponse] = WS
     .url("https://graph.facebook.com/" + facebookApiVersion + "/" + eventFacebookId + "/attending")
     .withQueryString(
       "access_token" -> facebookToken,
       "limit" -> "400")
     .get()
-    .flatMap{facebookResponse =>
-      val foundAttendees = facebookResponseToSeqAttendees(facebookResponse.json)
-      getMaybeNextAttendees(facebookResponse.json, foundAttendees)
-    }
 
   def facebookResponseToSeqAttendees(facebookResponse: JsValue): Seq[FacebookAttendee] = {
     readJsonAttendees(facebookResponse).map(attendeeReadToFacebookAttendee)
   }
 
-  def getMaybeNextAttendees(facebookResponse: JsValue, foundAttendees: Seq[FacebookAttendee]): Future[Seq[FacebookAttendee]] = {
+  def getMaybeNextAttendees(facebookResponse: JsValue, foundAttendees: Seq[FacebookAttendee]): Future[Seq[FacebookAttendee]] =
     returnMaybeNextPage(facebookResponse, "attending") match {
       case Some(url) => getAttendeesRecursively(url, foundAttendees)
       case _ => Future(foundAttendees)
     }
-  }
+
 
   def readJsonAttendees(facebookAttendees: JsValue): Seq[AttendeeRead] = {
     implicit val attendeeRead: Reads[AttendeeRead] = Json.reads[AttendeeRead]
