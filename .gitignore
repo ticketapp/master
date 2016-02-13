@@ -14,6 +14,8 @@ project/project
 project/target
 server/public/templates
 server/public/stylesheets/*.css
+server/public/plugins
+server-0.1-SNAPSHOT/
 target
 tmp
 public/bower_components
