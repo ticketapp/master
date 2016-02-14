@@ -23,6 +23,7 @@ version := "0.001"
 
 lazy val clients = Seq(client)
 lazy val scalaV = "2.11.7"
+lazy val akkaVersion = "2.4.0"
 
 resolvers := ("Atlassian Releases" at "https://maven.atlassian.com/public/") +: resolvers.value
 
@@ -35,6 +36,8 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
 
 resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+
+resolvers += "spray repo" at "http://repo.spray.io"
 
 lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
@@ -65,7 +68,15 @@ lazy val server = (project in file("server")).settings(
     "com.vividsolutions" % "jts" % "1.13",
     "com.typesafe.play" %% "play-mailer" % "3.0.1",
     "com.zaxxer" % "HikariCP" % "2.4.1",
-    "com.lihaoyi" %% "sourcecode" % "0.1.0"
+    "com.lihaoyi" %% "sourcecode" % "0.1.0",
+    "com.typesafe.akka" %% "akka-distributed-data-experimental" % akkaVersion,
+    "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+    "com.typesafe.akka" %% "akka-contrib" % akkaVersion,
+    "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
+    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+    "org.webjars" % "bootstrap" % "3.3.4",
+    "org.webjars" % "jquery" % "2.1.4",
+    "org.webjars" % "handlebars" % "4.0.2"
   )
 ).enablePlugins(PlayScala).
     aggregate(clients.map(projectToRef): _*).
@@ -75,13 +86,13 @@ lazy val client = (project in file("client")).settings(
   scalaVersion := scalaV,
   persistLauncher := true,
   persistLauncher in Test := false,
+  scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   testFrameworks := Seq(new TestFramework("com.greencatsoft.greenlight.Greenlight")),
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.8.0",
-    "com.lihaoyi" %%% "upickle" % "0.3.6",
+    "com.lihaoyi" %%% "upickle" % "0.3.8",
     "com.greencatsoft" %%% "scalajs-angular" % "0.6",
-    "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test",
     "com.greencatsoft" %%% "greenlight" % "0.3" % "test"
   ),
   jsDependencies += RuntimeDOM,
@@ -105,7 +116,6 @@ onLoad in Global := (Command.process("project server", _: State)) compose (onLoa
 
 routesGenerator := InjectedRoutesGenerator
 
-
 scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-feature", // Emit warning and location for usages of features that should be imported explicitly.
@@ -122,3 +132,4 @@ scalacOptions ++= Seq(
 cancelable in Global := true
 
 BrowserNotifierKeys.shouldOpenBrowser := false
+

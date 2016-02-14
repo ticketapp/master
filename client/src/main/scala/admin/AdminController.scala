@@ -20,7 +20,6 @@ import scala.scalajs.js.annotation.JSExportAll
 class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, timeout: Timeout, mdToast: MdToastService)
   extends AbstractController[AdminScopeType](adminScope) with jsonHelper {
 
-
   var salableEvents: js.Array[SalableEvent] = new js.Array[SalableEvent]
   var ticketsWithStatus: js.Array[TicketWithStatus] = new js.Array[TicketWithStatus]
   var pendingTickets: js.Array[PendingTicket] = new js.Array[PendingTicket]
@@ -29,7 +28,7 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
   val validationMessage = "Ok"
 
 
-  def findSalableEvents: Unit = {
+  def findSalableEvents(): Unit = {
     service.get(AdminRoutes.salableEvents) map { foundSalableEvents =>
       timeout(() => salableEvents = read[Seq[SalableEvent]](foundSalableEvents).toJSArray)
     }
@@ -48,31 +47,30 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
     )) map { response =>
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
-
     }
   }
 
-  def findTicketsWithStatus: Unit = {
+  def findTicketsWithStatus(): Unit = {
     service.get(AdminRoutes.findTicketsWithStatus) map { ticketsWithStatusFound =>
         timeout(() => ticketsWithStatus = read[Seq[TicketWithStatus]](ticketsWithStatusFound).toJSArray)
     }
   }
 
-  def findPendingTickets: Unit = {
+  def findPendingTickets(): Unit = {
     service.get(AdminRoutes.findPendingTickets) map { pendingTicketsFound =>
-        timeout( () => pendingTickets = read[Seq[PendingTicket]](pendingTicketsFound).toJSArray)
+        timeout(() => pendingTickets = read[Seq[PendingTicket]](pendingTicketsFound).toJSArray)
     }
   }
 
-  def findBoughtBills: Unit = {
+  def findBoughtBills(): Unit = {
     service.get(AdminRoutes.findBoughtBills) map { boughtBillsFind =>
-        timeout( () => boughtBills = read[Seq[TicketBill]](boughtBillsFind).toJSArray)
+        timeout(() => boughtBills = read[Seq[TicketBill]](boughtBillsFind).toJSArray)
     }
   }
 
-  def findSoldBills: Unit = {
+  def findSoldBills(): Unit = {
     service.get(AdminRoutes.findSoldBills) map { soldBillsFound =>
-      timeout( () => soldBills = read[Seq[TicketBill]](soldBillsFound).toJSArray)
+      timeout(() => soldBills = read[Seq[TicketBill]](soldBillsFound).toJSArray)
     }
   }
 

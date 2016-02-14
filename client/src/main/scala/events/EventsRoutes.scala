@@ -1,18 +1,16 @@
 package events
 
-import scala.scalajs.js
-import scala.scalajs.js.annotation.JSExport
-
-@js.native
 object EventsRoutes {
   def find(offset: Int, numberToReturn: Int, geographicPoint: String): String =
     "/events?offset=" + offset + "&numberToReturn=" + numberToReturn + "&geographicPoint=" + geographicPoint
 
   def FindInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): String =
-    "/events/inInterval/" + hourInterval + "?offset=" + offset + "&numberToReturn=" + numberToReturn + "&geographicPoint=" + geographicPoint
+    "/events/inInterval/" + hourInterval + "?offset=" + offset + "&numberToReturn=" + numberToReturn +
+      "&geographicPoint=" + geographicPoint
 
   def FindPassedInInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): String =
-    "/events/passedInInterval/" + hourInterval + "?offset=" + offset + "&numberToReturn=" + numberToReturn + "&geographicPoint=" + geographicPoint
+    "/events/passedInInterval/" + hourInterval + "?offset=" + offset + "&numberToReturn=" + numberToReturn +
+      "&geographicPoint=" + geographicPoint
 
   def find(id: Long): String = "/events/" + id
 
@@ -36,21 +34,15 @@ object EventsRoutes {
   def findNearCity(city: String, numberToReturn: Int, offset: Int): String =
     "/events/nearCity/" + city + "?numberToReturn=" + numberToReturn + "&offset=" + offset
 
-  def findByArtist(facebookUrl: String): String =
-    "/artists/" + facebookUrl + "/events"
+  def findByArtist(facebookUrl: String): String = "/artists/" + facebookUrl + "/events"
 
-  def findPassedByArtist(artistId: Long): String =
-    "/artists/" + artistId + "/passedEvents"
+  def findPassedByArtist(artistId: Long): String = "/artists/" + artistId + "/passedEvents"
 
-  def findByOrganizer(organizerId: Long): String =
-    "/organizers/" + organizerId + "/events"
+  def findByOrganizer(organizerId: Long): String = "/organizers/" + organizerId + "/events"
 
-  def findPassedByOrganizer(organizerId: Long): String =
-    "/organizers/" + organizerId + "/passedEvents"
+  def findPassedByOrganizer(organizerId: Long): String = "/organizers/" + organizerId + "/passedEvents"
 
-  def findByPlace(placeId: Long): String =
-    "/places/" + placeId + "/events"
+  def findByPlace(placeId: Long): String = "/places/" + placeId + "/events"
 
-  def findPassedByPlace(placeId: Long): String =
-    "/places/" + placeId + "/passedEvents"
+  def findPassedByPlace(placeId: Long): String = "/places/" + placeId + "/passedEvents"
 }

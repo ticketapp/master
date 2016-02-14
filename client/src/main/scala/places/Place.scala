@@ -1,22 +1,21 @@
 package places
 
 import addresses.Address
-import events.Geometry
 
 import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
-case class Place(id: Option[Long],
+case class Place(id: Option[Long] = None,
                  name: String,
-                 facebookId: Option[String],
-                 geographicPoint: Geometry,
-                 description: Option[String],
-                 websites: Option[String],
-                 capacity: Option[Int],
-                 openingHours: Option[String],
-                 imagePath: Option[String],
-                 addressId: Option[Long],
-                 linkedOrganizerId: Option[Long])
+                 facebookId: Option[String] = None,
+                 geographicPoint: String,
+                 description: Option[String] = None,
+                 websites: Option[String] = None,
+                 capacity: Option[Int] = None,
+                 openingHours: Option[String] = None,
+                 imagePath: Option[String] = None,
+                 addressId: Option[Long] = None,
+                 linkedOrganizerId: Option[Long] = None)
 
 @JSExportAll
-case class PlaceWithAddress(place: Place, maybeAddress: Option[Address])
+case class PlaceWithAddress(place: Place, maybeAddress: Option[Address] =  None)

@@ -13,6 +13,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportAll}
 import org.scalajs.dom.console
 import upickle.Js
 import upickle.default._
+
 @JSExportAll
 @injectable("eventsController")
 class EventsController(eventScope: EventsScopeType, service: HttpGeneralService, timeout: Timeout)
@@ -22,53 +23,53 @@ class EventsController(eventScope: EventsScopeType, service: HttpGeneralService,
 
   def findById(id: Int): Unit = {
     service.get(EventsRoutes.find(id)) map { foundEvent =>
-      timeout( () => events = js.Array(read[HappeningWithRelations](foundEvent)))
+      timeout(() => events = js.Array(read[HappeningWithRelations](foundEvent)))
     }
   }
 
   def find(offset: Int, numberToReturn: Int, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.find(offset, numberToReturn, geographicPoint)) map { foundEvents =>
-      timeout( () => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 
   def findInHourInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.FindInHourInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
-      timeout( () => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 
   def findPassedInInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.FindPassedInInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
-      timeout( () => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 
   def findAllContaining(pattern: String, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.findAllContaining(pattern, geographicPoint)) map { foundEvents =>
-      timeout( () => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 
   def findByCityPattern(pattern: String): Unit = {
     service.get(EventsRoutes.findByCityPattern(pattern)) map { foundEvents =>
-      timeout( () => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Unit = {
     service.get(EventsRoutes.findNearCity(city, numberToReturn, offset)) map { foundEvents =>
-      timeout( () => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 
   def createByFacebookId(facebookId: String): Unit = {
     service.post(EventsRoutes.createByFacebookId(facebookId)) map { foundEvents =>
-      timeout( () => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
 }

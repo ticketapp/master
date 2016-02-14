@@ -21,7 +21,8 @@ trait MousePosition extends js.Object {
 
 @JSExport
 @injectable("tracking")
-class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: HttpGeneralService) extends ClassDirective {
+class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: HttpGeneralService) 
+  extends ClassDirective with TrackingRoutes {
 
   val storedActions: Seq[Action] = Seq.empty[Action]
   var sessionId = ""
@@ -29,13 +30,14 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
     case string if string.isInstanceOf[String] =>
       sessionId = string.asInstanceOf[String]
     case _ =>
-      httpService.post(TrackingRoutes.postSession(screenWidth = window.innerWidth, screenHeight = window.innerHeight)) map { newSessionId =>
+      httpService.post(postSession(
+        screenWidth = window.innerWidth,
+        screenHeight = window.innerHeight)
+      ) map { newSessionId =>
         val newId = read[String](newSessionId)
         ngCookies.put("sessionId", newId)
         sessionId = newId
-        storedActions map { action =>
-          httpService.postWithObject(TrackingRoutes.postWithActionObject, write(action))
-        }
+        storedActions map(action => httpService.postWithObject(postWithActionObject, write(action)))
       }
   }
 
@@ -50,7 +52,7 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
   def track(action: String): Unit = {
     val newDate = new Date().getTime()
     val newAction = Action(action + "," + doc.scrollTop, newDate, sessionId)
-    if(sessionId.length > 0) httpService.postWithObject(TrackingRoutes.postWithActionObject, write(newAction))
+    if(sessionId.length > 0) httpService.postWithObject(postWithActionObject, write(newAction))
     else storedActions :+ newAction
   }
 
