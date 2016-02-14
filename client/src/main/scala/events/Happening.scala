@@ -29,6 +29,9 @@ case class Happening(var id: Option[Long],
 @JSExportAll
 case class Geometry(point: String)
 
+@JSExportAll
+case class MaybeSalableEvent(event: Happening, isSalable: Boolean)
+
 
 @JSExportAll
 case class HappeningWithRelations(event: Happening,

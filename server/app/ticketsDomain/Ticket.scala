@@ -5,6 +5,7 @@ import javax.inject.Inject
 
 import database.MyPostgresDriver.api._
 import database.{MyDBTableDefinitions, MyPostgresDriver}
+import eventsDomain.Event
 import org.joda.time.DateTime
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,6 +25,8 @@ case class TicketWithStatus(ticket: Ticket, ticketStatus: Option[TicketStatus])
 case class BlockedTicket(ticketId: Long, expirationDate: DateTime, userId: UUID)
 
 case class SalableEvent(eventId: Long)
+
+case class MaybeSalableEvent(event: Event, isSalable: Boolean)
 
 case class TicketBill(ticketId: Long, userId: UUID, date: DateTime, amount: BigDecimal)
 
@@ -163,6 +166,33 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def findSalableEvents: Future[Seq[SalableEvent]] = db.run(salableEvents.result)
+
+  def findMaybeSalableEventsByContaining(pattern: String): Future[Seq[MaybeSalableEvent]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+    val lowercasePattern = pattern.toLowerCase
+    val query = for {
+      event <- events.filter(event =>
+          (event.name.toLowerCase like s"%$lowercasePattern%") &&
+            ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
+        .sortBy(event => (event.startTime.desc, event.id))
+    } yield event
+    db.run(query.result) flatMap { events =>
+      Future.sequence(
+      events map { event =>
+        val isSalableEvent = db.run(salableEvents.filter(_.eventId === event.id.get).result)
+        isSalableEvent map { salableEvents =>
+          salableEvents.headOption match {
+            case Some(salableEvent) =>
+              MaybeSalableEvent(event, true)
+            case _ =>
+              MaybeSalableEvent(event, false)
+          }
+        }
+      }
+      )
+    }
+  }
 
   def addSalableEvents(salableEvent: SalableEvent): Future[Int] = db.run(salableEvents += salableEvent)
 }

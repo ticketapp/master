@@ -1,0 +1,15 @@
+<md-input-container>
+    <label>Pattern</label>
+    <input type="text" ng-model="pattern" />
+</md-input-container>
+<md-input-container>
+    <label>Lat</label>
+    <input type="number" step="0.000001"
+           ng-model="controller.initLat"/>
+</md-input-container>
+<md-input-container>
+    <label>Lng</label>
+    <input  type="number" step="0.000001"
+           ng-model="controller.initLng" />
+</md-input-container>
+<md-button type="submit" class="md-raised md-primary">Valider</md-button>

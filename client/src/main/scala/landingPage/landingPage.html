@@ -9,22 +9,25 @@
         {{ 'INTRO_TEXT' | translate }}
     </h4>
     <form class="column medium-10 medium-offset-1 large-8 large-offset-2 sell-form absolute">
-        <div class="form-container tracking">
+        <div class="form-container tracking" data-ng-controller="eventsController">
             <md-autocomplete
-                    md-selected-item="ctrl.selectedItem"
-                    md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
-                    md-search-text="ctrl.searchText"
+                    md-search-text-change="controller.findMaybeSalableEventsByContaining(ctrl.searchText)"
+                    md-search-text="$parent.ctrl.searchText"
                     md-selected-item-change="ctrl.selectedItemChange(item)"
-                    md-items="item in ctrl.querySearch(ctrl.searchText)"
+                    md-items="item in maybeSalableEvents"
                     md-item-text="item.display"
                     md-min-length="0"
                     class="sell-input tracking"
                     id="li1"
                     tracker="in,li1,{{ctrl.searchText}}"
                     focus="{{focusSearch}}"
-                    placeholder="Entrez un nom d'événement ou un lieu">
+                    placeholder="{{ 'INPUT_LANDING_PAGE_PLACEHOLDER' | translate }}">
                 <md-item-template>
-                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
+                        {{item.event.name}}
+                    </span>
+                    <a data-ng-show="item.isSalable" class="float-right">Vendez votre billet</a>
+                    <a data-ng-show="!item.isSalable" class="float-right">Nous n'achetons pas de billets</a>
                 </md-item-template>
                 <md-not-found>
                     No states matching "{{ctrl.searchText}}" were found.
@@ -34,16 +37,19 @@
             <a class="sell-form-link tracking"
                id="lb1"
                data-ng-click="focusSearch = true; directive.track('cl,lb1')"
-               data-ng-show="!focusSearch">← Obtenir une offre maintenant</a>
+               data-ng-show="ctrl.searchText.length == 0 || !ctrl.searchText">← {{ 'INPUT_LANDING_PAGE_TEXT' | translate }}</a>
         </div>
     </form>
 </div>
-<div class="parallax-content" style="margin-top: 600px; height: 250px;">
-
-    <event-min ng-if="$root.activEvent && events.length > 0"
-               class="float-left column small-12 medium-6 large-4 fade min_contener margin0"
+<div class="column large-12 padding0" style="min-height: 300px; margin-top: 600px; background: white" data-ng-controller="eventsController" data-ng-init="controller.findNearActualPosition(0,12)">
+    <div class="md-whiteframe-z1 column large-12">
+        <h1 class="column large-12">{{ 'PROXIMITY_EVENTS_HEADER' | translate }}</h1>
+        <h2 class="column large-2">{{ 'ADVANCED_SEARCH_HEADER' | translate }}: </h2>
+        <div class="column large-6 float-left" ng-include="'assets/templates/events/eventForms.html'"></div>
+    </div>
+    <event-min class="float-left column small-12 medium-6 large-4 fade min_contener margin0 padding0"
                data-ng-repeat="event in events | limitTo: limit">
-    </event-min>
+    </event-min >
 
 </div>
 <style>
@@ -83,7 +89,7 @@
         color: white;
         width: 100%;
         bottom: 0;
-        position: absolute;
+        float: left;
         padding: 50px;
     }
 
@@ -149,9 +155,11 @@
         top: 0;
         float: left;
         width: 100%;
-        height: 100%;
+        height: 800px;
         background: url('assets/images/concertLandingPage.jpg') no-repeat;
         background-size: 100%;
+        position: absolute;
+        background-position-y: center;
     }
 
     .sell-form-link {

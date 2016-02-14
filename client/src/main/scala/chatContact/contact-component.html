@@ -4,36 +4,40 @@
      ng-class="{'full': full}">
 
     <div ng-if="showSmallContact || full"
-         ng-click="$parent.full = true"
+         id="ccb2"
+         ng-click="full = true; directive.track('cl,ccb2')"
          ng-class="{'full': $parent.full}"
-         class="contact-tooltip inner-contact-tooltip">
+         class="contact-tooltip inner-contact-tooltip tracking">
 
         <i data-ng-click="$parent.showSmallContact = false; $parent.full = false;"
+           data-ng-show="$parent.full"
            class="fa fa-times close-icon">
         </i>
 
-        <span ng-click="$parent.full = true">
+        <span ng-click="$parent.full = true" class="md-whiteframe-z1 column large-12 marginTop10 marginBottom10">
             <md-button ng-click="$parent.full = true" class="md-fab md-primary notClickable">
                 S
             </md-button>
 
             <b>Connecté</b>
         </span>
-
-        <p ng-repeat="message in messages"
-              class="column small-12"
-              ng-class="{'messageFromUser': message.fromClient$1, 'messageFromUs': message.fromClient$1 == false}">
-
-            {{message.content$1}}
-        </p>
-
+        <div ng-repeat="message in messages"
+             class="column small-8"
+             ng-class="{'float-left': message.fromClient$1, 'float-right': message.fromClient$1 == false}">
+            <div ng-class="{'messageFromUser': message.fromClient$1, 'messageFromUs': message.fromClient$1 == false}">
+                {{message.content$1}}
+            </div>
+        </div>
         <form class="column small-12 chat-form" ng-click="$parent.full = true"
               ng-submit="controller.send(message); message=''">
 
             <input type="text"
                    ng-click="$parent.full = true"
                    ng-model="message"
-                   class="contact-text-input width100p"
+                   id="cci1"
+                   tracker="in,cci1,{{message}}"
+                   focus="{{full}}"
+                   class="contact-text-input width100p tracking"
                    placeholder="Démarrer une conversation">
 
         </form>
@@ -41,9 +45,9 @@
     </div>
     <md-button class="md-fab float-right contact-button tracking"
                ng-class="{'ng-hide': full}"
-               ng-mouseenter="showSmallContact = true"
+               ng-mouseenter="showSmallContact = true; directive.track('cl,ccb1')"
                id="ccb1"
-               ng-click="full = true; track('cl,ccb1'); directive.track('cl,ccb1')"
+               ng-click="full = true; directive.track('cl,ccb1')"
                aria-label="Contact">
         <img src="assets/images/contact.png" alt="Contact">
     </md-button>

@@ -33,6 +33,15 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
+  def findMaybeSalableEventsByContaining(pattern: String) = Action.async {
+    ticketMethods.findMaybeSalableEventsByContaining(pattern) map { maybeSalableEvents =>
+        Ok(Json.toJson(maybeSalableEvents))
+    } recover { case t: Throwable =>
+      Logger.error("TicketController.findMaybeSalableEventsByContaining: ", t)
+      InternalServerError("TicketController.findMaybeSalableEventsByContaining: " + t.getMessage)
+    }
+  }
+
   def addSalableEvents(eventId: Long) = Action.async {
     ticketMethods.addSalableEvents(SalableEvent(eventId)) map { response =>
         Ok(Json.toJson(response))

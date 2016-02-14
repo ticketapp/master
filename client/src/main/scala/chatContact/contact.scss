@@ -4,8 +4,9 @@
 
 #ccb1 {
   position: absolute;
-  right: 0;
-  bottom: 50px;
+  right: 15px;
+  bottom: 15px;
+  z-index: 1;
 }
 .close-icon {
   float: right;
@@ -31,6 +32,7 @@ contact-component > div.full {
 .contact-component {
   background-color: transparent;
   padding: 0 !important;
+  min-height: 100px;
 }
 
 .contact-component > div.ng-enter {
@@ -69,28 +71,68 @@ contact-component > div.full {
 
 .inner-contact-tooltip.full {
   width: 100%;
+  bottom: 0;
+}
+
+.inner-contact-tooltip {
+  max-width: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 90px;
+  z-index: 2;
 }
 
 .messageFromUser {
-  background-color: $info-color;
+  background-color: $primary-color;
   border-radius: 5px;
   display: block;
   float: left;
   margin-bottom: 5px;
-  margin-left: 4px;
-  margin-right: 68px;
   margin-top: 5px;
   text-align: left;
-  width: inherit;
+  padding: 5px 15px 5px;
+  max-width: 100%;
+  word-wrap: break-word;
 }
 
 .messageFromUs {
-  background-color: $info-color;
+  background-color: $success-color;
   border-radius: 5px;
   display: block;
-  float: right;
-  margin-left: 68px;
-  margin-right: 4px;
+  float: right!important;
   text-align: left;
-  width: inherit;
+  padding: 5px 15px 5px;
+  max-width: 100%;
+  word-wrap: break-word;
 }
+
+.messageFromUs:before {
+  content: "";
+  position: absolute;
+  right: 2px;
+  border-style: solid;
+  border-width: 4px 8px 10px 7px;
+  border-color: transparent;
+  border-bottom-color: $success-color;
+  display: block;
+  width: 0;
+  z-index: 1;
+  top: 32%;
+  transform: rotate(90deg);
+}
+
+.messageFromUser:before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  border-style: solid;
+  border-width: 4px 8px 10px 7px;
+  border-color: transparent;
+  border-bottom-color: $primary-color;
+  display: block;
+  width: 0;
+  z-index: 1;
+  top: 32%;
+  transform: rotate(-90deg);
+}
+

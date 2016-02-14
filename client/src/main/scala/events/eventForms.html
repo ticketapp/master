@@ -1,0 +1,61 @@
+<md-select ng-model="eventRequest">
+    <md-option value="byId">
+        {{ 'ID_FORM_EVENTS_HEADER' | translate }}
+    </md-option>
+    <md-option value="findByGeopoint">
+        {{ 'PROXIMITY_EVENTS_FORM_HEADER' | translate }}
+    </md-option>
+    <md-option value="eventsInHourInterval">
+        {{ 'HOUR_INTERVAL_EVENTS_FORM_HEADER' | translate }}
+    </md-option>
+    <md-option value="eventsPassedInInterval">
+        {{ 'PASSED_EVENTS_FORM_HEADER' | translate }}
+    </md-option>
+    <md-option value="findAllContaining">
+        {{ 'EVENTS_CONTAINING_FORM_HEADER' | translate }}
+    </md-option>
+    <md-option value="findByCityPattern">
+        {{ 'EVENTS_BY_CITY_FORM_HEADER' | translate }}
+    </md-option>
+    <md-option value="findNearCity">
+        {{ 'EVENTS_NEAR_CITY_FORM_HEADER' | translate }}
+    </md-option>
+    <md-option value="createEventByFacebookId">
+        {{ 'CREATE_EVENT_BY_FACEBOOK_ID_FORM_HEADER' | translate }}
+    </md-option>
+</md-select>
+
+<form ng-show="eventRequest == 'byId'" ng-submit="controller.findById(id)" >
+    <event-form-find-by-id></event-form-find-by-id>
+</form>
+
+<form ng-submit="controller.find(offset, numberToReturn,controller.initLat,controller.initLng); nav = true" ng-show="eventRequest == 'findByGeopoint'">
+    <event-form-find--by-geo-point></event-form-find--by-geo-point>
+</form>
+
+<form ng-submit="controller.findInHourInterval(hourInterval,controller.initLat,controller.initLng, offset, numberToReturn);
+        nav = true" ng-show="eventRequest == 'eventsInHourInterval'">
+    <event-form-find-in-hour-interval></event-form-find-in-hour-interval>
+</form>
+
+<form ng-submit="controller.findPassedInInterval(hourInterval,controller.initLat,controller.initLng, offset, numberToReturn);
+        nav = true" ng-show="eventRequest == 'eventsPassedInInterval'">
+    <event-form-find-passed-in-interval></event-form-find-passed-in-interval>
+</form>
+
+<form ng-submit="controller.findAllContaining(pattern,controller.initLat,controller.initLng); nav = true"
+      ng-show="eventRequest == 'findAllContaining'">
+    <event-form-find-all-containing></event-form-find-all-containing>
+</form>
+
+<form ng-submit="controller.findByCityPattern(pattern)" ng-show="eventRequest == 'findByCityPattern'">
+    <event-form-find-by-city-pattern></event-form-find-by-city-pattern>
+</form>
+
+<form ng-submit="controller.findNearCity(city, numberToReturn, offset)" ng-show="eventRequest == 'findNearCity'">
+    <event-form-find-near-city></event-form-find-near-city>
+</form>
+
+<form ng-submit="controller.createByFacebookId(facebookId)" ng-show="eventRequest == 'createEventByFacebookId'">
+    <event-form-create-by-facebook-id></event-form-create-by-facebook-id>
+</form>
