@@ -18,6 +18,11 @@ object RoutingConfig extends Config {
           templateUrl = urlTemplatePath("/"),
           title = "Main"))
       .when(
+        path = "/admin/",
+        route = Route(
+          templateUrl = urlTemplatePath("/"),
+          title = "Main"))
+      .when(
         path = "/events",
         route = Route(
           templateUrl = urlTemplatePath("/events"),

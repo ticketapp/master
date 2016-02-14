@@ -62,7 +62,6 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
 
   @JSExport
   def track(action: String): Unit = {
-    console.log(action)
     val newDate = new Date().getTime()
     val newAction = Action(action + "," + doc.scrollTop, newDate, sessionId)
     if(sessionId.length > 0) httpService.postWithObject(TrackingRoutes.postWithActionObject, write(newAction))

@@ -15,11 +15,11 @@ import upickle.default._
 
 @JSExport
 @injectable("trackingView")
-class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies, routeParams: RouteParams, window: Window)
+class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies,
+                            routeParams: RouteParams, window: Window)
   extends ElementDirective {
 
   var cursor = document.getElementById("cursor").asInstanceOf[Html]
-
   @JSExport
   var session = Seq.empty[Action]
   @JSExport
@@ -28,8 +28,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
   var trackingViewContainer = document.getElementById("tracking-player").asInstanceOf[Html]
   var trackingViewScroller = trackingViewContainer.getElementsByTagName("md-content").item(0).asInstanceOf[Html]
 
-  @JSExport
-  var template = "assets/templates/landingPage/landingPage.html"
+  window.location.replace(window.location.pathname + "#/")
   timeout( () => {
     val trackedItems = document.getElementsByClassName("tracking")
     for(i <- 0 to(trackedItems.length - 1)) {
@@ -76,7 +75,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
               case otherElement => otherElement.asInstanceOf[Html].getElementsByTagName("input").item(0).asInstanceOf[Input].value = seqAction(2)
             }
           case link if link == "a" =>
-            template = RoutingConfig.urlTemplatePath(seqAction(1))
+              window.location.replace(window.location.pathname + "#" + seqAction(1))
         }
       }, timeToWait)
     }
