@@ -2,11 +2,14 @@ package testsHelper
 
 import java.util.UUID
 
+import database.MyPostgresDriver.api._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.db.evolutions.Evolutions
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 
 trait GlobalApplicationForModelsIntegration extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
@@ -17,11 +20,21 @@ trait GlobalApplicationForModelsIntegration extends PlaySpec with OneAppPerSuite
 
   override def beforeAll() = {
     Evolutions.applyEvolutions(databaseApi.database("tests"))
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');"""),
+      5.seconds)
   }
 
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
+  def generalBeforeAll() = {
+    Evolutions.applyEvolutions(databaseApi.database("tests"))
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');"""),
+      5.seconds)
   }
+
+  override def afterAll() = Evolutions.cleanupEvolutions(databaseApi.database("tests"))
 
   def isOrdered(list: List[Double]): Boolean = list match {
     case Nil => true

@@ -1,19 +1,51 @@
 import java.util.UUID
 
-import artistsDomain.{ArtistWithWeightedGenres, Artist}
+import artistsDomain.{Artist, ArtistWithWeightedGenres}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import database.MyPostgresDriver.api._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
 
 import scala.concurrent.Await
-import scala.language.postfixOps
 import scala.concurrent.duration._
-
+import scala.language.postfixOps
 
 class TestTrackController extends GlobalApplicationForControllers {
-  sequential
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('200', 'name', 'facebookUrl00');
+
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('02894e56-08d1-4c1f-b3e4-466c069d15ed', 'title', 'url0', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('13894e56-08d1-4c1f-b3e4-466c069d15ed', 'title0', 'url00', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('24894e56-08d1-4c1f-b3e4-466c069d15ed', 'title00', 'url000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
+        INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
+          VALUES('35894e56-08d1-4c1f-b3e4-466c069d15ed', 'title000', 'url0000', 'y', 'thumbnailUrl', 'facebookUrl00', 'artistName0');
+
+        INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
+
+        INSERT INTO tracksgenres(genreid, trackid, weight)
+          VALUES((SELECT genreid FROM genres WHERE name = 'genretest0'), '13894e56-08d1-4c1f-b3e4-466c069d15ed', 1);
+
+        INSERT INTO tracksfollowed(userId, trackId)
+          VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', '02894e56-08d1-4c1f-b3e4-466c069d15ed');
+
+        INSERT INTO tracksrating(userId, trackId, reason)
+          VALUES('077f3ea6-2272-4457-a47e-9e9111108e44', '13894e56-08d1-4c1f-b3e4-466c069d15ed', 'a');
+
+        INSERT INTO artistsgenres(artistid, genreid, weight) VALUES
+          ((SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl0'),
+           (SELECT genreid FROM genres WHERE name = 'genretest0'), 1);
+        """),
+      5.seconds)
+  }
 
   "track controller" should {
 

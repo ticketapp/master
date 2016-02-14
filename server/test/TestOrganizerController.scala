@@ -1,30 +1,58 @@
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import database.MyPostgresDriver.api._
 import json.JsonHelper._
 import organizersDomain.Organizer
 import play.api.libs.json._
-import play.api.test._
+import play.api.test.FakeRequest
 import testsHelper.GlobalApplicationForControllers
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-
 class TestOrganizerController extends GlobalApplicationForControllers {
-    sequential
+
+  override def beforeAll(): Unit = {
+    generalBeforeAll()
+    Await.result(
+      dbConfProvider.get.db.run(sqlu"""
+        INSERT INTO organizers(name) VALUES('name0');
+        INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
+          VALUES(100, 'name1', 'facebookId', '0101000020E6100000ED2B0FD253E446401503249A40711350');
+        INSERT INTO organizers(organizerid, name, facebookid, geographicpoint)
+          VALUES(300, 'name2', 'facebookId1', '0101000020E6100000ED2B0FD253E446401503249A40711340');
+
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
+        INSERT INTO events(ispublic, isactive, name, starttime, endtime)
+          VALUES(true, true, 'eventPassed', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+        INSERT INTO events(ispublic, isactive, name, starttime, endtime)
+          VALUES(true, true, 'notPassedEvent2', timestamp '2012-08-24 14:00:00', timestamp '2012-08-24 14:00:00');
+
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'name0'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'eventPassed'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+
+        INSERT INTO organizersfollowed(organizerid, userid)
+          VALUES((SELECT organizerId FROM organizers WHERE name = 'name0'), '077f3ea6-2272-4457-a47e-9e9111108e44');
+        """),
+      5.seconds)
+  }
 
   "organizer controller" should {
 
     "create an organizer" in {
       val Some(result) = route(FakeRequest(POST, "/organizers/create")
-          .withJsonBody(Json.parse("""{ "facebookId": 111, "name": "test" }"""))
-          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-
+        .withJsonBody(Json.parse("""{ "facebookId": 111, "name": "test" }"""))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
       val organizer = (contentAsJson(result) \ "organizer").as[Organizer]
-      organizer mustEqual Organizer(id = organizer.id, facebookId = Some("111"), name = "test", verified = false)
 
       status(result) mustEqual OK
+      organizer mustEqual Organizer(id = organizer.id, facebookId = Some("111"), name = "test", verified = false)
     }
 
     "find a list of organizers" in {

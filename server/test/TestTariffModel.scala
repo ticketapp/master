@@ -1,8 +1,6 @@
-import org.scalatest.concurrent.ScalaFutures._
+import org.joda.time.DateTime
 import tariffsDomain.Tariff
 import testsHelper.GlobalApplicationForModels
-import org.joda.time.DateTime
-
 
 class TestTariffModel extends GlobalApplicationForModels {
 
@@ -29,25 +27,13 @@ class TestTariffModel extends GlobalApplicationForModels {
     }
 
     "find ticket seller" in {
-      val fnacTicket = tariffMethods.findTicketSellers(Set("lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm"))
+      val fnacTicket = tariffMethods.findTicketSellers(
+        Set("lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm"))
       val digitick = tariffMethods.findTicketSellers(Set("digitick.com"))
-      fnacTicket mustBe Some("lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm")
+
+      fnacTicket mustBe
+        Some("lasasconcerts.fnacspectacles.com/place-spectacle/manifestation/musique-electronique-microphone-recordings-party-86273.htm")
       digitick mustBe empty
-    }
-
-    "return its id when saved" in {
-      val tariff = Tariff(
-        denomination = "test",
-        eventId = 1,
-        startTime = new DateTime(),
-        endTime = new DateTime(),
-        price = 10)
-
-      whenReady(tariffMethods.save(tariff)) { tariffId => tariffId mustBe 1 }
-    }
-
-    "be found by eventId" in {
-      whenReady(tariffMethods.findByEventId(savedTariff.eventId)) { tariffs => tariffs must contain(savedTariff) }
     }
   }
 }
