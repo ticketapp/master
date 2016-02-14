@@ -177,19 +177,20 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
             ((event.endTime.nonEmpty && event.endTime > now) || (event.endTime.isEmpty && event.startTime > twelveHoursAgo)))
         .sortBy(event => (event.startTime.desc, event.id))
     } yield event
+
     db.run(query.result) flatMap { events =>
       Future.sequence(
-      events map { event =>
-        val isSalableEvent = db.run(salableEvents.filter(_.eventId === event.id.get).result)
-        isSalableEvent map { salableEvents =>
-          salableEvents.headOption match {
-            case Some(salableEvent) =>
-              MaybeSalableEvent(event, true)
-            case _ =>
-              MaybeSalableEvent(event, false)
+        events map { event =>
+          val isSalableEvent = db.run(salableEvents.filter(_.eventId === event.id.get).result)
+          isSalableEvent map { salableEvents =>
+            salableEvents.headOption match {
+              case Some(salableEvent) =>
+                MaybeSalableEvent(event, true)
+              case _ =>
+                MaybeSalableEvent(event, false)
+            }
           }
         }
-      }
       )
     }
   }

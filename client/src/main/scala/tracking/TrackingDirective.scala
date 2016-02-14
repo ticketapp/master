@@ -93,11 +93,11 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
     else storedActions :+ newAction
   }
 
-  override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit ={
-        elements.map{_.asInstanceOf[Html]}.foreach { element =>
-          attributes.$observe("tracker", (value: String) => {
-            track(value)
-          })
-        }
+  override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit = {
+    elements.map{_.asInstanceOf[Html]}.foreach { element =>
+      attributes.$observe("tracker", (value: String) => {
+        track(value)
+      })
     }
+  }
 }

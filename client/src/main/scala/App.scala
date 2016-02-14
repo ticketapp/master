@@ -4,6 +4,7 @@ import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
 import events._
 import focusDirective.FocusDirective
+import footer.LandingPageFooterDirective
 import geolocation.GeolocationServiceFactory
 import httpServiceFactory.HttpGeneralServiceFactory
 import organizers.OrganizersController
@@ -44,5 +45,6 @@ object App extends JSApp {
     module.directive[EventFormFindByCityPattern]
     module.directive[EventFormFindNearCity]
     module.directive[EventFormCreateByFacebookId]
+    module.directive[LandingPageFooterDirective]
   }
 }

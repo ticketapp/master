@@ -165,7 +165,8 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "find maybe salable events by containing" in {
       val expectedMaybeSalableEvent = MaybeSalableEvent(
-        Event(id = Some(100),
+        Event(
+          id = Some(100),
           facebookId = None,
           isPublic = true,
           isActive = true,
@@ -178,10 +179,12 @@ class TestTicketController extends GlobalApplicationForControllers {
           tariffRange = None,
           ticketSellers = None,
           imagePath = None),
-        true)
+        isSalable = true
+      )
 
       val expectedUnSalableEvent = MaybeSalableEvent(
-        Event(id = Some(5),
+        Event(
+          id = Some(5),
           facebookId = None,
           isPublic = true,
           isActive = true,
@@ -194,7 +197,7 @@ class TestTicketController extends GlobalApplicationForControllers {
           tariffRange = None,
           ticketSellers = None,
           imagePath = None),
-        false)
+        isSalable = false)
 
       val Some(info) = route(FakeRequest(
         ticketsDomain.routes.TicketController.findMaybeSalableEventsByContaining("notPassed"))
@@ -206,7 +209,6 @@ class TestTicketController extends GlobalApplicationForControllers {
         case maybeSalableEvent: JsSuccess[Seq[MaybeSalableEvent]] =>
           maybeSalableEvent.get
         case error: JsError =>
-          Logger.error("get all salable events:" + error)
           throw new Exception
       }
 

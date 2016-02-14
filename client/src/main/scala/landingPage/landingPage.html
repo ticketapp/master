@@ -11,7 +11,7 @@
     <form class="column medium-10 medium-offset-1 large-8 large-offset-2 sell-form absolute">
         <div class="form-container tracking" data-ng-controller="eventsController">
             <md-autocomplete
-                    md-search-text-change="controller.findMaybeSalableEventsByContaining(ctrl.searchText)"
+                    md-search-text-change="controller.findMaybeSalableEventsContaining(ctrl.searchText)"
                     md-search-text="$parent.ctrl.searchText"
                     md-selected-item-change="ctrl.selectedItemChange(item)"
                     md-items="item in maybeSalableEvents"

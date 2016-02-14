@@ -226,14 +226,15 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModels {
 
     "add sellable event" in {
       val newSalableEvent = SalableEvent(1000)
-      whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { eventIds =>
-        eventIds mustBe 1
+      whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { response =>
+        response mustBe 1
       }
     }
 
     "find maybe salable events by containing" in {
       val expectedMaybeSalableEvent = MaybeSalableEvent(
-        Event(id = Some(100),
+        Event(
+          id = Some(100),
           facebookId = None,
           isPublic = true,
           isActive = true,
@@ -246,10 +247,12 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModels {
           tariffRange = None,
           ticketSellers = None,
           imagePath = None),
-        true)
+        isSalable = true
+      )
 
       val expectedUnSalableEvent = MaybeSalableEvent(
-        Event(id = Some(5),
+        Event(
+          id = Some(5),
           facebookId = None,
           isPublic = true,
           isActive = true,
@@ -262,7 +265,8 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModels {
           tariffRange = None,
           ticketSellers = None,
           imagePath = None),
-        false)
+        isSalable = false
+      )
       whenReady(ticketMethods.findMaybeSalableEventsByContaining("notPassed")) { events =>
 
         events must contain(expectedMaybeSalableEvent)

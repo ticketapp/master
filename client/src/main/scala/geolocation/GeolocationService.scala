@@ -14,6 +14,7 @@ import org.scalajs.dom.{setInterval, clearInterval}
 import scala.scalajs.js.{UndefOr, JSON}
 
 case class GeographicPoint(lat: Double, lng: Double)
+
 @injectable("geolocationService")
 class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
 
@@ -21,7 +22,6 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
 
   def getHtmlGeolocation: Unit = {
     navigator.geolocation.getCurrentPosition((position: Position) => {
-      console.log(position)
       geographicPoint = GeographicPoint(position.coords.latitude,position.coords.longitude)
     }, (error: PositionError) => {
       getIpGeolocation map { geographicPointIp =>
@@ -52,7 +52,6 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
 
   def getUserGeolocation: Future[GeographicPoint] = {
     timeout(() => getHtmlGeolocation, 300) flatMap { a =>
-      console.log(geographicPoint.toString)
       if(geographicPoint.isDefined) Future(geographicPoint.get)
       else {
         getHtmlGeolocation

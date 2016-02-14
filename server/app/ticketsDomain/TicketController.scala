@@ -15,6 +15,7 @@ import org.joda.time.DateTime
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.control.NonFatal
 
 import scala.util.{Success, Failure}
 
@@ -36,9 +37,9 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
   def findMaybeSalableEventsByContaining(pattern: String) = Action.async {
     ticketMethods.findMaybeSalableEventsByContaining(pattern) map { maybeSalableEvents =>
         Ok(Json.toJson(maybeSalableEvents))
-    } recover { case t: Throwable =>
-      Logger.error("TicketController.findMaybeSalableEventsByContaining: ", t)
-      InternalServerError("TicketController.findMaybeSalableEventsByContaining: " + t.getMessage)
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)
+      InternalServerError(this.getClass + "findMaybeSalableEventsByContaining: " + e.getMessage)
     }
   }
 

@@ -55,5 +55,5 @@ object EventsRoutes {
     "/places/" + placeId + "/passedEvents"
 
   def findMaybeSalableEvents(pattern: String): String =
-    "/maybeSalableEvents?pattern=" + pattern
+    "/salableEventsContaining?pattern=" + pattern
 }

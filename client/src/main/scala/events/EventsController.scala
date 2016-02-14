@@ -21,18 +21,19 @@ class EventsController(eventScope: EventsScopeType, service: HttpGeneralService,
 
 //  var events: js.Array[HappeningWithRelations] = new js.Array[HappeningWithRelations]
   var initLat =  0.0
+  val coordinateMaxLength = 8
 
   geolocationService.getUserGeolocation map { geoloc =>
-    timeout(() =>initLat = geoloc.lat.toString.substring(0, 8).toDouble)
+    timeout(() =>initLat = geoloc.lat.toString.substring(0, coordinateMaxLength).toDouble)
   }
 
   var initLng = 0.0
 
   geolocationService.getUserGeolocation map { geoloc =>
-    timeout(() => initLng = geoloc.lng.toString.substring(0, 8).toDouble)
+    timeout(() => initLng = geoloc.lng.toString.substring(0, coordinateMaxLength).toDouble)
   }
 
-  def findMaybeSalableEventsByContaining(pattern: String): Unit = {
+  def findMaybeSalableEventsContaining(pattern: String): Unit = {
     service.get(EventsRoutes.findMaybeSalableEvents(pattern)) map { foundEvents =>
       timeout(() => eventScope.maybeSalableEvents = read[Seq[MaybeSalableEvent]](foundEvents).toJSArray)
     }
@@ -47,9 +48,7 @@ class EventsController(eventScope: EventsScopeType, service: HttpGeneralService,
   def findNearActualPosition(offset: Int, numberToReturn: Int): Unit = {
     geolocationService.getUserGeolocation map { geographicPoint =>
       val geoPoint = geographicPoint.lat + "," + geographicPoint.lng
-      console.log(geoPoint)
       service.get(EventsRoutes.find(offset, numberToReturn, geoPoint)) map { foundEvents =>
-        console.log(foundEvents)
         timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
       }
     }
@@ -58,7 +57,6 @@ class EventsController(eventScope: EventsScopeType, service: HttpGeneralService,
   def find(offset: Int, numberToReturn: Int, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.find(offset, numberToReturn, geographicPoint)) map { foundEvents =>
-      console.log(foundEvents)
       timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
@@ -79,7 +77,6 @@ class EventsController(eventScope: EventsScopeType, service: HttpGeneralService,
 
   def findAllContaining(pattern: String, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
-    console.log(geographicPoint)
     service.get(EventsRoutes.findAllContaining(pattern, geographicPoint)) map { foundEvents =>
       timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
