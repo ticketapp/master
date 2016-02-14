@@ -15,20 +15,20 @@ import upickle.default._
 
 @JSExport
 @injectable("trackingView")
-class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies, routeParams: RouteParams, window: Window)
+class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies,
+                            routeParams: RouteParams, window: Window)
   extends ElementDirective {
 
   var cursor = document.getElementById("cursor").asInstanceOf[Html]
-
   @JSExport
   var session = Seq.empty[Action]
   @JSExport
   var sessions = Seq.empty[Session].toJSArray
 
   var trackingViewContainer = document.getElementById("tracking-player").asInstanceOf[Html]
+  var trackingViewScroller = trackingViewContainer.getElementsByTagName("md-content").item(0).asInstanceOf[Html]
 
-  @JSExport
-  var template = "assets/templates/landingPage/landingPage.html"
+  window.location.replace(window.location.pathname + "#/")
   timeout( () => {
     val trackedItems = document.getElementsByClassName("tracking")
     for(i <- 0 to(trackedItems.length - 1)) {
@@ -57,21 +57,31 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
     trackingViewContainer.style.height = sessions.filter(_.uuid == session.head.sessionId).head.screenHeight + "px"
     val initTimestamp = session.head.timestamp
     session map { action =>
+      console.log(action.action)
       val seqAction = action.action.split(",").toSeq
       val timeToWait: Int = (action.timestamp - initTimestamp).toInt
       timeout(() => {
-        trackingViewContainer.scrollTop = seqAction.last.toDouble
-        seqAction.head match {
-          case mouseMouve if mouseMouve == "mm" =>
-            val left = seqAction(1)
-            val top = seqAction(2)
+        trackingViewScroller.scrollTop = seqAction.last.toDouble
+        seqAction.headOption match {
+          case Some(mouseMove) if mouseMove == "mm" =>
+            val leftMousePosition: String = seqAction(1)
+            val left = leftMousePosition
+            val topMousePosition: String = seqAction(2)
+            val top = topMousePosition
             moveCursor(top, left)
-          case click if click == "cl" =>
-            document.getElementById(seqAction(1)).asInstanceOf[Html].click()
-          case input if input == "in" =>
-            document.getElementById(seqAction(1)).asInstanceOf[Input].value = seqAction(2)
+          case Some(click) if click == "cl" =>
+            val elementId: String = seqAction(1)
+            document.getElementById(elementId).asInstanceOf[Html].click()
+          case Some(input) if input == "in" =>
+            val inputValue: String = seqAction(2)
+            document.getElementById(seqAction(1)) match {
+              case input1: Input =>
+                input1.value = inputValue
+              case otherElement => otherElement.asInstanceOf[Html].getElementsByTagName("input").item(0).asInstanceOf[Input].value = inputValue
+            }
           case link if link == "a" =>
-            template = RoutingConfig.urlTemplatePath(seqAction(1))
+              val path: String = seqAction(1)
+            window.location.replace(window.location.pathname + "#" + path)
         }
       }, timeToWait)
     }
@@ -83,9 +93,9 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
   }
 
   override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit = {
-        elements.map{_.asInstanceOf[Html]}.foreach { element =>
-          cursor = document.getElementById("cursor").asInstanceOf[Html]
-        }
+    elements.map{_.asInstanceOf[Html]}.foreach { element =>
+      cursor = document.getElementById("cursor").asInstanceOf[Html]
     }
+  }
 
 }

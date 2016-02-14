@@ -1,7 +1,8 @@
 <div class="block_min">
     <div class="img_min">
         <div class="toGrow">
-            <a href="#/events/{{event.event.id.x$2.l$2}}">
+            <a href="#/events/{{event.event.id.x$2.l$2}}" class="tracking" tracker="{{toTrack}}"
+               data-ng-click="toTrack='a,/events/'+event.event.id.x$2.l$2">
                 <img ng-src="{{ event.event.imagePath.x$2 }}" class="width100p"
                      on-error-src="assets/images/caroussel1.gif" ng-if="event.event.imagePath"/>
                 <img src="assets/images/caroussel1.gif"
@@ -98,7 +99,7 @@
                 </i>-->
             </div>
             <div class="infos_event" ng-class="{'float-left': $root.window == 'small'}">
-                <span class="dropDown" ng-show="organizer.name != event.places[0].name"
+                <span class="dropDown" ng-show="organizer.organizer.name != event.places[0].place.name"
                       data-ng-repeat="organizer in event.organizers">
                     <i class="fa fa-user"
                        style="font-size: 30px; color: {{event.priceColor}};"></i>

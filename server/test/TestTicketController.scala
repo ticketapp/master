@@ -2,6 +2,7 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
+import eventsDomain.Event
 import json.JsonHelper
 import org.joda.time.DateTime
 import play.api.Logger
@@ -160,6 +161,59 @@ class TestTicketController extends GlobalApplicationForControllers {
           Logger.error("get all salable events:" + error)
           error mustEqual 0
       }
+    }
+
+    "find maybe salable events by containing" in {
+      val expectedMaybeSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(100),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent2",
+          geographicPoint = geographicPointMethods.stringToTryPoint("45.7780684, 4.836889").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+
+      val expectedUnSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(5),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent",
+          geographicPoint = geographicPointMethods.stringToTryPoint("48.87135809999999, 2.3521577").get,
+          description = None,
+          startTime = new DateTime("2040-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = false)
+
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.findMaybeSalableEventsByContaining("notPassed"))
+      )
+      val validatedJsonMaybeSalableEvents: JsResult[Seq[MaybeSalableEvent]] =
+        contentAsJson(info).validate[Seq[MaybeSalableEvent]](JsonHelper.readMaybeSalableEventReads)
+
+      val maybeSalableEventsResult = validatedJsonMaybeSalableEvents match {
+        case maybeSalableEvent: JsSuccess[Seq[MaybeSalableEvent]] =>
+          maybeSalableEvent.get
+        case error: JsError =>
+          throw new Exception
+      }
+
+      maybeSalableEventsResult must contain(expectedMaybeSalableEvent)
+      maybeSalableEventsResult must contain(expectedUnSalableEvent)
     }
 
 

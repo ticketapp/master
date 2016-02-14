@@ -1,5 +1,6 @@
 import java.util.UUID
 
+import eventsDomain.Event
 import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures._
 import testsHelper.GlobalApplicationForModels
@@ -7,7 +8,7 @@ import ticketsDomain._
 
 import scala.language.postfixOps
 
-class TestTicketsModel extends GlobalApplicationForModels {
+class TicketsModelIntegrationTest extends GlobalApplicationForModels {
 
   "A ticket" must {
 
@@ -222,10 +223,54 @@ class TestTicketsModel extends GlobalApplicationForModels {
         eventIds must contain (savedSellableEvent)
       }
     }
+
     "add sellable event" in {
       val newSalableEvent = SalableEvent(1000)
-      whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { eventIds =>
-        eventIds mustBe 1
+      whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { response =>
+        response mustBe 1
+      }
+    }
+
+    "find maybe salable events by containing" in {
+      val expectedMaybeSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(100),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent2",
+          geographicPoint = geographicPointMethods.stringToTryPoint("45.7780684, 4.836889").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+
+      val expectedUnSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(5),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent",
+          geographicPoint = geographicPointMethods.stringToTryPoint("48.87135809999999, 2.3521577").get,
+          description = None,
+          startTime = new DateTime("2040-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = false
+      )
+      whenReady(ticketMethods.findMaybeSalableEventsByContaining("notPassed")) { events =>
+
+        events must contain(expectedMaybeSalableEvent)
+        events must contain(expectedUnSalableEvent)
       }
     }
   }

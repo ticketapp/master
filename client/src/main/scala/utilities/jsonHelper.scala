@@ -5,8 +5,8 @@ import java.util.Observable
 import addresses.Address
 import admin.{Ticket, TicketStatus, TicketWithStatus}
 import artists.Artist
-import events.{Geometry, Happening}
-import organizers.Organizer
+import events.{HappeningWithRelations, Geometry, Happening}
+import organizers.{OrganizerWithAddress, Organizer}
 import places.{Place, PlaceWithAddress}
 import upickle.Js
 import upickle.Js.{Num, Str, Value}
@@ -89,21 +89,25 @@ trait jsonHelper {
 
   implicit val organizerReader = upickle.default.Reader[Organizer]{
     case organizerObject =>
-      val organizer: Map[String, Any] = organizerObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
-      Organizer(
-        id = getOptionLong(organizer, "id"),
-        facebookId = getOptionString(organizer, "facebookId"),
-        name = organizer("name").asInstanceOf[Js.Str].value.toString,
-        description = getOptionString(organizer, "description"),
-        addressId = getOptionLong(organizer, "addressId"),
-        phone = getOptionString(organizer, "phone"),
-        publicTransit = getOptionString(organizer, "publicTransit"),
-        websites = getOptionString(organizer, "websites"),
-        verified = organizer("verified").toString.toBoolean,
-        imagePath = getOptionString(organizer, "imagePath"),
-        geographicPoint = Geometry(point = organizer("geographicPoint").asInstanceOf[Js.Str].value.toString),
-        linkedPlaceId = getOptionLong(organizer, "linkedPlaceId")
-      )
+      jsOrganizerToOrganizer(organizerObject)
+  }
+
+  def jsOrganizerToOrganizer(organizerObject: Value): Organizer = {
+    val organizer: Map[String, Any] = organizerObject.value.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
+    Organizer(
+      id = getOptionLong(organizer, "id"),
+      facebookId = getOptionString(organizer, "facebookId"),
+      name = organizer("name").asInstanceOf[Str].value.toString,
+      description = getOptionString(organizer, "description"),
+      addressId = getOptionLong(organizer, "addressId"),
+      phone = getOptionString(organizer, "phone"),
+      publicTransit = getOptionString(organizer, "publicTransit"),
+      websites = getOptionString(organizer, "websites"),
+      verified = organizer("verified").toString.toBoolean,
+      imagePath = getOptionString(organizer, "imagePath"),
+      geographicPoint = Geometry(point = organizer("geographicPoint").asInstanceOf[Str].value.toString),
+      linkedPlaceId = getOptionLong(organizer, "linkedPlaceId")
+    )
   }
 
   implicit val artistReader = upickle.default.Reader[Artist]{
@@ -147,6 +151,18 @@ trait jsonHelper {
         place = placeJsValueToPlace(placeWithRelation("place").asInstanceOf[Js.Value]),
         maybeAddress = if(placeWithRelation.isDefinedAt("maybeAddress"))
         Some(jsAddressToAddress(placeWithRelation("maybeAddress").asInstanceOf[Js.Value])) else None
+      )
+  }
+
+
+  implicit val organizerWithAddressReader = upickle.default.Reader[OrganizerWithAddress]{
+    case organizerObject =>
+      val organizerWithRelation: Map[String, Any] =
+        organizerObject.value.asInstanceOf[scala.collection.mutable.ArrayBuffer[Tuple2[String, Any]]].toMap
+      OrganizerWithAddress(
+        organizer = jsOrganizerToOrganizer(organizerWithRelation("organizer").asInstanceOf[Js.Value]),
+        address = if(organizerWithRelation.isDefinedAt("address"))
+        Some(jsAddressToAddress(organizerWithRelation("address").asInstanceOf[Js.Value])) else None
       )
   }
 

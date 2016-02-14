@@ -17,8 +17,11 @@ GET           /initDatabase                                      @fillDatabase.I
 
 ################################## Admin ################################################
 GET            /admin                                           @application.Application.admin
+
+################################# Salable events ######################################################################
 GET            /salableEvents                                   @ticketsDomain.TicketController.findSalableEvents()
 POST           /salableEvents                                   @ticketsDomain.TicketController.addSalableEvents(eventId: Long)
+GET            /salableEventsContaining                         @ticketsDomain.TicketController.findMaybeSalableEventsByContaining(pattern: String)
 
 #################################### Tickets ###############################################
 POST            /proposed                                         @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
