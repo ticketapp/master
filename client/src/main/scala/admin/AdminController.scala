@@ -4,6 +4,7 @@ import com.greencatsoft.angularjs.core.{Scope, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import httpServiceFactory.HttpGeneralService
 import materialDesign.MdToastService
+import tracking.Session
 import upickle.Js
 import upickle.default._
 import utilities.jsonHelper
@@ -14,6 +15,7 @@ import scala.scalajs.js
 import scala.scalajs.js.Date
 import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
 import scala.scalajs.js.annotation.JSExportAll
+import org.scalajs.dom.setInterval
 
 @JSExportAll
 @injectable("adminController")
@@ -27,6 +29,13 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
   var boughtBills: js.Array[TicketBill] = new js.Array[TicketBill]
   var soldBills: js.Array[TicketBill] = new js.Array[TicketBill]
   val validationMessage = "Ok"
+  var currentSessions = new js.Array[Session]()
+
+  setInterval(() => {
+    service.get(tracking.TrackingRoutes.getCurrentSessions) map { sessions =>
+      timeout(() => currentSessions = read[Seq[Session]](sessions).toJSArray)
+    }
+  }, 10000)
 
 
   def findSalableEvents: Unit = {

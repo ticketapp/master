@@ -33,8 +33,14 @@ class TestTrackingController extends GlobalApplicationForControllers {
         INSERT INTO userSessions(id, ip, screenWidth, screenHeight)
           VALUES('a4cea509-1002-47d0-b55c-593c91cb32ae', '127.0.0.0', 950, 450);
 
+        INSERT INTO userSessions(id, ip, screenWidth, screenHeight)
+          VALUES('a4bea509-1002-47d0-b55c-593c91cb32ae', '127.0.0.0', 950, 450);
+
         INSERT INTO userActions(id, action, timestamp, sessionId)
-          VALUES(100, 'mm,30,30', TIMESTAMP '1970-01-01 00:00:00.005', 'a4cea509-1002-47d0-b55c-593c91cb32ae');
+          VALUES(100, 'mm,30,30', timestamp '1970-01-01 01:00:00.005', 'a4cea509-1002-47d0-b55c-593c91cb32ae');
+
+        INSERT INTO userActions(id, action, timestamp, sessionId)
+          VALUES(1002, 'mm,30,30', current_timestamp, 'a4bea509-1002-47d0-b55c-593c91cb32ae');
         """),
       5.seconds)
   }
@@ -42,6 +48,7 @@ class TestTrackingController extends GlobalApplicationForControllers {
   val savedIp = "127.0.0.0"
   val savedSession = UserSession(UUID.fromString("a4cea509-1002-47d0-b55c-593c91cb32ae"), savedIp, 950, 450)
   val savedAction = UserAction("mm,30,30", new Timestamp(5), UUID.fromString("a4cea509-1002-47d0-b55c-593c91cb32ae"))
+  val savedCurrentSession = UserSession(UUID.fromString("a4bea509-1002-47d0-b55c-593c91cb32ae"), savedIp, 950, 450)
 
   "Tracking controller" should {
 
@@ -58,6 +65,22 @@ class TestTrackingController extends GlobalApplicationForControllers {
       }
 
       expectedSession must contain (savedSession)
+    }
+
+    "find current sessions" in {
+      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findCurrentSessions()))
+      val validatedJsonSalableEvents: JsResult[Seq[UserSession]] =
+        contentAsJson(info).validate[Seq[UserSession]](JsonHelper.readUserSessionReads)
+
+      val expectedSession = validatedJsonSalableEvents match {
+        case sessions: JsSuccess[Seq[UserSession]] =>
+          sessions.get
+        case error: JsError =>
+          throw new Exception
+      }
+
+      expectedSession must contain (savedCurrentSession)
+      expectedSession must not contain (savedSession)
     }
 
     "find actions by session id" in {

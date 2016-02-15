@@ -26,20 +26,28 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
   def findSessions() = Action.async {
     trackingMethods.findUserSessions map { userSessions =>
       Ok(Json.toJson(userSessions))
-    } recover { case t: Throwable =>
-      //replace by custom logger
-      Logger.error("TrackingController.findSessions: ", t)
-      InternalServerError("TrackingController.findSessions: " + t.getMessage)
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + " findSessions: ", e)
+      InternalServerError(this.getClass + " findSessions: " + e.getMessage)
+    }
+  }
+
+
+  def findCurrentSessions() = Action.async {
+    trackingMethods.findInProgressSession map { userSessions =>
+      Ok(Json.toJson(userSessions))
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + " findCurrentSessions: ", e)
+      InternalServerError(this.getClass + " findCurrentSessions: " + e.getMessage)
     }
   }
 
   def findActionsBySessionId(sessionId: String) = Action.async {
     trackingMethods.findUserActionBySessionId(UUID.fromString(sessionId)) map { userActions =>
       Ok(Json.toJson(userActions))
-    } recover { case t: Throwable =>
-      //replace by custom logger
-      Logger.error("TrackingController.findActionsBySessionId: ", t)
-      InternalServerError("TrackingController.findActionsBySessionId: " + t.getMessage)
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + " findActionsBySessionId: ", e)
+      InternalServerError(this.getClass + " findActionsBySessionId: " + e.getMessage)
     }
   }
 
@@ -47,10 +55,9 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     val userAction = request.body.asJson.get.validate[UserAction](userActionReads)
     trackingMethods.saveUserAction(userAction.get) map { userActions =>
       Ok(Json.toJson(userActions))
-    } recover { case t: Throwable =>
-      //replace by custom logger
-      Logger.error("TrackingController.saveUserAction: ", t)
-      InternalServerError("TrackingController.saveUserAction: " + t.getMessage)
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + " saveUserAction: ", e)
+      InternalServerError(this.getClass + " saveUserAction: " + e.getMessage)
     }
   }
 
@@ -61,9 +68,8 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     trackingMethods.saveUserSession(newSession) map { _ =>
       Ok(Json.toJson(sessionId))
     } recover { case NonFatal(e) =>
-      //replace by custom logger
-      Logger.error("TrackingController.saveUserSession: ", e)
-      InternalServerError("TrackingController.saveUserSession: " + e.getMessage)
+      Logger.error(this.getClass + " saveUserSession: ", e)
+      InternalServerError(this.getClass + " saveUserSession: " + e.getMessage)
     }
   }
 }
