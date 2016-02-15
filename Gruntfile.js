@@ -141,8 +141,12 @@ module.exports = function (grunt) {
             angularTranslate: {
                 src: 'bower_components/angular-translate/angular-translate.min.js',
                 dest: 'server/public/plugins/angular-translate.min.js'
-            }
+            },
 
+            jquery: {
+                src: 'bower_components/jquery/dist/jquery.min.js',
+                dest: 'server/public/plugins/jquery.min.js'
+            }
         },
 
         htmlmin: {
