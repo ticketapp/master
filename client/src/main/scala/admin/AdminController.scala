@@ -30,12 +30,12 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
   var soldBills: js.Array[TicketBill] = new js.Array[TicketBill]
   val validationMessage = "Ok"
   var currentSessions = new js.Array[Session]()
-
+  var timeBeforeReloadCurrentSessions = 10000
   setInterval(() => {
     service.get(tracking.TrackingRoutes.getCurrentSessions) map { sessions =>
       timeout(() => currentSessions = read[Seq[Session]](sessions).toJSArray)
     }
-  }, 10000)
+  }, timeBeforeReloadCurrentSessions)
 
 
   def findSalableEvents: Unit = {
