@@ -85,9 +85,6 @@ class TestTrackingController extends GlobalApplicationForControllers {
         case error: JsError => throw new Exception
       }
 
-      println(expectedAction)
-      println(savedAction)
-
       expectedAction must contain (savedAction)
     }
 
