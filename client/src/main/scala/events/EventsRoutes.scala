@@ -45,4 +45,6 @@ object EventsRoutes {
   def findByPlace(placeId: Long): String = "/places/" + placeId + "/events"
 
   def findPassedByPlace(placeId: Long): String = "/places/" + placeId + "/passedEvents"
+
+  def findMaybeSalableEvents(pattern: String): String = "/salableEventsContaining?pattern=" + pattern
 }

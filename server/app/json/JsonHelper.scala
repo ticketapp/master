@@ -119,12 +119,15 @@ object JsonHelper {
   implicit val userActionWrites: Writes[UserAction] = Json.writes[UserAction]
   implicit val userSessionReads: Reads[UserSession] = Json.reads[UserSession]
   implicit val userSessionWrites: Writes[UserSession] = Json.writes[UserSession]
+  implicit val maybeSalableEventReads: Reads[MaybeSalableEvent] = Json.reads[MaybeSalableEvent]
+  implicit val maybeSalableEventWrites: Writes[MaybeSalableEvent] = Json.writes[MaybeSalableEvent]
   val readUserActionReads: Reads[Seq[UserAction]] = Reads.seq(__.read[UserAction])
   val readUserSessionReads: Reads[Seq[UserSession]] = Reads.seq(__.read[UserSession])
   val readSalableEventReads: Reads[Seq[SalableEvent]] = Reads.seq(__.read[SalableEvent])
   val readTicketWithStatusReads: Reads[Seq[TicketWithStatus]] = Reads.seq(__.read[TicketWithStatus])
   val readPendingTicketReads: Reads[Seq[PendingTicket]] = Reads.seq(__.read[PendingTicket])
   val readTicketBillReads: Reads[Seq[TicketBill]] = Reads.seq(__.read[TicketBill])
+  val readMaybeSalableEventReads: Reads[Seq[MaybeSalableEvent]] = Reads.seq(__.read[MaybeSalableEvent])
   val readTariffReads: Reads[Seq[Tariff]] = Reads.seq(__.read[Tariff])
 
 }

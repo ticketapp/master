@@ -17,8 +17,11 @@ GET           /initDatabase                                      @fillDatabase.I
 
 ################################## Admin ################################################
 GET            /admin                                           @application.Application.admin
+
+################################# Salable events ######################################################################
 GET            /salableEvents                                   @ticketsDomain.TicketController.findSalableEvents()
 POST           /salableEvents                                   @ticketsDomain.TicketController.addSalableEvents(eventId: Long)
+GET            /salableEventsContaining                         @ticketsDomain.TicketController.findMaybeSalableEventsByContaining(pattern: String)
 
 #################################### Tickets ###############################################
 POST            /proposed                                         @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
@@ -133,6 +136,7 @@ POST    /issues/:issueId/comments                                            @is
 
 ################################# Tracking ################################################
 GET     /sessions                                                            @trackingDomain.TrackingController.findSessions()
+GET     /sessions/current                                                    @trackingDomain.TrackingController.findCurrentSessions()
 POST    /sessions                                                            @trackingDomain.TrackingController.saveUserSession(screenWidth: Int, screenHeight: Int)
 GET     /actions                                                             @trackingDomain.TrackingController.findActionsBySessionId(sessionId: String)
 POST    /actions                                                             @trackingDomain.TrackingController.saveUserAction()

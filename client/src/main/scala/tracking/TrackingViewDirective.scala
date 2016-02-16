@@ -4,8 +4,7 @@ import com.greencatsoft.angularjs.core.{RouteParams, Timeout, Window}
 import com.greencatsoft.angularjs.{Attributes, ElementDirective, injectable}
 import httpServiceFactory.HttpGeneralService
 import org.scalajs.dom.html.{Html, Input}
-import org.scalajs.dom.{Element, Event, document}
-import root.RoutingConfig
+import org.scalajs.dom.{Element, document}
 import upickle.default._
 import utilities.NgCookies
 
@@ -16,11 +15,9 @@ import scala.scalajs.js.annotation.JSExport
 @JSExport
 @injectable("trackingView")
 class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies,
-                            routeParams: RouteParams, window: Window)
-  extends ElementDirective with TrackingRoutes {
+                            routeParams: RouteParams, window: Window) extends ElementDirective {
 
   var cursor = document.getElementById("cursor").asInstanceOf[Html]
-
   @JSExport
   var session = Seq.empty[Action]
 
@@ -28,19 +25,17 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
   var sessions = Seq.empty[Session].toJSArray
 
   var trackingViewContainer = document.getElementById("tracking-player").asInstanceOf[Html]
+  var trackingViewScroller = trackingViewContainer.getElementsByTagName("md-content").item(0).asInstanceOf[Html]
 
-  @JSExport
-  var template = "assets/templates/landingPage/landingPage.html"
+  window.location.replace(window.location.pathname + "#/")
   timeout(() => {
     val trackedItems = document.getElementsByClassName("tracking")
     for(i <- 0 until trackedItems.length) {
       trackedItems.item(i).asInstanceOf[Html].classList.remove("tracking")
     }
-    document.onmousemove = (event: Event) => {
-    }
   })
 
-  httpService.get(getSessions) map { sessionsString =>
+  httpService.get(TrackingRoutes.getSessions) map { sessionsString =>
     timeout(() => {
       sessions = read[Seq[Session]](sessionsString).toJSArray
     })
@@ -48,7 +43,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
 
   @JSExport
   def setSession(sessionId: String): Unit = {
-    httpService.get(getActionsBySessionId(sessionId)) map { sessionString =>
+    httpService.get(TrackingRoutes.getActionsBySessionId(sessionId)) map { sessionString =>
       session = read[Seq[Action]](sessionString)
     }
   }
@@ -62,18 +57,34 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
       val seqAction = action.action.split(",").toSeq
       val timeToWait: Int = (action.timestamp - initTimestamp).toInt
       timeout(() => {
-        trackingViewContainer.scrollTop = seqAction.last.toDouble
-        seqAction.head match {
-          case mouseMove if mouseMove == "mm" =>
-            val left = seqAction(1)
-            val top = seqAction(2)
+        trackingViewScroller.scrollTop = seqAction.last.toDouble
+        seqAction.headOption match {
+          case Some(mouseMove) if mouseMove == "mm" =>
+            val leftMousePosition: String = seqAction(1)
+            val left = leftMousePosition
+            val topMousePosition: String = seqAction(2)
+            val top = topMousePosition
             moveCursor(top, left)
-          case click if click == "cl" =>
-            document.getElementById(seqAction(1)).asInstanceOf[Html].click()
-          case input if input == "in" =>
-            document.getElementById(seqAction(1)).asInstanceOf[Input].value = seqAction(2)
-          case link if link == "a" =>
-            template = RoutingConfig.urlTemplatePath(seqAction(1))
+
+          case Some(click) if click == "cl" =>
+            val elementId: String = seqAction(1)
+            document.getElementById(elementId).asInstanceOf[Html].click()
+
+          case Some(input) if input == "in" =>
+            val inputValue: String = seqAction(2)
+            document.getElementById(seqAction(1)) match {
+              case input1: Input =>
+                input1.value = inputValue
+              case otherElement =>
+                otherElement.asInstanceOf[Html].getElementsByTagName("input").item(0).asInstanceOf[Input].value = inputValue
+            }
+
+          case Some(link) if link == "a" =>
+              val path: String = seqAction(1)
+            window.location.replace(window.location.pathname + "#" + path)
+
+          case _ =>
+
         }
       }, timeToWait)
     }

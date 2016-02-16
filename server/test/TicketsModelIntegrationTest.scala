@@ -1,5 +1,6 @@
 import java.util.UUID
 
+import eventsDomain.Event
 import database.MyPostgresDriver.api._
 import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures._
@@ -21,6 +22,8 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
 
         INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime)
           VALUES(1000, 'facebookidattendeetest2', true, true, 'notPassedEvent4', TIMESTAMP WITH TIME ZONE '2030-08-24 14:00:00+02:00');
+       INSERT INTO events(eventid, ispublic, isactive, name, starttime)
+         VALUES(5, true, true, 'notPassedEvent', TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
 
         INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId)
           VALUES(10000, 'test', 10, TIMESTAMP WITH TIME ZONE '2040-08-24T14:00:00.000+02:00',
@@ -260,8 +263,51 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
 
     "add salable event" in {
       val newSalableEvent = SalableEvent(1000)
-      whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { eventIds =>
-        eventIds mustBe 1
+      whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { response =>
+        response mustBe 1
+      }
+    }
+
+    "find maybe salable events by containing" in {
+      val expectedMaybeSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(100),
+          facebookId = Some("facebookidattendeetest"),
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent3",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+
+      val expectedUnSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(5),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = false
+      )
+      whenReady(ticketMethods.findMaybeSalableEventsByContaining("notPassed")) { events =>
+
+        events must contain(expectedMaybeSalableEvent)
+        events must contain(expectedUnSalableEvent)
       }
     }
   }

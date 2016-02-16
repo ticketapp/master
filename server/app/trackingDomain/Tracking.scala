@@ -7,6 +7,7 @@ import javax.inject.Inject
 import application.GuestUser
 import database.MyPostgresDriver.api._
 import database.{MyDBTableDefinitions, MyPostgresDriver}
+import org.joda.time.DateTime
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 
 import scala.concurrent.Future
@@ -35,6 +36,29 @@ class TrackingMethods @Inject() (protected val dbConfigProvider: DatabaseConfigP
   }
 
   def findUserSessions: Future[Seq[UserSession]] = db.run(userSessions.result)
+
+  def findInProgressSession: Future[Seq[UserSession]] = {
+    val now = DateTime.now()
+    val fiveMinutesAgo = now.minusMinutes(5).getMillis
+    val query =
+      for {
+        session <- userSessions joinLeft userActions on (_.sessionUuid === _.sessionId)
+      } yield session
+
+    db.run(query.result) map { sessionsWithMaybeActions =>
+      val groupedSessions = sessionsWithMaybeActions.groupBy(_._1) map { sessionWithMaybeActions =>
+        val sessionWithCollectedActions= (sessionWithMaybeActions._1, sessionWithMaybeActions._2.collect {
+          case (_, Some(action)) =>
+            action
+        })
+        sessionWithCollectedActions
+      }
+      groupedSessions.toSeq.collect {
+        case (session, actions) if actions.exists(_.timestamp.getTime > fiveMinutesAgo) =>
+          session
+      }
+    }
+  }
 
   def saveUserAction(userAction: UserAction): Future[Int] = db.run(userActions += userAction)
 
