@@ -12,5 +12,12 @@
 </md-input-container>
 
 <md-button type="submit" class="md-raised md-primary">Valider</md-button>
-<md-button ng-show="nav" ng-click="offset = offset + numberToReturn" type="submit" class="md-raised md-primary">Next</md-button>
-<md-button ng-show="offset > 0 && nav" ng-click="offset = offset - numberToReturn" type="submit" class="md-raised md-primary">Prev</md-button>
+<md-button ng-show="nav" ng-click="offset = offset + numberToReturn" type="submit" class="md-raised md-primary">
+    Next
+</md-button>
+<md-button ng-show="offset > 0 && nav"
+           ng-click="offset = offset - numberToReturn"
+           type="submit"
+           class="md-raised md-primary">
+    Prev
+</md-button>

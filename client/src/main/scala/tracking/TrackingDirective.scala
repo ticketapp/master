@@ -1,9 +1,7 @@
 package tracking
 
-import java.util.concurrent.Future
-
 import com.greencatsoft.angularjs._
-import com.greencatsoft.angularjs.core.{Scope, Timeout}
+import com.greencatsoft.angularjs.core.Timeout
 import httpServiceFactory.HttpGeneralService
 import org.scalajs.dom._
 import org.scalajs.dom.html.Html
@@ -11,29 +9,8 @@ import upickle.default._
 import utilities.NgCookies
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.{Date, Object}
-
-@js.native
-trait MousePosition extends js.Object {
-  var left:Double = js.native
-  var top:Double = js.native
-}
-
-trait TrackingScope extends Scope {
-  var sessionId: String = js.native
-  var storedActions: Seq[Action] = js.native
-  var doc: Html = js.native
-  var httpService: HttpGeneralService = js.native
-  def track(action: String): Unit = {
-    console.log(action)
-    val newDate = new Date().getTime()
-    val newAction = Action(action + "," + doc.scrollTop, newDate, sessionId)
-    if(sessionId.length > 0) httpService.postWithObject(TrackingRoutes.postWithActionObject, write(newAction))
-    else storedActions :+ newAction
-  }
-}
 
 @JSExport
 @injectable("tracking")
@@ -44,11 +21,21 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
   val cookie = ngCookies.get("sessionId") match {
     case string if string.isInstanceOf[String] =>
       sessionId = string.asInstanceOf[String]
+
     case _ =>
-      createNewSession
+      httpService.post(TrackingRoutes.postSession(
+        screenWidth = window.innerWidth,
+        screenHeight = window.innerHeight)
+      ) map { newSessionId =>
+        val newId = read[String](newSessionId)
+        ngCookies.put("sessionId", newId)
+        sessionId = newId
+        storedActions map (action => httpService.postWithObject(TrackingRoutes.postWithActionObject, write(action)))
+      }
+      createNewSession()
   }
 
-  def createNewSession: Unit = {
+  def createNewSession(): Unit = {
     val url: String = TrackingRoutes.postSession(screenWidth = window.innerWidth, screenHeight = window.innerHeight)
     httpService.post(url) map { newSessionId =>
       val newId = read[String](newSessionId)
@@ -74,7 +61,7 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
     val oneMinuteAgo: Int = 60000
     if (lastActionTime < new Date().getTime() - oneMinuteAgo) {
       lastActionTime = new Date().getTime()
-      createNewSession
+      createNewSession()
     }
     val newDate = new Date().getTime()
     val newAction = Action(action + "," + doc.scrollTop, newDate, sessionId)

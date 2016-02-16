@@ -9,11 +9,14 @@ client/target
 server/target
 server/logs/application.log
 node_modules
+npm-debug.log
 bower_components/
 project/project
 project/target
 server/public/templates
 server/public/stylesheets/*.css
+server/public/plugins
+server-0.1-SNAPSHOT/
 target
 tmp
 public/bower_components

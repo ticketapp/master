@@ -21,7 +21,7 @@ object App extends JSApp {
 
   override def main() {
     val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap",
-      "ngCookies", "angularTranslateApp"))
+      "angularTranslateApp", "ngCookies"))
 
     module.config(RoutingConfig)
     module.directive[ContactComponentDirective]

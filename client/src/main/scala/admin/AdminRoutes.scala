@@ -1,9 +1,5 @@
 package admin
 
-import scala.scalajs.js
-import scala.scalajs.js.annotation.JSExport
-
-@js.native
 object AdminRoutes {
   def salableEvents: String = "/salableEvents"
 
@@ -27,11 +23,11 @@ object AdminRoutes {
 
   def findBoughtBills: String = "/bills/bought"
 
-  def findSoldBills:String = "/bills/sold "
+  def findSoldBills: String = "/bills/sold "
 
-  def findTariffsByEventId(eventId: Long):String = "/tariffs?eventId=" + eventId
+  def findTariffsByEventId(eventId: Long): String = "/tariffs?eventId=" + eventId
 
-  def addTariff(denomination: String, eventId: Long, startTime: String, endTime: String, price: Double):String =
+  def addTariff(denomination: String, eventId: Long, startTime: String, endTime: String, price: Double): String =
     "/tariffs?denomination=" + denomination + "&eventId=" + eventId + "&startTime=" + startTime + "&endTime=" +
       endTime + "&price=" + price
 }

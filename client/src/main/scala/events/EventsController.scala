@@ -1,36 +1,33 @@
 package events
 
-import com.greencatsoft.angularjs.core.{Timeout, Scope}
+import com.greencatsoft.angularjs.core.Timeout
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import geolocation.GeolocationService
 import httpServiceFactory.HttpGeneralService
+import upickle.default._
 import utilities.jsonHelper
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.scalajs.js.{UndefOr, Date, JSON}
-import scala.scalajs.js.annotation.{JSExport, JSExportAll}
-import org.scalajs.dom.console
-import upickle.Js
-import upickle.default._
+import scala.scalajs.js.annotation.JSExportAll
+
 @JSExportAll
 @injectable("eventsController")
-class EventsController(eventScope: EventsScopeType, service: HttpGeneralService, timeout: Timeout, geolocationService: GeolocationService)
-  extends AbstractController[EventsScopeType](eventScope) with jsonHelper {
+class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout,
+                       geolocationService: GeolocationService)
+    extends AbstractController[EventsScope](eventScope) with jsonHelper {
 
-//  var events: js.Array[HappeningWithRelations] = new js.Array[HappeningWithRelations]
   var initLat =  0.0
   val coordinateMaxLength = 8
-
-  geolocationService.getUserGeolocation map { geoloc =>
-    timeout(() =>initLat = geoloc.lat.toString.substring(0, coordinateMaxLength).toDouble)
-  }
-
   var initLng = 0.0
 
-  geolocationService.getUserGeolocation map { geoloc =>
-    timeout(() => initLng = geoloc.lng.toString.substring(0, coordinateMaxLength).toDouble)
+  geolocationService.getUserGeolocation map { geolocation =>
+    timeout(() => initLat = geolocation.lat.toString.substring(0, coordinateMaxLength).toDouble)
+  }
+
+  geolocationService.getUserGeolocation map { geolocation =>
+    timeout(() => initLng = geolocation.lng.toString.substring(0, coordinateMaxLength).toDouble)
   }
 
   def findMaybeSalableEventsContaining(pattern: String): Unit = {
@@ -99,11 +96,4 @@ class EventsController(eventScope: EventsScopeType, service: HttpGeneralService,
       timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
     }
   }
-}
-
-@js.native
-trait EventsScopeType extends Scope {
-  var events: js.Array[HappeningWithRelations] = js.native
-  var maybeSalableEvents: js.Array[MaybeSalableEvent] = js.native
-  var remove: js.Function1[HappeningWithRelations, _] = js.native
 }

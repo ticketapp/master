@@ -21,7 +21,7 @@ class ArtistsController(scope: Scope, service: HttpGeneralService, timeout: Time
   }
 
   def findByFacebookUrl(facebookUrl: String): Unit = {
-    service.get(ArtistsRoutes.FindByFacebookUrl(facebookUrl)) map { foundArtist =>
+    service.get(ArtistsRoutes.findByFacebookUrl(facebookUrl)) map { foundArtist =>
       timeout(() => artists = js.Array(foundArtist))
     }
   }
@@ -32,7 +32,7 @@ class ArtistsController(scope: Scope, service: HttpGeneralService, timeout: Time
     }
   }
 
-  def getFollowed: Unit = {
+  def getFollowed(): Unit = {
     service.get(ArtistsRoutes.getFollowed) map { foundArtist =>
       timeout(() => artists = js.Array(foundArtist))
     }
@@ -49,7 +49,6 @@ class ArtistsController(scope: Scope, service: HttpGeneralService, timeout: Time
       timeout(() => artists = js.Array(foundArtist))
     }
   }
-
 }
 
 /*

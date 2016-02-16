@@ -2,7 +2,6 @@ import com.greencatsoft.angularjs.core.Scope
 
 import scala.scalajs.js
 
-
 @js.native
 trait TestScope extends Scope {
 
@@ -14,11 +13,10 @@ trait TestScope extends Scope {
   var delete: js.Function = js.native
 }
 
-@js.native
 object TestAdminClientController extends AngularMockTest {
 
-  "an admin client controller" should
-    "get all salable events" in {
+//  "An admin client controller" should
+//    "get all salable events" in {
 //      println(new AdminController(.core.Scope, null, null).test)
 //    beforeAll {
      /* val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap", "websocketService"))
@@ -52,13 +50,5 @@ object TestAdminClientController extends AngularMockTest {
     withModule { module =>
       println(module)
     }*/
-  }
-  "The framework" should "be able to test equality" in {
-
-    (1 + 1) must be (2)
-
-    ("A" + "B") should be ("AB")
-
-    "Scala.js" must not be "overlooked!"
-  }
+//  }
 }

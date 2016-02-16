@@ -1,4 +1,4 @@
-<md-select ng-model="eventRequest">
+<md-select ng-model="eventRequest" aria-label="event">
     <md-option value="byId">
         {{ 'ID_FORM_EVENTS_HEADER' | translate }}
     </md-option>
@@ -29,8 +29,10 @@
     <event-form-find-by-id></event-form-find-by-id>
 </form>
 
-<form ng-submit="controller.find(offset, numberToReturn,controller.initLat,controller.initLng); nav = true" ng-show="eventRequest == 'findByGeopoint'">
-    <event-form-find--by-geo-point></event-form-find--by-geo-point>
+<form ng-submit="controller.find(offset, numberToReturn,controller.initLat,controller.initLng); nav = true"
+      ng-show="eventRequest == 'findByGeopoint'">
+    <event-form-find--by-geo-point>
+    </event-form-find--by-geo-point>
 </form>
 
 <form ng-submit="controller.findInHourInterval(hourInterval,controller.initLat,controller.initLng, offset, numberToReturn);
