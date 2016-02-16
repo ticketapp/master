@@ -22,6 +22,8 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
 
         INSERT INTO events(eventid, facebookId, ispublic, isactive, name, starttime)
           VALUES(1000, 'facebookidattendeetest2', true, true, 'notPassedEvent4', TIMESTAMP WITH TIME ZONE '2030-08-24 14:00:00+02:00');
+       INSERT INTO events(eventid, ispublic, isactive, name, starttime)
+         VALUES(5, true, true, 'notPassedEvent', TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
 
         INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId)
           VALUES(10000, 'test', 10, TIMESTAMP WITH TIME ZONE '2040-08-24T14:00:00.000+02:00',
@@ -270,11 +272,11 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
       val expectedMaybeSalableEvent = MaybeSalableEvent(
         Event(
           id = Some(100),
-          facebookId = None,
+          facebookId = Some("facebookidattendeetest"),
           isPublic = true,
           isActive = true,
-          name = "notPassedEvent2",
-          geographicPoint = geographicPointMethods.stringToTryPoint("45.7780684, 4.836889").get,
+          name = "notPassedEvent3",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get,
           description = None,
           startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
           endTime = None,
@@ -292,9 +294,9 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
           isPublic = true,
           isActive = true,
           name = "notPassedEvent",
-          geographicPoint = geographicPointMethods.stringToTryPoint("48.87135809999999, 2.3521577").get,
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get,
           description = None,
-          startTime = new DateTime("2040-08-24T14:00:00.000+02:00"),
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
           endTime = None,
           ageRestriction = 16,
           tariffRange = None,
