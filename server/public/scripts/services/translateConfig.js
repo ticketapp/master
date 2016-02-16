@@ -1,18 +1,18 @@
 angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).config(function($translateProvider) {
     $translateProvider.translations('en', {
         //Landing page
-        HEADLINE: 'Sell your tickets',
-        INTRO_TEXT: "Be payed now, claude is the buyer",
+        HEADLINE: 'Sell your concert tickets',
+        INTRO_TEXT: "Get paid now, regardless of whether a buyer is found or not",
         INPUT_LANDING_PAGE_TEXT: "Get an offer now",
-        INPUT_LANDING_PAGE_PLACEHOLDER: "Search a sellableEvent by name or placeName",
+        INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or by place name",
         //Events page header
         PROXIMITY_EVENTS_HEADER: "Events near you",
         //Events forms
         ID_FORM_EVENTS_HEADER: "Search by id",
         PROXIMITY_EVENTS_FORM_HEADER: "Find events by geolocation",
-        HOUR_INTERVAL_EVENTS_FORM_HEADER: "Find events In Hour Interval",
-        PASSED_EVENTS_FORM_HEADER: "Find events Passed In Interval",
-        EVENTS_CONTAINING_FORM_HEADER: "Find All Containing",
+        HOUR_INTERVAL_EVENTS_FORM_HEADER: "Find events by date",
+        PASSED_EVENTS_FORM_HEADER: "Find events passed by date",
+        EVENTS_CONTAINING_FORM_HEADER: "Find all containing",
         EVENTS_BY_CITY_FORM_HEADER: "Find in city",
         EVENTS_NEAR_CITY_FORM_HEADER: "Find near city",
         CREATE_EVENT_BY_FACEBOOK_ID_FORM_HEADER: "Create by facebook id",
@@ -31,9 +31,9 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         PROXIMITY_EVENTS_HEADER: "Evénements à proximité",
         //Events forms
         ID_FORM_EVENTS_HEADER: "Rechercher par id",
-        PROXIMITY_EVENTS_FORM_HEADER: "Rechercher par coordonnées géographique",
-        HOUR_INTERVAL_EVENTS_FORM_HEADER: "Rechercher par temps",
-        PASSED_EVENTS_FORM_HEADER: "Rechercher les evénements passés",
+        PROXIMITY_EVENTS_FORM_HEADER: "Rechercher par coordonnées géographiques",
+        HOUR_INTERVAL_EVENTS_FORM_HEADER: "Rechercher par date",
+        PASSED_EVENTS_FORM_HEADER: "Rechercher les evénements passés par date",
         EVENTS_CONTAINING_FORM_HEADER: "Rechercher par nom",
         EVENTS_BY_CITY_FORM_HEADER: "Rechercher les événements d'une ville",
         EVENTS_NEAR_CITY_FORM_HEADER: "Rechercher les événements proche d'une ville",
@@ -43,8 +43,9 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         BUY_TICKET: "Acheter un ticket",
         SELL_TICKET: "Vendre un ticket"
     });
+
     var userLang = (navigator.language || navigator.userLanguage).substring(0, 2);
     $translateProvider.preferredLanguage(userLang);
-    $translateProvider.useSanitizeValueStrategy('sanitize');
+    $translateProvider.useSanitizeValueStrategy("sanitize");
     //All documentation: https://angularjs.de/artikel/angularjs-i18n-ng-translate
 });

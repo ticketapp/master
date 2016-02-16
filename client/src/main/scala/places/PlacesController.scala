@@ -39,5 +39,4 @@ class PlacesController(scope: Scope, service: HttpGeneralService, timeout: Timeo
       timeout(() => places = js.Array(foundPlace))
     }
   }
-
 }

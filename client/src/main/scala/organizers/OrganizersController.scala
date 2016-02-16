@@ -1,6 +1,5 @@
 package organizers
 
-
 import com.greencatsoft.angularjs.core.{Scope, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import httpServiceFactory.HttpGeneralService

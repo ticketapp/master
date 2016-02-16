@@ -4,7 +4,8 @@ import com.greencatsoft.angularjs.core.{Scope, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import httpServiceFactory.HttpGeneralService
 import materialDesign.MdToastService
-import upickle.Js
+import org.scalajs.dom.setInterval
+import tracking.Session
 import upickle.default._
 import utilities.jsonHelper
 
@@ -17,9 +18,8 @@ import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 @injectable("adminController")
-class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, timeout: Timeout, mdToast: MdToastService)
-  extends AbstractController[AdminScopeType](adminScope) with jsonHelper {
-
+class AdminController(scope: Scope, service: HttpGeneralService, timeout: Timeout, mdToast: MdToastService)
+  extends AbstractController[Scope](scope) with jsonHelper {
 
   var salableEvents: js.Array[SalableEvent] = new js.Array[SalableEvent]
   var ticketsWithStatus: js.Array[TicketWithStatus] = new js.Array[TicketWithStatus]
@@ -27,9 +27,16 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
   var boughtBills: js.Array[TicketBill] = new js.Array[TicketBill]
   var soldBills: js.Array[TicketBill] = new js.Array[TicketBill]
   val validationMessage = "Ok"
+  var currentSessions = new js.Array[Session]()
+  var timeBeforeReloadCurrentSessions = 10000
+  setInterval(() => {
+    service.get(tracking.TrackingRoutes.getCurrentSessions) map { sessions =>
+      timeout(() => currentSessions = read[Seq[Session]](sessions).toJSArray)
+    }
+  }, timeBeforeReloadCurrentSessions)
 
 
-  def findSalableEvents: Unit = {
+  def findSalableEvents(): Unit = {
     service.get(AdminRoutes.salableEvents) map { foundSalableEvents =>
       timeout(() => salableEvents = read[Seq[SalableEvent]](foundSalableEvents).toJSArray)
     }
@@ -48,31 +55,30 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
     )) map { response =>
       val toast = mdToast.simple(validationMessage)
       mdToast.show(toast)
-
     }
   }
 
-  def findTicketsWithStatus: Unit = {
+  def findTicketsWithStatus(): Unit = {
     service.get(AdminRoutes.findTicketsWithStatus) map { ticketsWithStatusFound =>
         timeout(() => ticketsWithStatus = read[Seq[TicketWithStatus]](ticketsWithStatusFound).toJSArray)
     }
   }
 
-  def findPendingTickets: Unit = {
+  def findPendingTickets(): Unit = {
     service.get(AdminRoutes.findPendingTickets) map { pendingTicketsFound =>
-        timeout( () => pendingTickets = read[Seq[PendingTicket]](pendingTicketsFound).toJSArray)
+        timeout(() => pendingTickets = read[Seq[PendingTicket]](pendingTicketsFound).toJSArray)
     }
   }
 
-  def findBoughtBills: Unit = {
+  def findBoughtBills(): Unit = {
     service.get(AdminRoutes.findBoughtBills) map { boughtBillsFind =>
-        timeout( () => boughtBills = read[Seq[TicketBill]](boughtBillsFind).toJSArray)
+        timeout(() => boughtBills = read[Seq[TicketBill]](boughtBillsFind).toJSArray)
     }
   }
 
-  def findSoldBills: Unit = {
+  def findSoldBills(): Unit = {
     service.get(AdminRoutes.findSoldBills) map { soldBillsFound =>
-      timeout( () => soldBills = read[Seq[TicketBill]](soldBillsFound).toJSArray)
+      timeout(() => soldBills = read[Seq[TicketBill]](soldBillsFound).toJSArray)
     }
   }
 
@@ -117,9 +123,4 @@ class AdminController(adminScope: AdminScopeType, service: HttpGeneralService, t
       mdToast.show(toast)
     }
   }
-}
-
-@js.native
-trait AdminScopeType extends Scope {
-  var test: String = js.native
 }

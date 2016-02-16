@@ -1,17 +1,15 @@
 package geolocation
 
-import com.greencatsoft.angularjs.{Factory, injectable, Service}
-import com.greencatsoft.angularjs.core.{Timeout, HttpService}
-import events.Geometry
-import org.scalajs.dom.navigator
-import org.scalajs.dom.raw.{PositionError, Position}
-import org.scalajs.dom.console
+import com.greencatsoft.angularjs.core.{HttpService, Timeout}
+import com.greencatsoft.angularjs.{Factory, Service, injectable}
+import org.scalajs.dom.{console, navigator}
+import org.scalajs.dom.raw.{Position, PositionError}
+
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
-import org.scalajs.dom.{setInterval, clearInterval}
-import scala.scalajs.js.{UndefOr, JSON}
+import scala.scalajs.js.UndefOr
 
 case class GeographicPoint(lat: Double, lng: Double)
 
@@ -20,7 +18,7 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
 
   var geographicPoint: UndefOr[GeographicPoint] = js.undefined
 
-  def getHtmlGeolocation: Unit = {
+  def getHtmlGeolocation(): Unit = {
     navigator.geolocation.getCurrentPosition((position: Position) => {
       geographicPoint = GeographicPoint(position.coords.latitude,position.coords.longitude)
     }, (error: PositionError) => {
@@ -51,10 +49,10 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
   }
 
   def getUserGeolocation: Future[GeographicPoint] = {
-    timeout(() => getHtmlGeolocation, 300) flatMap { a =>
+    timeout(() => getHtmlGeolocation(), 300) flatMap { a =>
       if(geographicPoint.isDefined) Future(geographicPoint.get)
       else {
-        getHtmlGeolocation
+        getHtmlGeolocation()
         getUserGeolocation
       }
     }
