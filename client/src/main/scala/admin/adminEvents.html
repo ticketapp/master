@@ -1,4 +1,9 @@
 <div data-ng-controller="eventsController">
     <div ng-include="'assets/templates/events/eventForms.html'"></div>
-    <event-min data-ng-repeat="event in events"></event-min>
+    <div class="event-min-container">
+        <event-min class="float-left column small-12 medium-6 large-4 fade "
+                   data-ng-repeat="event in events | limitTo: limit">
+
+        </event-min>
+    </div>
 </div>
