@@ -1,5 +1,7 @@
 package tracking
 
+import java.util.concurrent.Future
+
 import com.greencatsoft.angularjs._
 import com.greencatsoft.angularjs.core.{Scope, Timeout}
 import httpServiceFactory.HttpGeneralService
@@ -37,20 +39,26 @@ trait TrackingScope extends Scope {
 @injectable("tracking")
 class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: HttpGeneralService) extends ClassDirective {
 
-  val storedActions: Seq[Action] = Seq.empty[Action]
+  var storedActions: Seq[Action] = Seq.empty[Action]
   var sessionId = ""
   val cookie = ngCookies.get("sessionId") match {
     case string if string.isInstanceOf[String] =>
       sessionId = string.asInstanceOf[String]
     case _ =>
-      httpService.post(TrackingRoutes.postSession(screenWidth = window.innerWidth, screenHeight = window.innerHeight)) map { newSessionId =>
-        val newId = read[String](newSessionId)
-        ngCookies.put("sessionId", newId)
-        sessionId = newId
-        storedActions map { action =>
-          httpService.postWithObject(TrackingRoutes.postWithActionObject, write(action))
-        }
+      createNewSession
+  }
+
+  def createNewSession: Unit = {
+    val url: String = TrackingRoutes.postSession(screenWidth = window.innerWidth, screenHeight = window.innerHeight)
+    httpService.post(url) map { newSessionId =>
+      val newId = read[String](newSessionId)
+      ngCookies.put("sessionId", newId)
+      sessionId = newId
+      storedActions map { action =>
+        httpService.postWithObject(TrackingRoutes.postWithActionObject, write(action))
       }
+      storedActions = Seq.empty[Action]
+    }
   }
 
   var mousePosition = new Object().asInstanceOf[MousePosition]
@@ -59,9 +67,15 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
   val doc = document.getElementsByTagName("md-content").item(0).asInstanceOf[Html]
 
   var scrollTop = 0.0
+  var lastActionTime = new Date().getTime()
 
   @JSExport
   def track(action: String): Unit = {
+    val oneMinuteAgo: Int = 60000
+    if (lastActionTime < new Date().getTime() - oneMinuteAgo) {
+      lastActionTime = new Date().getTime()
+      createNewSession
+    }
     val newDate = new Date().getTime()
     val newAction = Action(action + "," + doc.scrollTop, newDate, sessionId)
     if(sessionId.length > 0) httpService.postWithObject(TrackingRoutes.postWithActionObject, write(newAction))
@@ -69,6 +83,7 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
   }
 
   document.onmousemove = (event: MouseEvent) => {
+    lastActionTime = new Date().getTime()
     var left = 0.0
     var top = 0.0
     if(event.pageX == null && event.clientX != null) {
@@ -95,6 +110,7 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
   override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit = {
     elements.map{_.asInstanceOf[Html]}.foreach { element =>
       attributes.$observe("tracker", (value: String) => {
+        lastActionTime = new Date().getTime()
         track(value)
       })
     }
