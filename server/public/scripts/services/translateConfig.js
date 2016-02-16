@@ -16,7 +16,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EVENTS_BY_CITY_FORM_HEADER: "Find in city",
         EVENTS_NEAR_CITY_FORM_HEADER: "Find near city",
         CREATE_EVENT_BY_FACEBOOK_ID_FORM_HEADER: "Create by facebook id",
-        ADVANCED_SEARCH_HEADER: "Advanced search"
+        ADVANCED_SEARCH_HEADER: "Advanced search",
+        //tickets
+        BUY_TICKET: "Buy ticket",
+        SELL_TICKET: "Sell ticket"
     })
     .translations('fr', {
         //Landing page
@@ -35,7 +38,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EVENTS_BY_CITY_FORM_HEADER: "Rechercher les événements d'une ville",
         EVENTS_NEAR_CITY_FORM_HEADER: "Rechercher les événements proche d'une ville",
         CREATE_EVENT_BY_FACEBOOK_ID_FORM_HEADER: "Créer un événement par id facebook",
-        ADVANCED_SEARCH_HEADER: "Recherche avancée"
+        ADVANCED_SEARCH_HEADER: "Recherche avancée",
+        //tickets
+        BUY_TICKET: "Acheter un ticket",
+        SELL_TICKET: "Vendre un ticket"
     });
 
     var userLang = (navigator.language || navigator.userLanguage).substring(0, 2);

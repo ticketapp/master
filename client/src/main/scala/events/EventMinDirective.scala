@@ -21,8 +21,10 @@ class EventMinDirective(timeout: Timeout, window: Window) extends ElementDirecti
 
           def resize(): Unit = {
             val elemWidth = element.getBoundingClientRect().width
-            if(elemWidth > 50)
-              element.getElementsByClassName("img_min").item(0).asInstanceOf[Html].style.height = Math.round(elemWidth * 0.35) + "px"
+            if(elemWidth > 50) {
+              val heightRatio: Double = 0.35
+              element.style.height = Math.round(elemWidth * heightRatio) + "px"
+            }
             else timeout( () => resize(), 150)
           }
           resize()

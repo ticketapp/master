@@ -1,6 +1,7 @@
 @import '../componentsSettings/foundation';
 @import 'tools';
 @import '../../../client/src/main/scala/chatContact/contact';
+@import '../../../client/src/main/scala/events/eventsMin';
 @import "../modules/foundation/scss/foundation";
 @import "animate.min";
 @import "../styles/font-awesome";
@@ -22,6 +23,8 @@
 @import "../components/artist/artist";
 @import "../components/map/map";
 @import "../components/followButton/followButton";
+@import "../stylesheets/set2.css";
+@import "../stylesheets/set1.css";
 
 
 body,

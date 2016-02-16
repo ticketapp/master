@@ -42,17 +42,22 @@
     </form>
 </div>
 <div class="column large-12 padding0" style="min-height: 300px; margin-top: 600px; background: white" data-ng-controller="eventsController" data-ng-init="controller.findNearActualPosition(0,12)">
-    <div class="md-whiteframe-z1 column large-12">
+    <!--<div class="md-whiteframe-z1 column large-12">
         <h1 class="column large-12">{{ 'PROXIMITY_EVENTS_HEADER' | translate }}</h1>
         <h2 class="column large-2">{{ 'ADVANCED_SEARCH_HEADER' | translate }}: </h2>
         <div class="column large-6 float-left" ng-include="'assets/templates/events/eventForms.html'"></div>
+    </div>-->
+    <div class="event-min-container">
+        <event-min class="float-left column small-12 medium-6 large-4 fade "
+                   data-ng-repeat="event in events | limitTo: limit">
+            
+        </event-min>
     </div>
-    <event-min class="float-left column small-12 medium-6 large-4 fade min_contener margin0 padding0"
-               data-ng-repeat="event in events | limitTo: limit">
-    </event-min >
 
 </div>
 <style>
+
+
     .home-title {
         background-color: #2BA8DE;
         border-radius: 2px;
@@ -155,7 +160,7 @@
         top: 0;
         float: left;
         width: 100%;
-        height: 800px;
+        height: 600px;
         background: url('assets/images/concertLandingPage.jpg') no-repeat;
         background-size: 100%;
         position: absolute;
