@@ -10,8 +10,7 @@
   float: left;
   border-color: #2BA8DE #2BA8DE transparent;
 }
-.event-min-player::after
-{
+.event-min-player::after {
   content: "";
   border-radius: 0 0 249px 0;
   background: transparent;
@@ -25,8 +24,7 @@
   border-color: transparent #2BA8DE transparent transparent;
   transform: rotateY(180deg);
 }
-.event-min-player::before
-{
+.event-min-player::before {
   content: "";
   border-radius: 300px 0 0 0;
   background: transparent;

@@ -24,9 +24,7 @@
                         </h3>
                         <div class="width100p float-left">
                             <b style="vertical-align: text-bottom;" class="float-left">
-                                <i>Le </i>{{ event.event.startTime | date:'dd/MM' }}
-                                <i>à</i>
-                                {{ event.event.startTime | date:'HH:mm' }}
+                                {{ event.event.startTime | date:'dd/MM' }} - {{ event.event.startTime | date:'HH:mm' }}
                             </b>
                             <span data-ng-repeat="place in event.places" class="float-left">
                                 <b style="vertical-align: text-bottom;">,
