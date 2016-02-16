@@ -49,7 +49,8 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
   }
 
   def createNewSession: Unit = {
-    httpService.post(TrackingRoutes.postSession(screenWidth = window.innerWidth, screenHeight = window.innerHeight)) map { newSessionId =>
+    val url: String = TrackingRoutes.postSession(screenWidth = window.innerWidth, screenHeight = window.innerHeight)
+    httpService.post(url) map { newSessionId =>
       val newId = read[String](newSessionId)
       ngCookies.put("sessionId", newId)
       sessionId = newId
@@ -70,7 +71,8 @@ class TrackingDirective(timeout: Timeout, ngCookies: NgCookies, httpService: Htt
 
   @JSExport
   def track(action: String): Unit = {
-    if (lastActionTime < new Date().getTime() - 60000) {
+    val oneMinuteAgo: Int = 60000
+    if (lastActionTime < new Date().getTime() - oneMinuteAgo) {
       lastActionTime = new Date().getTime()
       createNewSession
     }
