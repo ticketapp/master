@@ -15,13 +15,12 @@ import tracking.{TrackingDirective, TrackingViewDirective}
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
-
 @JSExport
 object App extends JSApp {
 
   override def main() {
     val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap",
-      "ngCookies", "angularTranslateApp", "ngSanitize"))
+      "ngCookies", "angularTranslateApp", "ngSanitize", "themingAngularMaterial"))
 
     module.config(RoutingConfig)
     module.directive[ContactComponentDirective]
