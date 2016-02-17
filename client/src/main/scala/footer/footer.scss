@@ -1,0 +1,18 @@
+.footer {
+  background-color: $secondary-color;
+  width: 100%;
+  bottom: 0;
+  float: left;
+}
+
+.footerNotLink {
+  color: $darkGrey;
+}
+
+.footerLink {
+  color: $lightGrey;
+}
+
+.footerLink:hover {
+  color: $primary-color;
+}

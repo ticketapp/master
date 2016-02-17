@@ -1,10 +1,7 @@
 package footer
 
-
 import com.greencatsoft.angularjs.core.Timeout
-import com.greencatsoft.angularjs.{TemplatedDirective, Attributes, ClassDirective, injectable}
-import org.scalajs.dom.Element
-import org.scalajs.dom.html.Html
+import com.greencatsoft.angularjs.{ClassDirective, TemplatedDirective, injectable}
 
 import scala.scalajs.js.annotation.JSExport
 
@@ -13,5 +10,4 @@ import scala.scalajs.js.annotation.JSExport
 class LandingPageFooterDirective(timeout: Timeout) extends ClassDirective with TemplatedDirective {
 
   override val templateUrl = "assets/templates/footer/footer.html"
-
 }

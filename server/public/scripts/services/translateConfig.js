@@ -4,7 +4,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         HEADLINE: 'Sell your concert tickets',
         INTRO_TEXT: "Get paid now, regardless of whether a buyer is found or not",
         INPUT_LANDING_PAGE_TEXT: "Get an offer now",
-        INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or by place name",
+        INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or place name",
         //Events page header
         PROXIMITY_EVENTS_HEADER: "Events near you",
         //Events forms
@@ -19,7 +19,20 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         ADVANCED_SEARCH_HEADER: "Advanced search",
         //tickets
         BUY_TICKET: "Buy ticket",
-        SELL_TICKET: "Sell ticket"
+        SELL_TICKET: "Sell ticket",
+        //chatContact
+        START_CONVERSATION: "Start a conversation",
+        CLAUDE_TEAM: "Claude Team",
+        SMALL_CHAT_HOME_MESSAGE: "Ask us anything or share your feedback. We'd be happy to hear what you think about " +
+            "Claude.",
+        CHAT_HOME_MESSAGE_IF_CONNECTED: "We are connected, ask us anything. We'd be glad to hear what brought you to " +
+            "Claude!",
+        CHAT_HOME_MESSAGE_IF_NOT_CONNECTED: "We are not connected but enter your email in order to get notified. We " +
+            "always respond the same day!",
+        EMAIL_PLACE_HOLDER: "Your email",
+        //footer
+        LEGAL_NOTICES: "Legal notices",
+        GENERAL_TERMS: "General terms and conditions of sale"
     })
     .translations('fr', {
         //Landing page
@@ -41,10 +54,23 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         ADVANCED_SEARCH_HEADER: "Recherche avancée",
         //tickets
         BUY_TICKET: "Acheter un ticket",
-        SELL_TICKET: "Vendre un ticket"
+        SELL_TICKET: "Vendre un ticket",
+        //chatContact
+        START_CONVERSATION: "Démarrer une conversation",
+        CLAUDE_TEAM: "L'équipe Claude",
+        SMALL_CHAT_HOME_MESSAGE: "N'hésitez pas à nous demander quoi que ce soit ou à partager vos critiques.",
+        CHAT_HOME_MESSAGE_IF_CONNECTED: "Nous sommes connectés, n'hésitez pas à nous demander quoi que ce soit !",
+        CHAT_HOME_MESSAGE_IF_NOT_CONNECTED: "Nous ne sommes pas connectés, mais laissez nous votre email, nous " +
+            "répondons toujours le jour même !",
+        EMAIL_PLACE_HOLDER: "Votre email",
+        //footer
+        LEGAL_NOTICES: "Mentions légales",
+        GENERAL_TERMS: "Conditions générales de vente"
     });
 
     var userLang = (navigator.language || navigator.userLanguage).substring(0, 2);
+    if (userLang !== "en" && userLang !== "fr")
+        userLang = "en";
     $translateProvider.preferredLanguage(userLang);
     $translateProvider.useSanitizeValueStrategy("sanitize");
     //All documentation: https://angularjs.de/artikel/angularjs-i18n-ng-translate

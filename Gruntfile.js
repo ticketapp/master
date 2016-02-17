@@ -15,7 +15,6 @@ module.exports = function (grunt) {
         dist: 'dist'
     };
 
-
     grunt.initConfig({
 
         yeoman: appConfig,

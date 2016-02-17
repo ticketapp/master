@@ -8,7 +8,6 @@ import org.scalajs.dom.MessageEvent
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
 
-
 case class Message(content: String, fromClient: Boolean)
 
 @JSExportAll

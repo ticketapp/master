@@ -5,48 +5,57 @@
     <img src="assets/images/caroussel1.gif"
          ng-if="!event.event.imagePath" class="min"/>
 </a>
+
 <span class="tracking event-min-title">
-                <span data-ng-init="a = true">
-                    <div class="event-min-player" ng-if="(event.artists | filter: true).length">
-                        <i class="fi-play tracking"
-                           tracker="{{playerTrack}}"
-                           id="emb1"
-                           data-ng-click="playerTrack='cl,emb1'"></i>
-                    </div>
-                    <div class="flex paddingLeft10">
-                        <h3 class="width100p float-left margin0">
-                            <a href="#/events/{{event.event.id.x$2.l$2}}" class="tracking textColorWhite "
-                               tracker="{{toTrack}}"
-                               data-ng-click="toTrack='a,/events/'+event.event.id.x$2.l$2">
-                                {{ (event.event.name).toLowerCase() | limitTo: 42}}
-                                <b data-ng-show="event.event.name.length > 42">...</b>
-                            </a>
-                        </h3>
-                        <div class="width100p float-left">
-                            <b style="vertical-align: text-bottom;" class="float-left">
-                                {{ event.event.startTime | date:'dd/MM' }} - {{ event.event.startTime | date:'HH:mm' }}
-                            </b>
-                            <span data-ng-repeat="place in event.places" class="float-left">
-                                <b style="vertical-align: text-bottom;">,
-                                    <a href="#/places/{{ place.place.id.x$2.l$2 }}" class="tracking" tracker="{{toTrack}}"
-                                       data-ng-click="toTrack='a,/places/'+place.place.id.x$2.l$2">
-                                        {{place.place.name | limitTo: 25}}
-                                    </a>
-                                </b>
-                            </span>
-                            <i  style="vertical-align: text-bottom;"
-                                class="float-left"
-                                ng-if="event.addresses[0].city">
-                                ({{event.addresses[0].city.x$2}})
-                            </i>
-                            <div class="float-right"
-                                 ng-if="event.event.tariffRange.x$2">
-                                <b>{{event.event.tariffRange.x$2.split("-")[0]}} €</b>
-                            </div>
-                        </div>
-                    </div>
+    <span data-ng-init="a = true">
+
+        <div class="event-min-player" ng-if="(event.artists | filter: true).length">
+            <i class="fi-play tracking"
+               tracker="{{playerTrack}}"
+               id="emb1"
+               data-ng-click="playerTrack='cl,emb1'"></i>
+        </div>
+
+        <div class="flex paddingLeft10">
+
+            <h3 class="width100p float-left margin0">
+                <a href="#/events/{{event.event.id.x$2.l$2}}" class="tracking textColorWhite "
+                   tracker="{{toTrack}}"
+                   data-ng-click="toTrack='a,/events/'+event.event.id.x$2.l$2">
+                    {{ (event.event.name).toLowerCase() | limitTo: 42}}
+                    <b data-ng-show="event.event.name.length > 42">...</b>
+                </a>
+            </h3>
+
+            <div class="width100p float-left">
+                <b style="vertical-align: text-bottom;" class="float-left">
+                    {{ event.event.startTime | date:'dd/MM' }} - {{ event.event.startTime | date:'HH:mm' }}
+                </b>
+
+                <span data-ng-repeat="place in event.places" class="float-left">
+                    <b style="vertical-align: text-bottom;">,
+                        <a href="#/places/{{ place.place.id.x$2.l$2 }}" class="tracking" tracker="{{toTrack}}"
+                           data-ng-click="toTrack='a,/places/'+place.place.id.x$2.l$2">
+                            {{place.place.name | limitTo: 25}}
+                        </a>
+                    </b>
                 </span>
-            </span>
+
+                <span style="vertical-align: text-bottom;" class="float-left" ng-if="event.addresses[0].city">
+                    ({{event.addresses[0].city.x$2}})
+                </span>
+
+                <div class="float-right" ng-if="event.event.tariffRange.x$2">
+                    <b>{{event.event.tariffRange.x$2.split("-")[0]}} €</b>
+                </div>
+
+            </div>
+
+        </div>
+    </span>
+</span>
+
+
 <figcaption>
     <p class="icon-links">
         <a class="column small-6 margin0 md-button">{{ 'BUY_TICKET' | translate }}</a>
