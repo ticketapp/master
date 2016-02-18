@@ -61,8 +61,10 @@
             </div>
         </div>
 
-        <form class="column small-12 chat-form" ng-click="$parent.full = true"
-              ng-submit="controller.send(message); message=''">
+        <form class="column small-12 chat-form"
+              ng-click="$parent.full = true"
+              ng-submit="controller.send(message); message=''"
+              ng-class="{'paddingRight20 paddingLeft0': full}">
 
             <input type="text"
                    ng-click="$parent.full = true"
@@ -79,7 +81,7 @@
     </div>
 
     <md-button class="md-fab float-right contact-button tracking"
-               ng-class="{'ng-hide': full}"
+               ng-class="{'ng-hide': $parent.full}"
                ng-mouseenter="showSmallContact = true; directive.track('cl,ccb1')"
                id="ccb1"
                ng-click="full = true; directive.track('cl,ccb1')"

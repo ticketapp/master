@@ -28,6 +28,32 @@
   text-align: center;
 }
 
+.home-subtitle {
+  color: white;
+  font-family: "proxima-nova","Whitney SSm B", sans-serif;
+  text-shadow: 0 0 25px #595959;
+  font-size: 22px;
+  top: 275px;
+  position: relative;
+  text-align: center;
+  height: 60px !important;
+}
+
+.image-container {
+  top: 0;
+  float: left;
+  width: 100%;
+  height: 600px;
+  background: url('../images/concertLandingPage.jpg') no-repeat;
+  background-size: 100%;
+  position: absolute;
+  background-position-y: center;
+}
+
+.form-container {
+  position: relative;
+}
+
 .landing-page-footer {
   background-color: $secondary-color;
   color: white;
@@ -71,28 +97,14 @@
   color: $primary-color;
   font-size: 13px;
 }
+
 .sell-input > md-autocomplete-wrap,  .sell-input > md-autocomplete-wrap > input{
-  height: 50px;
+  height: 50px !important;
 }
 
 .sell-form {
   position: absolute;
   top: 515px;
-}
-
-.form-container {
-  position: relative;
-}
-
-.home-subtitle {
-  color: white;
-  font-family: "proxima-nova","Whitney SSm B", sans-serif;
-  text-shadow: 0 0 25px #595959;
-  font-size: 22px;
-  top: 275px;
-  position: relative;
-  text-align: center;
-  height: 60px !important;
 }
 
 .sell-form-link {
@@ -101,15 +113,4 @@
   right: 17px;
   color: $primary-color;
   font-size: 13px;
-}
-
-.image-container {
-  top: 0;
-  float: left;
-  width: 100%;
-  height: 600px;
-  background: url('../images/concertLandingPage.jpg') no-repeat;
-  background-size: 100%;
-  position: absolute;
-  background-position-y: center;
 }
