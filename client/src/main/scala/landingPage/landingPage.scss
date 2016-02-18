@@ -54,15 +54,6 @@
   position: relative;
 }
 
-.landing-page-footer {
-  background-color: $secondary-color;
-  color: white;
-  width: 100%;
-  bottom: 0;
-  float: left;
-  padding: 50px;
-}
-
 .sell-input {
   border: 1px solid $primary-color !important;
   display: inline-block;
@@ -70,7 +61,6 @@
   background: white;
   border-radius: 3px !important;
   vertical-align: middle;
-  color: $primary-color;
   font-weight: bold;
   height: 52px !important;
   color: $lightGrey; 
