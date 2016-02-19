@@ -10,13 +10,14 @@ import utilities.jsonHelper
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
+import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 @injectable("eventsController")
 class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout,
                        geolocationService: GeolocationService)
-    extends AbstractController[EventsScope](eventScope) with jsonHelper {
+      extends AbstractController[EventsScope](eventScope) with jsonHelper {
 
   var initLat =  0.0
   val coordinateMaxLength = 8
@@ -46,7 +47,7 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
     geolocationService.getUserGeolocation map { geographicPoint =>
       val geoPoint = geographicPoint.lat + "," + geographicPoint.lng
       service.get(EventsRoutes.find(offset, numberToReturn, geoPoint)) map { foundEvents =>
-        timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+        timeout(() => eventScope.testEvents = JSON.parse(foundEvents))
       }
     }
   }

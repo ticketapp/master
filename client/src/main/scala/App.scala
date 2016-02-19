@@ -9,6 +9,7 @@ import geolocation.GeolocationServiceFactory
 import httpServiceFactory.HttpGeneralServiceFactory
 import organizers.OrganizersController
 import places.PlacesController
+import player.{PlayerDirective, PlayerServiceFactory}
 import root.RoutingConfig
 import tracking.{TrackingDirective, TrackingViewDirective}
 
@@ -26,6 +27,7 @@ object App extends JSApp {
     module.directive[ContactComponentDirective]
     module.factory[HttpGeneralServiceFactory]
     module.factory[GeolocationServiceFactory]
+    module.factory[PlayerServiceFactory]
     module.controller[AdminController]
     module.controller[EventsController]
     module.controller[ArtistsController]
@@ -45,5 +47,6 @@ object App extends JSApp {
     module.directive[EventFormFindNearCity]
     module.directive[EventFormCreateByFacebookId]
     module.directive[LandingPageFooterDirective]
+    module.directive[PlayerDirective]
   }
 }

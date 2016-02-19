@@ -13,16 +13,27 @@
     </head>
 
     <body ng-app="app" class="tracking">
-
+        <player id="player">
+            <player-control>
+                <play-pause class="fa fa-play-circle-o"></play-pause>
+                <prev class="fa fa-arrow-circle-o-left"></prev>
+                <current-time></current-time>
+                <duration></duration>
+                <info></info>
+                <next class="fa fa-arrow-circle-o-right"></next>
+            </player-control>
+            <audio class="width100p" id="musicPlayer"></audio>
+            <video width="0" height="0" id="testPlayer" preload="none" class="ng-hide">
+                <source type="video/youtube" src="" />
+            </video>
+        </player>
         <md-content>
             <div ng-view="" class="column large-12 padding0"></div>
 
             <div class="landing-page-footer">
             </div>
         </md-content>
-
         <contact-component>
-
         </contact-component>
 
         @playscalajs.html.scripts("client")
