@@ -15,8 +15,8 @@
 .landing-page-footer {
   background-color: $secondary-color;
   width: 100%;
-  position: absolute;
-  bottom: 0;
+  position: relative;
+  float: left;
   padding: 50px;
 }
 
