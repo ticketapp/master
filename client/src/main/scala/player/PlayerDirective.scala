@@ -4,8 +4,7 @@ import com.greencatsoft.angularjs._
 import com.greencatsoft.angularjs.core.Timeout
 import events.HappeningWithRelations
 import org.scalajs.dom.html.Html
-import org.scalajs.dom.raw.Event
-import org.scalajs.dom.{MouseEvent, clearInterval, document, setInterval}
+import org.scalajs.dom.{MouseEvent, document}
 import upickle.default._
 import utilities.jsonHelper
 
@@ -151,15 +150,12 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
       playerContainerElement.setAttribute("ng-show", "true")
     }, 2000, true)
   }
-
-  def setPlayerListeners: Unit = {
-    val currentPlayer = playerService.getCurrentPlayer
+  
+  def listenTime: Unit = {
     val timeIntervalInMillisecond = 1000
-    val setCurrentTimeInterval = setInterval(() => setCurrentTime(secToTime(playerService.getCurrentTime())), timeIntervalInMillisecond)
-    currentPlayer.onended = (event: Event) => {
-      clearInterval(setCurrentTimeInterval)
-      next()
-    }
+    setCurrentTime(secToTime(playerService.getCurrentTime()))
+    if(playerService.getCurrentTime() == playerService.getDuration()) next()
+    else timeout(() => listenTime, timeIntervalInMillisecond)
   }
 
   def playTrack(track: Track): Unit = {
@@ -169,7 +165,7 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
     enableNextAndPrev
     waitForDuration()
     setTrackInfo(track)
-    setPlayerListeners
+    listenTime
     showPlayer
   }
 
