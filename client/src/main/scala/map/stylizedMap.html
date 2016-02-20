@@ -1,0 +1,22 @@
+<map zoom="{{zoom}}"
+     center="[{{geographicPoint}}]"
+     scrollwheel="false"
+     navigationControl="false"
+     disable-default-u-i="true"
+     mapTypeControl="false"
+     scaleControl="false"
+     styles="[
+        {
+             stylers: [{ hue:'#212B3A' }]
+        },
+        {
+            featureType: 'water',
+            stylers: [{ color:'#84BDEC' }]
+        }
+     ]"
+     style="height: 100%"
+     class="width100p">
+
+    <marker visible="true" position="{{geographicPoint}}" icon="assets/images/map-marker.png" >
+    </marker>
+</map>
