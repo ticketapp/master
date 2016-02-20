@@ -54,6 +54,12 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
     intermediateFuture
   }
 
+  def updateWithObject(url: String, objectToPost: js.Any): Future[String] = {
+    val postFuture = http.put[js.Any](url, objectToPost)
+    postFuture.error(errors)
+    postFuture.map(JSON.stringify(_))
+  }
+
 }
 @injectable("httpGeneralService")
 class HttpGeneralServiceFactory(http: HttpService, mdToast: MdToastService) extends Factory[HttpGeneralService] {

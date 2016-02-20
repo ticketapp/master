@@ -1,0 +1,42 @@
+<i class="fa fa-pencil float-right" data-ng-click="editArtist = !editArtist"></i>
+<h4 data-ng-click="editArtist = !editArtist">{{artist.artist.name}}</h4>
+<div class="column large-12" data-ng-show="editArtist" data-ng-init="newArtist = artist.artist">
+    <form ng-submit="controller.update(newArtist); editArtist = false">
+        <md-input-container class="column large-12">
+            <label>Name</label>
+            <input ng-model="newArtist.name">
+        </md-input-container>
+        <md-input-container class="column large-12">
+            <label>facebookUrl</label>
+            <input ng-model="newArtist.facebookUrl">
+        </md-input-container>
+        <md-input-container class="column large-12">
+            <label>facebookId</label>
+            <input ng-model="newArtist.facebookId">
+        </md-input-container>
+        <md-input-container class="column large-12">
+            <label>imagePath</label>
+            <input ng-model="newArtist.imagePath">
+        </md-input-container>
+        <md-input-container class="column large-12">
+            <label>description</label>
+            <input ng-model="newArtist.description">
+        </md-input-container>
+                <span ng-repeat="website in newArtist.websites" class="column large-12">
+                    <md-input-container >
+                        <label>website</label>
+                        <input ng-model="website" ng-blur="newArtist.websites[$index] = website">
+                    </md-input-container>
+                </span>
+        <md-button ng-click="newArtist.websites.push('')" class="column large-4">Add website</md-button>
+        <md-input-container class="column large-12">
+            <label>Likes</label>
+            <input ng-model="newArtist.likes" type="number">
+        </md-input-container>
+        <md-input-container class="column large-12">
+            <label>Country</label>
+            <input ng-model="newArtist.country">
+        </md-input-container>
+        <md-button type="submit" class="column large-12">Valider</md-button>
+    </form>
+</div>

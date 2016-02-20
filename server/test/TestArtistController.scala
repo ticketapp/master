@@ -20,6 +20,7 @@ class TestArtistController extends GlobalApplicationForControllers {
       dbConfProvider.get.db.run(sqlu"""
         INSERT INTO artists(artistid, name, facebookurl) VALUES('100', 'name', 'facebookUrl0');
         INSERT INTO artists(artistid, name, facebookurl) VALUES('200', 'name0', 'facebookUrl00');
+        INSERT INTO artists(artistid, name, facebookurl) VALUES('300', 'name00', 'facebookUrl000');
 
         INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint) VALUES(
           true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
@@ -83,6 +84,24 @@ class TestArtistController extends GlobalApplicationForControllers {
       stringUUIDsFromDB mustNotEqual Seq.empty
 
       distinctUUIDs mustEqual Seq.empty
+    }
+
+    "update an artist" in {
+      val artistJson = Json.parse("""{
+          "id": 300,
+          "facebookId": "10029715666",
+          "name": "waklssss",
+          "imagePath": "jskd",
+          "description": "artist.description",
+          "facebookUrl": "facebookUrl000",
+          "websites": ["hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls","facebook.com/worakls"],
+          "hasTracks": false,
+          "likes": 1
+      }""")
+      val Some(result) = route(FakeRequest(artistsDomain.routes.ArtistController.updateArtist())
+        .withJsonBody(artistJson))
+
+      status(result) mustEqual OK
     }
 
     "not create an artist twice and return an error" in {

@@ -1,8 +1,6 @@
 package artists
 
 import genres.GenreWithWeight
-
-import scala.collection.immutable.Seq
 import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
