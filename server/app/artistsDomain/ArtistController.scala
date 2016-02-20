@@ -16,7 +16,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json._
 import play.api.mvc._
-import services.Utilities
+import services.{LoggerHelper, Utilities}
 import trackingDomain.UserSession
 import tracksDomain.TrackMethods
 
@@ -29,7 +29,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
                                  val artistMethods: ArtistMethods,
                                  val trackMethods: TrackMethods,
                                  socialProviderRegistry: SocialProviderRegistry)
-    extends Silhouette[User, CookieAuthenticator] with artistFormsTrait with Utilities {
+    extends Silhouette[User, CookieAuthenticator] with artistFormsTrait with Utilities with LoggerHelper {
 
   def getFacebookArtistsContaining(pattern: String) = Action.async {
     artistMethods.getEventuallyFacebookArtists(pattern).map { artists =>
@@ -106,14 +106,19 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       case Some(artist) =>
         val validatedArtist = artist.validate[Artist](JsonHelper.artistRead)
         validatedArtist match {
+
           case successArtist: JsSuccess[Artist] =>
             artistMethods.update(successArtist.get) map { response =>
               Ok(Json.toJson(response))
             }
+
           case error: JsError =>
+            log(error.toString)
             Future(BadRequest("Bad artist object:" + error))
         }
+
       case _ =>
+        log("Bad artist object")
         Future(BadRequest("Bad artist object"))
     }
   }

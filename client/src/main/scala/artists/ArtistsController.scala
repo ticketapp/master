@@ -19,8 +19,7 @@ import org.scalajs.dom.console
 @injectable("artistsController")
 class ArtistsController(scope: Scope, service: HttpGeneralService, timeout: Timeout, mdToast: MdToastService)
   extends AbstractController[Scope](scope) with jsonHelper {
-  var artists: js.Array[ArtistWithWeightedGenres] = new js.Array[ArtistWithWeightedGenres]
-  var artists1: js.Any = Nil
+  var artists: js.Any = Nil
 
   def findById(id: Int): Unit = {
     service.get(ArtistsRoutes.find(id)) map { foundArtist =>
@@ -30,31 +29,31 @@ class ArtistsController(scope: Scope, service: HttpGeneralService, timeout: Time
 
   def findByFacebookUrl(facebookUrl: String): Unit = {
     service.get(ArtistsRoutes.findByFacebookUrl(facebookUrl)) map { foundArtist =>
-      timeout(() => artists = read[Seq[ArtistWithWeightedGenres]](foundArtist).toJSArray)
+      timeout(() => artists = JSON.parse(foundArtist))
     }
   }
 
   def find(numberToReturn: Int, offset: Int): Unit = {
     service.get(ArtistsRoutes.find(numberToReturn: Int, offset: Int)) map { foundArtist =>
-      timeout(() => artists1 = JSON.parse(foundArtist))
+      timeout(() => artists = JSON.parse(foundArtist))
     }
   }
 
   def getFollowed(): Unit = {
     service.get(ArtistsRoutes.getFollowed) map { foundArtist =>
-      timeout(() => artists = read[Seq[ArtistWithWeightedGenres]](foundArtist).toJSArray)
+      timeout(() => artists = JSON.parse(foundArtist))
     }
   }
 
   def getFacebookContaining(pattern: String): Unit = {
     service.get(ArtistsRoutes.getFacebookArtistsContaining(pattern: String)) map { foundArtist =>
-      timeout(() => artists = read[Seq[ArtistWithWeightedGenres]](foundArtist).toJSArray)
+      timeout(() => artists = JSON.parse(foundArtist))
     }
   }
 
   def findContaining(pattern: String): Unit = {
     service.get(ArtistsRoutes.findContaining(pattern: String)) map { foundArtist =>
-      timeout(() => artists = read[Seq[ArtistWithWeightedGenres]](foundArtist).toJSArray)
+      timeout(() => artists = JSON.parse(foundArtist))
     }
   }
 

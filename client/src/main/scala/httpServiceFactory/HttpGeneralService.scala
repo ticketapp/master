@@ -57,8 +57,7 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
   def updateWithObject(url: String, objectToPost: js.Any): Future[String] = {
     val postFuture = http.put[js.Any](url, objectToPost)
     postFuture.error(errors)
-    val intermediateFuture: Future[String] = postFuture.map(JSON.stringify(_))
-    intermediateFuture
+    postFuture.map(JSON.stringify(_))
   }
 
 }
