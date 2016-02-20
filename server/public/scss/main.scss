@@ -21,10 +21,11 @@
 @import '../../../client/src/main/scala/footer/footer';
 @import '../../../client/src/main/scala/chatContact/contact';
 @import '../../../client/src/main/scala/events/eventsMin';
+@import '../../../client/src/main/scala/events/event';
 @import '../../../client/src/main/scala/landingPage/landingPage';
 @import '../componentsSettings/foundation';
-@import 'tools';
 
+@import url(https://fonts.googleapis.com/css?family=Quicksand:400,300,700);
 
 body,
 html {
@@ -41,11 +42,16 @@ md-content {
   background-color: #F3F5F7;
   height: 100%;
   width: 100%;
+  font-family: 'Quicksand', sans-serif !important;
 }
 
-h3 {
-  color: $info-color;
-  //font-family: "LLCircularWeb-Bold", sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Quicksand', sans-serif !important;
 }
 
 md-content {
