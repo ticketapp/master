@@ -39,7 +39,8 @@ html {
 body,
 html,
 md-content {
-  background-color: #F3F5F7;
+  background-color: $veryLightGrey;
+  color: $darkGrey;
   height: 100%;
   width: 100%;
   font-family: 'Quicksand', sans-serif !important;
@@ -52,6 +53,7 @@ h4,
 h5,
 h6 {
   font-family: 'Quicksand', sans-serif !important;
+  color: $darkBlue;
 }
 
 md-content {
@@ -80,7 +82,7 @@ md-content {
   cursor: pointer;
 }
 //miniatures//
-.block_min:hover >.img_min>.toGrow{
+.block_min:hover > .img_min > .toGrow {
   -webkit-transform: scale(1.2);
   -moz-transform: scale(1.2);
   -o-transform: scale(1.2);
@@ -88,7 +90,7 @@ md-content {
   transform: scale(1.2);
 }
 
-.block_min{
+.block_min {
   margin:0 auto;
   box-shadow: 1px 1px 12px -5px rgba(85, 85, 85, 0.59);
   width:100%;
@@ -103,11 +105,11 @@ md-content {
   position: relative;
 }
 
-.block_min:hover{
+.block_min:hover {
   box-shadow: 1px 1px 12px -1px rgba(85, 85, 85, 0.59);
 }
 
-.img_min{
+.img_min {
   width:100%;
   overflow: hidden;
   position: relative;
@@ -193,7 +195,9 @@ md-content {
 html, body, #contener { height: 100%;}
 html {overflow-x: hidden;}
 body > #contener { height: auto; min-height: 100%; overflow: hidden;}
-body {padding-bottom: 0; color: #5a5a5a;}
+body {
+  padding-bottom: 0;
+}
 .wrapper-outer {width: 100%; padding-bottom: 200px; float: left;}
 /* Everything but the jumbotron gets side spacing for mobile first views */
 
