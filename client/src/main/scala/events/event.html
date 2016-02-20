@@ -1,0 +1,62 @@
+<div data-ng-controller="eventController" class="test-font">
+    <img data-ng-src="{{ event.event.imagePath }}s"
+         class="width100p"
+         data-on-error-src="assets/images/caroussel1.gif"
+         data-ng-if="event.event.imagePath"/>
+    <img data-ng-src="assets/images/caroussel1.gif" data-ng-if="!event.event.imagePath"/>
+
+    <div class="columns large-12">
+
+        <p class="column medium-10 paddingTop0 paddingLeft0 event.eventInfos">
+            <i class="fi-calendar fa-2x">
+            </i>
+
+            <b>
+                {{ event.event.startTime | date:'dd/MM - HH:mm' }}
+                <span data-ng-if="event.event.endTime">
+                    {{ 'UNTIL' | translate }} {{ event.event.endTime | date:'HH:mm' }}
+                </span>
+
+            </b>
+
+            <b data-ng-if="event.event.tariffRange != undefined">
+                <i class="fa fa-ticket fa-2x marginLeft20">
+                </i>
+                <b>
+                    {{ event.event.tariffRange }}€
+                </b>
+            </b>
+
+            <b>
+                <a href="#/places/{{ place.id }}"
+                   data-ng-repeat="place in event.event.places">
+                    <i class="fa fa-map-marker">
+                    </i>
+                    <b>
+                        {{ event.place.name }}
+                    </b>
+                </a>
+            </b>
+
+            <a data-ng-if="event.event.ticketSellers != undefined"
+               href="http://www.{{event.event.ticketSellers}}"
+               class="button"
+               target="_blank">
+                Acheter des places sur {{ event.event.ticketSellers }}
+            </a>
+
+        </p>
+
+        <h2 class="column padding0 marginTop0">
+            {{ event.event.name }}
+        </h2>
+
+    </div>
+
+    <div id="description" data-ng-bind-html="event.event.description">
+    </div>
+
+    <stylized-map class="eventMap">
+    </stylized-map>
+
+</div>
