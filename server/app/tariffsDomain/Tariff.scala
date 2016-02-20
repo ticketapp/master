@@ -6,9 +6,12 @@ import database.{MyDBTableDefinitions, MyPostgresDriver}
 import org.joda.time.DateTime
 import org.joda.time.Instant
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import services.LoggerHelper
 
 import scala.concurrent.Future
 import MyPostgresDriver.api._
+
+import scala.util.{Failure, Success, Try}
 
 case class Tariff(tariffId: Option[Long] = None,
                   denomination: String,
@@ -18,7 +21,7 @@ case class Tariff(tariffId: Option[Long] = None,
                   price: BigDecimal)
 
 class TariffMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions with LoggerHelper {
 
   def save(tariff: Tariff): Future[Long] = db.run(tariffs returning tariffs.map(_.tariffId) += tariff)
 
@@ -33,18 +36,28 @@ class TariffMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     case None =>
       None
     case Some(descriptionFound) =>
-      try {
+      Try {
         val descriptionWithoutComas = descriptionFound.replace(",", ".")
         val tariffPattern = """(\d+|\d+\.?\d*)\s*€""".r
         val tariffs: Set[Float] = tariffPattern.findAllIn(descriptionWithoutComas).matchData.map { priceMatcher =>
           priceMatcher.group(1).toFloat
         }.toSet
         tariffs match {
-          case emptySet if emptySet.isEmpty => None
-          case prices => Option(prices.min.toString + "-" + prices.max.toString)
+          case emptySet if emptySet.isEmpty =>
+            None
+
+          case prices =>
+            val minPrice = prices.min.toString.stripSuffix(".0")
+            val maxPrice = prices.max.toString.stripSuffix(".0")
+            Option(minPrice + "-" + maxPrice)
         }
-      } catch {
-        case e: Exception => throw new Exception("Tariff.findPrices: " + e.getMessage)
+      } match {
+        case Success(tariffRange) =>
+          tariffRange
+
+        case Failure(t) =>
+          log(maybeThrowable = Option(t))
+          None
       }
   }
 
