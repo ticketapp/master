@@ -5,7 +5,7 @@ import com.greencatsoft.angularjs.core.Timeout
 import events.HappeningWithRelations
 import org.scalajs.dom.html.Html
 import org.scalajs.dom.raw.Event
-import org.scalajs.dom.{MouseEvent, document}
+import org.scalajs.dom.{MouseEvent, clearInterval, document, setInterval}
 import upickle.default._
 import utilities.jsonHelper
 
@@ -18,15 +18,18 @@ import scala.scalajs.js.annotation.JSExport
 @injectable("playerControl")
 class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends ElementDirective with jsonHelper {
 
-  var currentPlaylist: Seq[Track] = Seq.empty
+  val playerContainerElement: Html = document.getElementById("playerContainer").asInstanceOf[Html]
   val player = document.getElementById("player")
+  var currentPlaylist: Seq[Track] = Seq.empty
   var currentPlaylistIndex = 0
   val durationElement: Html = player.getElementsByTagName("duration").item(0).asInstanceOf[Html]
-  val infoElement: Html = player.getElementsByTagName("info").item(0).asInstanceOf[Html]
+  val trackTitleElement: Html = player.getElementsByTagName("track-title").item(0).asInstanceOf[Html]
+  val trackArtistElement: Html = player.getElementsByTagName("artist-name").item(0).asInstanceOf[Html]
   val nextElement: Html = player.getElementsByTagName("next").item(0).asInstanceOf[Html]
   val prevElement: Html = player.getElementsByTagName("prev").item(0).asInstanceOf[Html]
   val playPauseElement: Html = player.getElementsByTagName("play-pause").item(0).asInstanceOf[Html]
   val currentTimeElement: Html = player.getElementsByTagName("current-time").item(0).asInstanceOf[Html]
+
 
   nextElement.onclick =  (event: MouseEvent) => {
     next()
@@ -37,8 +40,7 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
   }
 
   def passPlayBtnToPlay(): Unit = {
-    playPauseElement.classList.add("fa-play-circle-o")
-    playPauseElement.classList.remove("fa-pause")  
+    playPauseElement.classList.add("paused")
   }
   
   def next(): Unit = {
@@ -53,22 +55,60 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
       playTrack(currentPlaylist(currentPlaylistIndex - 1))
   }
 
+  def secToTime(seconds: Double): String = {
+    val minInSec = 60
+    val hourInSec = 60*60
+    val numberOfHours = Math.floor(seconds/hourInSec).toInt
+    val numberOfMinutes = Math.floor((seconds - (numberOfHours * hourInSec))/minInSec).toInt
+    val numberOfSeconds = seconds - (numberOfHours * hourInSec) - (numberOfMinutes * minInSec)
+
+    val hoursToDisplay = if(numberOfHours == 0) ""
+                         else if(numberOfHours < 10) "0" + numberOfHours + ":"
+                         else numberOfHours + ":"
+
+    val minutesToDisplay = if(numberOfMinutes == 0) "00:"
+                           else if(numberOfMinutes < 10) "0" + numberOfMinutes + ":"
+                           else numberOfMinutes + ":"
+
+    val secondsToDisplay = if(numberOfSeconds == 0) "00"
+                           else if(numberOfSeconds < 10) "0" + numberOfSeconds.toInt
+                           else numberOfSeconds.toInt
+
+    hoursToDisplay + minutesToDisplay + secondsToDisplay
+  }
+
   def waitForDuration(): Unit = {
     playerService.getDuration() match {
-      case duration if !duration.isNaN =>
-        durationElement.innerHTML = playerService.getDuration().toString
+      case duration if !duration.isNaN && duration > 0 =>
+        durationElement.innerHTML = secToTime(playerService.getDuration())
       case _ =>
         timeout(() => waitForDuration() , 200)
     }
   }
 
+  def setCurrentTime(time: String): Unit = {
+    currentTimeElement.innerHTML = time
+  }
+
   def setTrackInfo(track: Track): Unit = {
-    infoElement.innerHTML = track.title
+    val platform = if(track.platform == 's') "soundcloud"
+                   else if (track.platform == 'y') "youtube"
+    
+    val url = track.redirectUrl match {
+      case Some(redirectUrl) => redirectUrl
+      case _ => "https://youtube.com/watch?v=" + track.url
+    }
+    
+    trackTitleElement.innerHTML = track.title
+    trackArtistElement.innerHTML ="<a class=\"redirect-icon\" href=\"" + url + "\" target=\"_blank\">" +
+                                    "<i class=\"fa fa-" + platform + "\"></i>" +
+                                  "</a>" + track.artistName
   }
 
   @JSExport
-  def playEventPlaylist(jsEvent: js.Any): Unit = {
+  def setEventPlaylist(jsEvent: js.Any): Unit = {
     val event = read[HappeningWithRelations](JSON.stringify(jsEvent))
+    
     playerService.getEventPlaylist(event) map { playlist =>
       currentPlaylist = playlist
       playTrack(playlist.head)
@@ -85,8 +125,7 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
 
   def play(): Unit = {
     playerService.play()
-    playPauseElement.classList.add("fa-pause")
-    playPauseElement.classList.remove("fa-play-circle-o")
+    playPauseElement.classList.remove("paused")
     playPauseElement.onclick = (event: MouseEvent) => {
       pause()
     }
@@ -94,20 +133,44 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
 
   def setCurrentIndex(track: Track): Unit = {
     currentPlaylistIndex = currentPlaylist.indexOf(track)
-    if (currentPlaylistIndex == 0) prevElement.classList.add("ng-hide")
-    else prevElement.classList.remove("ng-hide")
-    if (currentPlaylistIndex >= currentPlaylist.length - 1) nextElement.classList.add("ng-hide")
-    else nextElement.classList.remove("ng-hide")
+  }
+
+  def enableNextAndPrev: Unit = {
+    if (currentPlaylistIndex == 0) prevElement.classList.add("disabled")
+    else prevElement.classList.remove("disabled")
+
+    if (currentPlaylistIndex >= currentPlaylist.length - 1) nextElement.classList.add("disabled")
+    else nextElement.classList.remove("disabled")
+  }
+
+  def showPlayer: Unit = {
+    playerContainerElement.classList.remove("ng-hide")
+    playerContainerElement.classList.add("showPlayer")
+    timeout(() => {
+      playerContainerElement.classList.remove("showPlayer")
+      playerContainerElement.setAttribute("ng-show", "true")
+    }, 2000, true)
+  }
+
+  def setPlayerListeners: Unit = {
+    val currentPlayer = playerService.getCurrentPlayer
+    val timeIntervalInMillisecond = 1000
+    val setCurrentTimeInterval = setInterval(() => setCurrentTime(secToTime(playerService.getCurrentTime())), timeIntervalInMillisecond)
+    currentPlayer.onended = (event: Event) => {
+      clearInterval(setCurrentTimeInterval)
+      next()
+    }
   }
 
   def playTrack(track: Track): Unit = {
     playerService.setTrack(track)
     play()
     setCurrentIndex(track)
+    enableNextAndPrev
     waitForDuration()
     setTrackInfo(track)
-    playerService.getCurrentPlayer.onended = (event: Event) => {
-      next()
-    }
+    setPlayerListeners
+    showPlayer
   }
+
 }

@@ -13,20 +13,38 @@
     </head>
 
     <body ng-app="app" class="tracking">
-        <player id="player">
-            <player-control>
-                <play-pause class="fa fa-play-circle-o"></play-pause>
-                <prev class="fa fa-arrow-circle-o-left"></prev>
-                <current-time></current-time>
-                <duration></duration>
-                <info></info>
-                <next class="fa fa-arrow-circle-o-right"></next>
-            </player-control>
-            <audio class="width100p" id="musicPlayer"></audio>
-            <video width="0" height="0" id="testPlayer" preload="none" class="ng-hide">
-                <source type="video/youtube" src="" />
-            </video>
-        </player>
+        <md-toolbar md-scroll-shrink ng-show="false" class="ng-hide" id="playerContainer">
+            <div class="md-toolbar-tools">
+                <player id="player">
+                    <player-control>
+                        <prev>
+                            <arrow></arrow>
+                            <arrow></arrow>
+                        </prev>
+                        <play-pause class="play-button paused">
+                            <div class="left"></div>
+                            <div class="right"></div>
+                            <div class="triangle-1"></div>
+                            <div class="triangle-2"></div>
+                        </play-pause>
+                        <next>
+                            <arrow></arrow>
+                            <arrow></arrow>
+                        </next>
+                    </player-control>
+                    <div class="time-container">
+                        <current-time></current-time>
+                        <duration></duration>
+                    </div>
+                    <artist-name flex="row"></artist-name>
+                    <track-title flex="row"></track-title>
+                    <audio class="width100p" id="musicPlayer"></audio>
+                    <video width="0" height="0" id="videoPlayer" preload="true" autoplay>
+                        <source type="video/youtube" src="" />
+                    </video>
+                </player>
+            </div>
+        </md-toolbar>
         <md-content>
             <div ng-view="" class="column large-12 padding0"></div>
 

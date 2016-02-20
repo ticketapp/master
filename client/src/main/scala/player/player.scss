@@ -1,3 +1,234 @@
+player {
+  float: left;
+  width: 100%;
+  height: 100%;
+}
+
+player > player-control {
+  float: left;
+  padding-right: 10px;
+  height: 100%;
+}
+
+.time-container {
+  width: 100px;
+  height: 100%;
+  position: relative;
+  text-align: center;
+  font-weight: bold;
+  color: $veryLightGrey;
+  float: left;
+  padding-right: 10px;
+}
+
+#playerContainer {
+  -webkit-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+
+#playerContainer:hover {
+  transform: translate3d(0px, 0px, 0px)!important;
+}
+
+.showPlayer {
+  transform: translate3d(0px, 0px, 0px)!important;
+}
+
+.time-container > duration {
+  border-top: solid 1px $lightGrey;
+  padding-top: 2px;
+}
+
+track-title {
+  display: flex;
+  text-align: left;
+  color: $veryLightGrey;
+}
+
+artist-name {
+  display: flex;
+  text-align: left;
+  color: $darkBlue;
+}
+
+artist-name .redirect-icon {
+  float: left;
+  color: $veryLightGrey!important;
+  padding-right: 10px;
+  font-weight: bold;
+}
+
+prev:hover {
+  left: -4px;
+}
+
+prev, next {
+  height: 30px;
+  float: left;
+  position: relative;
+  top: 16px;
+}
+
+prev > arrow {
+  -webkit-transform: rotate(45deg);
+}
+
+next > arrow {
+  -webkit-transform: rotate(-135deg);
+}
+
+arrow {
+  cursor: pointer;
+  -webkit-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+  position: relative;
+  display: block;
+  height: 20px;
+  width: 20px;
+  float: left;
+  margin-top: 5px;
+  background-image: -webkit-gradient(linear, left top, right bottom,
+          from($veryLightGrey),
+          to($veryLightGrey));
+  border-left: solid 1px $veryLightGrey;
+  border-bottom: solid 1px $veryLightGrey;
+  -webkit-mask-image: -webkit-gradient(linear, left bottom, right top,
+          from($veryLightGrey),
+          color-stop(0.5,$veryLightGrey),
+          color-stop(0.5, transparent),
+          to(transparent));
+}
+
+next:hover {
+  left: 4px;
+}
+
+.disabled > arrow {
+  cursor: not-allowed;
+  background-image: -webkit-gradient(linear, left top, right bottom,
+          from($lightGrey),
+          to($lightGrey));
+  border-left: solid 1px $lightGrey;
+  border-bottom: solid 1px $lightGrey;
+  -webkit-mask-image: -webkit-gradient(linear, left bottom, right top,
+          from($lightGrey),
+          color-stop(0.5,$lightGrey),
+          color-stop(0.5, transparent),
+          to(transparent));
+}
+
+.play-button {
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  display: block;
+  top: 11px;
+  float: left;
+  overflow: hidden;
+  position: relative;
+}
+
+.left {
+  height: 100%;
+  float: left;
+  background-color: $veryLightGrey;
+  width: 36%;
+  -webkit-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.triangle-1 {
+  -webkit-transform: translate(0, -100%);
+  transform: translate(0, -100%);
+}
+
+.triangle-2 {
+  -webkit-transform: translate(0, 100%);
+  transform: translate(0, 100%);
+}
+
+.triangle-1,
+.triangle-2 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: transparent;
+  width: 0;
+  height: 0;
+  border-right: 40px solid $primary-color;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+  -webkit-transition: -webkit-transform 0.25s ease;
+  transition: -webkit-transform 0.25s ease;
+  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, -webkit-transform 0.25s ease;
+}
+
+.right {
+  height: 100%;
+  float: right;
+  width: 36%;
+  background-color: $veryLightGrey;
+  -webkit-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+
+.paused .left {
+  width: 50%;
+}
+
+.paused .right {
+  width: 50%;
+}
+
+.paused .triangle-1 {
+  -webkit-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+}
+
+.paused .triangle-2 {
+  -webkit-transform: translate(0, 50%);
+  transform: translate(0, 50%);
+}
+
+
+@media (max-width: 767px) {
+  player {
+    font-size: 18px!important;
+    line-height: 24px!important;
+  }
+
+  .play-button {
+    height: 20px;
+    width: 20px;
+    top: 14px;
+  }
+
+  arrow {
+    height: 10px;
+    width: 10px;
+  }
+
+  track-title, artist-name {
+    max-height: 24px;
+    overflow: hidden;
+  }
+
+  .triangle-1,
+  .triangle-2 {
+    border-right: 20px solid $primary-color;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+  }
+
+  prev, next {
+    top: 14px;
+  }
+}
+
+
+//mediaElements
 
 .mejs-offscreen{
   /* Accessibility: hide screen reader texts (and prefer "top" for RTL languages). */
@@ -10,6 +241,11 @@
 }
 
 .mejs-container {
+  width: 0!important;
+  height: 0!important;
+  overflow: hidden;
+  margin: 0!important;
+  padding: 0!important;
   position: relative;
   background: #000;
   font-family: Helvetica, Arial;
@@ -209,7 +445,7 @@
 
 /* Start: Time (Current / Duration) */
 .mejs-container .mejs-controls .mejs-time {
-  color: #fff;
+  color: $veryLightGrey;
   display: block;
   height: 17px;
   width: auto;
@@ -222,7 +458,7 @@
 }
 
 .mejs-container .mejs-controls .mejs-time a {
-  color: #fff;
+  color: $veryLightGrey;
   font-size: 11px;
   line-height: 12px;
   display: block;
@@ -314,7 +550,7 @@
 }
 
 .mejs-controls .mejs-time-rail .mejs-time-current {
-  background: #fff;
+  background: $veryLightGrey;
   background: rgba(255,255,255,0.8);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(255,255,255,0.9)), to(rgba(200,200,200,0.8)));
   background: -webkit-linear-gradient(top, rgba(255,255,255,0.9), rgba(200,200,200,0.8));
@@ -330,7 +566,7 @@
   position: absolute;
   margin: 0;
   width: 10px;
-  background: #fff;
+  background: $veryLightGrey;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
@@ -531,7 +767,7 @@
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  background: #fff;
+  background: $veryLightGrey;
   background: rgba(255,255,255,0.8);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(255,255,255,0.9)), to(rgba(200,200,200,0.8)));
   background: -webkit-linear-gradient(top, rgba(255,255,255,0.9), rgba(200,200,200,0.8));
@@ -591,7 +827,7 @@
   padding: 0;
   list-style-type: none !important;
   display: block;
-  color: #fff;
+  color: $veryLightGrey;
   overflow: hidden;
 }
 
@@ -619,7 +855,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  -xborder-right: solid 1px #fff;
+  -xborder-right: solid 1px $veryLightGrey;
   width: 10000px;
   z-index: 1;
 }
@@ -642,7 +878,7 @@
 
 .mejs-chapters .mejs-chapter .mejs-chapter-block {
   font-size: 11px;
-  color: #fff;
+  color: $veryLightGrey;
   padding: 5px;
   display: block;
   border-right: solid 1px #333;
@@ -692,11 +928,11 @@
   text-align:center;
   line-height: 20px;
   font-size: 16px;
-  color: #fff;
+  color: $veryLightGrey;
 }
 
 .mejs-captions-layer  a {
-  color: #fff;
+  color: $veryLightGrey;
   text-decoration: underline;
 }
 
@@ -729,7 +965,7 @@
 }
 
 .me-cannotplay a {
-  color: #fff;
+  color: $veryLightGrey;
   font-weight: bold;
 }
 
@@ -776,7 +1012,7 @@
   border-radius: 4px;
   top: 0;
   left: 0;
-  background: #fff;
+  background: $veryLightGrey;
   border: solid 1px #999;
   z-index: 1001; /* make sure it shows on fullscreen */
 }
@@ -796,7 +1032,7 @@
 }
 .mejs-contextmenu .mejs-contextmenu-item:hover {
   background: #2C7C91;
-  color: #fff;
+  color: $veryLightGrey;
 }
 
 /* Start: Source Chooser */
@@ -838,7 +1074,7 @@
   padding: 0;
   list-style-type: none !important;
   display: block;
-  color: #fff;
+  color: $veryLightGrey;
   overflow: hidden;
 }
 
@@ -880,7 +1116,7 @@
   top: 0;
   background: url(background.png);
   background: rgba(50,50,50,0.7);
-  color: #fff;
+  color: $veryLightGrey;
   padding: 4px;
   z-index: 100;
   cursor: pointer;
@@ -899,7 +1135,7 @@ div.mejs-speed-button {
   width: 36px;
   font-size: 11px;
   line-height: normal;
-  color: #ffffff;
+  color: $veryLightGrey;
 }
 
 .mejs-controls .mejs-speed-button .mejs-speed-selector {
@@ -941,7 +1177,7 @@ div.mejs-speed-button {
   padding: 0 10px;
   list-style-type: none !important;
   display: block;
-  color: #fff;
+  color: $veryLightGrey;
   overflow: hidden;
 }
 
@@ -980,7 +1216,7 @@ div.mejs-speed-button {
   background: transparent;
   font-size: 9px;
   line-height: normal;
-  color: #ffffff;
+  color: $veryLightGrey;
 }
 
 /* End: Jump Forward */
@@ -995,5 +1231,5 @@ div.mejs-speed-button {
   background: transparent;
   font-size: 9px;
   line-height: normal;
-  color: #ffffff;
+  color: $veryLightGrey;
 }

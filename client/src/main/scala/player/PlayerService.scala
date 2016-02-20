@@ -4,7 +4,7 @@ import com.greencatsoft.angularjs.core.HttpService
 import com.greencatsoft.angularjs.{Factory, Service, injectable}
 import events.HappeningWithRelations
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.HTMLMediaElement
+import org.scalajs.dom.raw.{HTMLMediaElement, HTMLSourceElement}
 import upickle.default._
 import utilities.jsonHelper
 
@@ -15,6 +15,7 @@ import scala.scalajs.js.JSON
 
 class MediaElementPlayer(id: String) extends HTMLMediaElement {
   def setSrc(url: String) = js.native
+  val media: HTMLMediaElement = js.native
 }
 
 @injectable("playerService")
@@ -22,11 +23,9 @@ class PlayerService(http: HttpService) extends Service with jsonHelper {
   require(http != null, "Missing argument 'http'.")
 
   val soundcloudClientId: String = "f297807e1780623645f8f858637d4abb"
-
-  val videoPlayer = new MediaElementPlayer("#testPlayer")
-  val musicPlayer = document.getElementById("musicPlayer").asInstanceOf[HTMLMediaElement]
+  val videoPlayer = document.getElementById("videoPlayer").getElementsByTagName("source").item(0).asInstanceOf[HTMLSourceElement]
+  val musicPlayer = document.getElementById("musicPlayer").asInstanceOf[MediaElementPlayer]
   var currentPlayer = musicPlayer
-
 
   def getTracksByArtistFacebookUrl(facebookUrl: String, numberToReturn: Int, offset: Int): Future[Seq[Track]] = {
     http.get[js.Any](PlayerRoutes.findByArtist(facebookUrl, numberToReturn, offset)) map { tracks =>
@@ -39,6 +38,7 @@ class PlayerService(http: HttpService) extends Service with jsonHelper {
       case artistWithTracks if artistWithTracks.artist.hasTracks =>
         artistWithTracks.artist
     }
+
     val eventuallyEventPlaylist = collectedArtists.toSeq map { artist =>
       val numberToReturn: Int = 5
       val offset: Int = 0
@@ -49,7 +49,11 @@ class PlayerService(http: HttpService) extends Service with jsonHelper {
   }
 
   def getDuration(): Double = {
-    currentPlayer.duration
+    currentPlayer.media.duration
+  }
+
+  def getCurrentTime(): Double = {
+    currentPlayer.media.currentTime
   }
 
   def pause(): Unit = {
@@ -69,11 +73,11 @@ class PlayerService(http: HttpService) extends Service with jsonHelper {
       case soundcloud if soundcloud == 's' =>
         musicPlayer.src = track.url + "?client_id=" + soundcloudClientId
         currentPlayer.pause()
-        currentPlayer = musicPlayer
+        currentPlayer =  new MediaElementPlayer("#musicPlayer")
       case youtube if youtube == 'y' =>
-        videoPlayer.setSrc(track.url)
+        videoPlayer.src = "http://youtube.com/watch?v=" + track.url
         currentPlayer.pause()
-        currentPlayer = videoPlayer
+        currentPlayer = new MediaElementPlayer("#videoPlayer")
     }
   }
 }
