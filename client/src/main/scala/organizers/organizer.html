@@ -40,7 +40,9 @@
         </md-tabs>
     </md-content>
 
-    <stylized-map class="organizer-map" aaaa="aaaa">
+    <stylized-map ng-if="organizer.place.geographicPoint && place.place.geographicPoint != 'POINT (-84 30)'"
+                  ng-init="geographicPoint = (place.place.geographicPoint | geographicPointRefactoringFilter)"
+                  class="organizer-map">
 
     </stylized-map>
 </div>

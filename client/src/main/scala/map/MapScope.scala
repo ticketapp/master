@@ -8,8 +8,6 @@ import scala.scalajs.js
 trait MapScope extends Scope {
   var zoom: Int = js.native
 
-  var geographicPoint: String = js.native
-
   var travelMode: String = js.native
 
   var start: String = js.native

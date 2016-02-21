@@ -1,6 +1,10 @@
 <div data-ng-controller="placeController">
 
-    <div class="place-image-container">
+    <stylized-map ng-if="place.place.geographicPoint && place.place.geographicPoint != 'POINT (-84 30)'"
+                  ng-init="geographicPoint = (place.place.geographicPoint | geographicPointRefactoringFilter)"
+                  class="place-map">
+    </stylized-map>
+    <div class="place-image-container" data-ng-if="place.place.geographicPoint == 'POINT (-84 30)'">
         <img class="place-image" data-ng-src="{{ place.place.imagePath }}"/>
     </div>
     <!---->
@@ -50,6 +54,4 @@
         </md-tab>
     </md-tabs>
 
-    <stylized-map class="place-map">
-    </stylized-map>
 </div>

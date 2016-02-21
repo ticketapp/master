@@ -42,7 +42,7 @@
                href="http://www.{{event.event.ticketSellers}}"
                class="button"
                target="_blank">
-                Acheter des places sur {{ event.event.ticketSellers }}
+                {{ 'BUY_PLACE_ON' | translate }} {{ event.event.ticketSellers }}
             </a>
 
         </p>
@@ -56,7 +56,10 @@
     <div id="description" data-ng-bind-html="event.event.description">
     </div>
 
-    <stylized-map class="eventMap">
+
+    <stylized-map ng-if="event.event.geographicPoint && event.event.geographicPoint != 'POINT (-84 30)'"
+                  ng-init="geographicPoint = (event.event.geographicPoint | geographicPointRefactoringFilter)"
+                  class="eventMap">
     </stylized-map>
 
 </div>
