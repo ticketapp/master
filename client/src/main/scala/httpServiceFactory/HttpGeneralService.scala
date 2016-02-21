@@ -17,7 +17,6 @@ import scala.scalajs.js.annotation.JSExport
 class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Service {
   require(http != null, "Missing argument 'http'.")
 
-
   val errors = (error: Any, status: Int) => {
     var message = ""
     status match {
@@ -28,16 +27,14 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
     }
     val toast = mdToast.simple(message)
     mdToast.show(toast)
-    console.error(s"An error has occured: $error")
+    console.error(s"An error has occurred: $error")
   }
 
   @JSExport
   def get(url: String): Future[String] = {
     val getFuture = http.get[js.Any](url)
     getFuture.error(errors)
-    getFuture.map { a =>
-      JSON.stringify(a)
-    }
+    getFuture.map { response => JSON.stringify(response) }
   }
 
   def post(url: String): Future[String] = {
@@ -53,8 +50,8 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
     val intermediateFuture: Future[String] = postFuture.map(JSON.stringify(_))
     intermediateFuture
   }
-
 }
+
 @injectable("httpGeneralService")
 class HttpGeneralServiceFactory(http: HttpService, mdToast: MdToastService) extends Factory[HttpGeneralService] {
 

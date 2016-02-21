@@ -30,11 +30,8 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
 
   def getIpGeolocation: Future[GeographicPoint] = {
     val getPoint = http.get[js.Any]("/users/geographicPoint")
-    getPoint.error((error: Any) => {
-      geographicPoint = GeographicPoint(45.7667, 4.8833)
-    })
+    getPoint.error((error: Any) => geographicPoint = GeographicPoint(45.7667, 4.8833))
     getPoint map { response =>
-      console.log(response)
       val responseMap = response.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
       if(responseMap.isDefinedAt("status")) {
         responseMap("status") match {
@@ -43,22 +40,25 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
           case _ =>
             GeographicPoint(45.7667, 4.8833)
         }
-      } else
-      GeographicPoint(45.7667, 4.8833)
+      } else {
+        GeographicPoint(45.7667, 4.8833)
+      }
     }
   }
 
   def getUserGeolocation: Future[GeographicPoint] = {
-    timeout(() => getHtmlGeolocation(), 300) flatMap { a =>
-      if(geographicPoint.isDefined) Future(geographicPoint.get)
+    timeout(() => getHtmlGeolocation(), 300) flatMap { htmlGeolocation =>
+      if(geographicPoint.isDefined) {
+        Future(geographicPoint.get)
+      }
       else {
         getHtmlGeolocation()
         getUserGeolocation
       }
     }
   }
-
 }
+
 @injectable("geolocationService")
 class GeolocationServiceFactory(http: HttpService, timeout: Timeout) extends Factory[GeolocationService] {
 
