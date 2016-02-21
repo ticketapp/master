@@ -7,9 +7,10 @@ import focusDirective.FocusDirective
 import footer.LandingPageFooterDirective
 import geolocation.GeolocationServiceFactory
 import httpServiceFactory.HttpGeneralServiceFactory
+import images.OnErrorSrcDirective
+import map.{MapController, MapControlsDirective, StylizedMapDirective}
 import organizers.OrganizersController
 import places.PlacesController
-import root.RoutingConfig
 import tracking.{TrackingDirective, TrackingViewDirective}
 
 import scala.scalajs.js.JSApp
@@ -26,12 +27,15 @@ object App extends JSApp {
     module.directive[ContactComponentDirective]
     module.factory[HttpGeneralServiceFactory]
     module.factory[GeolocationServiceFactory]
+    module.factory[EventsServiceFactory]
     module.controller[AdminController]
     module.controller[EventsController]
     module.controller[ArtistsController]
     module.controller[OrganizersController]
     module.controller[PlacesController]
     module.controller[ChatContactController]
+    module.controller[EventController]
+    module.controller[MapController]
     module.directive[EventMinDirective]
     module.directive[TrackingViewDirective]
     module.directive[TrackingDirective]
@@ -45,5 +49,8 @@ object App extends JSApp {
     module.directive[EventFormFindNearCity]
     module.directive[EventFormCreateByFacebookId]
     module.directive[LandingPageFooterDirective]
+    module.directive[StylizedMapDirective]
+    module.directive[MapControlsDirective]
+    module.directive[OnErrorSrcDirective]
   }
 }
