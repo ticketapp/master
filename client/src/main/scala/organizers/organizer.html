@@ -1,0 +1,46 @@
+<div data-ng-controller="organizerController">
+
+    <img class="width100p" ng-src="{{ organizer.organizer.imagePath }}"
+         on-error-src="assets/images/caroussel1.png"/>
+
+    <div class="column large-12">
+        <h2 class="float-left marginTop0">
+            {{organizer.organizer.name}}
+        </h2>
+    </div>
+
+    <div id="description" data-ng-bind-html="organizer.organizer.description">
+    </div>
+
+    <ng-description class="column large-12">
+
+    </ng-description>
+
+    <md-content class="column">
+        <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
+            <md-tab label="{{ 'EVENTS' | translate }}">
+                <md-content  class="width100p float-left marginTop10">
+                    <event-min class="column large-4 medium-6 float-left fade margin0"
+                               data-ng-repeat="event in events | orderBy: 'startTime'">
+                    </event-min>
+                    <div layout="row"
+                         class="column large-12" layout-sm="column" layout-align="space-around"
+                         ng-if="loadEvents">
+                        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                    </div>
+                </md-content>
+            </md-tab>
+            <md-tab label="{{ 'PAST_EVENTS' | translate }}">
+                <md-content  class="width100p float-left marginTop10">
+                    <event-min class="column large-4 medium-6 float-left fade margin0"
+                               data-ng-repeat="event in passedEvents">
+                    </event-min>
+                </md-content>
+            </md-tab>
+        </md-tabs>
+    </md-content>
+
+    <stylized-map class="organizer-map" aaaa="aaaa">
+
+    </stylized-map>
+</div>

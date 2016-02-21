@@ -9,7 +9,7 @@ import geolocation.GeolocationServiceFactory
 import httpServiceFactory.HttpGeneralServiceFactory
 import images.OnErrorSrcDirective
 import map.{MapController, MapControlsDirective, StylizedMapDirective}
-import organizers.OrganizersController
+import organizers.{OrganizersServiceFactory, OrganizerController, OrganizersController}
 import places.{PlacesServiceFactory, PlaceController, PlacesController}
 import tracking.{TrackingDirective, TrackingViewDirective}
 
@@ -29,10 +29,12 @@ object App extends JSApp {
     module.factory[GeolocationServiceFactory]
     module.factory[EventsServiceFactory]
     module.factory[PlacesServiceFactory]
+    module.factory[OrganizersServiceFactory]
     module.controller[AdminController]
     module.controller[EventsController]
     module.controller[ArtistsController]
     module.controller[OrganizersController]
+    module.controller[OrganizerController]
     module.controller[PlacesController]
     module.controller[PlaceController]
     module.controller[ChatContactController]
