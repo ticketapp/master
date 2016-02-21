@@ -10,7 +10,7 @@ import httpServiceFactory.HttpGeneralServiceFactory
 import images.OnErrorSrcDirective
 import map.{MapController, MapControlsDirective, StylizedMapDirective}
 import organizers.OrganizersController
-import places.PlacesController
+import places.{PlacesServiceFactory, PlaceController, PlacesController}
 import tracking.{TrackingDirective, TrackingViewDirective}
 
 import scala.scalajs.js.JSApp
@@ -28,11 +28,13 @@ object App extends JSApp {
     module.factory[HttpGeneralServiceFactory]
     module.factory[GeolocationServiceFactory]
     module.factory[EventsServiceFactory]
+    module.factory[PlacesServiceFactory]
     module.controller[AdminController]
     module.controller[EventsController]
     module.controller[ArtistsController]
     module.controller[OrganizersController]
     module.controller[PlacesController]
+    module.controller[PlaceController]
     module.controller[ChatContactController]
     module.controller[EventController]
     module.controller[MapController]
