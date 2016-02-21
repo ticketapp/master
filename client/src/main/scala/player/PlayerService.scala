@@ -45,28 +45,18 @@ class PlayerService(http: HttpService) extends Service with jsonHelper {
       getTracksByArtistFacebookUrl(artist.facebookUrl, numberToReturn, offset)
     }
 
-   Future.sequence(eventuallyEventPlaylist) map(_.flatten)
+    Future.sequence(eventuallyEventPlaylist) map(_.flatten)
   }
 
-  def getDuration(): Double = {
-    currentPlayer.media.duration
-  }
+  def getDuration(): Double = currentPlayer.media.duration
 
-  def getCurrentTime(): Double = {
-    currentPlayer.media.currentTime
-  }
+  def getCurrentTime(): Double = currentPlayer.media.currentTime
 
-  def pause(): Unit = {
-    currentPlayer.pause()
-  }
+  def pause(): Unit = currentPlayer.pause()
 
-  def play(): Unit = {
-    currentPlayer.play()
-  }
+  def play(): Unit = currentPlayer.play()
 
-  def getCurrentPlayer: HTMLMediaElement = {
-    currentPlayer
-  }
+  def getCurrentPlayer: HTMLMediaElement = currentPlayer
 
   def setTrack(track: Track): Unit = {
     track.platform match {

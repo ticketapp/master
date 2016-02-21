@@ -33,7 +33,7 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
 
   def findMaybeSalableEventsContaining(pattern: String): Unit = {
     service.get(EventsRoutes.findMaybeSalableEvents(pattern)) map { foundEvents =>
-      timeout(() => eventScope.maybeSalableEvents = read[Seq[MaybeSalableEvent]](foundEvents).toJSArray)
+      timeout(() => eventScope.maybeSalableEvents = JSON.parse(foundEvents))
     }
   }
 
@@ -47,7 +47,7 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
     geolocationService.getUserGeolocation map { geographicPoint =>
       val geoPoint = geographicPoint.lat + "," + geographicPoint.lng
       service.get(EventsRoutes.find(offset, numberToReturn, geoPoint)) map { foundEvents =>
-        timeout(() => eventScope.testEvents = JSON.parse(foundEvents))
+        timeout(() => eventScope.events = JSON.parse(foundEvents))
       }
     }
   }
@@ -55,46 +55,46 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
   def find(offset: Int, numberToReturn: Int, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.find(offset, numberToReturn, geographicPoint)) map { foundEvents =>
-      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 
   def findInHourInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.FindInHourInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
-      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 
   def findPassedInInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.FindPassedInInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
-      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 
   def findAllContaining(pattern: String, lat: Double, lng: Double): Unit = {
     val geographicPoint = lat + "," + lng
     service.get(EventsRoutes.findAllContaining(pattern, geographicPoint)) map { foundEvents =>
-      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 
   def findByCityPattern(pattern: String): Unit = {
     service.get(EventsRoutes.findByCityPattern(pattern)) map { foundEvents =>
-      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Unit = {
     service.get(EventsRoutes.findNearCity(city, numberToReturn, offset)) map { foundEvents =>
-      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 
   def createByFacebookId(facebookId: String): Unit = {
     service.post(EventsRoutes.createByFacebookId(facebookId)) map { foundEvents =>
-      timeout(() => eventScope.events = read[Seq[HappeningWithRelations]](foundEvents).toJSArray)
+      timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 }

@@ -30,28 +30,25 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
   val currentTimeElement: Html = player.getElementsByTagName("current-time").item(0).asInstanceOf[Html]
 
 
-  nextElement.onclick =  (event: MouseEvent) => {
-    next()
-  }
+  nextElement.onclick =  (event: MouseEvent) => next()
 
-  prevElement.onclick =  (event: MouseEvent) => {
-    prev()
-  }
+  prevElement.onclick =  (event: MouseEvent) => prev()
 
-  def passPlayBtnToPlay(): Unit = {
-    playPauseElement.classList.add("paused")
-  }
+  def passPlayBtnToPlay(): Unit = playPauseElement.classList.add("paused")
+
   
   def next(): Unit = {
-    if(currentPlaylistIndex < currentPlaylist.length -1)
+    if(currentPlaylistIndex < currentPlaylist.length -1) {
       passPlayBtnToPlay()
       playTrack(currentPlaylist(currentPlaylistIndex + 1))
+    }
   }
 
   def prev(): Unit = {
-    if(currentPlaylistIndex > 0)
+    if(currentPlaylistIndex > 0) {
       passPlayBtnToPlay()
       playTrack(currentPlaylist(currentPlaylistIndex - 1))
+    }
   }
 
   def secToTime(seconds: Double): String = {
@@ -81,13 +78,11 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
       case duration if !duration.isNaN && duration > 0 =>
         durationElement.innerHTML = secToTime(playerService.getDuration())
       case _ =>
-        timeout(() => waitForDuration() , 200)
+        timeout(() => waitForDuration(), 200)
     }
   }
 
-  def setCurrentTime(time: String): Unit = {
-    currentTimeElement.innerHTML = time
-  }
+  def setCurrentTime(time: String): Unit = currentTimeElement.innerHTML = time
 
   def setTrackInfo(track: Track): Unit = {
     val platform = if(track.platform == 's') "soundcloud"
@@ -151,11 +146,11 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
     }, 2000, true)
   }
   
-  def listenTime: Unit = {
+  def updateTrackTime(): Unit = {
     val timeIntervalInMillisecond = 1000
     setCurrentTime(secToTime(playerService.getCurrentTime()))
     if(playerService.getCurrentTime() == playerService.getDuration()) next()
-    else timeout(() => listenTime, timeIntervalInMillisecond)
+    else timeout(() => updateTrackTime(), timeIntervalInMillisecond)
   }
 
   def playTrack(track: Track): Unit = {
@@ -165,7 +160,7 @@ class PlayerDirective(timeout: Timeout, playerService: PlayerService) extends El
     enableNextAndPrev
     waitForDuration()
     setTrackInfo(track)
-    listenTime
+    updateTrackTime()
     showPlayer
   }
 

@@ -14,7 +14,7 @@ case class Track (uuid: UUID,
                   artistFacebookUrl: String,
                   artistName: String,
                   redirectUrl: Option[String] = None,
-                  confidence: Double = 0.toDouble)
+                  confidence: Double = 0.0)
 
 @JSExportAll
 case class TrackWithGenres(track: Track, genres: Seq[Genre])

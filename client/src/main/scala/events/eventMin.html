@@ -8,7 +8,9 @@
 
 <span class="tracking event-min-title">
     <span>
-        <player-control class="event-min-player" ng-click="directive.setEventPlaylist(event)" ng-if="(event.artists | filter: true).length">
+        <player-control class="event-min-player"
+                        ng-click="directive.setEventPlaylist(event)"
+                        ng-if="(event.artists | filter: true).length">
             <i class="fi-play tracking"
                tracker="{{playerTrack}}"
                id="emb1"
