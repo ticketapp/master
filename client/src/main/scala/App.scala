@@ -1,5 +1,5 @@
 import admin.AdminController
-import artists.ArtistsController
+import artists.{ArtistMinFormDirective, ArtistsController}
 import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
 import events._
@@ -46,6 +46,7 @@ object App extends JSApp {
     module.directive[EventFormFindByCityPattern]
     module.directive[EventFormFindNearCity]
     module.directive[EventFormCreateByFacebookId]
+    module.directive[ArtistMinFormDirective]
     module.directive[LandingPageFooterDirective]
     module.directive[PlayerDirective]
   }
