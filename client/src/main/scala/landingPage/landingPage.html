@@ -1,7 +1,9 @@
 <div class="image-container">
     <div class="column large-12 padding0">
         <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
-            <b>{{ 'HEADLINE' | translate }}</b>
+            <b>
+                {{ 'HEADLINE' | translate }}
+            </b>
         </h1>
     </div>
 
@@ -28,8 +30,12 @@
                     <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
                         {{item.event.name}}
                     </span>
-                    <a data-ng-show="item.isSalable" class="float-right">Vendez votre billet</a>
-                    <a data-ng-show="!item.isSalable" class="float-right">Nous n'achetons pas de billets</a>
+                    <a data-ng-show="item.isSalable" class="float-right">
+                        Vendez votre billet
+                    </a>
+                    <a data-ng-show="!item.isSalable" class="float-right">
+                        Nous n'achetons pas de billets
+                    </a>
                 </md-item-template>
 
                 <md-not-found>

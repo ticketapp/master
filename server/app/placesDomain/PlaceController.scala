@@ -35,6 +35,7 @@ class PlaceController @Inject() (ws: WSClient,
       case Failure(exception) =>
         Logger.error("PlaceController.places: invalid geographicPoint")
         Future(BadRequest(Json.toJson("Invalid geographicPoint")))
+
       case Success(point) =>
         placeMethods.findNear(geographicPoint = point, numberToReturn = numberToReturn, offset = offset) map { places =>
           Ok(Json.toJson(places))
@@ -52,6 +53,7 @@ class PlaceController @Inject() (ws: WSClient,
           case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
             Logger.error(s"PlaceController.createPlace: this place already exist")
             Conflict
+
           case throwable: Throwable =>
             Logger.error("PlaceController.createPlace: INTERNAL_SERVER_ERROR: ", throwable)
             InternalServerError("PlaceController.createPlace: " + throwable.getMessage)
@@ -82,6 +84,7 @@ class PlaceController @Inject() (ws: WSClient,
     placeMethods.followByPlaceId(UserPlaceRelation(request.identity.uuid, placeId)) map {
       case 1 =>
         Created
+
       case _ =>
         Logger.error("PlaceController.followPlace: placeMethods.follow did not return 1")
         InternalServerError
@@ -89,9 +92,11 @@ class PlaceController @Inject() (ws: WSClient,
       case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: $placeId is already followed")
         Conflict
+
       case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: there is no place with the id $placeId")
         NotFound
+
       case unknownException =>
         Logger.error("PlaceController.followPlace", unknownException)
         InternalServerError
@@ -121,6 +126,7 @@ class PlaceController @Inject() (ws: WSClient,
     placeMethods.followByFacebookId(userId, facebookId) map {
       case 1 =>
         Created
+
       case _ =>
         Logger.error("PlaceController.followByFacebookId: placeMethods.followByFacebookId did not return 1")
         InternalServerError

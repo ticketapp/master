@@ -41,12 +41,11 @@ case class PlaceWithAddress(place: Place, maybeAddress: Option[Address] = None)
     place.geographicPoint match {
       case notAntarcticPoint if notAntarcticPoint != antarcticPoint =>
         notAntarcticPoint
+
       case _ =>
         maybeAddress map(_.geographicPoint) match {
-          case Some(notAntarcticPoint) if notAntarcticPoint != antarcticPoint =>
-            notAntarcticPoint
-          case _ =>
-            antarcticPoint
+          case Some(notAntarcticPoint) if notAntarcticPoint != antarcticPoint => notAntarcticPoint
+          case _ => antarcticPoint
         }
     }
   }
@@ -84,6 +83,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
           val organizerWithLinkedPlace = placeWithFormattedDescription.copy(linkedOrganizerId = maybePlaceId)
           doSave(organizerWithLinkedPlace)
         }
+
       case _ =>
         doSave(placeWithFormattedDescription)
     }
@@ -101,6 +101,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
             PlaceWithAddress(place, Option(savedAddress))
           }
         }
+
       case None =>
         save(placeWithAddress.place) map(PlaceWithAddress(_, None))
     }
