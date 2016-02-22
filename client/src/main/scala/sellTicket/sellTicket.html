@@ -1,0 +1,16 @@
+<div data-ng-controller="sellTicketController" class="sellTicketContainer">
+    <h2>Vendez votre billet pour {{event.event.name}}</h2>
+    <h3>Comment ça marche ?</h3>
+    <p>
+       Claude vous propose un prix de rachat pour votre billet. Ouvrez un compte en quelque clic,
+       et claude vous rachette directement votre billet.
+    </p>
+    <div data-ng-repeat="tariff in tariffs">
+        {{tariff.denomination}} : {{tariff.price}} €
+    </div>
+    <md-button>Téléchargez l'application</md-button>
+    ou <a>Connetez-vous</a>
+</div>
+
+<style>
+</style>

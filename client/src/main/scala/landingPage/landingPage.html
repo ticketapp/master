@@ -14,7 +14,6 @@
 
             <md-autocomplete md-search-text-change="controller.findMaybeSalableEventsContaining(ctrl.searchText)"
                              md-search-text="$parent.ctrl.searchText"
-                             md-selected-item-change="ctrl.selectedItemChange(item)"
                              md-items="item in maybeSalableEvents"
                              md-item-text="item.display"
                              md-min-length="0"
@@ -25,10 +24,12 @@
                              placeholder="{{ 'INPUT_LANDING_PAGE_PLACEHOLDER' | translate }}">
 
                 <md-item-template>
-                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
-                        {{item.event.name}}
-                    </span>
-                    <a data-ng-show="item.isSalable" class="float-right">Vendez votre billet</a>
+                    <a href="#/events/{{item.event.id}}" class="float-left">
+                         <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
+                            {{item.event.name}}
+                         </span>
+                    </a>
+                    <a data-ng-show="item.isSalable" href="#/sellTicket/{{item.event.id}}" class="float-right">Vendez votre billet</a>
                     <a data-ng-show="!item.isSalable" class="float-right">Nous n'achetons pas de billets</a>
                 </md-item-template>
 
@@ -55,11 +56,6 @@
      style="min-height: 300px; margin-top: 600px; background: white"
      data-ng-controller="eventsController"
      data-ng-init="controller.findNearActualPosition(0,12)">
-    <!--<div class="md-whiteframe-z1 column large-12">
-        <h1 class="column large-12">{{ 'PROXIMITY_EVENTS_HEADER' | translate }}</h1>
-        <h2 class="column large-2">{{ 'ADVANCED_SEARCH_HEADER' | translate }}: </h2>
-        <div class="column large-6 float-left" ng-include="'assets/templates/events/eventForms.html'"></div>
-    </div>-->
     <div class="event-min-container">
         <event-min class="float-left column small-12 medium-6 large-4 fade "
                    data-ng-repeat="event in events | limitTo: limit">

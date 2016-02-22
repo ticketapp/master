@@ -39,7 +39,7 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
 
   def findById(id: Int): Unit = {
     service.get(EventsRoutes.find(id)) map { foundEvent =>
-      timeout(() => eventScope.events = js.Array(read[HappeningWithRelations](foundEvent)))
+      timeout(() => eventScope.events = js.Array(JSON.parse(foundEvent)))
     }
   }
 
