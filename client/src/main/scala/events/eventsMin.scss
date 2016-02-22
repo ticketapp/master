@@ -5,11 +5,12 @@
   display: inline-block;
   width: 0.4em;
   height: 0.34em;
-  border: 5px solid #2BA8DE;
+  border: 5px solid $primary-color;
   border-radius: 0.35em 0.35em 0 0;
   float: left;
-  border-color: #2BA8DE #2BA8DE transparent;
+  border-color: $primary-color $primary-color transparent;
 }
+
 .event-min-player::after {
   content: "";
   border-radius: 0 0 249px 0;
@@ -21,9 +22,10 @@
   position: absolute;
   left: 0.339em;
   bottom: -0.09em;
-  border-color: transparent #2BA8DE transparent transparent;
+  border-color: transparent $primary-color transparent transparent;
   transform: rotateY(180deg);
 }
+
 .event-min-player::before {
   content: "";
   border-radius: 300px 0 0 0;
@@ -36,12 +38,13 @@
   left: -5px;
   transform: rotateY(180deg);
   bottom: -0.09em;
-  border-color: transparent #2BA8DE transparent transparent;
+  border-color: transparent $primary-color transparent transparent;
 }
+
 .event-min-player .fi-play {
   display: block;
   font-size: 40px;
-  color: #2BA8DE;
+  color: $primary-color;
   text-align: center;
   cursor: pointer;
 }
@@ -49,10 +52,10 @@
 .event-min-title {
   top: auto;
   bottom: 0;
-  border-bottom: #2BA8DE solid 0.3em;
+  border-bottom: $primary-color solid 0.3em;
   padding: 1em 1em 0 1em;
   background: transparent linear-gradient(to top, #000, #000 10%, transparent 90%) repeat scroll 0% 0%;
-  color: #F2FBFF;
+  color: $darkGrey;
   -webkit-transition: -webkit-transform 0.35s;
   transition: transform 0.35s;
   -webkit-transform: translate3d(0,100%,0);
@@ -77,6 +80,7 @@
   list-style: none;
   text-align: center;
 }
+
 .event-min-container event-min {
   position: relative;
   float: left;
@@ -86,22 +90,25 @@
   text-align: center;
   padding: 0;
 }
+
 .event-min-title h3 {
   overflow: hidden;
   height: 1.4em;
   word-wrap: break-word;
   white-space: nowrap;
 }
+
 event-min:hover .event-min-title {
   transform: translate3d(0,-100%,0);
 }
+
 event-min figcaption {
   top: auto;
   bottom: 0;
   padding: 1em;
   height: 3.7em;
-  background: #fff;
-  color: #3c4a50;
+  background: $veryLightGrey;
+  color: $darkGrey;
   -webkit-transition: -webkit-transform 0.35s;
   transition: transform 0.35s;
   -webkit-transform: translate3d(0,100%,0);
@@ -122,13 +129,13 @@ event-min h2 {
 
 event-min p.icon-links a {
   float: right;
-  color: #3c4a50;
+  color: $darkGrey;
   font-size: 1.4em;
 }
 
 event-min:hover p.icon-links a:hover,
 event-min:hover p.icon-links a:focus {
-  color: #252d31;
+  color: $darkBlue;
 }
 
 

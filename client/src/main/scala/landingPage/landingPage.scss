@@ -5,7 +5,7 @@
   display: inline-block;
   box-shadow: 0.2em 0 0 #84BDEC, -0.2em 0 0 #84BDEC;
   padding: 0.15em 0.2em;
-  font-family: "Gotham SSm A","Gotham SSm B", sans-serif;
+  //font-family: "Gotham SSm A","Gotham SSm B", sans-serif;
   font-style: normal;
   font-weight: 500;
   font-size: 36px;
@@ -30,10 +30,9 @@
 
 .home-subtitle {
   color: white;
-  font-family: "proxima-nova","Whitney SSm B", sans-serif;
   text-shadow: 0 0 25px #595959;
   font-size: 22px;
-  top: 275px;
+  top: 215px;
   position: relative;
   text-align: center;
   height: 60px !important;
@@ -54,15 +53,6 @@
   position: relative;
 }
 
-.landing-page-footer {
-  background-color: $secondary-color;
-  color: white;
-  width: 100%;
-  bottom: 0;
-  float: left;
-  padding: 50px;
-}
-
 .sell-input {
   border: 1px solid $primary-color !important;
   display: inline-block;
@@ -70,7 +60,6 @@
   background: white;
   border-radius: 3px !important;
   vertical-align: middle;
-  color: $primary-color;
   font-weight: bold;
   height: 52px !important;
   color: $lightGrey; 

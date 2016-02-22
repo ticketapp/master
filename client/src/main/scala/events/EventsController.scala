@@ -16,20 +16,8 @@ import scala.scalajs.js.annotation.JSExportAll
 @JSExportAll
 @injectable("eventsController")
 class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout,
-                       geolocationService: GeolocationService)
-      extends AbstractController[EventsScope](eventScope) with jsonHelper {
-
-  var initLat =  0.0
-  val coordinateMaxLength = 8
-  var initLng = 0.0
-
-  geolocationService.getUserGeolocation map { geolocation =>
-    timeout(() => initLat = geolocation.lat.toString.substring(0, coordinateMaxLength).toDouble)
-  }
-
-  geolocationService.getUserGeolocation map { geolocation =>
-    timeout(() => initLng = geolocation.lng.toString.substring(0, coordinateMaxLength).toDouble)
-  }
+                       geolocationService: GeolocationService, eventsService: EventsService)
+    extends AbstractController[EventsScope](eventScope) with jsonHelper {
 
   def findMaybeSalableEventsContaining(pattern: String): Unit = {
     service.get(EventsRoutes.findMaybeSalableEvents(pattern)) map { foundEvents =>
@@ -38,7 +26,7 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
   }
 
   def findById(id: Int): Unit = {
-    service.get(EventsRoutes.find(id)) map { foundEvent =>
+    service.get(EventsRoutes.findById(id)) map { foundEvent =>
       timeout(() => eventScope.events = js.Array(JSON.parse(foundEvent)))
     }
   }

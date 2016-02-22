@@ -14,7 +14,7 @@ class EventMinDirective(timeout: Timeout, window: Window) extends ElementDirecti
 
   override val templateUrl = "assets/templates/events/eventMin.html"
 
-  override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit ={
+  override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit = {
         elements.map(_.asInstanceOf[Html]).foreach { element =>
 
           def resize(): Unit = {

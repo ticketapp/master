@@ -1,0 +1,39 @@
+<a class="mapControls" data-ng-click="moreZoom()">
+    <i class="fi-plus">
+    </i>
+</a>
+
+<a class="mapControls" data-ng-click="lessZoom()">
+    <i class="fi-minus">
+    </i>
+</a>
+
+<a class=" mapControls" data-ng-click="getItinerary(); selectTravel = !selectTravel">
+    <i class="fa fa-road">
+    </i>
+</a>
+
+<span data-ng-if="selectTravel" class="width100p float-left ">
+
+    <a class="mapControls column small-4"
+       data-ng-class="{'primCol': $parent.travelMode == 'WALKING'}"
+       data-ng-click="changeTravelMode('WALKING')">
+        <i class="fi-blind">
+        </i>
+    </a>
+
+    <a class=" mapControls column small-4"
+       data-ng-class="{'primCol': $parent.travelMode == 'BICYCLING'}"
+       data-ng-click="changeTravelMode('BICYCLING')">
+        <i class="fa fa-bicycle">
+        </i>
+    </a>
+
+    <a class="mapControls column small-4"
+       data-ng-class="{'primCol': $parent.travelMode == 'DRIVING'}"
+       data-ng-click="changeTravelMode('DRIVING')">
+        <i class="fa fa-car">
+        </i>
+    </a>
+
+</span>

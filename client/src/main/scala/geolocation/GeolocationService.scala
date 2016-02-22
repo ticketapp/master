@@ -35,9 +35,7 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
   def getIpGeolocation: Future[GeographicPoint] = {
     val getPoint = http.get[js.Any]("/users/geographicPoint")
 
-    getPoint.error((error: Any) => {
-      geographicPoint = basePoint
-    })
+    getPoint.error((error: Any) => geographicPoint = basePoint)
 
     getPoint map { response =>
       val responseMap = response.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
@@ -56,12 +54,14 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
 
   val maxTry = 10
   var tryNumber = 0
+
   def getUserGeolocation: Future[GeographicPoint] = {
-    timeout(() => console.log("retry get geoPoint"), 1000) flatMap { a =>
-      if(geographicPoint.isDefined) Future(geographicPoint.get)
-      else {
-        if(tryNumber < maxTry) {
-          tryNumber = tryNumber + 1
+    timeout(() => console.log("retry get geoPoint"), 1000) flatMap { _ =>
+      if (geographicPoint.isDefined) {
+        Future(geographicPoint.get)
+      } else {
+        if (tryNumber < maxTry) {
+          tryNumber += 1
           getUserGeolocation
         } else {
           geographicPoint = basePoint

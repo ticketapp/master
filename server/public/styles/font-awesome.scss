@@ -6,8 +6,12 @@
  * -------------------------- */
 @font-face {
   font-family: 'FontAwesome';
-  src: url('../stylesheets/fontawesome-webfont.eot?v=4.3.0');
-  src: url('../stylesheets/fontawesome-webfont.eot?#iefix&v=4.3.0') format('embedded-opentype'), url('../stylesheets/fontawesome-webfont.woff2?v=4.3.0') format('woff2'), url('../stylesheets/fontawesome-webfont.woff?v=4.3.0') format('woff'), url('../stylesheets/fontawesome-webfont.ttf?v=4.3.0') format('truetype'), url('../stylesheets/fontawesome-webfont.svg?v=4.3.0#fontawesomeregular') format('svg');
+  src: url('../stylesheets/fontsAndIcons/fontawesome-webfont.eot');
+  src: url('../stylesheets/fontsAndIcons/fontawesome-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../stylesheets/fontsAndIcons/fontawesome-webfont.woff2') format('woff2'),
+    url('../stylesheets/fontsAndIcons/fontawesome-webfont.woff') format('woff'),
+    url('../stylesheets/fontsAndIcons/fontawesome-webfont.ttf') format('truetype'),
+    url('../stylesheets/fontsAndIcons/fontawesome-webfont.svg#fontawesomeregular') format('svg');
   font-weight: normal;
   font-style: normal;
 }
