@@ -27,6 +27,11 @@ object RoutingConfig extends Config {
         route = Route(
           templateUrl = urlTemplatePath("/events"),
           title = "Main"))
+      .when(
+        path = "/cookies",
+        route = Route(
+          templateUrl = "assets/templates/cookies/cookies.html",
+          title = "cookies"))
   }
   
   val urlTemplatePath = Map(
