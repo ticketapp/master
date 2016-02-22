@@ -28,8 +28,13 @@ object RoutingConfig extends Config {
           templateUrl = urlTemplatePath("/events"),
           title = "Main"))
       .when(
-        path = "/legalNotice",
+        path = "/cookies",
         route = Route(
+          templateUrl = "assets/templates/cookies/cookies.html",
+          title = "cookies"))
+      .when(
+          path = "/legalNotice",
+          route = Route(
           templateUrl = "/assets/templates/legalNotice/legalNotice.html",
           title = "legalNotice"))
   }
