@@ -4,6 +4,7 @@ import com.greencatsoft.angularjs.core.Timeout
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import geolocation.GeolocationService
 import httpServiceFactory.HttpGeneralService
+import materialDesign.MdToastService
 import upickle.default._
 import utilities.jsonHelper
 
@@ -16,7 +17,7 @@ import scala.scalajs.js.annotation.JSExportAll
 @JSExportAll
 @injectable("eventsController")
 class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout,
-                       geolocationService: GeolocationService)
+                       geolocationService: GeolocationService, mdToast: MdToastService)
       extends AbstractController[EventsScope](eventScope) with jsonHelper {
 
   var initLat =  0.0
@@ -29,6 +30,13 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
 
   geolocationService.getUserGeolocation map { geolocation =>
     timeout(() => initLng = geolocation.lng.toString.substring(0, coordinateMaxLength).toDouble)
+  }
+
+  def update(event: js.Any): Unit = {
+    service.updateWithObject(EventsRoutes.update(), event) map { response =>
+      val toast = mdToast.simple("event update ok")
+      mdToast.show(toast)
+    }
   }
 
   def findMaybeSalableEventsContaining(pattern: String): Unit = {

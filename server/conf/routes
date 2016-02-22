@@ -44,6 +44,7 @@ GET           /events/inInterval/:hourInterval                   @eventsDomain.E
 GET           /events/passedInInterval/:hourInterval             @eventsDomain.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET           /events/:id                                        @eventsDomain.EventController.find(id: Long)
 POST          /events/create                                     @eventsDomain.EventController.createEvent
+PUT           /events                                            @eventsDomain.EventController.update()
 POST          /events/create/:facebookId                         @eventsDomain.EventController.createEventByFacebookId(facebookId: String)
 POST          /events/:eventId/follow                            @eventsDomain.EventController.followEvent(eventId: Long)
 POST          /events/:eventId/unfollow                          @eventsDomain.EventController.unfollowEvent(eventId: Long)

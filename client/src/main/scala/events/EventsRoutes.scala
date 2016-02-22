@@ -14,6 +14,8 @@ object EventsRoutes {
 
   def find(id: Long): String = "/events/" + id
 
+  def update(): String = "/events"
+
   def create: String = "/events/create"
 
   def createByFacebookId(facebookId: String): String = "/events/create/" + facebookId

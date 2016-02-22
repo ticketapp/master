@@ -23,6 +23,9 @@ class TestEventController extends GlobalApplicationForControllers {
         INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
           VALUES(100, true, true, 'notPassedEvent', timestamp '2050-08-24 14:00:00',
           '01010000008906CEBE97E346405187156EF9581340');
+        INSERT INTO events(eventid, ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(666, true, true, 'eventToUpdate', timestamp '2050-08-24 14:00:00',
+          '01010000008906CEBE97E346405187156EF9581340');
         INSERT INTO events(ispublic, isactive, name, starttime, endtime)
           VALUES(true, true, 'inProgressEvent', timestamp '2012-08-24 14:00:00', timestamp '2042-08-24 14:00:00');
         INSERT INTO events(ispublic, isactive, name, starttime, endtime)
@@ -78,6 +81,43 @@ class TestEventController extends GlobalApplicationForControllers {
 
       contentAsJson(events).toString() must
         contain(""""name":"EventTest1","geographicPoint":"POINT (4.2 4.3)","description":"desc"""")
+    }
+
+    "update an event" in {
+
+      /*Event(id: Option[Long] = None,
+                 facebookId: Option[String] = None,
+                 isPublic: Boolean = true,
+                 isActive: Boolean = false,
+                 name: String,
+                 geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
+                 description: Option[String] = None,
+                 startTime: DateTime,
+                 endTime: Option[DateTime] = None,
+                 ageRestriction: Int = 16,
+                 tariffRange: Option[String] = None,
+                 ticketSellers: Option[String] = None,
+                 imagePath: Option[String] = None)
+                 */
+      val jsonEvent = """{
+                         "id": 666,
+                        "facebookId": "1111666",
+                        "isPublic": true,
+                        "isActive": true,
+                        "name": "EventUpadated",
+                        "geographicPoint": "POINT (4.2 4.3)",
+                        "description": "desc",
+                        "startTime": 1,
+                        "endTime": 2,
+                        "ageRestriction": 1
+                      }"""
+      val Some(events) = route(
+        FakeRequest(
+          eventsDomain.routes.EventController.update())
+          .withJsonBody(Json.parse(jsonEvent))
+      )
+
+      status(events) mustEqual OK
     }
 
     "find a list of event by containing" in {

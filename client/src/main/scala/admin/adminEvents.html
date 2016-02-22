@@ -1,9 +1,55 @@
 <div data-ng-controller="eventsController">
     <div ng-include="'assets/templates/events/eventForms.html'"></div>
     <div class="event-min-container">
-        <event-min class="float-left column small-12 medium-6 large-4 fade "
-                   data-ng-repeat="event in events | limitTo: limit">
-
-        </event-min>
+        <div class="float-left column small-12 fade md-whiteframe-z1"
+             data-ng-class="{'large-12 medium-12': changeEvent, 'medium-6 large-4': !changeEvent}"
+             data-ng-repeat="event in events">
+            <a class="column" data-ng-click="changeEvent = !changeEvent">{{event.event.name}}</a>
+            <div data-ng-show="changeEvent">
+                <form ng-submit="controller.update(event.event)">
+                    <md-input-container class="column">
+                        <label>name</label>
+                        <input ng-model="event.event.name">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>facebookId</label>
+                        <input ng-model="event.event.facebookId">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>geographicPoint</label>
+                        <input ng-model="event.event.geographicPoint">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>description</label>
+                        <input ng-model="event.event.description">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>startTime</label>
+                        <input ng-model="event.event.startTime" type="datetime">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>endTime</label>
+                        <input ng-model="event.event.endTime" type="datetime">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>ageRestriction</label>
+                        <input ng-model="event.event.ageRestriction" type="number">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>tariffRange</label>
+                        <input ng-model="event.event.tariffRange" type="text">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>ticketSellers</label>
+                        <input ng-model="event.event.ticketSellers" type="text">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>imagePath</label>
+                        <input ng-model="event.event.imagePath" type="text">
+                    </md-input-container>
+                    <md-button type="submit">Submit</md-button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
