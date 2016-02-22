@@ -5,6 +5,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         INTRO_TEXT: "Get paid now, regardless of whether a buyer is found or not",
         INPUT_LANDING_PAGE_TEXT: "Get an offer now",
         INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or place name",
+        KNOW_MORE: "Know more",
         //Events page header
         PROXIMITY_EVENTS_HEADER: "Events near you",
         //Events forms
@@ -32,7 +33,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EMAIL_PLACE_HOLDER: "Your email",
         //footer
         LEGAL_NOTICES: "Legal notices",
-        GENERAL_TERMS: "General terms and conditions of sale"
+        GENERAL_TERMS: "General terms and conditions of sale",
+        //legals
+        COOKIES: "En poursuivant votre navigation sur ce site, vous acceptez l'utilisation de cookies pour réaliser " +
+        "des statistiques de visites."
     })
     .translations('fr', {
         //Landing page
@@ -40,6 +44,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         INTRO_TEXT: "Récuperez instantanément votre argent, sans vous soucier qu'un acheteur soit trouvé",
         INPUT_LANDING_PAGE_TEXT: "Obtenir une offre maintenant",
         INPUT_LANDING_PAGE_PLACEHOLDER: "Entrez un nom d'événement ou un lieu",
+        KNOW_MORE: "En savoir plus",
         //Events page header
         PROXIMITY_EVENTS_HEADER: "Evénements à proximité",
         //Events forms
@@ -65,7 +70,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EMAIL_PLACE_HOLDER: "Votre email",
         //footer
         LEGAL_NOTICES: "Mentions légales",
-        GENERAL_TERMS: "Conditions générales de vente"
+        GENERAL_TERMS: "Conditions générales de vente",
+        //legals
+        COOKIES: "En poursuivant votre navigation sur ce site, vous acceptez l'utilisation de cookies pour réaliser " +
+        "des statistiques de visites."
     });
 
     var userLang = (navigator.language || navigator.userLanguage).substring(0, 2);

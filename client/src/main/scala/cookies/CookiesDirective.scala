@@ -13,7 +13,7 @@ import scala.scalajs.js.annotation.JSExport
 class CookiesDirective(timeout: Timeout, ngCookies: NgCookies) extends ElementDirective {
   val cookies = document.getElementsByTagName("cookies").item(0).asInstanceOf[Html]
   @JSExport
-  def hideCookies():Unit = {
+  def hideCookies(): Unit = {
     ngCookies.put("hiddenCookies", true)
     cookies.innerHTML = ""
   }
