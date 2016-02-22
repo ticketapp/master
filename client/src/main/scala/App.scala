@@ -2,6 +2,7 @@ import admin.AdminController
 import artists.{ArtistMinFormDirective, ArtistsController}
 import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
+import cookies.CookiesDirective
 import events._
 import focusDirective.FocusDirective
 import footer.LandingPageFooterDirective
@@ -41,6 +42,7 @@ object App extends JSApp {
     module.directive[TrackingDirective]
     module.directive[FocusDirective]
     module.directive[EventFormFindByIdDirective]
+    module.directive[CookiesDirective]
     module.directive[EventFormFindByGeoPoint]
     module.directive[EventFormFindInHourInterval]
     module.directive[EventFormFindPassedInInterval]
