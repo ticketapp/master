@@ -1,13 +1,17 @@
 <div data-ng-controller="eventController" class="test-font">
-    <img data-ng-src="{{ event.event.imagePath }}s"
+
+    {{event.organizers}}
+    {{event.artists}}
+
+
+    <img data-ng-src="{{ event.event.imagePath }}"
          class="width100p"
          data-on-error-src="assets/images/caroussel1.gif"
          data-ng-if="event.event.imagePath"/>
     <img data-ng-src="assets/images/caroussel1.gif" data-ng-if="!event.event.imagePath"/>
 
     <div class="columns large-12">
-
-        <p class="column medium-10 paddingTop0 paddingLeft0 event.eventInfos">
+        <div class="event-header">
             <i class="fi-calendar fa-2x">
             </i>
 
@@ -19,37 +23,83 @@
 
             </b>
 
-            <b data-ng-if="event.event.tariffRange != undefined">
+            <span data-ng-if="event.event.tariffRange != undefined">
                 <i class="fa fa-ticket fa-2x marginLeft20">
                 </i>
                 <b>
                     {{ event.event.tariffRange }}€
                 </b>
-            </b>
+            </span>
 
-            <b>
-                <a href="#/places/{{ place.id }}"
-                   data-ng-repeat="place in event.event.places">
-                    <i class="fa fa-map-marker">
-                    </i>
-                    <b>
-                        {{ event.place.name }}
-                    </b>
-                </a>
-            </b>
+            <a href="#/places/{{ place.place.id }}"
+               data-ng-repeat="place in event.places">
+                <i class="fa fa-map-marker fa-2x marginLeft20">
+                </i>
+                <b>
+                    {{ place.place.name }}
+                    <span data-ng-if="place.address">
+                        - {{ place.address }}
+                    </span>
+                </b>
+            </a>
 
-            <a data-ng-if="event.event.ticketSellers != undefined"
+            <a data-ng-if="event.event.ticketSellers"
                href="http://www.{{event.event.ticketSellers}}"
                class="button"
                target="_blank">
                 {{ 'BUY_PLACE_ON' | translate }} {{ event.event.ticketSellers }}
             </a>
+        </div>
 
-        </p>
+        <h3 class="column padding0 marginTop0">
 
-        <h2 class="column padding0 marginTop0">
-            {{ event.event.name }}
-        </h2>
+            <b data-ng-if="!event.organizer[0]">
+                {{ event.event.name }}
+            </b>
+
+            <span data-ng-if="event.organizer[0]">
+                {{ (event.event.name | limitTo: 50).trim() }}{{ event.event.name.length > 50 ? '...' : '' }}
+
+                <span class="event-by">
+                    {{ 'BY' | translate }}
+                </span>
+
+                <a href="#/organizers/{{ event.organizer[0].organizer.id }}">
+                    {{ event.organizer[0].organizer.name }}
+                </a>
+            </span>
+
+        </h3>
+
+        <div data-ng-if="event.artists" class="center">
+            <h5 class="column small-12 padding0">
+                <i class="fa fa-music fa-2x">
+                </i>
+                <b>
+                    {{ 'WHO_IS_PLAYING' | translate }}
+                </b>
+            </h5>
+
+
+            <div class="event-artists-container">
+
+                <div data-ng-repeat="artist in event.artists" class="event-artist-container">
+                    <div class="event-artist-circle"
+                         style="background-image: url({{ event.artists[0].artist.imagePath | refactorArtistImagePathFilter }});">
+                        <span data-ng-if="artist.artist.hasTracks" class="event-artist-play" style="">
+                            <img src="assets/images/playCircle.png" alt="play">
+                        </span>
+                    </div>
+                    <span class="event-artist-name">
+                        <b>
+                            <a href="#/artists/{{artist.artist.facebookUrl}}" class="event-artist-name-link">
+                                {{ (artist.artist.name | limitTo: 15).trim() }}{{ artist.artist.name.length > 15 ? '...' : '' }}
+                            </a>
+                        </b>
+                    </span>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -59,7 +109,7 @@
 
     <stylized-map ng-if="event.event.geographicPoint && event.event.geographicPoint != 'POINT (-84 30)'"
                   ng-init="geographicPoint = (event.event.geographicPoint | geographicPointRefactoringFilter)"
-                  class="eventMap">
+                  class="event-map">
     </stylized-map>
 
 </div>

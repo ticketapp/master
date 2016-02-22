@@ -1,6 +1,57 @@
-.eventMap {
+.event-artist-circle {
+  width: 195px;
+  height: 195px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center center;
+  display: inline-block;
+  position: relative
+}
+
+.event-artist-container {
+  display: inline-block;
+  margin: 20px;
+  position: relative;
+}
+
+.event-artist-name {
+  background-color: $primary-color;
+  border-radius: 3px;
+  bottom: -6px;
+  left:15px;
+  position: absolute;
+  text-align: center;
+  width: 165px;
+}
+
+.event-artist-name-link {
+  color: white;
+}
+
+.event-artist-play {
+  position: absolute;
+  left:76px;
+  top: 76px
+}
+
+.event-artists-container {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto 20px;
+}
+
+.event-by {
+ color: $success-color;
+}
+
+.event-map {
   height: 600px;
   padding: 0;
   width: 100%;
   float: left;
+}
+
+.event-header {
+  color: $darkBlue;
 }
