@@ -12,6 +12,7 @@ import organizers.OrganizersController
 import places.PlacesController
 import player.{PlayerDirective, PlayerServiceFactory}
 import root.RoutingConfig
+import sellTicket.SellTicketController
 import tracking.{TrackingDirective, TrackingViewDirective}
 
 import scala.scalajs.js.JSApp
@@ -35,6 +36,7 @@ object App extends JSApp {
     module.controller[OrganizersController]
     module.controller[PlacesController]
     module.controller[ChatContactController]
+    module.controller[SellTicketController]
     module.directive[EventMinDirective]
     module.directive[TrackingViewDirective]
     module.directive[TrackingDirective]

@@ -3,7 +3,6 @@ package root
 import com.greencatsoft.angularjs.core.{Route, RouteProvider}
 import com.greencatsoft.angularjs.{inject, Config}
 
-
 object RoutingConfig extends Config {
 
   @inject
@@ -27,6 +26,11 @@ object RoutingConfig extends Config {
         route = Route(
           templateUrl = urlTemplatePath("/events"),
           title = "Main"))
+      .when(
+        path = "/sellTicket/:eventId",
+        route = Route(
+          templateUrl = "/assets/templates/sellTicket/sellTicket.html",
+          title = "sellTicket"))
       .when(
         path = "/cookies",
         route = Route(
