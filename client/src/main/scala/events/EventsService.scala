@@ -12,7 +12,7 @@ import scala.scalajs.js.JSON
 @injectable("eventsService")
 class EventsService(httpGeneralService: HttpGeneralService) extends Service with jsonHelper {
 
-  def findByIdAsString(id: Int): Future[String] = httpGeneralService.get(EventsRoutes.find(id))
+  def findByIdAsString(id: Int): Future[String] = httpGeneralService.get(EventsRoutes.findById(id))
 
   def findByIdAsJson(id: Int): Future[js.Any] =  findByIdAsString(id) map(event => JSON.parse(event))
 

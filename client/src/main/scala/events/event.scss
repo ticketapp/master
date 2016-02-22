@@ -19,6 +19,7 @@
   background-color: $primary-color;
   border-radius: 3px;
   bottom: -6px;
+  color: white;
   left:15px;
   position: absolute;
   text-align: center;
@@ -54,4 +55,9 @@
 
 .event-header {
   color: $darkBlue;
+}
+
+.event-title {
+  text-align: center;
+  margin: 20px !important;
 }

@@ -1,3 +1,4 @@
+import addresses.GeographicPointRefactoringFilter
 import admin.AdminController
 import artists.ArtistsController
 import chatContact.{ChatContactController, ContactComponentDirective}
@@ -7,7 +8,7 @@ import focusDirective.FocusDirective
 import footer.LandingPageFooterDirective
 import geolocation.GeolocationServiceFactory
 import httpServiceFactory.HttpGeneralServiceFactory
-import images.OnErrorSrcDirective
+import images.{RefactorArtistImagePathFilter, OnErrorSrcDirective}
 import map.{MapController, MapControlsDirective, StylizedMapDirective}
 import organizers.{OrganizersServiceFactory, OrganizerController, OrganizersController}
 import places.{PlacesServiceFactory, PlaceController, PlacesController}
@@ -56,5 +57,8 @@ object App extends JSApp {
     module.directive[StylizedMapDirective]
     module.directive[MapControlsDirective]
     module.directive[OnErrorSrcDirective]
+    module.directive[EventAndPastEventsTabsDirective]
+    module.filter[GeographicPointRefactoringFilter]
+    module.filter[RefactorArtistImagePathFilter]
   }
 }

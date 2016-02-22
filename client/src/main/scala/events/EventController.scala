@@ -1,13 +1,10 @@
 package events
 
-import com.greencatsoft.angularjs.core.{Timeout, RouteParams}
+import com.greencatsoft.angularjs.core.{RouteParams, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
-import org.scalajs.dom
 
-import scala.scalajs.js
-import scala.scalajs.js.JSON
-import scala.scalajs.js.annotation.JSExportAll
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 @injectable("eventController")

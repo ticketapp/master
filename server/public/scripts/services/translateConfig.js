@@ -2,7 +2,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
     $translateProvider.translations('en', {
         //Landing page
         HEADLINE: 'Sell your concert tickets',
-        INTRO_TEXT: "Get paid now, regardless of whether a buyer is found or not",
+        INTRO_TEXT: "You will get paid, regardless of whether a buyer is found or not!",
         INPUT_LANDING_PAGE_TEXT: "Get an offer now",
         INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or place name",
         //Events page header
@@ -17,6 +17,15 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EVENTS_NEAR_CITY_FORM_HEADER: "Find near city",
         CREATE_EVENT_BY_FACEBOOK_ID_FORM_HEADER: "Create by facebook id",
         ADVANCED_SEARCH_HEADER: "Advanced search",
+        //Event
+        UNTIL: "until",
+        BUY_PLACE_ON: "Buy place on",
+        BY: "by",
+        WHO_IS_PLAYING: "Artist Lineup",
+        PLAY_EVENT_PLAYLIST: "Listen the event playlist prepared by Claude",
+        //Place
+        UPCOMING_EVENTS: "Upcoming events",
+        PAST_EVENTS: "Past events",
         //tickets
         BUY_TICKET: "Buy ticket",
         SELL_TICKET: "Sell ticket",
@@ -37,11 +46,11 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
     .translations('fr', {
         //Landing page
         HEADLINE: 'Vendez nous votre billet de concert',
-        INTRO_TEXT: "Récuperez instantanément votre argent, sans vous soucier qu'un acheteur soit trouvé",
+        INTRO_TEXT: "Vous récuperez votre argent, qu'un acheteur soit trouvé ou non !",
         INPUT_LANDING_PAGE_TEXT: "Obtenir une offre maintenant",
         INPUT_LANDING_PAGE_PLACEHOLDER: "Entrez un nom d'événement ou un lieu",
         //Events page header
-        PROXIMITY_EVENTS_HEADER: "Evénements à proximité",
+        PROXIMITY_EVENTS_HEADER: "Événements à proximité",
         //Events forms
         ID_FORM_EVENTS_HEADER: "Rechercher par id",
         PROXIMITY_EVENTS_FORM_HEADER: "Rechercher par coordonnées géographiques",
@@ -52,6 +61,15 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EVENTS_NEAR_CITY_FORM_HEADER: "Rechercher les événements proche d'une ville",
         CREATE_EVENT_BY_FACEBOOK_ID_FORM_HEADER: "Créer un événement par id facebook",
         ADVANCED_SEARCH_HEADER: "Recherche avancée",
+        //Event
+        UNTIL: "jusque",
+        BUY_PLACE_ON: "Acheter des places sur",
+        BY: "par",
+        WHO_IS_PLAYING: "Programmation",
+        PLAY_EVENT_PLAYLIST: "Écouter la playlist de l'événement préparée par Claude",
+        //Place
+        UPCOMING_EVENTS: "Événements à venir",
+        PAST_EVENTS: "Événements passés",
         //tickets
         BUY_TICKET: "Acheter un ticket",
         SELL_TICKET: "Vendre un ticket",

@@ -1,7 +1,7 @@
 package map
 
+import com.greencatsoft.angularjs._
 import com.greencatsoft.angularjs.core.Timeout
-import com.greencatsoft.angularjs.{ElementDirective, TemplatedDirective, injectable}
 
 import scala.scalajs.js.annotation.JSExport
 

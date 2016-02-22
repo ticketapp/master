@@ -4,54 +4,38 @@
                   ng-init="geographicPoint = (place.place.geographicPoint | geographicPointRefactoringFilter)"
                   class="place-map">
     </stylized-map>
+
     <div class="place-image-container" data-ng-if="place.place.geographicPoint == 'POINT (-84 30)'">
-        <img class="place-image" data-ng-src="{{ place.place.imagePath }}"/>
+        <img class="place-image"
+             data-ng-src="{{ place.place.imagePath }}"
+             data-on-error-src="assets/images/caroussel1.png"
+             data-ng-if="place.place.imagePath"/>
+        <img class="place-image"
+             data-ng-src="assets/images/caroussel1.gif"
+             data-ng-if="!place.place.imagePath"/>
     </div>
-    <!---->
-    <!--on error image-->
-    <!---->
+
+    <div data-ng-if="place.maybeAddress">
+        <i class="fa fa-map-marker fa-2x marginLeft20">
+        </i>
+        <b>
+            {{ place.maybeAddress.street }} {{ place.maybeAddress.zip }} {{ place.maybeAddress.city }}
+        </b>
+    </div>
 
     <div class="column small-12">
-        <h2 class="float-left marginTop0">
+        <h1 class="float-left place-name">
             {{ place.place.name }}
-        </h2>
+        </h1>
     </div>
 
     <div id="description" data-ng-bind-html="place.place.description">
     </div>
 
-    <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
-        <md-tab label="{{ 'EVENTS' | translate }}">
-            <md-content  class="width100p float-left marginTop10">
-                <event-min class="column large-4 medium-6 float-left fade margin0"
-                           data-ng-repeat="event in events | orderBy: 'startTime'">
-                </event-min>
-                <div layout="row"
-                     layout-sm="column"
-                     layout-align="space-around"
-                     class="column large-12"
-                     ng-if="loadEvents">
-                    <md-progress-circular md-mode="indeterminate">
-                    </md-progress-circular>
-                </div>
-            </md-content>
-        </md-tab>
+    <div data-ng-if="events || pastEvents">
+        <event-and-past-events-tabs>
 
-        <md-tab label="{{ 'PAST_EVENTS' | translate }}">
-            <md-content class="width100p float-left marginTop10">
-                <event-min class="column large-4 medium-6 float-left fade margin0"
-                           data-ng-repeat="event in passedEvents">
-                </event-min>
-                <div layout="row"
-                     layout-sm="column"
-                     layout-align="space-around"
-                     class="column large-12"
-                     ng-if="loadEvents">
-                    <md-progress-circular md-mode="indeterminate">
-                    </md-progress-circular>
-                </div>
-            </md-content>
-        </md-tab>
-    </md-tabs>
+        </event-and-past-events-tabs>
+    </div>
 
 </div>
