@@ -25,6 +25,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, w
   var trackingViewContainer = document.getElementById("tracking-player").asInstanceOf[Html]
   var trackingViewScroller = trackingViewContainer.getElementsByTagName("md-content").item(0).asInstanceOf[Html]
 
+  if(window.location.hash.length > 0) window.location.hash = ""
   window.location.replace(window.location.pathname + "#/")
   timeout(() => {
     val trackedItems = document.getElementsByClassName("tracking")

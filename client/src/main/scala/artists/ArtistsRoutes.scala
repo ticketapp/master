@@ -13,6 +13,8 @@ object ArtistsRoutes {
   
   def create: String = "/artists/createArtist"
 
+  def update: String = "/artists"
+
   def followByArtistId(artistId: Long): String = "artists/" + artistId + "/followByArtistId"
   
   def unfollowByArtistId(artistId: Long): String = "artists/" + artistId + "/unfollowArtistByArtistId"

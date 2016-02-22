@@ -5,6 +5,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         INTRO_TEXT: "You will get paid, regardless of whether a buyer is found or not!",
         INPUT_LANDING_PAGE_TEXT: "Get an offer now",
         INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or place name",
+        KNOW_MORE: "Know more",
         //Events page header
         PROXIMITY_EVENTS_HEADER: "Events near you",
         //Events forms
@@ -29,6 +30,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         //tickets
         BUY_TICKET: "Buy ticket",
         SELL_TICKET: "Sell ticket",
+        SELL_TICKET_DESCRIPTION: "Claude vous propose un prix de rachat pour votre billet. Ouvrez un compte en quelque clic," +
+        " et claude vous rachette directement votre billet.",
+        SELL_TICKET_TITLE_1: "how does it work ?",
+        SELL_TICKET_TITLE: "Sell your ticket for: ",
         //chatContact
         START_CONVERSATION: "Start a conversation",
         CLAUDE_TEAM: "Claude Team",
@@ -41,7 +46,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EMAIL_PLACE_HOLDER: "Your email",
         //footer
         LEGAL_NOTICES: "Legal notices",
-        GENERAL_TERMS: "General terms and conditions of sale"
+        GENERAL_TERMS: "General terms and conditions of sale",
+        //legals
+        COOKIES: "En poursuivant votre navigation sur ce site, vous acceptez l'utilisation de cookies pour réaliser " +
+        "des statistiques de visites."
     })
     .translations('fr', {
         //Landing page
@@ -49,6 +57,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         INTRO_TEXT: "Vous récuperez votre argent, qu'un acheteur soit trouvé ou non !",
         INPUT_LANDING_PAGE_TEXT: "Obtenir une offre maintenant",
         INPUT_LANDING_PAGE_PLACEHOLDER: "Entrez un nom d'événement ou un lieu",
+        KNOW_MORE: "En savoir plus",
         //Events page header
         PROXIMITY_EVENTS_HEADER: "Événements à proximité",
         //Events forms
@@ -73,6 +82,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         //tickets
         BUY_TICKET: "Acheter un ticket",
         SELL_TICKET: "Vendre un ticket",
+        SELL_TICKET_DESCRIPTION: "Claude vous propose un prix de rachat pour votre billet. Ouvrez un compte en quelque clic," +
+            " et claude vous rachette directement votre billet.",
+        SELL_TICKET_TITLE_1: "Comment ça marche ?",
+        SELL_TICKET_TITLE: "Vendez votre billet pour: ",
         //chatContact
         START_CONVERSATION: "Démarrer une conversation",
         CLAUDE_TEAM: "L'équipe Claude",
@@ -83,7 +96,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         EMAIL_PLACE_HOLDER: "Votre email",
         //footer
         LEGAL_NOTICES: "Mentions légales",
-        GENERAL_TERMS: "Conditions générales de vente"
+        GENERAL_TERMS: "Conditions générales de vente",
+        //legals
+        COOKIES: "En poursuivant votre navigation sur ce site, vous acceptez l'utilisation de cookies pour réaliser " +
+        "des statistiques de visites."
     });
 
     var userLang = (navigator.language || navigator.userLanguage).substring(0, 2);

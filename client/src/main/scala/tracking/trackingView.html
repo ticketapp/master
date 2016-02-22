@@ -19,17 +19,15 @@
     <md-input-container id="sessionSelector" class="float-right">
         <label>Sessions</label>
         <md-select ng-model="selectedSession" ng-change="directive.setSession(selectedSession)">
-            <md-option ng-repeat="session in directive.sessions" value="{{session.uuid}}">
+            <md-option ng-repeat="session in $parent.directive.sessions" value="{{session.uuid}}">
                 {{session.uuid}}
             </md-option>
         </md-select>
     </md-input-container>
     <div id="tracking-player" class="column padding0">
         <md-content>
-            <div  data-ng-view="" id="tracking-player-container" class="column large-12 padding0 float-left height100p"></div>
+            <div data-ng-view="" id="tracking-player-container" class="column large-12 padding0 float-left height100p"></div>
         </md-content>
         <contact-component ng-include="'assets/templates/chatContact/contact-component.html'"></contact-component>
-        <div class="landing-page-footer width100p">
-        </div>
     </div>
 </tracking-view>

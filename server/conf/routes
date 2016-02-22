@@ -60,6 +60,7 @@ GET           /artists/:facebookUrl                              @artistsDomain.
 GET           /artists/:facebookUrl/tracks                       @tracksDomain.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
 GET           /artists/byId/:id                                  @artistsDomain.ArtistController.artist(id: Long)
 POST          /artists/createArtist                              @artistsDomain.ArtistController.createArtist
+PUT           /artists                                           @artistsDomain.ArtistController.updateArtist()
 POST          /artists/:artistId/followByArtistId                @artistsDomain.ArtistController.followArtistByArtistId(artistId: Long)
 POST          /artists/:artistId/unfollowArtistByArtistId        @artistsDomain.ArtistController.unfollowArtistByArtistId(artistId: Long)
 POST          /artists/:facebookId/followByFacebookId            @artistsDomain.ArtistController.followArtistByFacebookId(facebookId: String)

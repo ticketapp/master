@@ -2,6 +2,7 @@ package geolocation
 
 import com.greencatsoft.angularjs.core.{HttpService, Timeout}
 import com.greencatsoft.angularjs.{Factory, Service, injectable}
+import materialDesign.{MdToastService, MdToast}
 import org.scalajs.dom.{console, navigator}
 import org.scalajs.dom.raw.{Position, PositionError}
 
@@ -16,6 +17,7 @@ case class GeographicPoint(lat: Double, lng: Double)
 @injectable("geolocationService")
 class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
 
+  val basePoint: GeographicPoint = GeographicPoint(45.7667, 4.8833)
   var geographicPoint: UndefOr[GeographicPoint] = js.undefined
 
   def getHtmlGeolocation(): Unit = {
@@ -28,9 +30,13 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
     })
   }
 
+  getHtmlGeolocation()
+
   def getIpGeolocation: Future[GeographicPoint] = {
     val getPoint = http.get[js.Any]("/users/geographicPoint")
-    getPoint.error((error: Any) => geographicPoint = GeographicPoint(45.7667, 4.8833))
+
+    getPoint.error((error: Any) => geographicPoint = basePoint)
+
     getPoint map { response =>
       val responseMap = response.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
       if(responseMap.isDefinedAt("status")) {
@@ -38,22 +44,29 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
           case success if success == "success" =>
             GeographicPoint(responseMap("lat").toString.toDouble, responseMap("lng").toString.toDouble)
           case _ =>
-            GeographicPoint(45.7667, 4.8833)
+            basePoint
         }
       } else {
-        GeographicPoint(45.7667, 4.8833)
+        basePoint
       }
     }
   }
 
+  val maxTry = 10
+  var tryNumber = 0
+
   def getUserGeolocation: Future[GeographicPoint] = {
-    timeout(() => getHtmlGeolocation(), 300) flatMap { htmlGeolocation =>
-      if(geographicPoint.isDefined) {
+    timeout(() => console.log("retry get geoPoint"), 1000) flatMap { _ =>
+      if (geographicPoint.isDefined) {
         Future(geographicPoint.get)
-      }
-      else {
-        getHtmlGeolocation()
-        getUserGeolocation
+      } else {
+        if (tryNumber < maxTry) {
+          tryNumber += 1
+          getUserGeolocation
+        } else {
+          geographicPoint = basePoint
+          Future(geographicPoint.get)
+        }
       }
     }
   }
