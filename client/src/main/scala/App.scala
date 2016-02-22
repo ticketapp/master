@@ -1,5 +1,6 @@
 import admin.AdminController
 import artists.{ArtistMinFormDirective, ArtistsController}
+import auth.AuthDirective
 import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
 import events._
@@ -21,9 +22,10 @@ object App extends JSApp {
 
   override def main() {
     val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap",
-      "ngCookies", "angularTranslateApp", "ngSanitize", "themingAngularMaterial"))
+      "ngCookies", "angularTranslateApp", "ngSanitize", "themingAngularMaterial", "satellizer"))
 
     module.config(RoutingConfig)
+    module.config(AuthConfig)
     module.directive[ContactComponentDirective]
     module.factory[HttpGeneralServiceFactory]
     module.factory[GeolocationServiceFactory]
@@ -49,5 +51,6 @@ object App extends JSApp {
     module.directive[ArtistMinFormDirective]
     module.directive[LandingPageFooterDirective]
     module.directive[PlayerDirective]
+    module.directive[AuthDirective]
   }
 }
