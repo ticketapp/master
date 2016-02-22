@@ -20,6 +20,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         //tickets
         BUY_TICKET: "Buy ticket",
         SELL_TICKET: "Sell ticket",
+        SELL_TICKET_DESCRIPTION: "Claude vous propose un prix de rachat pour votre billet. Ouvrez un compte en quelque clic," +
+        " et claude vous rachette directement votre billet.",
+        SELL_TICKET_TITLE_1: "how does it work ?",
+        SELL_TICKET_TITLE: "Sell your ticket for: ",
         //chatContact
         START_CONVERSATION: "Start a conversation",
         CLAUDE_TEAM: "Claude Team",
@@ -55,6 +59,10 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         //tickets
         BUY_TICKET: "Acheter un ticket",
         SELL_TICKET: "Vendre un ticket",
+        SELL_TICKET_DESCRIPTION: "Claude vous propose un prix de rachat pour votre billet. Ouvrez un compte en quelque clic," +
+            " et claude vous rachette directement votre billet.",
+        SELL_TICKET_TITLE_1: "Comment ça marche ?",
+        SELL_TICKET_TITLE: "Vendez votre billet pour: ",
         //chatContact
         START_CONVERSATION: "Démarrer une conversation",
         CLAUDE_TEAM: "L'équipe Claude",

@@ -19,36 +19,12 @@ class SellTicketController(sellTicketScope: SellTicketScope, service: HttpGenera
   extends AbstractController[SellTicketScope](sellTicketScope) with jsonHelper {
 
 
-  val maybeEventId = routeParams.get("id")
-
-  maybeEventId match {
-
-    case eventId if eventId.isDefined =>
-      val id = eventId.get.toString.toInt
-      service.get(AdminRoutes.findTariffsByEventId(id)) map { tariffsFound =>
-        timeout(() => sellTicketScope.tariffs = JSON.parse(tariffsFound))
-      } recover { case t: Throwable =>
-        sellTicketScope.message = "Error on found tariffs"
-      }
-
-      service.get(EventsRoutes.find(id)) map {
-
-        case foundEvent if foundEvent.length > 0 =>
-          timeout(() => sellTicketScope.event = JSON.parse(foundEvent))
-
-        case _ =>
-          sellTicketScope.message = "no event found"
-      } recover { case t: Throwable =>
-        sellTicketScope.message = "Error on found event"
-      }
-
-    case _ =>
-      sellTicketScope.message = "url error"
+  val eventId = routeParams.get("eventId").get.toString.toInt
+  
+  service.get(AdminRoutes.findTariffsByEventId(eventId)) map { tariffsFound =>
+    timeout(() => sellTicketScope.tariffs = JSON.parse(tariffsFound))
   }
-}
-
-trait SellTicketScope extends Scope {
-  var message: js.Any = js.native
-  var event: js.Any = js.native
-  var tariffs: js.Any = js.native
+  service.get(EventsRoutes.find(eventId)) map { foundEvent =>
+    timeout(() => sellTicketScope.event = JSON.parse(foundEvent))
+  }
 }

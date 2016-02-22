@@ -1,9 +1,8 @@
 <div data-ng-controller="sellTicketController" class="sellTicketContainer">
-    <h2>Vendez votre billet pour {{event.event.name}}</h2>
-    <h3>Comment ça marche ?</h3>
+    <h2>{{SELL_TICKET_TITLE | translate}} {{event.event.name}}</h2>
+    <h3>{{SELL_TICKET_TITLE_1 | translate}}</h3>
     <p>
-       Claude vous propose un prix de rachat pour votre billet. Ouvrez un compte en quelque clic,
-       et claude vous rachette directement votre billet.
+        {{SELL_TICKET_DESCRIPTION | translate}}
     </p>
     <div data-ng-repeat="tariff in tariffs">
         {{tariff.denomination}} : {{tariff.price}} €

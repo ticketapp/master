@@ -27,7 +27,7 @@ object RoutingConfig extends Config {
           templateUrl = urlTemplatePath("/events"),
           title = "Main"))
       .when(
-        path = "/sellTicket/:id",
+        path = "/sellTicket/:eventId",
         route = Route(
           templateUrl = "/assets/templates/sellTicket/sellTicket.html",
           title = "sellTicket"))

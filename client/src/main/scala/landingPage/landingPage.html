@@ -14,8 +14,8 @@
 
             <md-autocomplete md-search-text-change="controller.findMaybeSalableEventsContaining(ctrl.searchText)"
                              md-search-text="$parent.ctrl.searchText"
-                             md-items="item in maybeSalableEvents"
-                             md-item-text="item.display"
+                             md-items="event in maybeSalableEvents"
+                             md-item-text="event.display"
                              md-min-length="0"
                              class="sell-input tracking"
                              id="li1"
@@ -24,18 +24,19 @@
                              placeholder="{{ 'INPUT_LANDING_PAGE_PLACEHOLDER' | translate }}">
 
                 <md-item-template>
-                    <a href="#/events/{{item.event.id}}" class="float-left">
+                    <a href="#/events/{{event.event.id}}" class="float-left">
                          <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
-                            {{item.event.name}}
+                            {{event.event.name}}
                          </span>
                     </a>
-                    <a data-ng-show="item.isSalable" href="#/sellTicket/{{item.event.id}}" class="float-right">Vendez votre billet</a>
-                    <a data-ng-show="!item.isSalable" class="float-right">Nous n'achetons pas de billets</a>
+                    <a data-ng-show="event.isSalable" href="#/sellTicket/{{event.event.id}}" class="float-right">
+                        {{SELL_TICKET | translate}}
+                    </a>
+                    <a data-ng-show="!event.isSalable" class="float-right">{{SELL_TICKET | translate}}</a>
                 </md-item-template>
 
                 <md-not-found>
-                    No states matching "{{ctrl.searchText}}" were found.
-                    <a ng-click="ctrl.newState(ctrl.searchText)">Create a new one!</a>
+                    No events matching "{{ctrl.searchText}}" were found.
                 </md-not-found>
 
             </md-autocomplete>
