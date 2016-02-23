@@ -72,7 +72,30 @@
                         <md-not-found>
                             No states matching "{{ctrl.searchText}}" were found.
                         </md-not-found>
-
+                    </md-autocomplete>
+                </div>
+                <md-button class="column" data-ng-click="changeOrganizers = !changeOrganizers">Organizers</md-button>
+                <div data-ng-show="changeOrganizers" data-ng-controller="organizersController">
+                    <a data-ng-repeat="organizer in event.organizers"
+                            data-ng-click="controller.deleteEventRelation(event.event.id, organizer.organizer.id)">
+                        {{organizer.organizer.name}}
+                    </a>
+                    <md-autocomplete md-search-text-change="controller.findContaining(searchOrganizer)"
+                                     md-search-text="searchOrganizer"
+                                     md-selected-item-change="controller.saveEventRelation(event.event.id, organizer.organizer.id)"
+                                     md-items="organizer in controller.organizers"
+                                     md-item-text="organizer.organizer.name"
+                                     md-min-length="0"
+                                     class="column"
+                                     organizerholder="Search organizer">
+                        <md-item-template>
+                            <span md-highlight-text="searchOrganizer" md-highlight-flags="^i" class="float-left">
+                                {{organizer.organizer.name}}
+                            </span>
+                        </md-item-template>
+                        <md-not-found>
+                            No states matching "{{searchOrganizer}}" were found.
+                        </md-not-found>
                     </md-autocomplete>
                 </div>
             </div>
