@@ -64,14 +64,14 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
 
   def findInHourInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
-    service.get(EventsRoutes.FindInHourInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
+    service.get(EventsRoutes.findInHourInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
       timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }
 
   def findPassedInInterval(hourInterval: Int, lat: Double, lng: Double, offset: Int, numberToReturn: Int): Unit = {
     val geographicPoint = lat + "," + lng
-    service.get(EventsRoutes.FindPassedInInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
+    service.get(EventsRoutes.findPassedInInterval(hourInterval, geographicPoint, offset, numberToReturn)) map { foundEvents =>
       timeout(() => eventScope.events = JSON.parse(foundEvents))
     }
   }

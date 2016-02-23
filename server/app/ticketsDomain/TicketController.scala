@@ -34,7 +34,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def findMaybeSalableEventsByContaining(pattern: String) = Action.async {
+  def findMaybeSalableEventsContaining(pattern: String) = Action.async {
     ticketMethods.findMaybeSalableEventsByContaining(pattern) map { maybeSalableEvents =>
         Ok(Json.toJson(maybeSalableEvents))
     } recover { case NonFatal(e) =>

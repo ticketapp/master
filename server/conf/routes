@@ -19,20 +19,20 @@ GET           /initDatabase                                      @fillDatabase.I
 GET            /admin                                           @application.Application.admin
 
 ################################# Salable events ######################################################################
-GET            /salableEvents                                   @ticketsDomain.TicketController.findSalableEvents()
+GET            /salableEvents                                      @ticketsDomain.TicketController.findSalableEvents()
 POST           /salableEvents                                   @ticketsDomain.TicketController.addSalableEvents(eventId: Long)
-GET            /salableEventsContaining                         @ticketsDomain.TicketController.findMaybeSalableEventsByContaining(pattern: String)
+GET            /salableEvents/containing                        @ticketsDomain.TicketController.findMaybeSalableEventsContaining(pattern: String)
 
 #################################### Tickets ###############################################
-POST            /proposed                                         @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
-POST            /blockedTicket                                    @ticketsDomain.TicketController.blockTicketForUser(tariffId: Long)
-POST            /ticketToSale                                     @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
-POST            /acceptedPendingTicket                            @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
-POST            /rejectedPendingTicket                            @ticketsDomain.TicketController.rejectPendingTicket(pendingTicketId: Long)
+POST            /proposedTickets                                  @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)
+POST            /blockedTickets                                   @ticketsDomain.TicketController.blockTicketForUser(tariffId: Long)
+POST            /ticketsToSale                                    @ticketsDomain.TicketController.addTicketToSale(qrCode: String, eventId: Long, tariffId: Long)
+POST            /acceptedPendingTickets                           @ticketsDomain.TicketController.acceptPendingTicket(pendingTicketId: Long)
+POST            /rejectedPendingTickets                           @ticketsDomain.TicketController.rejectPendingTicket(pendingTicketId: Long)
 GET             /tickets                                          @ticketsDomain.TicketController.findTicketsWithStatus
-GET             /pending                                          @ticketsDomain.TicketController.findPendingTickets
-GET             /bills/bought                                     @ticketsDomain.TicketController.findBoughtBills
-GET             /bills/sold                                       @ticketsDomain.TicketController.findSoldBills
+GET             /pendingTickets                                   @ticketsDomain.TicketController.findPendingTickets
+GET             /boughtBills                                      @ticketsDomain.TicketController.findBoughtBills
+GET             /soldBills                                        @ticketsDomain.TicketController.findSoldBills
 
 #################################### tariffs ###############################################
 GET             /tariffs                                          @tariffsDomain.TariffController.findTariffsByEventId(eventId: Long)
@@ -43,8 +43,12 @@ GET           /events                                            @eventsDomain.E
 GET           /events/inInterval/:hourInterval                   @eventsDomain.EventController.eventsInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET           /events/passedInInterval/:hourInterval             @eventsDomain.EventController.eventsPassedInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int)
 GET           /events/:id                                        @eventsDomain.EventController.find(id: Long)
-POST          /events/create                                     @eventsDomain.EventController.createEvent
-PUT           /events                                            @eventsDomain.EventController.update()
+POST          /events                                            @eventsDomain.EventController.createEvent
+POST          /events/:facebookId                                @eventsDomain.EventController.createEventByFacebookId(facebookId: String)
+POST          /followedEvents                                    @eventsDomain.EventController.followEvent(eventId: Long)
+DELETE        /followedEvents                                    @eventsDomain.EventController.unfollowEvent(eventId: Long)
+GET           /followedEvents                                    @eventsDomain.EventController.getFollowedEvents
+PUT           /events                                            @eventsDomain.EventController.update
 POST          /events/create/:facebookId                         @eventsDomain.EventController.createEventByFacebookId(facebookId: String)
 POST          /events/:eventId/follow                            @eventsDomain.EventController.followEvent(eventId: Long)
 POST          /events/:eventId/unfollow                          @eventsDomain.EventController.unfollowEvent(eventId: Long)
@@ -56,17 +60,17 @@ GET           /events/nearCity/:city                             @eventsDomain.E
 
 ################################### Artists ##############################################
 
-GET           /artists/since                                     @artistsDomain.ArtistController.artistsSinceOffset(numberToReturn: Int, offset: Long)
+GET           /artists                                           @artistsDomain.ArtistController.artistsSinceOffset(numberToReturn: Int, offset: Long)
 GET           /artists/:facebookUrl                              @artistsDomain.ArtistController.artistByFacebookUrl(facebookUrl: String)
 GET           /artists/:facebookUrl/tracks                       @tracksDomain.TrackController.findAllByArtist(facebookUrl: String, numberToReturn: Int, offset: Int)
 GET           /artists/byId/:id                                  @artistsDomain.ArtistController.artist(id: Long)
-POST          /artists/createArtist                              @artistsDomain.ArtistController.createArtist
+POST          /artists                                           @artistsDomain.ArtistController.createArtist
 PUT           /artists                                           @artistsDomain.ArtistController.updateArtist()
-POST          /artists/:artistId/followByArtistId                @artistsDomain.ArtistController.followArtistByArtistId(artistId: Long)
-POST          /artists/:artistId/unfollowArtistByArtistId        @artistsDomain.ArtistController.unfollowArtistByArtistId(artistId: Long)
-POST          /artists/:facebookId/followByFacebookId            @artistsDomain.ArtistController.followArtistByFacebookId(facebookId: String)
-GET           /artists/followed/                                 @artistsDomain.ArtistController.getFollowedArtists
-GET           /artists/:artistId/isFollowed                      @artistsDomain.ArtistController.isArtistFollowed(artistId: Long)
+POST          /followedArtists/artistId/:artistId                @artistsDomain.ArtistController.followArtistByArtistId(artistId: Long)
+DELETE        /followedArtists/artistId/:artistId                @artistsDomain.ArtistController.unfollowArtistByArtistId(artistId: Long)
+POST          /followedArtists/facebookId/:facebookId            @artistsDomain.ArtistController.followArtistByFacebookId(facebookId: String)
+GET           /followedArtists                                   @artistsDomain.ArtistController.getFollowedArtists
+GET           /followedArtists/:artistId                         @artistsDomain.ArtistController.isArtistFollowed(artistId: Long)
 GET           /artists/:facebookUrl/events                       @eventsDomain.EventController.findByArtist(facebookUrl: String)
 GET           /artists/:artistId/passedEvents                    @eventsDomain.EventController.findPassedByArtist(artistId: Long)
 GET           /artists/containing/:pattern                       @artistsDomain.ArtistController.findArtistsContaining(pattern: String)
@@ -77,33 +81,33 @@ POST          /eventArtist                                       @artistsDomain.
 ################################### Places ###############################################
 GET           /places                                            @placesDomain.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET           /places/:id                                        @placesDomain.PlaceController.findById(id: Long)
-POST          /places/:placeId/followByPlaceId                   @placesDomain.PlaceController.followPlaceByPlaceId(placeId: Long)
-POST          /places/:placeId/unfollowPlaceByPlaceId            @placesDomain.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
-POST          /places/:facebookId/followByFacebookId             @placesDomain.PlaceController.followPlaceByFacebookId(facebookId: String)
-GET           /places/:placeId/isFollowed                        @placesDomain.PlaceController.isPlaceFollowed(placeId: Long)
+POST          /followedPlaces/placeId/:placeId                   @placesDomain.PlaceController.followPlaceByPlaceId(placeId: Long)
+DELETE        /followedPlaces/placeId/:placeId                   @placesDomain.PlaceController.unfollowPlaceByPlaceId(placeId: Long)
+POST          /followedPlaces/facebookId/:facebookId             @placesDomain.PlaceController.followPlaceByFacebookId(facebookId: String)
+GET           /followedPlaces/:placeId                           @placesDomain.PlaceController.isPlaceFollowed(placeId: Long)
 GET           /places/containing/:pattern                        @placesDomain.PlaceController.findPlacesContaining(pattern: String)
-POST          /places/create                                     @placesDomain.PlaceController.createPlace
+POST          /places                                            @placesDomain.PlaceController.createPlace
 GET           /places/:placeId/events                            @eventsDomain.EventController.findByPlace(placeId: Long)
 GET           /places/:placeId/passedEvents                      @eventsDomain.EventController.findPassedByPlace(placeId: Long)
 GET           /places/nearCity/:city                             @placesDomain.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
-GET           /places/followed/                                  @placesDomain.PlaceController.getFollowedPlaces
+GET           /followedPlaces                                    @placesDomain.PlaceController.getFollowedPlaces
 DELETE        /eventPlace                                        @placesDomain.PlaceController.deleteEventRelation(eventId: Long, placeId: Long)
 POST          /eventPlace                                        @placesDomain.PlaceController.saveEventRelation(eventId: Long, placeId: Long)
 
 ################################## Organizers ###############################################
 GET           /organizers                                        @organizersDomain.OrganizerController.findAllSinceOffset(offset: Long = 0, numberToReturn: Long = 1000)
 GET           /organizers/:id                                                @organizersDomain.OrganizerController.findById(id: Long)
-POST          /organizers/:organizerId/followByOrganizerId                   @organizersDomain.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
-POST          /organizers/:organizerId/unfollowOrganizerByOrganizerId        @organizersDomain.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
-POST          /organizers/:facebookId/followByFacebookId                     @organizersDomain.OrganizerController.followOrganizerByFacebookId(facebookId: String)
-GET           /organizers/:organizerId/isFollowed                @organizersDomain.OrganizerController.isOrganizerFollowed(organizerId: Long)
+POST          /followedOrganizers/organizerId/:organizerId                   @organizersDomain.OrganizerController.followOrganizerByOrganizerId(organizerId: Long)
+DELETE        /followedOrganizers/organizerId/:organizerId        @organizersDomain.OrganizerController.unfollowOrganizerByOrganizerId(organizerId: Long)
+POST          /followedOrganizers/facebookId/:facebookId                     @organizersDomain.OrganizerController.followOrganizerByFacebookId(facebookId: String)
+GET           /followedOrganizers/:organizerId                   @organizersDomain.OrganizerController.isOrganizerFollowed(organizerId: Long)
 GET           /organizers/containing/:pattern                    @organizersDomain.OrganizerController.findOrganizersContaining(pattern: String)
-POST          /organizers/create                                 @organizersDomain.OrganizerController.createOrganizer
+POST          /organizers                                        @organizersDomain.OrganizerController.createOrganizer
 GET           /organizers/:organizerId/events                    @eventsDomain.EventController.findByOrganizer(organizerId: Long)
 GET           /organizers/:organizerId/passedEvents              @eventsDomain.EventController.findPassedByOrganizer(organizerId: Long)
 GET           /organizers/findNearCity/:city                     @organizersDomain.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /organizers/findNearGeoPoint/                      @organizersDomain.OrganizerController.findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int)
-GET           /organizers/followed/                              @organizersDomain.OrganizerController.getFollowedOrganizers
+GET           /followedOrganizers                                @organizersDomain.OrganizerController.getFollowedOrganizers
 DELETE        /eventOrganizer                                    @organizersDomain.OrganizerController.deleteEventRelation(eventId: Long, organizerId: Long)
 POST          /eventOrganizer                                    @organizersDomain.OrganizerController.saveEventRelation(eventId: Long, organizerId: Long)
 
@@ -125,11 +129,11 @@ GET           /tracks                                            @tracksDomain.T
 GET           /tracks/:artistName/:artistFacebookUrl/:trackTitle        @tracksDomain.SearchTracksController.getYoutubeTracksForArtistAndTrackTitle(artistName: String, artistFacebookUrl: String, trackTitle: String)
 GET           /tracks/youtubeTrackInfo/:youtubeId                       @tracksDomain.SearchTracksController.getYoutubeTrackInfo(youtubeId: String)
 #GET     /tracks/:trackId/rating                                        @tracks.TrackController.getRatingForUser(trackId: String)
-POST          /tracks/rating                                            @tracksDomain.TrackController.upsertRatingForUser
-POST          /tracks/:trackId/addToFavorites                           @tracksDomain.TrackController.followTrack(trackId: String)
-POST          /tracks/:trackId/removeFromFavorites                      @tracksDomain.TrackController.unfollowTrack(trackId: String)
-GET           /tracks/favorites                                         @tracksDomain.TrackController.getFollowedTracks
-GET           /tracks/:trackId/isFollowed                               @tracksDomain.TrackController.isTrackFollowed(trackId: String)
+POST          /rating                                                   @tracksDomain.TrackController.upsertRatingForUser
+POST          /favorites/:trackId                                       @tracksDomain.TrackController.followTrack(trackId: String)
+DELETE        /favorites/:trackId                                       @tracksDomain.TrackController.unfollowTrack(trackId: String)
+GET           /favorites                                                @tracksDomain.TrackController.getFollowedTracks
+GET           /favorites/:trackId                                       @tracksDomain.TrackController.isTrackFollowed(trackId: String)
 
 ################################### City ################################################
 GET          /city/:city                                                @addresses.CityController.isACity(city: String)

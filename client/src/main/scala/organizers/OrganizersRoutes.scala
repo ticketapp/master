@@ -6,13 +6,13 @@ object OrganizersRoutes {
 
   def findById(id: Long): String = "/organizers/" + id
 
-  def followByOrganizerId(organizerId: Long): String = "organizers/" + organizerId + "/followByOrganizerId"
+  def followByOrganizerId(organizerId: Long): String = "followedOrganizers/organizerId/" + organizerId
 
-  def unfollowByOrganizerId(organizerId: Long): String = "organizers/" + organizerId + "/unfollowOrganizerByOrganizerId"
+  def unfollowByOrganizerId(organizerId: Long): String = "followedOrganizers/organizerId/" + organizerId
 
-  def followByFacebookId(facebookId: String): String = "/organizers/" + facebookId + "/followByFacebookId"
+  def followByFacebookId(facebookId: String): String = "followedOrganizers/facebookId/" + facebookId
 
-  def isFollowed(organizerId: Long): String = "/organizers/" + organizerId + "/isFollowed "
+  def isFollowed(organizerId: Long): String = "/followedOrganizers/" + organizerId
 
   def findContaining(pattern: String): String = "/organizers/containing/" + pattern
 
@@ -25,7 +25,7 @@ object OrganizersRoutes {
     "/organizers/findNearGeoPoint/?geographicPoint=" + geographicPoint + "&numberToReturn=" + numberToReturn +
       "&offset=" + offset
 
-  def getFollowed: String = "/organizers/followed/"
+  def getFollowed: String = "/followedOrganizers"
 
   def deleteEventRelation(eventId: Int, organizerId: Int): String =
     "/eventOrganizer?eventId=" + eventId + "&organizerId=" + organizerId
