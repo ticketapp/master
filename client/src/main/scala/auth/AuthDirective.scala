@@ -14,7 +14,7 @@ class AuthDirective(timeout: Timeout, auth: Auth) extends ElementDirective {
 
   override def link(scopeType: ScopeType, elements: Seq[Element], attributes: Attributes): Unit = {
     elements.map(_.asInstanceOf[Html]).foreach { element =>
-        element.onclick = (event: MouseEvent) => auth.authenticate("facebook")
+        element.onclick = (event: MouseEvent) => auth.authenticate("login")
     }
   }
 }

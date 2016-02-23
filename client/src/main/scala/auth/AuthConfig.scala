@@ -1,9 +1,8 @@
-import auth.{Provider, AuthProvider}
-import com.greencatsoft.angularjs.core.{Route, RouteProvider}
-import com.greencatsoft.angularjs.{inject, Config}
+package auth
+
+import com.greencatsoft.angularjs.{Config, inject}
 
 import scala.scalajs.js
-
 
 object AuthConfig extends Config {
 
@@ -15,5 +14,4 @@ object AuthConfig extends Config {
     facebookProvider.clientId = "1434764716814175"
     authProvider.facebook(facebookProvider)
   }
-
 }
