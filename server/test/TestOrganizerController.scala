@@ -36,6 +36,8 @@ class TestOrganizerController extends GlobalApplicationForControllers {
           VALUES((SELECT eventId FROM events WHERE name = 'eventPassed'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
         INSERT INTO eventsorganizers(eventid, organizerid)
           VALUES((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT organizerid FROM organizers WHERE name = 'name0'));
+        INSERT INTO eventsorganizers(eventid, organizerid)
+          VALUES(2, 300);
 
         INSERT INTO organizersfollowed(organizerid, userid)
           VALUES((SELECT organizerId FROM organizers WHERE name = 'name0'), '077f3ea6-2272-4457-a47e-9e9111108e44');
@@ -53,6 +55,20 @@ class TestOrganizerController extends GlobalApplicationForControllers {
 
       status(result) mustEqual OK
       organizer mustEqual Organizer(id = organizer.id, facebookId = Some("111"), name = "test", verified = false)
+    }
+
+    "add organizer event relation" in {
+      val Some(relation) = route(
+        FakeRequest(organizersDomain.routes.OrganizerController.saveEventRelation(1, 300))
+      )
+      status(relation) mustEqual OK
+    }
+
+    "delete organizer event relation" in {
+      val Some(relation) = route(
+        FakeRequest(organizersDomain.routes.OrganizerController.deleteEventRelation(2, 300))
+      )
+      status(relation) mustEqual OK
     }
 
     "find a list of organizers" in {

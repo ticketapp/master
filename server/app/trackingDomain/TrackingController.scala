@@ -27,7 +27,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     trackingMethods.findUserSessions map { userSessions =>
       Ok(Json.toJson(userSessions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " findSessions: " + e.getMessage)
     }
   }
@@ -37,7 +37,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     trackingMethods.findInProgressSession map { userSessions =>
       Ok(Json.toJson(userSessions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " findCurrentSessions: " + e.getMessage)
     }
   }
@@ -46,7 +46,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     trackingMethods.findUserActionBySessionId(UUID.fromString(sessionId)) map { userActions =>
       Ok(Json.toJson(userActions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " findActionsBySessionId: " + e.getMessage)
     }
   }
@@ -56,7 +56,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     trackingMethods.saveUserAction(userAction.get) map { userActions =>
       Ok(Json.toJson(userActions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " saveUserAction: " + e.getMessage)
     }
   }
@@ -68,7 +68,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     trackingMethods.saveUserSession(newSession) map { _ =>
       Ok(Json.toJson(sessionId))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " saveUserSession: " + e.getMessage)
     }
   }

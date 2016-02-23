@@ -1,9 +1,9 @@
 <a href="#/events/{{event.event.id}}" class="tracking" tracker="{{toTrack}}"
    data-ng-click="toTrack='a,/events/'+event.event.id">
-    <img ng-src="{{ event.event.imagePath}}" class="width100p"
-         on-error-src="assets/images/caroussel1.gif" ng-if="event.event.imagePath"/>
+    <img data-ng-src="{{ event.event.imagePath}}" class="width100p"
+         data-on-error-src="assets/images/caroussel1.gif" data-ng-if="event.event.imagePath"/>
     <img src="assets/images/caroussel1.gif"
-         ng-if="!event.event.imagePath" class="min"/>
+         data-ng-if="!event.event.imagePath" class="min"/>
 </a>
 
 <span class="tracking event-min-title">
@@ -20,34 +20,36 @@
         <div class="flex paddingLeft10">
 
             <h3 class="width100p float-left margin0">
-                <a href="#/events/{{event.event.id}}" class="tracking textColorWhite "
-                   tracker="{{toTrack}}"
-                   data-ng-click="toTrack='a,/events/'+event.event.id">
-                    {{ (event.event.name).toLowerCase() | limitTo: 42}}
-                    <b data-ng-show="event.event.name.length > 42">...</b>
-                </a>
+                <b>
+                    <a href="#/events/{{event.event.id}}" class="tracking textColorWhite "
+                       tracker="{{toTrack}}"
+                       data-ng-click="toTrack='a,/events/'+event.event.id">
+                        {{ ((event.event.name).toLowerCase() | limitTo: 20).trim() }}{{ event.event.name.length > 20 ? '...' : '' }}
+                    </a>
+                </b>
             </h3>
 
-            <div class="width100p float-left">
-                <b style="vertical-align: text-bottom;" class="float-left">
+            <div class="event-min-date-and-place">
+                <b class="event-min-start-date-time">
                     {{ event.event.startTime | date:'dd/MM' }} - {{ event.event.startTime | date:'HH:mm' }}
                 </b>
 
                 <span data-ng-repeat="place in event.places" class="float-left">
-                    <b style="vertical-align: text-bottom;">,
+                    <b class="event-min-place-name">
                         <a href="#/places/{{ place.place.id}}" class="tracking" tracker="{{toTrack}}"
                            data-ng-click="toTrack='a,/places/'+place.place.id">
-                            {{place.place.name | limitTo: 25}}
+                            {{ place.place.name | limitTo: 25 }}
                         </a>
+
+                        <span data-ng-if="event.addresses[0].city">
+                            ({{ event.addresses[0].city }})
+                        </span>
                     </b>
                 </span>
 
-                <span style="vertical-align: text-bottom;" class="float-left" ng-if="event.addresses[0].city">
-                    ({{event.addresses[0].city}})
-                </span>
 
-                <div class="float-right" ng-if="event.event.tariffRange">
-                    <b>{{event.event.tariffRange.split("-")[0]}} €</b>
+                <div class="event-min-tariff" data-ng-if="event.event.tariffRange">
+                    <b>{{ event.event.tariffRange.split("-")[0] }} €</b>
                 </div>
 
             </div>

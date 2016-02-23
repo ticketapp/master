@@ -48,6 +48,11 @@ POST          /events/:facebookId                                @eventsDomain.E
 POST          /followedEvents                                    @eventsDomain.EventController.followEvent(eventId: Long)
 DELETE        /followedEvents                                    @eventsDomain.EventController.unfollowEvent(eventId: Long)
 GET           /followedEvents                                    @eventsDomain.EventController.getFollowedEvents
+PUT           /events                                            @eventsDomain.EventController.update
+POST          /events/create/:facebookId                         @eventsDomain.EventController.createEventByFacebookId(facebookId: String)
+POST          /events/:eventId/follow                            @eventsDomain.EventController.followEvent(eventId: Long)
+POST          /events/:eventId/unfollow                          @eventsDomain.EventController.unfollowEvent(eventId: Long)
+GET           /events/followed/                                  @eventsDomain.EventController.getFollowedEvents
 GET           /events/:eventId/isFollowed                        @eventsDomain.EventController.isEventFollowed(eventId: Long)
 GET           /events/containing/:pattern                        @eventsDomain.EventController.findAllContaining(pattern: String, geographicPoint: String)
 GET           /events/city/:pattern                              @eventsDomain.EventController.findByCityPattern(pattern: String)
@@ -70,6 +75,8 @@ GET           /artists/:facebookUrl/events                       @eventsDomain.E
 GET           /artists/:artistId/passedEvents                    @eventsDomain.EventController.findPassedByArtist(artistId: Long)
 GET           /artists/containing/:pattern                       @artistsDomain.ArtistController.findArtistsContaining(pattern: String)
 GET           /artists/facebookContaining/:pattern               @artistsDomain.ArtistController.getFacebookArtistsContaining(pattern: String)
+DELETE        /eventArtist                                       @artistsDomain.ArtistController.deleteEventRelation(eventId: Long, artistId: Long)
+POST          /eventArtist                                       @artistsDomain.ArtistController.saveEventRelation(eventId: Long, artistId: Long)
 
 ################################### Places ###############################################
 GET           /places                                            @placesDomain.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)
@@ -84,6 +91,8 @@ GET           /places/:placeId/events                            @eventsDomain.E
 GET           /places/:placeId/passedEvents                      @eventsDomain.EventController.findPassedByPlace(placeId: Long)
 GET           /places/nearCity/:city                             @placesDomain.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /followedPlaces                                    @placesDomain.PlaceController.getFollowedPlaces
+DELETE        /eventPlace                                        @placesDomain.PlaceController.deleteEventRelation(eventId: Long, placeId: Long)
+POST          /eventPlace                                        @placesDomain.PlaceController.saveEventRelation(eventId: Long, placeId: Long)
 
 ################################## Organizers ###############################################
 GET           /organizers                                        @organizersDomain.OrganizerController.findAllSinceOffset(offset: Long = 0, numberToReturn: Long = 1000)
@@ -99,6 +108,9 @@ GET           /organizers/:organizerId/passedEvents              @eventsDomain.E
 GET           /organizers/findNearCity/:city                     @organizersDomain.OrganizerController.findNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /organizers/findNearGeoPoint/                      @organizersDomain.OrganizerController.findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int)
 GET           /followedOrganizers                                @organizersDomain.OrganizerController.getFollowedOrganizers
+DELETE        /eventOrganizer                                    @organizersDomain.OrganizerController.deleteEventRelation(eventId: Long, organizerId: Long)
+POST          /eventOrganizer                                    @organizersDomain.OrganizerController.saveEventRelation(eventId: Long, organizerId: Long)
+
 #
 ################################## Playlists ############################################
 GET           /playlists                            @playlistsDomain.PlaylistController.findByUser

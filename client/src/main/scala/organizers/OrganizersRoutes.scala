@@ -26,4 +26,10 @@ object OrganizersRoutes {
       "&offset=" + offset
 
   def getFollowed: String = "/followedOrganizers"
+
+  def deleteEventRelation(eventId: Int, organizerId: Int): String =
+    "/eventOrganizer?eventId=" + eventId + "&organizerId=" + organizerId
+
+  def saveEventRelation(eventId: Int, organizerId: Int): String =
+    "/eventOrganizer?eventId=" + eventId + "&organizerId=" + organizerId
 }

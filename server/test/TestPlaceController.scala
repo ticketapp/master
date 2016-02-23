@@ -49,6 +49,9 @@ class TestPlaceController extends GlobalApplicationForControllers {
         INSERT INTO eventsplaces(eventid, placeid)
           VALUES((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT placeid FROM places WHERE name = 'Test'));
 
+        INSERT INTO eventsplaces(eventid, placeid)
+          VALUES(1, 400);
+
         INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');
         """),
       5.seconds)
@@ -75,6 +78,20 @@ class TestPlaceController extends GlobalApplicationForControllers {
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(result) mustEqual OK
+    }
+
+    "add place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.saveEventRelation(1, 300))
+      )
+      status(relation) mustEqual OK
+    }
+
+    "delete place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.deleteEventRelation(1, 400))
+      )
+      status(relation) mustEqual OK
     }
 
     "find a list of places" in {

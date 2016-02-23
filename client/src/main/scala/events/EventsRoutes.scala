@@ -16,6 +16,8 @@ object EventsRoutes {
 
   def create: String = "/events"
 
+  def update: String = "/events"
+
   def createByFacebookId(facebookId: String): String = "/events/" + facebookId
 
   def follow(eventId: Long): String = "/followedEvents?eventId=" + eventId

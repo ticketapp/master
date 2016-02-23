@@ -42,6 +42,8 @@ class TestArtistController extends GlobalApplicationForControllers {
         INSERT INTO eventsartists(eventid, artistid) VALUES
           ((SELECT eventId FROM events WHERE name = 'name0'),
            (SELECT artistid FROM artists WHERE facebookurl = 'facebookUrl00'));
+        INSERT INTO eventsartists(eventid, artistid) VALUES
+          (2, 300);
         """),
       5.seconds)
   }
@@ -86,6 +88,20 @@ class TestArtistController extends GlobalApplicationForControllers {
       distinctUUIDs mustEqual Seq.empty
     }
 
+    "add artist event relation" in {
+      val Some(relation) = route(
+        FakeRequest(artistsDomain.routes.ArtistController.saveEventRelation(1, 300))
+      )
+      status(relation) mustEqual OK
+    }
+
+    "delete artist event relation" in {
+      val Some(relation) = route(
+        FakeRequest(artistsDomain.routes.ArtistController.deleteEventRelation(2, 300))
+      )
+      status(relation) mustEqual OK
+    }
+    
     "update an artist" in {
       val artistJson = Json.parse("""{
           "id": 300,
