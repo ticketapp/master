@@ -13,6 +13,7 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 
+@js.native
 class MediaElementPlayer(id: String) extends HTMLMediaElement {
   def setSrc(url: String) = js.native
   val media: HTMLMediaElement = js.native
@@ -35,8 +36,7 @@ class PlayerService(http: HttpService) extends Service with jsonHelper {
 
   def getEventPlaylist(event: HappeningWithRelations): Future[Seq[Track]] = {
     val collectedArtists = event.artists collect {
-      case artistWithTracks if artistWithTracks.artist.hasTracks =>
-        artistWithTracks.artist
+      case artistWithTracks if artistWithTracks.artist.hasTracks => artistWithTracks.artist
     }
 
     val eventuallyEventPlaylist = collectedArtists.toSeq map { artist =>
@@ -64,6 +64,7 @@ class PlayerService(http: HttpService) extends Service with jsonHelper {
         musicPlayer.src = track.url + "?client_id=" + soundcloudClientId
         currentPlayer.pause()
         currentPlayer =  new MediaElementPlayer("#musicPlayer")
+
       case youtube if youtube == 'y' =>
         videoPlayer.src = "http://youtube.com/watch?v=" + track.url
         currentPlayer.pause()
