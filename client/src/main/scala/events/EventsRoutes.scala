@@ -12,7 +12,7 @@ object EventsRoutes {
     "/events/passedInInterval/" + hourInterval + "?offset=" + offset + "&numberToReturn=" + numberToReturn +
       "&geographicPoint=" + geographicPoint
 
-  def find(id: Long): String = "/events/" + id
+  def findById(id: Long): String = "/events/" + id
 
   def update(): String = "/events"
 

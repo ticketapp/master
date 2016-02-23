@@ -2,7 +2,7 @@ package places
 
 object PlacesRoutes {
 
-  def findById(id: Long): String = "/places/" + id
+  def findById(id: Int): String = "/places/" + id
   
   def followByPlaceId(placeId: Long): String = "places/" + placeId + "/followByPlaceId"
   

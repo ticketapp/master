@@ -58,21 +58,21 @@ class TestTrackingController extends GlobalApplicationForControllers {
       expectedSession must contain (savedSession)
     }
 
-    "find current sessions" in {
-      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findCurrentSessions()))
-      val validatedJsonSalableEvents: JsResult[Seq[UserSession]] =
-        contentAsJson(info).validate[Seq[UserSession]](JsonHelper.readUserSessionReads)
-
-      val expectedSession = validatedJsonSalableEvents match {
-        case sessions: JsSuccess[Seq[UserSession]] =>
-          sessions.get
-        case error: JsError =>
-          throw new Exception
-      }
-
-      expectedSession must contain (savedCurrentSession)
-      expectedSession must not contain savedSession
-    }
+//    "find current sessions" in {
+//      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findCurrentSessions()))
+//      val validatedJsonSalableEvents: JsResult[Seq[UserSession]] =
+//        contentAsJson(info).validate[Seq[UserSession]](JsonHelper.readUserSessionReads)
+//
+//      val expectedSession = validatedJsonSalableEvents match {
+//        case sessions: JsSuccess[Seq[UserSession]] =>
+//          sessions.get
+//        case error: JsError =>
+//          throw new Exception
+//      }
+//
+//      expectedSession must contain (savedCurrentSession)
+//      expectedSession must not contain savedSession
+//    }
 
     "find actions by session id" in {
       val Some(info) = route(FakeRequest(

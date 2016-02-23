@@ -1,6 +1,5 @@
 package places
 
-
 import com.greencatsoft.angularjs.core.{Scope, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import httpServiceFactory.HttpGeneralService
@@ -13,15 +12,12 @@ import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 @injectable("placesController")
-class PlacesController(scope: Scope, service: HttpGeneralService, timeout: Timeout, mdToastService: MdToastService)
-  extends AbstractController[Scope](scope) {
+class PlacesController(scope: Scope, service: HttpGeneralService, placesService: PlacesService, timeout: Timeout,
+                       mdToastService: MdToastService) extends AbstractController[Scope](scope) {
   var places: js.Any = Nil
 
-  def findById(id: Int): Unit = {
-    service.get(PlacesRoutes.findById(id.toLong: Long)) map { foundPlace =>
-      timeout(() => places = JSON.parse(foundPlace))
-    }
-  }
+  def findById(id: Int): Unit =
+    placesService.findByIdAsJson(id) map(foundPlace => timeout(() => places = js.Array(foundPlace)))
 
   def findContaining(pattern: String): Unit = {
     service.get(PlacesRoutes.findContaining(pattern: String)) map { foundPlace =>

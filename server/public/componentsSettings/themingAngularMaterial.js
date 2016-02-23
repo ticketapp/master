@@ -7,14 +7,14 @@ angular.module('themingAngularMaterial', ['ngMaterial'])
             '300': '5D6571',
             '400': '84BDEC',
             '500': '212B3A',
-            '600': '4F0029',
-            '700': '4F0029',
-            '800': '4F0029',
-            '900': 'b71c1c',
+            '600': '2C5773',
+            '700': '038D98',
+            '800': 'AFC2DF',
+            '900': 'CEE8E7',
             'A100': '84BDEC',
-            'A200': 'ff5252',
-            'A400': 'ff1744',
-            'A700': '1A8F6F',
+            'A200': 'BDCFE8',
+            'A400': 'B6BFCB',
+            'A700': '68A5FF',
             'contrastDefaultColor': 'light',    // whether, by default, text (contrast)
                                                 // on this palette should be dark or light
             'contrastDarkColors': ['50', '100', //hues which contrast should be 'dark' by default

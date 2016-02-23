@@ -1,0 +1,15 @@
+<div data-ng-controller="sellTicketController" class="sellTicketContainer">
+    <h2>{{SELL_TICKET_TITLE | translate}} {{event.event.name}}</h2>
+    <h3>{{SELL_TICKET_TITLE_1 | translate}}</h3>
+    <p>
+        {{SELL_TICKET_DESCRIPTION | translate}}
+    </p>
+    <div data-ng-repeat="tariff in tariffs">
+        {{tariff.denomination}} : {{tariff.price}} €
+    </div>
+    <md-button>Téléchargez l'application</md-button>
+    ou <a>Connetez-vous</a>
+</div>
+
+<style>
+</style>

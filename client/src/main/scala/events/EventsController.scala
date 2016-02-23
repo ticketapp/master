@@ -5,19 +5,17 @@ import com.greencatsoft.angularjs.{AbstractController, injectable}
 import geolocation.GeolocationService
 import httpServiceFactory.HttpGeneralService
 import materialDesign.MdToastService
-import upickle.default._
 import utilities.jsonHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 @injectable("eventsController")
 class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout,
-                       geolocationService: GeolocationService, mdToast: MdToastService)
+                       geolocationService: GeolocationService, mdToast: MdToastService, eventsService: EventsService)
       extends AbstractController[EventsScope](eventScope) with jsonHelper {
 
   var initLat =  0.0
@@ -45,11 +43,8 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
     }
   }
 
-  def findById(id: Int): Unit = {
-    service.get(EventsRoutes.find(id)) map { foundEvent =>
-      timeout(() => eventScope.events = js.Array(read[HappeningWithRelations](foundEvent)))
-    }
-  }
+  def findById(id: Int): Unit =
+    eventsService.findByIdAsJson(id) map(event => timeout(() => eventScope.events = js.Array(event)))
 
   def findNearActualPosition(offset: Int, numberToReturn: Int): Unit = {
     geolocationService.getUserGeolocation map { geographicPoint =>

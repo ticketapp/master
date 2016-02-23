@@ -1,13 +1,14 @@
+#ccb1 {
+  position: absolute;
+  right: 22px;
+  bottom: 8px;
+  z-index: 1;
+}
+
 .chat-form {
   z-index: 999;
 }
 
-#ccb1 {
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-  z-index: 1;
-}
 .close-icon {
   float: right;
 }
@@ -17,6 +18,7 @@ contact-component > div.full {
   animation-name: zoomIn;
   box-shadow: -1px 0px 5px 0px #888888;
   height: 100%;
+  z-index: 1000000000;
 }
 
 .contact-button {
@@ -166,3 +168,13 @@ contact-component > div.full {
   width: 48px;
 }
 
+.square-validation-image {
+  height: 37px;
+  width: 37px;
+}
+
+.square-validation-image-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

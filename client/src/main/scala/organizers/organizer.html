@@ -1,0 +1,29 @@
+<div data-ng-controller="organizerController">
+
+    <img class="width100p"
+         data-ng-src="{{ organizer.organizer.imagePath }}"
+         data-on-error-src="assets/images/caroussel1.png"
+         data-ng-if="organizer.organizer.imagePath"/>
+    <img data-ng-src="assets/images/caroussel1.gif" data-ng-if="!organizer.organizer.imagePath"/>
+
+    <div class="column large-12">
+        <h2 class="float-left marginTop0">
+            {{organizer.organizer.name}}
+        </h2>
+    </div>
+
+    <div id="description" data-ng-bind-html="organizer.organizer.description">
+    </div>
+
+    <div data-ng-if="events || pastEvents">
+        <event-and-past-events-tabs>
+
+        </event-and-past-events-tabs>
+    </div>
+
+    <stylized-map ng-if="organizer.place.geographicPoint && place.place.geographicPoint != 'POINT (-84 30)'"
+                  ng-init="geographicPoint = (place.place.geographicPoint | geographicPointRefactoringFilter)"
+                  class="organizer-map">
+
+    </stylized-map>
+</div>

@@ -1,6 +1,5 @@
 package httpServiceFactory
 
-
 import com.greencatsoft.angularjs.core.HttpService
 import com.greencatsoft.angularjs.{Factory, Service, injectable}
 import materialDesign.MdToastService
@@ -12,32 +11,26 @@ import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExport
 
-
 @injectable("httpGeneralService")
 class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Service {
   require(http != null, "Missing argument 'http'.")
 
-
   val errors = (error: Any, status: Int) => {
-    var message = ""
-    status match {
-      case 401 =>
-        message = "Unauthorized"
-      case 404 =>
-        message = "Not found"
+    val message = status match {
+      case 401 => "Unauthorized"
+      case 404 => "Not found"
     }
+
     val toast = mdToast.simple(message)
     mdToast.show(toast)
-    console.error(s"An error has occured: $error")
+    console.error(s"An error has occurred: $error")
   }
 
   @JSExport
   def get(url: String): Future[String] = {
     val getFuture = http.get[js.Any](url)
     getFuture.error(errors)
-    getFuture.map { a =>
-      JSON.stringify(a)
-    }
+    getFuture.map { response => JSON.stringify(response) }
   }
 
   def post(url: String): Future[String] = {

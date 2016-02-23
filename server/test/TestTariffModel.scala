@@ -16,14 +16,20 @@ class TestTariffModel extends GlobalApplicationForModels {
 
     "find prices" in {
       tariffMethods.findPricesInDescription(None) mustBe None
-      tariffMethods.findPricesInDescription(Some("ion no no 6€ jlk ljk klj klj 7€")) mustBe Some("6.0-7.0")
-      tariffMethods.findPricesInDescription(Some("ion no no 7* / 9 €  jlk ljk klj klj")) mustBe Some("9.0-9.0")
-      tariffMethods.findPricesInDescription(Some("ion no no 6€ jlk ljk klj klj 145€ dsq q dqsdqsd q 4€")) mustBe Some("4.0-145.0")
-      tariffMethods.findPricesInDescription(Some("ion no no 6€ jlk ljk klj klj 7€ dsq q dqsdqsd q 4€/8€ qsdqsd")) mustBe Some("4.0-8.0")
-      tariffMethods.findPricesInDescription(Some("ion no no 6€ jlk ljk klj klj 3  € dsq q dqsdqsd q 4€/8 € qsdqsd")) mustBe Some("3.0-8.0")
-      tariffMethods.findPricesInDescription(Some("ion no no 6.8€ jlk ljk klj klj 3,45 € dsq q 16 dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.45-6.8")
-      tariffMethods.findPricesInDescription(Some("ion no no 6.8 € jlk ljk klj klj 3.11 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.11-6.8")
-      tariffMethods.findPricesInDescription(Some("ion no no 15€/10€/7.5€ jlk ljk klj klj dsq q dqsdqsd q  qsdqsd")) mustBe Some("7.5-15.0")
+      tariffMethods.findPricesInDescription(Some("ion no no 6€ jlk ljk klj klj 7€")) mustBe Some("6-7")
+      tariffMethods.findPricesInDescription(Some("ion no no 7* / 9 €  jlk ljk klj klj")) mustBe Some("9-9")
+      tariffMethods.findPricesInDescription(
+        Some("ion no no 6€ jlk ljk klj klj 145€ dsq q dqsdqsd q 4€")) mustBe Some("4-145")
+      tariffMethods.findPricesInDescription(
+        Some("ion no no 6€ jlk ljk klj klj 7€ dsq q dqsdqsd q 4€/8€ qsdqsd")) mustBe Some("4-8")
+      tariffMethods.findPricesInDescription(
+        Some("ion no no 6€ jlk ljk klj klj 3  € dsq q dqsdqsd q 4€/8 € qsdqsd")) mustBe Some("3-8")
+      tariffMethods.findPricesInDescription(
+        Some("ion no no 6.8€ jlk ljk klj klj 3,45 € dsq q 16 dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.45-6.8")
+      tariffMethods.findPricesInDescription(
+        Some("ion no no 6.8 € jlk ljk klj klj 3.11 € dsq q dqsdqsd q 4€/5 € qsdqsd")) mustBe Some("3.11-6.8")
+      tariffMethods.findPricesInDescription(
+        Some("ion no no 15€/10€/7.5€ jlk ljk klj klj dsq q dqsdqsd q  qsdqsd")) mustBe Some("7.5-15")
     }
 
     "find ticket seller" in {

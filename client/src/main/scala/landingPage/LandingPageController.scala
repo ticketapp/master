@@ -14,5 +14,4 @@ class LandingPageController(landingPageScope: LandingPageScope, service: HttpGen
   extends AbstractController[LandingPageScope](landingPageScope) {
 
   scope.events = new js.Array[Happening]
-
 }

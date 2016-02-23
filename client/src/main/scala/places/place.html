@@ -1,0 +1,41 @@
+<div data-ng-controller="placeController">
+
+    <stylized-map ng-if="place.place.geographicPoint && place.place.geographicPoint != 'POINT (-84 30)'"
+                  ng-init="geographicPoint = (place.place.geographicPoint | geographicPointRefactoringFilter)"
+                  class="place-map">
+    </stylized-map>
+
+    <div class="place-image-container" data-ng-if="place.place.geographicPoint == 'POINT (-84 30)'">
+        <img class="place-image"
+             data-ng-src="{{ place.place.imagePath }}"
+             data-on-error-src="assets/images/caroussel1.png"
+             data-ng-if="place.place.imagePath"/>
+        <img class="place-image"
+             data-ng-src="assets/images/caroussel1.gif"
+             data-ng-if="!place.place.imagePath"/>
+    </div>
+
+    <div data-ng-if="place.maybeAddress">
+        <i class="fa fa-map-marker fa-2x marginLeft20">
+        </i>
+        <b>
+            {{ place.maybeAddress.street }} {{ place.maybeAddress.zip }} {{ place.maybeAddress.city }}
+        </b>
+    </div>
+
+    <div class="column small-12">
+        <h1 class="float-left place-name">
+            {{ place.place.name }}
+        </h1>
+    </div>
+
+    <div id="description" data-ng-bind-html="place.place.description">
+    </div>
+
+    <div data-ng-if="events || pastEvents">
+        <event-and-past-events-tabs>
+
+        </event-and-past-events-tabs>
+    </div>
+
+</div>
