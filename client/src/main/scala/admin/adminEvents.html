@@ -6,7 +6,8 @@
              data-ng-repeat="event in events">
             <a class="column" data-ng-click="changeEvent = !changeEvent">{{event.event.name}}</a>
             <div data-ng-show="changeEvent">
-                <form ng-submit="controller.update(event.event)">
+                <md-button class="column" ng-click="updateEvent = !updateEvent">UpdateEvent</md-button>
+                <form ng-submit="controller.update(event.event)" data-ng-show="updateEvent">
                     <md-input-container class="column">
                         <label>name</label>
                         <input ng-model="event.event.name">
@@ -49,6 +50,31 @@
                     </md-input-container>
                     <md-button type="submit">Submit</md-button>
                 </form>
+                <md-button class="column" data-ng-click="changePlaces = !changePlaces">Places</md-button>
+                <div data-ng-show="changePlaces" data-ng-controller="placesController">
+                    <a data-ng-repeat="place in event.places"
+                            data-ng-click="controller.deleteEventRelation(event.event.id, place.place.id)">
+                        {{place.place.name}}
+                    </a>
+                    <md-autocomplete md-search-text-change="controller.findContaining(ctrl.searchText)"
+                                     md-search-text="ctrl.searchText"
+                                     md-selected-item-change="controller.saveEventRelation(event.event.id, place.place.id)"
+                                     md-items="place in controller.places"
+                                     md-item-text="place.place.name"
+                                     md-min-length="0"
+                                     class="column"
+                                     placeholder="Search place">
+                        <md-item-template>
+                            <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
+                                {{place.place.name}}
+                            </span>
+                        </md-item-template>
+                        <md-not-found>
+                            No states matching "{{ctrl.searchText}}" were found.
+                        </md-not-found>
+
+                    </md-autocomplete>
+                </div>
             </div>
         </div>
     </div>

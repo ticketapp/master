@@ -23,4 +23,10 @@ object PlacesRoutes {
     "/places?geographicPoint=" + geographicPoint + "&numberToReturn=" + numberToReturn + "&offset=" + offset
   
   def getFollowed: String = "/places/followed/"
+
+  def deleteEventRelation(eventId: Int, placeId: Int): String =
+    "/eventPlace?eventId=" + eventId + "&placeId=" + placeId
+
+  def saveEventRelation(eventId: Int, placeId: Int): String =
+    "/eventPlace?eventId=" + eventId + "&placeId=" + placeId
 }

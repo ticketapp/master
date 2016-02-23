@@ -7,7 +7,7 @@ import application.User
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import database.UserPlaceRelation
+import database.{EventPlaceRelation, UserPlaceRelation}
 import json.JsonHelper._
 import org.postgresql.util.PSQLException
 import play.api.Logger
@@ -160,6 +160,18 @@ class PlaceController @Inject() (ws: WSClient,
   def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action.async {
     placeMethods.findNearCity(city, numberToReturn, offset) map { places =>
       Ok(Json.toJson(places))
+    }
+  }
+
+  def deleteEventRelation(eventId: Long, placeId: Long) = Action.async {
+    placeMethods.deleteEventRelation(EventPlaceRelation(eventId, placeId)) map { result =>
+      Ok(Json.toJson(result))
+    }
+  }
+
+  def saveEventRelation(eventId: Long, placeId: Long) = Action.async {
+    placeMethods.saveEventRelation(EventPlaceRelation(eventId, placeId)) map { result =>
+      Ok(Json.toJson(result))
     }
   }
 }

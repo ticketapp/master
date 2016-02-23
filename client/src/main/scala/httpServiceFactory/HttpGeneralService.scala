@@ -60,6 +60,12 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
     postFuture.map(JSON.stringify(_))
   }
 
+  def delete(url: String): Future[String] = {
+    val deleteFuture = http.delete[js.Any](url)
+    deleteFuture.error(errors)
+    deleteFuture.map(JSON.stringify(_))
+  }
+
 }
 @injectable("httpGeneralService")
 class HttpGeneralServiceFactory(http: HttpService, mdToast: MdToastService) extends Factory[HttpGeneralService] {

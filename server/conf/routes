@@ -85,6 +85,8 @@ GET           /places/:placeId/events                            @eventsDomain.E
 GET           /places/:placeId/passedEvents                      @eventsDomain.EventController.findPassedByPlace(placeId: Long)
 GET           /places/nearCity/:city                             @placesDomain.PlaceController.findPlacesNearCity(city: String, numberToReturn: Int, offset: Int)
 GET           /places/followed/                                  @placesDomain.PlaceController.getFollowedPlaces
+DELETE        /eventPlace                                        @placesDomain.PlaceController.deleteEventRelation(eventId: Long, placeId: Long)
+POST          /eventPlace                                        @placesDomain.PlaceController.saveEventRelation(eventId: Long, placeId: Long)
 
 ################################## Organizers ###############################################
 GET           /organizers                                        @organizersDomain.OrganizerController.findAllSinceOffset(offset: Long = 0, numberToReturn: Long = 1000)
