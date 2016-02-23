@@ -1,3 +1,19 @@
+.event-min-address {
+  vertical-align: text-bottom;
+  float: left;
+}
+
+.event-min-date-and-place {
+  width: 100%;
+  float: left;
+  margin-top: -4px;
+}
+
+.event-min-place-name {
+  vertical-align: text-bottom;
+  margin-left: 5px;
+}
+
 .event-min-player {
   background: transparent;
   position: relative;
@@ -54,7 +70,7 @@
   bottom: 0;
   border-bottom: $primary-color solid 0.3em;
   padding: 1em 1em 0 1em;
-  background: transparent linear-gradient(to top, #000, #000 10%, transparent 90%) repeat scroll 0% 0%;
+  background: transparent linear-gradient(to top, black, black 10%, transparent 90%) repeat scroll 0 0;
   color: $darkGrey;
   -webkit-transition: -webkit-transform 0.35s;
   transition: transform 0.35s;
@@ -65,6 +81,17 @@
   width: 100%;
   text-transform: capitalize;
   height: 4.6em;
+}
+
+.event-min-start-date-time {
+  vertical-align: text-bottom;
+  float: left;
+  color: white;
+}
+
+.event-min-tariff {
+  float: right;
+  color: white;
 }
 
 .event-min-title span {
