@@ -6,6 +6,7 @@ import application.User
 import com.mohiva.play.silhouette.api.{Silhouette, Environment}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import com.vividsolutions.jts.geom.Geometry
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
@@ -35,7 +36,18 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
   }
 
   def findMaybeSalableEventsContaining(pattern: String) = Action.async {
-    ticketMethods.findMaybeSalableEventsByContaining(pattern) map { maybeSalableEvents =>
+    ticketMethods.findMaybeSalableEventsContaining(pattern) map { maybeSalableEvents =>
+        Ok(Json.toJson(maybeSalableEvents))
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)
+      InternalServerError(this.getClass + "findMaybeSalableEventsByContaining: " + e.getMessage)
+    }
+  }
+
+
+  def findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int) = Action.async {
+    ticketMethods.findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int) map {
+      maybeSalableEvents =>
         Ok(Json.toJson(maybeSalableEvents))
     } recover { case NonFatal(e) =>
       Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)

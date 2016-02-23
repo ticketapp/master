@@ -3,9 +3,11 @@ package ticketsDomain
 import java.util.UUID
 import javax.inject.Inject
 
+import com.vividsolutions.jts.geom.Geometry
 import database.MyPostgresDriver.api._
 import database.{MyDBTableDefinitions, MyPostgresDriver}
 import eventsDomain.Event
+import geolocation.GeographicPoint
 import org.joda.time.DateTime
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -157,7 +159,7 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
 
   def findSalableEvents: Future[Seq[SalableEvent]] = db.run(salableEvents.result)
 
-  def findMaybeSalableEventsByContaining(pattern: String): Future[Seq[MaybeSalableEvent]] = {
+  def findMaybeSalableEventsContaining(pattern: String): Future[Seq[MaybeSalableEvent]] = {
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
     val lowercasePattern = pattern.toLowerCase
@@ -182,6 +184,25 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
           }
         }
       )
+    }
+  }
+
+  def findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int): Future[Seq[MaybeSalableEvent]] = {
+    val now = DateTime.now()
+    val twelveHoursAgo = now.minusHours(12)
+    val query = for {
+      event <- (salableEvents join events on(_.eventId === _.id)).filter { salableEventWithEvent =>
+        val eventFound = salableEventWithEvent._2
+        (eventFound.endTime.nonEmpty && eventFound.endTime > now) ||
+          (eventFound.endTime.isEmpty && eventFound.startTime > twelveHoursAgo)
+      }
+      .sortBy(event => (event._2.geographicPoint <-> geographicPoint, event._2.id))
+      .drop(offset)
+      .take(numberToReturn)
+    } yield event._2
+
+    db.run(query.result) map { events =>
+      events map (event => MaybeSalableEvent(event, true))
     }
   }
 

@@ -304,7 +304,7 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
           imagePath = None),
         isSalable = false
       )
-      whenReady(ticketMethods.findMaybeSalableEventsByContaining("notPassed")) { events =>
+      whenReady(ticketMethods.findMaybeSalableEventsContaining("notPassed")) { events =>
 
         events must contain(expectedMaybeSalableEvent)
         events must contain(expectedUnSalableEvent)
