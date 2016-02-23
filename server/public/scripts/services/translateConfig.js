@@ -19,7 +19,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         ADVANCED_SEARCH_HEADER: "Advanced search",
         //Event
         UNTIL: "until",
-        BUY_PLACE_ON: "Buy place on",
+        BUY_PLACE_ON: "Buy a ticket on",
         BY: "by",
         WHO_IS_PLAYING: "Artist Lineup",
         PLAY_EVENT_PLAYLIST: "Listen the event playlist prepared by Claude",
