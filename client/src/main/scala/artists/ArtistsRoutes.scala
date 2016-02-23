@@ -28,4 +28,10 @@ object ArtistsRoutes {
   def findContaining(pattern: String): String = "/artists/containing/" + pattern
   
   def getFacebookArtistsContaining(pattern: String): String = "/artists/facebookContaining/" + pattern
+
+  def deleteEventRelation(eventId: Int, artistId: Int): String =
+    "/eventArtist?eventId=" + eventId + "&artistId=" + artistId
+
+  def saveEventRelation(eventId: Int, artistId: Int): String =
+    "/eventArtist?eventId=" + eventId + "&artistId=" + artistId
 }

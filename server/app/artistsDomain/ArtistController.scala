@@ -6,7 +6,7 @@ import application.{ThereIsNoArtistForThisFacebookIdException, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import database.UserArtistRelation
+import database.{EventArtistRelation, UserArtistRelation}
 import json.JsonHelper
 import json.JsonHelper._
 import org.postgresql.util.PSQLException
@@ -203,6 +203,18 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
       case e =>
         Logger.error("ArtistController.isArtistFollowed: ", e)
         InternalServerError
+    }
+  }
+
+  def deleteEventRelation(eventId: Long, artistId: Long) = Action.async {
+    artistMethods.deleteEventRelation(EventArtistRelation(eventId, artistId)) map { result =>
+      Ok(Json.toJson(result))
+    }
+  }
+
+  def saveEventRelation(eventId: Long, artistId: Long) = Action.async {
+    artistMethods.saveEventRelation(EventArtistRelation(eventId, artistId)) map { result =>
+      Ok(Json.toJson(result))
     }
   }
 }

@@ -84,21 +84,6 @@ class TestEventController extends GlobalApplicationForControllers {
     }
 
     "update an event" in {
-
-      /*Event(id: Option[Long] = None,
-                 facebookId: Option[String] = None,
-                 isPublic: Boolean = true,
-                 isActive: Boolean = false,
-                 name: String,
-                 geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
-                 description: Option[String] = None,
-                 startTime: DateTime,
-                 endTime: Option[DateTime] = None,
-                 ageRestriction: Int = 16,
-                 tariffRange: Option[String] = None,
-                 ticketSellers: Option[String] = None,
-                 imagePath: Option[String] = None)
-                 */
       val jsonEvent = """{
                          "id": 666,
                         "facebookId": "1111666",

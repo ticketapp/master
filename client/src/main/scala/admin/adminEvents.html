@@ -4,7 +4,9 @@
         <div class="float-left column small-12 fade md-whiteframe-z1"
              data-ng-class="{'large-12 medium-12': changeEvent, 'medium-6 large-4': !changeEvent}"
              data-ng-repeat="event in events">
-            <a class="column" data-ng-click="changeEvent = !changeEvent">{{event.event.name}}</a>
+            <a class="column" data-ng-click="changeEvent = !changeEvent">
+                {{event.event.name}} - Id: {{event.event.id}}
+            </a>
             <div data-ng-show="changeEvent">
                 <md-button class="column" ng-click="updateEvent = !updateEvent">UpdateEvent</md-button>
                 <form ng-submit="controller.update(event.event)" data-ng-show="updateEvent">
@@ -95,6 +97,30 @@
                         </md-item-template>
                         <md-not-found>
                             No states matching "{{searchOrganizer}}" were found.
+                        </md-not-found>
+                    </md-autocomplete>
+                </div>
+                <md-button class="column" data-ng-click="changeArtists = !changeArtists">Artists</md-button>
+                <div data-ng-show="changeArtists" data-ng-controller="artistsController">
+                    <a data-ng-repeat="artist in event.artists"
+                            data-ng-click="controller.deleteEventRelation(event.event.id, artist.artist.id)">
+                        {{artist.artist.name}}
+                    </a>
+                    <md-autocomplete md-search-text-change="controller.findContaining(searchArtist)"
+                                     md-search-text="searchArtist"
+                                     md-selected-item-change="controller.saveEventRelation(event.event.id, artist.artist.id)"
+                                     md-items="artist in controller.artists"
+                                     md-item-text="artist.artist.name"
+                                     md-min-length="0"
+                                     class="column"
+                                     artistholder="Search artist">
+                        <md-item-template>
+                            <span md-highlight-text="searchArtist" md-highlight-flags="^i" class="float-left">
+                                {{artist.artist.name}}
+                            </span>
+                        </md-item-template>
+                        <md-not-found>
+                            No states matching "{{searchArtist}}" were found.
                         </md-not-found>
                     </md-autocomplete>
                 </div>

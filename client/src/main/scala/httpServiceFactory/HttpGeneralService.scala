@@ -65,8 +65,8 @@ class HttpGeneralService(http: HttpService, mdToast: MdToastService) extends Ser
     deleteFuture.error(errors)
     deleteFuture.map(JSON.stringify(_))
   }
-
 }
+
 @injectable("httpGeneralService")
 class HttpGeneralServiceFactory(http: HttpService, mdToast: MdToastService) extends Factory[HttpGeneralService] {
 

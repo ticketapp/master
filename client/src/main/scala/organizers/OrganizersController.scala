@@ -49,7 +49,6 @@ class OrganizersController(scope: Scope, service: HttpGeneralService, timeout: T
     }
   }
 
-
   def deleteEventRelation(eventId: Int, organizerId: Int): Unit = {
     service.delete(OrganizersRoutes.deleteEventRelation(eventId, organizerId)) map { result =>
       val toast = mdToastService.simple("relation deleted")

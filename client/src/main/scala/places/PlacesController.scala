@@ -24,7 +24,6 @@ class PlacesController(scope: Scope, service: HttpGeneralService, timeout: Timeo
   }
 
   def findContaining(pattern: String): Unit = {
-    println(pattern)
     service.get(PlacesRoutes.findContaining(pattern: String)) map { foundPlace =>
       timeout(() => places = JSON.parse(foundPlace))
     }

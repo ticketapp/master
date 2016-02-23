@@ -71,6 +71,8 @@ GET           /artists/:facebookUrl/events                       @eventsDomain.E
 GET           /artists/:artistId/passedEvents                    @eventsDomain.EventController.findPassedByArtist(artistId: Long)
 GET           /artists/containing/:pattern                       @artistsDomain.ArtistController.findArtistsContaining(pattern: String)
 GET           /artists/facebookContaining/:pattern               @artistsDomain.ArtistController.getFacebookArtistsContaining(pattern: String)
+DELETE        /eventArtist                                       @artistsDomain.ArtistController.deleteEventRelation(eventId: Long, artistId: Long)
+POST          /eventArtist                                       @artistsDomain.ArtistController.saveEventRelation(eventId: Long, artistId: Long)
 
 ################################### Places ###############################################
 GET           /places                                            @placesDomain.PlaceController.places(geographicPoint: String, numberToReturn: Int, offset: Int)

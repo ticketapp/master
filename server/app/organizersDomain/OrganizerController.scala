@@ -7,7 +7,7 @@ import application.User
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import database.UserOrganizerRelation
+import database.{EventOrganizerRelation, UserOrganizerRelation}
 import json.JsonHelper._
 import models._
 import org.postgresql.util.PSQLException
@@ -175,6 +175,18 @@ class OrganizerController @Inject()(ws: WSClient,
             Logger.error("OrganizerController.findOrganizersNear: ", e)
             InternalServerError("OrganizerController.findOrganizersNear: " + e.getMessage)
         }
+    }
+  }
+
+  def deleteEventRelation(eventId: Long, organizerId: Long) = Action.async {
+    organizerMethods.deleteEventRelation(EventOrganizerRelation(eventId, organizerId)) map { result =>
+      Ok(Json.toJson(result))
+    }
+  }
+
+  def saveEventRelation(eventId: Long, organizerId: Long) = Action.async {
+    organizerMethods.saveEventRelation(EventOrganizerRelation(eventId, organizerId)) map { result =>
+      Ok(Json.toJson(result))
     }
   }
 }
