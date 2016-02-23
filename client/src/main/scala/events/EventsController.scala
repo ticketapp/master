@@ -4,20 +4,38 @@ import com.greencatsoft.angularjs.core.Timeout
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import geolocation.GeolocationService
 import httpServiceFactory.HttpGeneralService
-import upickle.default._
+import materialDesign.MdToastService
 import utilities.jsonHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 @injectable("eventsController")
 class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout,
-                       geolocationService: GeolocationService, eventsService: EventsService)
-    extends AbstractController[EventsScope](eventScope) with jsonHelper {
+                       geolocationService: GeolocationService, mdToast: MdToastService, eventsService: EventsService)
+      extends AbstractController[EventsScope](eventScope) with jsonHelper {
+
+  var initLat =  0.0
+  val coordinateMaxLength = 8
+  var initLng = 0.0
+
+  geolocationService.getUserGeolocation map { geolocation =>
+    timeout(() => initLat = geolocation.lat.toString.substring(0, coordinateMaxLength).toDouble)
+  }
+
+  geolocationService.getUserGeolocation map { geolocation =>
+    timeout(() => initLng = geolocation.lng.toString.substring(0, coordinateMaxLength).toDouble)
+  }
+
+  def update(event: js.Any): Unit = {
+    service.updateWithObject(EventsRoutes.update(), event) map { response =>
+      val toast = mdToast.simple("event update ok")
+      mdToast.show(toast)
+    }
+  }
 
   def findMaybeSalableEventsContaining(pattern: String): Unit = {
     service.get(EventsRoutes.findMaybeSalableEvents(pattern)) map { foundEvents =>
@@ -25,11 +43,8 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
     }
   }
 
-  def findById(id: Int): Unit = {
-    service.get(EventsRoutes.findById(id)) map { foundEvent =>
-      timeout(() => eventScope.events = js.Array(JSON.parse(foundEvent)))
-    }
-  }
+  def findById(id: Int): Unit =
+    eventsService.findByIdAsJson(id) map(event => timeout(() => eventScope.events = js.Array(event)))
 
   def findNearActualPosition(offset: Int, numberToReturn: Int): Unit = {
     geolocationService.getUserGeolocation map { geographicPoint =>
