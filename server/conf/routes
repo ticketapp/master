@@ -152,9 +152,9 @@ POST    /actions                                                             @tr
 #GET     /users/containing/:pattern                                        @controllers.UserController.findUsersContaining(pattern: String)
 #GET     /users/:userId/tools                                              @controllers.UserController.findToolsByUserId(userId: Long)
 GET           /users/geographicPoint                                         @application.UserController.getUserGeographicPoint
-#GET     /users/facebookAccessToken/                                       @controllers.UserController.findFacebookAccessToken
+POST          /users/facebookAccessToken/                                    @application.UserController.findFacebookAccessToken
 GET           /users/tracksRemoved                                           @application.UserController.getTracksRemoved
-GET           /users/isConnected                                           @application.UserController.isConnected
+POST           /users/isConnected                                           @application.UserController.isConnected
 
 ################################## Buy ticket ###########################################
 #GET           /buyTicket                                                     @others.TicketController.buyTicket

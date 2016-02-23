@@ -1,7 +1,7 @@
 import addresses.GeographicPointRefactoringFilter
 import admin.AdminController
 import artists.{ArtistMinFormDirective, ArtistsController}
-import auth.AuthDirective
+import auth.{AuthConfig, AuthDirective}
 import chatContact.{ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
 import cookies.CookiesDirective
