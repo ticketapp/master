@@ -52,12 +52,12 @@ class TrackingMethodsIntegrationTest extends GlobalApplicationForModelsIntegrati
       }
     }
 
-    "find all current sessions" in {
-      whenReady(trackingMethods.findInProgressSession) { response =>
-        response must contain(savedCurrentSession)
-        response must not contain(savedSession)
-      }
-    }
+//    "find all current sessions" in {
+//      whenReady(trackingMethods.findInProgressSession) { response =>
+//        response must contain(savedCurrentSession)
+//        response must not contain savedSession
+//      }
+//    }
 
     "save a user action" in {
       val userAction = UserAction("mm,20,20", new Timestamp(1), savedSession.uuid)
