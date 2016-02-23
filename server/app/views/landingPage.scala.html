@@ -8,15 +8,14 @@
 
         @scripts()
 
-        <title>Claude</title>
+        <title>
+            Claude
+        </title>
 
     </head>
 
-    <body ng-app="app" class="tracking">
-        <cookies class="width100p float-left">
-            {{COOKIES | translate}}
-            <a href="#/cookies">{{COOKIES_LINK | translate}}</a> <i class="fa fa-times float-right" ></i>
-        </cookies>
+    <body ng-app="app" class="tracking" ng-cloak>
+
         <md-toolbar md-scroll-shrink ng-show="false" class="ng-hide" id="playerContainer">
             <div class="md-toolbar-tools">
                 <player id="player">
@@ -49,7 +48,18 @@
                 </player>
             </div>
         </md-toolbar>
+
         <md-content>
+            <cookies class="width100p float-left marginLeft10">
+
+                {{ 'COOKIES' | translate }}
+
+                <a href="#/cookies">
+                {{ 'COOKIES_LINK' | translate }}
+                </a>
+                <i class="fa fa-times float-right marginRight20" >
+                </i>
+            </cookies>
 
             <div ng-view="" class="column large-12 padding0">
             </div>
