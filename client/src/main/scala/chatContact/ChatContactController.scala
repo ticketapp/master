@@ -15,19 +15,19 @@ case class Message(content: String, fromClient: Boolean)
 class ChatContactController(chatContactScope: ChatContactScope, httpService: HttpService, timeout: Timeout)
   extends AbstractController[ChatContactScope](chatContactScope) {
 
-  val webSocket = new dom.WebSocket("ws://localhost:9000/chatContact")
+//  val webSocket = new dom.WebSocket("ws://localhost:9000/chatContact")
 
   var areWeConnected: Boolean = false
 
   chatContactScope.messages = js.Array[Message]()
 
-  webSocket.onmessage = (message: MessageEvent) => {
-
-    timeout(() => chatContactScope.messages.push(Message(content = message.data.toString, fromClient = false)))
-  }
-
-  def send(message: String): Unit = {
-    timeout(() => scope.messages.push(Message(content = message, fromClient = true)))
-    webSocket.send(message)
-  }
+//  webSocket.onmessage = (message: MessageEvent) => {
+//
+//    timeout(() => chatContactScope.messages.push(Message(content = message.data.toString, fromClient = false)))
+//  }
+//
+//  def send(message: String): Unit = {
+//    timeout(() => scope.messages.push(Message(content = message, fromClient = true)))
+//    webSocket.send(message)
+//  }
 }
