@@ -17,8 +17,9 @@
             <md-autocomplete md-search-text-change="controller.findMaybeSalableEventsContaining(ctrl.searchText)"
                              md-search-text="$parent.ctrl.searchText"
                              md-items="event in maybeSalableEvents"
-                             md-item-text="event.display"
+                             md-item-text="event.event.name"
                              md-min-length="0"
+                             md-selected-item-change="controller.redirectSalableEvent(event)"
                              class="sell-input tracking"
                              id="li1"
                              tracker="in,li1,{{ctrl.searchText}}"
@@ -26,15 +27,11 @@
                              placeholder="{{ 'INPUT_LANDING_PAGE_PLACEHOLDER' | translate }}">
 
                 <md-item-template>
-                    <a href="#/events/{{event.event.id}}" class="float-left">
+                    <a  class="float-left">
                          <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
-                            {{event.event.name}}
+                            {{event.event.name}} <a class="float-right">{{SELL_TICKET | translate}}</a>
                          </span>
                     </a>
-                    <a data-ng-show="event.isSalable" href="#/sellTicket/{{event.event.id}}" class="float-right">
-                        {{SELL_TICKET | translate}}
-                    </a>
-                    <a data-ng-show="!event.isSalable" class="float-right">{{SELL_TICKET | translate}}</a>
                 </md-item-template>
 
                 <md-not-found>
