@@ -196,6 +196,47 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
+
+    "find salable events by geographicPoint" in {
+      val expectedMaybeSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(100),
+          facebookId = Some("facebookidattendeetest"),
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent3",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+      val geographicPoint = "-84, 30"
+      val offset = 0
+      val numberToReturn = 10
+
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.findMaybeSalableEventsNear(geographicPoint, offset: Int, numberToReturn: Int))
+      )
+
+      val validatedJsonMaybeSalableEvents: JsResult[Seq[MaybeSalableEvent]] =
+        contentAsJson(info).validate[Seq[MaybeSalableEvent]](JsonHelper.readMaybeSalableEventReads)
+
+      val maybeSalableEventsResult = validatedJsonMaybeSalableEvents match {
+        case maybeSalableEvent: JsSuccess[Seq[MaybeSalableEvent]] =>
+          maybeSalableEvent.get
+        case error: JsError =>
+          throw new Exception
+      }
+
+      maybeSalableEventsResult must contain(expectedMaybeSalableEvent)
+
+    }
+
     "find maybe salable events by containing" in {
       val expectedMaybeSalableEvent = MaybeSalableEvent(
         Event(
@@ -234,7 +275,7 @@ class TestTicketController extends GlobalApplicationForControllers {
       )
 
       val Some(info) = route(FakeRequest(
-        ticketsDomain.routes.TicketController.findMaybeSalableEventsByContaining("notPassed"))
+        ticketsDomain.routes.TicketController.findMaybeSalableEventsContaining("notPassed"))
       )
       val validatedJsonMaybeSalableEvents: JsResult[Seq[MaybeSalableEvent]] =
         contentAsJson(info).validate[Seq[MaybeSalableEvent]](JsonHelper.readMaybeSalableEventReads)

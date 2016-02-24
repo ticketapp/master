@@ -7,9 +7,9 @@ import com.vividsolutions.jts.geom.Geometry
 import database.MyPostgresDriver.api._
 import database.{MyDBTableDefinitions, MyPostgresDriver}
 import eventsDomain.Event
-import geolocation.GeographicPoint
 import org.joda.time.DateTime
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps

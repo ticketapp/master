@@ -1,5 +1,6 @@
 import java.util.UUID
 
+import com.vividsolutions.jts.geom.Geometry
 import eventsDomain.Event
 import database.MyPostgresDriver.api._
 import org.joda.time.DateTime
@@ -266,6 +267,36 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
       whenReady(ticketMethods.addSalableEvents(newSalableEvent)) { response =>
         response mustBe 1
       }
+    }
+
+    "find salable events by geographicPoint" in {
+      val expectedMaybeSalableEvent = MaybeSalableEvent(
+        Event(
+          id = Some(100),
+          facebookId = Some("facebookidattendeetest"),
+          isPublic = true,
+          isActive = true,
+          name = "notPassedEvent3",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+      val geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get
+      val offset = 0
+      val numberToReturn = 10
+
+      whenReady(ticketMethods.findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int)) {
+        events =>
+
+        events must contain(expectedMaybeSalableEvent)
+      }
+
     }
 
     "find maybe salable events by containing" in {

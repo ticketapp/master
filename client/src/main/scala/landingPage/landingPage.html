@@ -21,6 +21,7 @@
                              md-min-length="0"
                              class="sell-input tracking"
                              id="li1"
+                             ng-init="controller.findMaybeSalableEventsNearActualPosition(0, 12)"
                              tracker="in,li1,{{ctrl.searchText}}"
                              focus="{{focusSearch}}"
                              placeholder="{{ 'INPUT_LANDING_PAGE_PLACEHOLDER' | translate }}">

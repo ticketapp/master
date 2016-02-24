@@ -2,6 +2,7 @@ package ticketsDomain
 
 import javax.inject.Inject
 
+import addresses.SearchGeographicPoint
 import application.User
 import com.mohiva.play.silhouette.api.{Silhouette, Environment}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
@@ -22,7 +23,8 @@ import scala.util.{Success, Failure}
 
 class TicketController @Inject()(val messagesApi: MessagesApi,
                                  val env: Environment[User, CookieAuthenticator],
-                                 val ticketMethods: TicketMethods)
+                                 val ticketMethods: TicketMethods,
+                                  val geographicPointMethods: SearchGeographicPoint)
   extends Silhouette[User, CookieAuthenticator] {
 
 
@@ -45,7 +47,8 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
   }
 
 
-  def findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int) = Action.async {
+  def findMaybeSalableEventsNear(geographicPointString: String, offset: Int, numberToReturn: Int) = Action.async {
+    val geographicPoint = geographicPointMethods.stringToTryPoint(geographicPointString).get
     ticketMethods.findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int) map {
       maybeSalableEvents =>
         Ok(Json.toJson(maybeSalableEvents))
