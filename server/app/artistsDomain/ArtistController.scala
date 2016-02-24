@@ -40,36 +40,36 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def artistsSinceOffset(number: Int, offset: Long) =  Action.async {
+  def find(number: Int, offset: Long) =  Action.async {
     artistMethods.findSinceOffset(numberToReturn = number, offset = offset).map { artists =>
       Ok(Json.toJson(artists))
     }
   } 
 
-  def artist(id: Long) = Action.async {
+  def findById(id: Long) = Action.async {
     artistMethods.find(id).map { artist =>
       Ok(Json.toJson(artist))
     }
   }
 
-  def artistByFacebookUrl(facebookUrl: String) = Action.async {
+  def findByFacebookUrl(facebookUrl: String) = Action.async {
     artistMethods.findByFacebookUrl(facebookUrl).map { artist =>
       Ok(Json.toJson(artist))
     }
   }
 
-  def artistsByGenre(genre: String, numberToReturn: Int, offset: Int) = Action.async {
+  def findByGenre(genre: String, numberToReturn: Int, offset: Int) = Action.async {
     artistMethods.findAllByGenre(genre, offset = offset, numberToReturn = numberToReturn).map { artists =>
       Ok(Json.toJson(artists))
     }
   }
 
-  def findArtistsContaining(pattern: String) = Action.async {
+  def findContaining(pattern: String) = Action.async {
     artistMethods.findAllContaining(pattern) map { artists =>
       Ok(Json.toJson(artists)) }
   }
 
-  def createArtist = Action.async { implicit request =>
+  def create = Action.async { implicit request =>
     artistWithPatternBindingForm.bindFromRequest().fold(
       formWithErrors => {
         Logger.error(formWithErrors.errorsAsJson.toString())
@@ -104,8 +104,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
   def updateArtist() = Action.async { implicit request =>
     request.body.asJson match {
       case Some(artist) =>
-        val validatedArtist = artist.validate[Artist](JsonHelper.artistRead)
-        validatedArtist match {
+        artist.validate[Artist] match {
 
           case successArtist: JsSuccess[Artist] =>
             artistMethods.update(successArtist.get) map { response =>
@@ -123,7 +122,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def followArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
+  def followByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     Logger.info(userId.toString)
     artistMethods.followByArtistId(UserArtistRelation(userId, artistId)) map {
@@ -145,7 +144,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def unfollowArtistByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
+  def unfollowByArtistId(artistId : Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     artistMethods.unfollowByArtistId(UserArtistRelation(userId, artistId)) map {
       case 1 =>
@@ -163,7 +162,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def followArtistByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
+  def followByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     artistMethods.followByFacebookId(userId, facebookId) map {
       case 1 =>
@@ -186,8 +185,8 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def getFollowedArtists = SecuredAction.async { implicit request =>
-    artistMethods.getFollowedArtists(request.identity.uuid) map { artists =>
+  def findFollowed = SecuredAction.async { implicit request =>
+    artistMethods.findFollowedArtists(request.identity.uuid) map { artists =>
       Ok(Json.toJson(artists))
     } recover {
       case e =>
@@ -196,7 +195,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def isArtistFollowed(artistId: Long) = SecuredAction.async { implicit request =>
+  def isFollowed(artistId: Long) = SecuredAction.async { implicit request =>
     artistMethods.isFollowed(UserArtistRelation(request.identity.uuid, artistId)) map { boolean =>
       Ok(Json.toJson(boolean))
     } recover {

@@ -52,7 +52,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
   }
 
   def saveUserAction = Action.async { request =>
-    val userAction = request.body.asJson.get.validate[UserAction](userActionReads)
+    val userAction = request.body.asJson.get.validate[UserAction]
     trackingMethods.saveUserAction(userAction.get) map { userActions =>
       Ok(Json.toJson(userActions))
     } recover { case NonFatal(e) =>

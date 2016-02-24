@@ -81,8 +81,7 @@ class EventController @Inject()(ws: WSClient,
   def update() = Action.async { request =>
     request.body.asJson match {
       case Some(event) =>
-        val validatedEvent = event.validate[Event](JsonHelper.eventReads)
-        validatedEvent match {
+        event.validate[Event] match {
 
           case successEvent: JsSuccess[Event] =>
             eventMethods.update(successEvent.get) map { response =>
@@ -229,7 +228,7 @@ class EventController @Inject()(ws: WSClient,
   }
 
   def getFollowedEvents = SecuredAction.async { implicit request =>
-    eventMethods.getFollowedEvents(request.identity.uuid) map { events =>
+    eventMethods.findFollowedEvents(request.identity.uuid) map { events =>
       Ok(Json.toJson(events))
     } recover {
       case e =>

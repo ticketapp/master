@@ -31,7 +31,7 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
   }
 
   def update(event: js.Any): Unit = {
-    service.updateWithObject(EventsRoutes.update(), event) map { response =>
+    service.updateWithObject(EventsRoutes.update, event) map { response =>
       val toast = mdToast.simple("event update ok")
       mdToast.show(toast)
     }

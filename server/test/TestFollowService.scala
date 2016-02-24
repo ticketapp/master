@@ -85,7 +85,7 @@ class TestFollowService extends GlobalApplicationForModelsIntegration with Utili
     "be returned if is followed" in {
       val userUUID = UUID.fromString("a4aea509-1002-47d0-b55c-593c91cb32ae")
 
-      whenReady(artistMethods.getFollowedArtists(userUUID), timeout(Span(5, Seconds))) { artists =>
+      whenReady(artistMethods.findFollowedArtists(userUUID), timeout(Span(5, Seconds))) { artists =>
         artists map(_.artist.id) must contain allOf(Some(200), Some(1))
       }
     }
@@ -125,7 +125,7 @@ class TestFollowService extends GlobalApplicationForModelsIntegration with Utili
     }
 
     "be returned if is followed" in {
-      whenReady(eventMethods.getFollowedEvents(userUUID), timeout(Span(5, Seconds))) { response =>
+      whenReady(eventMethods.findFollowedEvents(userUUID), timeout(Span(5, Seconds))) { response =>
 
         response map(_.event.id) must contain(Some(100))
       }
@@ -249,7 +249,7 @@ class TestFollowService extends GlobalApplicationForModelsIntegration with Utili
     }
 
     "be returned if is followed" in {
-      whenReady(placeMethods.getFollowedPlaces(userUUID), timeout(Span(5, Seconds))) { response =>
+      whenReady(placeMethods.findFollowedPlaces(userUUID), timeout(Span(5, Seconds))) { response =>
         response map {
           _.place.id
         } must contain(Some(100))
@@ -276,7 +276,7 @@ class TestFollowService extends GlobalApplicationForModelsIntegration with Utili
     "be returned if is followed" in {
       val trackId = UUID.fromString("35894e56-08d1-4c1f-b3e4-466c069d15ed")
       whenReady(trackMethods.followByTrackId(UserTrackRelation(userUUID, trackId)), timeout(Span(5, Seconds))) { response =>
-        whenReady(trackMethods.getFollowedTracks(userUUID), timeout(Span(5, Seconds))) { response =>
+        whenReady(trackMethods.findFollowedTracks(userUUID), timeout(Span(5, Seconds))) { response =>
           response map {
             _.track.uuid
           } must contain(trackId)

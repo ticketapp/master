@@ -57,7 +57,7 @@ class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
     }
 
     "get his followed places" in {
-      whenReady(placeMethods.getFollowedPlaces(userUUID), timeout(Span(5, Seconds))) { followedPlaces =>
+      whenReady(placeMethods.findFollowedPlaces(userUUID), timeout(Span(5, Seconds))) { followedPlaces =>
 
         followedPlaces.map (_.place.id) should contain (Some(400))
       }
@@ -86,7 +86,7 @@ class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
               response mustBe 1
 
-            whenReady(organizerMethods.getFollowedOrganizers(uuid), timeout(Span(5, Seconds))) { organizers =>
+            whenReady(organizerMethods.findFollowedOrganizers(uuid), timeout(Span(5, Seconds))) { organizers =>
 
                 organizers must contain (savedOrganizer)
             }
