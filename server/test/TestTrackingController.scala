@@ -61,6 +61,13 @@ class TestTrackingController extends GlobalApplicationForControllers {
       expectedSession must contain (savedSession)
     }
 
+    "return status forbidden if user try to find sessions" in {
+      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findSessions())
+                              .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
 //    "find current sessions" in {
 //      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findCurrentSessions()))
 //      val validatedJsonSalableEvents: JsResult[Seq[UserSession]] =
@@ -90,6 +97,14 @@ class TestTrackingController extends GlobalApplicationForControllers {
       }
 
       expectedAction must contain (savedAction)
+    }
+
+    "return status forbidden if user try to find actions by session id" in {
+      val Some(info) = route(FakeRequest(
+        trackingDomain.routes.TrackingController.findActionsBySessionId(savedSession.uuid.toString))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
     }
 
     "save a session" in {

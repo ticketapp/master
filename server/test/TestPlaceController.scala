@@ -80,6 +80,26 @@ class TestPlaceController extends GlobalApplicationForControllers {
       status(result) mustEqual OK
     }
 
+    "return status forbidden if user try to create a place with an address" in {
+      val jsonPlace =
+        """{
+          "name": "PlaceTest", "geographicPoint": "4.2,4.3", "facebookId": "111",
+          "address":
+            {
+              "street": "tamere",
+              "city": "tonpere",
+              "zip": "69000",
+              "geographicPoint": "5.6,5.4"
+            }
+          }"""
+
+      val Some(result) = route(FakeRequest(placesDomain.routes.PlaceController.createPlace())
+        .withJsonBody(Json.parse(jsonPlace))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(result) mustEqual FORBIDDEN
+    }
+
     "add place event relation" in {
       val Some(relation) = route(
         FakeRequest(placesDomain.routes.PlaceController.saveEventRelation(1, 300))
@@ -88,12 +108,28 @@ class TestPlaceController extends GlobalApplicationForControllers {
       status(relation) mustEqual OK
     }
 
+    "return status forbidden if user try to add place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.saveEventRelation(1, 300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+      status(relation) mustEqual FORBIDDEN
+    }
+
     "delete place event relation" in {
       val Some(relation) = route(
         FakeRequest(placesDomain.routes.PlaceController.deleteEventRelation(1, 400))
         .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       status(relation) mustEqual OK
+    }
+
+    "return status forbidden if user try to delete place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.deleteEventRelation(1, 400))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+      status(relation) mustEqual FORBIDDEN
     }
 
     "find a list of places" in {

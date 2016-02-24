@@ -74,6 +74,40 @@ class TestEventController extends GlobalApplicationForControllers {
       status(result1) mustEqual OK
     }
 
+    "return forbidden when a user create an event" in {
+      val jsonEvent = """{
+                        "facebookId": "1111",
+                        "name": "EventTest1",
+                        "geographicPoint": "4.2,4.3",
+                        "description": "desc",
+                        "startTime": "2025-11-24 12:00",
+                        "endTime": "2115-10-24 12:00",
+                        "ageRestriction": 1
+                      }"""
+
+      val jsonPassedEvent = """{
+                              "facebookId": "11121",
+                              "name": "EventPassedTest",
+                              "geographicPoint": "4.2,4.3",
+                              "description": "desc",
+                              "startTime": "2015-10-24 12:00",
+                              "endTime": "2015-10-24 16:00",
+                              "ageRestriction": 1
+                            }"""
+
+      val Some(result) = route(FakeRequest(eventsDomain.routes.EventController.createEvent())
+        .withJsonBody(Json.parse(jsonEvent))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      val Some(result1) = route(FakeRequest(eventsDomain.routes.EventController.createEvent())
+        .withJsonBody(Json.parse(jsonPassedEvent))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(result) mustEqual FORBIDDEN
+      status(result1) mustEqual FORBIDDEN
+    }
+
+
     "find a list of events" in {
       val Some(events) = route(
         FakeRequest(
@@ -104,6 +138,29 @@ class TestEventController extends GlobalApplicationForControllers {
       )
 
       status(events) mustEqual OK
+    }
+
+    "return forbidden if an user try to update an event" in {
+      val jsonEvent = """{
+                         "id": 666,
+                        "facebookId": "1111666",
+                        "isPublic": true,
+                        "isActive": true,
+                        "name": "EventUpadated",
+                        "geographicPoint": "POINT (4.2 4.3)",
+                        "description": "desc",
+                        "startTime": 1,
+                        "endTime": 2,
+                        "ageRestriction": 1
+                      }"""
+      val Some(events) = route(
+        FakeRequest(
+          eventsDomain.routes.EventController.update())
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+          .withJsonBody(Json.parse(jsonEvent))
+      )
+
+      status(events) mustEqual FORBIDDEN
     }
 
     "find a list of event containing" in {

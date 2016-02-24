@@ -101,12 +101,31 @@ class TestArtistController extends GlobalApplicationForControllers {
       status(relation) mustEqual OK
     }
 
+
+    "return status forbiden when a connected user trie to add an artist-event relation" in {
+      val Some(result) = route(
+        FakeRequest(artistsDomain.routes.ArtistController.saveEventRelation(300, 300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+
+      status(result) mustEqual FORBIDDEN
+    }
+
     "delete artist event relation" in {
       val Some(relation) = route(FakeRequest(
         artistsDomain.routes.ArtistController.deleteEventRelation(eventId = 200, artistId = 300))
         .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(relation) mustEqual OK
+    }
+
+    "return status forbiden when a connected user trie to delete an artist-event relation" in {
+      val Some(result) = route(
+        FakeRequest(artistsDomain.routes.ArtistController.deleteEventRelation(200, 300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+
+      status(result) mustEqual FORBIDDEN
     }
     
     "update an artist" in {
@@ -126,6 +145,28 @@ class TestArtistController extends GlobalApplicationForControllers {
         .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(result) mustEqual OK
+    }
+
+
+
+    "return status forbiden when a connected user trie to update an artist" in {
+      val artistJson = Json.parse("""{
+          "id": 200,
+          "facebookId": "10029715666",
+          "name": "waklssss",
+          "imagePath": "jskd",
+          "description": "artist.description",
+          "facebookUrl": "Updated",
+          "websites": ["hungrymusic.fr", "youtube.com/user/worakls/videos", "twitter.com/worakls","facebook.com/worakls"],
+          "hasTracks": false,
+          "likes": 1
+      }""")
+      val Some(result) = route(FakeRequest(artistsDomain.routes.ArtistController.updateArtist())
+        .withJsonBody(artistJson)
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+
+      status(result) mustEqual FORBIDDEN
     }
 
     "not create an artist twice and return an error" in {

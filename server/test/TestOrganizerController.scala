@@ -57,6 +57,22 @@ class TestOrganizerController extends GlobalApplicationForControllers {
       organizer mustEqual Organizer(id = organizer.id, facebookId = Some("111"), name = "test", verified = false)
     }
 
+    "return status forbidden if user try to create an organizer" in {
+      val Some(result) = route(FakeRequest(organizersDomain.routes.OrganizerController.create())
+        .withJsonBody(Json.parse("""{ "facebookId": 111, "name": "test" }"""))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(result) mustEqual FORBIDDEN
+    }
+
+    "return status forbidden if user try to add organizer event relation" in {
+      val Some(relation) = route(
+        FakeRequest(organizersDomain.routes.OrganizerController.saveEventRelation(1, 300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+      status(relation) mustEqual FORBIDDEN
+    }
+
     "add organizer event relation" in {
       val Some(relation) = route(
         FakeRequest(organizersDomain.routes.OrganizerController.saveEventRelation(1, 300))
@@ -65,12 +81,28 @@ class TestOrganizerController extends GlobalApplicationForControllers {
       status(relation) mustEqual OK
     }
 
+    "return status forbidden if user try to add organizer event relation" in {
+      val Some(relation) = route(
+        FakeRequest(organizersDomain.routes.OrganizerController.saveEventRelation(1, 300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+      status(relation) mustEqual FORBIDDEN
+    }
+
     "delete organizer event relation" in {
       val Some(relation) = route(
         FakeRequest(organizersDomain.routes.OrganizerController.deleteEventRelation(2, 300))
         .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       status(relation) mustEqual OK
+    }
+
+    "return status forbidden if user try to delete organizer event relation" in {
+      val Some(relation) = route(
+        FakeRequest(organizersDomain.routes.OrganizerController.deleteEventRelation(2, 300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+      status(relation) mustEqual FORBIDDEN
     }
 
     "find a list of organizers" in {
