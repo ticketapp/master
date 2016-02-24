@@ -15,7 +15,7 @@ import scala.scalajs.js.JSON
 
 @js.native
 class MediaElementPlayer(id: String) extends HTMLMediaElement {
-  def setSrc(url: String) = js.native
+  def setSrc(url: String): js.Any = js.native
   val media: HTMLMediaElement = js.native
 }
 

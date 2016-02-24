@@ -49,18 +49,18 @@
 
         <h3 class="event-title">
 
-            <b data-ng-if="!event.organizer[0]">
+            <b data-ng-if="!event.organizers[0]">
                 {{ event.event.name }}
             </b>
 
-            <span data-ng-if="event.organizer[0]">
+            <span data-ng-if="event.organizers[0]">
                 {{ (event.event.name | limitTo: 50).trim() }}{{ event.event.name.length > 50 ? '...' : '' }}
 
                 <span class="event-by">
                     {{ 'BY' | translate }}
                 </span>
 
-                <a href="#/organizers/{{ event.organizer[0].organizer.id }}">
+                <a href="#/organizers/{{ event.organizers[0].organizer.id }}">
                     {{ event.organizers[0].organizer.name }}
                 </a>
             </span>
@@ -83,16 +83,19 @@
             <div class="event-artists-container">
 
                 <div data-ng-repeat="artist in event.artists" class="event-artist-container">
-                    <img data-ng-if="event.artists[0].artist.imagePath"
+
+                    <span data-ng-if="artist.artist.imagePath"
                          class="event-artist-circle"
-                         style="background-image: url({{ event.artists[0].artist.imagePath | refactorArtistImagePathFilter }});">
-                    <img data-ng-if="!event.artists[0].artist.imagePath"
+                         style="background-image: url({{ artist.artist.imagePath | refactorArtistImagePathFilter }});">
+                    </span>
+                    <span data-ng-if="!artist.artist.imagePath"
                          class="event-artist-circle"
                          style="background-image: url(assets/images/caroussel1.png);">
+                    </span>
 
-                        <span data-ng-if="artist.artist.hasTracks" class="event-artist-play">
-                            <img src="assets/images/playCircle.png" alt="play">
-                        </span>
+                    <span data-ng-if="artist.artist.hasTracks" class="event-artist-play">
+                        <img src="assets/images/playCircle.png" alt="play">
+                    </span>
 
                     <span class="event-artist-name">
                         <b>

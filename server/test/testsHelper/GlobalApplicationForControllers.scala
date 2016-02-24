@@ -16,8 +16,8 @@ import scala.concurrent.{Await, _}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-trait GlobalApplicationForControllers
-    extends PlaySpecification with Mockito with BeforeAll with AfterAll with Context with Injectors {
+trait GlobalApplicationForControllers extends PlaySpecification with Mockito with BeforeAll with AfterAll with Context
+    with Injectors {
 
   val defaultUserUUID =  UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
 

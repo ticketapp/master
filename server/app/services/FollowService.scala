@@ -34,7 +34,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
       .delete)
 
 
-  def getFollowedArtists(userId: UUID): Future[Seq[ArtistWithWeightedGenres]]= {
+  def findFollowedArtists(userId: UUID): Future[Seq[ArtistWithWeightedGenres]]= {
     val query = for {
       artistFollowed <- artistsFollowed if artistFollowed.userId === userId
       artist <- artists joinLeft
@@ -65,7 +65,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
         eventFollowed.userId === userEventRelation.userId && eventFollowed.eventId === userEventRelation.eventId)
       .delete)
 
-  def getFollowedEvents(userId: UUID): Future[Seq[EventWithRelations] ]= {
+  def findFollowedEvents(userId: UUID): Future[Seq[EventWithRelations] ]= {
     val query = for {
       eventFollowed <- eventsFollowed if eventFollowed.userId === userId
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
@@ -102,7 +102,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
         genreFollowed.userId === userGenreRelation.userId && genreFollowed.genreId === userGenreRelation.genreId)
       .delete)
 
-  def getFollowedGenres(userId: UUID): Future[Seq[Genre] ]= {
+  def findFollowedGenres(userId: UUID): Future[Seq[Genre] ]= {
     val query = for {
       genreFollowed <- genresFollowed if genreFollowed.userId === userId
       genre <- genres if genre.id === genreFollowed.genreId
@@ -138,7 +138,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
     db.run(query.head)
   }
 
-  def getFollowedOrganizers(userId: UUID): Future[Seq[OrganizerWithAddress]]= {
+  def findFollowedOrganizers(userId: UUID): Future[Seq[OrganizerWithAddress]]= {
     val query = for {
       organizerFollowed <- organizersFollowed if organizerFollowed.userId === userId
       organizerWithAddress <- organizers joinLeft addresses on (_.addressId === _.id)
@@ -167,7 +167,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
     db.run(query.head)
   }
 
-  def getFollowedPlaces(userId: UUID): Future[Seq[PlaceWithAddress]]= {
+  def findFollowedPlaces(userId: UUID): Future[Seq[PlaceWithAddress]]= {
     val query = for {
       placeFollowed <- placesFollowed if placeFollowed.userId === userId
       place <- places joinLeft addresses on (_.addressId === _.id) if place._1.id === placeFollowed.placeId
@@ -195,7 +195,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
     db.run(query.head)
   }
 
-  def getFollowedTracks(userId: UUID): Future[Seq[TrackWithGenres]]= {
+  def findFollowedTracks(userId: UUID): Future[Seq[TrackWithGenres]]= {
     val query = for {
       trackFollowed <- tracksFollowed if trackFollowed.userId === userId
       (track, genre) <- tracks joinLeft

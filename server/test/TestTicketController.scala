@@ -234,7 +234,7 @@ class TestTicketController extends GlobalApplicationForControllers {
       )
 
       val Some(info) = route(FakeRequest(
-        ticketsDomain.routes.TicketController.findMaybeSalableEventsByContaining("notPassed"))
+        ticketsDomain.routes.TicketController.findMaybeSalableEventsContaining("notPassed"))
       )
       val validatedJsonMaybeSalableEvents: JsResult[Seq[MaybeSalableEvent]] =
         contentAsJson(info).validate[Seq[MaybeSalableEvent]](JsonHelper.readMaybeSalableEventReads)

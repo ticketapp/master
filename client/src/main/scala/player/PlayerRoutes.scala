@@ -10,5 +10,5 @@ object PlayerRoutes {
 
   def getYoutubeTrackInfo(youtubeId: String): String = "/tracks/youtubeTrackInfo/" + youtubeId
 
-  def upsertRatingForUser(): String = "/tracks/rating"
+  def upsertRatingForUser(): String = "/rating"
 }

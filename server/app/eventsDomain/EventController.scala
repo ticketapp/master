@@ -8,13 +8,15 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import database.UserEventRelation
+import json.JsonHelper
 import json.JsonHelper._
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.i18n.MessagesApi
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
+import services.LoggerHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -27,7 +29,7 @@ class EventController @Inject()(ws: WSClient,
                                 val env: Environment[User, CookieAuthenticator],
                                 socialProviderRegistry: SocialProviderRegistry,
                                 val eventMethods: EventMethods)
-    extends Silhouette[User, CookieAuthenticator] with EventFormsTrait {
+    extends Silhouette[User, CookieAuthenticator] with EventFormsTrait with LoggerHelper {
 
   def events(offset: Int, numberToReturn: Int, geographicPoint: String) = Action.async {
     geographicPointMethods.stringToTryPoint(geographicPoint) match {
@@ -73,6 +75,27 @@ class EventController @Inject()(ws: WSClient,
     eventMethods.find(id) map {
       case Some(event) => Ok(Json.toJson(event))
       case None => NotFound
+    }
+  }
+
+  def update() = Action.async { request =>
+    request.body.asJson match {
+      case Some(event) =>
+        event.validate[Event] match {
+
+          case successEvent: JsSuccess[Event] =>
+            eventMethods.update(successEvent.get) map { response =>
+              Ok(Json.toJson(response))
+            }
+
+          case error: JsError =>
+            log(error.toString)
+            Future(BadRequest("Bad event object:" + error))
+        }
+
+      case _ =>
+        log("Bad event object")
+        Future(BadRequest("Bad event object"))
     }
   }
 
@@ -205,7 +228,7 @@ class EventController @Inject()(ws: WSClient,
   }
 
   def getFollowedEvents = SecuredAction.async { implicit request =>
-    eventMethods.getFollowedEvents(request.identity.uuid) map { events =>
+    eventMethods.findFollowedEvents(request.identity.uuid) map { events =>
       Ok(Json.toJson(events))
     } recover {
       case e =>

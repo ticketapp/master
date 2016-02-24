@@ -6,24 +6,24 @@ object AdminRoutes {
   def salableEvents(eventId: Long): String = "/salableEvents?eventId=" + eventId
 
   def proposeTicket(tariffId: Long, amount: Double, qrCode: String): String =
-    "/proposed?tariffId=" + tariffId + "&amount=" + amount + "&qrCode=" + qrCode
+    "/proposedTickets?tariffId=" + tariffId + "&amount=" + amount + "&qrCode=" + qrCode
 
-  def blockTicketForUser(tariffId: Long): String = "/blockedTicket?tariffId=" + tariffId
+  def blockTicketForUser(tariffId: Long): String = "/blockedTickets?tariffId=" + tariffId
 
   def addTicketToSale(qrCode: String, eventId: Long, tariffId: Long): String =
-    "/ticketToSale?qrCode=" + qrCode + "&eventId=" + eventId + "&tariffId=" + tariffId
+    "/ticketsToSale?qrCode=" + qrCode + "&eventId=" + eventId + "&tariffId=" + tariffId
 
-  def acceptPendingTicket(pendingTicketId: Long): String = "/acceptedPendingTicket?pendingTicketId=" + pendingTicketId
+  def acceptPendingTicket(pendingTicketId: Long): String = "/acceptedPendingTickets?pendingTicketId=" + pendingTicketId
 
-  def rejectPendingTicket(pendingTicketId: Long): String = "/rejectedPendingTicket?pendingTicketId=" + pendingTicketId
+  def rejectPendingTicket(pendingTicketId: Long): String = "/rejectedPendingTickets?pendingTicketId=" + pendingTicketId
 
   def findTicketsWithStatus: String = "/tickets"
 
-  def findPendingTickets: String = "/pending"
+  def findPendingTickets: String = "/pendingTickets"
 
-  def findBoughtBills: String = "/bills/bought"
+  def findBoughtBills: String = "/boughtBills"
 
-  def findSoldBills: String = "/bills/sold "
+  def findSoldBills: String = "/soldBills"
 
   def findTariffsByEventId(eventId: Long): String = "/tariffs?eventId=" + eventId
 
