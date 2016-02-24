@@ -105,7 +105,7 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "add a salable event" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addSalableEvents(1000))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
@@ -126,14 +126,14 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "add a ticket to sell" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addTicketToSale("newTicketToSell", 100, 10000))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
 
     "find pending tickets " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findPendingTickets())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[PendingTicket]] =
         contentAsJson(info).validate[Seq[PendingTicket]](JsonHelper.readPendingTicketReads)
 
@@ -148,7 +148,7 @@ class TestTicketController extends GlobalApplicationForControllers {
     "accept pending ticket " in {
       val Some(info) = route(FakeRequest(
         ticketsDomain.routes.TicketController.acceptPendingTicket(savedPendingTicket.pendingTicketId.get))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
@@ -156,14 +156,14 @@ class TestTicketController extends GlobalApplicationForControllers {
     "reject pending ticket " in {
       val Some(info) = route(
         FakeRequest(ticketsDomain.routes.TicketController.rejectPendingTicket(savedPendingTicket.pendingTicketId.get))
-          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+          .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
 
     "find all tickets with status " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findTicketsWithStatus())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[TicketWithStatus]] =
         contentAsJson(info).validate[Seq[TicketWithStatus]](JsonHelper.readTicketWithStatusReads)
 
@@ -178,7 +178,7 @@ class TestTicketController extends GlobalApplicationForControllers {
     "find bought bills " in {
       val Some(info) = route(FakeRequest(
         ticketsDomain.routes.TicketController.findBoughtBills())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       val validatedJsonTicketsEvents: JsResult[Seq[TicketBill]] =
         contentAsJson(info).validate[Seq[TicketBill]](JsonHelper.readTicketBillReads)
@@ -193,7 +193,7 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "find sold bills " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findSoldBills())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[TicketBill]] =
         contentAsJson(info).validate[Seq[TicketBill]](JsonHelper.readTicketBillReads)
 
@@ -262,7 +262,7 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     }
 
-    "find maybe salable events by containing" in {
+    "find maybe salable events containing" in {
       val expectedMaybeSalableEvent = MaybeSalableEvent(
         Event(
           id = Some(100),

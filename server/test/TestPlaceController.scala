@@ -75,7 +75,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
 
       val Some(result) = route(FakeRequest(placesDomain.routes.PlaceController.createPlace())
         .withJsonBody(Json.parse(jsonPlace))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(result) mustEqual OK
     }
@@ -83,6 +83,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     "add place event relation" in {
       val Some(relation) = route(
         FakeRequest(placesDomain.routes.PlaceController.saveEventRelation(1, 300))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       status(relation) mustEqual OK
     }
@@ -90,6 +91,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
     "delete place event relation" in {
       val Some(relation) = route(
         FakeRequest(placesDomain.routes.PlaceController.deleteEventRelation(1, 400))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       status(relation) mustEqual OK
     }

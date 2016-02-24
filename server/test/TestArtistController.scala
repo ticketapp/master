@@ -95,14 +95,16 @@ class TestArtistController extends GlobalApplicationForControllers {
 
     "add artist event relation" in {
       val Some(relation) = route(FakeRequest(
-        artistsDomain.routes.ArtistController.saveEventRelation(eventId = 300, artistId = 300)))
+        artistsDomain.routes.ArtistController.saveEventRelation(eventId = 300, artistId = 300))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(relation) mustEqual OK
     }
 
     "delete artist event relation" in {
       val Some(relation) = route(FakeRequest(
-        artistsDomain.routes.ArtistController.deleteEventRelation(eventId = 200, artistId = 300)))
+        artistsDomain.routes.ArtistController.deleteEventRelation(eventId = 200, artistId = 300))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(relation) mustEqual OK
     }
@@ -120,7 +122,8 @@ class TestArtistController extends GlobalApplicationForControllers {
           "likes": 1
       }""")
       val Some(result) = route(FakeRequest(artistsDomain.routes.ArtistController.updateArtist())
-        .withJsonBody(artistJson))
+        .withJsonBody(artistJson)
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(result) mustEqual OK
     }

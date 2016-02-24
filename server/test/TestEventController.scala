@@ -64,11 +64,11 @@ class TestEventController extends GlobalApplicationForControllers {
 
       val Some(result) = route(FakeRequest(eventsDomain.routes.EventController.createEvent())
         .withJsonBody(Json.parse(jsonEvent))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       val Some(result1) = route(FakeRequest(eventsDomain.routes.EventController.createEvent())
         .withJsonBody(Json.parse(jsonPassedEvent))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(result) mustEqual OK
       status(result1) mustEqual OK
@@ -99,13 +99,14 @@ class TestEventController extends GlobalApplicationForControllers {
       val Some(events) = route(
         FakeRequest(
           eventsDomain.routes.EventController.update())
+          .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
           .withJsonBody(Json.parse(jsonEvent))
       )
 
       status(events) mustEqual OK
     }
 
-    "find a list of event by containing" in {
+    "find a list of event containing" in {
       val Some(events) = route(
         FakeRequest(
           eventsDomain.routes.EventController.findAllContaining(pattern = "test", geographicPoint = "4.2,4.3")))

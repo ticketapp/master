@@ -50,7 +50,7 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     "create an organizer" in {
       val Some(result) = route(FakeRequest(organizersDomain.routes.OrganizerController.create())
         .withJsonBody(Json.parse("""{ "facebookId": 111, "name": "test" }"""))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val organizer = (contentAsJson(result) \ "organizer").as[Organizer]
 
       status(result) mustEqual OK
@@ -60,6 +60,7 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     "add organizer event relation" in {
       val Some(relation) = route(
         FakeRequest(organizersDomain.routes.OrganizerController.saveEventRelation(1, 300))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       status(relation) mustEqual OK
     }
@@ -67,6 +68,7 @@ class TestOrganizerController extends GlobalApplicationForControllers {
     "delete organizer event relation" in {
       val Some(relation) = route(
         FakeRequest(organizersDomain.routes.OrganizerController.deleteEventRelation(2, 300))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       status(relation) mustEqual OK
     }

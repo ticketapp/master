@@ -43,7 +43,7 @@ class Application @Inject()(ws: WSClient,
     Ok(views.html.landingPage())
   }
 
-  def claude = Action { implicit request =>
+  def claude = SecuredAction(Administrator()) { implicit request =>
     Ok(views.html.index(false))
   }
 

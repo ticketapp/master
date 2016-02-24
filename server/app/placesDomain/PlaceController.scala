@@ -3,7 +3,7 @@ package placesDomain
 import javax.inject.Inject
 
 import addresses.{SearchGeographicPoint, AddressFormsTrait}
-import application.User
+import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
@@ -43,7 +43,7 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def createPlace = Action.async { implicit request =>
+  def createPlace = SecuredAction(Administrator()).async { implicit request =>
     placeBindingForm.bindFromRequest().fold(
       formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       place => {
@@ -169,13 +169,13 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def deleteEventRelation(eventId: Long, placeId: Long) = Action.async {
+  def deleteEventRelation(eventId: Long, placeId: Long) = SecuredAction(Administrator()).async {
     placeMethods.deleteEventRelation(EventPlaceRelation(eventId, placeId)) map { result =>
       Ok(Json.toJson(result))
     }
   }
 
-  def saveEventRelation(eventId: Long, placeId: Long) = Action.async {
+  def saveEventRelation(eventId: Long, placeId: Long) = SecuredAction(Administrator()).async {
     placeMethods.saveEventRelation(EventPlaceRelation(eventId, placeId)) map { result =>
       Ok(Json.toJson(result))
     }
