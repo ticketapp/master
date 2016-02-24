@@ -25,9 +25,24 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
         INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
            VALUES(true, true, 'name0', current_timestamp, '01010000000917F2086ECC46409F5912A0A6161540');
         INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+           VALUES(true, true, 'nearestEvent', current_timestamp, '010100000000000000000055C00000000000006E40');
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
            VALUES(true, true, 'later', timestamp WITH TIME ZONE '2040-08-24 14:00:00', '01010000000927F2086ECC46409F5912A0A6161540');
         INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
           VALUES(true, true, 'laterThanLater', timestamp WITH TIME ZONE '2042-08-24 14:00:00', '01010000000917F2086ECC46409F5912A0A6161540');
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(true, true, 'name66', timestamp WITH TIME ZONE '2042-08-24 14:00:00',
+          ST_GeomFromText('POINT(46 4)', 4326));
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(true, true, 'name4', timestamp WITH TIME ZONE '2042-08-24 14:00:00',
+          ST_GeomFromText('POINT(45 4)', 4326));
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(true, true, 'name5', timestamp WITH TIME ZONE '2042-08-24 14:00:00',
+          ST_GeomFromText('POINT(66 4)', 4326));
+        INSERT INTO events(ispublic, isactive, name, starttime, geographicpoint)
+          VALUES(true, true, 'name6', timestamp WITH TIME ZONE '2042-08-24 14:00:00',
+          ST_GeomFromText('POINT(-84 30)', 4326));
+
         INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
         INSERT INTO eventsgenres(eventid, genreid) VALUES((SELECT eventId FROM events WHERE name = 'name0'), 1);
         INSERT INTO places(placeid, name) VALUES(100, 'name0');  
@@ -303,43 +318,10 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
     "find nearest events" in {
       val here = geographicPointMethods.stringToTryPoint("45, 4").get
-      val event = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name3",
-        geographicPointMethods.stringToTryPoint("46, 4").get,
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      val event1 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name4", here,
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      val event2 = EventWithRelations(Event(None, None, isPublic = true, isActive = true, "name5",
-        geographicPointMethods.stringToTryPoint("66, 4").get,
-        Option("description3"), new DateTime(), Option(new DateTime(100000000000000L)), 16, None, None, None))
-      val event3 = EventWithRelations(
-        event = Event(
-          isPublic = true,
-          isActive = true,
-          name = "name5",
-          startTime = new DateTime(),
-          endTime = None,
-          ageRestriction = 16))
-      whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
-        whenReady(eventMethods.save(event1), timeout(Span(5, Seconds))) { savedEvent1 =>
-          whenReady(eventMethods.save(event2), timeout(Span(5, Seconds))) { savedEvent2 =>
-            whenReady(eventMethods.save(event3), timeout(Span(5, Seconds))) { savedEvent3 =>
-              whenReady(eventMethods.findNear(here, numberToReturn = 10000, offset = 0),
-                timeout(Span(5, Seconds))) { eventsSeq =>
 
-                ///////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!///////////
-//    WHY EVENTS SAVED AT BEGINNING OF FILE ARE NOT RETURNED HERE
-//                ANYWAY: foutre tous les events de ce test au début, ce ser plus clair et ça n'interferera pas avec
-                //l'autre test commenté
-                ///////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!///////////
-                eventsSeq should contain inOrder(
-                  EventWithRelations(savedEvent1),
-                  EventWithRelations(savedEvent),
-                  EventWithRelations(savedEvent2),
-                  EventWithRelations(savedEvent3))
-              }
-            }
-          }
-        }
+      whenReady(eventMethods.findNear(here, numberToReturn = 10000, offset = 0),
+        timeout(Span(5, Seconds))) { eventsSeq =>
+        eventsSeq.map(_.event.name) should contain inOrder("name4", "name66", "name5", "name6")
       }
     }
 
@@ -352,12 +334,11 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
     "find events in period near" in {
       whenReady(eventMethods.findInPeriodNear(
         hourInterval = 4380000,
-        geographicPointMethods.stringToTryPoint("45.7579555,4.8351209").get,
+        geographicPointMethods.stringToTryPoint("-84, 240").get,
         numberToReturn = 10,
         offset = 0), timeout(Span(5, Seconds))) { events =>
-//COMMENCER PAR CELUI LA CAR LES ERREURS VIENNENT DE LAUTRE TEST MAIS SONT BIZARRES
-//        events map (_.event.name) should contain inOrder("later", "name0", "laterThanLater", "nameEventRelations")
-//        events map (_.event.name) should not contain allOf("eventPassed", "eventPassedWithoutEndTime")
+        events map (_.event.name) should contain inOrder("nearestEvent" ,"name0", "later")
+        events map (_.event.name) should not contain allOf("eventPassed", "eventPassedWithoutEndTime")
 
         assert(DateTime.now.minusHours(12).compareTo(events.head.event.startTime) < 0)
       }
