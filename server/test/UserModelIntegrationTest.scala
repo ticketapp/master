@@ -20,6 +20,8 @@ class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
     Await.result(
       dbConfProvider.get.db.run(sqlu"""
         INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
+        INSERT INTO guestUsers(ip) VALUES ('127.0.0.6');
+        INSERT INTO guestUsers(ip) VALUES ('127.0.0.7');
         INSERT INTO places(placeid, name, facebookid)
           VALUES(400, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
         INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');"""),
@@ -108,15 +110,35 @@ class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
     }
 
     "save a guestUser" in {
-        whenReady(userMethods.saveGuestUser(GuestUser("127.0.0.1", None)), timeout(Span(5, Seconds))) { response =>
-          response mustBe 1
-        }
+      whenReady(userMethods.saveGuestUser(GuestUser("127.0.0.1", None)), timeout(Span(5, Seconds))) { response =>
+        response mustBe 1
+      }
     }
-    
+
+    "update a guestUser" in {
+      whenReady(userMethods.updateGuestUser(GuestUser(
+        ip = "127.0.0.7",
+        userUuid = Some(UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"))
+      )), timeout(Span(5, Seconds))) { response =>
+        response mustBe 1
+      }
+    }
+
+    "maybe link user to guestUser" in {
+      val expectedGuestUser = GuestUser(
+        ip = "127.0.0.6",
+        userUuid = Some(UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"))
+      )
+      whenReady(userMethods.maybeLinkGuestUser("127.0.0.6", UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44"))) {
+        response =>
+          response mustEqual expectedGuestUser
+      }
+    }
+
     "find a guestUser by ip" in {
-        whenReady(userMethods.findGuestUserByIp(savedIp), timeout(Span(5, Seconds))) { response =>
-          response mustBe Some(GuestUser("127.0.0.0", None))
-        }
+      whenReady(userMethods.findGuestUserByIp(savedIp), timeout(Span(5, Seconds))) { response =>
+        response mustBe Some(GuestUser("127.0.0.0", None))
+      }
     }
 
 //
