@@ -191,14 +191,15 @@ class TicketMethods @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     val now = DateTime.now()
     val twelveHoursAgo = now.minusHours(12)
     val query = for {
-      event <- (salableEvents join events on(_.eventId === _.id)).filter { salableEventWithEvent =>
-        val eventFound = salableEventWithEvent._2
-        (eventFound.endTime.nonEmpty && eventFound.endTime > now) ||
-          (eventFound.endTime.isEmpty && eventFound.startTime > twelveHoursAgo)
-      }
-      .sortBy(event => (event._2.geographicPoint <-> geographicPoint, event._2.id))
-      .drop(offset)
-      .take(numberToReturn)
+      event <- (salableEvents join events on(_.eventId === _.id))
+        .filter { salableEventWithEvent =>
+          val eventFound = salableEventWithEvent._2
+          (eventFound.endTime.nonEmpty && eventFound.endTime > now) ||
+            (eventFound.endTime.isEmpty && eventFound.startTime > twelveHoursAgo)
+        }
+        .sortBy(event => (event._2.geographicPoint <-> geographicPoint, event._2.id))
+        .drop(offset)
+        .take(numberToReturn)
     } yield event._2
 
     db.run(query.result) map { events =>

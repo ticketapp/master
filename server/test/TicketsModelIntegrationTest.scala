@@ -29,6 +29,12 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
         INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId)
           VALUES(10000, 'test', 10, TIMESTAMP WITH TIME ZONE '2040-08-24T14:00:00.000+02:00',
           TIMESTAMP WITH TIME ZONE '2040-09-24T14:00:00.000+02:00', 100);
+        INSERT INTO events(eventid, ispublic, isactive, name, geographicpoint, starttime)
+          VALUES(5000, true, true, 'salableEvent', '010100000000000000000055C00000000000006E40',
+            TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+       INSERT INTO events(eventid, ispublic, isactive, name, geographicpoint, starttime)
+        VALUES(6000, true, true, 'salableEvent', '010100000000000000000055C00000000000005E40',
+         TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
           
         INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES(1000, 'savedTicket', 100, 10000);
         INSERT INTO tickets(ticketId, qrCode, eventId, tariffId) VALUES(1100, 'savedBlockedTicket', 100, 10000);
@@ -48,7 +54,10 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
          INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
            (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10);
                                    
-         INSERT INTO salableEvents(eventId) VALUES (100);"""),
+         INSERT INTO salableEvents(eventId) VALUES (100);
+         INSERT INTO salableEvents(eventId) VALUES (5000);
+         INSERT INTO salableEvents(eventId) VALUES (6000);
+        """),
       2.seconds)
   }
 
@@ -272,12 +281,12 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
     "find salable events by geographicPoint" in {
       val expectedMaybeSalableEvent = MaybeSalableEvent(
         Event(
-          id = Some(100),
-          facebookId = Some("facebookidattendeetest"),
+          id = Some(6000),
+          facebookId = None,
           isPublic = true,
           isActive = true,
-          name = "notPassedEvent3",
-          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get,
+          name = "salableEvent",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 120").get,
           description = None,
           startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
           endTime = None,
@@ -287,14 +296,32 @@ class TicketsModelIntegrationTest extends GlobalApplicationForModelsIntegration 
           imagePath = None),
         isSalable = true
       )
-      val geographicPoint = geographicPointMethods.stringToTryPoint("-84, 30").get
+
+      val expectedMaybeSalableEvent1 = MaybeSalableEvent(
+        Event(
+          id = Some(5000),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "salableEvent",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 240").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+      val geographicPoint = geographicPointMethods.stringToTryPoint("-84, 240").get
       val offset = 0
-      val numberToReturn = 10
+      val numberToReturn = 2
 
       whenReady(ticketMethods.findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int)) {
         events =>
 
-        events must contain(expectedMaybeSalableEvent)
+        events mustBe Seq(expectedMaybeSalableEvent1, expectedMaybeSalableEvent)
       }
 
     }

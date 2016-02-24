@@ -4,27 +4,25 @@ import javax.inject.Inject
 
 import addresses.SearchGeographicPoint
 import application.User
-import com.mohiva.play.silhouette.api.{Silhouette, Environment}
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import com.vividsolutions.jts.geom.Geometry
+import json.JsonHelper._
+import org.joda.time.DateTime
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc._
-import json.JsonHelper._
-import org.joda.time.DateTime
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
-
-import scala.util.{Success, Failure}
 
 class TicketController @Inject()(val messagesApi: MessagesApi,
                                  val env: Environment[User, CookieAuthenticator],
                                  val ticketMethods: TicketMethods,
-                                  val geographicPointMethods: SearchGeographicPoint)
+                                 val geographicPointMethods: SearchGeographicPoint)
   extends Silhouette[User, CookieAuthenticator] {
 
 
