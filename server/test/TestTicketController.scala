@@ -29,6 +29,12 @@ class TestTicketController extends GlobalApplicationForControllers {
         INSERT INTO events(eventid, ispublic, isactive, name, starttime)
           VALUES(5, true, true, 'notPassedEvent',
           TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+        INSERT INTO events(eventid, ispublic, isactive, name, geographicpoint, starttime)
+          VALUES(5000, true, true, 'salableEvent', '010100000000000000000055C00000000000006E40',
+          TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+        INSERT INTO events(eventid, ispublic, isactive, name, geographicpoint, starttime)
+          VALUES(6000, true, true, 'salableEvent', '010100000000000000000055C00000000000005E40',
+          TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
 
         INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId)
           VALUES(10000, 'test', 10, TIMESTAMP WITH TIME ZONE '2040-08-24 14:00:00+02:00',
@@ -52,7 +58,10 @@ class TestTicketController extends GlobalApplicationForControllers {
         INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
          (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10);
 
-        INSERT INTO salableEvents(eventId) VALUES (100);"""),
+        INSERT INTO salableEvents(eventId) VALUES (100);
+        INSERT INTO salableEvents(eventId) VALUES (5000);
+        INSERT INTO salableEvents(eventId) VALUES (6000);
+        """),
       5.seconds)
   }
 
@@ -194,6 +203,63 @@ class TestTicketController extends GlobalApplicationForControllers {
         case error: JsError =>
           throw new Exception
       }
+    }
+
+
+    "find salable events by geographicPoint" in {
+      val expectedMaybeSalableEvent = MaybeSalableEvent(
+          Event(
+            id = Some(6000),
+            facebookId = None,
+            isPublic = true,
+            isActive = true,
+            name = "salableEvent",
+            geographicPoint = geographicPointMethods.stringToTryPoint("-84, 120").get,
+            description = None,
+            startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+            endTime = None,
+            ageRestriction = 16,
+            tariffRange = None,
+            ticketSellers = None,
+            imagePath = None),
+          isSalable = true
+        )
+
+      val expectedMaybeSalableEvent1 = MaybeSalableEvent(
+        Event(
+          id = Some(5000),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "salableEvent",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 240").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+      val geographicPoint = "-84, 240"
+      val offset = 0
+      val numberToReturn = 2
+
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.findMaybeSalableEventsNear(geographicPoint, offset: Int, numberToReturn: Int))
+      )
+
+      val validatedJsonMaybeSalableEvents: JsResult[Seq[MaybeSalableEvent]] =
+        contentAsJson(info).validate[Seq[MaybeSalableEvent]](JsonHelper.readMaybeSalableEventReads)
+
+      val maybeSalableEventsResult = validatedJsonMaybeSalableEvents match {
+        case maybeSalableEvent: JsSuccess[Seq[MaybeSalableEvent]] => maybeSalableEvent.get
+        case error: JsError => throw new Exception
+      }
+
+      maybeSalableEventsResult mustEqual Seq(expectedMaybeSalableEvent1, expectedMaybeSalableEvent)
+
     }
 
     "find maybe salable events by containing" in {

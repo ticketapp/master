@@ -22,6 +22,7 @@ GET            /admin                                           @application.App
 GET            /salableEvents                                      @ticketsDomain.TicketController.findSalableEvents()
 POST           /salableEvents                                   @ticketsDomain.TicketController.addSalableEvents(eventId: Long)
 GET            /salableEvents/containing                        @ticketsDomain.TicketController.findMaybeSalableEventsContaining(pattern: String)
+GET            /salableEventsNear                               @ticketsDomain.TicketController.findMaybeSalableEventsNear(geographicPoint: String, offset: Int, numberToReturn: Int)
 
 #################################### Tickets ###############################################
 POST            /proposedTickets                                  @ticketsDomain.TicketController.proposeTicket(tariffId: Long, amount: Double, qrCode: String)

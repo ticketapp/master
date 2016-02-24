@@ -50,6 +50,16 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
     }
   }
 
+  def findMaybeSalableEventsNearActualPosition(offset: Int, numberToReturn: Int): Unit = {
+    geolocationService.getUserGeolocation map { geographicPoint =>
+      val geoPoint = geographicPoint.lat + "," + geographicPoint.lng
+      service.get(EventsRoutes.findMaybeSalableEventsNear(geoPoint: String, offset: Int, numberToReturn: Int)) map {
+        foundEvents =>
+          timeout(() => eventScope.maybeSalableEvents = JSON.parse(foundEvents))
+      }
+    }
+  }
+
   def findById(id: Int): Unit =
     eventsService.findByIdAsJson(id) map(event => timeout(() => eventScope.events = js.Array(event)))
 

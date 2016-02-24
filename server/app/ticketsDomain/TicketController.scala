@@ -2,26 +2,27 @@ package ticketsDomain
 
 import javax.inject.Inject
 
+import addresses.SearchGeographicPoint
 import application.User
-import com.mohiva.play.silhouette.api.{Silhouette, Environment}
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import com.vividsolutions.jts.geom.Geometry
+import json.JsonHelper._
+import org.joda.time.DateTime
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc._
-import json.JsonHelper._
-import org.joda.time.DateTime
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
-
-import scala.util.{Success, Failure}
 
 class TicketController @Inject()(val messagesApi: MessagesApi,
                                  val env: Environment[User, CookieAuthenticator],
-                                 val ticketMethods: TicketMethods)
+                                 val ticketMethods: TicketMethods,
+                                 val geographicPointMethods: SearchGeographicPoint)
   extends Silhouette[User, CookieAuthenticator] {
 
 
@@ -35,7 +36,19 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
   }
 
   def findMaybeSalableEventsContaining(pattern: String) = Action.async {
-    ticketMethods.findMaybeSalableEventsByContaining(pattern) map { maybeSalableEvents =>
+    ticketMethods.findMaybeSalableEventsContaining(pattern) map { maybeSalableEvents =>
+        Ok(Json.toJson(maybeSalableEvents))
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)
+      InternalServerError(this.getClass + "findMaybeSalableEventsByContaining: " + e.getMessage)
+    }
+  }
+
+
+  def findMaybeSalableEventsNear(geographicPointString: String, offset: Int, numberToReturn: Int) = Action.async {
+    val geographicPoint = geographicPointMethods.stringToTryPoint(geographicPointString).get
+    ticketMethods.findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int) map {
+      maybeSalableEvents =>
         Ok(Json.toJson(maybeSalableEvents))
     } recover { case NonFatal(e) =>
       Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)
