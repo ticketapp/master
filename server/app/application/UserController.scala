@@ -33,6 +33,12 @@ class UserController @Inject() (ws: WSClient,
       Ok(Json.toJson(true))
   }
 
+  case class Token(token: String)
+  def findFacebookAccessToken = SecuredAction { implicit request =>
+    val token = Json.parse("""{"token": 1}""")
+      Ok(Json.toJson(token))
+  }
+
   def getUserGeographicPoint = Action.async { implicit request =>
     WS.url("http://ip-api.com/json/" + request.remoteAddress)
       .get()
