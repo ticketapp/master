@@ -1,6 +1,6 @@
 package events
 
-import com.greencatsoft.angularjs.core.Timeout
+import com.greencatsoft.angularjs.core.{Window, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import geolocation.GeolocationService
 import httpServiceFactory.HttpGeneralService
@@ -11,10 +11,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExportAll
+import upickle.default._
 
 @JSExportAll
 @injectable("eventsController")
-class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout,
+class EventsController(eventScope: EventsScope, service: HttpGeneralService, timeout: Timeout, window: Window,
                        geolocationService: GeolocationService, mdToast: MdToastService, eventsService: EventsService)
       extends AbstractController[EventsScope](eventScope) with jsonHelper {
 
@@ -35,6 +36,12 @@ class EventsController(eventScope: EventsScope, service: HttpGeneralService, tim
       val toast = mdToast.simple("event update ok")
       mdToast.show(toast)
     }
+  }
+
+  def redirectSalableEvent(maybeSalableEvent: js.Any): Unit = {
+    val event = read[MaybeSalableEvent](JSON.stringify(maybeSalableEvent))
+    if (event.isSalable) window.location.replace("#/sellTicket/" + event.event.id.get)
+    else window.location.replace("#/events/" + event.event.id.get)
   }
 
   def findMaybeSalableEventsContaining(pattern: String): Unit = {
