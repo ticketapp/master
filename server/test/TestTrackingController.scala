@@ -1,6 +1,8 @@
 import java.sql.Timestamp
 import java.util.{TimeZone, UUID}
 
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.test._
 import database.MyPostgresDriver.api._
 import json.JsonHelper
 import play.api.libs.json._
@@ -44,7 +46,8 @@ class TestTrackingController extends GlobalApplicationForControllers {
   "Tracking controller" should {
 
     "find sessions" in {
-      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findSessions()))
+      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findSessions())
+                              .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonSalableEvents: JsResult[Seq[UserSession]] =
         contentAsJson(info).validate[Seq[UserSession]](JsonHelper.readUserSessionReads)
 
@@ -56,6 +59,13 @@ class TestTrackingController extends GlobalApplicationForControllers {
       }
 
       expectedSession must contain (savedSession)
+    }
+
+    "return status forbidden if user try to find sessions" in {
+      val Some(info) = route(FakeRequest(trackingDomain.routes.TrackingController.findSessions())
+                              .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
     }
 
 //    "find current sessions" in {
@@ -76,7 +86,8 @@ class TestTrackingController extends GlobalApplicationForControllers {
 
     "find actions by session id" in {
       val Some(info) = route(FakeRequest(
-        trackingDomain.routes.TrackingController.findActionsBySessionId(savedSession.uuid.toString)))
+        trackingDomain.routes.TrackingController.findActionsBySessionId(savedSession.uuid.toString))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonSalableEvents: JsResult[Seq[UserAction]] =
         contentAsJson(info).validate[Seq[UserAction]](JsonHelper.readUserActionReads)
 
@@ -86,6 +97,14 @@ class TestTrackingController extends GlobalApplicationForControllers {
       }
 
       expectedAction must contain (savedAction)
+    }
+
+    "return status forbidden if user try to find actions by session id" in {
+      val Some(info) = route(FakeRequest(
+        trackingDomain.routes.TrackingController.findActionsBySessionId(savedSession.uuid.toString))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
     }
 
     "save a session" in {

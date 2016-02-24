@@ -105,9 +105,17 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "add a salable event" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addSalableEvents(1000))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
+    }
+
+
+    "return status forbidden if user try to add a salable event" in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addSalableEvents(1000))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
     }
 
     "propose new ticket" in {
@@ -126,14 +134,21 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "add a ticket to sell" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addTicketToSale("newTicketToSell", 100, 10000))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
 
+    "return status forbidden if user try to add a ticket to sell" in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addTicketToSale("newTicketToSell", 100, 10000))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find pending tickets " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findPendingTickets())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[PendingTicket]] =
         contentAsJson(info).validate[Seq[PendingTicket]](JsonHelper.readPendingTicketReads)
 
@@ -145,25 +160,48 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
+    "return status forbidden if user try to find pending tickets " in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findPendingTickets())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "accept pending ticket " in {
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.acceptPendingTicket(savedPendingTicket.pendingTicketId.get))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
+
+      contentAsString(info).toInt mustEqual 1
+    }
+
+    "return status forbidden if user try to accept pending ticket " in {
       val Some(info) = route(FakeRequest(
         ticketsDomain.routes.TicketController.acceptPendingTicket(savedPendingTicket.pendingTicketId.get))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      contentAsString(info).toInt mustEqual 1
+      status(info) mustEqual FORBIDDEN
     }
 
     "reject pending ticket " in {
       val Some(info) = route(
         FakeRequest(ticketsDomain.routes.TicketController.rejectPendingTicket(savedPendingTicket.pendingTicketId.get))
-          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+          .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
 
+    "return status forbidden if user try to reject pending ticket " in {
+      val Some(info) = route(
+        FakeRequest(ticketsDomain.routes.TicketController.rejectPendingTicket(savedPendingTicket.pendingTicketId.get))
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find all tickets with status " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findTicketsWithStatus())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[TicketWithStatus]] =
         contentAsJson(info).validate[Seq[TicketWithStatus]](JsonHelper.readTicketWithStatusReads)
 
@@ -175,10 +213,17 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
+    "return status forbidden if user try to find all tickets with status " in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findTicketsWithStatus())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find bought bills " in {
       val Some(info) = route(FakeRequest(
         ticketsDomain.routes.TicketController.findBoughtBills())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       val validatedJsonTicketsEvents: JsResult[Seq[TicketBill]] =
         contentAsJson(info).validate[Seq[TicketBill]](JsonHelper.readTicketBillReads)
@@ -191,9 +236,18 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
+    "return status forbidden if user try to  find bought bills " in {
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.findBoughtBills())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find sold bills " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findSoldBills())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[TicketBill]] =
         contentAsJson(info).validate[Seq[TicketBill]](JsonHelper.readTicketBillReads)
 
@@ -203,6 +257,13 @@ class TestTicketController extends GlobalApplicationForControllers {
         case error: JsError =>
           throw new Exception
       }
+    }
+
+    "return status forbidden if user try to find sold bills " in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findSoldBills())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
     }
 
 
@@ -262,7 +323,7 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     }
 
-    "find maybe salable events by containing" in {
+    "find maybe salable events containing" in {
       val expectedMaybeSalableEvent = MaybeSalableEvent(
         Event(
           id = Some(100),

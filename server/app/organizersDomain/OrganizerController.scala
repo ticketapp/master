@@ -3,7 +3,7 @@ package organizersDomain
 import javax.inject.Inject
 
 import addresses.SearchGeographicPoint
-import application.User
+import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
@@ -57,7 +57,7 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def create = Action.async { implicit request =>
+  def create = SecuredAction(Administrator()).async { implicit request =>
     organizerBindingForm.bindFromRequest().fold(
       formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       organizer => {
@@ -177,13 +177,13 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def deleteEventRelation(eventId: Long, organizerId: Long) = Action.async {
+  def deleteEventRelation(eventId: Long, organizerId: Long) = SecuredAction(Administrator()).async {
     organizerMethods.deleteEventRelation(EventOrganizerRelation(eventId, organizerId)) map { result =>
       Ok(Json.toJson(result))
     }
   }
 
-  def saveEventRelation(eventId: Long, organizerId: Long) = Action.async {
+  def saveEventRelation(eventId: Long, organizerId: Long) = SecuredAction(Administrator()).async {
     organizerMethods.saveEventRelation(EventOrganizerRelation(eventId, organizerId)) map { result =>
       Ok(Json.toJson(result))
     }

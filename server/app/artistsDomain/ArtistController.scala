@@ -2,7 +2,7 @@ package artistsDomain
 
 import javax.inject.Inject
 
-import application.{ThereIsNoArtistForThisFacebookIdException, User}
+import application.{Administrator, ThereIsNoArtistForThisFacebookIdException, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
@@ -101,7 +101,7 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  def updateArtist() = Action.async { implicit request =>
+  def updateArtist() = SecuredAction(Administrator()).async { implicit request =>
     request.body.asJson match {
       case Some(artist) =>
         artist.validate[Artist] match {
@@ -205,13 +205,13 @@ class ArtistController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def deleteEventRelation(eventId: Long, artistId: Long) = Action.async {
+  def deleteEventRelation(eventId: Long, artistId: Long) = SecuredAction(Administrator()).async {
     artistMethods.deleteEventRelation(EventArtistRelation(eventId, artistId)) map { result =>
       Ok(Json.toJson(result))
     }
   }
 
-  def saveEventRelation(eventId: Long, artistId: Long) = Action.async {
+  def saveEventRelation(eventId: Long, artistId: Long) = SecuredAction(Administrator()).async {
     artistMethods.saveEventRelation(EventArtistRelation(eventId, artistId)) map { result =>
       Ok(Json.toJson(result))
     }

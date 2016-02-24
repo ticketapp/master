@@ -2,7 +2,7 @@ package tariffsDomain
 
 import javax.inject.Inject
 
-import application.User
+import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import json.JsonHelper._
@@ -32,7 +32,8 @@ class TariffController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def save(denomination: String, eventId: Long, startTime: String, endTime: String, price: Double) = Action.async {
+  def save(denomination: String, eventId: Long, startTime: String,
+           endTime: String, price: Double) = SecuredAction(Administrator()).async {
     val tariff = Tariff(None, denomination, eventId, new DateTime(startTime), new DateTime(endTime), price)
 
     tariffMethods.save(tariff) map { response =>

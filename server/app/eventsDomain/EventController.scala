@@ -3,7 +3,7 @@ package eventsDomain
 import javax.inject.Inject
 
 import addresses.SearchGeographicPoint
-import application.User
+import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
@@ -78,7 +78,7 @@ class EventController @Inject()(ws: WSClient,
     }
   }
 
-  def update() = Action.async { request =>
+  def update() = SecuredAction(Administrator()).async { request =>
     request.body.asJson match {
       case Some(event) =>
         event.validate[Event] match {
@@ -162,7 +162,7 @@ class EventController @Inject()(ws: WSClient,
       Ok(Json.toJson(events)) }
   }
 
-  def createEvent = Action.async { implicit request =>
+  def createEvent = SecuredAction(Administrator()).async { implicit request =>
     eventBindingForm.bindFromRequest().fold(
       formWithErrors => {
         Logger.error("EventController.createEvent: " + formWithErrors.errorsAsJson)
