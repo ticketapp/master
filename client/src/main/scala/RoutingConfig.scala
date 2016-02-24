@@ -54,5 +54,10 @@ object RoutingConfig extends Config {
           route = Route(
           templateUrl = "/assets/templates/legalNotice/legalNotice.html",
           title = "legalNotice"))
+      .when(
+          path = "/CGV",
+          route = Route(
+          templateUrl = "/assets/templates/legalNotice/CGV.html",
+          title = "CGV"))
   }
 }
