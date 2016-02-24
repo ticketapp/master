@@ -58,7 +58,7 @@
                 claude: {
                     name: 'claude',
                     url: '/users/facebookAccessToken/',
-                    authorizationEndpoint: window.location.origin + '/' || window.location.protocol + '//' +
+                    authorizationEndpoint: window.location.protocol + '//' +
                     window.location.host + '/authenticate/facebook',
                     redirectUri: window.location.origin + '/' || window.location.protocol + '//' + window.location.host + '/',
                     display: 'popup',
