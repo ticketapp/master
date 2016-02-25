@@ -22,6 +22,8 @@ class TestUserController extends GlobalApplicationForControllers {
           VALUES (100, 'bank', 'desk', 'account2', '20', '077f3ea6-2272-4457-a47e-9e9111108e44');
         INSERT INTO ribs(id, bankCode, deskCode, accountNumber, ribKey, userId)
           VALUES (200, 'bank', 'desk', 'account3', '20', '077f3ea6-2272-4457-a47e-9e9111108e44');
+        INSERT INTO idCards(uuid, userId)
+          VALUES ('077f3ea6-2272-4457-a47e-9e9111108e45', '077f3ea6-2272-4457-a47e-9e9111108e44');
         INSERT INTO tracks(trackid, title, url, platform, thumbnailurl, artistfacebookurl, artistname)
           VALUES('13894e56-08d1-4c1f-b3e4-466c069d15ed', 'title0', 'url00', 'y', 'thumbnailUrl', 'facebookUrl0', 'artistName');
         INSERT INTO tracksrating(userId, trackId, reason)
@@ -151,6 +153,7 @@ class TestUserController extends GlobalApplicationForControllers {
 
       status(response) mustEqual OK
     }
+
 
   }
 }

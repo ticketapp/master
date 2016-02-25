@@ -1,11 +1,13 @@
 package userDomain
 
+import java.io.{ByteArrayOutputStream, File}
 import java.util.UUID
+import javax.imageio.ImageIO
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import play.api.Logger
+import play.api.{Play, Logger}
 import play.api.Play.current
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits._
@@ -107,9 +109,65 @@ class UserController @Inject() (ws: WSClient,
     }
   }
 
-  def createIdCard = ???
+  def createIdCard = SecuredAction.async(parse.multipartFormData) { request =>
+    val userId = request.identity.uuid
 
-  def findIdCardsByUserId = ???
+    request.body.file("picture").map { image =>
+      image.contentType match {
+        case Some(fileExtension) if fileExtension == "jpg" =>
+          val filename = UUID.randomUUID()
+          image.ref.moveTo(new File(Play.application.path.getPath + "/idCards/" + filename), replace = true)
+          userMethods.createIdCard(IdCard(filename, userId)) map { response =>
+            Ok(Json.toJson(response))
+          }
+        case _ =>
+          Future(Unauthorized("Wrong content type"))
+      }
+    }.getOrElse {
+      Future(BadRequest)
+    }
+  }
 
-  def findUsersIdCards = ???
+  def findIdCardImageForUser(uuid: String) = SecuredAction.async { request =>
+    val userUuid = request.identity.uuid
+    userMethods.findIdCardsByUserId(userUuid) map { idCards =>
+      idCards.find(_.uuid == uuid) match {
+        case Some(idCard) =>
+          getImageForUUID(uuid)
+        case _ =>
+          log("error found id card for user")
+          InternalServerError("userController.findIdCardImageForUser")
+      }
+    }
+  }
+
+  def findIdCardImages(uuid: String) = SecuredAction(Administrator()) { request =>
+    getImageForUUID(uuid)
+  }
+
+  def getImageForUUID(uuid: String): Result = {
+    val imageFile = new File(Play.application.path.getPath + "/idCards/" + uuid)
+    val image = ImageIO.read(imageFile)
+    if (imageFile.length > 0) {
+      val baos = new ByteArrayOutputStream()
+      ImageIO.write(image, "jpg", baos)
+      Ok(baos.toByteArray).as("image/jpg")
+    } else
+      log("error found image of id card for user")
+    InternalServerError("userController.findIdCardImageForUser")
+  }
+
+  def findIdCardsByUserId(userId: String) = SecuredAction(Administrator()).async { request =>
+    val userUuid = UUID.fromString(userId)
+    userMethods.findIdCardsByUserId(userUuid) map { idCards =>
+      Ok(Json.toJson(idCards))
+    }
+  }
+
+  def findUsersIdCards = SecuredAction.async { request =>
+    val userUuid = request.identity.uuid
+    userMethods.findIdCardsByUserId(userUuid) map { idCards =>
+      Ok(Json.toJson(idCards))
+    }
+  }
 }
