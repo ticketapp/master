@@ -3,7 +3,6 @@ package fillDatabase
 import javax.inject.Inject
 
 import addresses.SearchGeographicPoint
-import application.User
 import artistsDomain.ArtistMethods
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
@@ -15,6 +14,7 @@ import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.i18n.MessagesApi
 import play.api.mvc.Action
+import userDomain.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source

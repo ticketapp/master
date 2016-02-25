@@ -164,10 +164,14 @@ POST    /actions                                                             @tr
 #GET     /users/:id                                                        @controllers.UserController.user(id: Long)
 #GET     /users/containing/:pattern                                        @controllers.UserController.findUsersContaining(pattern: String)
 #GET     /users/:userId/tools                                              @controllers.UserController.findToolsByUserId(userId: Long)
-GET           /users/geographicPoint                                         @application.UserController.getUserGeographicPoint
-POST          /users/facebookAccessToken/                                    @application.UserController.findFacebookAccessToken
-GET           /users/tracksRemoved                                           @application.UserController.getTracksRemoved
-POST           /users/isConnected                                           @application.UserController.isConnected
+GET           /users/geographicPoint                                         @userDomain.UserController.getUserGeographicPoint
+POST          /users/facebookAccessToken/                                    @userDomain.UserController.findFacebookAccessToken
+GET           /users/tracksRemoved                                           @userDomain.UserController.getTracksRemoved
+POST           /users/isConnected                                           @userDomain.UserController.isConnected
+POST           /ribs                                                        @userDomain.UserController.createRib
+PUT            /ribs                                                        @userDomain.UserController.updateRib
+GET            /ribs                                                        @userDomain.UserController.findRibsByUserId(userId: String)
+GET            /users/ribs                                                  @userDomain.UserController.findUsersRibs
 
 ################################## Buy ticket ###########################################
 #GET           /buyTicket                                                     @others.TicketController.buyTicket

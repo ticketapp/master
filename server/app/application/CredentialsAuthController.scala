@@ -12,6 +12,7 @@ import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers._
 import play.api.Configuration
 import play.api.i18n.MessagesApi
+import userDomain.User
 
 import scala.language.postfixOps
 

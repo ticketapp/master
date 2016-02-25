@@ -3,12 +3,10 @@ package eventsDomain
 import javax.inject.Inject
 
 import addresses.SearchGeographicPoint
-import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import database.UserEventRelation
-import json.JsonHelper
 import json.JsonHelper._
 import org.postgresql.util.PSQLException
 import play.api.Logger
@@ -17,6 +15,7 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.LoggerHelper
+import userDomain.{Administrator, User}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

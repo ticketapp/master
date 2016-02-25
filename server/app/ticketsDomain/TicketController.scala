@@ -3,7 +3,6 @@ package ticketsDomain
 import javax.inject.Inject
 
 import addresses.SearchGeographicPoint
-import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.vividsolutions.jts.geom.Geometry
@@ -13,6 +12,7 @@ import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc._
+import userDomain.{Administrator, User}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

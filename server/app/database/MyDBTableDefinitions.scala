@@ -4,7 +4,6 @@ import java.sql.{JDBCType, Timestamp}
 import java.util.UUID
 
 import addresses.Address
-import application.GuestUser
 import artistsDomain.Artist
 import attendees.{FacebookAttendee, FacebookAttendeeEventRelation}
 import com.vividsolutions.jts.geom.Geometry
@@ -25,6 +24,7 @@ import tracksDomain.{Track, TrackRating}
 import tariffsDomain.Tariff
 import ticketsDomain._
 import tracksDomain.{TrackRating, Track}
+import userDomain.{IdCard, Rib, GuestUser}
 
 
 case class UserArtistRelation(userId: UUID, artistId: Long)
@@ -509,6 +509,34 @@ trait MyDBTableDefinitions extends DBTableDefinitions {
     def aFK = foreignKey("sessionid", sessionId, userSessions)(_.sessionUuid)
   }
   lazy val userActions = TableQuery[UserActions]
+
+  class Ribs(tag: Tag) extends Table[Rib](tag, "ribs") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def bankCode = column[String]("bankcode")
+    def deskCode = column[String]("deskcode")
+    def accountNumber = column[String]("accountnumber")
+    def ribKey = column[String]("ribkey")
+    def userId = column[UUID]("userid")
+    def creationTime = column[Timestamp]("creationtime")
+
+    def * = (id.?, bankCode, deskCode, accountNumber, ribKey, userId) <>
+      ((Rib.apply _).tupled, Rib.unapply)
+
+    def aFK = foreignKey("userid", userId, slickUsers)(_.id)
+  }
+  lazy val ribs = TableQuery[Ribs]
+
+
+  class IdCards(tag: Tag) extends Table[IdCard](tag, "idcards") {
+    def uuid = column[UUID]("uuid", O.PrimaryKey)
+    def userId = column[UUID]("userid")
+    def creationTime = column[Timestamp]("creationtime")
+
+    def * = (uuid, userId) <> ((IdCard.apply _).tupled, IdCard.unapply)
+
+    def aFK = foreignKey("userid", userId, slickUsers)(_.id)
+  }
+  lazy val idCards = TableQuery[IdCards]
 
 
   lazy val artistsFollowed = TableQuery[ArtistsFollowed]

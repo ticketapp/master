@@ -3,7 +3,6 @@ package testsHelper
 import actors.DuplicateTracksActorInstance
 import addresses.{AddressMethods, SearchGeographicPoint}
 import akka.actor.ActorSystem
-import application.UserMethods
 import artistsDomain.ArtistMethods
 import attendees.AttendeeMethods
 import eventsDomain.EventMethods
@@ -23,6 +22,7 @@ import tariffsDomain.TariffMethods
 import ticketsDomain.TicketMethods
 import trackingDomain.TrackingMethods
 import tracksDomain.{SearchSoundCloudTracks, SearchYoutubeTracks, TrackMethods, TrackRatingMethods}
+import userDomain.UserMethods
 
 
 trait Injectors {

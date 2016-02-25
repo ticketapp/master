@@ -1,6 +1,4 @@
 import java.util.UUID
-
-import application.User
 import com.mohiva.play.silhouette.api.LoginInfo
 import database.MyPostgresDriver.api._
 import genresDomain.Genre
@@ -10,6 +8,7 @@ import org.scalatest.time.{Seconds, Span}
 import playlistsDomain._
 import testsHelper.GlobalApplicationForModelsIntegration
 import tracksDomain.{Track, TrackWithGenres}
+import userDomain.User
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

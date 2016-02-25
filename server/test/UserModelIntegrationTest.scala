@@ -1,6 +1,5 @@
 import java.util.UUID
 
-import application.{GuestUser, User}
 import com.mohiva.play.silhouette.api.LoginInfo
 import database.MyPostgresDriver.api._
 import database.UserOrganizerRelation
@@ -9,6 +8,7 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.time.{Seconds, Span}
 import organizersDomain.{Organizer, OrganizerWithAddress}
 import testsHelper.GlobalApplicationForModelsIntegration
+import userDomain.{IdCard, GuestUser, Rib, User}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -17,9 +17,21 @@ import scala.language.postfixOps
 class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
   override def beforeAll(): Unit = {
     generalBeforeAll()
+    /* val rib = Rib(
+        id = None,
+        bankCode = "bank",
+        deskCode = "desk",
+        accountNumber = "account1",
+        ribKey = "20",
+        userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      )*/
     Await.result(
       dbConfProvider.get.db.run(sqlu"""
         INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
+        INSERT INTO ribs(id, bankCode, deskCode, accountNumber, ribKey, userId)
+          VALUES (100, 'bank', 'desk', 'account2', '20', '077f3ea6-2272-4457-a47e-9e9111108e44');
+        INSERT INTO idCards(uuid, userId)
+          VALUES ('077f3ea6-2272-4457-a47e-9e9111108e45', '077f3ea6-2272-4457-a47e-9e9111108e44');
         INSERT INTO places(placeid, name, facebookid)
           VALUES(400, 'testId4BecauseThereIsTRANSBORDEUR', 'facebookIdTestFollowController');
         INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');"""),
@@ -117,6 +129,72 @@ class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
         whenReady(userMethods.findGuestUserByIp(savedIp), timeout(Span(5, Seconds))) { response =>
           response mustBe Some(GuestUser("127.0.0.0", None))
         }
+    }
+
+    "create a rib" in {
+      val rib = Rib(
+        id = None,
+        bankCode = "bank",
+        deskCode = "desk",
+        accountNumber = "account1",
+        ribKey = "20",
+        userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      )
+
+      whenReady(userMethods.createRib(rib)) { resp =>
+        resp mustBe 1
+      }
+    }
+
+    "found all ribs of an user" in {
+      val expectedRib = Rib(
+        id = Some(100),
+        bankCode = "bank",
+        deskCode = "desk",
+        accountNumber = "account2",
+        ribKey = "20",
+        userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      )
+
+      whenReady(userMethods.findRibsByUserId(expectedRib.userId)) { resp =>
+        resp must contain(expectedRib)
+      }
+    }
+
+    "update a rib" in {
+      val newRib = Rib(
+        id = Some(100),
+        bankCode = "bank",
+        deskCode = "desk",
+        accountNumber = "account5",
+        ribKey = "20",
+        userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      )
+
+      whenReady(userMethods.updateRib(newRib)) { resp =>
+        resp mustBe 1
+      }
+    }
+
+    "create an idCard" in {
+      val idCard = IdCard(
+        uuid = UUID.randomUUID(),
+        userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      )
+
+      whenReady(userMethods.createIdCard(idCard)) { resp =>
+        resp mustBe 1
+      }
+    }
+
+    "found all idCards for a user" in {
+      val expectedCard = IdCard(
+        uuid = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e45"),
+        userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
+      )
+      whenReady(userMethods.findIdCardsByUserId(expectedCard.userId)) { resp =>
+        resp must contain(expectedCard)
+      }
     }
 
 //

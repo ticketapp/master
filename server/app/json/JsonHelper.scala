@@ -17,6 +17,7 @@ import tariffsDomain.Tariff
 import ticketsDomain._
 import trackingDomain.{UserAction, UserSession}
 import tracksDomain.{Track, TrackWithGenres}
+import userDomain.{Rib, FromClientRib}
 
 object JsonHelper {
 
@@ -69,6 +70,8 @@ object JsonHelper {
   //  implicit val account4686Format: Format[Account4686] = Json.format[Account4686]
 
   implicit val genreFormat = Json.format[Genre]
+  implicit val fromClientRibFormat = Json.format[FromClientRib]
+  implicit val ribFormat = Json.format[Rib]
   implicit val trackFormat: Format[Track] = Json.format[Track]
   implicit val trackWithGenresFormat: Format[TrackWithGenres] = Json.format[TrackWithGenres]
   implicit val trackWithPlaylistRankFormat = Json.format[TrackWithPlaylistRank]
@@ -109,4 +112,5 @@ object JsonHelper {
   val readTicketBillReads: Reads[Seq[TicketBill]] = Reads.seq(__.read[TicketBill])
   val readMaybeSalableEventReads: Reads[Seq[MaybeSalableEvent]] = Reads.seq(__.read[MaybeSalableEvent])
   val readTariffReads: Reads[Seq[Tariff]] = Reads.seq(__.read[Tariff])
+  val readRibReads: Reads[Seq[Rib]] = Reads.seq(__.read[Rib])
 }

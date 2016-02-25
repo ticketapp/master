@@ -3,12 +3,11 @@ package trackingDomain
 import java.sql.Timestamp
 import java.util.UUID
 import javax.inject.Inject
-
-import application.GuestUser
 import database.MyPostgresDriver.api._
 import database.{MyDBTableDefinitions, MyPostgresDriver}
 import org.joda.time.DateTime
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import userDomain.GuestUser
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

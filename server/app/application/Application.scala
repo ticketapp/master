@@ -9,6 +9,7 @@ import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.ws._
 import play.api.mvc.Action
+import userDomain.{UserMethods, Administrator, GuestUser, User}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

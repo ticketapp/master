@@ -1,8 +1,6 @@
 package testsHelper
 
 import java.util.UUID
-
-import application.User
 import com.google.inject.AbstractModule
 import com.mohiva.play.silhouette.api.{Environment, LoginInfo}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
@@ -11,6 +9,7 @@ import net.codingwell.scalaguice.ScalaModule
 import org.specs2.specification.Scope
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
+import userDomain.User
 import scala.concurrent.ExecutionContext.Implicits.global
 
 

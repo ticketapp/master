@@ -2,8 +2,6 @@ package tracksDomain
 
 import java.util.UUID
 import javax.inject.Inject
-
-import application.User
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
@@ -16,6 +14,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
+import userDomain.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

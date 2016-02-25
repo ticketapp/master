@@ -3,15 +3,15 @@ package trackingDomain
 import java.util.UUID
 import javax.inject.Inject
 
-import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import json.JsonHelper._
-import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.json._
 import play.api.mvc._
 import services.LoggerHelper
+import userDomain.{Administrator, User}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 import scala.util.control.NonFatal

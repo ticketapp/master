@@ -2,8 +2,7 @@ package placesDomain
 
 import javax.inject.Inject
 
-import addresses.{SearchGeographicPoint, AddressFormsTrait}
-import application.{Administrator, User}
+import addresses.{AddressFormsTrait, SearchGeographicPoint}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
@@ -17,6 +16,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Utilities
+import userDomain.{Administrator, User}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}

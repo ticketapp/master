@@ -2,7 +2,7 @@ package artistsDomain
 
 import javax.inject.Inject
 
-import application.{Administrator, ThereIsNoArtistForThisFacebookIdException, User}
+import application.ThereIsNoArtistForThisFacebookIdException
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
@@ -19,6 +19,7 @@ import play.api.mvc._
 import services.{LoggerHelper, Utilities}
 import trackingDomain.UserSession
 import tracksDomain.TrackMethods
+import userDomain.{Administrator, User}
 
 import scala.concurrent.Future
 import scala.language.postfixOps

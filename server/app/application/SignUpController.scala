@@ -16,6 +16,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.Action
+import userDomain.User
 
 import scala.concurrent.Future
 

@@ -1,7 +1,6 @@
 package silhouette
 
 import _root_.services.{UserService, UserServiceImplementation}
-import application.User
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services._
@@ -27,6 +26,7 @@ import play.api.Configuration
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient
+import userDomain.User
 
 /**
  * The Guice module which wires all Silhouette dependencies.

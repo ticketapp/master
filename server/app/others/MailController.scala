@@ -1,6 +1,5 @@
 package others
 
-import application.User
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
@@ -15,6 +14,7 @@ import com.mohiva.play.silhouette.api.{ Environment, LogoutEvent, Silhouette }
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import play.api.i18n.MessagesApi
+import userDomain.User
 
 class MailController @Inject()(ws: WSClient,
                                val messagesApi: MessagesApi,

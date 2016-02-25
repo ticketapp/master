@@ -301,6 +301,21 @@ CREATE TABLE userActions (
   sessionId                 UUID REFERENCES userSessions(id)
 );
 
+CREATE TABLE ribs (
+  id                        SERIAL PRIMARY KEY,
+  bankCode                  VARCHAR(255) NOT NULL,
+  deskCode                  VARCHAR(255) NOT NULL,
+  accountNumber             VARCHAR(255) NOT NULL UNIQUE,
+  ribKey                    VARCHAR(255) NOT NULL,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  creationTime              TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
+);
+
+CREATE TABLE idCards (
+  uuid                      UUID PRIMARY KEY,
+  userId                    UUID REFERENCES users (userId) NOT NULL,
+  creationTime              TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
+);
 
 CREATE TABLE issues (
   issueId                   SERIAL PRIMARY KEY,
@@ -652,6 +667,8 @@ DROP TABLE IF EXISTS userActions;
 DROP TABLE IF EXISTS userSessions;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS guestUsers;
+DROP TABLE IF EXISTS ribs;
+DROP TABLE IF EXISTS idCards;
 DROP TABLE IF EXISTS tariffsBlocked;
 DROP TABLE IF EXISTS tariffs;
 DROP TABLE IF EXISTS bank;
