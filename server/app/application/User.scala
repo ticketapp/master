@@ -14,6 +14,7 @@ import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class User(uuid: UUID,
@@ -39,9 +40,29 @@ class UserMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   implicit val userWrites = Json.writes[User]
 
+
+  def maybeLinkGuestUser(ip: String, uUID: UUID): Future[GuestUser] = findGuestUserByIp(ip) flatMap {
+    case Some(guestUser) =>
+      guestUser.userUuid match {
+        case Some(uuid) =>
+          Future(guestUser)
+
+        case _ =>
+          val linkedGuestUser = guestUser.copy(userUuid = Some(uUID))
+          updateGuestUser(linkedGuestUser) map(_ => linkedGuestUser)
+    }
+
+    case _ =>
+      val newGuestUser = GuestUser(ip, Some(uUID))
+      saveGuestUser(newGuestUser) map(_ => newGuestUser)
+  }
+
   def findGuestUserByIp(ip: String): Future[Option[GuestUser]] = db.run(guestUsers.filter(_.ip === ip).result.headOption)
 
   def saveGuestUser(guestUser: GuestUser): Future[Int] = db.run(guestUsers += guestUser)
+
+  def updateGuestUser(guestUser: GuestUser): Future[Int] =
+    db.run(guestUsers.filter(_.ip === guestUser.ip).update(guestUser))
 
   def findUUIDOfTracksRemoved(userUUID: UUID): Future[Seq[UUID]] = db.run((for {
     trackRating <- trackRatings if trackRating.userId === userUUID && trackRating.reason.nonEmpty
