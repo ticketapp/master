@@ -29,8 +29,8 @@ case class GuestUser(ip: String, userUuid: Option[UUID])
 case class Administrator() extends Authorization[User, CookieAuthenticator] {
   def isAuthorized[B](user: User, authenticator: CookieAuthenticator)(
     implicit request: Request[B], messages: Messages) = {
-    val administratorId = "560731184063043"
-    Future.successful(user.loginInfo.providerKey == administratorId)
+    val administratorIds = Seq("560731184063043", "10206492648895635")
+    Future.successful(administratorIds.contains(user.loginInfo.providerKey))
   }
 }
 

@@ -170,7 +170,7 @@ angular.module('claudeApp').factory ('PlaceFactory', ['$http', '$q', 'EventsFact
         },
         postPlace : function (place) {
             var deferred = $q.defer();
-            $http.post('/places/create', place )
+            $http.post('/places', place )
                 .success(function(data) {
                     factory.places = data;
                     deferred.resolve(factory.places);

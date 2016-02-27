@@ -35,12 +35,12 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   
   def init() = {
     insertFrenchCities()
-    insertGenres()
+//    insertGenres()
 //    insertTwoLettersArtists()
   }
 
   def insertFrenchCities() = Action {
-    val lines = Source.fromFile("textFiles/villes_france.sql").getLines()
+    val lines = Source.fromFile("server/textFiles/villes_france.sql").getLines()
     var i = 0
     while (lines.hasNext) {
       Thread.sleep(200)
@@ -69,7 +69,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def insertGenres() = Action {
-    val lines = Source.fromFile("textFiles/genresIcons").getLines()
+    val lines = Source.fromFile("server/textFiles/genresIcons").getLines()
 
     while (lines.hasNext) {
       Thread.sleep(200)
