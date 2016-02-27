@@ -2,17 +2,6 @@ import com.greencatsoft.angularjs.core.Scope
 
 import scala.scalajs.js
 
-@js.native
-trait TestScope extends Scope {
-
-  var id: String = js.native
-  var name: String = js.native
-  var email: String = js.native
-  var friends: js.Array[String] = js.native
-
-  var delete: js.Function = js.native
-}
-
 object TestAdminClientController extends AngularMockTest {
 
 //  "An admin client controller" should
@@ -42,13 +31,5 @@ object TestAdminClientController extends AngularMockTest {
      /* AngularMockTest.inject(js.Array("adminController", (adminController: AdminController) => {
         println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     }))*/
-    /*withController[App]("adminController") { controller =>
-        println("jkjskjkskdjkkdsjdk" + controller)
-        val events = controller
-        events should not be empty
-      }
-    withModule { module =>
-      println(module)
-    }*/
 //  }
 }

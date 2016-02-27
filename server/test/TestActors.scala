@@ -1,9 +1,9 @@
-import actors.DuplicateTracksActor
 import akka.actor.ActorSystem
 import akka.actor.Actor
 import akka.actor.Props
 import akka.pattern.ask
 import testsHelper.GlobalApplicationForModels
+import tracksDomain.DuplicateTracksActor
 import scala.concurrent.Await
 
 //import akka.testkit.{ TestActors, DefaultTimeout, ImplicitSender, TestKit, TestActorRef}

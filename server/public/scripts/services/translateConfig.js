@@ -4,7 +4,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate', 'ngSanitize']).
         HEADLINE: 'Sell your concert tickets',
         INTRO_TEXT: "Get paid now, regardless of whether a buyer is found or not",
         INPUT_LANDING_PAGE_TEXT: "Get an offer now",
-        INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or by place name",
+        INPUT_LANDING_PAGE_PLACEHOLDER: "Search a salable event by name or place name",
         //Events page header
         PROXIMITY_EVENTS_HEADER: "Events near you",
         //Events forms

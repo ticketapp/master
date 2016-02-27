@@ -25,9 +25,7 @@ trait GlobalApplicationForModels extends PlaySpec with OneAppPerSuite with Injec
       5.seconds)
   }
 
-  override def afterAll() = {
-    Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-  }
+  override def afterAll() = Evolutions.cleanupEvolutions(databaseApi.database("tests"))
 
   def isOrdered(list: List[Double]): Boolean = list match {
     case Nil => true

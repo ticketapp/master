@@ -27,6 +27,11 @@ object RoutingConfig extends Config {
         route = Route(
           templateUrl = urlTemplatePath("/events"),
           title = "Main"))
+      .when(
+        path = "/adminChat",
+        route = Route(
+          templateUrl = "/assets/templates/chatContact/adminChat.html",
+          title = "AdminChat"))
   }
   
   val urlTemplatePath = Map(

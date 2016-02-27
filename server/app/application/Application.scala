@@ -10,8 +10,8 @@ import play.api.i18n.MessagesApi
 import play.api.libs.ws._
 import play.api.mvc.Action
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class Application @Inject()(ws: WSClient,
                             val messagesApi: MessagesApi,

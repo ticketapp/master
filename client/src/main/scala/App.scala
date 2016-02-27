@@ -1,6 +1,6 @@
 import admin.AdminController
 import artists.ArtistsController
-import chatContact.{ChatContactController, ContactComponentDirective}
+import chatContact.{TaskServiceFactory, AdminChatContactController, ChatContactController, ContactComponentDirective}
 import com.greencatsoft.angularjs._
 import events._
 import focusDirective.FocusDirective
@@ -27,12 +27,14 @@ object App extends JSApp {
     module.directive[ContactComponentDirective]
     module.factory[HttpGeneralServiceFactory]
     module.factory[GeolocationServiceFactory]
+    module.factory[TaskServiceFactory]
     module.controller[AdminController]
     module.controller[EventsController]
     module.controller[ArtistsController]
     module.controller[OrganizersController]
     module.controller[PlacesController]
     module.controller[ChatContactController]
+    module.controller[AdminChatContactController]
     module.directive[EventMinDirective]
     module.directive[TrackingViewDirective]
     module.directive[TrackingDirective]
