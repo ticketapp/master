@@ -3,7 +3,8 @@ GET           /                                   @application.Application.index
 GET           /claude                             @application.Application.claude
 GET           /googlea30e62044bb92d88.html        @application.Application.googleValidation
 
-GET           /chatContact                        @chatContact.MessagesController.openSocket
+GET     /chat                                     @chatContact.ChatContactController.openSocket
+GET     /adminChat                                @chatContact.ChatContactController.openAdminSocket
 
 #POST          /signIn                                            @application.Application.signIn
 POST          /authenticate/:provider             @application.SocialAuthController.authenticate(provider: String)

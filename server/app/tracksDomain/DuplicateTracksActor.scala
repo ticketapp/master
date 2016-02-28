@@ -1,14 +1,12 @@
-package actors
+package tracksDomain
 
 import java.util.concurrent.TimeUnit
 
 import akka.actor._
 import com.google.common.cache.{Cache, CacheBuilder}
 import services.Utilities
-import tracksDomain.Track
 
 import scala.collection.mutable.ListBuffer
-
 
 object DuplicateTracksActor {
   def props = Props[DuplicateTracksActor]

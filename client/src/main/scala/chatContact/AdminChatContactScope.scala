@@ -5,6 +5,6 @@ import com.greencatsoft.angularjs.core.Scope
 import scala.scalajs.js
 
 @js.native
-trait ChatContactScope extends Scope {
+trait AdminChatContactScope extends Scope {
   var messages: js.Array[Message] = js.native
 }

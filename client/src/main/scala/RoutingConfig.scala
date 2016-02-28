@@ -25,6 +25,11 @@ object RoutingConfig extends Config {
           templateUrl = "/assets/templates/admin/adminEvents.html",
           title = "AdminEvents"))
       .when(
+        path = "/adminChat",
+        route = Route(
+          templateUrl = "/assets/templates/chatContact/adminChat.html",
+          title = "AdminChat"))
+      .when(
         path = "/events/:id",
         route = Route(
           templateUrl = "/assets/templates/events/event.html",

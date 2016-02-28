@@ -4,6 +4,7 @@ import java.sql.Timestamp
 
 import addresses.Address
 import artistsDomain.{Artist, ArtistWithWeightedGenres}
+import chatContact.ClientOrAdmin
 import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.io.{WKTReader, WKTWriter}
 import eventsDomain.{Event, EventWithRelations}
@@ -57,6 +58,23 @@ object JsonHelper {
   }
 
   implicit val geometryJsonFormat = geomJsonFormat[Geometry]
+
+  def enumReads[E <: Enumeration](enum: E): Reads[E#Value] = new Reads[E#Value] {
+    def reads(json: JsValue): JsResult[E#Value] = json match {
+      case JsString(s) =>
+        try JsSuccess(enum.withName(s)) catch { case _: NoSuchElementException =>
+          JsError(s"Enumeration expected of type: '${enum.getClass}', but it does not appear to contain the value: '$s'")
+        }
+
+      case _ => JsError("String value expected")
+    }
+  }
+
+  implicit def enumWrites[E <: Enumeration]: Writes[E#Value] = new Writes[E#Value] {
+    def writes(v: E#Value): JsValue = JsString(v.toString)
+  }
+
+  implicit val myEnumReads: Reads[ClientOrAdmin.Value] = enumReads(ClientOrAdmin)
 
   //  implicit val account60Format: Format[Account60] = Json.format[Account60]
   //  implicit val account63Format: Format[Account63] = Json.format[Account63]

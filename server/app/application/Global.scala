@@ -7,12 +7,11 @@ import jobs.Scheduler
 import org.joda.time.DateTime
 import play.api.Play.current
 import play.api._
+import play.api.libs.concurrent.Akka
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.concurrent._
 import services.Utilities
 
 import scala.concurrent.duration._
-
 
 @Singleton
 class Global @Inject()(val scheduler: Scheduler) extends Utilities {
@@ -20,7 +19,6 @@ class Global @Inject()(val scheduler: Scheduler) extends Utilities {
   val hoursSinceMidnight: Int = DateTime.now().hourOfDay().get()
 
   val timeBefore4AMInHours = returnNumberOfHoursBetween4AMAndNow(hoursSinceMidnight).hours
-
 
   Akka.system.scheduler.schedule(initialDelay = timeBefore4AMInHours, interval = 12.hours) {
     Logger.info("Scheduler.findEventsForPlaces started")
