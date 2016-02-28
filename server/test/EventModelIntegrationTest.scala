@@ -114,6 +114,8 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
         whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { maybeFoundEvent =>
           val foundEvent = maybeFoundEvent.get
 
+          1 mustBe 2
+
           foundEvent.event mustEqual event.event.copy(id = foundEvent.event.id)
 
           foundEvent.organizers mustBe
