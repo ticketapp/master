@@ -1,14 +1,11 @@
 package eventsDomain
 
 import addresses.Address
-import application._
-import artistsDomain.{ArtistWithWeightedGenres, Artist}
+import artistsDomain.{Artist, ArtistWithWeightedGenres}
 import database._
 import genresDomain.Genre
-import models._
-import organizersDomain.{OrganizerWithAddress, Organizer}
-import placesDomain.{PlaceWithAddress, Place}
-
+import organizersDomain.{Organizer, OrganizerWithAddress}
+import placesDomain.{Place, PlaceWithAddress}
 
 trait eventWithRelationsTupleToEventWithRelationsClass {
   def eventWithRelationsTupleToEventWithRelationClass(eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]),

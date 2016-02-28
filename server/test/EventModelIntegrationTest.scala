@@ -45,7 +45,8 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
         INSERT INTO genres(name, icon) VALUES('genretest0', 'a');
         INSERT INTO eventsgenres(eventid, genreid) VALUES((SELECT eventId FROM events WHERE name = 'name0'), 1);
-        INSERT INTO places(placeid, name) VALUES(100, 'name0');  
+
+        INSERT INTO places(placeid, name) VALUES(100, 'name0');
         INSERT INTO places(placeid, name) VALUES(200, 'name1');
         INSERT INTO eventsplaces(eventid, placeid)
           VALUES((SELECT eventId FROM events WHERE name = 'name0'), (SELECT placeid FROM places WHERE name = 'name0'));
@@ -55,7 +56,8 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
           VALUES((SELECT eventId FROM events WHERE name = 'later'), (SELECT placeid FROM places WHERE name = 'name1'));
         INSERT INTO eventsplaces(eventid, placeid)
           VALUES((SELECT eventId FROM events WHERE name = 'laterThanLater'), (SELECT placeid FROM places WHERE name = 'name1'));
-        INSERT INTO addresses(city) VALUES('lyon');     
+
+        INSERT INTO addresses(city) VALUES('lyon');
         INSERT INTO eventsaddresses(eventid, addressid) VALUES((SELECT eventId FROM events WHERE name = 'name0'),
           (SELECT addressid FROM addresses WHERE city = 'lyon'));
         INSERT INTO frenchcities(city, geographicpoint) VALUES('lyon', '0101000020E6100000ED2B0FD253E446401503249A40711340');"""),
@@ -114,21 +116,21 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
           foundEvent.event mustEqual event.event.copy(id = foundEvent.event.id)
 
-//          foundEvent.organizers mustBe
-//            Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
-//
-//          foundEvent.artists mustBe
-//            Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
-//
-//          foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
-//
-//          foundEvent.addresses mustBe Vector(event.addresses.head.copy(
-//            id = foundEvent.addresses.head.id,
-//            city = Option(event.addresses.head.city.get.toLowerCase)))
-//
-//          foundEvent.genres mustBe Vector(event.genres.head.copy(
-//            id = foundEvent.genres.head.id,
-//            name = foundEvent.genres.head.name.toLowerCase))
+          foundEvent.organizers mustBe
+            Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
+
+          foundEvent.artists mustBe
+            Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
+
+          foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
+
+          foundEvent.addresses mustBe Vector(event.addresses.head.copy(
+            id = foundEvent.addresses.head.id,
+            city = Option(event.addresses.head.city.get.toLowerCase)))
+
+          foundEvent.genres mustBe Vector(event.genres.head.copy(
+            id = foundEvent.genres.head.id,
+            name = foundEvent.genres.head.name.toLowerCase))
         }
 
         whenReady(eventMethods.delete(savedEvent.id.get), timeout(Span(5, Seconds))) {

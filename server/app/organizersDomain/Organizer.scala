@@ -15,11 +15,12 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import MyPostgresDriver.api._
-import services.{SortByDistanceToPoint, SortableByGeographicPoint, FollowService, Utilities}
+import services._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 case class Organizer (id: Option[Long] = None,
                       facebookId: Option[String] = None,
@@ -47,7 +48,8 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     with FollowService
     with MyDBTableDefinitions
     with Utilities
-    with SortByDistanceToPoint {
+    with SortByDistanceToPoint
+    with LoggerHelper {
 
   def findSinceOffset(offset: Long, numberToReturn: Long): Future[Seq[OrganizerWithAddress]] = {
     val tupledJoin = organizers.drop(offset).take(numberToReturn) joinLeft addresses on (_.addressId === _.id)
@@ -165,7 +167,10 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
 
   def saveEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] =
-    db.run(eventsOrganizers += eventOrganizerRelation)
+    db.run(eventsOrganizers += eventOrganizerRelation) recover { case NonFatal(e) =>
+      log(s"The relation $eventOrganizerRelation was not saved", e)
+      0
+    }
 
   def saveEventRelations(eventOrganizerRelations: Seq[EventOrganizerRelation]): Future[Boolean] =
     db.run(eventsOrganizers ++= eventOrganizerRelations) map { _ =>

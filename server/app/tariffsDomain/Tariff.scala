@@ -56,7 +56,7 @@ class TariffMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
           tariffRange
 
         case Failure(t) =>
-          log(maybeThrowable = Option(t))
+          log(t)
           None
       }
   }

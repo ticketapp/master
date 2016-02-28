@@ -13,7 +13,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{WS, WSResponse}
 import MyPostgresDriver.api._
-import services.{SortByDistanceToPoint, SortableByGeographicPoint, FollowService, Utilities}
+import services._
 import silhouette.DBTableDefinitions
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -62,7 +62,8 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     with DBTableDefinitions
     with MyDBTableDefinitions
     with Utilities
-    with SortByDistanceToPoint {
+    with SortByDistanceToPoint
+    with LoggerHelper {
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
@@ -245,7 +246,11 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       Future(0)
   }
 
-  def saveEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces += eventPlaceRelation)
+  def saveEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] =
+    db.run(eventsPlaces += eventPlaceRelation) recover { case NonFatal(e) =>
+      log(s"The relation $eventPlaceRelation was not saved", e)
+      0
+    }
  
   def deleteEventRelation(eventPlaceRelation: EventPlaceRelation): Future[Int] = db.run(eventsPlaces
     .filter(eventPlace => eventPlace.eventId === eventPlaceRelation.eventId &&

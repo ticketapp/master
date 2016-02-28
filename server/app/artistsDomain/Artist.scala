@@ -51,7 +51,8 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     with FollowService
     with MyDBTableDefinitions
     with artistsAndOptionalGenresToArtistsWithWeightedGenresTrait
-    with Utilities {
+    with Utilities
+    with LoggerHelper {
 
 
   def findAll: Future[Vector[Artist]] = db.run(artists.result) map (_.toVector)
@@ -264,18 +265,23 @@ class ArtistMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         Future(0)
   }
 
-  def saveWithEventRelation(artist: ArtistWithWeightedGenres, eventId: Long): Future[Artist] = save(artist) flatMap { savedArtist =>
+  def saveWithEventRelation(artist: ArtistWithWeightedGenres,
+                            eventId: Long): Future[Artist] = save(artist) flatMap { savedArtist =>
     saveEventRelation(EventArtistRelation(eventId, savedArtist.id.getOrElse(0))) map {
       case 1 =>
         savedArtist
       case _ =>
-        Logger.error(s"Artist.saveWithEventRelation: not exactly one row saved by Artist.saveEventRelation for artist $savedArtist and eventId $eventId")
+        Logger.error(s"Artist.saveWithEventRelation: not exactly one row saved by Artist.saveEventRelation for " +
+          s"artist $savedArtist and eventId $eventId")
         savedArtist
     }
   }
 
   def saveEventRelation(eventArtistRelation: EventArtistRelation): Future[Int] = 
-    db.run(eventsArtists += eventArtistRelation)
+    db.run(eventsArtists += eventArtistRelation) recover { case NonFatal(e) =>
+      log(s"The relation $eventArtistRelation was not saved", e)
+      0
+    }
 
   def saveEventRelations(eventArtistRelations: Seq[EventArtistRelation]): Future[Boolean] =
     db.run(eventsArtists ++= eventArtistRelations) map { _ =>

@@ -9,10 +9,11 @@ import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
 import MyPostgresDriver.api._
-import services.Utilities
+import services.{LoggerHelper, Utilities}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 
 case class Address(id: Option[Long] = None,
@@ -31,7 +32,8 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with MyDBTableDefinitions
     with AddressFormsTrait
-    with Utilities {
+    with Utilities
+    with LoggerHelper {
 
   def findAll: Future[Seq[Address]] = db.run(addresses.result)
 
@@ -96,7 +98,10 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def saveEventRelation(eventAddressRelation: EventAddressRelation): Future[Int] =
-    db.run(eventsAddresses += eventAddressRelation)
+    db.run(eventsAddresses += eventAddressRelation) recover { case NonFatal(e) =>
+      log(s"The relation $eventAddressRelation was not saved", e)
+      0
+    }
 
   def saveEventRelations(eventAddressRelations: Seq[EventAddressRelation]): Future[Boolean] =
     db.run(eventsAddresses ++= eventAddressRelations) map { _ =>

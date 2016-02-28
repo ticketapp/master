@@ -6,12 +6,10 @@ import database.MyPostgresDriver.api._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.db.evolutions.Evolutions
-import play.api.libs.concurrent.Akka
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import play.api.Play.current
 
 trait GlobalApplicationForModelsIntegration extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
 

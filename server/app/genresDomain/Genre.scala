@@ -10,9 +10,11 @@ import eventsDomain.Event
 import play.api.Logger
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.concurrent.Execution.Implicits._
+import services.LoggerHelper
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 
 
 case class Genre (id: Option[Int] = None, name: String, icon: Char = 'a') {
@@ -23,7 +25,7 @@ case class GenreWithWeight(genre: Genre, weight: Int = 1)
 
 
 class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
-    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions {
+    extends HasDatabaseConfigProvider[MyPostgresDriver] with MyDBTableDefinitions with LoggerHelper {
 
   def findAll: Future[Seq[Genre]] = db.run(genres.result)
 
@@ -98,25 +100,29 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def isAGenre(pattern: String): Future[Boolean] = db.run(genres.filter(_.name === pattern).exists.result)
 
-  def saveWithEventRelation(genre: Genre, eventId: Long): Future[Int] = save(genre) flatMap { 
+  def saveWithEventRelation(genre: Genre, eventId: Long): Future[Int] = save(genre) flatMap {
     _.id match {
       case None =>
-        Logger.error("Genre.saveWithEventRelation: genre saved returned None as id")
+        log("Genre.saveWithEventRelation: genre saved returned None as id")
         Future(0)
+
       case Some(id) =>
         saveEventRelation(EventGenreRelation(eventId, id))
     }
   }
 
   def saveEventRelation(eventGenreRelation: EventGenreRelation): Future[Int] =
-    db.run(eventsGenres += eventGenreRelation)
+    db.run(eventsGenres += eventGenreRelation) recover { case NonFatal(e) =>
+      log(s"The relation genre-event $eventGenreRelation was not saved", e)
+      0
+    }
 
   def saveEventRelations(eventGenreRelations: Seq[EventGenreRelation]): Future[Boolean] =
     db.run(eventsGenres ++= eventGenreRelations) map { _ =>
       true
-    } recover { 
+    } recover {
       case e: Exception =>
-        Logger.error("Genre.saveEventRelations: ", e)
+        log(e)
         false
     }
 
@@ -126,7 +132,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def saveWithArtistRelation(genre: Genre, artistId: Long): Future[Option[ArtistGenreRelation]] = save(genre) flatMap {
     _.id match {
       case None =>
-        Logger.error("Genre.saveWithArtistRelation: genre saved returned None as id")
+        log("Genre.saveWithArtistRelation: genre saved returned None as id")
         Future(None)
       case Some(id) =>
         saveArtistRelation(ArtistGenreRelation(artistId, id)) map { Option(_) }
@@ -143,7 +149,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         val updatedArtistGenreRelation = artistGenre.copy(weight = artistGenre.weight + 1)
         updateArtistRelation(updatedArtistGenreRelation) map {
           case int if int != 1 =>
-            Logger.error("Genre.saveArtistRelation: not exactly one row was updated")
+            log("Genre.saveArtistRelation: not exactly one row was updated")
             artistGenre
           case _ =>
             updatedArtistGenreRelation
@@ -174,7 +180,7 @@ class GenreMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
   def saveWithTrackRelation(genre: Genre, trackId: UUID): Future[Int] = save(genre) flatMap {
     _.id match {
       case None =>
-        Logger.error("Genre.saveWithTrackRelation: genre saved returned None as id")
+        log("Genre.saveWithTrackRelation: genre saved returned None as id")
         Future(0)
       case Some(id) =>
         saveTrackRelation(TrackGenreRelation(trackId, id))
