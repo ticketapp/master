@@ -7,8 +7,8 @@ import genresDomain.Genre
 import organizersDomain.{Organizer, OrganizerWithAddress}
 import placesDomain.{Place, PlaceWithAddress}
 
-trait eventWithRelationsTupleToEventWithRelationsClass {
-  def eventWithRelationsTupleToEventWithRelationClass(eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]),
+trait eventWithRelationsTupleToEventWithRelations {
+  def eventWithRelationsTupleToEventWithRelation(eventWithRelations: Seq[((Event, Option[(EventOrganizerRelation, Organizer)]),
     Option[(EventArtistRelation, Artist)], Option[(EventPlaceRelation, Place)], Option[(EventGenreRelation, Genre)],
     Option[(EventAddressRelation, Address)])])
   : Vector[EventWithRelations] = {

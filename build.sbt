@@ -43,7 +43,6 @@ lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
   scalaJSProjects := clients,
   pipelineStages := Seq(scalaJSProd, gzip),
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   libraryDependencies ++= Seq(
   cache,
   evolutions,
@@ -73,13 +72,7 @@ lazy val server = (project in file("server")).settings(
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-contrib" % akkaVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
-  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
-  "com.github.julien-truffaut"  %%  "monocle-core"    % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-generic" % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-macro"   % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-state"   % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-refined" % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-law"     % libraryVersion % "test"
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
   )
 ).enablePlugins(PlayScala)
   .aggregate(clients.map(projectToRef): _*)

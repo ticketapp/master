@@ -90,7 +90,7 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
       val artists = Vector(ArtistWithWeightedGenres(
         artist = Artist(name = "nameEventRelations", facebookUrl = "saveEventRelations")))
       val organizers = Vector(OrganizerWithAddress(Organizer(None, None, "nameEventRelations")))
-      val addresses = Vector(Address(id = None, city = Option("cityEventRelations")))
+      val addresses = Vector(Address(city = Option("cityEventRelations")))
       val places = Vector(PlaceWithAddress(Place(name = "nameEventRelations")))
       val genres = Vector(Genre(name = "nameeventrelations"))
       val event = EventWithRelations(
@@ -112,17 +112,20 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
       whenReady(eventMethods.save(event), timeout(Span(5, Seconds))) { savedEvent =>
         whenReady(eventMethods.find(savedEvent.id.get), timeout(Span(5, Seconds))) { maybeFoundEvent =>
+          
           val foundEvent = maybeFoundEvent.get
 
           foundEvent.event mustEqual event.event.copy(id = foundEvent.event.id)
 
           foundEvent.organizers mustBe
-            Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(id = foundEvent.organizers.head.organizer.id)))
+            Vector(OrganizerWithAddress(event.organizers.head.organizer.copy(
+              id = foundEvent.organizers.head.organizer.id)))
 
           foundEvent.artists mustBe
             Vector(ArtistWithWeightedGenres(event.artists.head.artist.copy(id = foundEvent.artists.head.artist.id)))
 
-          foundEvent.places mustBe Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
+          foundEvent.places mustBe
+            Vector(PlaceWithAddress(event.places.head.place.copy(id = foundEvent.places.head.place.id)))
 
           foundEvent.addresses mustBe Vector(event.addresses.head.copy(
             id = foundEvent.addresses.head.id,
@@ -306,15 +309,19 @@ class EventModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
     "find a complete event by facebookId" in {
       val expectedGeoPoint = geographicPointMethods.optionStringToPoint(Option("45.7408394,4.8499501"))
+      val expectedTitle = "ENCORE w/ OCTAVE ONE live — MOJO — MOONRISE HILL CREW"
+      val expectedAddress: Address = Address(
+        id = None,
+        geographicPoint = expectedGeoPoint,
+        city = Some("lyon"),
+        zip = Some("69007"),
+        street = Some("rue paul vivier / rue de cronstadt"))
+
       whenReady(eventMethods.getEventOnFacebookByFacebookId("985240908201444"), timeout(Span(10, Seconds))) { event =>
-        event.get.event.name mustBe "ENCORE w/ OCTAVE ONE live — MOJO — MOONRISE HILL CREW"
+
+        event.get.event.name mustBe expectedTitle
         event.get.geographicPoint mustBe expectedGeoPoint
-        event.get.addresses mustBe Vector(Address(
-          id = Some(3),
-          geographicPoint = expectedGeoPoint,
-          city = Some("lyon"),
-          zip = Some("69007"),
-          street = Some("rue paul vivier / rue de cronstadt")))
+        event.get.addresses.head.copy(id = None) mustBe expectedAddress
       }
     }
 

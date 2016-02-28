@@ -50,24 +50,22 @@ case class EventWithRelations(event: Event,
                               genres: Seq[Genre] = Vector.empty,
                               addresses: Seq[Address] = Vector.empty) extends SortableByGeographicPoint with Utilities {
 
-  private def returnEventGeographicPointInRelations(event: Event, addresses: Seq[Address], places: Seq[PlaceWithAddress])
-  : Geometry = {
+  private def returnEventGeographicPointInRelations(event: Event, addresses: Seq[Address],
+                                                    places: Seq[PlaceWithAddress]): Geometry =
     event.geographicPoint match {
       case notAntarcticPoint if notAntarcticPoint != antarcticPoint =>
         notAntarcticPoint
+
       case _ =>
         val addressesGeoPoints = addresses map(_.geographicPoint)
         val placesGeoPoint = places.map(_.geographicPoint)
         val geoPoints = addressesGeoPoints ++ placesGeoPoint
 
         geoPoints find(_ != antarcticPoint) match {
-          case Some(geoPoint) =>
-            geoPoint
-          case _ =>
-            antarcticPoint
+          case Some(geoPoint) => geoPoint
+          case _ => antarcticPoint
         }
     }
-  }
 
   val geographicPoint: Geometry = returnEventGeographicPointInRelations(event, addresses, places)
 }
@@ -85,7 +83,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with FollowService
     with DBTableDefinitions
-    with eventWithRelationsTupleToEventWithRelationsClass
+    with eventWithRelationsTupleToEventWithRelations
     with MyDBTableDefinitions
     with Utilities
     with SortByDistanceToPoint {
@@ -102,14 +100,13 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def find(id: Long): Future[Option[EventWithRelations]] = {
     val query = for {
       (((((eventWithOptionalEventOrganizers), optionalEventArtists), optionalEventPlaces), optionalEventGenres),
-      optionalEventAddresses) <- events
-          .filter(_.id === id) joinLeft
+      optionalEventAddresses) <- events.filter(_.id === id) joinLeft
         (eventsOrganizers join organizers on (_.organizerId === _.id)) on (_.id === _._1.eventId) joinLeft
         (eventsArtists join artists on (_.artistId === _.id)) on (_._1.id === _._1.eventId) joinLeft
         (eventsPlaces join places on (_.placeId === _.id)) on (_._1._1.id === _._1.eventId) joinLeft
@@ -118,9 +115,8 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)) map {
-      _.headOption
-    }
+    db.run(query.result) map(eventWithRelations =>
+      eventWithRelationsTupleToEventWithRelation(eventWithRelations)) map(_.headOption)
   }
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] = {
@@ -144,7 +140,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
-      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
+      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelation(eventWithRelations)))
   }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Future[Seq[EventWithRelations]] =
@@ -177,11 +173,11 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
-      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
+      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelation(eventWithRelations)))
   }
 
-  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
-  : Future[Seq[EventWithRelations]] = {
+  def findPassedInHourIntervalNear(hourInterval: Int, geographicPoint: Geometry, offset: Int,
+                                   numberToReturn: Int): Future[Seq[EventWithRelations]] = {
     val now = DateTime.now()
     val xHoursAgo = now.minusHours(hourInterval)
 
@@ -200,7 +196,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllByGenre(genreName: String, geographicPoint: Geometry, offset: Int, numberToReturn: Int)
@@ -230,7 +226,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
-      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelationClass(eventWithRelations)))
+      sortByDistanceToPoint(geographicPoint, eventWithRelationsTupleToEventWithRelation(eventWithRelations)))
   }
 
   def findAllNotFinishedByPlace(placeId: Long): Future[Seq[EventWithRelations]] = {
@@ -255,7 +251,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
         optionalEventAddresses)
 
     db.run(query.result) map(eventWithRelations =>
-      eventWithRelationsTupleToEventWithRelationClass(eventWithRelations).sortBy(-_.event.startTime.getMillis))
+      eventWithRelationsTupleToEventWithRelation(eventWithRelations).sortBy(-_.event.startTime.getMillis))
   }
 
 
@@ -279,7 +275,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllByOrganizer(organizerId: Long): Future[Seq[EventWithRelations]] = {
@@ -304,7 +300,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllPassedByOrganizer(organizerId: Long): Future[Seq[EventWithRelations]] = {
@@ -327,7 +323,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllByArtist(facebookUrl: String): Future[Seq[EventWithRelations]] = {
@@ -352,7 +348,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllPassedByArtist(artistId: Long): Future[Seq[EventWithRelations]] = {
@@ -376,7 +372,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllContaining(pattern: String): Future[Seq[EventWithRelations]] = {
@@ -398,7 +394,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllContaining(pattern: String, geographicPoint: Geometry): Future[Seq[EventWithRelations]] = {
@@ -419,7 +415,7 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def findAllByCityPattern(cityPattern: String): Future[Seq[EventWithRelations]] = {
@@ -440,29 +436,47 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
-  def save(eventWithRelations: EventWithRelations): Future[Event] = db.run(
-    for {
+  def save(eventWithRelations: EventWithRelations): Future[Event] = {
+    val query = for {
       eventFound <- events.filter(_.facebookId === eventWithRelations.event.facebookId).result.headOption
       result <- eventFound.map(DBIO.successful).getOrElse(events returning events.map(_.id) += eventWithRelations.event)
-    } yield result) map {
+    } yield result
+
+    db.run(query) flatMap {
       case e: Event =>
         saveEventRelations(eventWithRelations)
+
       case id: Long =>
         saveEventRelations(eventWithRelations.copy(event = eventWithRelations.event.copy(id = Option(id))))
     }
+  }
 
-  def saveEventRelations(eventWithRelations: EventWithRelations): Event = {
+  def saveEventRelations(eventWithRelations: EventWithRelations): Future[Event] = {
     val eventId = eventWithRelations.event.id.getOrElse(0L)
 
-    eventWithRelations.genres map(genre => genreMethods.saveWithEventRelation(genre, eventId))
-    eventWithRelations.artists map(artist => artistMethods.saveWithEventRelation(artist, eventId))
-    eventWithRelations.organizers map(organizer => organizerMethods.saveWithEventRelation(organizer, eventId))
-    eventWithRelations.places map(place => placeMethods.saveWithEventRelation(place, eventId))
-    eventWithRelations.addresses map(address => addressMethods.saveWithEventRelation(address, eventId))
-    eventWithRelations.event
+    val eventuallyGenresResult =
+      Future.sequence(eventWithRelations.genres map(genre => genreMethods.saveWithEventRelation(genre, eventId)))
+    val eventuallyArtistsResult =
+      Future.sequence(eventWithRelations.artists map(artist => artistMethods.saveWithEventRelation(artist, eventId)))
+    val eventuallyOrganizersResult =
+      Future.sequence(eventWithRelations.organizers map(organizer => organizerMethods.saveWithEventRelation(organizer, eventId)))
+    val eventuallyPlacesResult =
+      Future.sequence(eventWithRelations.places map(place => placeMethods.saveWithEventRelation(place, eventId)))
+    val eventuallyAddressesResult =
+      Future.sequence(eventWithRelations.addresses map(address => addressMethods.saveWithEventRelation(address, eventId)))
+
+    val results = for {
+      genresResult <- eventuallyGenresResult
+      artistsResult <- eventuallyArtistsResult
+      organizersResult <- eventuallyOrganizersResult
+      placesResult <- eventuallyPlacesResult
+      addressesResult <- eventuallyAddressesResult
+    } yield (genresResult, artistsResult, organizersResult, placesResult, addressesResult)
+
+    results map( _ => eventWithRelations.event)
   }
 
   def delete(id: Long): Future[Int] = db.run(events.filter(_.id === id).delete)

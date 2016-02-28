@@ -22,18 +22,18 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.control.NonFatal
 
-case class Organizer (id: Option[Long] = None,
-                      facebookId: Option[String] = None,
-                      name: String,
-                      description: Option[String] = None,
-                      addressId: Option[Long] = None,
-                      phone: Option[String] = None,
-                      publicTransit: Option[String] = None,
-                      websites: Option[String] = None,
-                      verified: Boolean = false,
-                      imagePath: Option[String] = None,
-                      geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
-                      linkedPlaceId: Option[Long] = None)
+case class Organizer(id: Option[Long] = None,
+                     facebookId: Option[String] = None,
+                     name: String,
+                     description: Option[String] = None,
+                     addressId: Option[Long] = None,
+                     phone: Option[String] = None,
+                     publicTransit: Option[String] = None,
+                     websites: Option[String] = None,
+                     verified: Boolean = false,
+                     imagePath: Option[String] = None,
+                     geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
+                     linkedPlaceId: Option[Long] = None)
 
 case class OrganizerWithAddress(organizer: Organizer, address: Option[Address] = None) extends SortableByGeographicPoint {
   val geographicPoint = organizer.geographicPoint
@@ -90,42 +90,42 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
     organizerWithAddress.address match {
       case Some(address) =>
         addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
-          save(organizerWithAddress.organizer.copy(addressId = savedAddress.id)) map { orga =>
-            OrganizerWithAddress(orga, Option(savedAddress))
+          save(organizerWithAddress.organizer.copy(addressId = savedAddress.id)) map { organizer =>
+            OrganizerWithAddress(organizer, Option(savedAddress))
           }
         }
+
       case None =>
-        save(organizerWithAddress.organizer) map { savedOrganizer =>
-          OrganizerWithAddress(savedOrganizer, None)
-        }
+        save(organizerWithAddress.organizer) map(savedOrganizer => OrganizerWithAddress(savedOrganizer, None))
     }
   }
 
   def save(organizer: Organizer): Future[Organizer] = {
     val eventuallyMaybePlaceId: Future[Option[Long]] = organizer.facebookId match {
-      case None =>
-        Future(None)
-      case Some(facebookId) =>
-        placeMethods.findIdByFacebookId(facebookId)
+      case None => Future(None)
+      case Some(facebookId) => placeMethods.findIdByFacebookId(facebookId)
     }
 
     eventuallyMaybePlaceId flatMap { maybePlaceId =>
-      doSave(organizer.copy(
+      val organizerToSave = organizer.copy(
         description = formatDescription(organizer.description),
         phone = phoneNumbersSetToOptionString(phoneNumbersStringToSet(organizer.phone)),
-        linkedPlaceId = maybePlaceId
-      ))
+        linkedPlaceId = maybePlaceId)
+
+      doSave(organizerToSave)
     }
   }
 
   def doSave(organizer: Organizer): Future[Organizer] = {
-    db.run((for {
+    val query = for {
       organizerFound <- organizers.filter(_.facebookId === organizer.facebookId).result.headOption
       result <- organizerFound.map(DBIO.successful).getOrElse(organizers returning organizers.map(_.id) += organizer)
-    } yield result match {
-        case o: Organizer => o
-        case id: Long => organizer.copy(id = Option(id))
-      }).transactionally)
+    } yield result
+
+    db.run(query) map {
+      case organizer: Organizer => organizer
+      case id: Long => organizer.copy(id = Option(id))
+    }
   }
 
   def update(organizer: Organizer): Future[Int] = db.run(organizers.filter(_.id === organizer.id).update(organizer))
@@ -157,14 +157,14 @@ class OrganizerMethods @Inject()(protected val dbConfigProvider: DatabaseConfigP
 
   def saveWithEventRelation(organizer: OrganizerWithAddress, eventId: Long): Future[OrganizerWithAddress] =
     saveWithAddress(organizer) flatMap { savedOrganizer =>
-    saveEventRelation(EventOrganizerRelation(eventId, savedOrganizer.organizer.id.get)) map {
-      case 1 =>
-        savedOrganizer
-      case _ =>
-        Logger.error("Organizer.saveWithEventRelation: not exactly one row was updated by saveEventRelation")
-        savedOrganizer
+      saveEventRelation(EventOrganizerRelation(eventId, savedOrganizer.organizer.id.get)) map {
+        case 1 =>
+          savedOrganizer
+        case _ =>
+          Logger.error("Organizer.saveWithEventRelation: not exactly one row was updated by saveEventRelation")
+          savedOrganizer
+      }
     }
-  }
 
   def saveEventRelation(eventOrganizerRelation: EventOrganizerRelation): Future[Int] =
     db.run(eventsOrganizers += eventOrganizerRelation) recover { case NonFatal(e) =>
