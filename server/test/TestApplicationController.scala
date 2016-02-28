@@ -24,5 +24,30 @@ class TestApplicationController extends GlobalApplicationForControllers {
       status(result) mustEqual UNAUTHORIZED
     }
 
+    "return status unauthorized when a not connected user trie to get admin page" in {
+      val Some(result) = route(
+        FakeRequest(application.routes.Application.admin())
+      )
+      status(result) mustEqual UNAUTHORIZED
+    }
+
+    "return status unauthorized when a connected user trie to get admin page" in {
+      val Some(result) = route(
+        FakeRequest(application.routes.Application.admin())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+
+      status(result) mustEqual FORBIDDEN
+    }
+
+    "return status OK when a connected administrator trie to get admin page" in {
+      val Some(result) = route(
+        FakeRequest(application.routes.Application.admin())
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
+      )
+
+      status(result) mustEqual OK
+    }
+
   }
 }

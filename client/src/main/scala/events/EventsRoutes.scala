@@ -4,25 +4,27 @@ object EventsRoutes {
   def find(offset: Int, numberToReturn: Int, geographicPoint: String): String =
     "/events?offset=" + offset + "&numberToReturn=" + numberToReturn + "&geographicPoint=" + geographicPoint
 
-  def FindInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): String =
+  def findInHourInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): String =
     "/events/inInterval/" + hourInterval + "?offset=" + offset + "&numberToReturn=" + numberToReturn +
       "&geographicPoint=" + geographicPoint
 
-  def FindPassedInInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): String =
+  def findPassedInInterval(hourInterval: Int, geographicPoint: String, offset: Int, numberToReturn: Int): String =
     "/events/passedInInterval/" + hourInterval + "?offset=" + offset + "&numberToReturn=" + numberToReturn +
       "&geographicPoint=" + geographicPoint
 
-  def find(id: Long): String = "/events/" + id
+  def findById(id: Long): String = "/events/" + id
 
-  def create: String = "/events/create"
+  def create: String = "/events"
 
-  def createByFacebookId(facebookId: String): String = "/events/create/" + facebookId
+  def update: String = "/events"
 
-  def follow(eventId: Long): String = "/events/" + eventId + "/follow "
+  def createByFacebookId(facebookId: String): String = "/events/" + facebookId
 
-  def unfollow(eventId: Long): String = "/events/" + eventId + "/unfollow"
+  def follow(eventId: Long): String = "/followedEvents?eventId=" + eventId
 
-  def getFollowed: String = "/events/followed/"
+  def unfollow(eventId: Long): String = "/followedEvents?eventId=" + eventId
+
+  def getFollowed: String = "/followedEvents"
 
   def isFollowed(eventId: Long): String = "/events/" + eventId + "/isFollowed"
 
@@ -46,5 +48,8 @@ object EventsRoutes {
 
   def findPassedByPlace(placeId: Long): String = "/places/" + placeId + "/passedEvents"
 
-  def findMaybeSalableEvents(pattern: String): String = "/salableEventsContaining?pattern=" + pattern
+  def findMaybeSalableEvents(pattern: String): String = "/salableEvents/containing?pattern=" + pattern
+
+  def findMaybeSalableEventsNear(geographicPoint: String, offset: Int, numberToReturn: Int): String =
+    "/salableEventsNear?geographicPoint=" + geographicPoint + "&offset=" + offset + "&numberToReturn=" + numberToReturn
 }

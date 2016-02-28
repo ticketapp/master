@@ -14,13 +14,45 @@
            class="fa fa-times close-icon">
         </i>
 
-        <span ng-click="$parent.full = true" class="md-whiteframe-z1 column large-12 marginTop10 marginBottom10">
-            <md-button ng-click="$parent.full = true" class="md-fab md-primary notClickable">
-                S
-            </md-button>
+        <div ng-click="$parent.full = true" class="column small-12 marginTop10 marginBottom10 imagesBox">
+            <div class="center">
+                {{ 'CLAUDE_TEAM' | translate }}
+            </div>
 
-            <b>Connecté</b>
-        </span>
+            <div class="center">
+                <img src="assets/images/profile_pic1.png" class="profileImage">
+                <img src="assets/images/profile_pic_Simon.png" class="profileImage">
+            </div>
+
+            <div data-ng-if="$parent.full != true" class="column small-10 center small-offset-1">
+                {{ 'SMALL_CHAT_HOME_MESSAGE' | translate }}
+            </div>
+
+            <div data-ng-if="$parent.full">
+                <div data-ng-if="controller.areWeConnected" class="column small-10 center small-offset-1">
+                    {{ 'CHAT_HOME_MESSAGE_IF_CONNECTED' | translate }}
+                </div>
+
+                <div data-ng-if="!controller.areWeConnected" class="column small-10 center small-offset-1">
+                    {{ 'CHAT_HOME_MESSAGE_IF_NOT_CONNECTED' | translate }}
+
+                    <div style="position:relative">
+                        <input type="email"
+                               ng-model="emailContact"
+                               id="cci2"
+                               tracker="in,cci2,{{emailContact}}"
+                               required
+                               class="width100p tracking chat-email-input"
+                               placeholder="{{ 'EMAIL_PLACE_HOLDER' | translate }}">
+                        <div class="square-validation-image-container">
+                            <img src="assets/images/square_validation_button.png" class="square-validation-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
         <div ng-repeat="message in messages"
              class="column small-8"
              ng-class="{'float-left': message.fromClient$1, 'float-right': message.fromClient$1 == false}">
@@ -28,8 +60,11 @@
                 {{message.content$1}}
             </div>
         </div>
-        <form class="column small-12 chat-form" ng-click="$parent.full = true"
-              ng-submit="controller.send(message); message=''">
+
+        <form class="column small-12 chat-form"
+              ng-click="$parent.full = true"
+              ng-submit="controller.send(message); message=''"
+              ng-class="{'paddingRight20 paddingLeft0': full}">
 
             <input type="text"
                    ng-click="$parent.full = true"
@@ -37,14 +72,16 @@
                    id="cci1"
                    tracker="in,cci1,{{message}}"
                    focus="{{full}}"
+                   required
                    class="contact-text-input width100p tracking"
-                   placeholder="Démarrer une conversation">
+                   placeholder="{{ 'START_CONVERSATION' | translate }}">
 
         </form>
 
     </div>
+
     <md-button class="md-fab float-right contact-button tracking"
-               ng-class="{'ng-hide': full}"
+               ng-class="{'ng-hide': $parent.full}"
                ng-mouseenter="showSmallContact = true; directive.track('cl,ccb1')"
                id="ccb1"
                ng-click="full = true; directive.track('cl,ccb1')"

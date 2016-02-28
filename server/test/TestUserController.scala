@@ -41,6 +41,7 @@ class TestUserController extends GlobalApplicationForControllers {
 
       contentAsString(removedTracks) must contain("13894e56-08d1-4c1f-b3e4-466c069d15ed")
     }
+
   }
 }
 

@@ -3,11 +3,11 @@ package placesDomain
 import javax.inject.Inject
 
 import addresses.{SearchGeographicPoint, AddressFormsTrait}
-import application.User
+import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import database.UserPlaceRelation
+import database.{EventPlaceRelation, UserPlaceRelation}
 import json.JsonHelper._
 import org.postgresql.util.PSQLException
 import play.api.Logger
@@ -35,6 +35,7 @@ class PlaceController @Inject() (ws: WSClient,
       case Failure(exception) =>
         Logger.error("PlaceController.places: invalid geographicPoint")
         Future(BadRequest(Json.toJson("Invalid geographicPoint")))
+
       case Success(point) =>
         placeMethods.findNear(geographicPoint = point, numberToReturn = numberToReturn, offset = offset) map { places =>
           Ok(Json.toJson(places))
@@ -42,7 +43,7 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def createPlace = Action.async { implicit request =>
+  def createPlace = SecuredAction(Administrator()).async { implicit request =>
     placeBindingForm.bindFromRequest().fold(
       formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       place => {
@@ -52,6 +53,7 @@ class PlaceController @Inject() (ws: WSClient,
           case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
             Logger.error(s"PlaceController.createPlace: this place already exist")
             Conflict
+
           case throwable: Throwable =>
             Logger.error("PlaceController.createPlace: INTERNAL_SERVER_ERROR: ", throwable)
             InternalServerError("PlaceController.createPlace: " + throwable.getMessage)
@@ -78,10 +80,11 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def followPlaceByPlaceId(placeId: Long) = SecuredAction.async { implicit request =>
+  def followByPlaceId(placeId: Long) = SecuredAction.async { implicit request =>
     placeMethods.followByPlaceId(UserPlaceRelation(request.identity.uuid, placeId)) map {
       case 1 =>
         Created
+
       case _ =>
         Logger.error("PlaceController.followPlace: placeMethods.follow did not return 1")
         InternalServerError
@@ -89,16 +92,18 @@ class PlaceController @Inject() (ws: WSClient,
       case psqlException: PSQLException if psqlException.getSQLState == UNIQUE_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: $placeId is already followed")
         Conflict
+
       case psqlException: PSQLException if psqlException.getSQLState == FOREIGN_KEY_VIOLATION =>
         Logger.error(s"PlaceController.followPlaceByPlaceId: there is no place with the id $placeId")
         NotFound
+
       case unknownException =>
         Logger.error("PlaceController.followPlace", unknownException)
         InternalServerError
     }
   }
 
-  def unfollowPlaceByPlaceId(placeId : Long) = SecuredAction.async { implicit request =>
+  def unfollowByPlaceId(placeId : Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     placeMethods.unfollow(UserPlaceRelation(userId, placeId)) map {
       case 1 =>
@@ -116,11 +121,12 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def followPlaceByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
+  def followByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     placeMethods.followByFacebookId(userId, facebookId) map {
       case 1 =>
         Created
+
       case _ =>
         Logger.error("PlaceController.followByFacebookId: placeMethods.followByFacebookId did not return 1")
         InternalServerError
@@ -137,9 +143,9 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def getFollowedPlaces = SecuredAction.async { implicit request =>
+  def findFollowed = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
-    placeMethods.getFollowedPlaces(userId) map { places =>
+    placeMethods.findFollowedPlaces(userId) map { places =>
       Ok(Json.toJson(places))
     } recover { case t: Throwable =>
       Logger.error("PlaceController.getFollowedPlaces: ", t)
@@ -147,7 +153,7 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def isPlaceFollowed(placeId: Long) = SecuredAction.async { implicit request =>
+  def isFollowed(placeId: Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     placeMethods.isFollowed(UserPlaceRelation(userId, placeId)) map { places =>
       Ok(Json.toJson(places))
@@ -157,9 +163,21 @@ class PlaceController @Inject() (ws: WSClient,
     }
   }
 
-  def findPlacesNearCity(city: String, numberToReturn: Int, offset: Int) = Action.async {
+  def findNearCity(city: String, numberToReturn: Int, offset: Int) = Action.async {
     placeMethods.findNearCity(city, numberToReturn, offset) map { places =>
       Ok(Json.toJson(places))
+    }
+  }
+
+  def deleteEventRelation(eventId: Long, placeId: Long) = SecuredAction(Administrator()).async {
+    placeMethods.deleteEventRelation(EventPlaceRelation(eventId, placeId)) map { result =>
+      Ok(Json.toJson(result))
+    }
+  }
+
+  def saveEventRelation(eventId: Long, placeId: Long) = SecuredAction(Administrator()).async {
+    placeMethods.saveEventRelation(EventPlaceRelation(eventId, placeId)) map { result =>
+      Ok(Json.toJson(result))
     }
   }
 }

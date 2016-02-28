@@ -1,0 +1,214 @@
+.event-min-address {
+  vertical-align: text-bottom;
+  float: left;
+}
+
+.event-min-date-and-place {
+  width: 100%;
+  float: left;
+  margin-top: -4px;
+}
+
+.event-min-place-name {
+  vertical-align: text-bottom;
+  margin-left: 5px;
+}
+
+.event-min-player {
+  background: transparent;
+  position: relative;
+  font-size: 10em;
+  display: inline-block;
+  width: 0.4em;
+  height: 0.34em;
+  border: 5px solid $primary-color;
+  border-radius: 0.35em 0.35em 0 0;
+  float: left;
+  border-color: $primary-color $primary-color transparent;
+}
+
+.event-min-player::after {
+  content: "";
+  border-radius: 0 0 249px 0;
+  background: transparent;
+  width: 52px;
+  height: 14px;
+  display: block;
+  border: 5px solid;
+  position: absolute;
+  left: 0.339em;
+  bottom: -0.09em;
+  border-color: transparent $primary-color transparent transparent;
+  transform: rotateY(180deg);
+}
+
+.event-min-player::before {
+  content: "";
+  border-radius: 300px 0 0 0;
+  background: transparent;
+  width: 52px;
+  height: 20px;
+  display: block;
+  border: 5px solid;
+  position: absolute;
+  left: -5px;
+  transform: rotateY(180deg);
+  bottom: -0.09em;
+  border-color: transparent $primary-color transparent transparent;
+}
+
+.event-min-player .fi-play {
+  display: block;
+  font-size: 40px;
+  color: $primary-color;
+  text-align: center;
+  cursor: pointer;
+}
+
+.event-min-title {
+  top: auto;
+  bottom: 0;
+  border-bottom: $primary-color solid 0.3em;
+  padding: 1em 1em 0 1em;
+  background: transparent linear-gradient(to top, black, black 10%, transparent 90%) repeat scroll 0 0;
+  color: $darkGrey;
+  -webkit-transition: -webkit-transform 0.35s;
+  transition: transform 0.35s;
+  -webkit-transform: translate3d(0,100%,0);
+  transform: translate3d(0,0,0);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-transform: capitalize;
+  height: 4.6em;
+}
+
+.event-min-start-date-time {
+  vertical-align: text-bottom;
+  float: left;
+  color: white;
+}
+
+.event-min-tariff {
+  float: right;
+  color: white;
+}
+
+.event-min-title span {
+  display: flex;
+}
+
+.event-min-container {
+  position: relative;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 100%;
+  clear: both;
+  list-style: none;
+  text-align: center;
+}
+
+.event-min-container event-min {
+  position: relative;
+  float: left;
+  height: 222px;
+  overflow: hidden;
+  margin: 0;
+  text-align: center;
+  padding: 0;
+}
+
+.event-min-title h3 {
+  overflow: hidden;
+  height: 1.4em;
+  word-wrap: break-word;
+  white-space: nowrap;
+}
+
+event-min:hover .event-min-title {
+  transform: translate3d(0,-100%,0);
+}
+
+event-min figcaption {
+  top: auto;
+  bottom: 0;
+  padding: 1em;
+  height: 3.7em;
+  background: $veryLightGrey;
+  color: $darkGrey;
+  -webkit-transition: -webkit-transform 0.35s;
+  transition: transform 0.35s;
+  -webkit-transform: translate3d(0,100%,0);
+  transform: translate3d(0,100%,0);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-transform: uppercase;
+  font-size: 1.25em;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+event-min h2 {
+  float: left;
+  margin: 0;
+}
+
+event-min p.icon-links a {
+  float: right;
+  color: $darkGrey;
+  font-size: 1.4em;
+}
+
+event-min:hover p.icon-links a:hover,
+event-min:hover p.icon-links a:focus {
+  color: $darkBlue;
+}
+
+
+event-min h2,
+event-min p.icon-links a {
+  -webkit-transition: -webkit-transform 0.35s;
+  transition: transform 0.35s;
+  -webkit-transform: translate3d(0,200%,0);
+  transform: translate3d(0,200%,0);
+}
+
+event-min p.icon-links a span::before {
+  display: inline-block;
+  padding: 8px 10px;
+  speak: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+event-min h2 {
+  display: inline-block;
+}
+
+event-min:hover figcaption,
+event-min:hover h2,
+event-min:hover p.icon-links a {
+  -webkit-transform: translate3d(0,0,0);
+  transform: translate3d(0,0,0);
+}
+
+event-min:hover h2 {
+  -webkit-transition-delay: 0.05s;
+  transition-delay: 0.05s;
+}
+
+event-min:hover p.icon-links a:nth-child(3) {
+  -webkit-transition-delay: 0.1s;
+  transition-delay: 0.1s;
+}
+
+event-min:hover p.icon-links a:nth-child(2) {
+  -webkit-transition-delay: 0.15s;
+  transition-delay: 0.15s;
+}
+
+event-min:hover p.icon-links a:first-child {
+  -webkit-transition-delay: 0.2s;
+  transition-delay: 0.2s;
+}

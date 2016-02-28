@@ -35,22 +35,22 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   
   def init() = {
     insertFrenchCities()
-    insertGenres()
+//    insertGenres()
 //    insertTwoLettersArtists()
   }
 
   def insertFrenchCities() = Action {
-    val lines = Source.fromFile("textFiles/villes_france.sql").getLines()
+    val lines = Source.fromFile("server/textFiles/villes_france.sql").getLines()
     var i = 0
     while (lines.hasNext) {
       Thread.sleep(200)
       i = i + 1
       val line = lines.next()
       if (line != "" && line.take(1) == "(") {
-        val splitedLine = line.split(",")
+        val splitLine = line.split(",")
         Try {
-          val cityName: String = splitedLine(4).replaceAll("'", "").trim
-          val geographicPoint: String = splitedLine(19).trim + "," + splitedLine(20).trim
+          val cityName: String = splitLine(4).replaceAll("'", "").trim
+          val geographicPoint: String = splitLine(19).trim + "," + splitLine(20).trim
 
           geographicPointMethods.stringToTryPoint(geographicPoint) match {
             case Success(point) =>
@@ -60,7 +60,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
           }
         } match {
           case Failure(e: Exception) =>
-            Logger.error(e + splitedLine(4).replaceAll("'", "") + "(" + splitedLine(19).trim + "," + splitedLine(20).trim + ")")
+            Logger.error(e + splitLine(4).replaceAll("'", "") + "(" + splitLine(19).trim + "," + splitLine(20).trim + ")")
           case _ =>
         }
       }
@@ -69,7 +69,7 @@ class InitController @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def insertGenres() = Action {
-    val lines = Source.fromFile("textFiles/genresIcons").getLines()
+    val lines = Source.fromFile("server/textFiles/genresIcons").getLines()
 
     while (lines.hasNext) {
       Thread.sleep(200)

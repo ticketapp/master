@@ -1,27 +1,26 @@
 package json
 
 import java.sql.Timestamp
-import java.util.UUID
 
 import addresses.Address
 import artistsDomain.{Artist, ArtistWithWeightedGenres}
 import chatContact.ClientOrAdmin
+import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.io.{WKTReader, WKTWriter}
 import eventsDomain.{Event, EventWithRelations}
 import genresDomain.{Genre, GenreWithWeight}
 import issues.{Issue, IssueComment}
 import organizersDomain.{Organizer, OrganizerWithAddress}
 import placesDomain.{Place, PlaceWithAddress}
+import play.api.libs.json.{JsNumber, _}
 import playlistsDomain._
 import tariffsDomain.Tariff
 import ticketsDomain._
-import trackingDomain.{UserSession, UserAction}
+import trackingDomain.{UserAction, UserSession}
 import tracksDomain.{Track, TrackWithGenres}
 
-import com.vividsolutions.jts.geom.Geometry
-import play.api.libs.json.{JsNumber, _}
-
 object JsonHelper {
+
   implicit object JavaBigDecimalWrites extends AnyRef with Writes[java.math.BigDecimal] {
     def writes(bigDecimal: java.math.BigDecimal): JsNumber = JsNumber(BigDecimal(bigDecimal))
   }
@@ -77,68 +76,49 @@ object JsonHelper {
 
   implicit val myEnumReads: Reads[ClientOrAdmin.Value] = enumReads(ClientOrAdmin)
 
-//  implicit val account60Writes: Writes[Account60] = Json.writes[Account60]
-//  implicit val account63Writes: Writes[Account63] = Json.writes[Account63]
-//  implicit val account403Writes: Writes[Account403] = Json.writes[Account403]
-//  implicit val account413Writes: Writes[Account413] = Json.writes[Account413]
-//  implicit val account623Writes: Writes[Account623] = Json.writes[Account623]
-//  implicit val account626Writes: Writes[Account626] = Json.writes[Account626]
-//  implicit val account627Writes: Writes[Account627] = Json.writes[Account627]
-//  implicit val account708Writes: Writes[Account708] = Json.writes[Account708]
-//  implicit val account4686Writes: Writes[Account4686] = Json.writes[Account4686]
+  //  implicit val account60Format: Format[Account60] = Json.format[Account60]
+  //  implicit val account63Format: Format[Account63] = Json.format[Account63]
+  //  implicit val account403Format: Format[Account403] = Json.format[Account403]
+  //  implicit val account413Format: Format[Account413] = Json.format[Account413]
+  //  implicit val account623Format: Format[Account623] = Json.format[Account623]
+  //  implicit val account626Format: Format[Account626] = Json.format[Account626]
+  //  implicit val account627Format: Format[Account627] = Json.format[Account627]
+  //  implicit val account708Format: Format[Account708] = Json.format[Account708]
+  //  implicit val account4686Format: Format[Account4686] = Json.format[Account4686]
 
-  implicit val genreWrites = Json.writes[Genre]
-  implicit val trackWrites: Writes[Track] = Json.writes[Track]
-  implicit val trackReads: Reads[Track] = Json.reads[Track]
-  implicit val trackWithGenresWrites: Writes[TrackWithGenres] = Json.writes[TrackWithGenres]
-  implicit val trackWithPlaylistRankWrites = Json.writes[TrackWithPlaylistRank]
-  implicit val trackWithPlaylistRankAndGenres = Json.writes[TrackWithPlaylistRankAndGenres]
-  implicit val playlistInfoWrites = Json.writes[Playlist]
-  implicit val trackIdWithPlaylistRankWrites = Json.writes[TrackIdWithPlaylistRank]
-  implicit val playlistWithTracksWrites = Json.writes[PlaylistWithTracks]
-  implicit val playlistWithTracksWithGenres = Json.writes[PlaylistWithTracksWithGenres]
-  implicit val playlistNameTracksIdAndRankWrites = Json.writes[PlaylistNameTracksIdAndRank]
-  implicit val artistWrites = Json.writes[Artist]
-  implicit val genreWithWeightWrites = Json.writes[GenreWithWeight]
-  implicit val artistWithGenresWrites = Json.writes[ArtistWithWeightedGenres]
-  implicit val addressWrites = Json.writes[Address]
-  implicit val addressReads = Json.reads[Address]
-  implicit val placeWrites = Json.writes[Place]
-  implicit val placeReads = Json.reads[Place]
-  implicit val placeWithAddressWrites = Json.writes[PlaceWithAddress]
-  implicit val placeWithAddressReads = Json.reads[PlaceWithAddress]
-  implicit val organizerWrites = Json.writes[Organizer]
-  implicit val organizerReads = Json.reads[Organizer]
-  implicit val organizerWithAddressWrites = Json.writes[OrganizerWithAddress]
-  implicit val eventWrites = Json.writes[Event]
-  implicit val eventReads = Json.reads[Event]
-  implicit val eventWithRelationsWrites = Json.writes[EventWithRelations]
-//  implicit val infoWrites: Writes[Info] = Json.writes[Info]
-  implicit val issueWrites: Writes[Issue] = Json.writes[Issue]
-  implicit val issueReads: Reads[Issue] = Json.reads[Issue]
-//  implicit val mailWrites: Writes[Mail] = Json.writes[Mail]
-  implicit val issueCommentWrites: Writes[IssueComment] = Json.writes[IssueComment]
-  implicit val issueCommentReads: Reads[IssueComment] = Json.reads[IssueComment]
-  implicit val ticketWrites: Writes[Ticket] = Json.writes[Ticket]
-  implicit val ticketRead: Reads[Ticket] = Json.reads[Ticket]
-  implicit val statusWrites: Writes[TicketStatus] = Json.writes[TicketStatus]
-  implicit val statusRead: Reads[TicketStatus] = Json.reads[TicketStatus]
-  implicit val ticketWithStatusWrites: Writes[TicketWithStatus] = Json.writes[TicketWithStatus]
-  implicit val ticketWithStatusRead: Reads[TicketWithStatus] = Json.reads[TicketWithStatus]
-  implicit val salableEventReads: Reads[SalableEvent] = Json.reads[SalableEvent]
-  implicit val salableEventWrites: Writes[SalableEvent] = Json.writes[SalableEvent]
-  implicit val pendingTicketReads: Reads[PendingTicket] = Json.reads[PendingTicket]
-  implicit val pendingTicketWrites: Writes[PendingTicket] = Json.writes[PendingTicket]
-  implicit val ticketBillReads: Reads[TicketBill] = Json.reads[TicketBill]
-  implicit val ticketBillWrites: Writes[TicketBill] = Json.writes[TicketBill]
-  implicit val tariffReads: Reads[Tariff] = Json.reads[Tariff]
-  implicit val tariffWrites: Writes[Tariff] = Json.writes[Tariff]
-  implicit val userActionReads: Reads[UserAction] = Json.reads[UserAction]
-  implicit val userActionWrites: Writes[UserAction] = Json.writes[UserAction]
-  implicit val userSessionReads: Reads[UserSession] = Json.reads[UserSession]
-  implicit val userSessionWrites: Writes[UserSession] = Json.writes[UserSession]
-  implicit val maybeSalableEventReads: Reads[MaybeSalableEvent] = Json.reads[MaybeSalableEvent]
-  implicit val maybeSalableEventWrites: Writes[MaybeSalableEvent] = Json.writes[MaybeSalableEvent]
+  implicit val genreFormat = Json.format[Genre]
+  implicit val trackFormat: Format[Track] = Json.format[Track]
+  implicit val trackWithGenresFormat: Format[TrackWithGenres] = Json.format[TrackWithGenres]
+  implicit val trackWithPlaylistRankFormat = Json.format[TrackWithPlaylistRank]
+  implicit val trackWithPlaylistRankAndGenres = Json.format[TrackWithPlaylistRankAndGenres]
+  implicit val playlistInfoFormat = Json.format[Playlist]
+  implicit val trackIdWithPlaylistRankFormat = Json.format[TrackIdWithPlaylistRank]
+  implicit val playlistWithTracksFormat = Json.format[PlaylistWithTracks]
+  implicit val playlistWithTracksWithGenres = Json.format[PlaylistWithTracksWithGenres]
+  implicit val playlistNameTracksIdAndRankFormat = Json.format[PlaylistNameTracksIdAndRank]
+  implicit val artistFormat: Format[Artist] = Json.format[Artist]
+  implicit val genreWithWeightFormat = Json.format[GenreWithWeight]
+  implicit val artistWithGenresFormat = Json.format[ArtistWithWeightedGenres]
+  implicit val addressFormat = Json.format[Address]
+  implicit val placeFormat = Json.format[Place]
+  implicit val placeWithAddressFormat = Json.format[PlaceWithAddress]
+  implicit val organizerFormat = Json.format[Organizer]
+  implicit val organizerWithAddressFormat = Json.format[OrganizerWithAddress]
+  implicit val eventFormat = Json.format[Event]
+  implicit val eventWithRelationsFormat = Json.format[EventWithRelations]
+  implicit val issueFormat: Format[Issue] = Json.format[Issue]
+  implicit val issueCommentFormat: Format[IssueComment] = Json.format[IssueComment]
+  implicit val ticketFormat: Format[Ticket] = Json.format[Ticket]
+  implicit val statusFormat: Format[TicketStatus] = Json.format[TicketStatus]
+  implicit val ticketWithStatusFormat: Format[TicketWithStatus] = Json.format[TicketWithStatus]
+  implicit val salableEventFormat: Format[SalableEvent] = Json.format[SalableEvent]
+  implicit val pendingTicketFormat: Format[PendingTicket] = Json.format[PendingTicket]
+  implicit val ticketBillFormat: Format[TicketBill] = Json.format[TicketBill]
+  implicit val tariffFormat: Format[Tariff] = Json.format[Tariff]
+  implicit val userActionFormat: Format[UserAction] = Json.format[UserAction]
+  implicit val userSessionFormat: Format[UserSession] = Json.format[UserSession]
+  implicit val maybeSalableEventFormat: Format[MaybeSalableEvent] = Json.format[MaybeSalableEvent]
+
   val readUserActionReads: Reads[Seq[UserAction]] = Reads.seq(__.read[UserAction])
   val readUserSessionReads: Reads[Seq[UserSession]] = Reads.seq(__.read[UserSession])
   val readSalableEventReads: Reads[Seq[SalableEvent]] = Reads.seq(__.read[SalableEvent])
@@ -147,5 +127,4 @@ object JsonHelper {
   val readTicketBillReads: Reads[Seq[TicketBill]] = Reads.seq(__.read[TicketBill])
   val readMaybeSalableEventReads: Reads[Seq[MaybeSalableEvent]] = Reads.seq(__.read[MaybeSalableEvent])
   val readTariffReads: Reads[Seq[Tariff]] = Reads.seq(__.read[Tariff])
-
 }

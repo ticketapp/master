@@ -73,10 +73,7 @@ lazy val server = (project in file("server")).settings(
     "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
     "com.typesafe.akka" %% "akka-contrib" % akkaVersion,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
-    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
-    "org.webjars" % "bootstrap" % "3.3.4",
-    "org.webjars" % "jquery" % "2.1.4",
-    "org.webjars" % "handlebars" % "4.0.2"
+    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
   )
 ).enablePlugins(PlayScala).
     aggregate(clients.map(projectToRef): _*).

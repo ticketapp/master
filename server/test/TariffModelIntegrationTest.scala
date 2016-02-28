@@ -7,7 +7,7 @@ import database.MyPostgresDriver.api._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class TariffModelTestIntegration extends GlobalApplicationForModelsIntegration {
+class TariffModelIntegrationTest extends GlobalApplicationForModelsIntegration {
 
   override def beforeAll(): Unit = {
     generalBeforeAll()

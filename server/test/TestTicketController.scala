@@ -29,6 +29,12 @@ class TestTicketController extends GlobalApplicationForControllers {
         INSERT INTO events(eventid, ispublic, isactive, name, starttime)
           VALUES(5, true, true, 'notPassedEvent',
           TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+        INSERT INTO events(eventid, ispublic, isactive, name, geographicpoint, starttime)
+          VALUES(5000, true, true, 'salableEvent', '010100000000000000000055C00000000000006E40',
+          TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
+        INSERT INTO events(eventid, ispublic, isactive, name, geographicpoint, starttime)
+          VALUES(6000, true, true, 'salableEvent', '010100000000000000000055C00000000000005E40',
+          TIMESTAMP WITH TIME ZONE '2050-08-24 14:00:00+02:00');
 
         INSERT INTO tariffs(tariffId, denomination, price, startTime, endTime, eventId)
           VALUES(10000, 'test', 10, TIMESTAMP WITH TIME ZONE '2040-08-24 14:00:00+02:00',
@@ -52,7 +58,10 @@ class TestTicketController extends GlobalApplicationForControllers {
         INSERT INTO soldTicketBills(billId, ticketId, userId, date, amount) VALUES
          (1000, 1100, '077f3ea6-2272-4457-a47e-9e9111108e44', TIMESTAMP WITH TIME ZONE '2015-09-24 14:00:00+02:00', 10);
 
-        INSERT INTO salableEvents(eventId) VALUES (100);"""),
+        INSERT INTO salableEvents(eventId) VALUES (100);
+        INSERT INTO salableEvents(eventId) VALUES (5000);
+        INSERT INTO salableEvents(eventId) VALUES (6000);
+        """),
       5.seconds)
   }
 
@@ -96,9 +105,17 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "add a salable event" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addSalableEvents(1000))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
+    }
+
+
+    "return status forbidden if user try to add a salable event" in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addSalableEvents(1000))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
     }
 
     "propose new ticket" in {
@@ -117,14 +134,21 @@ class TestTicketController extends GlobalApplicationForControllers {
 
     "add a ticket to sell" in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addTicketToSale("newTicketToSell", 100, 10000))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
 
+    "return status forbidden if user try to add a ticket to sell" in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.addTicketToSale("newTicketToSell", 100, 10000))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find pending tickets " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findPendingTickets())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[PendingTicket]] =
         contentAsJson(info).validate[Seq[PendingTicket]](JsonHelper.readPendingTicketReads)
 
@@ -136,25 +160,48 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
+    "return status forbidden if user try to find pending tickets " in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findPendingTickets())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "accept pending ticket " in {
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.acceptPendingTicket(savedPendingTicket.pendingTicketId.get))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
+
+      contentAsString(info).toInt mustEqual 1
+    }
+
+    "return status forbidden if user try to accept pending ticket " in {
       val Some(info) = route(FakeRequest(
         ticketsDomain.routes.TicketController.acceptPendingTicket(savedPendingTicket.pendingTicketId.get))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
-      contentAsString(info).toInt mustEqual 1
+      status(info) mustEqual FORBIDDEN
     }
 
     "reject pending ticket " in {
       val Some(info) = route(
         FakeRequest(ticketsDomain.routes.TicketController.rejectPendingTicket(savedPendingTicket.pendingTicketId.get))
-          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+          .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       contentAsString(info).toInt mustEqual 1
     }
 
+    "return status forbidden if user try to reject pending ticket " in {
+      val Some(info) = route(
+        FakeRequest(ticketsDomain.routes.TicketController.rejectPendingTicket(savedPendingTicket.pendingTicketId.get))
+          .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find all tickets with status " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findTicketsWithStatus())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[TicketWithStatus]] =
         contentAsJson(info).validate[Seq[TicketWithStatus]](JsonHelper.readTicketWithStatusReads)
 
@@ -166,10 +213,17 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
+    "return status forbidden if user try to find all tickets with status " in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findTicketsWithStatus())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find bought bills " in {
       val Some(info) = route(FakeRequest(
         ticketsDomain.routes.TicketController.findBoughtBills())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
       )
       val validatedJsonTicketsEvents: JsResult[Seq[TicketBill]] =
         contentAsJson(info).validate[Seq[TicketBill]](JsonHelper.readTicketBillReads)
@@ -182,9 +236,18 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
+    "return status forbidden if user try to  find bought bills " in {
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.findBoughtBills())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+
+      status(info) mustEqual FORBIDDEN
+    }
+
     "find sold bills " in {
       val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findSoldBills())
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
       val validatedJsonTicketsEvents: JsResult[Seq[TicketBill]] =
         contentAsJson(info).validate[Seq[TicketBill]](JsonHelper.readTicketBillReads)
 
@@ -196,7 +259,71 @@ class TestTicketController extends GlobalApplicationForControllers {
       }
     }
 
-    "find maybe salable events by containing" in {
+    "return status forbidden if user try to find sold bills " in {
+      val Some(info) = route(FakeRequest(ticketsDomain.routes.TicketController.findSoldBills())
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(info) mustEqual FORBIDDEN
+    }
+
+
+    "find salable events by geographicPoint" in {
+      val expectedMaybeSalableEvent = MaybeSalableEvent(
+          Event(
+            id = Some(6000),
+            facebookId = None,
+            isPublic = true,
+            isActive = true,
+            name = "salableEvent",
+            geographicPoint = geographicPointMethods.stringToTryPoint("-84, 120").get,
+            description = None,
+            startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+            endTime = None,
+            ageRestriction = 16,
+            tariffRange = None,
+            ticketSellers = None,
+            imagePath = None),
+          isSalable = true
+        )
+
+      val expectedMaybeSalableEvent1 = MaybeSalableEvent(
+        Event(
+          id = Some(5000),
+          facebookId = None,
+          isPublic = true,
+          isActive = true,
+          name = "salableEvent",
+          geographicPoint = geographicPointMethods.stringToTryPoint("-84, 240").get,
+          description = None,
+          startTime = new DateTime("2050-08-24T14:00:00.000+02:00"),
+          endTime = None,
+          ageRestriction = 16,
+          tariffRange = None,
+          ticketSellers = None,
+          imagePath = None),
+        isSalable = true
+      )
+      val geographicPoint = "-84, 240"
+      val offset = 0
+      val numberToReturn = 2
+
+      val Some(info) = route(FakeRequest(
+        ticketsDomain.routes.TicketController.findMaybeSalableEventsNear(geographicPoint, offset: Int, numberToReturn: Int))
+      )
+
+      val validatedJsonMaybeSalableEvents: JsResult[Seq[MaybeSalableEvent]] =
+        contentAsJson(info).validate[Seq[MaybeSalableEvent]](JsonHelper.readMaybeSalableEventReads)
+
+      val maybeSalableEventsResult = validatedJsonMaybeSalableEvents match {
+        case maybeSalableEvent: JsSuccess[Seq[MaybeSalableEvent]] => maybeSalableEvent.get
+        case error: JsError => throw new Exception
+      }
+
+      maybeSalableEventsResult mustEqual Seq(expectedMaybeSalableEvent1, expectedMaybeSalableEvent)
+
+    }
+
+    "find maybe salable events containing" in {
       val expectedMaybeSalableEvent = MaybeSalableEvent(
         Event(
           id = Some(100),
@@ -234,7 +361,7 @@ class TestTicketController extends GlobalApplicationForControllers {
       )
 
       val Some(info) = route(FakeRequest(
-        ticketsDomain.routes.TicketController.findMaybeSalableEventsByContaining("notPassed"))
+        ticketsDomain.routes.TicketController.findMaybeSalableEventsContaining("notPassed"))
       )
       val validatedJsonMaybeSalableEvents: JsResult[Seq[MaybeSalableEvent]] =
         contentAsJson(info).validate[Seq[MaybeSalableEvent]](JsonHelper.readMaybeSalableEventReads)

@@ -1,26 +1,30 @@
 package artistsDomain
 
 import genresDomain.{GenreWithWeight, genreFormsTrait}
-import play.api.data.Form
+import play.api.data.{Mapping, Form}
 import play.api.data.Forms._
 
 
 trait artistFormsTrait extends genreFormsTrait {
 
-  val artistBindingForm = Form(
+  private val mappingArtist: Mapping[ArtistWithWeightedGenres] = mapping(
+    "facebookId" -> optional(nonEmptyText(2)),
+    "artistName" -> nonEmptyText(2),
+    "imagePath" -> optional(nonEmptyText(2)),
+    "description" -> optional(nonEmptyText),
+    "facebookUrl" -> nonEmptyText,
+    "websites" -> seq(nonEmptyText(4)),
+    "genres" -> seq(genreWithWeightBindingForm),
+    "likes" -> optional(number),
+    "country" -> optional(nonEmptyText)
+  )(artistFormApply)(artistFormUnapply)
+
+  val artistBindingForm = Form(mappingArtist)
+
+  val artistWithPatternBindingForm = Form(
     mapping(
       "searchPattern" -> nonEmptyText(3),
-      "artist" -> mapping(
-        "facebookId" -> optional(nonEmptyText(2)),
-        "artistName" -> nonEmptyText(2),
-        "imagePath" -> optional(nonEmptyText(2)),
-        "description" -> optional(nonEmptyText),
-        "facebookUrl" -> nonEmptyText,
-        "websites" -> seq(nonEmptyText(4)),
-        "genresDomain" -> seq(genreWithWeightBindingForm),
-        "likes" -> optional(number),
-        "country" -> optional(nonEmptyText)
-      )(artistFormApply)(artistFormUnapply)
+      "artist" -> mappingArtist
     )(formWithPatternApply)(formWithPatternUnapply)
   )
 

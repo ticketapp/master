@@ -32,10 +32,22 @@ trait Context extends Scope {
     avatarURL = None
   )
 
-  implicit val envvv: Environment[User, CookieAuthenticator] =
-    new FakeEnvironment[User, CookieAuthenticator](Seq(identity.loginInfo -> identity))
+  val administrator = User(
+    uuid = UUID.fromString("078f3ea6-2272-4457-a47e-9e9111108e44"),
+    loginInfo = LoginInfo("facebook", "560731184063043"),
+    firstName = None,
+    lastName = None,
+    fullName = None,
+    email = None,
+    avatarURL = None
+  )
 
-  lazy val application = new GuiceApplicationBuilder().configure(Configuration.from(Map(
+  implicit val envvv: Environment[User, CookieAuthenticator] =
+    new FakeEnvironment[User, CookieAuthenticator](Seq(
+      identity.loginInfo -> identity,
+      administrator.loginInfo -> administrator))
+
+  lazy val fakeApplication = new GuiceApplicationBuilder().configure(Configuration.from(Map(
     "slick.dbs.default.driver" -> "slick.driver.PostgresDriver$",
     "slick.dbs.default.db.driver" -> "org.postgresql.Driver",
     "slick.dbs.default.db.url" -> "jdbc:postgresql://dbHostTest:5432/tests",

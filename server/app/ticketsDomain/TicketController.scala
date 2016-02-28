@@ -2,26 +2,27 @@ package ticketsDomain
 
 import javax.inject.Inject
 
-import application.User
-import com.mohiva.play.silhouette.api.{Silhouette, Environment}
+import addresses.SearchGeographicPoint
+import application.{Administrator, User}
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
-import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
+import com.vividsolutions.jts.geom.Geometry
+import json.JsonHelper._
+import org.joda.time.DateTime
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.libs.json.Json
 import play.api.mvc._
-import json.JsonHelper._
-import org.joda.time.DateTime
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
-
-import scala.util.{Success, Failure}
 
 class TicketController @Inject()(val messagesApi: MessagesApi,
                                  val env: Environment[User, CookieAuthenticator],
-                                 val ticketMethods: TicketMethods)
+                                 val ticketMethods: TicketMethods,
+                                 val geographicPointMethods: SearchGeographicPoint)
   extends Silhouette[User, CookieAuthenticator] {
 
 
@@ -34,8 +35,8 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def findMaybeSalableEventsByContaining(pattern: String) = Action.async {
-    ticketMethods.findMaybeSalableEventsByContaining(pattern) map { maybeSalableEvents =>
+  def findMaybeSalableEventsContaining(pattern: String) = Action.async {
+    ticketMethods.findMaybeSalableEventsContaining(pattern) map { maybeSalableEvents =>
         Ok(Json.toJson(maybeSalableEvents))
     } recover { case NonFatal(e) =>
       Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)
@@ -43,7 +44,19 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def addSalableEvents(eventId: Long) = Action.async {
+
+  def findMaybeSalableEventsNear(geographicPointString: String, offset: Int, numberToReturn: Int) = Action.async {
+    val geographicPoint = geographicPointMethods.stringToTryPoint(geographicPointString).get
+    ticketMethods.findMaybeSalableEventsNear(geographicPoint: Geometry, offset: Int, numberToReturn: Int) map {
+      maybeSalableEvents =>
+        Ok(Json.toJson(maybeSalableEvents))
+    } recover { case NonFatal(e) =>
+      Logger.error(this.getClass + e.getStackTrace.apply(1).getMethodName, e)
+      InternalServerError(this.getClass + "findMaybeSalableEventsByContaining: " + e.getMessage)
+    }
+  }
+
+  def addSalableEvents(eventId: Long) = SecuredAction(Administrator()).async {
     ticketMethods.addSalableEvents(SalableEvent(eventId)) map { response =>
         Ok(Json.toJson(response))
     } recover { case t: Throwable =>
@@ -84,7 +97,8 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def addTicketToSale(qrCode: String, eventId: Long, tariffId: Long) = Action.async { implicit request =>
+  def addTicketToSale(qrCode: String, eventId: Long, tariffId: Long) = SecuredAction(Administrator()).async {
+    implicit request =>
     val newTicket = Ticket(qrCode = qrCode, eventId = eventId, tariffId = tariffId)
     ticketMethods.save(newTicket) map { response =>
       Ok(Json.toJson(response))
@@ -94,7 +108,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def findPendingTickets = Action.async { implicit request =>
+  def findPendingTickets = SecuredAction(Administrator()).async { implicit request =>
     ticketMethods.findPendingTickets map { pendingTickets =>
       Ok(Json.toJson(pendingTickets))
     } recover { case t: Throwable =>
@@ -103,7 +117,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def acceptPendingTicket(pendingTicketId: Long) = Action.async { implicit request =>
+  def acceptPendingTicket(pendingTicketId: Long) = SecuredAction(Administrator()).async { implicit request =>
     ticketMethods.updatePendingTicket(Some(pendingTicketId), isValidate = true) map { response =>
       Ok(Json.toJson(response))
     } recover { case t: Throwable =>
@@ -112,7 +126,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def rejectPendingTicket(pendingTicketId: Long) = Action.async { implicit request =>
+  def rejectPendingTicket(pendingTicketId: Long) = SecuredAction(Administrator()).async { implicit request =>
     ticketMethods.updatePendingTicket(Some(pendingTicketId), isValidate = false) map { response =>
       Ok(Json.toJson(response))
     } recover { case t: Throwable =>
@@ -121,7 +135,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def findTicketsWithStatus = Action.async { implicit request =>
+  def findTicketsWithStatus = SecuredAction(Administrator()).async { implicit request =>
     ticketMethods.findAll() map { tickets =>
       Ok(Json.toJson(tickets))
     } recover { case t: Throwable =>
@@ -130,7 +144,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def findBoughtBills = Action.async { implicit request =>
+  def findBoughtBills = SecuredAction(Administrator()).async { implicit request =>
     ticketMethods.findAllBoughtTicketBill map {bills =>
       Ok(Json.toJson(bills))
     } recover { case t: Throwable =>
@@ -139,7 +153,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def findSoldBills = Action.async { implicit request =>
+  def findSoldBills = SecuredAction(Administrator()).async { implicit request =>
     ticketMethods.findAllSoldTicketBill map {bills =>
       Ok(Json.toJson(bills))
     } recover { case t: Throwable =>

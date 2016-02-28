@@ -38,7 +38,7 @@ class TrackingMethods @Inject() (protected val dbConfigProvider: DatabaseConfigP
   def findUserSessions: Future[Seq[UserSession]] = db.run(userSessions.result)
 
   def findInProgressSession: Future[Seq[UserSession]] = {
-    val now = DateTime.now()
+    /*val now = DateTime.now()
     val fiveMinutesAgo = now.minusMinutes(5).getMillis
     val query =
       for {
@@ -57,7 +57,8 @@ class TrackingMethods @Inject() (protected val dbConfigProvider: DatabaseConfigP
         case (session, actions) if actions.exists(_.timestamp.getTime > fiveMinutesAgo) =>
           session
       }
-    }
+    }*/
+    Future(Seq.empty)
   }
 
   def saveUserAction(userAction: UserAction): Future[Int] = db.run(userActions += userAction)

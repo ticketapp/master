@@ -8,21 +8,69 @@
 
         @scripts()
 
-        <title>Claude</title>
+        <title>
+            Claude
+        </title>
 
     </head>
 
-    <body ng-app="app" class="tracking">
+    <body ng-app="app" class="tracking" ng-cloak>
+
+        <auth class="absolute top marginRight20 right0 md-button md-fab md-primary"><i class="fa fa-facebook"></i></auth>
+
+        <md-toolbar md-scroll-shrink ng-show="false" class="ng-hide" id="playerContainer">
+            <div class="md-toolbar-tools">
+                <player id="player">
+                    <player-control>
+                        <prev>
+                            <arrow></arrow>
+                            <arrow></arrow>
+                        </prev>
+                        <play-pause class="play-button paused">
+                            <div class="left"></div>
+                            <div class="right"></div>
+                            <div class="triangle-1"></div>
+                            <div class="triangle-2"></div>
+                        </play-pause>
+                        <next>
+                            <arrow></arrow>
+                            <arrow></arrow>
+                        </next>
+                    </player-control>
+                    <div class="time-container">
+                        <current-time></current-time>
+                        <duration></duration>
+                    </div>
+                    <artist-name flex="row"></artist-name>
+                    <track-title flex="row"></track-title>
+                    <audio class="width100p" id="musicPlayer"></audio>
+                    <video width="0" height="0" id="videoPlayer" preload="true" autoplay>
+                        <source type="video/youtube" src="" />
+                    </video>
+                </player>
+            </div>
+        </md-toolbar>
 
         <md-content>
-            <div ng-view="" class="column large-12 padding0"></div>
+            <cookies class="width100p float-left marginLeft10">
 
-            <div class="landing-page-footer ">
+                {{ 'COOKIES' | translate }}
+
+                <a href="#/cookies">
+                {{ 'COOKIES_LINK' | translate }}
+                </a>
+                <i class="fa fa-times float-right marginRight20" >
+                </i>
+            </cookies>
+
+            <div ng-view="" class="column large-12 padding0">
             </div>
+
+            <div class="landing-page-footer">
+            </div>
+
         </md-content>
-
         <contact-component>
-
         </contact-component>
 
         @playscalajs.html.scripts("client")

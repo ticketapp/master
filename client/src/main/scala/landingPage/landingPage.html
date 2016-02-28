@@ -1,180 +1,66 @@
-
 <div class="image-container">
     <div class="column large-12 padding0">
         <h1 class="home-title column medium-8 medium-offset-2 large-6 large-offset-3">
-            <b>{{ 'HEADLINE' | translate }}</b>
+            <b>
+                {{ 'HEADLINE' | translate }}
+            </b>
         </h1>
     </div>
+
     <h4 class="home-subtitle column padding0">
         {{ 'INTRO_TEXT' | translate }}
     </h4>
+
     <form class="column medium-10 medium-offset-1 large-8 large-offset-2 sell-form absolute">
         <div class="form-container tracking" data-ng-controller="eventsController">
-            <md-autocomplete
-                    md-search-text-change="controller.findMaybeSalableEventsContaining(ctrl.searchText)"
-                    md-search-text="$parent.ctrl.searchText"
-                    md-selected-item-change="ctrl.selectedItemChange(item)"
-                    md-items="item in maybeSalableEvents"
-                    md-item-text="item.display"
-                    md-min-length="0"
-                    class="sell-input tracking"
-                    id="li1"
-                    tracker="in,li1,{{ctrl.searchText}}"
-                    focus="{{focusSearch}}"
-                    placeholder="{{ 'INPUT_LANDING_PAGE_PLACEHOLDER' | translate }}">
+
+            <md-autocomplete md-search-text-change="controller.findMaybeSalableEventsContaining(ctrl.searchText)"
+                             md-search-text="$parent.ctrl.searchText"
+                             md-items="event in maybeSalableEvents"
+                             md-item-text="event.event.name"
+                             md-min-length="0"
+                             md-selected-item-change="controller.redirectSalableEvent(event)"
+                             class="sell-input tracking"
+                             id="li1"
+                             ng-init="controller.findMaybeSalableEventsNearActualPosition(0, 12)"
+                             tracker="in,li1,{{ctrl.searchText}}"
+                             focus="{{focusSearch}}"
+                             placeholder="{{ 'INPUT_LANDING_PAGE_PLACEHOLDER' | translate }}">
+
                 <md-item-template>
-                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
-                        {{item.event.name}}
-                    </span>
-                    <a data-ng-show="item.isSalable" class="float-right">Vendez votre billet</a>
-                    <a data-ng-show="!item.isSalable" class="float-right">Nous n'achetons pas de billets</a>
+                    <a  class="float-left">
+                         <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
+                            {{event.event.name}} <a class="float-right">{{SELL_TICKET | translate}}</a>
+                         </span>
+                    </a>
                 </md-item-template>
+
                 <md-not-found>
-                    No states matching "{{ctrl.searchText}}" were found.
-                    <a ng-click="ctrl.newState(ctrl.searchText)">Create a new one!</a>
+                    No events matching "{{ctrl.searchText}}" were found.
                 </md-not-found>
+
             </md-autocomplete>
+
             <a class="sell-form-link tracking"
                id="lb1"
                data-ng-click="focusSearch = true; directive.track('cl,lb1')"
-               data-ng-show="ctrl.searchText.length == 0 || !ctrl.searchText">← {{ 'INPUT_LANDING_PAGE_TEXT' | translate }}</a>
+               data-ng-show="ctrl.searchText.length == 0 || !ctrl.searchText">
+                ← {{ 'INPUT_LANDING_PAGE_TEXT' | translate }}
+            </a>
+
         </div>
     </form>
+
 </div>
-<div class="column large-12 padding0" style="min-height: 300px; margin-top: 600px; background: white" data-ng-controller="eventsController" data-ng-init="controller.findNearActualPosition(0,12)">
-    <div class="md-whiteframe-z1 column large-12">
-        <h1 class="column large-12">{{ 'PROXIMITY_EVENTS_HEADER' | translate }}</h1>
-        <h2 class="column large-2">{{ 'ADVANCED_SEARCH_HEADER' | translate }}: </h2>
-        <div class="column large-6 float-left" ng-include="'assets/templates/events/eventForms.html'"></div>
+
+<div class="column large-12 padding0"
+     style="min-height: 300px; margin-top: 600px; background: white"
+     data-ng-controller="eventsController"
+     data-ng-init="controller.findNearActualPosition(0,12)">
+    <div class="event-min-container">
+        <event-min class="float-left column small-12 medium-6 large-4 fade "
+                   data-ng-repeat="event in events | limitTo: limit">
+        </event-min>
     </div>
-    <event-min class="float-left column small-12 medium-6 large-4 fade min_contener margin0 padding0"
-               data-ng-repeat="event in events | limitTo: limit">
-    </event-min >
 
 </div>
-<style>
-    .home-title {
-        background-color: #2BA8DE;
-        border-radius: 2px;
-        color: white;
-        display: inline-block;
-        box-shadow: 0.2em 0 0 #2BA8DE, -0.2em 0 0 #2BA8DE;
-        padding: 0.15em 0.2em;
-        font-family: "Gotham SSm A","Gotham SSm B", sans-serif;
-        font-style: normal;
-        font-weight: 500;
-        font-size: 36px;
-        line-height: 1.45;
-        font-size-adjust: none;
-        font-stretch: normal;
-        font-feature-settings: normal;
-        font-language-override: normal;
-        font-kerning: auto;
-        font-synthesis: weight style;
-        font-variant-alternates: normal;
-        font-variant-caps: normal;
-        font-variant-east-asian: normal;
-        font-variant-ligatures: normal;
-        font-variant-numeric: normal;
-        font-variant-position: normal;
-        letter-spacing: -2px;
-        position: absolute;
-        top: 200px;
-        text-align: center;
-    }
-
-    .landing-page-footer {
-        background-color: #76D3B6;
-        /*background-color: #888888;*/
-        color: white;
-        width: 100%;
-        bottom: 0;
-        float: left;
-        padding: 50px;
-    }
-
-    .sell-input {
-        border: 1px solid #2ba8de !important;
-        display: inline-block;
-        width: 100%;
-        background: white;
-        border-radius: 3px !important;
-        vertical-align: middle;
-        color: #2ba8de;
-        font-weight: bold;
-        height: 52px !important;
-        /*color: #595959; when the user is typing*/
-    }
-
-    .sell-input::-webkit-input-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
-    }
-
-    .sell-input> md-autocomplete-wrap>input::-webkit-input-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
-        height: 100%;
-    }
-
-    .sell-input>md-autocomplete-wrap>input:-moz-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
-        height: 100%;
-    }
-
-    .sell-input>md-autocomplete-wrap>input:-ms-input-placeholder {
-        color: #2ba8de;
-        font-size: 13px;
-    }
-    .sell-input > md-autocomplete-wrap,  .sell-input > md-autocomplete-wrap > input{
-        height: 50px;
-    }
-
-    .sell-form {
-        position: absolute;
-        top: 515px;
-    }
-
-    .form-container {
-        position: relative;
-    }
-
-    .home-subtitle {
-        color: white;
-        font-family: "proxima-nova","Whitney SSm B", sans-serif;
-        text-shadow: 0 0 25px #595959;
-        font-size: 22px;
-        top: 275px;
-        position: relative;
-        text-align: center;
-        height: 60px !important;
-    }
-
-    .image-container {
-        top: 0;
-        float: left;
-        width: 100%;
-        height: 800px;
-        background: url('assets/images/concertLandingPage.jpg') no-repeat;
-        background-size: 100%;
-        position: absolute;
-        background-position-y: center;
-    }
-
-    .sell-form-link {
-        position: absolute;
-        top: 17px;
-        right: 17px;
-        color: #2ba8de;
-        font-size: 13px;
-    }
-</style>
-
-
-
-
-
-
-
-

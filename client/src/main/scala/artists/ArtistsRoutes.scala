@@ -2,7 +2,7 @@ package artists
 
 object ArtistsRoutes {
   def find(numberToReturn: Int, offset: Int): String =
-    "/artists/since?offset=" + offset + "&numberToReturn=" + numberToReturn
+    "/artists?offset=" + offset + "&numberToReturn=" + numberToReturn
   
   def findByFacebookUrl(facebookUrl: String): String = "/artists/" + facebookUrl
   
@@ -11,19 +11,27 @@ object ArtistsRoutes {
   
   def find(id: Int): String = "/artists/byId/" + id
   
-  def create: String = "/artists/createArtist"
+  def create: String = "/artists"
 
-  def followByArtistId(artistId: Long): String = "artists/" + artistId + "/followByArtistId"
+  def update: String = "/artists"
+
+  def followByArtistId(artistId: Long): String = "/followedArtists/artistId/" + artistId
   
-  def unfollowByArtistId(artistId: Long): String = "artists/" + artistId + "/unfollowArtistByArtistId"
+  def unfollowByArtistId(artistId: Long): String = "/followedArtists/artistId/" + artistId
   
-  def followByFacebookId(facebookId: String): String = "artists/" + facebookId + "/followByFacebookId"
+  def followByFacebookId(facebookId: String): String = "/followedArtists/facebookId/" + facebookId
   
-  def getFollowed: String = "/artists/followed/"
+  def getFollowed: String = "/followedArtists"
   
-  def isFollowed(artistId: Long): String = "/artists/" + artistId + "/isFollowed"
+  def isFollowed(artistId: Long): String = "/followedArtists/" + artistId
   
   def findContaining(pattern: String): String = "/artists/containing/" + pattern
   
   def getFacebookArtistsContaining(pattern: String): String = "/artists/facebookContaining/" + pattern
+
+  def deleteEventRelation(eventId: Int, artistId: Int): String =
+    "/eventArtist?eventId=" + eventId + "&artistId=" + artistId
+
+  def saveEventRelation(eventId: Int, artistId: Int): String =
+    "/eventArtist?eventId=" + eventId + "&artistId=" + artistId
 }

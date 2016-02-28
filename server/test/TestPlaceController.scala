@@ -49,6 +49,9 @@ class TestPlaceController extends GlobalApplicationForControllers {
         INSERT INTO eventsplaces(eventid, placeid)
           VALUES((SELECT eventId FROM events WHERE name = 'notPassedEvent2'), (SELECT placeid FROM places WHERE name = 'Test'));
 
+        INSERT INTO eventsplaces(eventid, placeid)
+          VALUES(1, 400);
+
         INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');
         """),
       5.seconds)
@@ -72,9 +75,61 @@ class TestPlaceController extends GlobalApplicationForControllers {
 
       val Some(result) = route(FakeRequest(placesDomain.routes.PlaceController.createPlace())
         .withJsonBody(Json.parse(jsonPlace))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       status(result) mustEqual OK
+    }
+
+    "return status forbidden if user try to create a place with an address" in {
+      val jsonPlace =
+        """{
+          "name": "PlaceTest", "geographicPoint": "4.2,4.3", "facebookId": "111",
+          "address":
+            {
+              "street": "tamere",
+              "city": "tonpere",
+              "zip": "69000",
+              "geographicPoint": "5.6,5.4"
+            }
+          }"""
+
+      val Some(result) = route(FakeRequest(placesDomain.routes.PlaceController.createPlace())
+        .withJsonBody(Json.parse(jsonPlace))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
+      status(result) mustEqual FORBIDDEN
+    }
+
+    "add place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.saveEventRelation(1, 300))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
+      )
+      status(relation) mustEqual OK
+    }
+
+    "return status forbidden if user try to add place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.saveEventRelation(1, 300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+      status(relation) mustEqual FORBIDDEN
+    }
+
+    "delete place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.deleteEventRelation(1, 400))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
+      )
+      status(relation) mustEqual OK
+    }
+
+    "return status forbidden if user try to delete place event relation" in {
+      val Some(relation) = route(
+        FakeRequest(placesDomain.routes.PlaceController.deleteEventRelation(1, 400))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+      status(relation) mustEqual FORBIDDEN
     }
 
     "find a list of places" in {
@@ -97,9 +152,9 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "follow and unfollow a place by id" in {
-      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByPlaceId(1))
+      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followByPlaceId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowPlaceByPlaceId(1))
+      val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowByPlaceId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED
@@ -107,30 +162,30 @@ class TestPlaceController extends GlobalApplicationForControllers {
     }
 
     "return an error if a user try to follow a place twice" in {
-      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByPlaceId(400))
+      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followByPlaceId(400))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CONFLICT
     }
 
     "follow by facebookId" in {
-      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followPlaceByFacebookId("facebookId600"))
+      val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followByFacebookId("facebookId600"))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED
     }
 
     "find followed places" in {
-      val Some(places) = route(FakeRequest(placesDomain.routes.PlaceController.getFollowedPlaces())
+      val Some(places) = route(FakeRequest(placesDomain.routes.PlaceController.findFollowed())
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsString(places) must contain(""""name":"testId4BecauseThereIsTRANSBORDEUR"""")
     }
 
     "return true if isFollowed else false" in {
-      val Some(boolean) = route(FakeRequest(placesDomain.routes.PlaceController.isPlaceFollowed(400))
+      val Some(boolean) = route(FakeRequest(placesDomain.routes.PlaceController.isFollowed(400))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(boolean2) = route(FakeRequest(placesDomain.routes.PlaceController.isPlaceFollowed(3))
+      val Some(boolean2) = route(FakeRequest(placesDomain.routes.PlaceController.isFollowed(3))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       contentAsJson(boolean) mustEqual Json.parse("true")

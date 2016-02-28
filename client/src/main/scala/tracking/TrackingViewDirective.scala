@@ -1,12 +1,11 @@
 package tracking
 
-import com.greencatsoft.angularjs.core.{RouteParams, Timeout, Window}
+import com.greencatsoft.angularjs.core.{Timeout, Window}
 import com.greencatsoft.angularjs.{Attributes, ElementDirective, injectable}
 import httpServiceFactory.HttpGeneralService
 import org.scalajs.dom.html.{Html, Input}
 import org.scalajs.dom.{Element, document}
 import upickle.default._
-import utilities.NgCookies
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.JSConverters.JSRichGenTraversableOnce
@@ -14,8 +13,7 @@ import scala.scalajs.js.annotation.JSExport
 
 @JSExport
 @injectable("trackingView")
-class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, ngCookies: NgCookies,
-                            routeParams: RouteParams, window: Window) extends ElementDirective {
+class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, window: Window) extends ElementDirective {
 
   var cursor = document.getElementById("cursor").asInstanceOf[Html]
   @JSExport
@@ -27,6 +25,7 @@ class TrackingViewDirective(timeout: Timeout, httpService: HttpGeneralService, n
   var trackingViewContainer = document.getElementById("tracking-player").asInstanceOf[Html]
   var trackingViewScroller = trackingViewContainer.getElementsByTagName("md-content").item(0).asInstanceOf[Html]
 
+  if(window.location.hash.length > 0) window.location.hash = ""
   window.location.replace(window.location.pathname + "#/")
   timeout(() => {
     val trackedItems = document.getElementsByClassName("tracking")

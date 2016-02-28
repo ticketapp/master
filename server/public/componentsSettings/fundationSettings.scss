@@ -117,9 +117,15 @@ $black       : #000000;
 $blackTransparent   : rgba(0, 0, 0, 0.66);
 $transparent   : rgba(0, 0, 0, 0);
 
+$veryLightGrey: #F0F6FB;
+$lightGrey: #C5D0DD;
+$darkGrey: #5d6571;
+$lightBlue: #84BDEC;
+$darkBlue: #212B3A;
+
 // We use these as default colors throughout
-$primary-color: #2BA8DE;
-$secondary-color: #D3EAF2;
+$primary-color: #84BDEC;
+$secondary-color: #212B3A;
 $alert-color: #E6E6E6;
 $success-color: #76D3B6;
 $warning-color: #B8B8B8;

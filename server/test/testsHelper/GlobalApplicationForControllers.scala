@@ -16,32 +16,36 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, _}
 import scala.language.postfixOps
 
-trait GlobalApplicationForControllers
-    extends PlaySpecification with Mockito with BeforeAll with AfterAll with Context with Injectors {
+trait GlobalApplicationForControllers extends PlaySpecification with Mockito with BeforeAll with AfterAll with Context
+    with Injectors {
 
   val defaultUserUUID =  UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
 
   override def beforeAll() {
-    Play.start(application)
+    Play.start(fakeApplication)
     Evolutions.applyEvolutions(databaseApi.database("tests"))
     Await.result(
       dbConfProvider.get.db.run(sqlu"""
-        INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');"""),
+        INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');
+        INSERT INTO users(userID, email) VALUES ('078f3ea6-2272-4457-a47e-9e9111108e44', 'administrator@facebook.com');
+        """),
       5.seconds)
   }
 
   def generalBeforeAll() {
-    Play.start(application)
+    Play.start(fakeApplication)
     Evolutions.applyEvolutions(databaseApi.database("tests"))
     Await.result(
       dbConfProvider.get.db.run(sqlu"""
-        INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');"""),
+        INSERT INTO users(userID, email) VALUES ('077f3ea6-2272-4457-a47e-9e9111108e44', 'user@facebook.com');
+        INSERT INTO users(userID, email) VALUES ('078f3ea6-2272-4457-a47e-9e9111108e44', 'administrator@facebook.com');
+        """),
       5.seconds)
   }
 
   override def afterAll() {
     Evolutions.cleanupEvolutions(databaseApi.database("tests"))
-    Play.stop(application)
+    Play.stop(fakeApplication)
   }
 
   override def contentAsBytes(of: Future[Result])(implicit timeout: Timeout): Array[Byte] = {

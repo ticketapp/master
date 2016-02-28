@@ -3,7 +3,7 @@ package trackingDomain
 import java.util.UUID
 import javax.inject.Inject
 
-import application.User
+import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import json.JsonHelper._
@@ -23,40 +23,40 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
   extends Silhouette[User, CookieAuthenticator] with LoggerHelper{
 
 
-  def findSessions() = Action.async {
+  def findSessions() = SecuredAction(Administrator()).async {
     trackingMethods.findUserSessions map { userSessions =>
       Ok(Json.toJson(userSessions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " findSessions: " + e.getMessage)
     }
   }
 
 
-  def findCurrentSessions() = Action.async {
+  def findCurrentSessions() = SecuredAction(Administrator()).async {
     trackingMethods.findInProgressSession map { userSessions =>
       Ok(Json.toJson(userSessions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " findCurrentSessions: " + e.getMessage)
     }
   }
 
-  def findActionsBySessionId(sessionId: String) = Action.async {
+  def findActionsBySessionId(sessionId: String) = SecuredAction(Administrator()).async {
     trackingMethods.findUserActionBySessionId(UUID.fromString(sessionId)) map { userActions =>
       Ok(Json.toJson(userActions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " findActionsBySessionId: " + e.getMessage)
     }
   }
 
   def saveUserAction = Action.async { request =>
-    val userAction = request.body.asJson.get.validate[UserAction](userActionReads)
+    val userAction = request.body.asJson.get.validate[UserAction]
     trackingMethods.saveUserAction(userAction.get) map { userActions =>
       Ok(Json.toJson(userActions))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " saveUserAction: " + e.getMessage)
     }
   }
@@ -68,7 +68,7 @@ class TrackingController @Inject()(val messagesApi: MessagesApi,
     trackingMethods.saveUserSession(newSession) map { _ =>
       Ok(Json.toJson(sessionId))
     } recover { case NonFatal(e) =>
-      log(e.toString)
+      log(maybeThrowable = Option(e))
       InternalServerError(this.getClass + " saveUserSession: " + e.getMessage)
     }
   }

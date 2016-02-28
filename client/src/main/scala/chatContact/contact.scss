@@ -12,10 +12,15 @@
 
 #ccb1 {
   position: absolute;
-  right: 15px;
-  bottom: 15px;
+  right: 22px;
+  bottom: 8px;
   z-index: 1;
 }
+
+.chat-form {
+  z-index: 999;
+}
+
 .close-icon {
   float: right;
 }
@@ -25,10 +30,11 @@ contact-component > div.full {
   animation-name: zoomIn;
   box-shadow: -1px 0px 5px 0px #888888;
   height: 100%;
+  z-index: 1000000000;
 }
 
 .contact-button {
-  background-color: $info-color !important;
+  background-color: $primary-color !important;
 }
 
 .contact-button-container {
@@ -46,19 +52,23 @@ contact-component > div.full {
 .contact-component > div.ng-enter {
   animation-duration: .4s;
   animation-name: zoomIn;
+  background-color: $veryLightGrey;
 }
 
 .contact-component > div.full {
   height: 100%;
+  background-color: $veryLightGrey;
 
   .chat-form {
     bottom: 0;
     position: absolute;
+    margin-right: 6px;
   }
 }
 
 .contact-component > div.ng-leave {
   animation-duration: 1s;
+  background-color: $veryLightGrey;
   animation-name: zoomOut;
   bottom: 50px;
   left: 0;
@@ -72,17 +82,33 @@ contact-component > div.full {
 }
 
 .contact-tooltip {
+  background-color: $veryLightGrey;
   float: left;
   padding: 10px;
-  background: white;
+  margin-right: 20px;
+}
+
+.chat-email-input {
+  margin-top: 15px !important;
+  box-sizing: border-box !important;
+  border-radius: 4px !important;
+  color: $darkGrey !important;
+}
+
+.imagesBox {
+  box-shadow: 0 0 3px rgba(0,0,0,.2);
+  border-radius: 5px;
+  padding: 20px 12px 26px;
 }
 
 .inner-contact-tooltip.full {
+  background-color: $veryLightGrey;
   width: 100%;
   bottom: 0;
 }
 
 .inner-contact-tooltip {
+  background-color: $veryLightGrey;
   max-width: 100%;
   position: absolute;
   left: 0;
@@ -91,7 +117,8 @@ contact-component > div.full {
 }
 
 .messageFromUser {
-  background-color: $primary-color;
+  background-color: $lightGrey;
+  color: white;
   border-radius: 5px;
   display: block;
   float: left;
@@ -104,10 +131,11 @@ contact-component > div.full {
 }
 
 .messageFromUs {
-  background-color: $success-color;
+  background-color: $primary-color;
   border-radius: 5px;
   display: block;
   float: right!important;
+  color: white;
   text-align: left;
   padding: 5px 15px 5px;
   max-width: 100%;
@@ -117,11 +145,12 @@ contact-component > div.full {
 .messageFromUs:before {
   content: "";
   position: absolute;
-  right: 2px;
+  right: 1px;
   border-style: solid;
   border-width: 4px 8px 10px 7px;
   border-color: transparent;
-  border-bottom-color: $success-color;
+  color: white;
+  border-bottom-color: $primary-color;
   display: block;
   width: 0;
   z-index: 1;
@@ -132,11 +161,11 @@ contact-component > div.full {
 .messageFromUser:before {
   content: "";
   position: absolute;
-  left: 2px;
+  left: 1px;
   border-style: solid;
   border-width: 4px 8px 10px 7px;
   border-color: transparent;
-  border-bottom-color: $primary-color;
+  border-bottom-color: $lightGrey;
   display: block;
   width: 0;
   z-index: 1;
@@ -144,3 +173,20 @@ contact-component > div.full {
   transform: rotate(-90deg);
 }
 
+.profileImage {
+  border-radius: 50%;
+  height: 48px;
+  margin: 15px;
+  width: 48px;
+}
+
+.square-validation-image {
+  height: 37px;
+  width: 37px;
+}
+
+.square-validation-image-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

@@ -1,3 +1,5 @@
+import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
+import com.mohiva.play.silhouette.test._
 import database.MyPostgresDriver.api._
 import json.JsonHelper
 import org.joda.time.DateTime
@@ -54,9 +56,21 @@ class TestTariffController extends GlobalApplicationForControllers {
     "save a new tariffs" in {
       val Some(info) = route(FakeRequest(tariffsDomain.routes.TariffController.save(
         "saveTest", savedTariff.eventId, "2040-08-24T14:00:00.000+02:00", "2040-09-24T14:00:00.000+02:00", 20.0
-      )))
+        ))
+        .withAuthenticator[CookieAuthenticator](administrator.loginInfo)
+      )
 
       contentAsString(info).toInt mustEqual 1
+    }
+
+    "return status unauthorized if user try to save a new tariffs" in {
+      val Some(info) = route(FakeRequest(tariffsDomain.routes.TariffController.save(
+        "saveTest", savedTariff.eventId, "2040-08-24T14:00:00.000+02:00", "2040-09-24T14:00:00.000+02:00", 20.0
+        ))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo)
+      )
+
+      status(info) mustEqual FORBIDDEN
     }
   }
 }

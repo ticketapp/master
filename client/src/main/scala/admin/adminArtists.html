@@ -62,5 +62,10 @@
         </md-input-container>
         <md-button type="submit" class="md-raised md-primary">Valider</md-button>
     </form>
-    <div data-ng-repeat="artist in controller.artists">{{artist}}</div>
+
+    <div class="column md-whiteframe-z1"
+         data-ng-class="{'large-12': editArtist, 'large-3': !editArtist}"
+         data-ng-repeat="artist in controller.artists">
+        <artist-min-form></artist-min-form>
+    </div>
 </div>

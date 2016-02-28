@@ -1,0 +1,122 @@
+<div data-ng-controller="eventController" class="test-font">
+
+    <img data-ng-src="{{ event.event.imagePath }}"
+         class="width100p"
+         data-on-error-src="assets/images/caroussel1.gif"
+         data-ng-if="event.event.imagePath"/>
+    <img data-ng-src="assets/images/caroussel1.gif" data-ng-if="!event.event.imagePath"/>
+
+    <div class="columns large-12">
+        <div class="event-header">
+            <i class="fi-calendar fa-2x">
+            </i>
+
+            <b>
+                {{ event.event.startTime | date:'dd/MM - HH:mm' }}
+                <span data-ng-if="event.event.endTime">
+                    {{ 'UNTIL' | translate }} {{ event.event.endTime | date:'HH:mm' }}
+                </span>
+
+            </b>
+
+            <span data-ng-if="event.event.tariffRange != undefined">
+                <i class="fa fa-ticket fa-2x marginLeft20">
+                </i>
+                <b>
+                    {{ event.event.tariffRange }}€
+                </b>
+            </span>
+
+            <a href="#/places/{{ place.place.id }}"
+               data-ng-repeat="place in event.places">
+                <i class="fa fa-map-marker fa-2x marginLeft20">
+                </i>
+                <b>
+                    {{ place.place.name }}
+                    <span data-ng-if="place.address.city">
+                        - {{ place.address.city }}
+                    </span>
+                </b>
+            </a>
+
+            <a data-ng-if="event.event.ticketSellers"
+               href="http://www.{{event.event.ticketSellers}}"
+               class="button"
+               target="_blank">
+                {{ 'BUY_PLACE_ON' | translate }} {{ event.event.ticketSellers }}
+            </a>
+        </div>
+
+        <h3 class="event-title">
+
+            <b data-ng-if="!event.organizers[0]">
+                {{ event.event.name }}
+            </b>
+
+            <span data-ng-if="event.organizers[0]">
+                {{ (event.event.name | limitTo: 50).trim() }}{{ event.event.name.length > 50 ? '...' : '' }}
+
+                <span class="event-by">
+                    {{ 'BY' | translate }}
+                </span>
+
+                <a href="#/organizers/{{ event.organizers[0].organizer.id }}">
+                    {{ event.organizers[0].organizer.name }}
+                </a>
+            </span>
+
+        </h3>
+
+        <div data-ng-if="event.artists" class="center">
+            <h5 class="column small-12 padding0">
+                <i class="fa fa-music fa-2x">
+                </i>
+                <b>
+                    {{ 'WHO_IS_PLAYING' | translate }} -
+                    <a>
+                        {{ 'PLAY_EVENT_PLAYLIST' | translate }}
+                    </a>
+                </b>
+            </h5>
+
+
+            <div class="event-artists-container">
+
+                <div data-ng-repeat="artist in event.artists" class="event-artist-container">
+
+                    <span data-ng-if="artist.artist.imagePath"
+                         class="event-artist-circle"
+                         style="background-image: url({{ artist.artist.imagePath | refactorArtistImagePathFilter }});">
+                    </span>
+                    <span data-ng-if="!artist.artist.imagePath"
+                         class="event-artist-circle"
+                         style="background-image: url(assets/images/caroussel1.png);">
+                    </span>
+
+                    <span data-ng-if="artist.artist.hasTracks" class="event-artist-play">
+                        <img src="assets/images/playCircle.png" alt="play">
+                    </span>
+
+                    <span class="event-artist-name">
+                        <b>
+                            <!--<a href="#/artists/{{artist.artist.facebookUrl}}" class="event-artist-name-link">-->
+                            {{ (artist.artist.name | limitTo: 15).trim() }}{{ artist.artist.name.length > 15 ? '...' : '' }}
+                            <!--</a>-->
+                        </b>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="description" data-ng-bind-html="event.event.description">
+    </div>
+
+
+    <stylized-map ng-if="event.event.geographicPoint && event.event.geographicPoint != 'POINT (-84 30)'"
+                  ng-init="geographicPoint = (event.event.geographicPoint | geographicPointRefactoringFilter)"
+                  class="event-map">
+    </stylized-map>
+
+</div>

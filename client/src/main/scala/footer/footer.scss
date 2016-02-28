@@ -1,0 +1,22 @@
+.footerLink {
+  color: $lightGrey;
+  position: relative;
+  z-index: 100000000;
+}
+
+.footerLink:hover {
+  color: $primary-color;
+}
+
+.footerNotLink {
+  color: $darkGrey;
+}
+
+.landing-page-footer {
+  background-color: $secondary-color;
+  width: 100%;
+  position: relative;
+  float: left;
+  padding: 50px;
+}
+

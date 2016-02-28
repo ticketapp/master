@@ -46,6 +46,7 @@ trait AngularMockTest extends TestSuite with BeforeAndAfter with BeforeAndAfterA
   }
 }
 
+@js.native
 object AngularMockTest extends GlobalScope {
 
   def module(name: String): Unit = js.native

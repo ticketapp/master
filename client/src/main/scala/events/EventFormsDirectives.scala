@@ -1,8 +1,6 @@
 package events
 
-
-import com.greencatsoft.angularjs.core.Timeout
-import com.greencatsoft.angularjs.{TemplatedDirective, ElementDirective, injectable}
+import com.greencatsoft.angularjs.{ElementDirective, TemplatedDirective, injectable}
 
 import scala.scalajs.js.annotation.JSExport
 

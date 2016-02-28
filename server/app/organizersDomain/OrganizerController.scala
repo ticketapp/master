@@ -3,13 +3,12 @@ package organizersDomain
 import javax.inject.Inject
 
 import addresses.SearchGeographicPoint
-import application.User
+import application.{Administrator, User}
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
-import database.UserOrganizerRelation
+import database.{EventOrganizerRelation, UserOrganizerRelation}
 import json.JsonHelper._
-import models._
 import org.postgresql.util.PSQLException
 import play.api.Logger
 import play.api.i18n.MessagesApi
@@ -49,7 +48,7 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def findOrganizersContaining(pattern: String) = Action.async {
+  def findContaining(pattern: String) = Action.async {
     organizerMethods.findAllContaining(pattern) map { organizers =>
       Ok(Json.toJson(organizers))
     } recover { case t: Throwable =>
@@ -58,7 +57,7 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def createOrganizer = Action.async { implicit request =>
+  def create = SecuredAction(Administrator()).async { implicit request =>
     organizerBindingForm.bindFromRequest().fold(
       formWithErrors => Future { BadRequest(formWithErrors.errorsAsJson) },
       organizer => {
@@ -73,7 +72,7 @@ class OrganizerController @Inject()(ws: WSClient,
     )
   }
 
-  def followOrganizerByOrganizerId(organizerId: Long) = SecuredAction.async { implicit request =>
+  def followByOrganizerId(organizerId: Long) = SecuredAction.async { implicit request =>
     organizerMethods.followByOrganizerId(
       UserOrganizerRelation(userId = request.identity.uuid, organizerId = organizerId)) map {
       case 1 =>
@@ -94,7 +93,7 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def unfollowOrganizerByOrganizerId(organizerId : Long) = SecuredAction.async { implicit request =>
+  def unfollowByOrganizerId(organizerId : Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     organizerMethods.unfollow(
       UserOrganizerRelation(userId = request.identity.uuid, organizerId = organizerId)) map {
@@ -113,7 +112,7 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def followOrganizerByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
+  def followByFacebookId(facebookId : String) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     organizerMethods.followByFacebookId(userId, facebookId) map {
       case 1 =>
@@ -134,9 +133,9 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def getFollowedOrganizers = SecuredAction.async { implicit request =>
+  def findFollowed = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
-    organizerMethods.getFollowedOrganizers(userId) map { organizers =>
+    organizerMethods.findFollowedOrganizers(userId) map { organizers =>
       Ok(Json.toJson(organizers))
     } recover { case t: Throwable =>
       Logger.error("OrganizerController.getFollowedOrganizers: ", t)
@@ -144,7 +143,7 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def isOrganizerFollowed(organizerId: Long) = SecuredAction.async { implicit request =>
+  def isFollowed(organizerId: Long) = SecuredAction.async { implicit request =>
     val userId = request.identity.uuid
     organizerMethods.isFollowed(UserOrganizerRelation(userId, organizerId)) map { organizers =>
       Ok(Json.toJson(organizers))
@@ -160,7 +159,7 @@ class OrganizerController @Inject()(ws: WSClient,
     }
   }
 
-  def findOrganizersNear(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
+  def findNear(geographicPoint: String, numberToReturn: Int, offset: Int) = Action.async {
     geographicPointMethods.stringToTryPoint(geographicPoint) match {
       case Failure(exception) =>
         Logger.error("OrganizerController.findOrganizersNear: ", exception)
@@ -175,6 +174,18 @@ class OrganizerController @Inject()(ws: WSClient,
             Logger.error("OrganizerController.findOrganizersNear: ", e)
             InternalServerError("OrganizerController.findOrganizersNear: " + e.getMessage)
         }
+    }
+  }
+
+  def deleteEventRelation(eventId: Long, organizerId: Long) = SecuredAction(Administrator()).async {
+    organizerMethods.deleteEventRelation(EventOrganizerRelation(eventId, organizerId)) map { result =>
+      Ok(Json.toJson(result))
+    }
+  }
+
+  def saveEventRelation(eventId: Long, organizerId: Long) = SecuredAction(Administrator()).async {
+    organizerMethods.saveEventRelation(EventOrganizerRelation(eventId, organizerId)) map { result =>
+      Ok(Json.toJson(result))
     }
   }
 }

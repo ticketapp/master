@@ -1,4 +1,130 @@
 <div data-ng-controller="eventsController">
     <div ng-include="'assets/templates/events/eventForms.html'"></div>
-    <event-min data-ng-repeat="event in events"></event-min>
+    <div class="event-min-container">
+        <div class="float-left column small-12 fade md-whiteframe-z1"
+             data-ng-class="{'large-12 medium-12': changeEvent, 'medium-6 large-4': !changeEvent}"
+             data-ng-repeat="event in events">
+            <a class="column" data-ng-click="changeEvent = !changeEvent">
+                {{event.event.name}} - Id: {{event.event.id}}
+            </a>
+            <div data-ng-show="changeEvent">
+                <md-button class="column" ng-click="updateEvent = !updateEvent">UpdateEvent</md-button>
+                <form ng-submit="controller.update(event.event)" data-ng-show="updateEvent">
+                    <md-input-container class="column">
+                        <label>name</label>
+                        <input ng-model="event.event.name">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>facebookId</label>
+                        <input ng-model="event.event.facebookId">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>geographicPoint</label>
+                        <input ng-model="event.event.geographicPoint">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>description</label>
+                        <input ng-model="event.event.description">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>startTime</label>
+                        <input ng-model="event.event.startTime" type="datetime">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>endTime</label>
+                        <input ng-model="event.event.endTime" type="datetime">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>ageRestriction</label>
+                        <input ng-model="event.event.ageRestriction" type="number">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>tariffRange</label>
+                        <input ng-model="event.event.tariffRange" type="text">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>ticketSellers</label>
+                        <input ng-model="event.event.ticketSellers" type="text">
+                    </md-input-container>
+                    <md-input-container class="column">
+                        <label>imagePath</label>
+                        <input ng-model="event.event.imagePath" type="text">
+                    </md-input-container>
+                    <md-button type="submit">Submit</md-button>
+                </form>
+                <md-button class="column" data-ng-click="changePlaces = !changePlaces">Places</md-button>
+                <div data-ng-show="changePlaces" data-ng-controller="placesController">
+                    <a data-ng-repeat="place in event.places"
+                            data-ng-click="controller.deleteEventRelation(event.event.id, place.place.id)">
+                        {{place.place.name}}
+                    </a>
+                    <md-autocomplete md-search-text-change="controller.findContaining(ctrl.searchText)"
+                                     md-search-text="ctrl.searchText"
+                                     md-selected-item-change="controller.saveEventRelation(event.event.id, place.place.id)"
+                                     md-items="place in controller.places"
+                                     md-item-text="place.place.name"
+                                     md-min-length="0"
+                                     class="column"
+                                     placeholder="Search place">
+                        <md-item-template>
+                            <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i" class="float-left">
+                                {{place.place.name}}
+                            </span>
+                        </md-item-template>
+                        <md-not-found>
+                            No states matching "{{ctrl.searchText}}" were found.
+                        </md-not-found>
+                    </md-autocomplete>
+                </div>
+                <md-button class="column" data-ng-click="changeOrganizers = !changeOrganizers">Organizers</md-button>
+                <div data-ng-show="changeOrganizers" data-ng-controller="organizersController">
+                    <a data-ng-repeat="organizer in event.organizers"
+                            data-ng-click="controller.deleteEventRelation(event.event.id, organizer.organizer.id)">
+                        {{organizer.organizer.name}}
+                    </a>
+                    <md-autocomplete md-search-text-change="controller.findContaining(searchOrganizer)"
+                                     md-search-text="searchOrganizer"
+                                     md-selected-item-change="controller.saveEventRelation(event.event.id, organizer.organizer.id)"
+                                     md-items="organizer in controller.organizers"
+                                     md-item-text="organizer.organizer.name"
+                                     md-min-length="0"
+                                     class="column"
+                                     organizerholder="Search organizer">
+                        <md-item-template>
+                            <span md-highlight-text="searchOrganizer" md-highlight-flags="^i" class="float-left">
+                                {{organizer.organizer.name}}
+                            </span>
+                        </md-item-template>
+                        <md-not-found>
+                            No states matching "{{searchOrganizer}}" were found.
+                        </md-not-found>
+                    </md-autocomplete>
+                </div>
+                <md-button class="column" data-ng-click="changeArtists = !changeArtists">Artists</md-button>
+                <div data-ng-show="changeArtists" data-ng-controller="artistsController">
+                    <a data-ng-repeat="artist in event.artists"
+                            data-ng-click="controller.deleteEventRelation(event.event.id, artist.artist.id)">
+                        {{artist.artist.name}}
+                    </a>
+                    <md-autocomplete md-search-text-change="controller.findContaining(searchArtist)"
+                                     md-search-text="searchArtist"
+                                     md-selected-item-change="controller.saveEventRelation(event.event.id, artist.artist.id)"
+                                     md-items="artist in controller.artists"
+                                     md-item-text="artist.artist.name"
+                                     md-min-length="0"
+                                     class="column"
+                                     artistholder="Search artist">
+                        <md-item-template>
+                            <span md-highlight-text="searchArtist" md-highlight-flags="^i" class="float-left">
+                                {{artist.artist.name}}
+                            </span>
+                        </md-item-template>
+                        <md-not-found>
+                            No states matching "{{searchArtist}}" were found.
+                        </md-not-found>
+                    </md-autocomplete>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

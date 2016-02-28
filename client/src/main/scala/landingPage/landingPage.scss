@@ -1,0 +1,105 @@
+.home-title {
+  background-color: #84BDEC;
+  border-radius: 2px;
+  color: white;
+  display: inline-block;
+  box-shadow: 0.2em 0 0 #84BDEC, -0.2em 0 0 #84BDEC;
+  padding: 0.15em 0.2em;
+  //font-family: "Gotham SSm A","Gotham SSm B", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.45;
+  font-size-adjust: none;
+  font-stretch: normal;
+  font-feature-settings: normal;
+  font-language-override: normal;
+  font-kerning: auto;
+  font-synthesis: weight style;
+  font-variant-alternates: normal;
+  font-variant-caps: normal;
+  font-variant-east-asian: normal;
+  font-variant-ligatures: normal;
+  font-variant-numeric: normal;
+  font-variant-position: normal;
+  letter-spacing: -2px;
+  position: absolute;
+  top: 200px;
+  text-align: center;
+}
+
+.home-subtitle {
+  color: white;
+  text-shadow: 0 0 25px black;
+  font-size: 22px;
+  top: 215px;
+  position: relative;
+  text-align: center;
+  height: 60px !important;
+}
+
+.image-container {
+  top: 0;
+  float: left;
+  width: 100%;
+  height: 600px;
+  background: url('../images/concertLandingPage.jpg') no-repeat;
+  background-size: 100%;
+  position: absolute;
+  background-position-y: top;
+}
+
+.form-container {
+  position: relative;
+}
+
+.sell-input {
+  border: 1px solid $primary-color !important;
+  display: inline-block;
+  width: 100%;
+  background: white;
+  border-radius: 3px !important;
+  vertical-align: middle;
+  font-weight: bold;
+  height: 52px !important;
+  color: $lightGrey; 
+}
+
+.sell-input::-webkit-input-placeholder {
+  color: $primary-color;
+  font-size: 13px;
+}
+
+.sell-input> md-autocomplete-wrap>input::-webkit-input-placeholder {
+  color: $primary-color;
+  font-size: 13px;
+  height: 100%;
+}
+
+.sell-input>md-autocomplete-wrap>input:-moz-placeholder {
+  color: $primary-color;
+  font-size: 13px;
+  height: 100%;
+}
+
+.sell-input>md-autocomplete-wrap>input:-ms-input-placeholder {
+  color: $primary-color;
+  font-size: 13px;
+}
+
+.sell-input > md-autocomplete-wrap,  .sell-input > md-autocomplete-wrap > input{
+  height: 50px !important;
+}
+
+.sell-form {
+  position: absolute;
+  top: 515px;
+}
+
+.sell-form-link {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  color: $primary-color;
+  font-size: 13px;
+}
