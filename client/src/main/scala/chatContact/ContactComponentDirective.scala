@@ -5,7 +5,6 @@ import com.greencatsoft.angularjs.{TemplatedDirective, ElementDirective, injecta
 
 import scala.scalajs.js.annotation.JSExport
 
-
 @JSExport
 @injectable("contactComponent")
 class ContactComponentDirective(sidenav: Sidenav) extends ElementDirective with TemplatedDirective {
