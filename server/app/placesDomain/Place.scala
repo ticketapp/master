@@ -67,17 +67,21 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   def delete(id: Long): Future[Int] = db.run(places.filter(_.id === id).delete)
 
-  def doSave(place: Place): Future[Place] =
-    db.run((for {
+  def doSave(place: Place): Future[Place] = {
+    val query =  for {
       placeFound <- places.filter(_.facebookId === place.facebookId).result.headOption
       result <- placeFound.map(DBIO.successful).getOrElse(places returning places.map(_.id) += place)
-    } yield result match {
-        case p: Place => p
-        case id: Long => place.copy(id = Option(id))
-      }).transactionally)
+    } yield result
+
+    db.run(query) map {
+      case place: Place => place
+      case id: Long => place.copy(id = Option(id))
+    }
+  }
 
   def save(place: Place): Future[Place] = {
     val placeWithFormattedDescription = place.copy(description = formatDescription(place.description))
+
     place.facebookId match {
       case Some(facebookId) =>
         findOrganizerIdByFacebookId(facebookId) flatMap { maybePlaceId =>
@@ -96,15 +100,15 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     placeWithAddress.maybeAddress match {
       case Some(address) =>
         addressMethods.saveAddressWithGeoPoint(address) flatMap { savedAddress =>
-          save(placeWithAddress.place.copy(
+          val placeToSave: Place = placeWithAddress.place.copy(
             addressId = savedAddress.id,
-            geographicPoint = savedAddress.geographicPoint)) map { place =>
-            PlaceWithAddress(place, Option(savedAddress))
-          }
+            geographicPoint = savedAddress.geographicPoint)
+
+          save(placeToSave) map(place => PlaceWithAddress(place, Option(savedAddress)))
         }
 
       case None =>
-        save(placeWithAddress.place) map(PlaceWithAddress(_, None))
+        save(placeWithAddress.place) map{ p => println(p); PlaceWithAddress(p, None)}
     }
   }
 
@@ -123,7 +127,11 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(organizers.filter(_.facebookId === facebookId).map(_.id).result.headOption)
 
   def findIdByFacebookId(facebookId: String): Future[Option[Long]] =
-    db.run(places.filter(_.facebookId === facebookId).map(_.id).result.headOption)
+    db.run(places.filter(_.facebookId === facebookId).map(_.id).result.headOption) recover {
+      case NonFatal(e) =>
+        log(e)
+        None
+    }
 
   def findNear(geographicPoint: Geometry, numberToReturn: Int, offset: Int): Future[Seq[PlaceWithAddress]] = {
     val query = for {
@@ -257,13 +265,12 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       eventPlace.placeId === eventPlaceRelation.placeId)
     .delete)
 
-  def saveEventRelations(eventPlaceRelations: Seq[EventPlaceRelation]): Future[Boolean] = db.run(
-    eventsPlaces ++= eventPlaceRelations) map { _ =>
-        true
-    } recover {
-    case e: Exception =>
-      Logger.error("place.saveEventRelations: ", e)
-      false
+  def saveEventRelations(eventPlaceRelations: Seq[EventPlaceRelation]): Future[Boolean] =
+    db.run(eventsPlaces ++= eventPlaceRelations) map { _ =>
+      true
+    } recover { case e: Exception =>
+    log(e)
+    false
   }
 
   def saveWithEventRelation(place: PlaceWithAddress, eventId: Long): Future[PlaceWithAddress] = saveWithAddress(place) flatMap { savedPlace =>
@@ -271,7 +278,7 @@ class PlaceMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
       case 1 =>
         savedPlace
       case _ =>
-        Logger.error(s"Place.saveWithEventRelation: not exactly one row saved by Place.saveEventRelation for place $savedPlace and eventId $eventId")
+        log(s"Not exactly one row saved by Place.saveEventRelation for place $savedPlace and eventId $eventId")
         savedPlace
     }
   }

@@ -10,18 +10,18 @@ import play.api.Play.current
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.ws.WS
 import MyPostgresDriver.api._
-import services.Utilities
+import services.{LoggerHelper, Utilities}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-
 class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[MyPostgresDriver]
     with MyDBTableDefinitions
     with geographicPointTrait
-    with Utilities {
+    with Utilities
+    with LoggerHelper {
 
   def findGeographicPointOfCity(city: String): Future[Option[Geometry]] = {
     val query = frenchCities.filter(_.city.toLowerCase === city.toLowerCase) map(_.geographicPoint)
@@ -38,9 +38,11 @@ class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseCo
       readGoogleGeographicPoint(_) match {
         case Success(Some(geographicPoint)) =>
           Future(address.copy(geographicPoint = geographicPoint))
+
         case Failure(e: Exception) =>
-          Logger.error("Address.getGeographicPoint: ", e)
+          log(e)
           Future(address)
+
         case _ =>
           Future(address)
       }
@@ -48,8 +50,9 @@ class SearchGeographicPoint @Inject()(protected val dbConfigProvider: DatabaseCo
     case e: OverQueryLimit if retry > 0 =>
       Logger.info("Address.getGeographicPoint: retry: " + retry + " ", e)
       getGeographicPoint(address, retry - 1)
+
     case e: Exception =>
-      Logger.error("Address.getGeographicPoint: ", e)
+      log(e)
       Future(address)
   }
 }

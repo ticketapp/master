@@ -5,7 +5,7 @@ import java.util.UUID
 import application._
 import artistsDomain.{artistsAndOptionalGenresToArtistsWithWeightedGenresTrait, ArtistWithWeightedGenres}
 import database._
-import eventsDomain.{EventWithRelations, eventWithRelationsTupleToEventWithRelationsClass}
+import eventsDomain.{EventWithRelations, eventWithRelationsTupleToEventWithRelations}
 import genresDomain.Genre
 import models._
 import organizersDomain.OrganizerWithAddress
@@ -20,7 +20,7 @@ import scala.concurrent.Future
 trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
     with MyDBTableDefinitions
     with TrackTransformTrait
-    with eventWithRelationsTupleToEventWithRelationsClass
+    with eventWithRelationsTupleToEventWithRelations
     with artistsAndOptionalGenresToArtistsWithWeightedGenresTrait {
   
   //////////////////////////////////////////// artist ///////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ trait FollowService extends HasDatabaseConfigProvider[MyPostgresDriver]
     } yield (eventWithOptionalEventOrganizers, optionalEventArtists, optionalEventPlaces, optionalEventGenres,
         optionalEventAddresses)
 
-    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
+    db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelation(eventWithRelations))
   }
 
   def isFollowed(userEventRelation: UserEventRelation): Future[Boolean] = {

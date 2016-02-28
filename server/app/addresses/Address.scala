@@ -15,7 +15,6 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.control.NonFatal
 
-
 case class Address(id: Option[Long] = None,
                    geographicPoint: Geometry = new GeometryFactory().createPoint(new Coordinate(-84, 30)),
                    city: Option[String] = None,
@@ -63,36 +62,43 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       street = optionStringToLowerCaseOptionString(address.street),
       city = optionStringToLowerCaseOptionString(address.city))
 
-    db.run(
-      (for {
-        addressFound <- addresses.filter(a => a.street === lowerCaseAddress.street &&
-          a.zip === lowerCaseAddress.zip && a.city === lowerCaseAddress.city).result.headOption
-        result <- addressFound.map(DBIO.successful).getOrElse(addresses returning addresses.map(_.id) += lowerCaseAddress)
-      } yield result match {
-        case addressWithAntarcticGeographicPoint: Address if addressWithAntarcticGeographicPoint.geographicPoint == antarcticPoint &&
+    val query = for {
+      addressFound <- addresses.filter(a => a.street === lowerCaseAddress.street &&
+        a.zip === lowerCaseAddress.zip && a.city === lowerCaseAddress.city).result.headOption
+      result <- addressFound.map(DBIO.successful).getOrElse(addresses returning addresses.map(_.id) += lowerCaseAddress)
+    } yield result
+
+    db.run(query) flatMap {
+      case addressWithAntarcticGeographicPoint: Address
+        if addressWithAntarcticGeographicPoint.geographicPoint == antarcticPoint &&
           lowerCaseAddress.geographicPoint != antarcticPoint =>
-          val updatedAddress = lowerCaseAddress.copy(id = addressWithAntarcticGeographicPoint.id)
-          update(updatedAddress) map {
-            case int if int != 1 =>
-              Logger.error("Address.save: not exactly one row was updated")
-              addressWithAntarcticGeographicPoint
-            case _ =>
-              updatedAddress
-          }
+        val updatedAddress = lowerCaseAddress.copy(id = addressWithAntarcticGeographicPoint.id)
+        update(updatedAddress) map {
+          case int if int != 1 =>
+            log("Not exactly one row was updated")
+            addressWithAntarcticGeographicPoint
 
-        case a: Address =>
-          Future(a)
+          case _ =>
+            updatedAddress
+        }
 
-        case id: Long =>
-          Future(lowerCaseAddress.copy(id = Option(id)))
-        }).transactionally).flatMap(eventuallyAddress => eventuallyAddress)
+      case a: Address =>
+        Future(a)
+
+      case id: Long =>
+        Future(lowerCaseAddress.copy(id = Option(id)))
+      }
   }
 
-  def update(address: Address): Future[Int] = db.run(addresses.filter(_.id === address.id).update(address))
+  def update(address: Address): Future[Int] = db.run(addresses.filter(_.id === address.id).update(address)) recover {
+    case NonFatal(e) =>
+      log(e)
+      0
+  }
 
   def saveAddressWithGeoPoint(address: Address): Future[Address] = address match {
     case addressWitAntarcticGeographicPoint if addressWitAntarcticGeographicPoint.geographicPoint == antarcticPoint =>
-      searchGeographicPoint.getGeographicPoint(addressWitAntarcticGeographicPoint, retry = 3) flatMap { save }
+      searchGeographicPoint.getGeographicPoint(addressWitAntarcticGeographicPoint, retry = 3) flatMap save
     case addressWithGeoPoint =>
       save(addressWithGeoPoint)
   }
@@ -106,10 +112,9 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   def saveEventRelations(eventAddressRelations: Seq[EventAddressRelation]): Future[Boolean] =
     db.run(eventsAddresses ++= eventAddressRelations) map { _ =>
       true
-    } recover {
-      case e: Exception =>
-        Logger.error("Address.saveEventRelations: ", e)
-        false
+    } recover { case NonFatal(e) =>
+      log(e)
+      false
     }
 
   def saveWithEventRelation(address: Address, eventId: Long): Future[Address] = save(address) flatMap { savedAddress =>
@@ -117,7 +122,7 @@ class AddressMethods @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       case 1 =>
         savedAddress
       case _ =>
-        Logger.error(s"Address.saveWithEventRelation: not exactly one row saved by Address.saveEventRelation for address $savedAddress and eventId $eventId")
+        log(s"Not exactly one row saved for address $savedAddress and eventId $eventId")
         savedAddress
     }
   }
