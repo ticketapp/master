@@ -13,16 +13,14 @@ case class Message(content: String, fromClient: Boolean)
 @JSExportAll
 @injectable("chatContactController")
 class ChatContactController(chatContactScope: ChatContactScope, httpService: HttpService, timeout: Timeout,
-                            window: Window, chatService: ChatService)
+                            chatService: ChatService)
     extends AbstractController[ChatContactScope](chatContactScope) {
 
   chatContactScope.messages = js.Array[Message]()
 
-  val host = window.location.host
-
-  val webSocket = new dom.WebSocket(s"ws://$host/chat")
-
   var areWeConnected: Boolean = false
+
+  val webSocket = new dom.WebSocket(chatService.findWebSocketUrl() + "chat")
 
   webSocket.onmessage = (message: MessageEvent) =>
     timeout(() => chatContactScope.messages.push(Message(content = message.data.toString, fromClient = false)))

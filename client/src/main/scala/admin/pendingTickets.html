@@ -1,5 +1,5 @@
 <md-list>
-    <md-list-item ng-repeat="ticket in controller.pendingTickets$2">
+    <md-list-item ng-repeat="ticket in controller.pendingTickets">
         {{ticket}}
         <md-button ng-click="controller.acceptPendingTicket(ticket.pendingTicketId)">Accept</md-button>
         <md-button ng-click="controller.rejectPendingTicket(ticket.pendingTicketId)">Reject</md-button>

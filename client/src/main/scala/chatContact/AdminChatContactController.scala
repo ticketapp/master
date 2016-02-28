@@ -12,14 +12,12 @@ import scala.scalajs.js.annotation.JSExportAll
 @JSExportAll
 @injectable("adminChatContactController")
 class AdminChatContactController(chatContactScope: AdminChatContactScope, httpService: HttpService, timeout: Timeout,
-                                 window: Window, chatService: ChatService)
+                                 chatService: ChatService)
     extends AbstractController[AdminChatContactScope](chatContactScope) {
 
   chatContactScope.messages = js.Array[Message]()
 
-  val host = window.location.host
-
-  val webSocket = new dom.WebSocket(s"ws://$host/adminChat")
+  val webSocket = new dom.WebSocket(chatService.findWebSocketUrl() + "chat")
 
   var areWeConnected: Boolean = false
 

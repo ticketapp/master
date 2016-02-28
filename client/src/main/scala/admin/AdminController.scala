@@ -19,7 +19,7 @@ import scala.scalajs.js.annotation.JSExportAll
 @JSExportAll
 @injectable("adminController")
 class AdminController(scope: Scope, service: HttpGeneralService, timeout: Timeout, mdToast: MdToastService)
-  extends AbstractController[Scope](scope) with jsonHelper {
+    extends AbstractController[Scope](scope) with jsonHelper {
 
   var salableEvents: js.Array[SalableEvent] = new js.Array[SalableEvent]
   var ticketsWithStatus: js.Array[TicketWithStatus] = new js.Array[TicketWithStatus]
