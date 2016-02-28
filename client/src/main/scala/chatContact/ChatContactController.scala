@@ -1,6 +1,6 @@
 package chatContact
 
-import com.greencatsoft.angularjs.core.{HttpService, Timeout}
+import com.greencatsoft.angularjs.core.{HttpService, Timeout, Window}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom
 import org.scalajs.dom.MessageEvent
@@ -12,22 +12,23 @@ case class Message(content: String, fromClient: Boolean)
 
 @JSExportAll
 @injectable("chatContactController")
-class ChatContactController(chatContactScope: ChatContactScope, httpService: HttpService, timeout: Timeout)
-  extends AbstractController[ChatContactScope](chatContactScope) {
-
-//  val webSocket = new dom.WebSocket("ws://localhost:9000/chatContact")
-
-  var areWeConnected: Boolean = false
+class ChatContactController(chatContactScope: ChatContactScope, httpService: HttpService, timeout: Timeout,
+                            window: Window, chatService: ChatService)
+    extends AbstractController[ChatContactScope](chatContactScope) {
 
   chatContactScope.messages = js.Array[Message]()
 
-//  webSocket.onmessage = (message: MessageEvent) => {
-//
-//    timeout(() => chatContactScope.messages.push(Message(content = message.data.toString, fromClient = false)))
-//  }
-//
-//  def send(message: String): Unit = {
-//    timeout(() => scope.messages.push(Message(content = message, fromClient = true)))
-//    webSocket.send(message)
-//  }
+  val host = window.location.host
+
+  val webSocket = new dom.WebSocket(s"ws://$host/chat")
+
+  var areWeConnected: Boolean = false
+
+  webSocket.onmessage = (message: MessageEvent) =>
+    timeout(() => chatContactScope.messages.push(Message(content = message.data.toString, fromClient = false)))
+
+  def send(message: String) = {
+    chatService.send(webSocket, message)
+    timeout(() => chatContactScope.messages.push(Message(content = message, fromClient = true)))
+  }
 }

@@ -1,0 +1,17 @@
+<div data-ng-controller="adminChatContactController">
+
+    <form data-ng-submit="controller.send(message); message=''">
+
+        <input type="text" data-ng-model="message" required>
+
+    </form>
+
+
+    <div data-ng-repeat="message in messages">
+        <span data-ng-class="{'adminMessageFromUser': message.fromClient$1,
+                              'adminMessageFromUs': message.fromClient$1 == false}">
+            {{ message.content$1 }}
+        </span>
+    </div>
+
+</div>

@@ -12,8 +12,8 @@ import play.api.libs.iteratee._
 import play.api.mvc._
 import play.api.test.PlaySpecification
 
-import scala.concurrent.{Await, _}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, _}
 import scala.language.postfixOps
 
 trait GlobalApplicationForControllers extends PlaySpecification with Mockito with BeforeAll with AfterAll with Context

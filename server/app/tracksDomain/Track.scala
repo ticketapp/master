@@ -5,8 +5,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-import actors.DuplicateTracksActor.FilterTracks
-import actors.DuplicateTracksActorInstance
+import DuplicateTracksActor.FilterTracks
 import akka.pattern.ask
 import database.MyPostgresDriver.api._
 import database.{MyDBTableDefinitions, MyPostgresDriver}

@@ -2,7 +2,7 @@ import addresses.GeographicPointRefactoringFilter
 import admin.AdminController
 import artists.{ArtistMinFormDirective, ArtistsController}
 import auth.{AuthConfig, AuthDirective}
-import chatContact.{ChatContactController, ContactComponentDirective}
+import chatContact.{AdminChatContactController, ChatContactController, ContactComponentDirective, TaskServiceFactory}
 import com.greencatsoft.angularjs._
 import cookies.CookiesDirective
 import events._
@@ -30,30 +30,23 @@ object App extends JSApp {
 
     module.config(RoutingConfig)
     module.config(AuthConfig)
-    module.directive[ContactComponentDirective]
-    module.factory[HttpGeneralServiceFactory]
-    module.factory[GeolocationServiceFactory]
-    module.factory[EventsServiceFactory]
-    module.factory[PlacesServiceFactory]
-    module.factory[OrganizersServiceFactory]
-    module.factory[PlayerServiceFactory]
+    module.controller[AdminChatContactController]
     module.controller[AdminController]
-    module.controller[EventsController]
     module.controller[ArtistsController]
+    module.controller[ChatContactController]
+    module.controller[EventController]
+    module.controller[EventsController]
+    module.controller[MapController]
     module.controller[OrganizersController]
     module.controller[OrganizerController]
     module.controller[PlacesController]
     module.controller[PlaceController]
-    module.controller[ChatContactController]
-    module.controller[EventController]
-    module.controller[MapController]
     module.controller[SellTicketController]
-    module.directive[EventMinDirective]
-    module.directive[TrackingViewDirective]
-    module.directive[TrackingDirective]
-    module.directive[FocusDirective]
-    module.directive[EventFormFindByIdDirective]
+    module.directive[ContactComponentDirective]
     module.directive[CookiesDirective]
+    module.directive[ArtistMinFormDirective]
+    module.directive[EventAndPastEventsTabsDirective]
+    module.directive[EventFormFindByIdDirective]
     module.directive[EventFormFindByGeoPoint]
     module.directive[EventFormFindInHourInterval]
     module.directive[EventFormFindPassedInInterval]
@@ -61,15 +54,24 @@ object App extends JSApp {
     module.directive[EventFormFindByCityPattern]
     module.directive[EventFormFindNearCity]
     module.directive[EventFormCreateByFacebookId]
-    module.directive[ArtistMinFormDirective]
+    module.directive[EventMinDirective]
+    module.directive[FocusDirective]
     module.directive[LandingPageFooterDirective]
-    module.directive[StylizedMapDirective]
     module.directive[MapControlsDirective]
     module.directive[OnErrorSrcDirective]
-    module.directive[EventAndPastEventsTabsDirective]
-    module.filter[GeographicPointRefactoringFilter]
-    module.filter[RefactorArtistImagePathFilter]
+    module.directive[StylizedMapDirective]
+    module.directive[TrackingViewDirective]
+    module.directive[TrackingDirective]
     module.directive[PlayerDirective]
     module.directive[AuthDirective]
+    module.factory[EventsServiceFactory]
+    module.factory[HttpGeneralServiceFactory]
+    module.factory[GeolocationServiceFactory]
+    module.factory[OrganizersServiceFactory]
+    module.factory[PlacesServiceFactory]
+    module.factory[PlayerServiceFactory]
+    module.factory[TaskServiceFactory]
+    module.filter[GeographicPointRefactoringFilter]
+    module.filter[RefactorArtistImagePathFilter]
   }
 }

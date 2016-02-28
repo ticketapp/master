@@ -1,6 +1,5 @@
 package testsHelper
 
-import actors.DuplicateTracksActorInstance
 import addresses.{AddressMethods, SearchGeographicPoint}
 import akka.actor.ActorSystem
 import application.UserMethods
@@ -22,7 +21,7 @@ import silhouette.{OAuth2InfoDAO, UserDAOImpl}
 import tariffsDomain.TariffMethods
 import ticketsDomain.TicketMethods
 import trackingDomain.TrackingMethods
-import tracksDomain.{SearchSoundCloudTracks, SearchYoutubeTracks, TrackMethods, TrackRatingMethods}
+import tracksDomain._
 
 
 trait Injectors {
