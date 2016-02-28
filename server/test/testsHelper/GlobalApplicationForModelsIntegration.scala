@@ -11,7 +11,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-
 trait GlobalApplicationForModelsIntegration extends PlaySpec with OneAppPerSuite with Injectors with BeforeAndAfterAll {
 
   implicit val actorTimeout: akka.util.Timeout = 5.seconds

@@ -1,6 +1,5 @@
 package eventsDomain
 
-import java.sql.Timestamp
 import javax.inject.Inject
 
 import addresses.{Address, AddressMethods, SearchGeographicPoint}
@@ -29,7 +28,6 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
-
 
 case class Event(id: Option[Long] = None,
                  facebookId: Option[String] = None,
@@ -445,24 +443,26 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     db.run(query.result) map(eventWithRelations => eventWithRelationsTupleToEventWithRelationClass(eventWithRelations))
   }
 
-  def save(eventWithRelations: EventWithRelations): Future[Event] = db.run((for {
-    eventFound <- events.filter(_.facebookId === eventWithRelations.event.facebookId).result.headOption
-    result <- eventFound.map(DBIO.successful).getOrElse(events returning events.map(_.id) += eventWithRelations.event)
-  } yield result match {
-    case e: Event =>
-      saveEventRelations(eventWithRelations, e.id.get)
-      e
-    case id: Long =>
-      saveEventRelations(eventWithRelations, id)
-      eventWithRelations.event.copy(id = Option(id))
-  }).transactionally)
+  def save(eventWithRelations: EventWithRelations): Future[Event] = db.run(
+    for {
+      eventFound <- events.filter(_.facebookId === eventWithRelations.event.facebookId).result.headOption
+      result <- eventFound.map(DBIO.successful).getOrElse(events returning events.map(_.id) += eventWithRelations.event)
+    } yield result) map {
+      case e: Event =>
+        saveEventRelations(eventWithRelations)
+      case id: Long =>
+        saveEventRelations(eventWithRelations.copy(event = eventWithRelations.event.copy(id = Option(id))))
+    }
 
-  def saveEventRelations(eventWithRelations: EventWithRelations, eventId: Long): Seq[Future[Address]] = {
+  def saveEventRelations(eventWithRelations: EventWithRelations): Event = {
+    val eventId = eventWithRelations.event.id.getOrElse(0L)
+
     eventWithRelations.genres map(genre => genreMethods.saveWithEventRelation(genre, eventId))
     eventWithRelations.artists map(artist => artistMethods.saveWithEventRelation(artist, eventId))
     eventWithRelations.organizers map(organizer => organizerMethods.saveWithEventRelation(organizer, eventId))
     eventWithRelations.places map(place => placeMethods.saveWithEventRelation(place, eventId))
     eventWithRelations.addresses map(address => addressMethods.saveWithEventRelation(address, eventId))
+    eventWithRelations.event
   }
 
   def delete(id: Long): Future[Int] = db.run(events.filter(_.id === id).delete)
@@ -474,17 +474,19 @@ class EventMethods @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     maybeEvent flatMap {
       case Some(event) =>
         Future(Option(event))
+
       case None =>
         getEventOnFacebookByFacebookId(eventFacebookId) flatMap {
           case Some(event) =>
             Future {
               event.artists.foreach { artist =>
-              val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
-              trackMethods.saveTracksEnumerator(tracksEnumerator)
+                val tracksEnumerator = artistMethods.getArtistTracks(PatternAndArtist(artist.artist.name, artist))
+                trackMethods.saveTracksEnumerator(tracksEnumerator)
                 artist
               }
             }
             save(event) map Option.apply
+
           case None =>
             Future(None)
         }

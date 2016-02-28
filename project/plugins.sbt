@@ -17,4 +17,5 @@ addSbtPlugin("com.jamesward" % "play-auto-refresh" % "0.0.13")
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.6")
 
 addSbtPlugin("com.lihaoyi" % "workbench" % "0.2.3")
+
 //addSbtPlugin("com.softwaremill.clippy" % "plugin-sbt" % "0.1")

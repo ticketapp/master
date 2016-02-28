@@ -4,7 +4,6 @@ import com.greencatsoft.angularjs.core.{Scope, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import httpServiceFactory.HttpGeneralService
 import materialDesign.MdToastService
-import places.PlacesRoutes
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
@@ -14,7 +13,8 @@ import scala.scalajs.js.annotation.JSExportAll
 @JSExportAll
 @injectable("organizersController")
 class OrganizersController(scope: Scope, service: HttpGeneralService, timeout: Timeout, mdToastService: MdToastService)
-  extends AbstractController[Scope](scope) {
+    extends AbstractController[Scope](scope) {
+
   var organizers: js.Any = Nil
 
   def findById(id: Long): Unit = {
@@ -29,12 +29,10 @@ class OrganizersController(scope: Scope, service: HttpGeneralService, timeout: T
     }
   }
 
-  def findContaining(pattern: String): Unit = {
-    println(pattern)
+  def findContaining(pattern: String): Unit =
     service.get(OrganizersRoutes.findContaining(pattern: String)) map { foundOrganizer =>
       timeout(() => organizers = JSON.parse(foundOrganizer))
     }
-  }
 
   def findNearCity(city: String, numberToReturn: Int, offset: Int): Unit = {
     service.get(OrganizersRoutes.findNearCity(city: String, numberToReturn: Int, offset: Int)) map { foundOrganizer =>
