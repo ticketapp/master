@@ -112,14 +112,15 @@ class UserController @Inject() (ws: WSClient,
   def createIdCard = SecuredAction.async(parse.multipartFormData) { request =>
     val userId = request.identity.uuid
     request.body.file("picture").map { image =>
-      println("image = " + image.contentType)
       image.contentType match {
+
         case Some(fileExtension) if fileExtension == "image/jpeg" =>
           val filename = UUID.randomUUID()
           image.ref.moveTo(new File(Play.application.path.getPath + "/idCards/" + filename), replace = true)
           userMethods.createIdCard(IdCard(filename, userId)) map { response =>
             Ok(Json.toJson(filename))
           }
+
         case _ =>
           Future(Unauthorized("Wrong content type"))
       }
@@ -133,8 +134,10 @@ class UserController @Inject() (ws: WSClient,
     val uuid = UUID.fromString(stringUuid)
     userMethods.findIdCardsByUserId(userUuid) map { idCards =>
       idCards.find(_.uuid == uuid) match {
+
         case Some(idCard) =>
           getImageForUUID(stringUuid)
+
         case _ =>
           log("error found id card for user")
           NotFound("userController.findIdCardImageForUser")

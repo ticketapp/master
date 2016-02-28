@@ -1,63 +1,21 @@
-import java.nio.file.{Files, Paths}
 import java.util.UUID
 
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import com.mohiva.play.silhouette.test._
 import database.MyPostgresDriver.api._
-import org.specs2.runner.files
-import play.api.libs.Files.TemporaryFile
-import play.api.libs.json.{JsResult, JsSuccess, JsError, Json}
-import play.api.mvc.{AnyContentAsMultipartFormData, MultipartFormData}
-import play.api.mvc.MultipartFormData.FilePart
-import play.api.test.{FakeHeaders, FakeRequest}
-import testsHelper.GlobalApplicationForControllers
-import userDomain.{IdCard, Rib}
 import json.JsonHelper._
+import play.api.libs.Files.TemporaryFile
+import play.api.libs.json.{JsError, JsResult, JsSuccess, Json}
+import play.api.mvc.MultipartFormData
+import play.api.mvc.MultipartFormData.FilePart
+import play.api.test.FakeRequest
+import testsHelper.GlobalApplicationForControllers
+import testsHelper.MultipartFormDataWritable._
+import userDomain.{IdCard, Rib}
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.concurrent.ExecutionContext.Implicits.global
-import java.io.File
-
-import play.api.http.{HeaderNames, Writeable}
-import play.api.libs.Files.TemporaryFile
-import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{AnyContentAsMultipartFormData, Codec, MultipartFormData}
-
-object MultipartFormDataWritable {
-  val boundary = "--------ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-
-  def formatDataParts(data: Map[String, Seq[String]]) = {
-    val dataParts = data.flatMap { case (key, values) =>
-      values.map { value =>
-        val name = s""""$key""""
-        s"--$boundary\r\n${HeaderNames.CONTENT_DISPOSITION}: form-data; name=$name\r\n\r\n$value\r\n"
-      }
-    }.mkString("")
-    Codec.utf_8.encode(dataParts)
-  }
-
-  def filePartHeader(file: FilePart[TemporaryFile]) = {
-    val name = s""""${file.key}""""
-    val filename = s""""${file.filename}""""
-    val contentType = file.contentType.map { ct =>
-      s"${HeaderNames.CONTENT_TYPE}: $ct\r\n"
-    }.getOrElse("")
-    Codec.utf_8.encode(s"--$boundary\r\n${HeaderNames.CONTENT_DISPOSITION}: form-data; name=$name; filename=$filename\r\n$contentType\r\n")
-  }
-
-  val singleton = Writeable[MultipartFormData[TemporaryFile]](
-    transform = { form: MultipartFormData[TemporaryFile] =>
-      formatDataParts(form.dataParts) ++
-        form.files.flatMap { file =>
-          val fileBytes = Files.readAllBytes(Paths.get(file.ref.file.getAbsolutePath))
-          filePartHeader(file) ++ fileBytes ++ Codec.utf_8.encode("\r\n")
-        } ++
-        Codec.utf_8.encode(s"--$boundary--")
-    },
-    contentType = Some(s"multipart/form-data; boundary=$boundary")
-  )
-}
 
 class TestUserController extends GlobalApplicationForControllers {
   override def beforeAll(): Unit = {
@@ -151,10 +109,8 @@ class TestUserController extends GlobalApplicationForControllers {
         userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
       )
 
-      val Some(ribs) = route(FakeRequest(
-        userDomain.routes.UserController.findUsersRibs()
-      )
-       .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+      val Some(ribs) = route(FakeRequest(userDomain.routes.UserController.findUsersRibs())
+                            .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       val validatedRibs: JsResult[Seq[Rib]] = contentAsJson(ribs).validate[Seq[Rib]](readRibReads)
       val readRibs = validatedRibs match {
@@ -170,18 +126,14 @@ class TestUserController extends GlobalApplicationForControllers {
     "return forbidden if a connected user try to get other users ribs" in {
 
       val Some(ribs) = route(FakeRequest(
-        userDomain.routes.UserController.findRibsByUserId("077f3ea6-2272-4457-a47e-9e9111108e44")
-      )
-       .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+                        userDomain.routes.UserController.findRibsByUserId("077f3ea6-2272-4457-a47e-9e9111108e44")
+                      ).withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(ribs) mustEqual FORBIDDEN
     }
 
     "return unauthorized if an unconnected user try to get ribs" in {
-
-      val Some(ribs) = route(FakeRequest(
-        userDomain.routes.UserController.findUsersRibs()
-      ))
+      val Some(ribs) = route(FakeRequest(userDomain.routes.UserController.findUsersRibs()))
 
       status(ribs) mustEqual UNAUTHORIZED
     }
@@ -203,24 +155,19 @@ class TestUserController extends GlobalApplicationForControllers {
       status(response) mustEqual OK
     }
 
-
-    implicit val anyContentAsMultipartFormWritable: Writeable[AnyContentAsMultipartFormData] = {
-      MultipartFormDataWritable.singleton.map(_.mdf)
-    }
-
     "create a new IdCard" in {
       val tempFile = TemporaryFile(new java.io.File("../favicon.jpeg"))
       val part = FilePart[TemporaryFile](key = "picture", filename = "the.file", contentType = Some("image/jpeg"),
       ref = tempFile)
       val formData = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
       val Some(result) = route(FakeRequest(userDomain.routes.UserController.createIdCard())
-        .withMultipartFormDataBody(formData)
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+                              .withMultipartFormDataBody(formData)
+                              .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(result) mustEqual OK
     }
 
-    "return unauthorized if a unconnected user try to create a new IdCard" in {
+    "return unauthorized if a not loged in user try to create a new IdCard" in {
       val tempFile = TemporaryFile(new java.io.File("../favicon.jpeg"))
       val part = FilePart[TemporaryFile](key = "picture", filename = "the.file", contentType = Some("image/jpeg"),
       ref = tempFile)
@@ -259,8 +206,8 @@ class TestUserController extends GlobalApplicationForControllers {
         userId = UUID.fromString("078f3ea6-2272-4457-a47e-9e9111108e44"))
 
       val Some(result) = route(FakeRequest(
-      userDomain.routes.UserController.findIdCardsByUserId("077f3ea6-2272-4457-a47e-9e9111108e44"))
-      .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
+                               userDomain.routes.UserController.findIdCardsByUserId("077f3ea6-2272-4457-a47e-9e9111108e44"))
+                               .withAuthenticator[CookieAuthenticator](administrator.loginInfo))
 
       val validatedIdCards: JsResult[Seq[IdCard]] = contentAsJson(result).validate[Seq[IdCard]](readIdCardReads)
       val readIdCards = validatedIdCards match {

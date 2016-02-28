@@ -17,14 +17,6 @@ import scala.language.postfixOps
 class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
   override def beforeAll(): Unit = {
     generalBeforeAll()
-    /* val rib = Rib(
-        id = None,
-        bankCode = "bank",
-        deskCode = "desk",
-        accountNumber = "account1",
-        ribKey = "20",
-        userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
-      )*/
     Await.result(
       dbConfProvider.get.db.run(sqlu"""
         INSERT INTO guestUsers(ip) VALUES ('127.0.0.0');
@@ -156,8 +148,8 @@ class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
         userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
       )
 
-      whenReady(userMethods.findRibsByUserId(expectedRib.userId)) { resp =>
-        resp must contain(expectedRib)
+      whenReady(userMethods.findRibsByUserId(expectedRib.userId)) { ribs =>
+        ribs must contain(expectedRib)
       }
     }
 
@@ -192,8 +184,8 @@ class UserModelIntegrationTest extends GlobalApplicationForModelsIntegration {
         uuid = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e45"),
         userId = UUID.fromString("077f3ea6-2272-4457-a47e-9e9111108e44")
       )
-      whenReady(userMethods.findIdCardsByUserId(expectedCard.userId)) { resp =>
-        resp must contain(expectedCard)
+      whenReady(userMethods.findIdCardsByUserId(expectedCard.userId)) { cards =>
+        cards must contain(expectedCard)
       }
     }
 
