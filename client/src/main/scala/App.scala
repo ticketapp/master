@@ -26,7 +26,7 @@ object App extends JSApp {
 
   override def main() {
     val module = Angular.module("app", Seq("ngAnimate", "ngAria", "ngMaterial", "mm.foundation", "ngRoute", "ngMap",
-      "ngCookies", "angularTranslateApp", "ngSanitize", "themingAngularMaterial", "satellizer"))
+      "ngCookies", "angularTranslateApp", "ngSanitize", "themingAngularMaterial", "satellizer", "idCardUploader"))
 
     module.config(RoutingConfig)
     module.config(AuthConfig)

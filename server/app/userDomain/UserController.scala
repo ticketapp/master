@@ -111,14 +111,14 @@ class UserController @Inject() (ws: WSClient,
 
   def createIdCard = SecuredAction.async(parse.multipartFormData) { request =>
     val userId = request.identity.uuid
-
     request.body.file("picture").map { image =>
+      println("image = " + image.contentType)
       image.contentType match {
-        case Some(fileExtension) if fileExtension == "jpg" =>
+        case Some(fileExtension) if fileExtension == "image/jpeg" =>
           val filename = UUID.randomUUID()
           image.ref.moveTo(new File(Play.application.path.getPath + "/idCards/" + filename), replace = true)
           userMethods.createIdCard(IdCard(filename, userId)) map { response =>
-            Ok(Json.toJson(response))
+            Ok(Json.toJson(filename))
           }
         case _ =>
           Future(Unauthorized("Wrong content type"))
@@ -128,33 +128,33 @@ class UserController @Inject() (ws: WSClient,
     }
   }
 
-  def findIdCardImageForUser(uuid: String) = SecuredAction.async { request =>
+  def findIdCardImageForUser(stringUuid: String) = SecuredAction.async { request =>
     val userUuid = request.identity.uuid
+    val uuid = UUID.fromString(stringUuid)
     userMethods.findIdCardsByUserId(userUuid) map { idCards =>
       idCards.find(_.uuid == uuid) match {
         case Some(idCard) =>
-          getImageForUUID(uuid)
+          getImageForUUID(stringUuid)
         case _ =>
           log("error found id card for user")
-          InternalServerError("userController.findIdCardImageForUser")
+          NotFound("userController.findIdCardImageForUser")
       }
     }
   }
 
-  def findIdCardImages(uuid: String) = SecuredAction(Administrator()) { request =>
-    getImageForUUID(uuid)
-  }
+  def findIdCardImages(uuid: String) = SecuredAction(Administrator()) { request => getImageForUUID(uuid) }
 
   def getImageForUUID(uuid: String): Result = {
     val imageFile = new File(Play.application.path.getPath + "/idCards/" + uuid)
-    val image = ImageIO.read(imageFile)
     if (imageFile.length > 0) {
-      val baos = new ByteArrayOutputStream()
-      ImageIO.write(image, "jpg", baos)
-      Ok(baos.toByteArray).as("image/jpg")
-    } else
+      val image = ImageIO.read(imageFile)
+      val byteArrayOutputStream = new ByteArrayOutputStream()
+      ImageIO.write(image, "png", byteArrayOutputStream)
+      Ok(byteArrayOutputStream.toByteArray).as("image/png")
+    } else {
       log("error found image of id card for user")
-    InternalServerError("userController.findIdCardImageForUser")
+      InternalServerError("userController.findIdCardImageForUser")
+    }
   }
 
   def findIdCardsByUserId(userId: String) = SecuredAction(Administrator()).async { request =>
