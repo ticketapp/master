@@ -13,8 +13,6 @@ import scala.concurrent.Future
 @injectable("sessionIdService")
 class SessionIdService(timeout: Timeout, ngCookies: NgCookies, httpService: HttpGeneralService) extends Service {
 
-  def aaa: Int = 5
-
   def getMaybeSessionId: Option[String] = ngCookies.get("sessionId") match {
     case string if string.isInstanceOf[String] => Option(string.asInstanceOf[String])
     case _ => None
