@@ -10,11 +10,10 @@ class ChatService(window: Window) {
 
   def findWebSocketUrl(): String = {
     val host = window.location.host
-    val protocolLetter = window.location.protocol.last match {
-      case 's' => "s"
-      case _ => println("ok"); ""
+    window.location.protocol.stripSuffix(":").last match {
+      case 's' => s"wss://$host/"
+      case _ => s"ws://$host/"
     }
-    s"ws$protocolLetter://$host/"
   }
 }
 
