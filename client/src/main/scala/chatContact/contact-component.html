@@ -1,12 +1,13 @@
 <div class="contact-component float-right absolute right0 bottom0 animated column large-3 medium-5"
-     ng-mouseleave="showSmallContact = false;"
+     data-ng-mouseleave="showSmallContact = false;"
      data-ng-controller="chatContactController"
-     ng-class="{'full': full}">
+     data-ng-init="full = false"
+     data-ng-class="{'full': full}">
 
-    <div ng-if="showSmallContact || full"
+    <div data-ng-if="showSmallContact || full"
          id="ccb2"
-         ng-click="full = true; directive.track('cl,ccb2')"
-         ng-class="{'full': $parent.full}"
+         data-ng-click="full = true; directive.track('cl,ccb2')"
+         data-ng-class="{'full': $parent.full}"
          class="contact-tooltip inner-contact-tooltip tracking">
 
         <i data-ng-click="$parent.showSmallContact = false; $parent.full = false;"
@@ -14,7 +15,7 @@
            class="fa fa-times close-icon">
         </i>
 
-        <div ng-click="$parent.full = true" class="column small-12 marginTop10 marginBottom10 imagesBox">
+        <div data-ng-click="$parent.full = true" class="column small-12 marginTop10 marginBottom10 imagesBox">
             <div class="center">
                 {{ 'CLAUDE_TEAM' | translate }}
             </div>
@@ -38,7 +39,7 @@
 
                     <div style="position:relative">
                         <input type="email"
-                               ng-model="emailContact"
+                               data-ng-model="emailContact"
                                id="cci2"
                                tracker="in,cci2,{{emailContact}}"
                                required
@@ -53,22 +54,22 @@
 
         </div>
 
-        <div ng-repeat="message in messages"
+        <div data-ng-repeat="message in messages"
              class="column small-8"
-             ng-class="{'float-left': message.fromClient$1, 'float-right': message.fromClient$1 == false}">
-            <div ng-class="{'messageFromUser': message.fromClient$1, 'messageFromUs': message.fromClient$1 == false}">
+             data-ng-class="{'float-left': message.fromClient$1, 'float-right': message.fromClient$1 == false}">
+            <div data-ng-class="{'messageFromUser': message.fromClient$1, 'messageFromUs': message.fromClient$1 == false}">
                 {{message.content$1}}
             </div>
         </div>
 
         <form class="column small-12 chat-form"
-              ng-click="$parent.full = true"
-              ng-submit="controller.send(message); message=''"
-              ng-class="{'paddingRight20 paddingLeft0': full}">
+              data-ng-click="$parent.full = true"
+              data-ng-submit="controller.send(message); message=''"
+              data-ng-class="{'paddingRight20 paddingLeft0': full}">
 
             <input type="text"
-                   ng-click="$parent.full = true"
-                   ng-model="message"
+                   data-ng-click="$parent.full = true"
+                   data-ng-model="message"
                    id="cci1"
                    tracker="in,cci1,{{message}}"
                    focus="{{full}}"

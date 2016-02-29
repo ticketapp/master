@@ -38,8 +38,8 @@ class GeolocationService(http: HttpService, timeout: Timeout) extends Service {
     getPoint.error((error: Any) => geographicPoint = basePoint)
 
     getPoint map { response =>
-      val responseMap = response.asInstanceOf[ArrayBuffer[Pair[String, Any]]].toMap
-      if(responseMap.isDefinedAt("status")) {
+      val responseMap = response.asInstanceOf[ArrayBuffer[(String, Any)]].toMap
+      if (responseMap.isDefinedAt("status")) {
         responseMap("status") match {
           case success if success == "success" =>
             GeographicPoint(responseMap("lat").toString.toDouble, responseMap("lng").toString.toDouble)

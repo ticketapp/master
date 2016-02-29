@@ -1,8 +1,16 @@
 <md-list>
-    <md-list-item ng-repeat="event in controller.salableEvents">
-        {{event}}
+        {{controller}}
+    <md-list-item ng-repeat="event in salableEvents">
+
+        {{ event }}
+
         <span data-ng-init="tariffs = controller.findTariffsByEventId(event.eventId)">
-            <p data-ng-repeat="tariff in tariffs">{{tariff}}</p>
+
+            <p data-ng-repeat="tariff in tariffs">
+                {{ tariff }}
+            </p>
+
         </span>
+
     </md-list-item>
 </md-list>
