@@ -93,7 +93,7 @@ module.exports = function (grunt) {
             },
 
             angular: {
-                src: 'bower_components/angular/angular.js',
+                src: 'bower_components/angular/angular.min.js',
                 dest: 'server/public/plugins/angular.min.js'
             },
 

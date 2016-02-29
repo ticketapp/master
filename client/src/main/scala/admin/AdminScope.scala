@@ -7,7 +7,6 @@ import scala.scalajs.js
 @js.native
 trait AdminScope extends Scope {
   var salableEvents: js.Any = js.native
-//  var tariffs: js.Any = js.native
   var ticketsWithStatus: js.Any = js.native
   var pendingTickets: js.Any = js.native
   var boughtBills: js.Any = js.native
