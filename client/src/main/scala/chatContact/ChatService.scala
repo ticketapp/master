@@ -12,7 +12,7 @@ class ChatService(window: Window) {
     val host = window.location.host
     val protocolLetter = window.location.protocol.last match {
       case 's' => "s"
-      case _ => ""
+      case _ => println("ok"); ""
     }
     s"ws$protocolLetter://$host/"
   }
