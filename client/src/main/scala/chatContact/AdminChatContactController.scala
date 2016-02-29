@@ -1,6 +1,6 @@
 package chatContact
 
-import com.greencatsoft.angularjs.core.{HttpService, Timeout, Window}
+import com.greencatsoft.angularjs.core.{HttpService, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom
 import org.scalajs.dom.MessageEvent
@@ -17,7 +17,7 @@ class AdminChatContactController(chatContactScope: AdminChatContactScope, httpSe
 
   chatContactScope.messages = js.Array[Message]()
 
-  val webSocket = new dom.WebSocket(chatService.findWebSocketUrl() + "chat")
+  val webSocket = new dom.WebSocket(chatService.findWebSocketUrl() + "adminChat")
 
   var areWeConnected: Boolean = false
 

@@ -1,6 +1,6 @@
 package chatContact
 
-import com.greencatsoft.angularjs.core.{HttpService, Timeout, Window}
+import com.greencatsoft.angularjs.core.{HttpService, Timeout}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom
 import org.scalajs.dom.MessageEvent
