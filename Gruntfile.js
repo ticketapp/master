@@ -73,7 +73,7 @@ module.exports = function (grunt) {
 
         concat: {
             angularMaterial: {
-                src: 'bower_components/angular-material/angular-material.js',
+                src: 'bower_components/angular-material/angular-material.min.js',
                 dest: 'server/public/plugins/angular-material.js'
             },
 
