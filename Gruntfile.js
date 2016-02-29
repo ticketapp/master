@@ -87,13 +87,13 @@ module.exports = function (grunt) {
                 dest: 'server/public/plugins/angular-animate.min.js'
             },
 
-            angulararia: {
+            angularAria: {
                 src: 'bower_components/angular-aria/angular-aria.min.js',
                 dest: 'server/public/plugins/angular-aria.min.js'
             },
 
             angular: {
-                src: 'bower_components/angular/angular.min.js',
+                src: 'bower_components/angular/angular.js',
                 dest: 'server/public/plugins/angular.min.js'
             },
 
@@ -107,7 +107,7 @@ module.exports = function (grunt) {
                 dest: 'server/public/plugins/ng-map.min.js'
             },
 
-            angularWebsocket: {
+            angularWebSocket: {
                 src: 'bower_components/angular-websocket/angular-websocket.js',
                 dest: 'server/public/plugins/angular-websocket.js'
             },
@@ -122,7 +122,7 @@ module.exports = function (grunt) {
                 dest: 'server/public/plugins/angular-messages.min.js'
             },
 
-            angularRessource: {
+            angularResource: {
                 src: 'bower_components/angular-resource/angular-resource.min.js',
                 dest: 'server/public/plugins/angular-resource.min.js'
             },
