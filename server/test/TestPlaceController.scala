@@ -53,6 +53,7 @@ class TestPlaceController extends GlobalApplicationForControllers {
           VALUES(1, 400);
 
         INSERT INTO placesfollowed(placeid, userid) VALUES (400, '077f3ea6-2272-4457-a47e-9e9111108e44');
+        INSERT INTO placesfollowed(placeid, userid) VALUES (300, '077f3ea6-2272-4457-a47e-9e9111108e44');
         """),
       5.seconds)
   }
@@ -151,13 +152,17 @@ class TestPlaceController extends GlobalApplicationForControllers {
       contentAsString(place) must contain(""""name":"testId900","facebookId":"facebookId900"""")
     }
 
-    "follow and unfollow a place by id" in {
+    "follow a place by id" in {
       val Some(response) = route(FakeRequest(placesDomain.routes.PlaceController.followByPlaceId(1))
-        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
-      val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowByPlaceId(1))
         .withAuthenticator[CookieAuthenticator](identity.loginInfo))
 
       status(response) mustEqual CREATED
+    }
+
+    "unfollow a place by id" in {
+      val Some(response1) = route(FakeRequest(placesDomain.routes.PlaceController.unfollowByPlaceId(300))
+        .withAuthenticator[CookieAuthenticator](identity.loginInfo))
+
       status(response1) mustEqual OK
     }
 

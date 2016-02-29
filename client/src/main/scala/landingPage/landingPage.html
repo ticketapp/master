@@ -11,7 +11,8 @@
         {{ 'INTRO_TEXT' | translate }}
     </h4>
 
-    <form class="column medium-10 medium-offset-1 large-8 large-offset-2 sell-form absolute">
+    <form class="column medium-10 medium-offset-1 large-8 large-offset-2 sell-form absolute"
+          data-ng-init="focusSearch = false">
         <div class="form-container tracking" data-ng-controller="eventsController">
 
             <md-autocomplete md-search-text-change="controller.findMaybeSalableEventsContaining(ctrl.searchText)"

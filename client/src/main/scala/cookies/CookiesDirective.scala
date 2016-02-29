@@ -23,5 +23,6 @@ class CookiesDirective(timeout: Timeout, ngCookies: NgCookies) extends ElementDi
   ngCookies.get("hiddenCookies") match {
     case isHidden if isHidden.isInstanceOf[String] =>
       cookies.innerHTML = ""
+    case _ =>
   }
 }
